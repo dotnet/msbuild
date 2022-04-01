@@ -861,8 +861,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1107: "}</note>
       </trans-unit>
       <trans-unit id="UsingPreviewSdk_Info">
-        <source>You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</source>
-        <target state="translated">Você está usando uma versão prévia do .NET. Confira: https://aka.ms/dotnet-support-policy</target>
+        <source>NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</source>
+        <target state="needs-review-translation">Você está usando uma versão prévia do .NET. Confira: https://aka.ms/dotnet-support-policy</target>
         <note />
       </trans-unit>
       <trans-unit id="WinMDObjNotSupportedOnTargetFramework">

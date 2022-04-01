@@ -328,7 +328,7 @@
     <comment>{StrBegin="NETSDK1056: "}</comment>
   </data>
   <data name="UsingPreviewSdk_Info" xml:space="preserve">
-    <value>You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</value>
+    <value>NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</value>
   </data>
   <data name="InvalidItemSpecToUse" xml:space="preserve">
     <value>NETSDK1058: Invalid value for ItemSpecToUse parameter: '{0}'.  This property must be blank or set to 'Left' or 'Right'</value>
