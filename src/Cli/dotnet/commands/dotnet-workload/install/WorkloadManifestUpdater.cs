@@ -164,21 +164,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         }
 
         public IEnumerable<(
-            ManifestId manifestId,
-            ManifestVersion existingVersion,
-            SdkFeatureBand existingFeatureBand,
-            ManifestVersion newVersion,
-            SdkFeatureBand newFeatureBand,
+            ManifestVersionUpdate manifestUpdate,
             Dictionary<WorkloadId, WorkloadDefinition> Workloads
             )>
             CalculateManifestUpdates()
         {
             var manifestUpdates =
-                new List<(ManifestId manifestId,
-                    ManifestVersion existingVersion,
-                    SdkFeatureBand existingFeatureBand,
-                    ManifestVersion newVersion,
-                    SdkFeatureBand newFeatureBand,
+                new List<(ManifestVersionUpdate manifestUpdate,
                     Dictionary<WorkloadId, WorkloadDefinition> Workloads)>();
             var currentManifestIds = GetInstalledManifestIds();
             foreach (var manifestId in currentManifestIds)
@@ -193,8 +185,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 if (advertisingManifestVersionAndWorkloads != null &&
                     advertisingManifestVersionAndWorkloads.Value.ManifestVersion.CompareTo(currentManifestVersion.Item1) > 0)
                 {
-                    manifestUpdates.Add((manifestId, currentManifestVersion.Item1, currentManifestVersion.Item2,
-                        advertisingManifestVersionAndWorkloads.Value.ManifestVersion, advertisingManifestVersionAndWorkloads.Value.ManifestFeatureBand,
+                    manifestUpdates.Add((new ManifestVersionUpdate(manifestId, currentManifestVersion.manifestVersion, currentManifestVersion.sdkFeatureBand.ToString(),
+                        advertisingManifestVersionAndWorkloads.Value.ManifestVersion, advertisingManifestVersionAndWorkloads.Value.ManifestFeatureBand.ToString()),
                         advertisingManifestVersionAndWorkloads.Value.Workloads));
                 }
             }
@@ -216,7 +208,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, SdkFeatureBand existingFeatureBand, ManifestVersion newVersion, SdkFeatureBand newFeatureBand)> CalculateManifestRollbacks(string rollbackDefinitionFilePath)
+        public IEnumerable<ManifestVersionUpdate> CalculateManifestRollbacks(string rollbackDefinitionFilePath)
         {
             var currentManifestIds = GetInstalledManifestIds();
             var manifestRollbacks = ParseRollbackDefinitionFile(rollbackDefinitionFilePath);
@@ -232,7 +224,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 .Select(manifest =>
                 {
                     var installedManifestInfo = GetInstalledManifestVersion(manifest.id);
-                    return (manifest.id, installedManifestInfo.manifestVersion, installedManifestInfo.sdkFeatureBand, manifest.version, manifest.featureBand);
+                    return new ManifestVersionUpdate(manifest.id, installedManifestInfo.manifestVersion, installedManifestInfo.sdkFeatureBand.ToString(),
+                        manifest.version, manifest.featureBand.ToString());
                 });
 
             return manifestUpdates;

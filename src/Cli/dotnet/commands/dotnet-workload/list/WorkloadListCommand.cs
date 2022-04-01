@@ -155,8 +155,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                 _workloadManifestUpdater.CalculateManifestUpdates();
 
             List<UpdateAvailableEntry> updateList = new();
-            foreach ((ManifestId _, ManifestVersion existingVersion, SdkFeatureBand existingFeatureBand, ManifestVersion newVersion, SdkFeatureBand newFeatureBand,
-                Dictionary<WorkloadId, WorkloadDefinition> workloads) in manifestsToUpdate)
+            foreach ((ManifestVersionUpdate manifestUpdate, Dictionary<WorkloadId, WorkloadDefinition> workloads) in manifestsToUpdate)
             {
                 foreach ((WorkloadId WorkloadId, WorkloadDefinition workloadDefinition) in
                     workloads)
@@ -164,8 +163,8 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                     if (installedWorkloads.Contains(new WorkloadId(WorkloadId.ToString())))
                     {
                         //  TODO: Potentially show existing and new feature bands
-                        updateList.Add(new UpdateAvailableEntry(existingVersion.ToString(),
-                            newVersion.ToString(),
+                        updateList.Add(new UpdateAvailableEntry(manifestUpdate.ExistingVersion.ToString(),
+                            manifestUpdate.NewVersion.ToString(),
                             workloadDefinition.Description, WorkloadId.ToString()));
                     }
                 }

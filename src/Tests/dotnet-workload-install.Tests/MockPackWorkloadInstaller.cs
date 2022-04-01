@@ -15,9 +15,9 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
     internal class MockPackWorkloadInstaller : IWorkloadPackInstaller
     {
         public IList<PackInfo> InstalledPacks;
-        public IList<PackInfo> RolledBackPacks = new List<PackInfo>();
-        public IList<(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache)> InstalledManifests = 
-            new List<(ManifestId, ManifestVersion, SdkFeatureBand, DirectoryPath?)>();
+        public List<PackInfo> RolledBackPacks = new List<PackInfo>();
+        public IList<(ManifestVersionUpdate manifestUpdate, DirectoryPath? offlineCache)> InstalledManifests = 
+            new List<(ManifestVersionUpdate manifestUpdate, DirectoryPath?)>();
         public IList<PackInfo> CachedPacks = new List<PackInfo>();
         public string CachePath;
         public bool GarbageCollectionCalled = false;
@@ -38,31 +38,34 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             FailingGarbageCollection = failingGarbageCollection;
         }
 
-        public void InstallWorkloadPacks(IEnumerable<PackInfo> packInfos, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
+        public void InstallWorkloadPacks(IEnumerable<PackInfo> packInfos, SdkFeatureBand sdkFeatureBand, ITransactionContext transactionContext, DirectoryPath? offlineCache = null)
         {
-            foreach (var packInfo in packInfos)
+            transactionContext.Run(action: () =>
             {
-                InstalledPacks = InstalledPacks.Append(packInfo).ToList();
-                CachePath = offlineCache?.Value;
-                if (packInfo.Id.ToString().Equals(FailingPack))
+                foreach (var packInfo in packInfos)
                 {
-                    throw new Exception($"Failing pack: {packInfo.Id}");
+                    InstalledPacks = InstalledPacks.Append(packInfo).ToList();
+                    CachePath = offlineCache?.Value;
+                    if (packInfo.Id.ToString().Equals(FailingPack))
+                    {
+                        throw new Exception($"Failing pack: {packInfo.Id}");
+                    }
                 }
-            }
-        }
-
-        public void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
-        {
-            InstallWorkloadPacks(new[] { packInfo }, sdkFeatureBand, offlineCache);
-        }
-
-        public void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
-        {
-            if (FailingRollback)
+            },
+            rollback: () =>
             {
-                throw new Exception("Rollback failure");
-            }
-            RolledBackPacks.Add(packInfo);
+                if (FailingRollback)
+                {
+                    throw new Exception("Rollback failure");
+                }
+
+                RolledBackPacks.AddRange(packInfos);
+            });
+        }
+
+        public void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, ITransactionContext context, DirectoryPath? offlineCache = null)
+        {
+            InstallWorkloadPacks(new[] { packInfo }, sdkFeatureBand, context, offlineCache);
         }
 
         public void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null)
@@ -89,9 +92,9 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             return InstallationRecordRepository;
         }
 
-        public void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null, bool isRollback = false)
+        public void InstallWorkloadManifest(ManifestVersionUpdate manifestUpdate, ITransactionContext transactionContext, DirectoryPath? offlineCache = null, bool isRollback = false)
         {
-            InstalledManifests.Add((manifestId, manifestVersion, sdkFeatureBand, offlineCache));
+            InstalledManifests.Add((manifestUpdate, offlineCache));
         }
 
         public void DownloadToOfflineCache(PackInfo pack, DirectoryPath cachePath, bool includePreviews)

@@ -16,15 +16,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         Task BackgroundUpdateAdvertisingManifestsWhenRequiredAsync();
 
         IEnumerable<(
-            ManifestId manifestId, 
-            ManifestVersion existingVersion,
-            SdkFeatureBand existingFeatureBand,
-            ManifestVersion newVersion,
-            SdkFeatureBand newFeatureBand,
+            ManifestVersionUpdate manifestUpdate,
             Dictionary<WorkloadId, WorkloadDefinition> Workloads
             )> CalculateManifestUpdates();
 
-        IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, SdkFeatureBand existingFeatureBand, ManifestVersion newVersion,  SdkFeatureBand newFeatureBand)>
+        IEnumerable<ManifestVersionUpdate>
             CalculateManifestRollbacks(string rollbackDefinitionFilePath);
 
         Task<IEnumerable<string>> DownloadManifestPackagesAsync(bool includePreviews, DirectoryPath downloadPath);
