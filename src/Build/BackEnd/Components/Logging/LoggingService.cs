@@ -241,22 +241,25 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Queue for asynchronous event processing.
         /// </summary>
         private ConcurrentQueue<object> _eventQueue;
+
         /// <summary>
-        /// Auto reset event raised when message is consumed from queue.
+        /// Event set when message is consumed from queue.
         /// </summary>
-        private AutoResetEvent _dequeueEvent;
+        private ManualResetEventSlim _dequeueEvent;
         /// <summary>
-        /// Auto reset event raised when queue become empty.
+        /// Event set when queue become empty.
         /// </summary>
-        private AutoResetEvent _emptyQueueEvent;
+        private ManualResetEventSlim _emptyQueueEvent;
         /// <summary>
-        /// Auto reset event raised when message is added into queue.
+        /// Even set when message is added into queue.
         /// </summary>
-        private AutoResetEvent _enqueueEvent;
+        private ManualResetEventSlim _enqueueEvent;
+
         /// <summary>
         /// CTS for stopping logging event processing.
         /// </summary>
         private CancellationTokenSource _loggingEventProcessingCancellation;
+
         /// <summary>
         /// Task which pump/process messages from <see cref="_eventQueue"/>
         /// </summary>
@@ -1182,7 +1185,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 while (_eventQueue.Count >= _queueCapacity)
                 {
                     // Block and wait for dequeue event.
-                    _dequeueEvent.WaitOne();
+                    _dequeueEvent.Wait();
+                    _dequeueEvent.Reset();
                 }
 
                 _eventQueue.Enqueue(buildEvent);
@@ -1205,10 +1209,14 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public void WaitForLoggingToProcessEvents()
         {
-            while (_eventQueue != null && !_eventQueue.IsEmpty)
+            while (_eventQueue?.IsEmpty == false)
             {
-                _emptyQueueEvent.WaitOne();
+                _emptyQueueEvent?.Wait();
             }
+            // To avoid race condition when last message has been removed from queue but
+            //   not yet fully processed (handled by loggers), we need to make sure _emptyQueueEvent
+            //   is set as it is guaranteed to be in set state no sooner than after event has been processed.
+            _emptyQueueEvent?.Wait();
         }
 
         /// <summary>
@@ -1257,9 +1265,9 @@ namespace Microsoft.Build.BackEnd.Logging
         private void StartLoggingEventProcessing()
         {
             _eventQueue = new ConcurrentQueue<object>();
-            _dequeueEvent = new AutoResetEvent(false);
-            _emptyQueueEvent = new AutoResetEvent(false);
-            _enqueueEvent = new AutoResetEvent(false);
+            _dequeueEvent = new ManualResetEventSlim(false);
+            _emptyQueueEvent = new ManualResetEventSlim(false);
+            _enqueueEvent = new ManualResetEventSlim(false);
             _loggingEventProcessingCancellation = new CancellationTokenSource();
 
             _loggingEventProcessingThread = new Thread(LoggingEventProc);
@@ -1270,15 +1278,13 @@ namespace Microsoft.Build.BackEnd.Logging
             void LoggingEventProc()
             {
                 var completeAdding = _loggingEventProcessingCancellation.Token;
+                WaitHandle[] waitHandlesForNextEvent = { completeAdding.WaitHandle, _enqueueEvent.WaitHandle };
 
                 do
                 {
-                    // We peak message first in order to not have _eventQueue.IsEmpty before we actually process event
-                    //   as this could be interpreted like "every message has been already processed" otherwise.
-                    if (_eventQueue.TryPeek(out object ev))
+                    if (_eventQueue.TryDequeue(out object ev))
                     {
                         LoggingEventProcessor(ev);
-                        _eventQueue.TryDequeue(out _);
                         _dequeueEvent.Set();
                     }
                     else
@@ -1286,7 +1292,13 @@ namespace Microsoft.Build.BackEnd.Logging
                         _emptyQueueEvent.Set();
 
                         // Wait for next event, or finish.
-                        if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty) WaitHandle.WaitAny(new[] { completeAdding.WaitHandle, _enqueueEvent });
+                        if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
+                        {
+                            WaitHandle.WaitAny(waitHandlesForNextEvent);
+                        }
+
+                        _enqueueEvent.Reset();
+                        _emptyQueueEvent.Reset();
                     }
                 } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
 
@@ -1319,7 +1331,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private void TerminateLoggingEventProcessing()
         {
-            // Capture pump task in local variable as cancelling event processing is nulling _loggingEventProcessingPump.
+            // Capture pump task in local variable as cancelling event processing is nulling _loggingEventProcessingThread.
             var pumpTask = _loggingEventProcessingThread;
             _loggingEventProcessingCancellation.Cancel();
             pumpTask.Join();

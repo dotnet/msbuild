@@ -451,7 +451,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (Interlocked.CompareExchange(ref s_globalProjectCollection, local, null) != null)
                     {
-                        // Other thread had beat us to it, lets dispose this project collection
+                        // Other thread beat us to it; dispose of this project collection
                         local.Dispose();
                     }
                 }
