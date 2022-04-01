@@ -58,29 +58,37 @@ namespace Microsoft.Build.Tasks
             {
                 AssignedProjectsWithPlatform[i] = new TaskItem(AnnotatedProjects[i]);
 
-                string projectReferencePlatformMetadata = AssignedProjectsWithPlatform[i].GetMetadata("Platforms");
+                string referencedProjectPlatform = AssignedProjectsWithPlatform[i].GetMetadata("Platform");
+                string projectReferencePlatformsMetadata = AssignedProjectsWithPlatform[i].GetMetadata("Platforms");
+                string projectReferenceLookupTableMetadata = AssignedProjectsWithPlatform[i].GetMetadata("PlatformLookupTable");
 
-                if (string.IsNullOrEmpty(projectReferencePlatformMetadata))
+                if (string.IsNullOrEmpty(projectReferencePlatformsMetadata) && string.IsNullOrEmpty(referencedProjectPlatform))
                 {
+                    // TODO: This message should mean "We weren't given enough info to perform platform negotiation"
                     Log.LogWarningWithCodeFromResources("GetCompatiblePlatform.NoPlatformsListed", AssignedProjectsWithPlatform[i].ItemSpec);
                     continue;
                 }
 
-                string projectReferenceLookupTableMetadata = AssignedProjectsWithPlatform[i].GetMetadata("PlatformLookupTable");
                 // Pull platformlookuptable metadata from the referenced project. This allows custom
                 // mappings on a per-ProjectReference basis.
                 Dictionary<string, string>? projectReferenceLookupTable = ExtractLookupTable(projectReferenceLookupTableMetadata);
 
                 HashSet<string> projectReferencePlatforms = new HashSet<string>();
-                foreach (string s in projectReferencePlatformMetadata.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
+                foreach (string s in projectReferencePlatformsMetadata.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
                 {
                     projectReferencePlatforms.Add(s);
                 }
 
                 string buildProjectReferenceAs = string.Empty;
 
+                // If the referenced project has a defined `Platform` it should always build as _and_ it's compatible, build it without passing any global properties to reuse the evaluation.
+                if (!string.IsNullOrEmpty(referencedProjectPlatform) && referencedProjectPlatform.Equals(CurrentProjectPlatform))
+                {
+                    // TODO: Add this resource
+                    Log.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform");
+                }
                 // Prefer matching platforms
-                if (projectReferencePlatforms.Contains(CurrentProjectPlatform))
+                else if (projectReferencePlatforms.Contains(CurrentProjectPlatform))
                 {
                     buildProjectReferenceAs = CurrentProjectPlatform;
                     Log.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.SamePlatform");
