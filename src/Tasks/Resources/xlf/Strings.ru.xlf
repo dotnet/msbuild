@@ -1366,6 +1366,11 @@
         <target state="translated">MSB3982: EnableDynamicPlatformResolution имеет значение true, но у указанного проекта "{0}" нет заданных метаданных "Platforms". Сборка будет выполнена без указанной платформы.</target>
         <note>{StrBegin="MSB3982: "}</note>
       </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform">
+        <source>Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</source>
+        <target state="new">Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="GetCompatiblePlatform.SamePlatform">
         <source>ProjectReference and current project have the same platform.</source>
         <target state="translated">ProjectReference и текущий проект используют одну платформу.</target>

@@ -1366,6 +1366,11 @@
         <target state="translated">MSB3982: EnableDynamicPlatformResolution je true, ale odkazovaný projekt {0} nemá nastavená metadata pro platformy. Sestaví se bez zadané platformy.</target>
         <note>{StrBegin="MSB3982: "}</note>
       </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform">
+        <source>Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</source>
+        <target state="new">Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="GetCompatiblePlatform.SamePlatform">
         <source>ProjectReference and current project have the same platform.</source>
         <target state="translated">ProjectReference a aktuální projekt mají stejnou platformu.</target>
