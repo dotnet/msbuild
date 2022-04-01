@@ -83,6 +83,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public virtual bool IsImmutable => false;
 
+        private bool _loggedEnvProperty = false;
+
         /// <summary>
         /// Evaluated value of the property, escaped as necessary.
         /// Setter assumes caller has protected global properties, if necessary.
@@ -92,11 +94,11 @@ namespace Microsoft.Build.Execution
         {
             get
             {
-                if ((this as IProperty).IsEnvironmentProperty && loggingContext is not null)
+                if ((this as IProperty).IsEnvironmentProperty && loggingContext?.IsValid == true && !_loggedEnvProperty)
                 {
                     EnvironmentVariableReadEventArgs args = new(Name, _escapedValue);
                     loggingContext.LogBuildEvent(args);
-                    loggingContext = null;
+                    _loggedEnvProperty = true;
                 }
 
                 return _escapedValue;

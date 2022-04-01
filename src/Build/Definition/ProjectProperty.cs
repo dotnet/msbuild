@@ -98,15 +98,18 @@ namespace Microsoft.Build.Evaluation
             [DebuggerStepThrough]
             get
             {
-                if ((this as IProperty).IsEnvironmentProperty && this is ProjectPropertyNotXmlBacked notXmlBacked && notXmlBacked.loggingContext is not null)
+                if ((this as IProperty).IsEnvironmentProperty && this is ProjectPropertyNotXmlBacked notXmlBacked && notXmlBacked.loggingContext?.IsValid == true && !_loggedEnvProperty)
                 {
                     EnvironmentVariableReadEventArgs args = new(Name, EvaluatedValueEscapedInternal);
                     notXmlBacked.loggingContext.LogBuildEvent(args);
+                    _loggedEnvProperty = true;
                 }
 
                 return EvaluatedValueEscapedInternal;
             }
         }
+
+        private bool _loggedEnvProperty = false;
 
         /// <summary>
         /// Gets or sets the unevaluated property value.
