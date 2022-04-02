@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
+using System.Threading;
 
 #nullable disable
 
@@ -329,8 +330,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                nodeId = _nextNodeId;
-                _nextNodeId++;
+                nodeId = Interlocked.Increment(ref _nextNodeId) - 1;
             }
 
             NodeConfiguration configToSend = nodeConfiguration.Clone();

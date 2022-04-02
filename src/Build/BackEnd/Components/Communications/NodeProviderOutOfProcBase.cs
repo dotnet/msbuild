@@ -275,7 +275,10 @@ namespace Microsoft.Build.BackEnd
 
                 // Create the node process
                 Process msbuildProcess = LaunchNode(msbuildLocation, commandLineArgs);
-                _processesToIgnore.Add(GetProcessesToIgnoreKey(hostHandshake, msbuildProcess.Id));
+                if (_componentHost.BuildParameters.EnableNodeReuse)
+                {
+                    _processesToIgnore.Add(GetProcessesToIgnoreKey(hostHandshake, msbuildProcess.Id));
+                }
 
                 // Note, when running under IMAGEFILEEXECUTIONOPTIONS registry key to debug, the process ID
                 // gotten back from CreateProcess is that of the debugger, which causes this to try to connect

@@ -2602,17 +2602,29 @@ namespace Microsoft.Build.Execution
                         break;
 
                     case ScheduleActionType.CreateNode:
-                        var newNodes = new List<NodeInfo>();
+                        var newNodes = new NodeInfo[response.NumberOfNodesToCreate];
+                        var nodeConfig = GetNodeConfiguration();
+
+                        // Parallelize node spawning if OOP and NodeReuse is not enabled.
+                        if (response.RequiredNodeType == NodeAffinity.OutOfProc && !_buildParameters.EnableNodeReuse)
+                        {
+                            Parallel.For(0, response.NumberOfNodesToCreate, (i) =>
+                            {
+                                newNodes[i] = _nodeManager.CreateNode(nodeConfig, response.RequiredNodeType);
+                            });
+                        }
 
                         for (int i = 0; i < response.NumberOfNodesToCreate; i++)
                         {
-                            NodeInfo createdNode = _nodeManager.CreateNode(GetNodeConfiguration(), response.RequiredNodeType);
+                            if (response.RequiredNodeType != NodeAffinity.OutOfProc || _buildParameters.EnableNodeReuse)
+                            {
+                                newNodes[i] = _nodeManager.CreateNode(nodeConfig, response.RequiredNodeType);
+                            }
 
-                            if (createdNode != null)
+                            if (newNodes[i] != null)
                             {
                                 _noNodesActiveEvent.Reset();
-                                _activeNodes.Add(createdNode.NodeId);
-                                newNodes.Add(createdNode);
+                                _activeNodes.Add(newNodes[i].NodeId);
                                 ErrorUtilities.VerifyThrow(_activeNodes.Count != 0, "Still 0 nodes after asking for a new node.  Build cannot proceed.");
                             }
                             else
