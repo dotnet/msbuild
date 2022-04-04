@@ -632,7 +632,7 @@ namespace Microsoft.Build.CommandLine
                     // that priority. Idle priority would prevent the build from proceeding as the user does normal actions.
                     try
                     {
-                        if (lowPriority && Process.GetCurrentProcess().PriorityClass != ProcessPriorityClass.Idle)
+                        if (lowPriority && Process.GetCurrentProcess().PriorityClass != ProcessPriorityClass.Idle && !s_isServerNodeHosted)
                         {
                             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.BelowNormal;
                         }
@@ -1961,6 +1961,11 @@ namespace Microsoft.Build.CommandLine
         internal static bool usingSwitchesFromAutoResponseFile = false;
 
         /// <summary>
+        /// Indicates that this process is working as a server.
+        /// </summary>
+        private static bool s_isServerNodeHosted;
+
+        /// <summary>
         /// Parses the auto-response file (assumes the "/noautoresponse" switch is not specified on the command line), and combines the
         /// switches from the auto-response file with the switches passed in.
         /// Returns true if the response file was found.
@@ -2648,10 +2653,9 @@ namespace Microsoft.Build.CommandLine
                         return (exitCode, exitType.ToString());
                     };
 
-                    // commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters]
-
                     OutOfProcServerNode node = new(buildFunction);
 
+                    s_isServerNodeHosted = true;
                     shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);
 
                     FileUtilities.ClearCacheDirectory();
@@ -3149,6 +3153,12 @@ namespace Microsoft.Build.CommandLine
                 if ((consoleLoggerParameters?.Length > 0))
                 {
                     consoleParameters = AggregateParameters(consoleParameters, consoleLoggerParameters);
+                }
+
+                // Always use ANSI escape codes when the build is initiated by server
+                if (s_isServerNodeHosted)
+                {
+                    consoleParameters = AggregateParameters(consoleParameters, new[] { "FORCECONSOLECOLOR" });
                 }
 
                 // Check to see if there is a possibility we will be logging from an out-of-proc node.

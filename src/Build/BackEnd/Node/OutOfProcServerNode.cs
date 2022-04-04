@@ -114,7 +114,7 @@ namespace Microsoft.Build.Execution
         {
             string msBuildLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
             var handshake = new ServerNodeHandshake(
-                CommunicationsUtilities.GetHandshakeOptions(taskHost: false, nodeReuse: enableReuse, lowPriority: lowPriority, is64Bit: EnvironmentUtilities.Is64BitProcess),
+                CommunicationsUtilities.GetHandshakeOptions(taskHost: false, lowPriority: lowPriority, is64Bit: EnvironmentUtilities.Is64BitProcess),
                 msBuildLocation);
 
             string pipeName = NamedPipeUtil.GetPipeNameOrPath("MSBuildServer-" + handshake.ComputeHash());
@@ -458,8 +458,8 @@ namespace Microsoft.Build.Execution
 
             public static bool WasOpen(string mutexName)
             {
-                bool result = Mutex.TryOpenExisting(mutexName, out Mutex mutex);
-                mutex.Dispose();
+                bool result = Mutex.TryOpenExisting(mutexName, out Mutex? mutex);
+                mutex?.Dispose();
 
                 return result;
             }
