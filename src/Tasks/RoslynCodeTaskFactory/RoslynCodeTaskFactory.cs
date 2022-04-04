@@ -105,7 +105,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Stores functions that were added to the current app domain. Should be removed once we're finished.
         /// </summary>
-        private List<ResolveEventHandler> functionsAddedToAppDomain = new();
+        private ResolveEventHandler handlerAddedToAppDomain = null;
 
         /// <summary>
         /// Stores the parameters parsed in the &lt;UsingTask /&gt;.
@@ -128,9 +128,9 @@ namespace Microsoft.Build.Tasks
         /// <inheritdoc cref="ITaskFactory.CleanupTask(ITask)"/>
         public void CleanupTask(ITask task)
         {
-            foreach (ResolveEventHandler del in functionsAddedToAppDomain)
+            if (handlerAddedToAppDomain is not null)
             {
-                AppDomain.CurrentDomain.AssemblyResolve -= del;
+                AppDomain.CurrentDomain.AssemblyResolve -= handlerAddedToAppDomain;
             }
         }
 
@@ -541,6 +541,8 @@ namespace Microsoft.Build.Tasks
                 references = references.Union(DefaultReferences[taskInfo.CodeLanguage]);
             }
 
+            List<string> directoriesToAddToAppDomain = new();
+
             // Loop through the user specified references as well as the default references
             foreach (string reference in references)
             {
@@ -549,11 +551,8 @@ namespace Microsoft.Build.Tasks
                 {
                     // The path could be relative like ..\Assembly.dll so we need to get the full path
                     string fullPath = Path.GetFullPath(reference);
-                    string directory = Path.GetDirectoryName(fullPath);
+                    directoriesToAddToAppDomain.Add(Path.GetDirectoryName(fullPath));
                     resolvedAssemblyReferences.Add(fullPath);
-                    ResolveEventHandler delegateToAdd = (_, eventArgs) => TryLoadAssembly(directory, new AssemblyName(eventArgs.Name).Name);
-                    AppDomain.CurrentDomain.AssemblyResolve += delegateToAdd;
-                    functionsAddedToAppDomain.Add(delegateToAdd);
                     continue;
                 }
 
@@ -586,12 +585,23 @@ namespace Microsoft.Build.Tasks
             // Transform the list of resolved assemblies to TaskItems if they were all resolved
             items = hasInvalidReference ? null : resolvedAssemblyReferences.Select(i => (ITaskItem)new TaskItem(i)).ToArray();
 
+            handlerAddedToAppDomain = (_, eventArgs) => TryLoadAssembly(directoriesToAddToAppDomain, new AssemblyName(eventArgs.Name).Name);
+            AppDomain.CurrentDomain.AssemblyResolve += handlerAddedToAppDomain;
+
             return !hasInvalidReference;
 
-            static Assembly TryLoadAssembly(string directory, string name)
+            static Assembly TryLoadAssembly(List<string> directories, string name)
             {
-                string path = Path.Combine(directory, name + ".dll");
-                return File.Exists(path) ? Assembly.LoadFrom(path) : null;
+                foreach (string directory in directories)
+                {
+                    string path = Path.Combine(directory, name + ".dll");
+                    if (File.Exists(path))
+                    {
+                        return Assembly.LoadFrom(path);
+                    }
+                }
+
+                return null;
             }
         }
 
