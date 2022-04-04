@@ -18,7 +18,7 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal class MSBuildLoadContext : AssemblyLoadContext
     {
-        private AssemblyDependencyResolver _resolver;
+        private AssemblyDependencyResolver? _resolver;
 
         private readonly string _directory;
 
@@ -37,7 +37,7 @@ namespace Microsoft.Build.Shared
         {
             _directory = Directory.GetParent(assemblyPath)!.FullName;
 
-            _resolver = new AssemblyDependencyResolver(assemblyPath);
+            _resolver = File.Exists(assemblyPath) ? new AssemblyDependencyResolver(assemblyPath) : null;
         }
 
         protected override Assembly? Load(AssemblyName assemblyName)
@@ -52,7 +52,7 @@ namespace Microsoft.Build.Shared
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_2))
             {
                 // respect plugin.dll.json with the AssemblyDependencyResolver
-                string? assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
+                string? assemblyPath = _resolver?.ResolveAssemblyToPath(assemblyName);
                 if (assemblyPath != null)
                 {
                     return LoadFromAssemblyPath(assemblyPath);
@@ -109,7 +109,7 @@ namespace Microsoft.Build.Shared
         {
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_2))
             {
-                string? libraryPath = _resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
+                string? libraryPath = _resolver?.ResolveUnmanagedDllToPath(unmanagedDllName);
                 if (libraryPath != null)
                 {
                     return LoadUnmanagedDllFromPath(libraryPath);
