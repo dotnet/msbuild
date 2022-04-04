@@ -4531,7 +4531,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldBeEmpty();
+                        .ShouldHaveSingleItem()
+                        .EnvironmentVariableName
+                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents
@@ -4560,7 +4562,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldBeEmpty();
+                        .ShouldHaveSingleItem()
+                        .EnvironmentVariableName
+                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents
@@ -4589,7 +4593,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldBeEmpty();
+                        .ShouldHaveSingleItem()
+                        .EnvironmentVariableName
+                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents
@@ -4618,7 +4624,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldBeEmpty();
+                        .ShouldHaveSingleItem()
+                        .EnvironmentVariableName
+                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents
@@ -4702,7 +4710,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldBeEmpty();
+                        .ShouldHaveSingleItem()
+                        .EnvironmentVariableName
+                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents
