@@ -187,12 +187,12 @@ EndGlobal
 
                 string output = RunnerUtilities.ExecMSBuild(solutionFile.Path + " /t:Clean;Build;Custom", out bool success);
                 success.ShouldBeTrue();
-                output.IndexOf("classlib.Build").ShouldBeGreaterThan(-1);
-                output.IndexOf("classlib.Clean").ShouldBeGreaterThan(-1);
-                output.IndexOf("classlib.Custom").ShouldBeGreaterThan(-1);
-                output.IndexOf("simpleProject.Build").ShouldBeGreaterThan(-1);
-                output.IndexOf("simpleProject.Clean").ShouldBeGreaterThan(-1);
-                output.IndexOf("simpleProject.Custom").ShouldBeGreaterThan(-1);
+                output.ShouldContain("classlib.Build");
+                output.ShouldContain("classlib.Clean");
+                output.ShouldContain("classlib.Custom");
+                output.ShouldContain("simpleProject.Build");
+                output.ShouldContain("simpleProject.Clean");
+                output.ShouldContain("simpleProject.Custom");
             }
         }
 
@@ -259,17 +259,22 @@ Global
 EndGlobal
                 ");
 
-                Environment.SetEnvironmentVariable("MSBUILD_BATCHPROJECTTARGETS", "1");
-                var output = RunnerUtilities.ExecMSBuild(solutionFile.Path + " /m /t:Clean;Build;Custom", out bool success);
-                Environment.SetEnvironmentVariable("MSBUILD_BATCHPROJECTTARGETS", "");
-
-                output.IndexOf("classlib.Build").ShouldBeGreaterThan(-1);
-                output.IndexOf("classlib.Clean").ShouldBeGreaterThan(-1);
-                output.IndexOf("classlib.Custom").ShouldBeGreaterThan(-1);
-                output.IndexOf("simpleProject.Build").ShouldBeGreaterThan(-1);
-                output.IndexOf("simpleProject.Clean").ShouldBeGreaterThan(-1);
-                output.IndexOf("simpleProject.Custom").ShouldBeGreaterThan(-1);
-                success.ShouldBeTrue();
+                try
+                {
+                    Environment.SetEnvironmentVariable("MSBuildSolutionBatchTargets", "1");
+                    var output = RunnerUtilities.ExecMSBuild(solutionFile.Path + " /m /t:Clean;Build;Custom", out bool success);
+                    success.ShouldBeTrue();
+                    output.ShouldContain("classlib.Build");
+                    output.ShouldContain("classlib.Clean");
+                    output.ShouldContain("classlib.Custom");
+                    output.ShouldContain("simpleProject.Build");
+                    output.ShouldContain("simpleProject.Clean");
+                    output.ShouldContain("simpleProject.Custom");
+                }
+                finally
+                {
+                    Environment.SetEnvironmentVariable("MSBuildSolutionBatchTargets", "");
+                }
             }
         }
 

@@ -302,8 +302,10 @@ namespace Microsoft.Build.UnitTests
                 @"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                     <Target Name=`t` >
                         <ItemGroup>
-                            <ProjectReference Include=`this_project_does_not_exist.csproj` >
+                            <ProjectReference Include=`this_project_does_not_exist_warn.csproj` >
                                 <SkipNonexistentProjects>true</SkipNonexistentProjects>
+                            </ProjectReference>
+                            <ProjectReference Include=`this_project_does_not_exist_error.csproj` >
                             </ProjectReference>
                             <ProjectReference Include=`foo.csproj` >
                                 <SkipNonexistentProjects>false</SkipNonexistentProjects>
@@ -324,14 +326,16 @@ namespace Microsoft.Build.UnitTests
                 ");
 
             MockLogger logger = new MockLogger(_testOutput);
-            ObjectModelHelpers.BuildTempProjectFileExpectSuccess(@"SkipNonexistentProjectsMain.csproj", logger);
+            ObjectModelHelpers.BuildTempProjectFileExpectFailure(@"SkipNonexistentProjectsMain.csproj", logger);
 
             logger.AssertLogContains("Hello from foo.csproj");
-            string message = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFoundMessage"), "this_project_does_not_exist.csproj");
-            string error = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFound"), "this_project_does_not_exist.csproj");
+            string message = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFoundMessage"), "this_project_does_not_exist_warn.csproj");
+            string error = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFound"), "this_project_does_not_exist_warn.csproj");
+            string error2 = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFound"), "this_project_does_not_exist_error.csproj");
             Assert.Equal(0, logger.WarningCount);
-            Assert.Equal(0, logger.ErrorCount);
+            Assert.Equal(1, logger.ErrorCount);
             Assert.Contains(message, logger.FullLog); // for the missing project
+            Assert.Contains(error2, logger.FullLog);
             Assert.DoesNotContain(error, logger.FullLog);
         }
 

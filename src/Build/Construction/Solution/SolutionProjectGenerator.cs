@@ -186,7 +186,7 @@ namespace Microsoft.Build.Construction
             _loggingService = loggingService;
             _sdkResolverService = sdkResolverService ?? SdkResolverService.Instance;
             _submissionId = submissionId;
-            _batchProjectTargets = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_BATCHPROJECTTARGETS"));
+            _batchProjectTargets = Traits.Instance.SolutionBatchTargets;
 
             if (targetNames != null)
             {
