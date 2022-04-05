@@ -379,7 +379,8 @@ namespace Microsoft.NET.Build.Tests
             testProject.AdditionalProperties["EnableDefaultResourceItems"] = "false";
 
             // Windows App SDK related
-            testProject.AdditionalProperties["WindowsAppSdkFoundation"] = "true";
+            testProject.AdditionalProperties["EnableDefaultWindowsAppSdkContentItems"] = "true";
+            testProject.AdditionalProperties["EnableDefaultWindowsAppSdkPRIResourceItems"] = "true";
             testProject.AdditionalProperties["EnableDefaultContentItems"] = "false";
             testProject.AdditionalProperties["EnableDefaultPRIResourceItems"] = "false";
 
@@ -768,7 +769,8 @@ public class Class1
             };
 
             // Windows App SDK
-            testProject.AdditionalProperties["WindowsAppSdkFoundation"] = "true";
+            testProject.AdditionalProperties["EnableDefaultWindowsAppSdkContentItems"] = "true";
+            testProject.AdditionalProperties["EnableDefaultWindowsAppSdkPRIResourceItems"] = "true";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
             var projectFolder = Path.Combine(testAsset.TestRoot, testProject.Name);
@@ -819,7 +821,7 @@ public class Class1
                 IsExe = true,
             };
 
-            // Not setting the "WindowsAppSdkFoundation" property!
+            // Not setting the "EnableDefaultWindowsAppSdkContentItems" or "EnableDefaultWindowsAppSdkPRIResourceItems" properties!
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
             var projectFolder = Path.Combine(testAsset.TestRoot, testProject.Name);
