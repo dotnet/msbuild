@@ -12,8 +12,8 @@
   "symbols/langVersion/displayName": "Версия языка",
   "symbols/skipRestore/description": "Если установлено, автоматическое восстановление проекта при создании пропускается.",
   "symbols/skipRestore/displayName": "Пропустить восстановление",
-  "symbols/UseProgramMain/description": "Whether to generate an explicit Program class and Main method instead of top-level statements.",
-  "symbols/UseProgramMain/displayName": "Do not use top-level statements",
+  "symbols/UseProgramMain/description": "Следует ли создавать явный класс Program и метод Main вместо операторов верхнего уровня.",
+  "symbols/UseProgramMain/displayName": "Не использовать операторы верхнего уровня",
   "postActions/restore/description": "Восстановление пакетов NuGet, необходимых для этого проекта.",
   "postActions/restore/manualInstructions/default/text": "Выполнить команду \"dotnet restore\"",
   "postActions/open-file/description": "Открывает файл Program.cs в редакторе"

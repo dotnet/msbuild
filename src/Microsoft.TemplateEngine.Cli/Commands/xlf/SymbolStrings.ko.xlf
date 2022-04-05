@@ -21,8 +21,8 @@
         <source>NuGet package ID or path to folder or NuGet package to install. 
 To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;version&gt;.
 </source>
-        <target state="new">NuGet package ID or path to folder or NuGet package to install. 
-To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;version&gt;.
+        <target state="translated">설치할 NuGet 패키지 ID 또는 폴더 또는 NuGet 패키지의 경로입니다. 
+특정 버전의 NuGet 패키지를 설치하려면 &lt;package ID&gt;::&lt;version&gt;을 사용하세요.
 </target>
         <note />
       </trans-unit>

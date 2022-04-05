@@ -703,7 +703,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostActionDispatcher_Error_RunScriptNotAllowed">
         <source>Execution of 'Run script' post action is not allowed.</source>
-        <target state="translated">L'esecuzione dell'azione post "Esegui script" non è consentita.</target>
+        <target state="translated">L'esecuzione dell'azione post \"Esegui script\" non è consentita.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionFailedInstructionHeader">
@@ -733,7 +733,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
         <source>Failed to run the command: argument 'executable' is missing in post action configuration.</source>
-        <target state="translated">Non è stato possibile eseguire il comando: argomento "eseguibile" mancante nella configurazione dell'azione post.</target>
+        <target state="translated">Non è stato possibile eseguire il comando: argomento \"eseguibile\" mancante nella configurazione dell'azione post.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessingPostActions">
@@ -829,12 +829,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_BuiltInCheck_Info_BuiltInPackageAvailable">
         <source>An update for template package '{0}' is available in the '{1}' provider.</source>
-        <target state="new">An update for template package '{0}' is available in the '{1}' provider.</target>
+        <target state="translated">Un aggiornamento per il pacchetto modello '{0}' è disponibile nel provider '{1}'.</target>
         <note>{0} - id and version of template package, {1} - provider name (.NET SDK, Optional workloads, etc)</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_BuiltInCheck_Info_UninstallPackage">
         <source>To use built-in template package, uninstall manually installed template package using:</source>
-        <target state="new">To use built-in template package, uninstall manually installed template package using:</target>
+        <target state="translated">Per usare il pacchetto di modelli predefinito, disinstallare il pacchetto modello installato manualmente usando:</target>
         <note>followed by command to uninstall package</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">

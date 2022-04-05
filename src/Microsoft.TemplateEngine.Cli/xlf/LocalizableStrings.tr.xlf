@@ -829,12 +829,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_BuiltInCheck_Info_BuiltInPackageAvailable">
         <source>An update for template package '{0}' is available in the '{1}' provider.</source>
-        <target state="new">An update for template package '{0}' is available in the '{1}' provider.</target>
+        <target state="translated">'{1}' sağlayıcısında '{0}' şablon paketi için bir güncelleştirme var.</target>
         <note>{0} - id and version of template package, {1} - provider name (.NET SDK, Optional workloads, etc)</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_BuiltInCheck_Info_UninstallPackage">
         <source>To use built-in template package, uninstall manually installed template package using:</source>
-        <target state="new">To use built-in template package, uninstall manually installed template package using:</target>
+        <target state="translated">Yerleşik şablon paketini kullanmak için el ile yüklenen şablon paketini şu komutu kullanarak kaldırın:</target>
         <note>followed by command to uninstall package</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">

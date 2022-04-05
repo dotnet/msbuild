@@ -21,8 +21,8 @@
         <source>NuGet package ID or path to folder or NuGet package to install. 
 To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;version&gt;.
 </source>
-        <target state="new">NuGet package ID or path to folder or NuGet package to install. 
-To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;version&gt;.
+        <target state="translated">ID do pacote NuGet ou caminho para a pasta ou pacote NuGet a ser instalado. 
+Para instalar o pacote NuGet de determinada versão, utilize &lt;package ID&gt;::&lt;version&gt;.
 </target>
         <note />
       </trans-unit>
