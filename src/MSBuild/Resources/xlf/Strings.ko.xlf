@@ -1170,7 +1170,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="MSBuildDebugPath">
         <source>MSBuild logs and debug information will be at "{0}"</source>
-        <target state="new">MSBuild logs and debug information will be at "{0}"</target>
+        <target state="translated">MSBuild 로그 및 디버그 정보는 "{0}"에 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingLoggerError">
