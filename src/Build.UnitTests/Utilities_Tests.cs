@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests
                 XmlDocumentWithLocation.ClearReadOnlyFlags_UnitTestsOnly();
 
                 TransientTestFile inputFile = env.CreateFile("tempInput.tmp", ObjectModelHelpers.CleanupFileContents(@"
-<Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+<Project DefaultTargets='Build'>
   <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets'/>
 </Project>"));
                 TransientTestFile outputFile = env.CreateFile("tempOutput.tmp");
