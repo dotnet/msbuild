@@ -2,16 +2,22 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 //
 
-using System;
-
 namespace Microsoft.Build.BackEnd
 {
     internal sealed class ServerNodeBuildResult : INodePacket
     {
+        private int _exitCode = default!;
+        private string _exitType = default!;
+
+        /// <summary>
+        /// Private constructor for deserialization
+        /// </summary>
+        private ServerNodeBuildResult() { }
+
         public ServerNodeBuildResult(int exitCode, string exitType)
         {
-            ExitCode = exitCode;
-            ExitType = exitType;
+            _exitCode = exitCode;
+            _exitType = exitType;
         }
 
         #region INodePacket Members
@@ -24,23 +30,25 @@ namespace Microsoft.Build.BackEnd
 
         #endregion
 
-        public int ExitCode { get; }
+        public int ExitCode => _exitCode;
 
-        public string ExitType { get; }
+        public string ExitType => _exitType;
 
         public void Translate(ITranslator translator)
         {
-            if (translator.Mode == TranslationDirection.WriteToStream)
-            {
-                var bw = translator.Writer;
+            translator.Translate(ref _exitCode);
+            translator.Translate(ref _exitType);
+        }
 
-                bw.Write(ExitCode);
-                bw.Write(ExitType);
-            }
-            else
-            {
-                throw new InvalidOperationException("Read from stream not supported");
-            }
+        /// <summary>
+        /// Factory for deserialization.
+        /// </summary>
+        internal static INodePacket FactoryForDeserialization(ITranslator translator)
+        {
+            ServerNodeBuildResult command = new();
+            command.Translate(translator);
+
+            return command;
         }
     }
 }

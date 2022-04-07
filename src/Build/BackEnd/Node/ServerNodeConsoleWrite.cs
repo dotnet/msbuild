@@ -1,23 +1,29 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-
 namespace Microsoft.Build.BackEnd
 {
     internal sealed class ServerNodeConsoleWrite : INodePacket
     {
-        public string Text { get; }
+        private string _text = default!;
+        private byte _outputType = default!;
+
+        public string Text => _text;
 
         /// <summary>
         /// 1 = stdout, 2 = stderr
         /// </summary>
-        public byte OutputType { get; }
+        public byte OutputType => _outputType;
+
+        /// <summary>
+        /// Private constructor for deserialization
+        /// </summary>
+        private ServerNodeConsoleWrite() { }
 
         public ServerNodeConsoleWrite(string text, byte outputType)
         {
-            Text = text;
-            OutputType = outputType;
+            _text = text;
+            _outputType = outputType;
         }
 
         #region INodePacket Members
@@ -31,17 +37,16 @@ namespace Microsoft.Build.BackEnd
 
         public void Translate(ITranslator translator)
         {
-            if (translator.Mode == TranslationDirection.WriteToStream)
-            {
-                var bw = translator.Writer;
+            translator.Translate(ref _text);
+            translator.Translate(ref _outputType);
+        }
 
-                bw.Write(Text);
-                bw.Write(OutputType);
-            }
-            else
-            {
-                throw new InvalidOperationException("Read from stream not supported");
-            }
+        internal static INodePacket FactoryForDeserialization(ITranslator translator)
+        {
+            ServerNodeConsoleWrite command = new();
+            command.Translate(translator);
+
+            return command;
         }
     }
 }

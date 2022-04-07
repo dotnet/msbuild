@@ -13,13 +13,19 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal sealed class ServerNodeBuildCommand : INodePacket
     {
+        private string _commandLine = default!;
+        private string _startupDirectory = default!;
+        private Dictionary<string, string> _buildProcessEnvironment = default!;
+        private CultureInfo _culture = default!;
+        private CultureInfo _uiCulture = default!;
+
         public ServerNodeBuildCommand(string commandLine, string startupDirectory, Dictionary<string, string> buildProcessEnvironment, CultureInfo culture, CultureInfo uiCulture)
         {
-            CommandLine = commandLine;
-            StartupDirectory = startupDirectory;
-            BuildProcessEnvironment = buildProcessEnvironment;
-            Culture = culture;
-            UICulture = uiCulture;
+            _commandLine = commandLine;
+            _startupDirectory = startupDirectory;
+            _buildProcessEnvironment = buildProcessEnvironment;
+            _culture = culture;
+            _uiCulture = uiCulture;
         }
 
         /// <summary>
@@ -41,27 +47,27 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The startup directory
         /// </summary>
-        public string CommandLine { get; private set; } = default!;
+        public string CommandLine => _commandLine;
 
         /// <summary>
         /// The startup directory
         /// </summary>
-        public string StartupDirectory { get; private set; } = default!;
+        public string StartupDirectory => _startupDirectory;
 
         /// <summary>
         /// The process environment.
         /// </summary>
-        public Dictionary<string, string> BuildProcessEnvironment { get; private set; } = default!;
+        public Dictionary<string, string> BuildProcessEnvironment => _buildProcessEnvironment;
 
         /// <summary>
         /// The culture
         /// </summary>
-        public CultureInfo Culture { get; private set; } = default!;
+        public CultureInfo Culture => _culture;
 
         /// <summary>
         /// The UI culture.
         /// </summary>
-        public CultureInfo UICulture { get; private set; } = default!;
+        public CultureInfo UICulture => _uiCulture;
 
         #region INodePacketTranslatable Members
 
@@ -71,27 +77,11 @@ namespace Microsoft.Build.BackEnd
         /// <param name="translator">The translator to use.</param>
         public void Translate(ITranslator translator)
         {
-            if (translator.Mode == TranslationDirection.ReadFromStream)
-            {
-                var br = translator.Reader;
-
-                CommandLine = br.ReadString();
-                StartupDirectory = br.ReadString();
-                int count = br.ReadInt32();
-                BuildProcessEnvironment = new Dictionary<string, string>(count, StringComparer.OrdinalIgnoreCase);
-                for (int i = 0; i < count; ++i)
-                {
-                    var key = br.ReadString();
-                    var value = br.ReadString();
-                    BuildProcessEnvironment.Add(key, value);
-                }
-                Culture = new CultureInfo(br.ReadString());
-                UICulture = new CultureInfo(br.ReadString());
-            }
-            else
-            {
-                throw new InvalidOperationException("Writing into stream not supported");
-            }
+            translator.Translate(ref _commandLine);
+            translator.Translate(ref _startupDirectory);
+            translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
+            translator.TranslateCulture(ref _culture);
+            translator.TranslateCulture(ref _uiCulture);
         }
 
         /// <summary>
