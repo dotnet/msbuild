@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
@@ -320,53 +319,56 @@ namespace Microsoft.Build.Execution
             // configure console output redirection
             var oldOut = Console.Out;
             var oldErr = Console.Error;
+            (int exitCode, string exitType) buildResult;
 
-            using var outWriter = new RedirectConsoleWriter(text =>
+            // Dispose must be called before the server sends response packet
+            using (var outWriter = RedirectConsoleWriter.Create(text => SendPacket(new ServerNodeConsoleWrite(text, 1))))
+            using (var errWriter = RedirectConsoleWriter.Create(text => SendPacket(new ServerNodeConsoleWrite(text, 2))))
             {
-                SendPacket(new ServerNodeConsoleWrite(text, 1));
-            });
-            using var errWriter = new RedirectConsoleWriter(text =>
-            {
-                SendPacket(new ServerNodeConsoleWrite(text, 2));
-            });
+                Console.SetOut(outWriter);
+                Console.SetError(errWriter);
 
-            Console.SetOut(outWriter);
-            Console.SetError(errWriter);
+                buildResult = _buildFunction(command.CommandLine);
 
-            var (exitCode, exitType) = _buildFunction(command.CommandLine);
-
-            Console.SetOut(oldOut);
-            Console.SetError(oldErr);
-
+                Console.SetOut(oldOut);
+                Console.SetError(oldErr);
+            }
+          
             // On Windows, a process holds a handle to the current directory,
             // so reset it away from a user-requested folder that may get deleted.
             NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
 
-            var response = new ServerNodeBuildResult(exitCode, exitType);
+            var response = new ServerNodeBuildResult(buildResult.exitCode, buildResult.exitType);
             SendPacket(response);
 
             _shutdownReason = NodeEngineShutdownReason.BuildCompleteReuse;
             _shutdownEvent.Set();
         }
 
-        // TODO: unit tests
         internal sealed class RedirectConsoleWriter : StringWriter
         {
-            private readonly string _newLineString;
-
             private readonly Action<string> _writeCallback;
+            private readonly Timer _timer;
+            private readonly TextWriter _syncWriter;
 
-            public RedirectConsoleWriter(Action<string> writeCallback)
+            private RedirectConsoleWriter(Action<string> writeCallback)
             {
-                _newLineString = new String(CoreNewLine);
                 _writeCallback = writeCallback;
+                _syncWriter = Synchronized(this);
+                _timer = new Timer(TimerCallback, null, 0, 200);
             }
 
-            private void MaybeFlushCaptured(bool force)
+            public static TextWriter Create(Action<string> writeCallback)
             {
-                if (force || GetStringBuilder().Length > 200)
+                RedirectConsoleWriter writer = new(writeCallback);
+                return writer._syncWriter;
+            }
+
+            private void TimerCallback(object? state)
+            {
+                if (GetStringBuilder().Length > 0)
                 {
-                    Flush();
+                    _syncWriter.Flush();
                 }
             }
 
@@ -374,6 +376,7 @@ namespace Microsoft.Build.Execution
             {
                 if (disposing)
                 {
+                    _timer.Dispose();
                     Flush();
                 }
 
@@ -388,29 +391,6 @@ namespace Microsoft.Build.Execution
                 _writeCallback(captured);
 
                 base.Flush();
-            }
-
-            public override void Write(char value)
-            {
-                base.Write(value);
-                MaybeFlushCaptured(false);
-            }
-
-            public override void Write(char[] buffer, int index, int count)
-            {
-                base.Write(buffer, index, count);
-                MaybeFlushCaptured(buffer.SequenceEqual(CoreNewLine));
-            }
-
-            public override void Write(string? value)
-            {
-                if (value is null)
-                {
-                    return;
-                }
-
-                base.Write(value);
-                MaybeFlushCaptured(value.Contains(_newLineString));
             }
         }
 
