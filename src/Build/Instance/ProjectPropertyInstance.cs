@@ -97,6 +97,7 @@ namespace Microsoft.Build.Execution
                 if ((this as IProperty).IsEnvironmentProperty && loggingContext?.IsValid == true && !_loggedEnvProperty)
                 {
                     EnvironmentVariableReadEventArgs args = new(Name, _escapedValue);
+                    args.BuildEventContext = loggingContext.BuildEventContext;
                     loggingContext.LogBuildEvent(args);
                     _loggedEnvProperty = true;
                 }

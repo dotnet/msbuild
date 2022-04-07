@@ -101,6 +101,7 @@ namespace Microsoft.Build.Evaluation
                 if ((this as IProperty).IsEnvironmentProperty && this is ProjectPropertyNotXmlBacked notXmlBacked && notXmlBacked.loggingContext?.IsValid == true && !_loggedEnvProperty)
                 {
                     EnvironmentVariableReadEventArgs args = new(Name, EvaluatedValueEscapedInternal);
+                    args.BuildEventContext = notXmlBacked.loggingContext.BuildEventContext;
                     notXmlBacked.loggingContext.LogBuildEvent(args);
                     _loggedEnvProperty = true;
                 }
