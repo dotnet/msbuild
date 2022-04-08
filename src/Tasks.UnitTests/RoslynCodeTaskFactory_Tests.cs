@@ -55,7 +55,7 @@ Log.LogError(Alpha.GetString());
 </Project>
 ");
                 string output = RunnerUtilities.ExecMSBuild(inlineTask.Path, out bool success);
-                success.ShouldBeTrue();
+                success.ShouldBeTrue(output);
                 output.ShouldContain("Alpha.GetString");
             }
         }
