@@ -96,7 +96,7 @@ namespace ManifestReaderTests
                 = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null);
 
             Action a = () => sdkDirectoryWorkloadManifestProvider.GetManifests().Select(m => {
-                using (m.openManifestStream()) { }
+                using (m.OpenManifestStream()) { }
                 return true;
             }).ToList();
 
@@ -384,7 +384,7 @@ namespace ManifestReaderTests
 
         private IEnumerable<string> GetManifestContents(SdkDirectoryWorkloadManifestProvider manifestProvider)
         {
-            return manifestProvider.GetManifests().Select(manifest => new StreamReader(manifest.openManifestStream()).ReadToEnd());
+            return manifestProvider.GetManifests().Select(manifest => new StreamReader(manifest.OpenManifestStream()).ReadToEnd());
         }
 
         private class EnvironmentMock

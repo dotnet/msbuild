@@ -75,11 +75,6 @@ namespace Microsoft.DotNet.Cli
                 {
                     return ProcessArgs(args, startupTime);
                 }
-                catch (HelpException e)
-                {
-                    Reporter.Output.WriteLine(e.Message);
-                    return 0;
-                }
                 catch (Exception e) when (e.ShouldBeDisplayedAsError())
                 {
                     Reporter.Error.WriteLine(CommandContext.IsVerbose()

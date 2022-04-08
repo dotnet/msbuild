@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.Linq;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Test;
@@ -78,7 +80,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<IEnumerable<string>> CollectOption = new ForwardedOption<IEnumerable<string>>("--collect", LocalizableStrings.cmdCollectDescription)
         {
             ArgumentHelpName = LocalizableStrings.cmdCollectFriendlyName
-        }.ForwardAsSingle(o => $"-property:VSTestCollect={SurroundWithDoubleQuotes(string.Join(";", GetSemiColonEscapedArgs(o)))}")
+        }.ForwardAsSingle(o => $"-property:VSTestCollect=\"{string.Join(";", GetSemiColonEscapedArgs(o))}\"")
         .AllowSingleArgPerToken();
 
         public static readonly Option<bool> BlameOption = new ForwardedOption<bool>("--blame", LocalizableStrings.CmdBlameDescription)
@@ -151,11 +153,11 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(NoLogoOption);
             command.AddOption(ConfigurationOption);
             command.AddOption(FrameworkOption);
-            command.AddOption(CommonOptions.RuntimeOption.WithHelpDescription(command, LocalizableStrings.RuntimeOptionDescription));
+            command.AddOption(CommonOptions.LongFormRuntimeOption.WithHelpDescription(command, LocalizableStrings.RuntimeOptionDescription));
             command.AddOption(NoRestoreOption);
             command.AddOption(CommonOptions.InteractiveMsBuildForwardOption);
             command.AddOption(CommonOptions.VerbosityOption);
-            command.AddOption(CommonOptions.ArchitectureOption);
+            command.AddOption(CommonOptions.LongFormArchitectureOption);
             command.AddOption(CommonOptions.OperatingSystemOption);
 
             command.SetHandler(TestCommand.Run);

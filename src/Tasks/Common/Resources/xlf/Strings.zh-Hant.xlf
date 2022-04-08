@@ -567,7 +567,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="Net6NotCompatibleWithDev16">
         <source>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</source>
-        <target state="needs-review-translation">NETSDK1182: 不支援以 Visual Studio 2019 中的 .NET 6.0 為目標。</target>
+        <target state="translated">NETSDK1182: 不支援在 Visual Studio 2019 中以 .NET 6.0 或更高版本為目標。</target>
         <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
@@ -914,10 +914,10 @@ You may need to build the project on another operating system or architecture, o
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
-To install these workloads, run the following command: {1}</source>
+To install these workloads, run the following command: dotnet workload restore</source>
         <target state="translated">NETSDK1147: 若要建立此專案，必須安裝下列工作負載: {0}
-若要安裝這些工作負載，請執行下列命令: {1}</target>
-        <note>{StrBegin="NETSDK1147: "}</note>
+若要安裝這些工作負載，請執行下列命令: dotnet workload restore</target>
+        <note>{StrBegin="NETSDK1147: "} LOCALIZATION: Do not localize "dotnet workload restore"</note>
       </trans-unit>
     </body>
   </file>

@@ -27,9 +27,9 @@
         <target state="translated">Nie znaleziono pakietu {0} w kanałach informacyjnych NuGet {1}".</target>
         <note />
       </trans-unit>
-      <trans-unit id="SkipNuGetpackageSigningValidationSDKNotFirstParty">
-        <source>Skip NuGet package signing validation. The current .NET SDK is not signed by first party.</source>
-        <target state="translated">Pomiń weryfikację podpisywania pakietu NuGet. Bieżący zestaw .NET SDK nie jest podpisany przez właściwą stronę.</target>
+      <trans-unit id="NuGetPackageSignatureVerificationSkipped">
+        <source>Skipping NuGet package signature verification.</source>
+        <target state="new">Skipping NuGet package signature verification.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipNuGetpackageSigningValidationmacOSLinux">

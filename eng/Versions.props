@@ -55,6 +55,7 @@
     <MicrosoftNETHostModelVersion>7.0.0-preview.4.22201.3</MicrosoftNETHostModelVersion>
     <MicrosoftExtensionsFileSystemGlobbingPackageVersion>6.0.0-preview.7.21363.9</MicrosoftExtensionsFileSystemGlobbingPackageVersion>
     <MicrosoftExtensionsDependencyModelVersion>$(MicrosoftExtensionsDependencyModelPackageVersion)</MicrosoftExtensionsDependencyModelVersion>
+    <SystemServiceProcessServiceControllerVersion>7.0.0-preview.4.22201.3</SystemServiceProcessServiceControllerVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/nuget/nuget.client -->

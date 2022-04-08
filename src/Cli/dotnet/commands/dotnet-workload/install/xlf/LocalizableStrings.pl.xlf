@@ -17,6 +17,16 @@
         <target state="translated">Pakiet {0} w wersji {1} nie istnieje w pamięci podręcznej trybu offline {2}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
+        <target state="translated">Nie można jednocześnie używać poleceń {0} i {1}. W przypadku instalowania z pliku wycofywania usuń polecenie {0}. W przeciwnym razie usuń polecenie {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CheckForUpdatedWorkloadManifests">
+        <source>Checking for updated workload manifests.</source>
+        <target state="translated">Sprawdzanie zaktualizowanych manifestów obciążenia.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}…</source>
         <target state="translated">Odinstalowywanie pakietu obciążeń {0} w wersji {1}…</target>
@@ -205,6 +215,11 @@
       <trans-unit id="SkipManifestUpdateOptionDescription">
         <source>Skip updating the workload manifests.</source>
         <target state="translated">Pomiń aktualizowanie manifestów pakietu roboczego.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipSignCheckOptionDescription">
+        <source>Skip signature verification of workload packages and installers.</source>
+        <target state="new">Skip signature verification of workload packages and installers.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingManifestUpdate">

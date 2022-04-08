@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli
                 IsHidden = true
             }.ForwardAsProperty()
             .AllowSingleArgPerToken();
-
+            
         public static Option<VerbosityOptions> VerbosityOption =
             new ForwardedOption<VerbosityOptions>(
                 new string[] { "-v", "--verbosity" },
@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Cli
                     ArgumentHelpName = CommonLocalizableStrings.LevelArgumentName
                 }.ForwardAsSingle(o => $"-verbosity:{o}");
 
-        public static Option<VerbosityOptions> HiddenVerbosityOption =>
+        public static Option<VerbosityOptions> HiddenVerbosityOption =
             new ForwardedOption<VerbosityOptions>(
                 new string[] { "-v", "--verbosity" },
                 description: CommonLocalizableStrings.VerbosityOptionDescription)
@@ -113,12 +113,6 @@ namespace Microsoft.DotNet.Cli
                 "--interactive",
                 CommonLocalizableStrings.CommandInteractiveOptionDescription);
 
-        public static Option<bool> DisableBuildServersOption =
-            new ForwardedOption<bool>(
-                "--disable-build-servers",
-                CommonLocalizableStrings.DisableBuildServersOptionDescription)
-            .ForwardAsMany(_ => new string[] { "-p:UseRazorBuildServer=false", "-p:UseSharedCompilation=false", "/nodeReuse:false" });
-
         public static Option<string> ArchitectureOption =
             new ForwardedOption<string>(
                 new string[] { "--arch", "-a" },
@@ -156,6 +150,12 @@ namespace Microsoft.DotNet.Cli
                 CommonLocalizableStrings.FrameworkDependentOptionDescription)
             // Flip the argument so that if this option is specified we get selfcontained=false
             .SetForwardingFunction((arg, p) => ForwardSelfContainedOptions(!arg, p)); 
+
+        public static readonly Option<string> TestPlatformOption = new Option<string>("--Platform");
+
+        public static readonly Option<string> TestFrameworkOption = new Option<string>("--Framework");
+
+        public static readonly Option<string> TestLoggerOption = new Option<string>("--logger");
 
         public static readonly Option<string> TestPlatformOption = new Option<string>("--Platform");
 

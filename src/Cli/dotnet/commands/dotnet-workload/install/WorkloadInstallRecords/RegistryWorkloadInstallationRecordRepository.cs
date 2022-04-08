@@ -32,8 +32,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
         /// </summary>
         private RegistryKey _baseKey = Registry.LocalMachine;
 
-        internal RegistryWorkloadInstallationRecordRepository(InstallElevationContextBase elevationContext, ISetupLogger logger)
-            : base(elevationContext, logger)
+        internal RegistryWorkloadInstallationRecordRepository(InstallElevationContextBase elevationContext, ISetupLogger logger, bool verifySignatures)
+            : base(elevationContext, logger, verifySignatures)
         {
 
         }
@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
         /// <param name="baseKey">The base key to use, e.g. <see cref="Registry.CurrentUser"/>.</param>
         internal RegistryWorkloadInstallationRecordRepository(InstallElevationContextBase elevationContext, ISetupLogger logger,
             RegistryKey baseKey, string basePath)
-            : this(elevationContext, logger)
+            : this(elevationContext, logger, verifySignatures: false)
         {
             _baseKey = baseKey;
             BasePath = basePath;

@@ -4,9 +4,11 @@
 using Microsoft.DotNet.Tools.Build;
 using FluentAssertions;
 using Xunit;
+using Microsoft.NET.TestFramework;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
+    [Collection(TestConstants.UsesStaticTelemetryState)]
     public class GivenDotnetBuildInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
         const string ExpectedPrefix = "-maxcpucount -verbosity:m";

@@ -7,9 +7,11 @@ using Xunit;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.NET.TestFramework;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
+    [Collection(TestConstants.UsesStaticTelemetryState)]
     public class GivenDotnetRestoreInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
         private const string ExpectedPrefix =
@@ -42,7 +44,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         {
             CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
             {
-                Telemetry.Telemetry.CurrentSessionId = null;
+                Telemetry.Telemetry.DisableForTests();
 
                 expectedAdditionalArgs =
                     (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}")

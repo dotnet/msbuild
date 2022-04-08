@@ -8,14 +8,11 @@ namespace Microsoft.DotNet.PackageInstall.Tests
 {
     public class MockFirstPartyNuGetPackageSigningVerifier: IFirstPartyNuGetPackageSigningVerifier
     {
-        private readonly bool _isExecutableIsFirstPartySignedWithoutValidation;
         private readonly bool _verifyResult;
         private readonly string _commandOutput;
-
         
-        public MockFirstPartyNuGetPackageSigningVerifier(bool isExecutableIsFirstPartySignedWithoutValidation = true, bool verifyResult = true, string commandOutput = "")
+        public MockFirstPartyNuGetPackageSigningVerifier(bool verifyResult = true, string commandOutput = "")
         {
-            _isExecutableIsFirstPartySignedWithoutValidation = isExecutableIsFirstPartySignedWithoutValidation;
             _verifyResult = verifyResult;
             _commandOutput = commandOutput;
         }
@@ -24,11 +21,6 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         {
             commandOutput = _commandOutput;
             return _verifyResult;
-        }
-
-        public bool IsExecutableIsFirstPartySignedWithoutValidation(FilePath executable)
-        {
-            return _isExecutableIsFirstPartySignedWithoutValidation;
         }
     }
 }

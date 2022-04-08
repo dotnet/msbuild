@@ -13,9 +13,24 @@ namespace Microsoft.DotNet.Cli
 {
     public static class ParseResultExtensions
     {
+        ///<summary>
+        /// Finds the command of the parse result and invokes help for that command.
+        /// If no command is specified, invokes help for the application.
+        ///<summary>
+        ///<remarks>
+        /// This is accomplished by finding a set of tokens that should be valid and appending a help token
+        /// to that list, then re-parsing the list of tokens. This is not ideal - either we should have a direct way
+        /// of invoking help for a ParseResult, or we should eliminate this custom, ad-hoc help invocation by moving
+        /// more situations that want to show help into Parsing Errors (which trigger help in the default System.CommandLine pipeline)
+        /// or custom Invocation Middleware, so we can more easily create our version of a HelpResult type.
+        ///</remarks>
         public static void ShowHelp(this ParseResult parseResult)
         {
-            Parser.Instance.Parse(parseResult.Tokens.Select(t => t.Value).Append("-h").ToArray()).Invoke();
+            // take from the start of the list until we hit an option/--/unparsed token
+            // since commands can have arguments, we must take those as well in order to get accurate help
+            var tokenList = parseResult.Tokens.TakeWhile(token => token.Type == TokenType.Argument || token.Type == TokenType.Command || token.Type == TokenType.Directive).Select(t => t.Value).ToList();
+            tokenList.Add("-h");
+            Parser.Instance.Parse(tokenList).Invoke();
         }
 
         public static void ShowHelpOrErrorIfAppropriate(this ParseResult parseResult)

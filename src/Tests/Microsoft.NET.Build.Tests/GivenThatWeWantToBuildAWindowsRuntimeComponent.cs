@@ -204,7 +204,7 @@ class Program
                 .HaveStdOut("(0, 0)");
         }
 
-        [FullMSBuildOnlyFact]
+        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/24326")]
         public void WinMDInteropProjectCanBeReferenced()
         {
 
@@ -241,6 +241,7 @@ class Program
             };
 
             consoleApp.ReferencedProjects.Add(projectionProject);
+            consoleApp.PackageReferences.Add(new TestPackageReference("Microsoft.VCRTForwarders.140", "1.0.7"));
 
             //  Workaround for PrivateAssets
             consoleApp.PackageReferences.Add(new TestPackageReference("Microsoft.Windows.CsWinRT", "1.2.3"));

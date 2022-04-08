@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="WorkloadSourceColumn">
         <source>Installation Source</source>
-        <target state="new">Installation Source</target>
+        <target state="translated">インストール ソース</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">

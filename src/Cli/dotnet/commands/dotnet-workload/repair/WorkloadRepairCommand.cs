@@ -19,7 +19,7 @@ using NuGet.Common;
 
 namespace Microsoft.DotNet.Workloads.Workload.Repair
 {
-    internal class WorkloadRepairCommand : CommandBase
+    internal class WorkloadRepairCommand : WorkloadCommandBase
     {
         private readonly IReporter _reporter;
         private readonly PackageSourceLocation _packageSourceLocation;
@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
                 new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, nullLogger), nullLogger, restoreActionConfig: _parseResult.ToRestoreActionConfig());
             _workloadInstaller = workloadInstaller ??
                                  WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand,
-                                     _workloadResolver, _verbosity, userProfileDir, nugetPackageDownloader, dotnetDir, tempDirPath,
+                                     _workloadResolver, _verbosity, userProfileDir, VerifySignatures, nugetPackageDownloader, dotnetDir, tempDirPath,
                                      _packageSourceLocation, _parseResult.ToRestoreActionConfig());
         }
 
@@ -121,7 +121,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
 
                 foreach (var packId in packsToInstall)
                 {
-                    installer.RepairWorkloadPack(packId, sdkFeatureBand);
+                    CliTransaction.RunNew(context => installer.RepairWorkloadPack(packId, sdkFeatureBand, context));
                 }
             }
             else
