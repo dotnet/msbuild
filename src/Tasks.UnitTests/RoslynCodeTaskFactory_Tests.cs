@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -25,6 +26,39 @@ namespace Microsoft.Build.Tasks.UnitTests
     public class RoslynCodeTaskFactory_Tests
     {
         private const string TaskName = "MyInlineTask";
+
+        [Fact]
+        public void InlineTaskWithAssemblyPlatformAgnostic()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+                TransientTestFile inlineTask = env.CreateFile(folder, "5106.proj", @$"
+<Project>
+
+  <UsingTask TaskName=""MyInlineTask"" TaskFactory=""RoslynCodeTaskFactory"" AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
+    <Task>
+      <Reference Include=""{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\..\..\..\Samples\Dependency\Debug\net472\Dependency.dll"" />
+      <Using Namespace=""Dependency"" />
+      <Code Type=""Fragment"" Language=""cs"" >
+<![CDATA[
+Log.LogError(Alpha.GetString());
+]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+<Target Name=""ToRun"">
+  <MyInlineTask/>
+</Target>
+
+</Project>
+");
+                string output = RunnerUtilities.ExecMSBuild(inlineTask.Path, out bool success);
+                success.ShouldBeTrue();
+                output.ShouldContain("Alpha.GetString");
+            }
+        }
 
         [Fact]
         [SkipOnPlatform(TestPlatforms.AnyUnix, ".NETFramework 4.0 isn't on unix machines.")]
@@ -67,8 +101,6 @@ namespace _5106 {
     <Task>
       <Reference Include=""{Path.Combine(folder.Path, "subFolder", "5106.dll")}"" />
       <Reference Include=""netstandard"" />
-      <Using Namespace=""System"" />
-      <Using Namespace=""System.IO"" />
       <Using Namespace=""_5106"" />
       <Code Type=""Fragment"" Language=""cs"" >
 <![CDATA[
