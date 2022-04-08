@@ -800,7 +800,7 @@ namespace Microsoft.NET.Publish.Tests
 
             File.Exists(referenceDll).Should().BeTrue();
             DoesImageHaveMethod(referenceDll, "FeatureAPI").Should().BeTrue();
-            DoesImageHaveMethod(referenceDll, "get_FeatureDisabled").Should().BeTrue();
+            DoesImageHaveMethod(referenceDll, "get_FeatureDisabled").Should().BeFalse();
             // Check that this method is removed when the feature is disabled
             DoesImageHaveMethod(referenceDll, "FeatureImplementation").Should().BeFalse();
         }
