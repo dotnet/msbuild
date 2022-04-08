@@ -328,7 +328,8 @@ namespace Microsoft.Build.Shared
 
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
                 if (_buildEvent is ProjectEvaluationStartedEventArgs ||
-                    _buildEvent is ProjectEvaluationFinishedEventArgs)
+                    _buildEvent is ProjectEvaluationFinishedEventArgs ||
+                    _buildEvent is EnvironmentVariableReadEventArgs)
                 {
                     // switch to serialization methods that we provide in this file
                     // and don't use the WriteToStream inherited from LazyFormattedBuildEventArgs
