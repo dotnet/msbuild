@@ -15,6 +15,7 @@ using Xunit;
 using Xunit.Abstractions;
 
 using NativeMethods = Microsoft.Build.Tasks.NativeMethods;
+using System.Runtime.Versioning;
 
 #nullable disable
 
@@ -2491,10 +2492,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
         }
 
-#pragma warning disable CA1416
         /// <summary>
         /// Registry access delegate. Given a hive and a view, return the registry base key.
         /// </summary>
+        [SupportedOSPlatform("windows")]
         private static RegistryKey GetBaseKey(RegistryHive hive, RegistryView view)
         {
             if (hive == RegistryHive.CurrentUser)
@@ -2516,6 +2517,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <param name="baseKey">The base registry key.</param>
         /// <param name="subKey">The subkey</param>
         /// <returns>An enumeration of strings.</returns>
+        [SupportedOSPlatform("windows")]
         private static IEnumerable<string> GetRegistrySubKeyNames(RegistryKey baseKey, string subKey)
         {
             if (baseKey == Registry.CurrentUser)
@@ -2765,6 +2767,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <param name="baseKey">The base registry key.</param>
         /// <param name="subKey">The subkey</param>
         /// <returns>A string containing the default value.</returns>
+        [SupportedOSPlatform("windows")]
         private static string GetRegistrySubKeyDefaultValue(RegistryKey baseKey, string subKey)
         {
             if (baseKey == Registry.CurrentUser)
@@ -2900,7 +2903,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.True(false, $"New GetRegistrySubKeyDefaultValue parameters encountered, need to add unittesting support for subKey={subKey}");
             return null;
         }
-#pragma warning restore CA1416
 
         /// <summary>
         /// Delegate for System.IO.File.GetLastWriteTime

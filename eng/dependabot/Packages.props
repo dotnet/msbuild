@@ -12,7 +12,7 @@
     <PackageReference Update="LargeAddressAware" Version="1.0.5" />
     <PackageReference Update="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.3" />
     <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.36" />
-    <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="3.0.4496" PrivateAssets="All" />
+    <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="3.1.2196" PrivateAssets="All" />
     <PackageReference Update="PdbGit" Version="3.0.41" />
     <PackageReference Update="Shouldly" Version="3.0.0" />
   </ItemGroup>

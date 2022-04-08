@@ -516,7 +516,7 @@
       </trans-unit>
       <trans-unit id="General.TaskRequiresWindows">
         <source>MSB3096: Task "{0}" is only supported when building on Windows.</source>
-        <target state="new">MSB3096: Task "{0}" is only supported when building on Windows.</target>
+        <target state="translated">MSB3096: 작업 "{0}"은(는) Windows에서 빌드할 때만 지원됩니다.</target>
         <note>{StrBegin="MSB3096: "}</note>
       </trans-unit>
       <trans-unit id="General.UndefineProperties">
@@ -1146,7 +1146,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.InvalidHexEscapeValue">
         <source>MSB3569: Invalid hex value after '\u' in resource "{0}", value '{1}'.</source>
-        <target state="translated">MSB3569: "{0}" 리소스에서 '\u' 뒤의 16진수가 잘못되었습니다. '{1}' 값</target>
+        <target state="translated">MSB3569: 리소스 "{0}", 값 '{1}'에서 '\u' 뒤의 16진수 값이 잘못되었습니다.</target>
         <note>{StrBegin="MSB3569: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CannotWriteSTRFile">
