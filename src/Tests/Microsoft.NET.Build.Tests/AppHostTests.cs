@@ -106,7 +106,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute(new string[] {
-                    "/p:_EnableMacOSCodeSign=false",
+                    "/p:_EnableMacOSCodeSign=false;ProduceReferenceAssembly=false",
                 })
                 .Should()
                 .Pass();
