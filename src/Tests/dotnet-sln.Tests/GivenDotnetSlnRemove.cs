@@ -614,7 +614,7 @@ EndGlobal
 
             new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .Execute("build", "App.sln", "--configuration", "Release")
+                .Execute("build", "App.sln", "--configuration", "Release","/p:ProduceReferenceAssembly=false")
                 .Should().Pass();
 
             var reasonString = "should be built in release mode, otherwise it means build configurations are missing from the sln file";
