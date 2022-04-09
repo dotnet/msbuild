@@ -67,8 +67,9 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Keeps track of the processes we've already checked for nodes so we don't check them again.
+        /// We decided to use ConcurrentDictionary of(string, byte) as common implementation of ConcurrentHashSet.
         /// </summary>
-        private HashSet<string> _processesToIgnore = new HashSet<string>();
+        private readonly ConcurrentDictionary<string, byte /*void*/> _processesToIgnore = new();
 
         /// <summary>
         /// Delegate used to tell the node provider that a context has terminated.
@@ -222,13 +223,13 @@ namespace Microsoft.Build.BackEnd
 
                     // Get the full context of this inspection so that we can always skip this process when we have the same taskhost context
                     string nodeLookupKey = GetProcessesToIgnoreKey(hostHandshake, nodeProcess.Id);
-                    if (_processesToIgnore.Contains(nodeLookupKey))
+                    if (_processesToIgnore.ContainsKey(nodeLookupKey))
                     {
                         continue;
                     }
 
                     // We don't need to check this again
-                    _processesToIgnore.Add(nodeLookupKey);
+                    _processesToIgnore.TryAdd(nodeLookupKey, default);
 
                     // Attempt to connect to each process in turn.
                     Stream nodeStream = TryConnectToProcess(nodeProcess.Id, 0 /* poll, don't wait for connections */, hostHandshake);
@@ -275,10 +276,7 @@ namespace Microsoft.Build.BackEnd
 
                 // Create the node process
                 Process msbuildProcess = LaunchNode(msbuildLocation, commandLineArgs);
-                if (_componentHost.BuildParameters.EnableNodeReuse)
-                {
-                    _processesToIgnore.Add(GetProcessesToIgnoreKey(hostHandshake, msbuildProcess.Id));
-                }
+                _processesToIgnore.TryAdd(GetProcessesToIgnoreKey(hostHandshake, msbuildProcess.Id), default);
 
                 // Note, when running under IMAGEFILEEXECUTIONOPTIONS registry key to debug, the process ID
                 // gotten back from CreateProcess is that of the debugger, which causes this to try to connect

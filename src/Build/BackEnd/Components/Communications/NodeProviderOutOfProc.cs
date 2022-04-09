@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -8,7 +9,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -23,7 +23,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// A mapping of all the nodes managed by this provider.
         /// </summary>
-        private Dictionary<int, NodeContext> _nodeContexts;
+        private ConcurrentDictionary<int, NodeContext> _nodeContexts;
 
         /// <summary>
         /// Constructor.
@@ -79,7 +79,10 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
 
-            if (_nodeContexts.Count >= ComponentHost.BuildParameters.MaxNodeCount)
+            // This can run concurrently. To be properly detect internal bug when we create more nodes than allowed
+            //   we add into _nodeContexts premise of future node and verify that it will not cross limits.
+            _nodeContexts[nodeId] = null;
+            if (_nodeContexts.Count > ComponentHost.BuildParameters.MaxNodeCount)
             {
                 ErrorUtilities.ThrowInternalError("All allowable nodes already created ({0}).", _nodeContexts.Count);
                 return false;
@@ -132,12 +135,7 @@ namespace Microsoft.Build.BackEnd
         public void ShutdownConnectedNodes(bool enableReuse)
         {
             // Send the build completion message to the nodes, causing them to shutdown or reset.
-            List<NodeContext> contextsToShutDown;
-
-            lock (_nodeContexts)
-            {
-                contextsToShutDown = new List<NodeContext>(_nodeContexts.Values);
-            }
+            var contextsToShutDown = new List<NodeContext>(_nodeContexts.Values);
 
             ShutdownConnectedNodes(contextsToShutDown, enableReuse);
         }
@@ -171,7 +169,7 @@ namespace Microsoft.Build.BackEnd
         public void InitializeComponent(IBuildComponentHost host)
         {
             this.ComponentHost = host;
-            _nodeContexts = new Dictionary<int, NodeContext>();
+            _nodeContexts = new ConcurrentDictionary<int, NodeContext>();
         }
 
         /// <summary>
@@ -197,10 +195,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void NodeContextTerminated(int nodeId)
         {
-            lock (_nodeContexts)
-            {
-                _nodeContexts.Remove(nodeId);
-            }
+            _nodeContexts.TryRemove(nodeId, out _);
         }
     }
 }

@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
 using System.Threading;
@@ -40,7 +40,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Mapping of manager-produced node IDs to the provider hosting the node.
         /// </summary>
-        private Dictionary<int, INodeProvider> _nodeIdToProvider;
+        private ConcurrentDictionary<int, INodeProvider> _nodeIdToProvider;
 
         /// <summary>
         /// The packet factory used to translate and route packets
@@ -81,7 +81,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private NodeManager()
         {
-            _nodeIdToProvider = new Dictionary<int, INodeProvider>();
+            _nodeIdToProvider = new ConcurrentDictionary<int, INodeProvider>();
             _packetFactory = new NodePacketFactory();
             _nextNodeId = _inprocNodeId + 1;
         }
@@ -293,8 +293,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void RemoveNodeFromMapping(int nodeId)
         {
-            _nodeIdToProvider.Remove(nodeId);
-            if (_nodeIdToProvider.Count == 0)
+            _nodeIdToProvider.TryRemove(nodeId, out _);
+            if (_nodeIdToProvider.IsEmpty)
             {
                 // The inproc node is always 1 therefore when new nodes are requested we need to start at 2
                 _nextNodeId = _inprocNodeId + 1;
@@ -344,7 +344,7 @@ namespace Microsoft.Build.BackEnd
                 return InvalidNodeId;
             }
 
-            _nodeIdToProvider.Add(nodeId, nodeProvider);
+            _nodeIdToProvider.TryAdd(nodeId, nodeProvider);
             return nodeId;
         }
     }
