@@ -33,12 +33,13 @@ namespace Microsoft.Build.Tasks.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 TransientTestFolder folder = env.CreateFolder(createFolder: true);
+                string location = Assembly.GetExecutingAssembly().Location;
                 TransientTestFile inlineTask = env.CreateFile(folder, "5106.proj", @$"
 <Project>
 
   <UsingTask TaskName=""MyInlineTask"" TaskFactory=""RoslynCodeTaskFactory"" AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
     <Task>
-      <Reference Include=""{ Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "..", "..", "..", "Samples", "Dependency", "Debug", "net472", "Dependency.dll") }"" />
+      <Reference Include=""{ Path.Combine(Path.GetDirectoryName(location), "..", "..", "..", "Samples", "Dependency", location.Contains("Debug") ? "Debug" : "Release", "net472", "Dependency.dll") }"" />
       <Using Namespace=""Dependency"" />
       <Code Type=""Fragment"" Language=""cs"" >
 <![CDATA[
