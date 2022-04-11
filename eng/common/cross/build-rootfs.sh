@@ -32,9 +32,9 @@ __UbuntuPackages="build-essential"
 __AlpinePackages="alpine-base"
 __AlpinePackages+=" build-base"
 __AlpinePackages+=" linux-headers"
-__AlpinePackagesEdgeCommunity=" lldb-dev"
-__AlpinePackagesEdgeMain+=" python3"
-__AlpinePackagesEdgeMain+=" libedit"
+__AlpinePackages+=" lldb-dev"
+__AlpinePackages+=" python3"
+__AlpinePackages+=" libedit"
 
 # symlinks fixer
 __UbuntuPackages+=" symlinks"
@@ -203,23 +203,17 @@ while :; do
             __UbuntuRepo=
             __Tizen=tizen
             ;;
-        alpine|alpine3.9)
-            __CodeName=alpine
-            __UbuntuRepo=
-            __AlpineVersion=3.9
-            __AlpinePackagesEdgeMain+=" llvm11-libs"
-            __AlpinePackagesEdgeMain+=" clang-libs"
-            ;;
-        alpine3.13)
+        alpine|alpine3.13)
             __CodeName=alpine
             __UbuntuRepo=
             __AlpineVersion=3.13
-            # Alpine 3.13 has all the packages we need in the 3.13 repository
-            __AlpinePackages+=$__AlpinePackagesEdgeCommunity
-            __AlpinePackagesEdgeCommunity=
-            __AlpinePackages+=$__AlpinePackagesEdgeMain
-            __AlpinePackagesEdgeMain=
             __AlpinePackages+=" llvm10-libs"
+            ;;
+        alpine3.14)
+            __CodeName=alpine
+            __UbuntuRepo=
+            __AlpineVersion=3.14
+            __AlpinePackages+=" llvm11-libs"
             ;;
         freebsd12)
             __CodeName=freebsd
@@ -298,20 +292,6 @@ if [[ "$__CodeName" == "alpine" ]]; then
       -X http://dl-cdn.alpinelinux.org/alpine/v$__AlpineVersion/community \
       -U --allow-untrusted --root $__RootfsDir --arch $__AlpineArch --initdb \
       add $__AlpinePackages
-
-    if [[ -n "$__AlpinePackagesEdgeMain" ]]; then
-      $__ApkToolsDir/apk-tools-$__ApkToolsVersion/apk \
-        -X http://dl-cdn.alpinelinux.org/alpine/edge/main \
-        -U --allow-untrusted --root $__RootfsDir --arch $__AlpineArch --initdb \
-        add $__AlpinePackagesEdgeMain
-    fi
-
-    if [[ -n "$__AlpinePackagesEdgeCommunity" ]]; then
-      $__ApkToolsDir/apk-tools-$__ApkToolsVersion/apk \
-        -X http://dl-cdn.alpinelinux.org/alpine/edge/community \
-        -U --allow-untrusted --root $__RootfsDir --arch $__AlpineArch --initdb \
-        add $__AlpinePackagesEdgeCommunity
-    fi
 
     rm -r $__ApkToolsDir
 elif [[ "$__CodeName" == "freebsd" ]]; then

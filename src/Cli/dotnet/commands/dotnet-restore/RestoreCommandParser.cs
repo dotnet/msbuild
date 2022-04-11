@@ -67,7 +67,6 @@ namespace Microsoft.DotNet.Cli
             var command = new DocumentedCommand("restore", DocsLink, LocalizableStrings.AppFullName);
 
             command.AddArgument(SlnOrProjectArgument);
-            command.AddOption(CommonOptions.DisableBuildServersOption);
 
             foreach (var option in FullRestoreOptions())
             {
