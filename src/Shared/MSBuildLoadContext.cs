@@ -49,7 +49,7 @@ namespace Microsoft.Build.Shared
                 return null;
             }
 
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_2))
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
             {
                 // respect plugin.dll.json with the AssemblyDependencyResolver
                 string? assemblyPath = _resolver?.ResolveAssemblyToPath(assemblyName);
@@ -93,7 +93,6 @@ namespace Microsoft.Build.Shared
             // - the assembly from the user specified path is loaded, if it exists, into the custom ALC, or
             // - if the simple name of the assembly exists in the same folder as msbuild.exe, then that assembly gets loaded
             //   into the default ALC (so it's shared with other uses).
-
             var assemblyNameInExecutableDirectory = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory,
                 $"{assemblyName.Name}.dll");
 
@@ -107,7 +106,7 @@ namespace Microsoft.Build.Shared
 
         protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
         {
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_2))
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
             {
                 string? libraryPath = _resolver?.ResolveUnmanagedDllToPath(unmanagedDllName);
                 if (libraryPath != null)
