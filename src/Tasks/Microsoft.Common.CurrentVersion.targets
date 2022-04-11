@@ -648,6 +648,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <MSBuildWarningsAsMessages Condition="'$(MSBuildWarningsAsMessages)'==''">$(NoWarn)</MSBuildWarningsAsMessages>
     <MSBuildWarningsAsErrors Condition="'$(MSBuildWarningsAsErrors)'==''">$(WarningsAsErrors)</MSBuildWarningsAsErrors>
+    <MSBuildWarningsNotAsErrors Condition="'$(MSBuildWarningsNotAsErrors)'==''">$(WarningsNotAsErrors)</MSBuildWarningsNotAsErrors>
   </PropertyGroup>
 
   <!-- Common Project System support -->
@@ -1905,14 +1906,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </_AdditionalTargetFrameworkInfoPropertyWithValue>
     </ItemGroup>
 
-    <PropertyGroup>
-      <_UseAttributeForTargetFrameworkInfoPropertyNames Condition="'$(_UseAttributeForTargetFrameworkInfoPropertyNames)' == ''">false</_UseAttributeForTargetFrameworkInfoPropertyNames>
-    </PropertyGroup>
-
     <CombineTargetFrameworkInfoProperties
         RootElementName="$(TargetFramework)"
-        PropertiesAndValues="@(_AdditionalTargetFrameworkInfoPropertyWithValue)"
-        UseAttributeForTargetFrameworkInfoPropertyNames="$(_UseAttributeForTargetFrameworkInfoPropertyNames)">
+        PropertiesAndValues="@(_AdditionalTargetFrameworkInfoPropertyWithValue)">
       <Output TaskParameter="Result"
               PropertyName="_AdditionalTargetFrameworkInfoProperties"/>
     </CombineTargetFrameworkInfoProperties>

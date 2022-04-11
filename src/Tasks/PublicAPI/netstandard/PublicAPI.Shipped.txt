@@ -1642,6 +1642,8 @@ Microsoft.Build.Tasks.SGen.UseProxyTypes.set -> void
 Microsoft.Build.Tasks.SignFile
 Microsoft.Build.Tasks.SignFile.CertificateThumbprint.get -> string
 Microsoft.Build.Tasks.SignFile.CertificateThumbprint.set -> void
+Microsoft.Build.Tasks.SignFile.DisallowMansignTimestampFallback.get -> bool
+Microsoft.Build.Tasks.SignFile.DisallowMansignTimestampFallback.set -> void
 Microsoft.Build.Tasks.SignFile.SignFile() -> void
 Microsoft.Build.Tasks.SignFile.SigningTarget.get -> Microsoft.Build.Framework.ITaskItem
 Microsoft.Build.Tasks.SignFile.SigningTarget.set -> void
@@ -1848,7 +1850,9 @@ override Microsoft.Build.Tasks.FindInvalidProjectReferences.Execute() -> bool
 override Microsoft.Build.Tasks.FindUnderPath.Execute() -> bool
 override Microsoft.Build.Tasks.FormatUrl.Execute() -> bool
 override Microsoft.Build.Tasks.FormatVersion.Execute() -> bool
+override Microsoft.Build.Tasks.GenerateApplicationManifest.Execute() -> bool
 override Microsoft.Build.Tasks.GenerateBindingRedirects.Execute() -> bool
+override Microsoft.Build.Tasks.GenerateDeploymentManifest.Execute() -> bool
 override Microsoft.Build.Tasks.GenerateLauncher.Execute() -> bool
 override Microsoft.Build.Tasks.GenerateManifestBase.Execute() -> bool
 override Microsoft.Build.Tasks.GenerateResource.Execute() -> bool
@@ -1914,6 +1918,7 @@ static Microsoft.Build.Tasks.Deployment.ManifestUtilities.SecurityUtilities.Sign
 static Microsoft.Build.Tasks.Deployment.ManifestUtilities.SecurityUtilities.SignFile(string certThumbprint, System.Uri timestampUrl, string path) -> void
 static Microsoft.Build.Tasks.Deployment.ManifestUtilities.SecurityUtilities.SignFile(string certThumbprint, System.Uri timestampUrl, string path, string targetFrameworkVersion) -> void
 static Microsoft.Build.Tasks.Deployment.ManifestUtilities.SecurityUtilities.SignFile(string certThumbprint, System.Uri timestampUrl, string path, string targetFrameworkVersion, string targetFrameworkIdentifier) -> void
+static Microsoft.Build.Tasks.Deployment.ManifestUtilities.SecurityUtilities.SignFile(string certThumbprint, System.Uri timestampUrl, string path, string targetFrameworkVersion, string targetFrameworkIdentifier, bool disallowMansignTimestampFallback) -> void
 static Microsoft.Build.Tasks.Deployment.ManifestUtilities.SecurityUtilities.SignFile(System.Security.Cryptography.X509Certificates.X509Certificate2 cert, System.Uri timestampUrl, string path) -> void
 System.Deployment.Internal.CodeSigning.RSAPKCS1SHA256SignatureDescription
 System.Deployment.Internal.CodeSigning.RSAPKCS1SHA256SignatureDescription.RSAPKCS1SHA256SignatureDescription() -> void

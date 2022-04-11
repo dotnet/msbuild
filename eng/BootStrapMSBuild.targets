@@ -8,7 +8,7 @@
 
   <PropertyGroup>
     <BootstrapDestination>$(ArtifactsBinDir)bootstrap\</BootstrapDestination>
-    <BootstrapDestination Condition="'$(Platform)' == 'x64'">$(BootstrapDestination)$(Platform)\</BootstrapDestination>
+    <BootstrapDestination Condition="'$(Platform)' == 'x64' or '$(Platform)' == 'arm64'">$(BootstrapDestination)$(Platform)\</BootstrapDestination>
     <BootstrapDestination>$(BootstrapDestination)$(TargetFramework.ToLowerInvariant())\MSBuild\</BootstrapDestination>
 
     <!-- TODO: Mono build should use BootstrapNetCore logic -->
@@ -21,7 +21,7 @@
 
   <Target Name="Bootstrap" DependsOnTargets="$(BootstrapDependsOn)"
           AfterTargets="AfterBuild"
-          Condition="'$(CreateBootstrap)' == 'true'"/>
+          Condition="'$(CreateBootstrap)' != 'false'"/>
 
   <Target Name="CleanBootstrapFolder">
     <!-- This sometimes fails so it might need be retried. -->
@@ -100,6 +100,13 @@
       <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.exe.config" />
       <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.dll.config" />
 
+      <FreshlyBuiltBinariesArm64 Include="$(X64BinPath)\Microsoft.Build.Tasks.Core.dll" />
+      <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.exe" />
+      <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.tlb" />
+      <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.pdb" />
+      <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.exe.config" />
+      <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.dll.config" />
+
       <FreshlyBuiltRootProjects Include="$(OutputPath)Microsoft.Common.props" />
       <FreshlyBuiltRootProjects Include="$(OutputPath)Microsoft.VisualStudioVersion.*.Common.props" />
       <FreshlyBuiltProjects Include="$(OutputPath)**\*props" Exclude="@(FreshlyBuiltRootProjects)" />
@@ -155,6 +162,10 @@
      <Copy SourceFiles="@(FreshlyBuiltBinariesx64)"
           DestinationFiles="@(FreshlyBuiltBinariesx64 -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\amd64\%(RecursiveDir)%(Filename)%(Extension)')" />
 
+    <!-- Copy our binaries to the arm64 location. -->
+     <Copy SourceFiles="@(FreshlyBuiltBinariesArm64)"
+          DestinationFiles="@(FreshlyBuiltBinariesArm64 -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\arm64\%(RecursiveDir)%(Filename)%(Extension)')" />
+
     <!-- Copy our freshly-built props and targets, overwriting anything we copied from the machine -->
     <Copy SourceFiles="@(FreshlyBuiltRootProjects)"
           DestinationFiles="@(FreshlyBuiltRootProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\%(Filename)%(Extension)')" />
@@ -162,6 +173,8 @@
           DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(FreshlyBuiltProjects)"
           DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\amd64\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(FreshlyBuiltProjects)"
+          DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\arm64\%(RecursiveDir)%(Filename)%(Extension)')" />
 
   </Target>
 

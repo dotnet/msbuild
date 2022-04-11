@@ -70,6 +70,11 @@ namespace Microsoft.Build.Framework
         public static readonly string MSBuildNodeHandshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
 
         /// <summary>
+        /// Override property "MSBuildRuntimeType" to "Full", ignoring the actual runtime type of MSBuild.
+        /// </summary>
+        public readonly bool ForceEvaluateAsFullFramework = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildForceEvaluateAsFullFramework"));
+
+        /// <summary>
         /// Setting the associated environment variable to 1 restores the pre-15.8 single
         /// threaded (slower) copy behavior. Zero implies Int32.MaxValue, less than zero
         /// (default) uses the empirical default in Copy.cs, greater than zero can allow
