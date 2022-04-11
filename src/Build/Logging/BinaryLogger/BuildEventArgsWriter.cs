@@ -262,7 +262,6 @@ Build
             Write(BinaryLogRecordKind.BuildFinished);
             WriteBuildEventArgsFields(e);
             Write(e.Succeeded);
-            Write(EnvironmentUtilities.EnvironmentVariablesUsedAsProperties);
         }
 
         private void Write(ProjectEvaluationStartedEventArgs e)

@@ -1,2 +1,0 @@
-Microsoft.Build.Framework.BuildFinishedEventArgs.BuildFinishedEventArgs(string message, string helpKeyword, bool succeeded, System.DateTime eventTimestamp, System.Collections.Generic.IDictionary<string, string> environmentVariables, params object[] messageArgs) -> void
-Microsoft.Build.Framework.BuildFinishedEventArgs.EnvironmentVariables.get -> System.Collections.Generic.IDictionary<string, string>

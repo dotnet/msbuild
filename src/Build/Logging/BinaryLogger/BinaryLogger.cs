@@ -55,7 +55,7 @@ namespace Microsoft.Build.Logging
         //   - TargetSkippedEventArgs: added SkipReason, OriginalBuildEventContext
         // version 15:
         //   - Don't log all environment variables at BuildStarted
-        //   - Log environment variables accessed as properties at BuildFinished
+        //   - Log environment variables accessed as properties via EnvironmentVariableReadEventArgs
         internal const int FileFormatVersion = 15;
 
         private Stream stream;
