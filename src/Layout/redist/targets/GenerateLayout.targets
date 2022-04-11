@@ -409,8 +409,9 @@
     </PropertyGroup>
     <ItemGroup>
       <!-- Exclude F# from retargeting: https://github.com/dotnet/toolset/issues/2866 -->
+      <!-- Exclude testhost from retargeting: https://github.com/dotnet/sdk/issues/24769 -->
       <ToolRuntimeConfigPath Include="$(OutputPath)/**/*.runtimeconfig.json"
-                             Exclude="$(OutputPath)/**/fsc.runtimeconfig.json;$(OutputPath)/**/fsi.runtimeconfig.json"/>
+                             Exclude="$(OutputPath)/**/fsc.runtimeconfig.json;$(OutputPath)/**/fsi.runtimeconfig.json;$(OutputPath)/**/testhost-*.runtimeconfig.json"/>
 
       <MSBuild15Items Include="$(OutputPath)/15.0/**/*" />
     </ItemGroup>
