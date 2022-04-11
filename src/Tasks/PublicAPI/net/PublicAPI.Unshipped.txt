@@ -19,9 +19,4 @@ Microsoft.Build.Tasks.BuildUri.UriScheme.get -> string
 Microsoft.Build.Tasks.BuildUri.UriScheme.set -> void
 Microsoft.Build.Tasks.BuildUri.UriUserName.get -> string
 Microsoft.Build.Tasks.BuildUri.UriUserName.set -> void
-Microsoft.Build.Tasks.SignFile.DisallowMansignTimestampFallback.get -> bool
-Microsoft.Build.Tasks.SignFile.DisallowMansignTimestampFallback.set -> void
 override Microsoft.Build.Tasks.BuildUri.Execute() -> bool
-override Microsoft.Build.Tasks.GenerateApplicationManifest.Execute() -> bool
-override Microsoft.Build.Tasks.GenerateDeploymentManifest.Execute() -> bool
-static Microsoft.Build.Tasks.Deployment.ManifestUtilities.SecurityUtilities.SignFile(string certThumbprint, System.Uri timestampUrl, string path, string targetFrameworkVersion, string targetFrameworkIdentifier, bool disallowMansignTimestampFallback) -> void
