@@ -21,7 +21,7 @@
 
   <Target Name="Bootstrap" DependsOnTargets="$(BootstrapDependsOn)"
           AfterTargets="AfterBuild"
-          Condition="'$(CreateBootstrap)' == 'true'"/>
+          Condition="'$(CreateBootstrap)' != 'false'"/>
 
   <Target Name="CleanBootstrapFolder">
     <!-- This sometimes fails so it might need be retried. -->
