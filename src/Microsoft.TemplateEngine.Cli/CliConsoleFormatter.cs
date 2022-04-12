@@ -18,7 +18,7 @@ namespace Microsoft.TemplateEngine.Cli
             (_optionsReloadToken, _formatterOptions) =
                 (options.OnChange(ReloadLoggerOptions), options.CurrentValue);
 
-        public override void Write<TState>(in LogEntry<TState> logEntry, IExternalScopeProvider scopeProvider, TextWriter textWriter)
+        public override void Write<TState>(in LogEntry<TState> logEntry, IExternalScopeProvider? scopeProvider, TextWriter textWriter)
         {
             string? message = null;
             if (logEntry.Formatter != null)
@@ -64,7 +64,7 @@ namespace Microsoft.TemplateEngine.Cli
             return (_formatterOptions.UseUtcTimestamp ? DateTimeOffset.UtcNow : DateTimeOffset.Now).ToString(format);
         }
 
-        private void CreateDebugMessage<TState>(TextWriter textWriter, in LogEntry<TState> logEntry, string message, IExternalScopeProvider scopeProvider)
+        private void CreateDebugMessage<TState>(TextWriter textWriter, in LogEntry<TState> logEntry, string message, IExternalScopeProvider? scopeProvider)
         {
             //timestamp and log level
             textWriter.Write($"[{GetCurrentDateTime()}] [{logEntry.LogLevel}]");

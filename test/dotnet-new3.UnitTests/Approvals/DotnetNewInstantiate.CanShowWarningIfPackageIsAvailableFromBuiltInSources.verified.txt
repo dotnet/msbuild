@@ -2,7 +2,7 @@
 
 An update for template package 'Microsoft.DotNet.Common.ItemTemplates::6.0.100' is available.
 To update the package use:
-   dotnet-new3 new3 install Microsoft.DotNet.Common.ItemTemplates::6.0.201
+   dotnet-new3 new3 install Microsoft.DotNet.Common.ItemTemplates::%VERSION%
 
 An update for template package 'Microsoft.DotNet.Common.ItemTemplates::%VERSION%' is available in the 'new3 built-in' provider.
 To use built-in template package, uninstall manually installed template package using:

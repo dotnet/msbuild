@@ -332,6 +332,7 @@ namespace Dotnet_new3.IntegrationTests
             .AddScrubber(output =>
             {
                 output.ScrubByRegex("'Microsoft\\.DotNet\\.Common\\.ItemTemplates::[A-Za-z0-9.-]+' is available in", "'Microsoft.DotNet.Common.ItemTemplates::%VERSION%' is available in");
+                output.ScrubByRegex("install Microsoft\\.DotNet\\.Common\\.ItemTemplates::[A-Za-z0-9.-]+", "install Microsoft.DotNet.Common.ItemTemplates::%VERSION%");
             });
         }
         
