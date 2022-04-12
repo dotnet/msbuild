@@ -51,7 +51,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
         }
 
         [Fact]
-        public void ParsesSingleEmptyStringAsString()
+        public void ParsesSingleWhitespaceStringAsString()
         {
             var resxWithSingleString = MSBuildResXReader.GetResourcesFromString(
                 ResXHelper.SurroundWithBoilerplate(
@@ -64,7 +64,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
         }
 
         [Fact]
-        public void ParsesSingleEmptyStringWithNoPreserveAsString()
+        public void ParsesSingleWhitespaceStringWithNoPreserveAsEmptyString()
         {
             var resxWithSingleString = MSBuildResXReader.GetResourcesFromString(
                 ResXHelper.SurroundWithBoilerplate(
