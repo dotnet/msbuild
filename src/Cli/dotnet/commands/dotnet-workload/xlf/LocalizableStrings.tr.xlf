@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="SkipSignCheckInvalidOption">
         <source>Unable to bypass signature verification. The specified option conflicts with a global policy.</source>
-        <target state="new">Unable to bypass signature verification. The specified option conflicts with a global policy.</target>
+        <target state="translated">İmza doğrulaması atlanamıyor. Belirtilen seçenek bir genel ilkeyle çakışıyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="WasmToolsDescription">

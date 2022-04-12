@@ -219,7 +219,7 @@
       </trans-unit>
       <trans-unit id="SkipSignCheckOptionDescription">
         <source>Skip signature verification of workload packages and installers.</source>
-        <target state="new">Skip signature verification of workload packages and installers.</target>
+        <target state="translated">Überspringen Sie die Signaturüberprüfung von Workloadpaketen und -installationsprogrammen.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingManifestUpdate">
