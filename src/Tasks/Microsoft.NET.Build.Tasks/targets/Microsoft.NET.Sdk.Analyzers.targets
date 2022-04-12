@@ -80,6 +80,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     <WarningLevel Condition="'$(Language)' == 'C#'">6</WarningLevel>
   </PropertyGroup>
 
+  <!-- Set the default WarningLevel based on EffectiveAnalysisLevel
+       For .NET 7 we want the Warning level to be 7 -->
+  <PropertyGroup Condition="'$(EffectiveAnalysisLevel)' != '' And
+                             $([MSBuild]::VersionGreaterThanOrEquals($(EffectiveAnalysisLevel), '7.0'))">
+    <WarningLevel Condition="'$(Language)' == 'C#'">7</WarningLevel>
+  </PropertyGroup>
+
   <PropertyGroup>
     <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == ''">false</EnableNETAnalyzers>
 
