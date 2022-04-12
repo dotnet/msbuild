@@ -632,7 +632,7 @@ namespace Microsoft.Build.CommandLine
                     // that priority. Idle priority would prevent the build from proceeding as the user does normal actions.
                     try
                     {
-                        if (lowPriority && Process.GetCurrentProcess().PriorityClass != ProcessPriorityClass.Idle && !s_isServerNodeHosted)
+                        if (lowPriority && Process.GetCurrentProcess().PriorityClass != ProcessPriorityClass.Idle && !s_isServerNode)
                         {
                             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.BelowNormal;
                         }
@@ -1963,7 +1963,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Indicates that this process is working as a server.
         /// </summary>
-        private static bool s_isServerNodeHosted;
+        private static bool s_isServerNode;
 
         /// <summary>
         /// Parses the auto-response file (assumes the "/noautoresponse" switch is not specified on the command line), and combines the
@@ -2655,7 +2655,7 @@ namespace Microsoft.Build.CommandLine
 
                     OutOfProcServerNode node = new(buildFunction);
 
-                    s_isServerNodeHosted = true;
+                    s_isServerNode = true;
                     shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);
 
                     FileUtilities.ClearCacheDirectory();
@@ -3156,7 +3156,7 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 // Always use ANSI escape codes when the build is initiated by server
-                if (s_isServerNodeHosted)
+                if (s_isServerNode)
                 {
                     consoleParameters = AggregateParameters(consoleParameters, new[] { "FORCECONSOLECOLOR" });
                 }
