@@ -16,7 +16,7 @@ This is determined on a case by case basis and should be discussed with the MSBu
 Change Wave features should match the LTS version of VS they were released with. Any feature requiring a changewave during a non-LTS release of VS should use the **NEXT** version number.
 
 # Developing With Change Waves in Mind
-For the purpose of providing an example, the rest of this document assumes we're developing a feature for MSBuild version **17.4**.
+For the purpose of providing an example, the rest of this document assumes we're developing a feature for MSBuild version **17.3**.
 
 The Process:
 1. Develop your feature.
