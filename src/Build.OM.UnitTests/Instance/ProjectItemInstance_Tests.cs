@@ -7,6 +7,7 @@ using System.IO;
 using System.Xml;
 
 using Microsoft.Build.Construction;
+using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -14,6 +15,7 @@ using Microsoft.Build.Shared;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using Shouldly;
 using System.Linq;
 
 #nullable disable
@@ -29,6 +31,39 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// The number of built-in metadata for items.
         /// </summary>
         public const int BuiltInMetadataCount = 15;
+
+        internal const string TargetItemWithInclude = @"
+            <Project>
+                <Target Name='TestTarget'>
+                    <ItemGroup>
+                        <i Include='{0}'/>
+                    </ItemGroup>
+                </Target>
+            </Project>
+            ";
+
+        internal const string TargetItemWithIncludeAndExclude = @"
+            <Project>
+                <Target Name='TestTarget'>
+                    <ItemGroup>
+                        <i Include='{0}' Exclude='{1}'/>
+                    </ItemGroup>
+                </Target>
+            </Project>
+            ";
+
+        internal const string TargetWithDefinedPropertyAndItemWithInclude = @"
+            <Project>
+                <PropertyGroup>
+                    <{0}>{1}</{0}>
+                </PropertyGroup>
+                <Target Name='TestTarget'>
+                    <ItemGroup>
+                        <i Include='{2}' />
+                    </ItemGroup>
+                </Target>
+            </Project>
+            ";
 
         /// <summary>
         /// Basic ProjectItemInstance without metadata
@@ -835,6 +870,162 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Assert.Equal("0", items[0].GetMetadataValue("m0"));
             Assert.Equal("1", items[0].GetMetadataValue("m1"));
             Assert.Equal(String.Empty, items[0].GetMetadataValue("m2"));
+        }
+
+        /// <summary>
+        /// Fail build for drive enumerating wildcards that exist in projects on any platform.
+        /// </summary>
+        [Theory]
+        [InlineData(
+            TargetItemWithIncludeAndExclude,
+            @"$(Microsoft_WindowsAzure_EngSys)\**\*",
+            @"$(Microsoft_WindowsAzure_EngSys)\*.pdb;$(Microsoft_WindowsAzure_EngSys)\Microsoft.WindowsAzure.Storage.dll;$(Microsoft_WindowsAzure_EngSys)\Certificates\**\*")]
+
+        [InlineData(
+            TargetItemWithIncludeAndExclude,
+            @"$(Microsoft_WindowsAzure_EngSys)\*.pdb",
+            @"$(Microsoft_WindowsAzure_EngSys)\**\*")]
+
+        [InlineData(
+            TargetItemWithInclude,
+            @"$(Microsoft_WindowsAzure_EngSys)\**\*")]
+
+        [InlineData(
+            TargetWithDefinedPropertyAndItemWithInclude,
+            "$(Microsoft_WindowsAzure_EngSys)**",
+            null,
+            "Microsoft_WindowsAzure_EngSys",
+            @"\")]
+        public void ThrowExceptionUponBuildingProjectWithDriveEnumeration(string content, string include, string exclude = null, string property = null, string propertyValue = null)
+        {
+            content = (string.IsNullOrEmpty(property) && string.IsNullOrEmpty(propertyValue)) ?
+                string.Format(content, include, exclude) :
+                string.Format(content, property, propertyValue, include);
+
+            Helpers.CleanContentsAndBuildTargetWithDriveEnumeratingWildcard(
+                content,
+                "1",
+                "TestTarget",
+                Helpers.ExpectedBuildResult.FailWithError);
+        }
+
+        /// <summary>
+        /// Log warning for drive enumerating wildcards that exist in projects on Windows platform.
+        /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [Theory]
+        [InlineData(
+            TargetItemWithIncludeAndExclude,
+            @"z:$(Microsoft_WindowsAzure_EngSys)\**\*",
+            @"$(Microsoft_WindowsAzure_EngSys)\*.pdb;$(Microsoft_WindowsAzure_EngSys)\Microsoft.WindowsAzure.Storage.dll;$(Microsoft_WindowsAzure_EngSys)\Certificates\**\*")]
+
+        [InlineData(
+            TargetItemWithIncludeAndExclude,
+            @"$(Microsoft_WindowsAzure_EngSys)\*.pdb",
+            @"z:$(Microsoft_WindowsAzure_EngSys)\**\*")]
+
+        [InlineData(
+            TargetWithDefinedPropertyAndItemWithInclude,
+            @"$(Microsoft_WindowsAzure_EngSys)**",
+            null,
+            "Microsoft_WindowsAzure_EngSys",
+            @"z:\")]
+
+        [InlineData(
+            TargetWithDefinedPropertyAndItemWithInclude,
+            @"$(Microsoft_WindowsAzure_EngSys)\**\*",
+            null,
+            "Microsoft_WindowsAzure_EngSys",
+            @"z:")]
+        public void LogWindowsWarningUponBuildingProjectWithDriveEnumeration(string content, string include, string exclude = null, string property = null, string propertyValue = null)
+        {
+            content = (string.IsNullOrEmpty(property) && string.IsNullOrEmpty(propertyValue)) ?
+                string.Format(content, include, exclude) :
+                string.Format(content, property, propertyValue, include);
+
+            Helpers.CleanContentsAndBuildTargetWithDriveEnumeratingWildcard(
+                content,
+                "0",
+                "TestTarget",
+                Helpers.ExpectedBuildResult.SucceedWithWarning);
+        }
+
+        /// <summary>
+        /// Log warning for drive enumerating wildcards that exist in projects on Unix platform.
+        /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [Theory]
+        [InlineData(
+            TargetWithDefinedPropertyAndItemWithInclude,
+            @"$(Microsoft_WindowsAzure_EngSys)**",
+            null,
+            "Microsoft_WindowsAzure_EngSys",
+            @"/")]
+
+        [InlineData(
+            TargetWithDefinedPropertyAndItemWithInclude,
+            @"$(Microsoft_WindowsAzure_EngSys)*/*.log",
+            null,
+            "Microsoft_WindowsAzure_EngSys",
+            @"/*")]
+        public void LogUnixWarningUponBuildingProjectWithDriveEnumeration(string content, string include, string exclude = null, string property = null, string propertyValue = null)
+        {
+            content = (string.IsNullOrEmpty(property) && string.IsNullOrEmpty(propertyValue)) ?
+                    string.Format(content, include, exclude) :
+                    string.Format(content, property, propertyValue, include);
+
+            Helpers.CleanContentsAndBuildTargetWithDriveEnumeratingWildcard(
+                    content,
+                    "0",
+                    "TestTarget",
+                    Helpers.ExpectedBuildResult.SucceedWithWarning);
+        }
+
+        /// <summary>
+        /// Tests target item evaluation resulting in no build failures.
+        /// </summary>
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [Theory]
+        [InlineData(
+            TargetWithDefinedPropertyAndItemWithInclude,
+            @"$(Microsoft_WindowsAzure_EngSys)*.cs",
+            null,
+            "Microsoft_WindowsAzure_EngSys",
+            @"c:\*\")]
+
+        [InlineData(
+            TargetWithDefinedPropertyAndItemWithInclude,
+            @"\$(Microsoft_WindowsAzure_EngSys)*\*.cs",
+            null,
+            "Microsoft_WindowsAzure_EngSys",
+            @"c:")]
+
+        [InlineData(
+            TargetWithDefinedPropertyAndItemWithInclude,
+            @":\$(Microsoft_WindowsAzure_EngSys)*\*.log",
+            null,
+            "Microsoft_WindowsAzure_EngSys",
+            @"c")]
+
+        [InlineData(
+            TargetWithDefinedPropertyAndItemWithInclude,
+            @"$(Microsoft_WindowsAzure_EngSys)*\*.log",
+            null,
+            "Microsoft_WindowsAzure_EngSys",
+            @"\")]
+        public void NoErrorsAndWarningsUponBuildingProject(string content, string include, string exclude = null, string property = null, string propertyValue = null)
+        {
+            content = (string.IsNullOrEmpty(property) && string.IsNullOrEmpty(propertyValue)) ?
+                    string.Format(content, include, exclude) :
+                    string.Format(content, property, propertyValue, include);
+
+            Helpers.CleanContentsAndBuildTargetWithDriveEnumeratingWildcard(
+                content,
+                "0",
+                "TestTarget",
+                Helpers.ExpectedBuildResult.SucceedWithNoErrorsAndWarnings);
         }
 
         [Fact]

@@ -1089,5 +1089,45 @@ namespace Microsoft.Build.UnitTests
 
             FileUtilities.TruncatePathToTrailingSegments(path, trailingSegments).ShouldBe(expectedTruncatedPath);
         }
+
+        /// <summary>
+        /// Exercises FileUtilities.EnsureSingleQuotes
+        /// </summary>
+        [Theory]
+        [InlineData(null, null)] // Null test
+        [InlineData("", "")] // Empty string test
+        [InlineData(@" ", @"' '")] // One character which is a space
+        [InlineData(@"'", @"'''")] // One character which is a single quote
+        [InlineData(@"""", @"'""'")] // One character which is a double quote
+        [InlineData(@"example", @"'example'")] // Unquoted string
+        [InlineData(@"'example'", @"'example'")] // Single quoted string
+        [InlineData(@"""example""", @"'example'")] // Double quoted string
+        [InlineData(@"'example""", @"''example""'")] // Mixed Quotes - Leading Single
+        [InlineData(@"""example'", @"'""example''")] // Mixed Quotes - Leading Double
+        [InlineData(@"ex""am'ple", @"'ex""am'ple'")] // Interior Quotes
+        public void EnsureSingleQuotesTest(string path, string expectedResult)
+        {
+            FileUtilities.EnsureSingleQuotes(path).ShouldBe(expectedResult);
+        }
+
+        /// <summary>
+        /// Exercises FileUtilities.EnsureDoubleQuotes
+        /// </summary>
+        [Theory]
+        [InlineData(null, null)] // Null test
+        [InlineData("", "")] // Empty string test
+        [InlineData(@" ", @""" """)] // One character which is a space
+        [InlineData(@"'", @"""'""")] // One character which is a single quote
+        [InlineData(@"""", @"""""""")] // One character which is a double quote
+        [InlineData(@"example", @"""example""")] // Unquoted string
+        [InlineData(@"'example'", @"""example""")] // Single quoted string
+        [InlineData(@"""example""", @"""example""")] // Double quoted string
+        [InlineData(@"'example""", @"""'example""""")] // Mixed Quotes - Leading Single
+        [InlineData(@"""example'", @"""""example'""")] // Mixed Quotes - Leading Double
+        [InlineData(@"ex""am'ple", @"""ex""am'ple""")] // Interior Quotes
+        public void EnsureDoubleQuotesTest(string path, string expectedResult)
+        {
+            FileUtilities.EnsureDoubleQuotes(path).ShouldBe(expectedResult);
+        }
     }
 }

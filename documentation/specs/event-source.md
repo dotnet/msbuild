@@ -34,6 +34,7 @@ EventSource is primarily used to profile code. For MSBuild specifically, a major
 | Save | Saves a project to the file system if dirty, creating directories as necessary. |
 | SdkResolverResolveSdk | A single SDK resolver is called. |
 | SdkResolverServiceInitialize | Initializes SDK resolvers. |
+| SdkResolverEvent | An SDK resolver logs an event. |
 | Target | Executes a target. |
 | TargetUpToDate | Checks whether a particular target needs to run or is up-to-date. |
 | WriteLinesToFile | Checks whether the WriteLinesToFile task needs to execute. |

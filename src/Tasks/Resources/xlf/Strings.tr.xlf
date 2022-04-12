@@ -514,6 +514,11 @@
         <target state="translated">MSB3667: "{0}" konumunda zaten bir dosya var. Önceden hesaplanan bir önbellek oluşturmayı deniyorsanız bütünleştirilmiş kodlarınızı derlemek yerine bütünleştirilmiş kodlarınızı temel alan tek bir proje derlediğinizden emin olun. ResolveAssemblyReference görevini normal bir şekilde çalıştırıyorsanız ResolveAssemblyReference görevinin "AssemblyInformationCacheOutputPath" parametresini ayarlamayın.</target>
         <note>{StrBegin="MSB3667: "}</note>
       </trans-unit>
+      <trans-unit id="General.TaskRequiresWindows">
+        <source>MSB3096: Task "{0}" is only supported when building on Windows.</source>
+        <target state="translated">MSB3096: "{0}" görevi yalnızca Windows üzerinde derlendiğinde desteklenir.</target>
+        <note>{StrBegin="MSB3096: "}</note>
+      </trans-unit>
       <trans-unit id="General.UndefineProperties">
         <source>Removing Properties:</source>
         <target state="translated">Özellikler kaldırılıyor:</target>

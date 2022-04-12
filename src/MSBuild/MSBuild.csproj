@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -7,6 +7,9 @@
     <OutputType>Exe</OutputType>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
+    <!-- MSBuild.exe needs to be architecture specific, the rest of the .dlls can be AnyCPU. -->
+    <PlatformTarget Condition="'$(Platform)' == 'arm64'">arm64</PlatformTarget>
+
     <!-- MSBuild.csproj no longer uses apphost. This fixes an issue where certain tests would find
          MSBuild.exe AND MSBuild.dll when they should only find MSBuild.dll. -->
     <UseAppHost>false</UseAppHost>
@@ -30,7 +33,7 @@
     <!-- Temporary solution for
          https://github.com/dotnet/msbuild/issues/834 Long term
          two files should be generated from a single source. -->
-    <AppConfig Condition="'$(Platform)' == 'x64'">app.amd64.config</AppConfig>
+    <AppConfig Condition="'$(Platform)' == 'x64' or '$(Platform)' == 'arm64'">app.amd64.config</AppConfig>
     <!-- Disable binding redirect generation: we want to be deliberate
          about the redirects we expose plugins to, and we explicitly
          redirect ValueTuple _down_ to match VS. -->
@@ -211,6 +214,13 @@
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
+    <!-- Manually download this library for RoslynCodeTaskFactory.
+           See target AddRefAssemblies below. -->
+    <ItemGroup>
+      <PackageDownload Include="netstandard.library">
+        <Version>[2.0.3]</Version>
+      </PackageDownload>
+    </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <!-- File for Assemblies we depend on -->
     <Reference Include="System" />
@@ -330,6 +340,8 @@
 
   </Target>
 
+  <!-- Note: Keep the `AssemblyFile=` usage here instead of using `AssemblyName`. It acts as a regression test for folks who have been using it this way,
+             which has been in the official docs for some time. -->
   <UsingTask TaskName="ValidateMSBuildPackageDependencyVersions" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
     <Task>
       <Code Source="ValidateMSBuildPackageDependencyVersions.cs" Language="cs" />

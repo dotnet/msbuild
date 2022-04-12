@@ -514,6 +514,11 @@
         <target state="translated">MSB3667: V {0} už nějaký soubor existuje. Pokud se pokoušíte vytvořit předvypočítanou mezipaměť, ujistěte se, že sestavujete jeden projekt, který závisí na sestaveních, nikoli sestavení samotná. Pokud spouštíte úlohu ResolveAssemblyReference běžným způsobem, nenastavujte v úloze ResolveAssemblyReference parametr AssemblyInformationCacheOutputPath.</target>
         <note>{StrBegin="MSB3667: "}</note>
       </trans-unit>
+      <trans-unit id="General.TaskRequiresWindows">
+        <source>MSB3096: Task "{0}" is only supported when building on Windows.</source>
+        <target state="translated">MSB3096: Úloha {0} se podporuje pouze při sestavování v systému Windows.</target>
+        <note>{StrBegin="MSB3096: "}</note>
+      </trans-unit>
       <trans-unit id="General.UndefineProperties">
         <source>Removing Properties:</source>
         <target state="translated">Odstraňování vlastností:</target>

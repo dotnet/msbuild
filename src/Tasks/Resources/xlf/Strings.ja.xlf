@@ -514,6 +514,11 @@
         <target state="translated">MSB3667: "{0}" には既にファイルが存在します。事前計算済みキャッシュを作成しようとしている場合は、アセンブリ自体をビルドするのではなく、アセンブリに依存する単一のプロジェクトをビルドしてください。ResolveAssemblyReference タスクを正常に実行している場合は、ResolveAssemblyReference タスクの "AssemblyInformationCacheOutputPath" パラメーターを設定しないでください。</target>
         <note>{StrBegin="MSB3667: "}</note>
       </trans-unit>
+      <trans-unit id="General.TaskRequiresWindows">
+        <source>MSB3096: Task "{0}" is only supported when building on Windows.</source>
+        <target state="translated">MSB3096: タスク "{0}" は、Windows 上でビルドする場合にのみサポートされます。</target>
+        <note>{StrBegin="MSB3096: "}</note>
+      </trans-unit>
       <trans-unit id="General.UndefineProperties">
         <source>Removing Properties:</source>
         <target state="translated">プロパティの削除:</target>

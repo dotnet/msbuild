@@ -126,7 +126,7 @@ namespace Microsoft.Build.Graph
 
         private void AddEdgesFromProjectReferenceItems(Dictionary<ConfigurationMetadata, ParsedProject> allParsedProjects, GraphEdges edges)
         {
-            var transitiveReferenceCache = new Dictionary<ProjectGraphNode, HashSet<ProjectGraphNode>>(allParsedProjects.Count);
+            Dictionary<ProjectGraphNode, HashSet<ProjectGraphNode>> transitiveReferenceCache = new(allParsedProjects.Count);
 
             foreach (var parsedProject in allParsedProjects)
             {
@@ -164,52 +164,30 @@ namespace Microsoft.Build.Graph
 
             HashSet<ProjectGraphNode> GetTransitiveProjectReferencesExcludingSelf(ParsedProject parsedProject)
             {
-                HashSet<ProjectGraphNode> references = new();
-                GetTransitiveProjectReferencesExcludingSelfHelper(parsedProject, references, null);
-                return references;
-            }
-
-            // transitiveReferences contains all of the references we've found so far from the initial GetTransitiveProjectReferencesExcludingSelf call.
-            // referencesFromHere is essentially "reset" at each level of the recursion.
-            // The first is important because if we find a cycle at some point, we need to know not to keep recursing. We wouldn't have added to transitiveReferenceCache yet, since we haven't finished
-            // finding all the transitive references yet.
-            // On the other hand, the second is important to help us fill that cache afterwards. The cache is from a particular node to all of its references, including transitive references
-            // but not including itself, which means we can't include parents as we would if we used transitiveReferences. You can see that for any particular call, it creates a new "toCache"
-            // HashSet that we fill with direct references and pass as referencesFromHere in recursive calls to fill it with transitive references. It is then used to populate the cache.
-            // Meanwhile, we avoid going into the recursive step at all if transitiveReferences already includes a particular node to avoid a StackOverflowException if there's a loop.
-            void GetTransitiveProjectReferencesExcludingSelfHelper(ParsedProject parsedProject, HashSet<ProjectGraphNode> traversedReferences, HashSet<ProjectGraphNode> incompleteReferencesOfDirectlyReferencingNode)
-            {
-                if (transitiveReferenceCache.TryGetValue(parsedProject.GraphNode, out HashSet<ProjectGraphNode> cachedTransitiveReferences))
+                if (transitiveReferenceCache.TryGetValue(parsedProject.GraphNode, out HashSet<ProjectGraphNode> transitiveReferences))
                 {
-                    traversedReferences.UnionWith(cachedTransitiveReferences);
+                    return transitiveReferences;
                 }
-                else
-                {
-                    HashSet<ProjectGraphNode> referencesFromThisNode = new();
-                    foreach (ProjectInterpretation.ReferenceInfo referenceInfo in parsedProject.ReferenceInfos)
-                    {
-                        ParsedProject reference = allParsedProjects[referenceInfo.ReferenceConfiguration];
-                        if (traversedReferences.Add(reference.GraphNode))
-                        {
-                            GetTransitiveProjectReferencesExcludingSelfHelper(reference, traversedReferences, referencesFromThisNode);
-                        }
-                        else if (transitiveReferenceCache.TryGetValue(reference.GraphNode, out cachedTransitiveReferences))
-                        {
-                            referencesFromThisNode.UnionWith(cachedTransitiveReferences);
-                        }
-                        referencesFromThisNode.Add(reference.GraphNode);
-                    }
 
-                    // We've returned from recursing through all transitive references
-                    // of this node, so add that set to the cache
-                    transitiveReferenceCache[parsedProject.GraphNode] = referencesFromThisNode;
-                    if (incompleteReferencesOfDirectlyReferencingNode is not null)
+                transitiveReferences = new();
+
+                // Add the results to the cache early, even though it'll be incomplete until the loop below finishes. This helps handle cycles by not allowing them to recurse infinitely.
+                // Note that this makes transitive references incomplete in the case of a cycle, but direct dependencies are always added so a cycle will still be detected and an exception will still be thrown.
+                transitiveReferenceCache[parsedProject.GraphNode] = transitiveReferences;
+
+                foreach (ProjectInterpretation.ReferenceInfo referenceInfo in parsedProject.ReferenceInfos)
+                {
+                    ParsedProject reference = allParsedProjects[referenceInfo.ReferenceConfiguration];
+                    transitiveReferences.Add(reference.GraphNode);
+
+                    // Perf note: avoiding UnionWith to avoid boxing the HashSet enumerator.
+                    foreach (ProjectGraphNode transitiveReference in GetTransitiveProjectReferencesExcludingSelf(reference))
                     {
-                        // Also add it to the set of transitive dependencies of
-                        // the referencing node (which are probably still incomplete)
-                        incompleteReferencesOfDirectlyReferencingNode.UnionWith(referencesFromThisNode);
+                        transitiveReferences.Add(transitiveReference);
                     }
                 }
+
+                return transitiveReferences;
             }
         }
 
@@ -283,7 +261,7 @@ namespace Microsoft.Build.Graph
                 valueComparer: StringComparer.OrdinalIgnoreCase,
                 items: solutionEntryPoint.GlobalProperties ?? ImmutableDictionary<string, string>.Empty);
 
-            var solution = SolutionFile.Parse(FileUtilities.NormalizePath(solutionEntryPoint.ProjectFile));
+            var solution = SolutionFile.Parse(solutionEntryPoint.ProjectFile);
 
             if (solution.SolutionParserWarnings.Count != 0 || solution.SolutionParserErrorCodes.Count != 0)
             {
@@ -410,7 +388,7 @@ namespace Microsoft.Build.Graph
 
                     AddGraphBuildGlobalVariable(globalPropertyDictionary);
 
-                    var configurationMetadata = new ConfigurationMetadata(FileUtilities.NormalizePath(entryPoint.ProjectFile), globalPropertyDictionary);
+                    var configurationMetadata = new ConfigurationMetadata(entryPoint.ProjectFile, globalPropertyDictionary);
                     entryPointConfigurationMetadata.Add(configurationMetadata);
                 }
 

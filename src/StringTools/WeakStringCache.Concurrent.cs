@@ -32,7 +32,7 @@ namespace Microsoft.NET.StringTools
         {
             int hashCode = internable.GetHashCode();
 
-            StringWeakHandle handle;
+            StringWeakHandle? handle;
             string? result;
 
             // Get the existing handle from the cache and lock it while we're dereferencing it to prevent a race with the Scavenge
@@ -98,7 +98,7 @@ namespace Microsoft.NET.StringTools
             foreach (KeyValuePair<int, StringWeakHandle> entry in _stringsByHashCode)
             {
                 // We can safely dereference entry.Value as the caller guarantees that Scavenge runs only on one thread.
-                if (!entry.Value.IsUsed && _stringsByHashCode.TryRemove(entry.Key, out StringWeakHandle removedHandle))
+                if (!entry.Value.IsUsed && _stringsByHashCode.TryRemove(entry.Key, out StringWeakHandle? removedHandle))
                 {
                     lock (removedHandle)
                     {

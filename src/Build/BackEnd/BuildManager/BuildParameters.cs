@@ -294,6 +294,7 @@ namespace Microsoft.Build.Execution
             _logTaskInputs = other._logTaskInputs;
             _logInitialPropertiesAndItems = other._logInitialPropertiesAndItems;
             WarningsAsErrors = other.WarningsAsErrors == null ? null : new HashSet<string>(other.WarningsAsErrors, StringComparer.OrdinalIgnoreCase);
+            WarningsNotAsErrors = other.WarningsNotAsErrors == null ? null : new HashSet<string>(other.WarningsNotAsErrors, StringComparer.OrdinalIgnoreCase);
             WarningsAsMessages = other.WarningsAsMessages == null ? null : new HashSet<string>(other.WarningsAsMessages, StringComparer.OrdinalIgnoreCase);
             _projectLoadSettings = other._projectLoadSettings;
             _interactive = other._interactive;
@@ -542,6 +543,11 @@ namespace Microsoft.Build.Execution
         /// A list of warnings to treat as errors.  To treat all warnings as errors, set this to an empty <see cref="HashSet{String}"/>.
         /// </summary>
         public ISet<string> WarningsAsErrors { get; set; }
+
+        /// <summary>
+        /// A list of warnings to not treat as errors. Only has any effect if WarningsAsErrors is empty.
+        /// </summary>
+        public ISet<string> WarningsNotAsErrors { get; set; }
 
         /// <summary>
         /// A list of warnings to treat as low importance messages.

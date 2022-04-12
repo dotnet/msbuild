@@ -823,6 +823,18 @@ namespace Microsoft.Build.BackEnd
             catch (Exception ex)
             {
                 thrownException = ex;
+                if (ex is BuildAbortedException)
+                {
+                    // The build was likely cancelled. We do not need to log an error in this case.
+                }
+                else if (_projectLoggingContext is null)
+                {
+                    _nodeLoggingContext.LogError(BuildEventFileInfo.Empty, "UnhandledMSBuildError", ex.ToString());
+                }
+                else
+                {
+                    _projectLoggingContext.LogError(BuildEventFileInfo.Empty, "UnhandledMSBuildError", ex.ToString());
+                }
 
                 if (ExceptionHandling.IsCriticalException(ex))
                 {
@@ -1304,19 +1316,16 @@ namespace Microsoft.Build.BackEnd
         private void ConfigureWarningsAsErrorsAndMessages()
         {
             // Gather needed objects
-            //
             ProjectInstance project = _requestEntry?.RequestConfiguration?.Project;
             BuildEventContext buildEventContext = _projectLoggingContext?.BuildEventContext;
             ILoggingService loggingService = _projectLoggingContext?.LoggingService;
 
             // Ensure everything that is required is available at this time
-            //
             if (project != null && buildEventContext != null && loggingService != null && buildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
                 if (String.Equals(project.GetPropertyValue(MSBuildConstants.TreatWarningsAsErrors)?.Trim(), "true", StringComparison.OrdinalIgnoreCase))
                 {
                     // If <MSBuildTreatWarningsAsErrors was specified then an empty ISet<string> signals the IEventSourceSink to treat all warnings as errors
-                    //
                     loggingService.AddWarningsAsErrors(buildEventContext, new HashSet<string>());
                 }
                 else
@@ -1327,6 +1336,13 @@ namespace Microsoft.Build.BackEnd
                     {
                         loggingService.AddWarningsAsErrors(buildEventContext, warningsAsErrors);
                     }
+                }
+
+                ISet<string> warningsNotAsErrors = ParseWarningCodes(project.GetPropertyValue(MSBuildConstants.WarningsNotAsErrors));
+
+                if (warningsNotAsErrors?.Count > 0)
+                {
+                    loggingService.AddWarningsNotAsErrors(buildEventContext, warningsNotAsErrors);
                 }
 
                 ISet<string> warningsAsMessages = ParseWarningCodes(project.GetPropertyValue(MSBuildConstants.WarningsAsMessages));

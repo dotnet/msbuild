@@ -514,6 +514,11 @@
         <target state="translated">MSB3667: в "{0}" уже существует файл. Если вы пытаетесь создать предварительно вычисляемый кэш, убедитесь, что выполняется сборка отдельного проекта, который зависит от ваших сборок, а не создание самих сборок. Если вы выполняете задачу ResolveAssemblyReference обычным образом, не устанавливайте параметр "AssemblyInformationCacheOutputPath" задачи ResolveAssemblyReference.</target>
         <note>{StrBegin="MSB3667: "}</note>
       </trans-unit>
+      <trans-unit id="General.TaskRequiresWindows">
+        <source>MSB3096: Task "{0}" is only supported when building on Windows.</source>
+        <target state="translated">MSB3096: задача "{0}" поддерживается только при сборке в Windows.</target>
+        <note>{StrBegin="MSB3096: "}</note>
+      </trans-unit>
       <trans-unit id="General.UndefineProperties">
         <source>Removing Properties:</source>
         <target state="translated">Удаление свойств:</target>

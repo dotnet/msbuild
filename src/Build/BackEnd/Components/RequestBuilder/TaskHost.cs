@@ -713,6 +713,26 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        private ICollection<string> _warningsNotAsErrors;
+
+        /// <summary>
+        /// Contains all warnings that should be logged as errors.
+        /// Non-null empty set when all warnings should be treated as errors.
+        /// </summary>
+        private ICollection<string> WarningsNotAsErrors
+        {
+            get
+            {
+                // Test compatibility
+                if (_taskLoggingContext == null)
+                {
+                    return null;
+                }
+
+                return _warningsNotAsErrors ??= _taskLoggingContext.GetWarningsNotAsErrors();
+            }
+        }
+
         private ICollection<string> _warningsAsMessages;
 
         /// <summary>
@@ -747,7 +767,12 @@ namespace Microsoft.Build.BackEnd
             }
 
             // An empty set means all warnings are errors.
-            return WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningCode);
+            return (WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningCode)) || WarningsAsErrors.Contains(warningCode);
+        }
+
+        private bool WarningAsErrorNotOverriden(string warningCode)
+        {
+            return WarningsNotAsErrors?.Contains(warningCode) != true;
         }
 
         #endregion

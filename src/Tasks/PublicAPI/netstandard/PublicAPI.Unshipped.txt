@@ -1,3 +1,0 @@
-Microsoft.Build.Tasks.SignFile.DisallowMansignTimestampFallback.get -> bool
-Microsoft.Build.Tasks.SignFile.DisallowMansignTimestampFallback.set -> void
-static Microsoft.Build.Tasks.Deployment.ManifestUtilities.SecurityUtilities.SignFile(string certThumbprint, System.Uri timestampUrl, string path, string targetFrameworkVersion, string targetFrameworkIdentifier, bool disallowMansignTimestampFallback) -> void

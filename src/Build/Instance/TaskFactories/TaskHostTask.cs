@@ -274,6 +274,7 @@ namespace Microsoft.Build.BackEnd
                         _setParameters,
                         new Dictionary<string, string>(_buildComponentHost.BuildParameters.GlobalProperties),
                         _taskLoggingContext.GetWarningsAsErrors(),
+                        _taskLoggingContext.GetWarningsNotAsErrors(),
                         _taskLoggingContext.GetWarningsAsMessages()
                         
                     );

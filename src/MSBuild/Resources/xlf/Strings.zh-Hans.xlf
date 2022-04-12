@@ -55,6 +55,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     that itself launches MSBuild on a number of other projects.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="EnvironmentVariableAsSwitch">
+        <source>MSBUILD : error MSB1060: Undefined environment variable passed in as switch.</source>
+        <target state="translated">MSBUILD : error MSB1060: 未定义的环境变量作为开关传入。</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1060: "}
+      UE: This error is shown when a user passes in an environment variable (including from a response file)
+      but the environment variable is not defined.
+    </note>
+      </trans-unit>
       <trans-unit id="FatalError">
         <source>MSBUILD : error MSB1025: An internal failure occurred while running MSBuild.</source>
         <target state="translated">MSBUILD : error MSB1025: 运行 MSBuild 时发生内部错误。</target>
@@ -247,6 +256,32 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       2) the string "proj" that describes the extension we look for
       3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_40_WarnNotAsErrorSwitch">
+        <source>
+      -warnNotAsError[:code[;code2]]
+                     List of warning codes to treats not treat as errors.
+                     Use a semicolon or a comma to separate
+                     multiple warning codes. Has no effect if the -warnaserror
+                     switch is not set.
+
+                     Example:
+                       -warnNotAsError:MSB3026
+    </source>
+        <target state="translated">
+      -warnNotAsError[:code[;code2]]
+                     不视为错误的警告代码列表.
+                     使用分号或逗号分隔
+                     多个警告代码。如果未设置 -warnaserror
+                     开关，则不会产生任何影响。
+
+                     示例:
+                       -warnNotAsError:MSB3026
+    </target>
+        <note>
+      LOCALIZATION: "-warnNotAsError" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
@@ -1133,6 +1168,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <target state="translated">MSBuild 版本 = "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildDebugPath">
+        <source>MSBuild logs and debug information will be at "{0}"</source>
+        <target state="new">MSBuild logs and debug information will be at "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MissingLoggerError">
         <source>MSBUILD : error MSB1007: Specify a logger.</source>
         <target state="translated">MSBUILD : error MSB1007: 请指定记录器。</target>
@@ -1205,6 +1245,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="MissingWarnNotAsErrorParameterError">
+        <source>MSBUILD : error MSB1060: Specify one or more warning codes when using the -warnNotAsError switch.</source>
+        <target state="translated">MSBUILD : error MSB1060: 使用 -warnNotAsError 开关时指定一个或多个警告代码。</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1060: "}
+      UE: This happens if the user does something like "msbuild.exe -warnNotAsError:" without any codes.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="MultipleSchemasError">
         <source>MSBUILD : error MSB1024: Only one schema can be specified for validation of the project.</source>
         <target state="translated">MSBUILD : error MSB1024: 只能指定一个项目验证架构。</target>
@@ -1212,6 +1261,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       {StrBegin="MSBUILD : error MSB1024: "}UE: The user did something like msbuild -validate:foo.xsd -validate:bar.xsd. We only allow one schema to be specified.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
+      </trans-unit>
+      <trans-unit id="NotWarnAsErrorWithoutWarnAsError">
+        <source>MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</source>
+        <target state="translated">MSBUILD : error MSB1062: 除非还指定了 -warnaserror 开关并将其留空，否则无法指定 -warnnotaserror 开关。</target>
+        <note>{StrBegin="MSBUILD : error MSB1062: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-warnnotaserror" and "-warnaserror" should not be localized.</note>
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
         <source>The specified logger could not be created and will not be used. {0}</source>
@@ -1276,6 +1330,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     message does not need in-line parameters because the exception takes care of displaying the invalid arg.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="ResponseFileSwitchFromLocation">
+        <source>'{0}' came from '{1}'</source>
+        <target state="translated">“{0}”来自“{1}”</target>
+        <note>
+      These are response file switches with the location of the response file on disk.
+    </note>
+      </trans-unit>
       <trans-unit id="SchemaFileLocation">
         <source>Validating project using schema file "{0}".</source>
         <target state="translated">正在使用架构文件“{0}”验证项目。</target>
@@ -1302,6 +1363,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <note>{StrBegin="MSBUILD : error MSB1026: "}UE: This error is printed if the default schema does not exist or in the extremely unlikely event
     that an explicit schema file was passed and existed when the command line parameters were checked but was deleted from disk before this check was made.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="SwitchErrorWithArguments">
+        <source>{0}
+    Full command line: '{1}'
+  Switches appended by response files:{2}</source>
+        <target state="translated">{0}
+    完整命令行:“{1}”
+  响应文件追加的开关: {2}</target>
+        <note />
       </trans-unit>
       <trans-unit id="TargetsCouldNotBePrinted">
         <source>MSBUILD : error MSB1059: Targets could not be printed. {0}</source>

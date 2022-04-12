@@ -156,13 +156,13 @@ namespace Microsoft.Build.Utilities
         /// Use a private property so that we can lazy initialize the regex
         /// </summary>
         private Regex DefinitelyNeedQuotes => _definitelyNeedQuotes
-            ?? (_definitelyNeedQuotes = new Regex(_quoteHyphens ? s_definitelyNeedQuotesRegexWithHyphen : s_definitelyNeedQuotesRegexNoHyphen, RegexOptions.None));
+            ?? (_definitelyNeedQuotes = new Regex(_quoteHyphens ? s_definitelyNeedQuotesRegexWithHyphen : s_definitelyNeedQuotesRegexNoHyphen, RegexOptions.CultureInvariant));
 
         /// <summary>
         /// Use a private getter property to we can lazy initialize the regex
         /// </summary>
         private Regex AllowedUnquoted => _allowedUnquoted
-            ?? (_allowedUnquoted = new Regex(_quoteHyphens ? s_allowedUnquotedRegexNoHyphen : s_allowedUnquotedRegexWithHyphen, RegexOptions.IgnoreCase));
+            ?? (_allowedUnquoted = new Regex(_quoteHyphens ? s_allowedUnquotedRegexNoHyphen : s_allowedUnquotedRegexWithHyphen, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant));
 
         /// <summary>
         /// Checks the given switch parameter to see if it must/can be quoted.

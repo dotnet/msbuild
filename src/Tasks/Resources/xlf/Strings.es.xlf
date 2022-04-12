@@ -514,6 +514,11 @@
         <target state="translated">MSB3667: Ya hay un archivo en "{0}". Si está intentando crear una memoria caché precalculada, asegúrese de estar compilando un solo proyecto que dependa de sus ensamblados, en lugar de compilar los ensamblados en sí. Si está ejecutando la tarea ResolveAssemblyReference normalmente, no establezca el parámetro "AssemblyInformationCacheOutputPath" de la tarea ResolveAssemblyReference.</target>
         <note>{StrBegin="MSB3667: "}</note>
       </trans-unit>
+      <trans-unit id="General.TaskRequiresWindows">
+        <source>MSB3096: Task "{0}" is only supported when building on Windows.</source>
+        <target state="translated">MSB3096: La tarea “{0}” solo se admite cuando se compila en Windows.</target>
+        <note>{StrBegin="MSB3096: "}</note>
+      </trans-unit>
       <trans-unit id="General.UndefineProperties">
         <source>Removing Properties:</source>
         <target state="translated">Quitando propiedades:</target>

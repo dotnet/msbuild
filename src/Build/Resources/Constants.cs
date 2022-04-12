@@ -301,12 +301,12 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.Environment::GetFolderPath", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::GetLogicalDrives", environmentType);
 
-// All the following properties only have getters
+                        // All the following properties only have getters
                         availableStaticMethods.TryAdd("System.Environment::CommandLine", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::Is64BitOperatingSystem", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::Is64BitProcess", environmentType);
-
                         availableStaticMethods.TryAdd("System.Environment::MachineName", environmentType);
+                        availableStaticMethods.TryAdd("System.Environment::NewLine", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::OSVersion", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::ProcessorCount", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::StackTrace", environmentType);

@@ -514,6 +514,11 @@
         <target state="translated">MSB3667: W lokalizacji „{0}” już istnieje plik. Jeśli próbujesz utworzyć wstępnie obliczoną pamięć podręczną, upewnij się, że kompilujesz pojedynczy projekt zależący od zestawów, a nie same zestawy. Jeśli uruchamiasz zadanie ResolveAssemblyReference w normalny sposób, nie ustawiaj parametru „AssemblyInformationCacheOutputPath” zadania ResolveAssemblyReference.</target>
         <note>{StrBegin="MSB3667: "}</note>
       </trans-unit>
+      <trans-unit id="General.TaskRequiresWindows">
+        <source>MSB3096: Task "{0}" is only supported when building on Windows.</source>
+        <target state="translated">MSB3096: zadanie „{0}“ jest obsługiwane tylko podczas kompilowania w systemie Windows.</target>
+        <note>{StrBegin="MSB3096: "}</note>
+      </trans-unit>
       <trans-unit id="General.UndefineProperties">
         <source>Removing Properties:</source>
         <target state="translated">Usuwanie właściwości:</target>

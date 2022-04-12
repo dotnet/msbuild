@@ -142,6 +142,9 @@
     <Compile Include="..\Framework\StringBuilderCache.cs">
       <Link>StringBuilderCache.cs</Link>
     </Compile>
+    <Compile Include="..\Framework\SupportedOSPlatform.cs">
+      <Link>SupportedOSPlatform.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs">
       <Link>TaskEngineAssemblyResolver.cs</Link>
     </Compile>
