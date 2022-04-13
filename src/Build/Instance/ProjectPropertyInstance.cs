@@ -85,6 +85,8 @@ namespace Microsoft.Build.Execution
 
         private bool _loggedEnvProperty = false;
 
+        internal bool IsEnvironmentProperty { get; set; }
+
         /// <summary>
         /// Evaluated value of the property, escaped as necessary.
         /// Setter assumes caller has protected global properties, if necessary.
@@ -94,7 +96,7 @@ namespace Microsoft.Build.Execution
         {
             get
             {
-                if ((this as IProperty).IsEnvironmentProperty && loggingContext?.IsValid == true && !_loggedEnvProperty)
+                if (IsEnvironmentProperty && loggingContext?.IsValid == true && !_loggedEnvProperty)
                 {
                     EnvironmentVariableReadEventArgs args = new(Name, _escapedValue);
                     args.BuildEventContext = loggingContext.BuildEventContext;
@@ -116,8 +118,6 @@ namespace Microsoft.Build.Execution
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         string IValued.EscapedValue => _escapedValue;
-
-        bool IProperty.IsEnvironmentProperty { get; set; }
 
         #region IEquatable<ProjectPropertyInstance> Members
 
@@ -233,7 +233,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal static ProjectPropertyInstance Create(ProjectPropertyInstance that)
         {
-            return Create(that._name, that._escapedValue, mayBeReserved: true /* already validated */, isImmutable: that.IsImmutable, ((IProperty)that).IsEnvironmentProperty);
+            return Create(that._name, that._escapedValue, mayBeReserved: true /* already validated */, isImmutable: that.IsImmutable, that.IsEnvironmentProperty);
         }
 
         /// <summary>
@@ -242,7 +242,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal static ProjectPropertyInstance Create(ProjectPropertyInstance that, bool isImmutable)
         {
-            return Create(that._name, that._escapedValue, mayBeReserved: true /* already validated */, isImmutable: isImmutable, ((IProperty)that).IsEnvironmentProperty);
+            return Create(that._name, that._escapedValue, mayBeReserved: true /* already validated */, isImmutable: isImmutable, that.IsEnvironmentProperty);
         }
 
         /// <summary>
@@ -317,7 +317,7 @@ namespace Microsoft.Build.Execution
             }
 
             ProjectPropertyInstance instance = isImmutable ? new ProjectPropertyInstanceImmutable(name, escapedValue) : new ProjectPropertyInstance(name, escapedValue);
-            ((IProperty)instance).IsEnvironmentProperty = isEnvironmentProperty;
+            instance.IsEnvironmentProperty = isEnvironmentProperty;
             instance.loggingContext = loggingContext;
             return instance;
         }

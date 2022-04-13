@@ -98,7 +98,7 @@ namespace Microsoft.Build.Evaluation
             [DebuggerStepThrough]
             get
             {
-                if ((this as IProperty).IsEnvironmentProperty && this is ProjectPropertyNotXmlBacked notXmlBacked && notXmlBacked.loggingContext?.IsValid == true && !_loggedEnvProperty)
+                if (IsEnvironmentProperty && this is ProjectPropertyNotXmlBacked notXmlBacked && notXmlBacked.loggingContext?.IsValid == true && !_loggedEnvProperty)
                 {
                     EnvironmentVariableReadEventArgs args = new(Name, EvaluatedValueEscapedInternal);
                     args.BuildEventContext = notXmlBacked.loggingContext.BuildEventContext;
@@ -218,8 +218,6 @@ namespace Microsoft.Build.Evaluation
             [DebuggerStepThrough]
             get => EvaluatedValueEscapedInternal;
         }
-
-        bool IProperty.IsEnvironmentProperty { get => IsEnvironmentProperty; set => throw new NotImplementedException(); }
 
         #region IEquatable<ProjectProperty> Members
 

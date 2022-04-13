@@ -35,11 +35,5 @@ namespace Microsoft.Build.Evaluation
         {
             get;
         }
-
-        bool IsEnvironmentProperty
-        {
-            get;
-            set;
-        }
     }
 }
