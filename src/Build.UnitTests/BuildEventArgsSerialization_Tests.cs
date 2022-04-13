@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests
             // touch the type so that static constructor runs
             _ = ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix;
         }
-
+        
         [Fact]
         public void RoundtripBuildStartedEventArgs()
         {
