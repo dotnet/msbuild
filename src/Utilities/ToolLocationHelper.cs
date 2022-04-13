@@ -185,13 +185,11 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Indicates the 32-bit .NET Framework
         /// </summary>
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Bitness", Justification = "Bitness is a reasonable term")]
         Bitness32 = 1,
 
         /// <summary>
         /// Indicates the 64-bit .NET Framework
         /// </summary>
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Bitness", Justification = "Bitness is a reasonable term")]
         Bitness64 = 2
     }
 
@@ -369,7 +367,6 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetPlatformIdentifier">Targeted platform to find SDKs for</param>
         /// <param name="targetPlatformVersion">Targeted platform version to find SDKs for</param>
         /// <returns>IDictionary of installed SDKS and their location. K:SDKName V:SDK installation location</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static IDictionary<string, string> GetPlatformExtensionSDKLocations(string targetPlatformIdentifier, Version targetPlatformVersion)
             => GetPlatformExtensionSDKLocations(null, null, targetPlatformIdentifier, targetPlatformVersion);
 
@@ -381,7 +378,6 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetPlatformIdentifier">Targeted platform to find SDKs for</param>
         /// <param name="targetPlatformVersion">Targeted platform version to find SDKs for</param>
         /// <returns>IDictionary of installed SDKS and their location. K:SDKName V:SDK installation location</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static IDictionary<string, string> GetPlatformExtensionSDKLocations(string[] diskRoots, string registryRoot, string targetPlatformIdentifier, Version targetPlatformVersion)
             => GetPlatformExtensionSDKLocations(diskRoots, null, registryRoot, targetPlatformIdentifier, targetPlatformVersion);
 
@@ -394,7 +390,6 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetPlatformIdentifier">Targeted platform to find SDKs for</param>
         /// <param name="targetPlatformVersion">Targeted platform version to find SDKs for</param>
         /// <returns>IDictionary of installed SDKS and their location. K:SDKName V:SDK installation location</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static IDictionary<string, string> GetPlatformExtensionSDKLocations(string[] diskRoots, string[] extensionDiskRoots, string registryRoot, string targetPlatformIdentifier, Version targetPlatformVersion)
         {
             var extensionSDKs = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -415,7 +410,6 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetPlatformIdentifier">Targeted platform to find SDKs for</param>
         /// <param name="targetPlatformVersion">Targeted platform version to find SDKs for</param>
         /// <returns>IDictionary of installed SDKS and their tuples containing (location, platform version).</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Casing kept to maintain consistency with existing APIs")]
         public static IDictionary<string, Tuple<string, string>> GetPlatformExtensionSDKLocationsAndVersions(string targetPlatformIdentifier, Version targetPlatformVersion)
             => GetPlatformExtensionSDKLocationsAndVersions(null, null, targetPlatformIdentifier, targetPlatformVersion);
 
@@ -427,7 +421,6 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetPlatformIdentifier">Targeted platform to find SDKs for</param>
         /// <param name="targetPlatformVersion">Targeted platform version to find SDKs for</param>
         /// <returns>IDictionary of installed SDKS and their tuples containing (location, platform version).</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Casing kept to maintain consistency with existing APIs")]
         public static IDictionary<string, Tuple<string, string>> GetPlatformExtensionSDKLocationsAndVersions(string[] diskRoots, string registryRoot, string targetPlatformIdentifier, Version targetPlatformVersion)
             => GetPlatformExtensionSDKLocationsAndVersions(diskRoots, null, registryRoot, targetPlatformIdentifier, targetPlatformVersion);
 
@@ -440,7 +433,6 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetPlatformIdentifier">Targeted platform to find SDKs for</param>
         /// <param name="targetPlatformVersion">Targeted platform version to find SDKs for</param>
         /// <returns>IDictionary of installed SDKS and their tuples containing (location, platform version). Version may be null if the SDK targets multiple versions.</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Casing kept to maintain consistency with existing APIs")]
         public static IDictionary<string, Tuple<string, string>> GetPlatformExtensionSDKLocationsAndVersions(string[] diskRoots, string[] multiPlatformDiskRoots, string registryRoot, string targetPlatformIdentifier, Version targetPlatformVersion)
         {
             var extensionSDKsAndVersions = new Dictionary<string, Tuple<string, string>>(StringComparer.OrdinalIgnoreCase);
@@ -488,7 +480,6 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetPlatformIdentifier">Targeted platform to find SDKs for</param>
         /// <param name="targetPlatformVersion">Targeted platform version to find SDKs for</param>
         /// <returns>Location of the SDK if it is found, empty string if it could not be found</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static string GetPlatformExtensionSDKLocation(string sdkMoniker, string targetPlatformIdentifier, Version targetPlatformVersion)
             => GetPlatformExtensionSDKLocation(sdkMoniker, targetPlatformIdentifier, targetPlatformVersion, null, null);
 
@@ -502,7 +493,6 @@ namespace Microsoft.Build.Utilities
         /// <param name="diskRoots">List of disk roots to search for sdks within</param>
         /// <param name="registryRoot">Registry root to look for sdks within</param>
         /// <returns>Location of the SDK if it is found, empty string if it could not be found</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static string GetPlatformExtensionSDKLocation(string sdkMoniker, string targetPlatformIdentifier, Version targetPlatformVersion, string[] diskRoots, string registryRoot)
             => GetPlatformExtensionSDKLocation(sdkMoniker, targetPlatformIdentifier, targetPlatformVersion, diskRoots, null, registryRoot);
 
@@ -517,7 +507,6 @@ namespace Microsoft.Build.Utilities
         /// <param name="extensionDiskRoots">List of disk roots to look for manifest driven extension sdks</param>
         /// <param name="registryRoot">Registry root to look for sdks within</param>
         /// <returns>Location of the SDK if it is found, empty string if it could not be found</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static string GetPlatformExtensionSDKLocation(string sdkMoniker, string targetPlatformIdentifier, Version targetPlatformVersion, string[] diskRoots, string[] extensionDiskRoots, string registryRoot)
         {
             ErrorUtilities.VerifyThrowArgumentLength(targetPlatformIdentifier, nameof(targetPlatformIdentifier));
@@ -554,7 +543,6 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetPlatformIdentifier">Identifier for the platform</param>
         /// <param name="targetPlatformVersion">Version of the platform</param>
         /// <returns>A full path to the sdk root if the sdk exists in the targeted platform or an empty string if it does not exist.</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static string GetPlatformExtensionSDKLocation(string sdkMoniker, string targetPlatformIdentifier, string targetPlatformVersion)
             => GetPlatformExtensionSDKLocation(sdkMoniker, targetPlatformIdentifier, targetPlatformVersion, null, null);
 
@@ -568,7 +556,6 @@ namespace Microsoft.Build.Utilities
         /// <param name="diskRoots">List of disk roots to search for sdks within</param>
         /// <param name="registryRoot">Registry root to look for sdks within</param>
         /// <returns>Location of the SDK if it is found, empty string if it could not be found</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static string GetPlatformExtensionSDKLocation(string sdkMoniker, string targetPlatformIdentifier, string targetPlatformVersion, string diskRoots, string registryRoot)
             => GetPlatformExtensionSDKLocation(sdkMoniker, targetPlatformIdentifier, targetPlatformVersion, diskRoots, null, registryRoot);
 
@@ -583,7 +570,6 @@ namespace Microsoft.Build.Utilities
         /// <param name="extensionDiskRoots">List of disk roots to look for manifest driven extension sdks</param>
         /// <param name="registryRoot">Registry root to look for sdks within</param>
         /// <returns>Location of the SDK if it is found, empty string if it could not be found</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static string GetPlatformExtensionSDKLocation(string sdkMoniker, string targetPlatformIdentifier, string targetPlatformVersion, string diskRoots, string extensionDiskRoots, string registryRoot)
         {
             ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion, nameof(targetPlatformVersion));
@@ -616,7 +602,6 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetPlatformVersion"></param>
         /// <param name="extensionSdks"></param>
         /// <returns>A IDictionary collection of filtered extension SDKs</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Not worth breaking customers")]
         public static IDictionary<string, string> FilterPlatformExtensionSDKs(Version targetPlatformVersion, IDictionary<string, string> extensionSdks)
         {
             var filteredExtensionSdks = new Dictionary<string, string>();
@@ -639,7 +624,6 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="sdkRoot">Root folder for the SDK</param>
         /// <returns>A list of folders in the order which they should be used when looking for references in the SDK</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static IList<string> GetSDKReferenceFolders(string sdkRoot) => GetSDKReferenceFolders(sdkRoot, retailConfigurationName, neutralArchitectureName);
 
         /// <summary>
@@ -650,7 +634,6 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetConfiguration">The configuration the SDK is targeting. This should be Debug or Retail</param>
         /// <param name="targetArchitecture">The architecture the SDK is targeting</param>
         /// <returns>A list of folders in the order which they should be used when looking for references in the SDK</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static IList<string> GetSDKReferenceFolders(string sdkRoot, string targetConfiguration, string targetArchitecture)
         {
             ErrorUtilities.VerifyThrowArgumentLength(sdkRoot, nameof(sdkRoot));
@@ -703,7 +686,6 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="sdkRoot">Root folder for the SDK must contain a redist folder</param>
         /// <returns>A list of folders in the order which they should be used when looking for redist files in the SDK</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static IList<string> GetSDKRedistFolders(string sdkRoot) => GetSDKRedistFolders(sdkRoot, retailConfigurationName, neutralArchitectureName);
 
         /// <summary>
@@ -714,7 +696,6 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetConfiguration">The configuration the SDK is targeting. This should be Debug or Retail</param>
         /// <param name="targetArchitecture">The architecture the SDK is targeting</param>
         /// <returns>A list of folders in the order which they should be used when looking for redist files in the SDK</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static IList<string> GetSDKRedistFolders(string sdkRoot, string targetConfiguration, string targetArchitecture)
         {
             ErrorUtilities.VerifyThrowArgumentLength(sdkRoot, nameof(sdkRoot));
@@ -733,7 +714,6 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="sdkRoot">Root folder for the SDK must contain a Designtime folder</param>
         /// <returns>A list of folders in the order which they should be used when looking for DesignTime files in the SDK</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static IList<string> GetSDKDesignTimeFolders(string sdkRoot) => GetSDKDesignTimeFolders(sdkRoot, retailConfigurationName, neutralArchitectureName);
 
         /// <summary>
@@ -744,7 +724,6 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetConfiguration">The configuration the SDK is targeting. This should be Debug or Retail</param>
         /// <param name="targetArchitecture">The architecture the SDK is targeting</param>
         /// <returns>A list of folders in the order which they should be used when looking for DesignTime files in the SDK</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static IList<string> GetSDKDesignTimeFolders(string sdkRoot, string targetConfiguration, string targetArchitecture)
         {
             ErrorUtilities.VerifyThrowArgumentLength(sdkRoot, nameof(sdkRoot));
@@ -1250,7 +1229,6 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetPlatformIdentifier">Targeted platform to find SDKs for</param>
         /// <param name="targetPlatformVersion">Targeted platform version to find SDKs for</param>
         /// <returns>Location of the SDK if it is found, empty string if it could not be found</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static string GetPlatformSDKLocation(string targetPlatformIdentifier, Version targetPlatformVersion)
             => GetPlatformSDKLocation(targetPlatformIdentifier, targetPlatformVersion, null, null);
 
@@ -1262,7 +1240,6 @@ namespace Microsoft.Build.Utilities
         /// <param name="diskRoots">List of disk roots to search for sdks within</param>
         /// <param name="registryRoot">Registry root to look for sdks within</param>
         /// <returns>Location of the SDK if it is found, empty string if it could not be found</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static string GetPlatformSDKLocation(string targetPlatformIdentifier, Version targetPlatformVersion, string[] diskRoots, string registryRoot)
         {
             var targetPlatform = GetMatchingPlatformSDK(targetPlatformIdentifier, targetPlatformVersion, diskRoots, null, registryRoot);
@@ -1275,7 +1252,6 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetPlatformIdentifier">Identifier for the platform</param>
         /// <param name="targetPlatformVersion">Version of the platform</param>
         /// <returns>A full path to the sdk root if the sdk exists in the targeted platform or an empty string if it does not exist.</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static string GetPlatformSDKLocation(string targetPlatformIdentifier, string targetPlatformVersion)
             => GetPlatformSDKLocation(targetPlatformIdentifier, targetPlatformVersion, null, null);
 
@@ -1287,7 +1263,6 @@ namespace Microsoft.Build.Utilities
         /// <param name="diskRoots">List of disk roots to search for sdks within</param>
         /// <param name="registryRoot">Registry root to look for sdks within</param>
         /// <returns>Location of the platform SDK if it is found, empty string if it could not be found</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static string GetPlatformSDKLocation(string targetPlatformIdentifier, string targetPlatformVersion, string diskRoots, string registryRoot)
         {
             ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion, nameof(targetPlatformVersion));
@@ -2376,7 +2351,6 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Clear out the appdomain wide cache of Platform and Extension SDKs.
         /// </summary>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static void ClearSDKStaticCache()
         {
             lock (s_locker)
