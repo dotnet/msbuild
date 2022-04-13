@@ -113,6 +113,12 @@ namespace Microsoft.DotNet.Cli
                 "--interactive",
                 CommonLocalizableStrings.CommandInteractiveOptionDescription);
 
+        public static Option<bool> DisableBuildServersOption =
+            new ForwardedOption<bool>(
+                "--disable-build-servers",
+                CommonLocalizableStrings.DisableBuildServersOptionDescription)
+            .ForwardAsMany(_ => new string[] { "-p:UseRazorBuildServer=false", "-p:UseSharedCompilation=false", "/nodeReuse:false" });
+
         public static Option<string> ArchitectureOption =
             new ForwardedOption<string>(
                 new string[] { "--arch", "-a" },
