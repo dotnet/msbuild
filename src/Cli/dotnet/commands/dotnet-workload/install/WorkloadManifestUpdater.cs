@@ -20,6 +20,7 @@ using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli;
 using System.Net;
 using System.Net.Http;
+using System.Globalization;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -184,7 +185,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                 if (advertisingManifestVersionAndWorkloads != null &&
                     (advertisingManifestVersionAndWorkloads.Value.ManifestVersion.CompareTo(currentManifestVersion.manifestVersion) > 0 ||
-                    advertisingManifestVersionAndWorkloads.Value.ManifestFeatureBand.CompareTo(currentManifestVersion.sdkFeatureBand) > 0)) // update this to also check if the feature band is greater (OR -- doesn't need to be both)
+                    advertisingManifestVersionAndWorkloads.Value.ManifestFeatureBand.CompareTo(currentManifestVersion.sdkFeatureBand) > 0)) 
                 {
                     manifestUpdates.Add((new ManifestVersionUpdate(manifestId, currentManifestVersion.manifestVersion, currentManifestVersion.sdkFeatureBand.ToString(),
                         advertisingManifestVersionAndWorkloads.Value.ManifestVersion, advertisingManifestVersionAndWorkloads.Value.ManifestFeatureBand.ToString()),
@@ -297,6 +298,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             string packagePath = null;
             string extractionPath = null;
             var manifestId = new ManifestId(manifest.Id);
+            string currentFeatureBand = _sdkFeatureBand.ToString();
 
             try
             {
@@ -306,7 +308,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 {
                     try
                     {
-                        packagePath = GetOnlinePackagePath(_sdkFeatureBand, manifestId, includePreviews).ToString();
+                        packagePath = await GetOnlinePackagePath(_sdkFeatureBand, manifestId, includePreviews);
                     }
                     catch (NuGetPackageNotFoundException)
                     {
@@ -315,7 +317,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         // then try downloading the manifest's feature band
                         if (!(manifest.ManifestFeatureBand).Equals(_sdkFeatureBand))
                         {
-                            packagePath = GetOnlinePackagePath(new SdkFeatureBand(manifest.ManifestFeatureBand), manifestId, includePreviews).ToString();
+                            packagePath = await GetOnlinePackagePath(new SdkFeatureBand(manifest.ManifestFeatureBand), manifestId, includePreviews);
+                            currentFeatureBand = manifest.ManifestFeatureBand.ToString();
                         }
                         else
                         {
@@ -332,6 +335,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         if (!(manifest.ManifestFeatureBand).Equals(_sdkFeatureBand))
                         {
                             packagePath = GetOfflinePackagePath(new SdkFeatureBand(manifest.ManifestFeatureBand), manifestId, offlineCache);
+                            currentFeatureBand = manifest.ManifestFeatureBand.ToString();
                         }
                         else
                         {
@@ -350,8 +354,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 }
                 Directory.CreateDirectory(Path.GetDirectoryName(adManifestPath));
                 FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(Path.Combine(extractionPath, "data"), adManifestPath));
-                // TODO add file with the current feature band (within the adManifestPath directory) --> contents should be the advertisted manifest feature band
-                // (AdvertisedManifestFeatureBand.txt)
+
+                File.WriteAllText(Path.Combine(adManifestPath, "AdvertisedManifestFeatureBand.txt"), currentFeatureBand);
 
                 if (_displayManifestUpdates)
                 {
@@ -403,6 +407,18 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId.ToString(), fsSource, manifestPath);
                 // we need to know the feature band of the advertised manifest (read it from the AvertisedManifestFeatureBand.txt file)
                 // if we don't find the file then use the current feature band
+                var adManifestFeatureBandPath = Path.Combine(GetAdvertisingManifestPath(_sdkFeatureBand, manifestId), "AdvertisedManifestFeatureBand.txt");
+
+                if (File.Exists(adManifestFeatureBandPath))
+                {
+                    SdkFeatureBand adManifestFeatureBand = new SdkFeatureBand(File.ReadAllText(adManifestFeatureBandPath));
+                }
+                else
+                {
+                    SdkFeatureBand adManifestFeatureBand = _sdkFeatureBand;
+                }
+                
+
                 return (new ManifestVersion(manifest.Version), _sdkFeatureBand, manifest.Workloads.Values.OfType<WorkloadDefinition>().ToDictionary(w => w.Id));
             }
         }
