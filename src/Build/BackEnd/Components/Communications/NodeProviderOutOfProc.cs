@@ -84,7 +84,7 @@ namespace Microsoft.Build.BackEnd
             //   we add into _nodeContexts premise of future node and verify that it will not cross limits.
             if (_nodeContexts.Count + numberOfNodesToCreate > ComponentHost.BuildParameters.MaxNodeCount)
             {
-                ErrorUtilities.ThrowInternalError("Exceeded max node count of '{0}'; current count '{_nodeContexts.Count}' ", _nodeContexts.Count);
+                ErrorUtilities.ThrowInternalError("Exceeded max node count of '{0}', current count is '{1}' ", ComponentHost.BuildParameters.MaxNodeCount, _nodeContexts.Count);
                 return new List<NodeInfo>();
             }
 

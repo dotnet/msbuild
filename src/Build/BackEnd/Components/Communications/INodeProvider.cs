@@ -58,14 +58,14 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Requests that a new node be created on the specified machine.
         /// </summary>
-        /// <param name="nextNodeId">The id to assign to the first created node. Following nodes ids will be increasing by 1.</param>
+        /// <param name="nextNodeId">The id to assign to the first created node. Resulting nodes ids will be in range [nextNodeId, nextNodeId + numberOfNodesToCreate - 1]</param>
         /// <param name="packetFactory">
         /// The packet factory used to create packets when data is
         /// received on this node.
         /// </param>
         /// <param name="configurationFactory">NodeConfiguration factory of particular node</param>
         /// <param name="numberOfNodesToCreate">Required number of nodes to create</param>
-        /// <returns>Array of NodeInfo which size is equal of successfully created nodes</returns>
+        /// <returns>Array of NodeInfo of successfully created nodes</returns>
         IList<NodeInfo> CreateNodes(int nextNodeId, INodePacketFactory packetFactory, Func<NodeInfo, NodeConfiguration> configurationFactory, int numberOfNodesToCreate);
 
         /// <summary>
