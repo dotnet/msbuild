@@ -153,11 +153,11 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(NoLogoOption);
             command.AddOption(ConfigurationOption);
             command.AddOption(FrameworkOption);
-            command.AddOption(CommonOptions.LongFormRuntimeOption.WithHelpDescription(command, LocalizableStrings.RuntimeOptionDescription));
+            command.AddOption(CommonOptions.RuntimeOption.WithHelpDescription(command, LocalizableStrings.RuntimeOptionDescription));
             command.AddOption(NoRestoreOption);
             command.AddOption(CommonOptions.InteractiveMsBuildForwardOption);
             command.AddOption(CommonOptions.VerbosityOption);
-            command.AddOption(CommonOptions.LongFormArchitectureOption);
+            command.AddOption(CommonOptions.ArchitectureOption);
             command.AddOption(CommonOptions.OperatingSystemOption);
 
             command.SetHandler(TestCommand.Run);
