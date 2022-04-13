@@ -39,7 +39,13 @@ namespace Microsoft.Build.Tasks.UnitTests
 
   <UsingTask TaskName=""MyInlineTask"" TaskFactory=""RoslynCodeTaskFactory"" AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
     <Task>
-      <Reference Include=""{ Path.Combine(Path.GetDirectoryName(location), "..", "..", "..", "Samples", "Dependency", location.Contains("Debug") ? "Debug" : "Release", "net472", "Dependency.dll") }"" />
+      <Reference Include=""" + Path.Combine(Path.GetDirectoryName(location), "..", "..", "..", "Samples", "Dependency",
+#if DEBUG
+      "Debug"
+#else
+      "Release"
+#endif
+      , "net472", "Dependency.dll") + @""" />
       <Using Namespace=""Dependency"" />
       <Code Type=""Fragment"" Language=""cs"" >
 <![CDATA[
