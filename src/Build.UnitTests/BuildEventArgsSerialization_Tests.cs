@@ -24,25 +24,36 @@ namespace Microsoft.Build.UnitTests
             _ = ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix;
         }
 
-        [Fact]
-        public void RoundtripBuildStartedEventArgs()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void RoundtripBuildStartedEventArgs(bool serializeAllEnvironmentVariables)
         {
-            var args = new BuildStartedEventArgs(
-                "Message",
-                "HelpKeyword",
-                DateTime.Parse("3/1/2017 11:11:56 AM"));
-            Roundtrip(args,
-                e => e.Message,
-                e => e.HelpKeyword,
-                e => e.Timestamp.ToString());
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES", serializeAllEnvironmentVariables ? "1" : null);
+                var args = new BuildStartedEventArgs(
+                    "Message",
+                    "HelpKeyword",
+                    DateTime.Parse("3/1/2017 11:11:56 AM"));
+                Roundtrip(args,
+                    e => e.Message,
+                    e => e.HelpKeyword,
+                    e => e.Timestamp.ToString());
 
-            args = new BuildStartedEventArgs(
-                "M",
-                null);
-            Roundtrip(args,
-                e => e.HelpKeyword,
-                e => e.ThreadId.ToString(),
-                e => e.SenderName);
+                args = new BuildStartedEventArgs(
+                    "M",
+                    null,
+                    new Dictionary<string, string>
+                    {
+                    { "SampleName", "SampleValue" }
+                    });
+                Roundtrip(args,
+                    e => serializeAllEnvironmentVariables ? TranslationHelpers.ToString(e.BuildEnvironment) : null,
+                    e => e.HelpKeyword,
+                    e => e.ThreadId.ToString(),
+                    e => e.SenderName);
+            }
         }
 
         [Fact]
