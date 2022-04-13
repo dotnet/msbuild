@@ -84,7 +84,12 @@ namespace Microsoft.Build.CommandLine
             /// <summary>
             /// A project cache failed unexpectedly.
             /// </summary>
-            ProjectCacheFailure
+            ProjectCacheFailure,
+            /// <summary>
+            /// The client for MSBuild server failed unexpectedly, for example,
+            /// because the server process died or hung.
+            /// </summary>
+            MSBuildClientFailure
         }
 
         /// <summary>
@@ -216,14 +221,30 @@ namespace Microsoft.Build.CommandLine
                 DumpCounters(true /* initialize only */);
             }
 
-            // return 0 on success, non-zero on failure
-            int exitCode = ((s_initialized && Execute(
+            int exitCode;
+            if (Environment.GetEnvironmentVariable("MSBUILDUSESERVER") == "1")
+            {
+                // Use the client app to execute build in msbuild server. Opt-in feature.
+                exitCode = ((s_initialized && MSBuildClientApp.Execute(
+#if FEATURE_GET_COMMANDLINE
+                Environment.CommandLine,
+#else
+                ConstructArrayArg(args),
+#endif
+                s_buildCancellationSource.Token
+                ) == ExitType.Success) ? 0 : 1);
+            }
+            else
+            {
+                // return 0 on success, non-zero on failure
+                exitCode = ((s_initialized && Execute(
 #if FEATURE_GET_COMMANDLINE
                 Environment.CommandLine
 #else
                 ConstructArrayArg(args)
 #endif
-            ) == ExitType.Success) ? 0 : 1);
+                ) == ExitType.Success) ? 0 : 1);
+            }
 
             if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
             {
