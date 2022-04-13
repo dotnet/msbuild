@@ -585,19 +585,28 @@ namespace Microsoft.Build.Tasks
             // Transform the list of resolved assemblies to TaskItems if they were all resolved
             items = hasInvalidReference ? null : resolvedAssemblyReferences.Select(i => (ITaskItem)new TaskItem(i)).ToArray();
 
-            handlerAddedToAppDomain = (_, eventArgs) => TryLoadAssembly(directoriesToAddToAppDomain, new AssemblyName(eventArgs.Name).Name);
+            handlerAddedToAppDomain = (_, eventArgs) => TryLoadAssembly(directoriesToAddToAppDomain, new AssemblyName(eventArgs.Name));
             AppDomain.CurrentDomain.AssemblyResolve += handlerAddedToAppDomain;
 
             return !hasInvalidReference;
 
-            static Assembly TryLoadAssembly(List<string> directories, string name)
+            static Assembly TryLoadAssembly(List<string> directories, AssemblyName name)
             {
                 foreach (string directory in directories)
                 {
-                    string path = Path.Combine(directory, name + ".dll");
+                    string path = Path.Combine(directory, name.Name + ".dll");
                     if (File.Exists(path))
                     {
                         return Assembly.LoadFrom(path);
+                    }
+
+                    if (!string.IsNullOrEmpty(name.CultureName))
+                    {
+                        path = Path.Combine(directory, name.CultureName, name.Name + ".dll");
+                        if (File.Exists(path))
+                        {
+                            return Assembly.LoadFrom(path);
+                        }
                     }
                 }
 
