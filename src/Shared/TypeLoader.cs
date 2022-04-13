@@ -377,18 +377,17 @@ namespace Microsoft.Build.Shared
 
                         bool msbuildIs64Bit = RuntimeInformation.ProcessArchitecture == Architecture.X64;
                         Machine machineArch = reader.PEHeaders.CoffHeader.Machine;
-                        if (msbuildIs64Bit && Required32Bit(machineArch))
+                        if (msbuildIs64Bit && machineArch == Machine.AM33)
                         {
                             runtimeInformation.Architecture = XMakeAttributes.MSBuildArchitectureValues.x86;
                         }
-                        else if (!msbuildIs64Bit && Required64Bit(machineArch))
+                        else if (!msbuildIs64Bit && machineArch == Machine.Amd64)
                         {
                             runtimeInformation.Architecture = XMakeAttributes.MSBuildArchitectureValues.x64;
                         }
 
                         if (netcoremsbuild && runtimeInformation.Architecture == XMakeAttributes.MSBuildArchitectureValues.x86)
                         {
-                            // Don't support automatic architecture correction on core for some reason?
                             ErrorUtilities.ThrowArgument("Shared.32BitTaskOnCore");
                         }
 
