@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using Microsoft.Build.Internal;
@@ -184,13 +185,32 @@ namespace Microsoft.Build.BackEnd
             ShutdownConnectedNodes(false /* no node reuse */);
         }
 
+        public IList<NodeInfo> CreateNodes(int nextNodeId, INodePacketFactory factory, Func<NodeInfo, NodeConfiguration> configurationFactory, int numberOfNodesToCreate)
+        {
+            var nodes = new List<NodeInfo>(numberOfNodesToCreate);
+
+            for (int i = 0; i < numberOfNodesToCreate; i++)
+            {
+                int nodeId = nextNodeId + i;
+
+                NodeInfo nodeInfo = CreateNode(nodeId, factory, configurationFactory);
+                // If it fails let it return what we have crated so far to so caller can somehow acquire missing nodes.
+                if (nodeInfo == null)
+                    break;
+
+                nodes.Add(nodeInfo);
+            }
+
+            return nodes;
+        }
+
         /// <summary>
         /// Requests that a node be created on the specified machine.
         /// </summary>
         /// <param name="nodeId">The id of the node to create.</param>
         /// <param name="factory">The factory to use to create packets from this node.</param>
-        /// <param name="configuration">The configuration for the node.</param>
-        public bool CreateNode(int nodeId, INodePacketFactory factory, NodeConfiguration configuration)
+        /// <param name="configurationFactory">The configuration factory for the node.</param>
+        private NodeInfo CreateNode(int nodeId, INodePacketFactory factory, Func<NodeInfo, NodeConfiguration> configurationFactory)
         {
             ErrorUtilities.VerifyThrow(nodeId != InvalidInProcNodeId, "Cannot create in-proc node.");
 
@@ -215,7 +235,7 @@ namespace Microsoft.Build.BackEnd
                     if (!InProcNodeOwningOperatingEnvironment.WaitOne(0))
                     {
                         // Can't take the operating environment.
-                        return false;
+                        return null;
                     }
                 }
             }
@@ -225,14 +245,16 @@ namespace Microsoft.Build.BackEnd
             {
                 if (!InstantiateNode(factory))
                 {
-                    return false;
+                    return null;
                 }
             }
 
-            _inProcNodeEndpoint.SendData(configuration);
+            NodeInfo nodeInfo = new(nodeId, ProviderType);
+
+            _inProcNodeEndpoint.SendData(configurationFactory(nodeInfo));
             _inProcNodeId = nodeId;
 
-            return true;
+            return nodeInfo;
         }
 
         #endregion

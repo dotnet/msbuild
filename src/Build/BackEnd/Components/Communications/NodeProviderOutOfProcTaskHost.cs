@@ -151,7 +151,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Instantiates a new MSBuild process acting as a child node.
         /// </summary>
-        public bool CreateNode(int nodeId, INodePacketFactory factory, NodeConfiguration configuration)
+        public IList<NodeInfo> CreateNodes(int nextNodeId, INodePacketFactory packetFactory, Func<NodeInfo, NodeConfiguration> configurationFactory, int numberOfNodesToCreate)
         {
             throw new NotImplementedException("Use the other overload of CreateNode instead");
         }
@@ -522,30 +522,35 @@ namespace Microsoft.Build.BackEnd
             CommunicationsUtilities.Trace("For a host context of {0}, spawning executable from {1}.", hostContext.ToString(), msbuildLocation ?? "MSBuild.exe");
 
             // Make it here.
-            NodeContext context = GetNode
-                                    (
-                                        msbuildLocation,
-                                        commandLineArgs,
-                                        (int)hostContext,
-                                        this,
-                                        new Handshake(hostContext),
-                                        NodeContextTerminated
-                                    );
+            int nodeId = (int)hostContext;
+            IList<NodeContext> nodeContexts = GetNodes(
+                msbuildLocation,
+                commandLineArgs,
+                nodeId,
+                this,
+                new Handshake(hostContext),
+                NodeContextCreated,
+                NodeContextTerminated,
+                1);
 
-            if (context != null)
+            return nodeContexts.Count == 1;
+        }
+
+        /// <summary>
+        /// Method called when a context created.
+        /// </summary>
+        private void NodeContextCreated(NodeContext context)
+        {
+            _nodeContexts[(HandshakeOptions)context.NodeId] = context;
+
+            // Start the asynchronous read.
+            context.BeginAsyncPacketRead();
+
+            lock (_activeNodes)
             {
-                _nodeContexts[hostContext] = context;
-
-                // Start the asynchronous read.
-                context.BeginAsyncPacketRead();
-
-                _activeNodes.Add((int)hostContext);
-                _noNodesActiveEvent.Reset();
-
-                return true;
+                _activeNodes.Add(context.NodeId);
             }
-
-            return false;
+            _noNodesActiveEvent.Reset();
         }
 
         /// <summary>

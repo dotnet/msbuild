@@ -2602,38 +2602,25 @@ namespace Microsoft.Build.Execution
                         break;
 
                     case ScheduleActionType.CreateNode:
-                        var newNodes = new NodeInfo[response.NumberOfNodesToCreate];
                         var nodeConfig = GetNodeConfiguration();
 
-                        // Parallelize node spawning if OOP and NodeReuse is not enabled.
-                        if (response.RequiredNodeType == NodeAffinity.OutOfProc && !_buildParameters.EnableNodeReuse)
+                        IList<NodeInfo> newNodes;
+
+                        newNodes = _nodeManager.CreateNodes(nodeConfig, response.RequiredNodeType, response.NumberOfNodesToCreate);
+
+                        if (newNodes?.Count != response.NumberOfNodesToCreate || newNodes.Any(n => n == null))
                         {
-                            Parallel.For(0, response.NumberOfNodesToCreate, (i) =>
-                            {
-                                newNodes[i] = _nodeManager.CreateNode(nodeConfig, response.RequiredNodeType);
-                            });
+                            BuildEventContext buildEventContext = new BuildEventContext(0, Scheduler.VirtualNode, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                            ((IBuildComponentHost)this).LoggingService.LogError(buildEventContext, new BuildEventFileInfo(String.Empty), "UnableToCreateNode", response.RequiredNodeType.ToString("G"));
+
+                            throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnableToCreateNode", response.RequiredNodeType.ToString("G")));
                         }
 
-                        for (int i = 0; i < response.NumberOfNodesToCreate; i++)
+                        foreach (var node in newNodes)
                         {
-                            if (response.RequiredNodeType != NodeAffinity.OutOfProc || _buildParameters.EnableNodeReuse)
-                            {
-                                newNodes[i] = _nodeManager.CreateNode(nodeConfig, response.RequiredNodeType);
-                            }
-
-                            if (newNodes[i] != null)
-                            {
-                                _noNodesActiveEvent.Reset();
-                                _activeNodes.Add(newNodes[i].NodeId);
-                                ErrorUtilities.VerifyThrow(_activeNodes.Count != 0, "Still 0 nodes after asking for a new node.  Build cannot proceed.");
-                            }
-                            else
-                            {
-                                BuildEventContext buildEventContext = new BuildEventContext(0, Scheduler.VirtualNode, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-                                ((IBuildComponentHost)this).LoggingService.LogError(buildEventContext, new BuildEventFileInfo(String.Empty), "UnableToCreateNode", response.RequiredNodeType.ToString("G"));
-
-                                throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnableToCreateNode", response.RequiredNodeType.ToString("G")));
-                            }
+                            _noNodesActiveEvent.Reset();
+                            _activeNodes.Add(node.NodeId);
+                            ErrorUtilities.VerifyThrow(_activeNodes.Count != 0, "Still 0 nodes after asking for a new node.  Build cannot proceed.");
                         }
 
                         IEnumerable<ScheduleResponse> newResponses = _scheduler.ReportNodesCreated(newNodes);

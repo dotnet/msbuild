@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-
+using System.Linq;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
@@ -73,20 +74,21 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Instantiates a new MSBuild process acting as a child node.
+        /// Instantiates a new MSBuild processes acting as a child nodes or connect to existing ones.
         /// </summary>
-        public bool CreateNode(int nodeId, INodePacketFactory factory, NodeConfiguration configuration)
+        public IList<NodeInfo> CreateNodes(int nextNodeId, INodePacketFactory factory, Func<NodeInfo, NodeConfiguration> configurationFactory, int numberOfNodesToCreate)
         {
             ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
 
             // This can run concurrently. To be properly detect internal bug when we create more nodes than allowed
             //   we add into _nodeContexts premise of future node and verify that it will not cross limits.
-            _nodeContexts[nodeId] = null;
-            if (_nodeContexts.Count > ComponentHost.BuildParameters.MaxNodeCount)
+            if (_nodeContexts.Count + numberOfNodesToCreate > ComponentHost.BuildParameters.MaxNodeCount)
             {
-                ErrorUtilities.ThrowInternalError("All allowable nodes already created ({0}).", _nodeContexts.Count);
-                return false;
+                ErrorUtilities.ThrowInternalError("Exceeded max node count of '{0}'; current count '{_nodeContexts.Count}' ", _nodeContexts.Count);
+                return new List<NodeInfo>();
             }
+
+            ConcurrentBag<NodeInfo> nodes = new();
 
             // Start the new process.  We pass in a node mode with a node number of 1, to indicate that we
             // want to start up just a standard MSBuild out-of-proc node.
@@ -95,25 +97,33 @@ namespace Microsoft.Build.BackEnd
             string commandLineArgs = $"/nologo /nodemode:1 /nodeReuse:{ComponentHost.BuildParameters.EnableNodeReuse.ToString().ToLower()} /low:{ComponentHost.BuildParameters.LowPriority.ToString().ToLower()}";
 
             // Make it here.
-            CommunicationsUtilities.Trace("Starting to acquire a new or existing node to establish node ID {0}...", nodeId);
+            CommunicationsUtilities.Trace("Starting to acquire a new or existing {1} node(s) to establish nodes starting from ID {0}...", nextNodeId, numberOfNodesToCreate);
 
             Handshake hostHandshake = new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, nodeReuse: ComponentHost.BuildParameters.EnableNodeReuse, lowPriority: ComponentHost.BuildParameters.LowPriority, is64Bit: EnvironmentUtilities.Is64BitProcess));
-            NodeContext context = GetNode(null, commandLineArgs, nodeId, factory, hostHandshake, NodeContextTerminated);
 
-            if (context != null)
+            IList<NodeContext> nodeContexts = GetNodes(null, commandLineArgs, nextNodeId, factory, hostHandshake, NodeContextCreated, NodeContextTerminated, numberOfNodesToCreate);
+
+            if (nodeContexts.Count > 0)
             {
-                _nodeContexts[nodeId] = context;
+                return nodeContexts
+                    .Select(nc => new NodeInfo(nc.NodeId, ProviderType))
+                    .ToList();
+            }
+
+            throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotConnectToMSBuildExe", ComponentHost.BuildParameters.NodeExeLocation));
+
+            void NodeContextCreated(NodeContext context)
+            {
+                NodeInfo nodeInfo = new NodeInfo(context.NodeId, ProviderType);
+
+                _nodeContexts[context.NodeId] = context;
 
                 // Start the asynchronous read.
                 context.BeginAsyncPacketRead();
 
                 // Configure the node.
-                context.SendData(configuration);
-
-                return true;
+                context.SendData(configurationFactory(nodeInfo));
             }
-
-            throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotConnectToMSBuildExe", ComponentHost.BuildParameters.NodeExeLocation));
         }
 
         /// <summary>
