@@ -11,13 +11,7 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal sealed class ServerNodeEndpointOutOfProc : NodeEndpointOutOfProcBase
     {
-        #region Private Data
-
         private readonly IHandshake _handshake;
-
-        #endregion
-
-        #region Constructors and Factories
 
         /// <summary>
         /// Instantiates an endpoint to act as a client
@@ -32,8 +26,6 @@ namespace Microsoft.Build.BackEnd
 
             InternalConstruct(pipeName);
         }
-
-        #endregion
 
         /// <summary>
         /// Returns the host handshake for this node endpoint

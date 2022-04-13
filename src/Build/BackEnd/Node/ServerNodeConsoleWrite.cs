@@ -6,39 +6,35 @@ namespace Microsoft.Build.BackEnd
     internal sealed class ServerNodeConsoleWrite : INodePacket
     {
         private string _text = default!;
-        private byte _outputType = default!;
+        private ConsoleOutput _outputType = default!;
+
+        /// <summary>
+        /// Packet type.
+        /// </summary>
+        public NodePacketType Type => NodePacketType.ServerNodeConsoleWrite;
 
         public string Text => _text;
 
         /// <summary>
-        /// 1 = stdout, 2 = stderr
+        /// Console output for the message
         /// </summary>
-        public byte OutputType => _outputType;
+        public ConsoleOutput OutputType => _outputType;
 
         /// <summary>
         /// Private constructor for deserialization
         /// </summary>
         private ServerNodeConsoleWrite() { }
 
-        public ServerNodeConsoleWrite(string text, byte outputType)
+        public ServerNodeConsoleWrite(string text, ConsoleOutput outputType)
         {
             _text = text;
             _outputType = outputType;
         }
 
-        #region INodePacket Members
-
-        /// <summary>
-        /// Packet type.
-        /// </summary>
-        public NodePacketType Type => NodePacketType.ServerNodeConsole;
-
-        #endregion
-
         public void Translate(ITranslator translator)
         {
             translator.Translate(ref _text);
-            translator.Translate(ref _outputType);
+            translator.TranslateEnum(ref _outputType, (int)_outputType);
         }
 
         internal static INodePacket FactoryForDeserialization(ITranslator translator)

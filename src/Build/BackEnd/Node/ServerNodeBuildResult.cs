@@ -10,6 +10,16 @@ namespace Microsoft.Build.BackEnd
         private string _exitType = default!;
 
         /// <summary>
+        /// Packet type.
+        /// This has to be in sync with <see cref="NodePacketType.ServerNodeBuildResult" />
+        /// </summary>
+        public NodePacketType Type => NodePacketType.ServerNodeBuildResult;
+
+        public int ExitCode => _exitCode;
+
+        public string ExitType => _exitType;
+
+        /// <summary>
         /// Private constructor for deserialization
         /// </summary>
         private ServerNodeBuildResult() { }
@@ -19,20 +29,6 @@ namespace Microsoft.Build.BackEnd
             _exitCode = exitCode;
             _exitType = exitType;
         }
-
-        #region INodePacket Members
-
-        /// <summary>
-        /// Packet type.
-        /// This has to be in sync with Microsoft.Build.BackEnd.NodePacketType.ServerNodeBuildCommand
-        /// </summary>
-        public NodePacketType Type => NodePacketType.ServerNodeBuildResult;
-
-        #endregion
-
-        public int ExitCode => _exitCode;
-
-        public string ExitType => _exitType;
 
         public void Translate(ITranslator translator)
         {

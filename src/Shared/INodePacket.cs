@@ -206,7 +206,7 @@ namespace Microsoft.Build.BackEnd
         /// Info about server console activity. 
         /// Keep this enum value constant intact as this is part of contract with dotnet CLI
         /// </summary>
-        ServerNodeConsole = 0xF2,
+        ServerNodeConsoleWrite = 0xF2,
     }
     #endregion
 

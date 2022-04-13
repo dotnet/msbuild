@@ -19,30 +19,10 @@ namespace Microsoft.Build.BackEnd
         private CultureInfo _culture = default!;
         private CultureInfo _uiCulture = default!;
 
-        public ServerNodeBuildCommand(string commandLine, string startupDirectory, Dictionary<string, string> buildProcessEnvironment, CultureInfo culture, CultureInfo uiCulture)
-        {
-            _commandLine = commandLine;
-            _startupDirectory = startupDirectory;
-            _buildProcessEnvironment = buildProcessEnvironment;
-            _culture = culture;
-            _uiCulture = uiCulture;
-        }
-
-        /// <summary>
-        /// Private constructor for deserialization
-        /// </summary>
-        private ServerNodeBuildCommand()
-        {
-        }
-
-        #region INodePacket Members
-
         /// <summary>
         /// Retrieves the packet type.
         /// </summary>
         public NodePacketType Type => NodePacketType.ServerNodeBuildCommand;
-
-        #endregion
 
         /// <summary>
         /// The startup directory
@@ -69,7 +49,21 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public CultureInfo UICulture => _uiCulture;
 
-        #region INodePacketTranslatable Members
+        /// <summary>
+        /// Private constructor for deserialization
+        /// </summary>
+        private ServerNodeBuildCommand()
+        {
+        }
+
+        public ServerNodeBuildCommand(string commandLine, string startupDirectory, Dictionary<string, string> buildProcessEnvironment, CultureInfo culture, CultureInfo uiCulture)
+        {
+            _commandLine = commandLine;
+            _startupDirectory = startupDirectory;
+            _buildProcessEnvironment = buildProcessEnvironment;
+            _culture = culture;
+            _uiCulture = uiCulture;
+        }
 
         /// <summary>
         /// Translates the packet to/from binary form.
@@ -94,6 +88,5 @@ namespace Microsoft.Build.BackEnd
 
             return command;
         }
-        #endregion
     }
 }

@@ -322,8 +322,8 @@ namespace Microsoft.Build.Execution
             (int exitCode, string exitType) buildResult;
 
             // Dispose must be called before the server sends response packet
-            using (var outWriter = RedirectConsoleWriter.Create(text => SendPacket(new ServerNodeConsoleWrite(text, 1))))
-            using (var errWriter = RedirectConsoleWriter.Create(text => SendPacket(new ServerNodeConsoleWrite(text, 2))))
+            using (var outWriter = RedirectConsoleWriter.Create(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Standard))))
+            using (var errWriter = RedirectConsoleWriter.Create(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Error))))
             {
                 Console.SetOut(outWriter);
                 Console.SetError(errWriter);
