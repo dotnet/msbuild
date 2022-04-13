@@ -349,23 +349,19 @@ namespace Microsoft.Build.BackEnd
                         {
                             try
                             {
-                                CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it has exited with exit code {1}. This can indicate a crash at startup",
-                                    msbuildProcess.Id, msbuildProcess.ExitCode);
+                                CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it has exited with exit code {1}. This can indicate a crash at startup", msbuildProcess.Id, msbuildProcess.ExitCode);
                             }
                             catch (InvalidOperationException)
                             {
                                 // This case is common on Windows where we called CreateProcess and the Process object
                                 // can't get the exit code.
-                                CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it has exited with unknown exit code. This can indicate a crash at startup",
-                                    msbuildProcess.Id);
+                                CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it has exited with unknown exit code. This can indicate a crash at startup", msbuildProcess.Id);
                             }
                         }
                     }
                     else
                     {
-                        CommunicationsUtilities.Trace(
-                            "Could not connect to node with PID {0}; it is still running. This can occur when two multiprocess builds run in parallel and the other one 'stole' this node",
-                            msbuildProcess.Id);
+                        CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it is still running. This can occur when two multiprocess builds run in parallel and the other one 'stole' this node", msbuildProcess.Id);
                     }
                 }
 
@@ -386,7 +382,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="msbuildLocation"></param>
         /// <returns>
         /// Item 1 is the name of the process being searched for.
-        /// Item 2 is the queue of ordered processes themselves.
+        /// Item 2 is the ConcurrentQueue of ordered processes themselves.
         /// </returns>
         private (string expectedProcessName, ConcurrentQueue<Process> nodeProcesses) GetPossibleRunningNodes(string msbuildLocation = null)
         {
