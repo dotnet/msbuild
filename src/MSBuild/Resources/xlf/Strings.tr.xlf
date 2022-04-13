@@ -55,6 +55,15 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
     that itself launches MSBuild on a number of other projects.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="EnvironmentVariableAsSwitch">
+        <source>MSBUILD : error MSB1060: Undefined environment variable passed in as switch.</source>
+        <target state="translated">MSBUILD : error MSB1060: Tanımlanmamış ortam değişkeni anahtar olarak geçirildi.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1060: "}
+      UE: This error is shown when a user passes in an environment variable (including from a response file)
+      but the environment variable is not defined.
+    </note>
+      </trans-unit>
       <trans-unit id="FatalError">
         <source>MSBUILD : error MSB1025: An internal failure occurred while running MSBuild.</source>
         <target state="translated">MSBUILD : error MSB1025: MSBuild çalıştırılırken bir iç hata oluştu.</target>
@@ -247,6 +256,32 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       2) the string "proj" that describes the extension we look for
       3) all switch names and their short forms e.g. -property, or -p
       4) all verbosity levels and their short forms e.g. quiet, or q
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_40_WarnNotAsErrorSwitch">
+        <source>
+      -warnNotAsError[:code[;code2]]
+                     List of warning codes to treats not treat as errors.
+                     Use a semicolon or a comma to separate
+                     multiple warning codes. Has no effect if the -warnaserror
+                     switch is not set.
+
+                     Example:
+                       -warnNotAsError:MSB3026
+    </source>
+        <target state="translated">
+-warnNotAsError[:code[;code2]]
+                     Hata olarak kabul edilmeyen uyarı kodlarının listesi.
+                     Ayırmak için noktalı virgül veya virgül kullanın
+                    çoklu uyarı kodları -warnaserror ise hiçbir etkisi yoktur
+                     anahtarı ayarlanmadı.
+
+Örnek:
+                       -warnNotAsError:MSB3026
+    </target>
+        <note>
+      LOCALIZATION: "-warnNotAsError" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
@@ -1137,6 +1172,11 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
         <target state="translated">MSBuild sürümü = "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildDebugPath">
+        <source>MSBuild logs and debug information will be at "{0}"</source>
+        <target state="new">MSBuild logs and debug information will be at "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MissingLoggerError">
         <source>MSBUILD : error MSB1007: Specify a logger.</source>
         <target state="translated">MSBUILD : error MSB1007: Günlükçü belirtin.</target>
@@ -1209,6 +1249,15 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="MissingWarnNotAsErrorParameterError">
+        <source>MSBUILD : error MSB1060: Specify one or more warning codes when using the -warnNotAsError switch.</source>
+        <target state="translated">MSBUILD : error MSB1060: -warnNotAsError anahtarını kullanırken bir veya daha fazla uyarı kodu belirtin.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1060: "}
+      UE: This happens if the user does something like "msbuild.exe -warnNotAsError:" without any codes.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="MultipleSchemasError">
         <source>MSBUILD : error MSB1024: Only one schema can be specified for validation of the project.</source>
         <target state="translated">MSBUILD : error MSB1024: Projenin doğrulanması için yalnızca bir şema belirtilebilir.</target>
@@ -1216,6 +1265,11 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       {StrBegin="MSBUILD : error MSB1024: "}UE: The user did something like msbuild -validate:foo.xsd -validate:bar.xsd. We only allow one schema to be specified.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
+      </trans-unit>
+      <trans-unit id="NotWarnAsErrorWithoutWarnAsError">
+        <source>MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</source>
+        <target state="translated">MSBUILD : error MSB1062: -warnnotaserror anahtarı, -warnaserror anahtarı da belirtilmedikçe ve boş bırakılmadıkça belirtilemez.</target>
+        <note>{StrBegin="MSBUILD : error MSB1062: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-warnnotaserror" and "-warnaserror" should not be localized.</note>
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
         <source>The specified logger could not be created and will not be used. {0}</source>
@@ -1280,6 +1334,13 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
     message does not need in-line parameters because the exception takes care of displaying the invalid arg.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="ResponseFileSwitchFromLocation">
+        <source>'{0}' came from '{1}'</source>
+        <target state="translated">'{0}', '{1}' kaynağından geldi</target>
+        <note>
+      These are response file switches with the location of the response file on disk.
+    </note>
+      </trans-unit>
       <trans-unit id="SchemaFileLocation">
         <source>Validating project using schema file "{0}".</source>
         <target state="translated">"{0}" şema dosyası kullanılarak proje doğrulanıyor.</target>
@@ -1306,6 +1367,15 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
         <note>{StrBegin="MSBUILD : error MSB1026: "}UE: This error is printed if the default schema does not exist or in the extremely unlikely event
     that an explicit schema file was passed and existed when the command line parameters were checked but was deleted from disk before this check was made.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="SwitchErrorWithArguments">
+        <source>{0}
+    Full command line: '{1}'
+  Switches appended by response files:{2}</source>
+        <target state="translated">{0}
+    Tam komut satırı: '{1}'
+  Yanıt dosyaları tarafından eklenen anahtarlar:{2}</target>
+        <note />
       </trans-unit>
       <trans-unit id="TargetsCouldNotBePrinted">
         <source>MSBUILD : error MSB1059: Targets could not be printed. {0}</source>

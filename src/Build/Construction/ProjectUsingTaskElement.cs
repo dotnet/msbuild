@@ -130,6 +130,19 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// Gets and sets the value of the Architecture attribute.
+        /// </summary>
+        public string Override
+        {
+            get => GetAttributeValue(XMakeAttributes.overrideUsingTask);
+
+            set
+            {
+                SetOrRemoveAttribute(XMakeAttributes.overrideUsingTask, value, "Set usingtask Override {0}", value);
+            }
+        }
+
+        /// <summary>
         /// Get any contained TaskElement.
         /// </summary>
         public ProjectUsingTaskBodyElement TaskBody
@@ -182,6 +195,11 @@ namespace Microsoft.Build.Construction
         /// Location of the TaskFactory attribute, if any
         /// </summary>
         public ElementLocation TaskFactoryLocation => GetAttributeLocation(XMakeAttributes.taskFactory);
+
+        /// <summary>
+        /// Location of the Override attribute, if any
+        /// </summary>
+        public ElementLocation OverrideLocation => GetAttributeLocation(XMakeAttributes.overrideUsingTask);
 
         /// <summary>
         /// Convenience method that picks a location based on a heuristic:

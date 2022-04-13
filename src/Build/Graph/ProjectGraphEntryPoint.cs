@@ -31,12 +31,12 @@ namespace Microsoft.Build.Graph
         {
             ErrorUtilities.VerifyThrowArgumentLength(projectFile, nameof(projectFile));
 
-            ProjectFile = projectFile;
+            ProjectFile = FileUtilities.NormalizePath(projectFile);
             GlobalProperties = globalProperties;
         }
 
         /// <summary>
-        /// Gets the project file to use for this entry point.
+        /// Gets the full path to the project file to use for this entry point.
         /// </summary>
         public string ProjectFile { get; }
 

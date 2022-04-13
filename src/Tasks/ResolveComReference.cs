@@ -187,7 +187,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         public override bool Execute()
         {
-            Log.LogErrorFromResources("TaskRequiresFrameworkFailure", nameof(ResolveComReference));
+            Log.LogErrorWithCodeFromResources("TaskRequiresFrameworkFailure", nameof(ResolveComReference));
             return false;
         }
 
@@ -432,7 +432,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                SetCopyLocalToFalseOnGacOrNoPIAAssemblies(resolvedReferenceList, GlobalAssemblyCache.GetGacPath());
+                SetCopyLocalToFalseOnGacOrNoPIAAssemblies(resolvedReferenceList, GlobalAssemblyCache.GacPath);
 
                 ResolvedModules = moduleList.ToArray();
                 ResolvedFiles = resolvedReferenceList.ToArray();

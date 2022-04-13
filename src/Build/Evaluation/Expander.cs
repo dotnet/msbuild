@@ -2241,8 +2241,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         if (Traits.Instance.UseLazyWildCardEvaluation)
                         {
-                            foreach (
-                                var resultantItem in
+                            foreach (var resultantItem in
                                 EngineFileUtilities.GetFileListEscaped(
                                     item.ProjectDirectory,
                                     item.EvaluatedIncludeEscaped,

@@ -341,7 +341,7 @@ namespace Microsoft.Build.Evaluation
         /// Helper that creates a list of ProjectItem's given an unevaluated Include and a ProjectRootElement.
         /// Used by both Evaluator.EvaluateItemElement and by Project.AddItem.
         /// </summary>
-        internal static List<I> CreateItemsFromInclude(string rootDirectory, ProjectItemElement itemElement, IItemFactory<I, I> itemFactory, string unevaluatedIncludeEscaped, Expander<P, I> expander)
+        internal static List<I> CreateItemsFromInclude(string rootDirectory, ProjectItemElement itemElement, IItemFactory<I, I> itemFactory, string unevaluatedIncludeEscaped, Expander<P, I> expander, ILoggingService loggingService, string buildEventFileInfoFullPath, BuildEventContext buildEventContext)
         {
             ErrorUtilities.VerifyThrowArgumentLength(unevaluatedIncludeEscaped, nameof(unevaluatedIncludeEscaped));
 
@@ -373,7 +373,16 @@ namespace Microsoft.Build.Evaluation
                     else
                     {
                         // The expression is not of the form "@(X)". Treat as string
-                        string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(rootDirectory, includeSplitEscaped, excludeSpecsEscaped: null, forceEvaluate: false, fileMatcher: expander.EvaluationContext?.FileMatcher);
+                        string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
+                            rootDirectory,
+                            includeSplitEscaped,
+                            excludeSpecsEscaped: null,
+                            forceEvaluate: false,
+                            fileMatcher: expander.EvaluationContext?.FileMatcher,
+                            loggingMechanism: loggingService,
+                            includeLocation: itemElement.IncludeLocation,
+                            buildEventFileInfoFullPath: buildEventFileInfoFullPath,
+                            buildEventContext: buildEventContext);
 
                         if (includeSplitFilesEscaped.Length > 0)
                         {
@@ -1139,7 +1148,8 @@ namespace Microsoft.Build.Evaluation
             }
 
 #if RUNTIME_TYPE_NETCORE
-            SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType, "Core");
+            SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType,
+                Traits.Instance.ForceEvaluateAsFullFramework ? "Full" : "Core");
 #elif MONO
             SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType,
                                                         NativeMethodsShared.IsMono ? "Mono" : "Full");
@@ -2042,7 +2052,13 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     // Expand the wildcards and provide an alphabetical order list of import statements.
-                    importFilesEscaped = EngineFileUtilities.GetFileListEscaped(directoryOfImportingFile, importExpressionEscapedItem, forceEvaluate: true, fileMatcher: _evaluationContext.FileMatcher);
+                    importFilesEscaped = EngineFileUtilities.GetFileListEscaped(
+                        directoryOfImportingFile,
+                        importExpressionEscapedItem,
+                        forceEvaluate: true,
+                        fileMatcher: _evaluationContext.FileMatcher,
+                        loggingMechanism: _evaluationLoggingContext,
+                        importLocation: importLocationInProject);
                 }
                 catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {

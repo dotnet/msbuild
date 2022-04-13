@@ -100,7 +100,7 @@ stages:
       displayName: 'Install OptProf Plugin'
 
     # Required by MicroBuildBuildVSBootstrapper
-    - task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
+    - task: MicroBuildSwixPlugin@4
       inputs:
         dropName: $(VisualStudio.DropName)
 
@@ -125,6 +125,9 @@ stages:
       displayName: Build
       condition: succeeded()
 
+    # Required by Microsoft policy
+    - template: eng\common\templates\steps\generate-sbom.yml
+
     # Publish OptProf configuration files
     - task: ms-vscs-artifact.build-tasks.artifactDropTask-1.artifactDropTask@0
       inputs:
@@ -138,7 +141,7 @@ stages:
 
     # Build VS bootstrapper
     # Generates $(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
-    - task: ms-vseng.MicroBuildTasks.0e9d0d4d-71ec-4e4e-ae40-db9896f1ae74.MicroBuildBuildVSBootstrapper@2
+    - task: MicroBuildBuildVSBootstrapper@2
       inputs:
         vsMajorVersion: $(VisualStudio.MajorVersion)
         channelName: $(VisualStudio.ChannelName)
@@ -253,7 +256,7 @@ stages:
         - Windows_NT
         - Source_Build_Managed
       pool:
-        vmImage: vs2017-win2016
+        vmImage: windows-latest
 
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: eng\common\templates\post-build\post-build.yml

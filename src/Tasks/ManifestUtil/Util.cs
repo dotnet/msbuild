@@ -13,6 +13,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
@@ -226,11 +227,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
                 if (string.IsNullOrEmpty(targetFrameWorkVersion) || CompareFrameworkVersions(targetFrameWorkVersion, Constants.TargetFrameworkVersion40) <= 0)
                 {
-                    hashAlg = new SHA1CryptoServiceProvider();
+                    hashAlg = SHA1.Create("System.Security.Cryptography.SHA1CryptoServiceProvider");
                 }
                 else
                 {
-                    hashAlg = new SHA256CryptoServiceProvider();
+                    hashAlg = SHA256.Create("System.Security.Cryptography.SHA256CryptoServiceProvider");
                 }
                 byte[] hashBytes = hashAlg.ComputeHash(s);
                 hash = Convert.ToBase64String(hashBytes);
@@ -250,6 +251,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return logPath;
         }
 
+        [SupportedOSPlatform("windows")]
         public static string GetRegisteredOrganization()
         {
             RegistryKey key = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", false);
@@ -515,7 +517,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return path;
         }
 
-        #region ItemComparer 
+#region ItemComparer 
         private static readonly ItemComparer s_itemComparer = new ItemComparer();
         private class ItemComparer : IComparer
         {
@@ -541,7 +543,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 return String.Compare(item1.ItemSpec, item2.ItemSpec, StringComparison.Ordinal);
             }
         }
-        #endregion
+#endregion
 
         public static Version ConvertFrameworkVersionToString(string version)
         {

@@ -162,6 +162,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// List of warnings to not treat as errors.
+        /// </summary>
+        public ISet<string> WarningsNotAsErrors
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// List of warnings to treat as low importance messages.
         /// </summary>
         public ISet<string> WarningsAsMessages
@@ -236,6 +245,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         public void AddWarningsAsErrors(BuildEventContext buildEventContext, ISet<string> codes)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddWarningsNotAsErrors(BuildEventContext buildEventContext, ISet<string> codes)
         {
             throw new NotImplementedException();
         }
@@ -605,6 +619,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         public ICollection<string> GetWarningsAsErrors(BuildEventContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICollection<string> GetWarningsNotAsErrors(BuildEventContext context)
         {
             throw new NotImplementedException();
         }

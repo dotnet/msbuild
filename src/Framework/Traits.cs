@@ -43,6 +43,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public readonly bool UseLazyWildCardEvaluation = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildSkipEagerWildCardEvaluationRegexes"));
         public readonly bool LogExpandedWildcards = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGEXPANDEDWILDCARDS"));
+        public readonly bool ThrowOnDriveEnumeratingWildcard = Environment.GetEnvironmentVariable("MSBUILDFAILONDRIVEENUMERATINGWILDCARD") == "1";
 
         /// <summary>
         /// Cache file existence for the entire process
@@ -67,6 +68,11 @@ namespace Microsoft.Build.Framework
         /// Allow the user to specify that two processes should not be communicating via an environment variable.
         /// </summary>
         public static readonly string MSBuildNodeHandshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
+
+        /// <summary>
+        /// Override property "MSBuildRuntimeType" to "Full", ignoring the actual runtime type of MSBuild.
+        /// </summary>
+        public readonly bool ForceEvaluateAsFullFramework = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildForceEvaluateAsFullFramework"));
 
         /// <summary>
         /// Setting the associated environment variable to 1 restores the pre-15.8 single

@@ -36,7 +36,7 @@ namespace Microsoft.Build.Framework
             Metadata = metadata;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is SdkResultItem item &&
                    ItemSpec == item.ItemSpec &&

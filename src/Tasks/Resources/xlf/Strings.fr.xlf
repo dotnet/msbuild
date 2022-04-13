@@ -514,6 +514,11 @@
         <target state="translated">MSB3667: il existe déjà un fichier sur "{0}". Si vous essayez de créer un cache précalculé, vérifiez que vous générez un seul projet qui dépend de vos assemblys au lieu de générer les assemblys eux-mêmes. Si vous exécutez la tâche ResolveAssemblyReference normalement, ne définissez pas le paramètre "AssemblyInformationCacheOutputPath" de la tâche ResolveAssemblyReference.</target>
         <note>{StrBegin="MSB3667: "}</note>
       </trans-unit>
+      <trans-unit id="General.TaskRequiresWindows">
+        <source>MSB3096: Task "{0}" is only supported when building on Windows.</source>
+        <target state="translated">MSB3096: La tâche "{0}" n’est prise en charge que lors de la génération sur Windows.</target>
+        <note>{StrBegin="MSB3096: "}</note>
+      </trans-unit>
       <trans-unit id="General.UndefineProperties">
         <source>Removing Properties:</source>
         <target state="translated">Suppression des propriétés :</target>

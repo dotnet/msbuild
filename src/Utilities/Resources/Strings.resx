@@ -287,11 +287,14 @@
   <data name="MuxLogger_BuildFinishedSuccess">
     <value xml:space="preserve">Build succeeded.</value>
   </data>
-
+  <data name="DebugPathTooLong" Visibility="Public">
+    <value>MSB6012: The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</value>
+    <comment>{StrBegin="MSB6012: "}</comment>
+  </data>
   <!--
         The Utilities message bucket is: MSB6001 - MSB6200
 
-        Next message code should be MSB6012
+        Next message code should be MSB6013
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>

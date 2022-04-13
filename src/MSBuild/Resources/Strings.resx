@@ -824,6 +824,22 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
+  <data name="HelpMessage_40_WarnNotAsErrorSwitch" Visibility="Public">
+    <value>
+      -warnNotAsError[:code[;code2]]
+                     List of warning codes to treats not treat as errors.
+                     Use a semicolon or a comma to separate
+                     multiple warning codes. Has no effect if the -warnaserror
+                     switch is not set.
+
+                     Example:
+                       -warnNotAsError:MSB3026
+    </value>
+    <comment>
+      LOCALIZATION: "-warnNotAsError" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </comment>
+  </data>
   <data name="InvalidConfigurationFile" Visibility="Public">
     <value>MSBUILD : Configuration error MSB1043: The application could not start. {0}</value>
     <comment>
@@ -1258,6 +1274,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
+  <data name="MissingWarnNotAsErrorParameterError" UESanitized="true" Visibility="Public">
+    <value>MSBUILD : error MSB1060: Specify one or more warning codes when using the -warnNotAsError switch.</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB1060: "}
+      UE: This happens if the user does something like "msbuild.exe -warnNotAsError:" without any codes.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </comment>
+  </data>
   <data name="InvalidProfilerValue" xml:space="preserve">
     <value>MSBUILD : error MSB1053: Provided filename is not valid. {0}</value>
   </data>
@@ -1276,6 +1300,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       logger could not be created -- this message comes from the CLR/FX and is localized.
     </comment>
   </data>
+  <data name="EnvironmentVariableAsSwitch" Visibility="Public">
+    <value>MSBUILD : error MSB1060: Undefined environment variable passed in as switch.</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB1060: "}
+      UE: This error is shown when a user passes in an environment variable (including from a response file)
+      but the environment variable is not defined.
+    </comment>
+  </data>
   <data name="Process" UESanitized="true" Visibility="Public">
     <value>Process = "{0}"</value>
   </data>
@@ -1291,10 +1323,28 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <data name="MSBVersion" UESanitized="true" Visibility="Public">
     <value>MSBuild version = "{0}"</value>
   </data>
+  <data name="MSBuildDebugPath" Visibility="Public">
+    <value>MSBuild logs and debug information will be at "{0}"</value>
+  </data>
+  <data name="SwitchErrorWithArguments" Visibility="Public">
+    <value>{0}
+    Full command line: '{1}'
+  Switches appended by response files:{2}</value>
+  </data>
+  <data name="ResponseFileSwitchFromLocation" Visibility="Public">
+    <value>'{0}' came from '{1}'</value>
+    <comment>
+      These are response file switches with the location of the response file on disk.
+    </comment>
+  </data>
+  <data name="NotWarnAsErrorWithoutWarnAsError" Visibility="Public">
+    <value>MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</value>
+    <comment>{StrBegin="MSBUILD : error MSB1062: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-warnnotaserror" and "-warnaserror" should not be localized.</comment>
+  </data>
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1060.
+        Next error code should be MSB1063.
 
         Don't forget to update this comment after using the new code.
   -->

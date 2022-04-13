@@ -379,6 +379,7 @@ namespace Microsoft.Build.Execution
             Dictionary<string, string> taskFactoryParameters = null;
             string runtime = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.Runtime, expanderOptions, projectUsingTaskXml.RuntimeLocation);
             string architecture = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.Architecture, expanderOptions, projectUsingTaskXml.ArchitectureLocation);
+            string overrideUsingTask = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.Override, expanderOptions, projectUsingTaskXml.OverrideLocation);
 
             if ((runtime != String.Empty) || (architecture != String.Empty))
             {
@@ -388,7 +389,7 @@ namespace Microsoft.Build.Execution
                 taskFactoryParameters.Add(XMakeAttributes.architecture, architecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture);
             }
 
-            taskRegistry.RegisterTask(taskName, AssemblyLoadInfo.Create(assemblyName, assemblyFile), taskFactory, taskFactoryParameters, parameterGroupAndTaskElementRecord);
+            taskRegistry.RegisterTask(taskName, AssemblyLoadInfo.Create(assemblyName, assemblyFile), taskFactory, taskFactoryParameters, parameterGroupAndTaskElementRecord, loggingService, buildEventContext, projectUsingTaskXml, ConversionUtilities.ValidBooleanTrue(overrideUsingTask));
         }
 
         private static Dictionary<string, string> CreateTaskFactoryParametersDictionary(int? initialCount = null)
@@ -413,10 +414,9 @@ namespace Microsoft.Build.Execution
         )
         {
             TaskFactoryWrapper taskFactory = null;
-            bool retrievedFromCache;
-
+            
             // If there are no usingtask tags in the project don't bother caching or looking for tasks locally
-            RegisteredTaskRecord record = GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache);
+            RegisteredTaskRecord record = GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out bool retrievedFromCache);
 
             if (record != null)
             {
@@ -472,6 +472,23 @@ namespace Microsoft.Build.Execution
             RegisteredTaskRecord taskRecord = null;
             retrievedFromCache = false;
             RegisteredTaskIdentity taskIdentity = new RegisteredTaskIdentity(taskName, taskIdentityParameters);
+
+            // Project-level override tasks are keyed by task name (unqualified).
+            // Because Foo.Bar and Baz.Bar are both valid, they are stored
+            // in a dictionary keyed as `Bar` because most tasks are called unqualified
+            if (overriddenTasks.TryGetValue(taskName, out List<RegisteredTaskRecord> recs))
+            {
+                // When we determine this task was overridden, search all task records
+                // to find the most correct registration. Search with the fully qualified name (if applicable)
+                // Behavior is intended to be "first one wins"
+                foreach (RegisteredTaskRecord rec in recs)
+                {
+                    if (RegisteredTaskIdentity.RegisteredTaskIdentityComparer.IsPartialMatch(taskIdentity, rec.TaskIdentity))
+                    {
+                        return rec;
+                    }
+                }
+            }
 
             // Try the override task registry first
             if (_toolset != null)
@@ -637,11 +654,26 @@ namespace Microsoft.Build.Execution
             return relevantTaskRegistrations;
         }
 
+        // Create another set containing architecture-specific task entries.
+        // Then when we look for them, check if the name exists in that.
+        Dictionary<string, List<RegisteredTaskRecord>> overriddenTasks = new Dictionary<string, List<RegisteredTaskRecord>>();
+
         /// <summary>
         /// Registers an evaluated using task tag for future
         /// consultation
         /// </summary>
-        private void RegisterTask(string taskName, AssemblyLoadInfo assemblyLoadInfo, string taskFactory, Dictionary<string, string> taskFactoryParameters, RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord)
+        private void RegisterTask
+        (
+            string taskName,
+            AssemblyLoadInfo assemblyLoadInfo,
+            string taskFactory,
+            Dictionary<string, string> taskFactoryParameters,
+            RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord,
+            ILoggingService loggingService,
+            BuildEventContext context,
+            ProjectUsingTaskElement projectUsingTaskInXml,
+            bool overrideTask = false
+        )
         {
             ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
             ErrorUtilities.VerifyThrowInternalNull(assemblyLoadInfo, nameof(assemblyLoadInfo));
@@ -662,7 +694,39 @@ namespace Microsoft.Build.Execution
                 _taskRegistrations[taskIdentity] = registeredTaskEntries;
             }
 
-            registeredTaskEntries.Add(new RegisteredTaskRecord(taskName, assemblyLoadInfo, taskFactory, taskFactoryParameters, inlineTaskRecord));
+            RegisteredTaskRecord newRecord = new RegisteredTaskRecord(taskName, assemblyLoadInfo, taskFactory, taskFactoryParameters, inlineTaskRecord);
+
+            if (overrideTask)
+            {
+                // Key the dictionary based on Unqualified task names
+                // This is to support partial matches on tasks like Foo.Bar and Baz.Bar
+                string[] nameComponents = taskName.Split('.');
+                string unqualifiedTaskName = nameComponents[nameComponents.Length - 1];
+
+                // Is the task already registered?
+                if (overriddenTasks.TryGetValue(unqualifiedTaskName, out List<RegisteredTaskRecord> recs))
+                {
+                    foreach (RegisteredTaskRecord rec in recs)
+                    {
+                        if (rec.RegisteredName.Equals(taskIdentity.Name, StringComparison.OrdinalIgnoreCase))
+                        {
+                            loggingService.LogError(context, null, new BuildEventFileInfo(projectUsingTaskInXml.OverrideLocation), "DuplicateOverrideUsingTaskElement", taskName);
+                            break;
+                        }
+                    }
+                    recs.Add(newRecord);
+                }
+                else
+                {
+                    // New record's name may be fully qualified. Use it anyway to account for partial matches.
+                    List<RegisteredTaskRecord> unqualifiedTaskNameMatches = new();
+                    unqualifiedTaskNameMatches.Add(newRecord);
+                    overriddenTasks.Add(unqualifiedTaskName, unqualifiedTaskNameMatches);
+                    loggingService.LogComment(context, MessageImportance.Low, "OverrideUsingTaskElementCreated", taskName, projectUsingTaskInXml.OverrideLocation);
+                }
+            }
+
+            registeredTaskEntries.Add(newRecord);
         }
 
         private static Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> CreateRegisteredTaskDictionary(int? capacity = null)

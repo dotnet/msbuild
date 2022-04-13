@@ -573,6 +573,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             ReuseableStringBuilder projectConfigurationDescription = null;
+            bool descriptionEmpty = true;
 
             Internal.Utilities.EnumerateItems(items, item =>
             {
@@ -592,7 +593,14 @@ namespace Microsoft.Build.BackEnd.Logging
                     };
 
                     // Add the item value to the string to be printed in error/warning messages.
-                    projectConfigurationDescription.Append(" ").Append(itemSpec);
+                    if (!descriptionEmpty)
+                    {
+                        projectConfigurationDescription.Append(" "); 
+                    }
+
+                    projectConfigurationDescription.Append(itemSpec);
+
+                    descriptionEmpty = false;
                 }
             });
 
@@ -653,7 +661,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         // should be shown
                         string targets = startedEvent.TargetNames;
                         string projectName = startedEvent.ProjectFile ?? string.Empty;
-                        
+
                         // Show which targets were built as part of this project
                         if (string.IsNullOrEmpty(targets))
                         {

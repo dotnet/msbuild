@@ -116,7 +116,7 @@ namespace Microsoft.Build.Tasks
         public string FactoryName => "Roslyn Code Task Factory";
 
         /// <summary>
-        /// Gets the <see cref="T:System.Type" /> of the compiled task.
+        /// Gets the <see cref="Type"/> of the compiled task.
         /// </summary>
         public Type TaskType { get; private set; }
 

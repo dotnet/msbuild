@@ -28,13 +28,12 @@ namespace Microsoft.Build.UnitTests
          * 
          **********************************************************************/
         [Fact]
-        public void VerifyInvalidProjectSchema
-            (
-            )
+        public void VerifyInvalidProjectSchema()
         {
             string[] msbuildTempXsdFilenames = Array.Empty<string>();
             string projectFilename = null;
             string oldValueForMSBuildOldOM = null;
+            string oldValueForMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
             try
             {
                 oldValueForMSBuildOldOM = Environment.GetEnvironmentVariable("MSBuildOldOM");
@@ -60,6 +59,7 @@ namespace Microsoft.Build.UnitTests
                 if (projectFilename != null) File.Delete(projectFilename);
                 CleanupSchemaFiles(msbuildTempXsdFilenames);
                 Environment.SetEnvironmentVariable("MSBuildOldOM", oldValueForMSBuildOldOM);
+                Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", oldValueForMSBuildLoadMicrosoftTargetsReadOnly);
             }
         }
 
@@ -68,13 +68,12 @@ namespace Microsoft.Build.UnitTests
         /// against is itself invalid
         /// </summary>
         [Fact]
-        public void VerifyInvalidSchemaItself1
-            (
-            )
+        public void VerifyInvalidSchemaItself1()
         {
             string invalidSchemaFile = null;
             string projectFilename = null;
             string oldValueForMSBuildOldOM = null;
+            string oldValueForMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
             try
             {
                 oldValueForMSBuildOldOM = Environment.GetEnvironmentVariable("MSBuildOldOM");
@@ -99,6 +98,7 @@ namespace Microsoft.Build.UnitTests
                 if (projectFilename != null) File.Delete(projectFilename);
                 if (invalidSchemaFile != null) File.Delete(invalidSchemaFile);
                 Environment.SetEnvironmentVariable("MSBuildOldOM", oldValueForMSBuildOldOM);
+                Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", oldValueForMSBuildLoadMicrosoftTargetsReadOnly);
             }
         }
 
@@ -107,13 +107,12 @@ namespace Microsoft.Build.UnitTests
         /// against is itself invalid
         /// </summary>
         [Fact]
-        public void VerifyInvalidSchemaItself2
-            (
-            )
+        public void VerifyInvalidSchemaItself2()
         {
             string invalidSchemaFile = null;
             string projectFilename = null;
             string oldValueForMSBuildOldOM = null;
+            string oldValueForMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
 
             try
             {
@@ -151,6 +150,7 @@ namespace Microsoft.Build.UnitTests
                 if (invalidSchemaFile != null) File.Delete(invalidSchemaFile);
                 if (projectFilename != null) File.Delete(projectFilename);
                 Environment.SetEnvironmentVariable("MSBuildOldOM", oldValueForMSBuildOldOM);
+                Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", oldValueForMSBuildLoadMicrosoftTargetsReadOnly);
             }
         }
 
@@ -163,10 +163,9 @@ namespace Microsoft.Build.UnitTests
          * 
          **********************************************************************/
         [Fact]
-        public void VerifyValidProjectSchema
-            (
-            )
+        public void VerifyValidProjectSchema()
         {
+            string oldValueForMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
             string[] msbuildTempXsdFilenames = Array.Empty<string>();
             string projectFilename = CreateTempFileOnDisk(@"
                     <Project xmlns=`msbuildnamespace`>
@@ -198,6 +197,7 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(projectFilename);
                 CleanupSchemaFiles(msbuildTempXsdFilenames);
                 Environment.SetEnvironmentVariable("MSBuildOldOM", oldValueForMSBuildOldOM);
+                Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", oldValueForMSBuildLoadMicrosoftTargetsReadOnly);
             }
         }
 
@@ -207,10 +207,9 @@ namespace Microsoft.Build.UnitTests
         /// should not be caught by the schema
         /// </summary>
         [Fact]
-        public void VerifyInvalidImportNotCaughtBySchema
-            (
-            )
+        public void VerifyInvalidImportNotCaughtBySchema()
         {
+            string oldValueForMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
             string[] msbuildTempXsdFilenames = Array.Empty<string>();
 
             string importedProjectFilename = CreateTempFileOnDisk(@"
@@ -252,6 +251,7 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(projectFilename);
                 File.Delete(importedProjectFilename);
                 Environment.SetEnvironmentVariable("MSBuildOldOM", oldValueForMSBuildOldOM);
+                Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", oldValueForMSBuildLoadMicrosoftTargetsReadOnly);
             }
         }
 

@@ -13,7 +13,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.FileSystem;
@@ -1401,6 +1403,107 @@ namespace Microsoft.Build.UnitTests
 
                 return result;
             }
+        }
+
+        internal enum ExpectedBuildResult
+        {
+            // The build should fail with a logged error upon drive enumerationg wildcard detection and setting of environment variable.
+            FailWithError,
+            // The build should succeed with a logged warning upon drive enumerating wildcard detection (regardless of environment variable value).
+            SucceedWithWarning,
+            // The build should succeed with no logged warnings and errors, as there are no drive enumerating wildcards.
+            SucceedWithNoErrorsAndWarnings
+        }
+
+        /// <summary>
+        /// Verify that a drive enumerating wildcard warning is logged or exception is thrown. 
+        /// </summary>
+        internal static void CleanContentsAndBuildTargetWithDriveEnumeratingWildcard(string content, string failOnDriveEnumerationEnvVar, string targetName, ExpectedBuildResult expectedBuildResult, ITestOutputHelper testOutput = null)
+        {
+            using (var env = TestEnvironment.Create(testOutput))
+            {
+                // Clean file contents by replacing single quotes with double quotes, etc.
+                content = ObjectModelHelpers.CleanupFileContents(content);
+                var testProject = env.CreateTestProjectWithFiles(content.Cleanup());
+
+                // Reset state
+                ResetStateForDriveEnumeratingWildcardTests(env, failOnDriveEnumerationEnvVar);
+
+                // Setup and build test target
+                BuildTargetWithDriveEnumeratingWildcardUsingBuildManager(env, testProject.ProjectFile, targetName, expectedBuildResult, testOutput);
+            }
+        }
+
+        internal static void ResetStateForDriveEnumeratingWildcardTests(TestEnvironment env, string setEnvVar)
+        {
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDFAILONDRIVEENUMERATINGWILDCARD", setEnvVar);
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+        }
+
+        internal static void BuildTargetWithDriveEnumeratingWildcardUsingBuildManager(TestEnvironment env, string testProjectFile, string targetName, ExpectedBuildResult expectedBuildResult, ITestOutputHelper testOutput = null)
+        {
+            try
+            {
+                // Setup build
+                MockLogger mockLogger = (testOutput == null) ? new MockLogger() : new MockLogger(testOutput);
+                var p = ProjectInstance.FromFile(testProjectFile, new ProjectOptions());
+                BuildManager buildManager = BuildManager.DefaultBuildManager;
+                BuildRequestData data = new BuildRequestData(p, new[] { targetName });
+                BuildParameters parameters = new BuildParameters()
+                {
+                    Loggers = new ILogger[] { mockLogger },
+                };
+
+                // Perform build using build manager
+                BuildResult buildResult = buildManager.Build(parameters, data);
+
+                // Verify result based on value of ExpectedBuildResult
+                if (expectedBuildResult == ExpectedBuildResult.FailWithError)
+                {
+                    VerifyErrorLoggedForDriveEnumeratingWildcard(buildResult, mockLogger, targetName);
+                }
+                else if (expectedBuildResult == ExpectedBuildResult.SucceedWithWarning)
+                {
+                    VerifyWarningLoggedForDriveEnumeratingWildcard(buildResult, mockLogger, targetName);
+                }
+                else if (expectedBuildResult == ExpectedBuildResult.SucceedWithNoErrorsAndWarnings)
+                {
+                    VerifyNoErrorsAndWarningsForDriveEnumeratingWildcard(buildResult, mockLogger, targetName);
+                }
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
+        private static void VerifyErrorLoggedForDriveEnumeratingWildcard(BuildResult buildResult, MockLogger mockLogger, string targetName)
+        {
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
+            buildResult[targetName].ResultCode.ShouldBe(TargetResultCode.Failure);
+            mockLogger.ErrorCount.ShouldBe(1);
+            mockLogger.Errors[0].Code.ShouldBe("MSB5029");
+        }
+
+        private static void VerifyWarningLoggedForDriveEnumeratingWildcard(BuildResult buildResult, MockLogger mockLogger, string targetName)
+        {
+            VerifySuccessOfBuildAndTargetResults(buildResult, targetName);
+            mockLogger.WarningCount.ShouldBe(1);
+            mockLogger.Warnings[0].Code.ShouldBe("MSB5029");
+        }
+
+        private static void VerifyNoErrorsAndWarningsForDriveEnumeratingWildcard(BuildResult buildResult, MockLogger mockLogger, string targetName)
+        {
+            VerifySuccessOfBuildAndTargetResults(buildResult, targetName);
+            mockLogger.WarningCount.ShouldBe(0);
+            mockLogger.ErrorCount.ShouldBe(0);
+        }
+
+        private static void VerifySuccessOfBuildAndTargetResults(BuildResult buildResult, string targetName)
+        {
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            buildResult[targetName].ResultCode.ShouldBe(TargetResultCode.Success);
         }
 
         /// <summary>

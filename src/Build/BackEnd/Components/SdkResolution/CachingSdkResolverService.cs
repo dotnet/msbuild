@@ -38,9 +38,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
         {
-            MSBuildEventSource.Log.CachedSdkResolverServiceResolveSdkStart(sdk.Name, solutionPath, projectPath);
-
             SdkResult result;
+
+            bool wasResultCached = true;
+
+            MSBuildEventSource.Log.CachedSdkResolverServiceResolveSdkStart(sdk.Name, solutionPath, projectPath);
 
             if (Traits.Instance.EscapeHatches.DisableSdkResolutionCache)
             {
@@ -59,7 +61,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                  */
                 Lazy<SdkResult> resultLazy = cached.GetOrAdd(
                     sdk.Name,
-                    key => new Lazy<SdkResult>(() => base.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio)));
+                    key => new Lazy<SdkResult>(() =>
+                    {
+                        wasResultCached = false;
+
+                        return base.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
+                    }));
 
                 // Get the lazy value which will block all waiting threads until the SDK is resolved at least once while subsequent calls get cached results.
                 result = resultLazy.Value;
@@ -73,7 +80,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "ReferencingMultipleVersionsOfTheSameSdk", sdk.Name, result.Version, result.ElementLocation, sdk.Version);
             }
 
-            MSBuildEventSource.Log.CachedSdkResolverServiceResolveSdkStop(sdk.Name, solutionPath, projectPath, result.Success);
+            MSBuildEventSource.Log.CachedSdkResolverServiceResolveSdkStop(sdk.Name, solutionPath, projectPath, result.Success, wasResultCached);
 
             return result;
         }

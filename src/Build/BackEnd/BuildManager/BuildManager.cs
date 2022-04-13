@@ -493,6 +493,7 @@ namespace Microsoft.Build.Execution
                     AppendDebuggingLoggers(_buildParameters.Loggers),
                     _buildParameters.ForwardingLoggers,
                     _buildParameters.WarningsAsErrors,
+                    _buildParameters.WarningsNotAsErrors,
                     _buildParameters.WarningsAsMessages);
 
                 _nodeManager.RegisterPacketHandler(NodePacketType.LogMessage, LogMessagePacket.FactoryForDeserialization, loggingService as INodePacketHandler);
@@ -2938,7 +2939,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates a logging service around the specified set of loggers.
         /// </summary>
-        private ILoggingService CreateLoggingService(IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> forwardingLoggers, ISet<string> warningsAsErrors, ISet<string> warningsAsMessages)
+        private ILoggingService CreateLoggingService(IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> forwardingLoggers, ISet<string> warningsAsErrors, ISet<string> warningsNotAsErrors, ISet<string> warningsAsMessages)
         {
             Debug.Assert(Monitor.IsEntered(_syncLock));
 
@@ -2959,6 +2960,7 @@ namespace Microsoft.Build.Execution
             loggingService.OnProjectStarted += _projectStartedEventHandler;
             loggingService.OnProjectFinished += _projectFinishedEventHandler;
             loggingService.WarningsAsErrors = warningsAsErrors;
+            loggingService.WarningsNotAsErrors = warningsNotAsErrors;
             loggingService.WarningsAsMessages = warningsAsMessages;
 
             try
@@ -2979,7 +2981,7 @@ namespace Microsoft.Build.Execution
                         loggerClassName: typeof(ConfigurableForwardingLogger).FullName,
                         loggerAssemblyName: typeof(ConfigurableForwardingLogger).GetTypeInfo().Assembly.GetName().FullName,
                         loggerAssemblyFile: null,
-                        loggerSwitchParameters: "PROJECTSTARTEDEVENT;PROJECTFINISHEDEVENT",
+                        loggerSwitchParameters: "PROJECTSTARTEDEVENT;PROJECTFINISHEDEVENT;FORWARDPROJECTCONTEXTEVENTS",
                         verbosity: LoggerVerbosity.Quiet);
 
                     ForwardingLoggerRecord[] forwardingLogger = { new ForwardingLoggerRecord(new NullLogger(), forwardingLoggerDescription) };
@@ -3230,6 +3232,25 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public void Initialize(IEventSource eventSource)
             {
+                // The concrete type we get should always be our internal
+                // implementation and up-to-date, but we need to meet the
+                // external contract so can't specify that for the
+                // argument.
+
+                IEventSource4 eventSource4 = (IEventSource4)eventSource;
+
+                // Most checks in LoggingService are "does any attached logger
+                // specifically opt into this new behavior?". As such, the
+                // NullLogger shouldn't opt into them explicitly and should
+                // let other loggers opt in.
+
+                // IncludeEvaluationPropertiesAndItems is different though,
+                // because its check is "do ALL attached loggers opt into
+                // the new behavior?", since the new behavior removes
+                // information from old loggers. So the NullLogger must
+                // opt in to ensure it doesn't accidentally veto the new
+                // behavior.
+                eventSource4.IncludeEvaluationPropertiesAndItems();
             }
 
             /// <summary>
