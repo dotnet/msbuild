@@ -180,7 +180,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             installer.InstalledManifests[0].manifestUpdate.ManifestId.Should().Be(manifestsToUpdate[0].manifestUpdate.ManifestId);
             installer.InstalledManifests[0].manifestUpdate.NewVersion.Should().Be(manifestsToUpdate[0].manifestUpdate.NewVersion);
-            installer.InstalledManifests[0].manifestUpdate.NewFeatureBand.Should().Be("6.0.100");
+            installer.InstalledManifests[0].manifestUpdate.NewFeatureBand.Should().Be(new SdkFeatureBand(sdkVersion).ToString());
             installer.InstalledManifests[0].offlineCache.Should().Be(null);
         }
 
@@ -212,7 +212,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             installer.InstalledManifests[0].manifestUpdate.ManifestId.Should().Be(manifestsToUpdate[0].manifestUpdate.ManifestId);
             installer.InstalledManifests[0].manifestUpdate.NewVersion.Should().Be(manifestsToUpdate[0].manifestUpdate.NewVersion);
-            installer.InstalledManifests[0].manifestUpdate.NewFeatureBand.Should().Be("6.0.100");
+            installer.InstalledManifests[0].manifestUpdate.NewFeatureBand.Should().Be(new SdkFeatureBand(sdkVersion).ToString());
             installer.InstalledManifests[0].offlineCache.Should().Be(new DirectoryPath(cachePath));
         }
 
@@ -494,7 +494,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             command
                 .WithEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", string.Empty)
                 .WithEnvironmentVariable("PATH", "fake")
-                .Execute("workload", "install", "--verbosity:quiet", "android")
+                .Execute("workload", "install", "--verbosity:quiet", "wasm-tools")
                 .Should()
                 .NotHaveStdOutContaining(Workloads.Workload.Install.LocalizableStrings.CheckForUpdatedWorkloadManifests)
                 .And
@@ -511,7 +511,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             command
                 .WithEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", string.Empty)
                 .WithEnvironmentVariable("PATH", "fake")
-                .Execute("workload", "install", verbosityFlag, "android")
+                .Execute("workload", "install", verbosityFlag, "wasm-tools")
                 .Should()
                 .HaveStdOutContaining(Workloads.Workload.Install.LocalizableStrings.CheckForUpdatedWorkloadManifests)
                 .And
