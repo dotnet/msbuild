@@ -380,7 +380,7 @@ public static class Program
         [InlineData("netcoreapp2.0", true)]
         [InlineData("netcoreapp3.0", true)]
         [InlineData("net5.0", true)]
-        [InlineData("net6.0", false)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, false)]
         public void It_stops_generating_runtimeconfig_dev_json_after_net6(string targetFramework, bool shouldGenerateRuntimeConfigDevJson)
         {
             TestProject proj = new TestProject()
@@ -409,7 +409,7 @@ public static class Program
         [InlineData("netcoreapp2.0")]
         [InlineData("netcoreapp3.0")]
         [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_stops_generating_runtimeconfig_dev_json_after_net6_allow_property_override(string targetFramework)
         {
             TestProject proj = new TestProject()
