@@ -98,19 +98,17 @@ namespace Microsoft.Build.Evaluation
             [DebuggerStepThrough]
             get
             {
-                if (IsEnvironmentProperty && this is ProjectPropertyNotXmlBacked notXmlBacked && notXmlBacked.loggingContext?.IsValid == true && !_loggedEnvProperty)
+                if (this is EnvironmentDerivedProjectProperty environmentProperty && environmentProperty.loggingContext?.IsValid == true && !environmentProperty._loggedEnvProperty)
                 {
                     EnvironmentVariableReadEventArgs args = new(Name, EvaluatedValueEscapedInternal);
-                    args.BuildEventContext = notXmlBacked.loggingContext.BuildEventContext;
-                    notXmlBacked.loggingContext.LogBuildEvent(args);
-                    _loggedEnvProperty = true;
+                    args.BuildEventContext = environmentProperty.loggingContext.BuildEventContext;
+                    environmentProperty.loggingContext.LogBuildEvent(args);
+                    environmentProperty._loggedEnvProperty = true;
                 }
 
                 return EvaluatedValueEscapedInternal;
             }
         }
-
-        private bool _loggedEnvProperty = false;
 
         /// <summary>
         /// Gets or sets the unevaluated property value.
@@ -254,7 +252,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal static ProjectProperty Create(Project project, string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext = null)
         {
-            return new ProjectPropertyNotXmlBacked(project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, loggingContext);
+            return !isGlobalProperty && !mayBeReserved ? new EnvironmentDerivedProjectProperty(project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, loggingContext) :
+                new ProjectPropertyNotXmlBacked(project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved);
         }
 
         /// <summary>
@@ -509,7 +508,6 @@ namespace Microsoft.Build.Evaluation
             /// Name of the property.
             /// </summary>
             private readonly string _name;
-            internal LoggingContext loggingContext;
 
             /// <summary>
             /// Creates a property without backing XML.
@@ -517,7 +515,7 @@ namespace Microsoft.Build.Evaluation
             /// This is ONLY to be used by the Evaluator (and Project.SetGlobalProperty) and ONLY for Global, Environment, and Built-in properties.
             /// All other properties originate in XML, and should have a backing XML object.
             /// </summary>
-            internal ProjectPropertyNotXmlBacked(Project project, string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext)
+            internal ProjectPropertyNotXmlBacked(Project project, string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved)
                 : base(project, evaluatedValueEscaped)
             {
                 ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
@@ -526,7 +524,6 @@ namespace Microsoft.Build.Evaluation
                 ErrorUtilities.VerifyThrowArgument(mayBeReserved || !ReservedPropertyNames.IsReservedProperty(name), "OM_ReservedName", name);
 
                 _name = name;
-                this.loggingContext = loggingContext;
             }
 
             /// <summary>
@@ -643,6 +640,17 @@ namespace Microsoft.Build.Evaluation
             public override bool IsImported
             {
                 get { return false; }
+            }
+        }
+
+        private class EnvironmentDerivedProjectProperty : ProjectPropertyNotXmlBacked
+        {
+            internal bool _loggedEnvProperty = false;
+            internal LoggingContext loggingContext;
+
+            internal EnvironmentDerivedProjectProperty(Project project, string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext) : base(project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved)
+            {
+                this.loggingContext = loggingContext;
             }
         }
     }

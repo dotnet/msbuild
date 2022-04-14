@@ -43,8 +43,6 @@ namespace Microsoft.Build.Execution
             _escapedValue = escapedValue;
         }
 
-        internal LoggingContext loggingContext;
-
         /// <summary>
         /// Name of the property
         /// </summary>
@@ -83,10 +81,6 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public virtual bool IsImmutable => false;
 
-        private bool _loggedEnvProperty = false;
-
-        internal bool IsEnvironmentProperty { get; set; }
-
         /// <summary>
         /// Evaluated value of the property, escaped as necessary.
         /// Setter assumes caller has protected global properties, if necessary.
@@ -96,12 +90,12 @@ namespace Microsoft.Build.Execution
         {
             get
             {
-                if (IsEnvironmentProperty && loggingContext?.IsValid == true && !_loggedEnvProperty)
+                if (this is EnvironmentDerivedProjectPropertyInstance envProperty && envProperty.loggingContext?.IsValid == true && !envProperty._loggedEnvProperty)
                 {
                     EnvironmentVariableReadEventArgs args = new(Name, _escapedValue);
-                    args.BuildEventContext = loggingContext.BuildEventContext;
-                    loggingContext.LogBuildEvent(args);
-                    _loggedEnvProperty = true;
+                    args.BuildEventContext = envProperty.loggingContext.BuildEventContext;
+                    envProperty.loggingContext.LogBuildEvent(args);
+                    envProperty._loggedEnvProperty = true;
                 }
 
                 return _escapedValue;
@@ -233,7 +227,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal static ProjectPropertyInstance Create(ProjectPropertyInstance that)
         {
-            return Create(that._name, that._escapedValue, mayBeReserved: true /* already validated */, isImmutable: that.IsImmutable, that.IsEnvironmentProperty);
+            return Create(that._name, that._escapedValue, mayBeReserved: true /* already validated */, isImmutable: that.IsImmutable, that is EnvironmentDerivedProjectPropertyInstance);
         }
 
         /// <summary>
@@ -242,7 +236,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal static ProjectPropertyInstance Create(ProjectPropertyInstance that, bool isImmutable)
         {
-            return Create(that._name, that._escapedValue, mayBeReserved: true /* already validated */, isImmutable: isImmutable, that.IsEnvironmentProperty);
+            return Create(that._name, that._escapedValue, mayBeReserved: true /* already validated */, isImmutable: isImmutable, that is EnvironmentDerivedProjectPropertyInstance);
         }
 
         /// <summary>
@@ -316,9 +310,9 @@ namespace Microsoft.Build.Execution
                 XmlUtilities.VerifyThrowProjectValidElementName(name, location);
             }
 
-            ProjectPropertyInstance instance = isImmutable ? new ProjectPropertyInstanceImmutable(name, escapedValue) : new ProjectPropertyInstance(name, escapedValue);
-            instance.IsEnvironmentProperty = isEnvironmentProperty;
-            instance.loggingContext = loggingContext;
+            ProjectPropertyInstance instance = isEnvironmentProperty ? new EnvironmentDerivedProjectPropertyInstance(name, escapedValue, loggingContext) :
+                isImmutable ? new ProjectPropertyInstanceImmutable(name, escapedValue) :
+                new ProjectPropertyInstance(name, escapedValue);
             return instance;
         }
 
@@ -346,6 +340,28 @@ namespace Microsoft.Build.Execution
             /// Usually gotten from the parent ProjectInstance.
             /// </remarks>
             public override bool IsImmutable => true;
+        }
+
+        private class EnvironmentDerivedProjectPropertyInstance : ProjectPropertyInstance
+        {
+            internal EnvironmentDerivedProjectPropertyInstance(string name, string escapedValue, LoggingContext loggingContext)
+                : base(name, escapedValue)
+            {
+                this.loggingContext = loggingContext;
+            }
+
+            /// <summary>
+            /// Whether this object can be changed. An immutable object cannot be made mutable.
+            /// </summary>
+            /// <remarks>
+            /// The environment is captured at the start of the build, so environment-derived
+            /// properties can't change.
+            /// </remarks>
+            public override bool IsImmutable => true;
+
+            internal bool _loggedEnvProperty = false;
+
+            internal LoggingContext loggingContext;
         }
     }
 }
