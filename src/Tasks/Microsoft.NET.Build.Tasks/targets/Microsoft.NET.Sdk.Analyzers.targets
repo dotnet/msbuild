@@ -18,7 +18,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- If not specified and greater than or equal to .NET 5, default the AnalysisLevel to the the MAJ.MIN version -->
     <AnalysisLevel Condition="'$(AnalysisLevel)' == '' And
                               '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
-                              $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">$(_TargetFrameworkVersionWithoutV)</AnalysisLevel>
+                              $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">latest</AnalysisLevel>
 
 
     <!-- AnalysisLevel can also contain compound values with a prefix and suffix separated by a '-' character.
