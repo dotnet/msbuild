@@ -55,7 +55,7 @@ namespace Microsoft.NET.Build.Tests
             };
 
             var testAsset = _testAssetsManager
-                .CreateTestProject(testProject, identifier: "warningLevelConsoleApp", targetExtension: ".csproj");
+                .CreateTestProject(testProject, identifier: "warningLevelConsoleApp"+tfm, targetExtension: ".csproj");
 
             var buildCommand = new GetValuesCommand(
                 Log,
