@@ -2617,7 +2617,6 @@ namespace Microsoft.Build.Execution
                             _noNodesActiveEvent.Reset();
                             _activeNodes.Add(node.NodeId);
                         }
-                        ErrorUtilities.VerifyThrow(_activeNodes.Count != 0, "Still 0 nodes after asking for a new node.  Build cannot proceed.");
 
                         IEnumerable<ScheduleResponse> newResponses = _scheduler.ReportNodesCreated(newNodes);
                         PerformSchedulingActions(newResponses);
