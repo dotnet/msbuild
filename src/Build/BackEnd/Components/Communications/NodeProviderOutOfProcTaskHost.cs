@@ -521,7 +521,7 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace("For a host context of {0}, spawning executable from {1}.", hostContext.ToString(), msbuildLocation ?? "MSBuild.exe");
 
-            // Make it here.
+            // There is always one task host per host context so we always create just 1 one task host node here.
             int nodeId = (int)hostContext;
             IList<NodeContext> nodeContexts = GetNodes(
                 msbuildLocation,

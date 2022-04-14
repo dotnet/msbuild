@@ -96,10 +96,9 @@ namespace Microsoft.Build.BackEnd
             // (next to msbuild.exe) is ignored.
             string commandLineArgs = $"/nologo /nodemode:1 /nodeReuse:{ComponentHost.BuildParameters.EnableNodeReuse.ToString().ToLower()} /low:{ComponentHost.BuildParameters.LowPriority.ToString().ToLower()}";
 
-            // Make it here.
-            CommunicationsUtilities.Trace("Starting to acquire a new or existing {1} node(s) to establish nodes starting from ID {0}...", nextNodeId, numberOfNodesToCreate);
+            CommunicationsUtilities.Trace("Starting to acquire {1} new or existing node(s) to establish nodes from ID {0} to {2}...", nextNodeId, numberOfNodesToCreate, nextNodeId + numberOfNodesToCreate - 1);
 
-            Handshake hostHandshake = new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, nodeReuse: ComponentHost.BuildParameters.EnableNodeReuse, lowPriority: ComponentHost.BuildParameters.LowPriority, is64Bit: EnvironmentUtilities.Is64BitProcess));
+            Handshake hostHandshake = new(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, nodeReuse: ComponentHost.BuildParameters.EnableNodeReuse, lowPriority: ComponentHost.BuildParameters.LowPriority, is64Bit: EnvironmentUtilities.Is64BitProcess));
 
             IList<NodeContext> nodeContexts = GetNodes(null, commandLineArgs, nextNodeId, factory, hostHandshake, NodeContextCreated, NodeContextTerminated, numberOfNodesToCreate);
 

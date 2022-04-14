@@ -228,7 +228,14 @@ namespace Microsoft.Build.BackEnd
             // Try to connect to idle nodes if node reuse is enabled.
             if (_componentHost.BuildParameters.EnableNodeReuse)
             {
-                (expectedProcessName, possibleRunningNodes) = GetPossibleRunningNodes(msbuildLocation);
+                IList<Process> possibleRunningNodesList;
+                (expectedProcessName, possibleRunningNodesList) = GetPossibleRunningNodes(msbuildLocation);
+                possibleRunningNodes = new ConcurrentQueue<Process>(possibleRunningNodesList);
+
+                if (possibleRunningNodesList.Count > 0)
+                {
+                    CommunicationsUtilities.Trace("Attempting to connect to {1} existing processes '{0}'...", expectedProcessName, possibleRunningNodesList.Count);
+                }
             }
 #endif
             ConcurrentQueue<NodeContext> nodeContexts = new();
@@ -260,7 +267,7 @@ namespace Microsoft.Build.BackEnd
             {
                 while (possibleRunningNodes != null && possibleRunningNodes.TryDequeue(out var nodeToReuse))
                 {
-                    CommunicationsUtilities.Trace("Try to connect to each existing {0} process candidate to establish node {1}...", expectedProcessName, nodeId);
+                    CommunicationsUtilities.Trace("Trying to connect to existing process with id {1} '{2} {3}' to establish node {0}...", nodeId, nodeToReuse.Id, nodeToReuse.ProcessName, nodeToReuse.StartInfo.Arguments);
                     if (nodeToReuse.Id == Process.GetCurrentProcess().Id)
                     {
                         continue;
@@ -384,7 +391,7 @@ namespace Microsoft.Build.BackEnd
         /// Item 1 is the name of the process being searched for.
         /// Item 2 is the ConcurrentQueue of ordered processes themselves.
         /// </returns>
-        private (string expectedProcessName, ConcurrentQueue<Process> nodeProcesses) GetPossibleRunningNodes(string msbuildLocation = null)
+        private (string expectedProcessName, IList<Process> nodeProcesses) GetPossibleRunningNodes(string msbuildLocation = null)
         {
             if (String.IsNullOrEmpty(msbuildLocation))
             {
@@ -395,9 +402,8 @@ namespace Microsoft.Build.BackEnd
 
             var processes = Process.GetProcessesByName(expectedProcessName);
             Array.Sort(processes, (left, right) => left.Id.CompareTo(right.Id));
-            ConcurrentQueue<Process> orderedProcesses = new(processes);
 
-            return (expectedProcessName, orderedProcesses);
+            return (expectedProcessName, processes);
         }
 
         /// <summary>
