@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli
                 IsHidden = true
             }.ForwardAsProperty()
             .AllowSingleArgPerToken();
-
+            
         public static Option<VerbosityOptions> VerbosityOption =
             new ForwardedOption<VerbosityOptions>(
                 new string[] { "-v", "--verbosity" },
@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Cli
                     ArgumentHelpName = CommonLocalizableStrings.LevelArgumentName
                 }.ForwardAsSingle(o => $"-verbosity:{o}");
 
-        public static Option<VerbosityOptions> HiddenVerbosityOption =>
+        public static Option<VerbosityOptions> HiddenVerbosityOption =
             new ForwardedOption<VerbosityOptions>(
                 new string[] { "-v", "--verbosity" },
                 description: CommonLocalizableStrings.VerbosityOptionDescription)

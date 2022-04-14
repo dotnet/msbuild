@@ -17,6 +17,16 @@
         <target state="translated">O pacote {0} versão {1} não existe no cache offline {2}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
+        <target state="translated">Não é possível usar as opções {0} e {1} juntas. Se estiver instalando a partir de um arquivo de reversão, remova {0}. Caso contrário, remova {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CheckForUpdatedWorkloadManifests">
+        <source>Checking for updated workload manifests.</source>
+        <target state="translated">Verificando manifestos de carga de trabalho atualizados.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}…</source>
         <target state="translated">Desinstalando pacote de carga de trabalho {0} versão {1}...</target>
@@ -205,6 +215,11 @@
       <trans-unit id="SkipManifestUpdateOptionDescription">
         <source>Skip updating the workload manifests.</source>
         <target state="translated">Ignorar a atualização dos manifestos de carga de trabalho.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipSignCheckOptionDescription">
+        <source>Skip signature verification of workload packages and installers.</source>
+        <target state="new">Skip signature verification of workload packages and installers.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingManifestUpdate">

@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
@@ -45,7 +44,7 @@ namespace dotnet.Tests
         }
 
         [WindowsOnlyFact]
-        public async Task ItShouldReturnListOfManifestFiles()
+        public void ItShouldReturnListOfManifestFiles()
         {
             Initialize(nameof(ItShouldReturnListOfManifestFiles));
             NuGetPackageDownloader nuGetPackageDownloader = new NuGetPackageDownloader(new DirectoryPath(_updaterDir),
@@ -62,16 +61,16 @@ namespace dotnet.Tests
             string package = DownloadSamplePackage(new PackageId("Microsoft.NET.Workload.Emscripten.Manifest-6.0.100"),
                 NuGetVersion.Parse("6.0.0-preview.7.21377.2"), nuGetPackageDownloader);
 
-            await workloadManifestUpdater.ExtractManifestPackagesToTempDirAsync(new List<string> {package},
-                new DirectoryPath(_manifestDirectory));
+            workloadManifestUpdater.ExtractManifestPackagesToTempDirAsync(new List<string> {package},
+                new DirectoryPath(_manifestDirectory)).GetAwaiter().GetResult();
 
             TempDirectoryWorkloadManifestProvider tempDirectoryWorkloadManifestProvider =
                 new TempDirectoryWorkloadManifestProvider(_manifestDirectory, mockWorkloadResolver.GetSdkFeatureBand());
-            IEnumerable<(string manifestId, string informationalPath, Func<Stream> openManifestStream, Func<Stream> openLocalizationStream)> manifest =
+            IEnumerable<ReadableWorkloadManifest> manifest =
                 tempDirectoryWorkloadManifestProvider.GetManifests();
-            manifest.First().manifestId.Should()
+            manifest.First().ManifestId.Should()
                 .NotBe("microsoft.net.workload.emscripten.manifest-6.0.100.6.0.0-preview.7.21377.2");
-            manifest.First().manifestId.Should()
+            manifest.First().ManifestId.Should()
                 .BeEquivalentTo("microsoft.net.workload.emscripten");
         }
 

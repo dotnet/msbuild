@@ -16,7 +16,6 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.NET.Build.Tasks</RootNamespace>
     <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(DotNetBuildFromSource)' == 'true' ">$(SdkTargetFramework)</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>

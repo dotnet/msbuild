@@ -15,12 +15,15 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class Complete
     {
-        public static CompletionDelegate TargetFrameworksFromProjectFile => 
+
+        private static CompletionItem ToCompletionItem (string s) => new CompletionItem(s);
+
+        public static CompletionDelegate TargetFrameworksFromProjectFile =>
             (_context) =>
             {
                 try
                 {
-                    return GetMSBuildProject()?.GetTargetFrameworks().Select(tf => new CompletionItem(tf.GetShortFolderName())) ?? Empty<CompletionItem>();
+                    return GetMSBuildProject()?.GetTargetFrameworks().Select(tf => tf.GetShortFolderName()).Select(ToCompletionItem) ?? Empty<CompletionItem>();
                 }
                 catch (Exception)
                 {
@@ -32,11 +35,11 @@ namespace Microsoft.DotNet.Cli
             Reporter.Verbose.WriteLine($"Exception occurred while getting completions: {e}");
 
         public static CompletionDelegate RunTimesFromProjectFile =>
-            (context) =>
+            (_context) =>
             {
                 try
                 {
-                    return GetMSBuildProject()?.GetRuntimeIdentifiers().Select((rid) => new CompletionItem(rid)) ?? Empty<CompletionItem>();
+                    return GetMSBuildProject()?.GetRuntimeIdentifiers().Select(ToCompletionItem) ?? Empty<CompletionItem>();
                 }
                 catch (Exception)
                 {
@@ -44,12 +47,12 @@ namespace Microsoft.DotNet.Cli
                 }
             };
 
-        public static CompletionDelegate ProjectReferencesFromProjectFile => 
-            (context) =>
+        public static CompletionDelegate ProjectReferencesFromProjectFile =>
+            (_context) =>
             {
                 try
                 {
-                    return GetMSBuildProject()?.GetProjectToProjectReferences().Select(r => new CompletionItem(r.Include)) ?? Empty<CompletionItem>();
+                    return GetMSBuildProject()?.GetProjectToProjectReferences().Select(r => ToCompletionItem(r.Include)) ?? Empty<CompletionItem>();
                 }
                 catch (Exception)
                 {
@@ -57,12 +60,12 @@ namespace Microsoft.DotNet.Cli
                 }
             };
 
-        public static CompletionDelegate ConfigurationsFromProjectFileOrDefaults =>
-            (context) =>
+        public static CompletionDelegate ConfigurationsFromProjectFileOrDefaults => 
+            (_context) =>
             {
                 try
                 {
-                    return (GetMSBuildProject()?.GetConfigurations() ?? new[] { "Debug", "Release" }).Select(configuration => new CompletionItem(configuration));
+                    return (GetMSBuildProject()?.GetConfigurations() ?? new[] { "Debug", "Release" }).Select(ToCompletionItem);
                 }
                 catch (Exception)
                 {

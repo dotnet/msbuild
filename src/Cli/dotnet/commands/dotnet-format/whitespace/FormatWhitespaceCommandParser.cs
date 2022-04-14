@@ -21,10 +21,7 @@ namespace Microsoft.DotNet.Tools.Format
 
         private static Command ConstructCommand()
         {
-            var command = new Command("whitespace", LocalizableStrings.Run_whitespace_formatting)
-            {
-                FolderOption,
-            };
+            var command = new Command("whitespace", LocalizableStrings.Run_whitespace_formatting);
             command.AddCommonOptions();
             command.SetHandler((ParseResult parseResult) => FormatCommand.Run(parseResult.GetArguments()));
             return command;

@@ -17,6 +17,16 @@
         <target state="translated">Das Paket {0}, Version {1}, ist im Offlinecache {2} nicht vorhanden.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
+        <target state="translated">Die Optionen {0} und {1} können nicht zusammen verwendet werden. Entfernen Sie bei der Installation aus einer Rollbackdatei {0}. Entfernen Sie andernfalls {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CheckForUpdatedWorkloadManifests">
+        <source>Checking for updated workload manifests.</source>
+        <target state="translated">Es wird nach aktualisierten Workloadmanifesten gesucht.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}…</source>
         <target state="translated">Das Workloadpaket {0}, Version {1}, wird deinstalliert…</target>
@@ -205,6 +215,11 @@
       <trans-unit id="SkipManifestUpdateOptionDescription">
         <source>Skip updating the workload manifests.</source>
         <target state="translated">Überspringen Sie die Aktualisierung der Workload-Manifeste.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipSignCheckOptionDescription">
+        <source>Skip signature verification of workload packages and installers.</source>
+        <target state="new">Skip signature verification of workload packages and installers.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingManifestUpdate">

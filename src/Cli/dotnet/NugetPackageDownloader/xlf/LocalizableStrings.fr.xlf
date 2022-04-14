@@ -27,9 +27,9 @@
         <target state="translated">{0} est introuvable dans les flux NuGet {1}.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SkipNuGetpackageSigningValidationSDKNotFirstParty">
-        <source>Skip NuGet package signing validation. The current .NET SDK is not signed by first party.</source>
-        <target state="translated">Ignorer la validation de signature de package NuGet. Le SDK .NET actuel n’est pas signé par le premier tiers.</target>
+      <trans-unit id="NuGetPackageSignatureVerificationSkipped">
+        <source>Skipping NuGet package signature verification.</source>
+        <target state="new">Skipping NuGet package signature verification.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipNuGetpackageSigningValidationmacOSLinux">

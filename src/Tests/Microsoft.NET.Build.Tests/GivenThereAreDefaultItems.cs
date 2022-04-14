@@ -367,7 +367,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Fact]
-        public void It_does_not_include_source_or_resx_files_in_None()
+        public void It_does_not_include_items_in_any_group_if_group_specific_default_include_properties_are_false()
         {
             var testProject = new TestProject()
             {
@@ -378,9 +378,16 @@ namespace Microsoft.NET.Build.Tests
             testProject.AdditionalProperties["EnableDefaultCompileItems"] = "false";
             testProject.AdditionalProperties["EnableDefaultResourceItems"] = "false";
 
+            // Windows App SDK related
+            testProject.AdditionalProperties["EnableDefaultWindowsAppSdkContentItems"] = "true";
+            testProject.AdditionalProperties["EnableDefaultWindowsAppSdkPRIResourceItems"] = "true";
+            testProject.AdditionalProperties["EnableDefaultContentItems"] = "false";
+            testProject.AdditionalProperties["EnableDefaultPRIResourceItems"] = "false";
+
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .WithProjectChanges(project =>
                 {
+                    // "Manual" include via project file modification.
                     var ns = project.Root.Name.Namespace;
                     XElement itemGroup = new XElement(ns + "ItemGroup");
                     project.Root.Add(itemGroup);
@@ -391,7 +398,10 @@ namespace Microsoft.NET.Build.Tests
 
             File.WriteAllText(Path.Combine(projectFolder, "ShouldBeIgnored.cs"), "!InvalidCSharp!");
             File.WriteAllText(Path.Combine(projectFolder, "Resources.resx"), "<Resource/>");
+            File.WriteAllText(Path.Combine(projectFolder, "ResourcesResw.resw"), "<root/>");
+            File.WriteAllText(Path.Combine(projectFolder, "TestImage.jpg"), "");
 
+            // Validate Compile items.
             var getCompileItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "Compile", GetValuesCommand.ValueType.Item);
             getCompileItemsCommand.Execute()
                 .Should()
@@ -401,6 +411,7 @@ namespace Microsoft.NET.Build.Tests
             RemoveGeneratedCompileItems(compileItems);
             compileItems.ShouldBeEquivalentTo(new[] { testProject.Name + ".cs" });
 
+            // Validate None items.
             var getNoneItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "None", GetValuesCommand.ValueType.Item);
             getNoneItemsCommand.Execute()
                 .Should()
@@ -409,6 +420,7 @@ namespace Microsoft.NET.Build.Tests
             getNoneItemsCommand.GetValues()
                 .Should().BeEmpty();
 
+            // Validate Resource items.
             var getResourceItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "Resource", GetValuesCommand.ValueType.Item);
             getResourceItemsCommand.Execute()
                 .Should()
@@ -417,6 +429,23 @@ namespace Microsoft.NET.Build.Tests
             getResourceItemsCommand.GetValues()
                 .Should().BeEmpty();
 
+            // Validate PRIResource items.
+            var getPRIResourceItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "PRIResource", GetValuesCommand.ValueType.Item);
+            getPRIResourceItemsCommand.Execute()
+                .Should()
+                .Pass();
+
+            getPRIResourceItemsCommand.GetValues()
+                .Should().BeEmpty();
+
+            // Validate Content items.
+            var getContentItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "Content", GetValuesCommand.ValueType.Item);
+            getContentItemsCommand.Execute()
+                .Should()
+                .Pass();
+
+            getContentItemsCommand.GetValues()
+                .Should().BeEmpty();
         }
 
         [Fact]
@@ -727,6 +756,113 @@ public class Class1
                 r.metadata["ExcludeAssets"].Should().BeEmpty();
                 r.metadata["IsImplicitlyDefined"].Should().BeEmpty();
             }
+        }
+
+        [Fact]
+        public void It_includes_Windows_App_SDK_items_in_the_correct_groups_if_Windows_App_SDK_is_present()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DontIncludeSourceFilesInNone",
+                TargetFrameworks = "net6.0",
+                IsExe = true,
+            };
+
+            // Windows App SDK
+            testProject.AdditionalProperties["EnableDefaultWindowsAppSdkContentItems"] = "true";
+            testProject.AdditionalProperties["EnableDefaultWindowsAppSdkPRIResourceItems"] = "true";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var projectFolder = Path.Combine(testAsset.TestRoot, testProject.Name);
+
+            File.WriteAllText(Path.Combine(projectFolder, "ResourcesResw.resw"), "<root/>");
+            string[] imageFiles = { "TestImage1.png", "TestImage2.bmp", "TestImage3.jpg", "TestImage4.dds", "TestImage5.tif", "TestImage6.tga", "TestImage7.gif" };
+            foreach (string fileName in imageFiles)
+            {
+                File.WriteAllText(Path.Combine(projectFolder, fileName), "");
+            }
+
+            // Validate None items.
+            var getNoneItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "None", GetValuesCommand.ValueType.Item);
+            getNoneItemsCommand.Execute()
+                .Should()
+                .Pass();
+
+            getNoneItemsCommand.GetValues()
+                .Should()
+                .BeEmpty();
+
+            // Validate PRIResource items.
+            var getPRIResourceItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "PRIResource", GetValuesCommand.ValueType.Item);
+            getPRIResourceItemsCommand.Execute()
+                .Should()
+                .Pass();
+
+            var getPRIResourceItems = getPRIResourceItemsCommand.GetValues();
+            getPRIResourceItems.ShouldBeEquivalentTo(new[] { "ResourcesResw.resw" });
+
+            // Validate Content items.
+            var getContentItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "Content", GetValuesCommand.ValueType.Item);
+            getContentItemsCommand.Execute()
+                .Should()
+                .Pass();
+
+            var getContentItems = getContentItemsCommand.GetValues();
+            getContentItems.ShouldBeEquivalentTo(imageFiles);
+        }
+
+        [Fact]
+        public void It_does_not_include_Windows_App_SDK_items_if_Windows_App_SDK_is_absent()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DontIncludeSourceFilesInNone",
+                TargetFrameworks = "net6.0",
+                IsExe = true,
+            };
+
+            // Not setting the "EnableDefaultWindowsAppSdkContentItems" or "EnableDefaultWindowsAppSdkPRIResourceItems" properties!
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var projectFolder = Path.Combine(testAsset.TestRoot, testProject.Name);
+
+            File.WriteAllText(Path.Combine(projectFolder, "ResourcesResw.resw"), "<root/>");
+            List<string> imageFiles = new List<string>{ "TestImage1.png", "TestImage2.bmp", "TestImage3.jpg", "TestImage4.dds", "TestImage5.tif", "TestImage6.tga", "TestImage7.gif" };
+            foreach (string fileName in imageFiles)
+            {
+                File.WriteAllText(Path.Combine(projectFolder, fileName), "");
+            }
+
+            // Validate None items.
+            var getNoneItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "None", GetValuesCommand.ValueType.Item);
+            getNoneItemsCommand.Execute()
+                .Should()
+                .Pass();
+
+            var getNoneItems = getNoneItemsCommand.GetValues();
+            List<string> expectedFiles = imageFiles;
+            expectedFiles.Add("ResourcesResw.resw");
+            getNoneItems.ShouldBeEquivalentTo(expectedFiles.ToArray());
+
+            // Validate PRIResource items.
+            var getPRIResourceItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "PRIResource", GetValuesCommand.ValueType.Item);
+            getPRIResourceItemsCommand.Execute()
+                .Should()
+                .Pass();
+
+            getPRIResourceItemsCommand.GetValues()
+                .Should()
+                .BeEmpty();
+
+            // Validate Content items.
+            var getContentItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "Content", GetValuesCommand.ValueType.Item);
+            getContentItemsCommand.Execute()
+                .Should()
+                .Pass();
+
+            getContentItemsCommand.GetValues()
+                .Should()
+                .BeEmpty();
         }
 
         void RemoveGeneratedCompileItems(List<string> compileItems)

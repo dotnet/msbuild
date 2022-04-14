@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.Linq;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Test;
@@ -78,7 +80,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<IEnumerable<string>> CollectOption = new ForwardedOption<IEnumerable<string>>("--collect", LocalizableStrings.cmdCollectDescription)
         {
             ArgumentHelpName = LocalizableStrings.cmdCollectFriendlyName
-        }.ForwardAsSingle(o => $"-property:VSTestCollect={SurroundWithDoubleQuotes(string.Join(";", GetSemiColonEscapedArgs(o)))}")
+        }.ForwardAsSingle(o => $"-property:VSTestCollect=\"{string.Join(";", GetSemiColonEscapedArgs(o))}\"")
         .AllowSingleArgPerToken();
 
         public static readonly Option<bool> BlameOption = new ForwardedOption<bool>("--blame", LocalizableStrings.CmdBlameDescription)

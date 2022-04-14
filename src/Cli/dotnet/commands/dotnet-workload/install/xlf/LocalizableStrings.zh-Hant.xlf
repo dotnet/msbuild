@@ -17,6 +17,16 @@
         <target state="translated">離線快取 {2} 中並沒有套件 {0} 版本 {1}。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
+        <target state="translated">無法同時使用 {0} 與 {1} 選項。如果從復原檔案安裝，請移除 {0}。否則，請移除 {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CheckForUpdatedWorkloadManifests">
+        <source>Checking for updated workload manifests.</source>
+        <target state="translated">正在檢查更新的工作負載資訊清單。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}…</source>
         <target state="translated">正在解除安裝工作負載套件 {0} 版本 {1}…</target>
@@ -205,6 +215,11 @@
       <trans-unit id="SkipManifestUpdateOptionDescription">
         <source>Skip updating the workload manifests.</source>
         <target state="translated">跳過更新工作負載資訊清單。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipSignCheckOptionDescription">
+        <source>Skip signature verification of workload packages and installers.</source>
+        <target state="new">Skip signature verification of workload packages and installers.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingManifestUpdate">

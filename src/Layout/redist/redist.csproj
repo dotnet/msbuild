@@ -83,4 +83,17 @@
       <ResolvedCompileFileDefinitions Remove="@(ResolvedCompileFileDefinitions)" Condition="'%(FileName)' == 'MSBuild'" />
     </ItemGroup>
   </Target>
+
+  <Target Name="_ResolvePublishFSharpNuGetPackages"
+       AfterTargets="CoreCompile">
+
+    <PropertyGroup>
+        <FSharpCorePath Condition="'$(DotNetFinalVersionKind)'!='release'">Shipping</FSharpCorePath>
+        <FSharpCorePath Condition="'$(DotNetFinalVersionKind)'=='release'">Release</FSharpCorePath>
+    </PropertyGroup>
+    <ItemGroup>
+        <ItemsToPushToBlobFeed Include="$(PkgMicrosoft_FSharp_Compiler)\contentFiles\$(FSharpCorePath)\FSharp.Core.*.nupkg"/>
+        <ItemsToPushToBlobFeed Include="$(PkgMicrosoft_FSharp_Compiler)\contentFiles\$(FSharpCorePath)\FSharp.Compiler.Service.*.nupkg" />
+    </ItemGroup>
+ </Target>
 </Project>

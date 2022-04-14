@@ -17,6 +17,16 @@
         <target state="translated">{0} paketi sürüm {1}, çevrimdışı {2} önbelleğinde yok.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
+        <target state="translated">{0} ve {1} seçenekleri birlikte kullanılamıyor. Bir geri alma dosyasından yükleniyorsa {0} seçeneğini kaldırın. Aksi takdirde, {1} seçeneğini kaldırın</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CheckForUpdatedWorkloadManifests">
+        <source>Checking for updated workload manifests.</source>
+        <target state="translated">Güncelleştirilmiş iş yükü bildirimleri denetleniyor.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}…</source>
         <target state="translated">{0} iş yükü paketi sürüm {1} kaldırılıyor...</target>
@@ -205,6 +215,11 @@
       <trans-unit id="SkipManifestUpdateOptionDescription">
         <source>Skip updating the workload manifests.</source>
         <target state="translated">İş yükü bildirimlerinin güncelleştirilmesini atlayın.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipSignCheckOptionDescription">
+        <source>Skip signature verification of workload packages and installers.</source>
+        <target state="new">Skip signature verification of workload packages and installers.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingManifestUpdate">
