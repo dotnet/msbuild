@@ -267,7 +267,7 @@ namespace Microsoft.Build.BackEnd
             {
                 while (possibleRunningNodes != null && possibleRunningNodes.TryDequeue(out var nodeToReuse))
                 {
-                    CommunicationsUtilities.Trace("Trying to connect to existing process with id {1} '{2} {3}' to establish node {0}...", nodeId, nodeToReuse.Id, nodeToReuse.ProcessName, nodeToReuse.StartInfo.Arguments);
+                    CommunicationsUtilities.Trace("Trying to connect to existing process {2} with id {1} to establish node {0}...", nodeId, nodeToReuse.Id, nodeToReuse.ProcessName);
                     if (nodeToReuse.Id == Process.GetCurrentProcess().Id)
                     {
                         continue;
