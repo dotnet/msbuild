@@ -15,21 +15,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Analysis level is a single property that can be used to control both the compiler warning waves
          and enable .NET analyzers. Valid values are 'none', 'latest', 'preview', or a version number  -->
 
-    <!-- Automatically set AnalysisLevel to 5 if targeting .net 5 and nothing else specified -->
+    <!-- If not specified and greater than or equal to .NET 5, default the AnalysisLevel to the the MAJ.MIN version -->
     <AnalysisLevel Condition="'$(AnalysisLevel)' == '' And
                               '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
-                              $([MSBuild]::VersionEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">5.0</AnalysisLevel>
+                              $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">$(_TargetFrameworkVersionWithoutV)</AnalysisLevel>
 
-    <!-- Automatically set AnalysisLevel if not specified based on TFM major version -->
-    <AnalysisLevel Condition="'$(AnalysisLevel)' == '' And
-                              (('$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
-                               $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))) Or
-                               '$(AnalysisMode)' != '')">6.0</AnalysisLevel>
-
-    <AnalysisLevel Condition="'$(AnalysisLevel)' == '' And
-                               (('$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
-                                $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '7.0'))) Or
-                                '$(AnalysisMode)' != '')">7.0</AnalysisLevel>
 
     <!-- AnalysisLevel can also contain compound values with a prefix and suffix separated by a '-' character.
          The prefix indicates the core AnalysisLevel and the suffix indicates the bucket of
@@ -45,8 +35,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- EffectiveAnalysisLevel is used to differentiate from user specified strings (such as 'none')
          and an implied numerical option (such as '4')-->
     <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'none' or '$(AnalysisLevelPrefix)' == 'none'">4.0</EffectiveAnalysisLevel>
-    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'latest' or '$(AnalysisLevelPrefix)' == 'latest'">6.0</EffectiveAnalysisLevel>
-    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'preview' or '$(AnalysisLevelPrefix)' == 'preview'">7.0</EffectiveAnalysisLevel>
+    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'latest' or '$(AnalysisLevelPrefix)' == 'latest'">7.0</EffectiveAnalysisLevel>
+    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'preview' or '$(AnalysisLevelPrefix)' == 'preview'">8.0</EffectiveAnalysisLevel>
 
     <!-- Set EffectiveAnalysisLevel to the value of AnalysisLevel if it is a version number -->
     <EffectiveAnalysisLevel Condition="'$(EffectiveAnalysisLevel)' == '' And
@@ -69,32 +59,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Enable the trim analyzer when any trimming settings are enabled. Warnings may suppressed based on other settings. -->
     <EnableTrimAnalyzer Condition="'$(EnableTrimAnalyzer)' == '' And ('$(PublishTrimmed)' == 'true' Or '$(IsTrimmable)' == 'true')">true</EnableTrimAnalyzer>
 
-    <!-- The compiler warning level is defaulted to 4. We promote it to 5 if the user has set analysis level to 5 or higher
-         NOTE: at this time only the C# compiler supports warning waves -->
-    <WarningLevel Condition="'$(Language)' == 'C#' And '$(WarningLevel)' == ''">5</WarningLevel>
-  </PropertyGroup>
+    <!-- If the user specified 'preview' we want to pick a very high warning level to opt into the highest possible warning wave -->
+    <WarningLevel Condition="'$(Language)' == 'C#' And '$(AnalysisLevel)' == 'preview'">9999</WarningLevel>
+    <!-- NOTE: at this time only the C# compiler supports warning waves like this. -->
+    <WarningLevel Condition="'$(Language)' == 'C#' And '$(WarningLevel)' == ''">$(_TargetFrameworkVersionWithoutV.Substring(0, 1))</WarningLevel>
 
-  <!-- Set the default WarningLevel based on EffectiveAnalysisLevel
-       For .NET 6 we want the Warning level to be 6 -->
-  <PropertyGroup Condition="'$(EffectiveAnalysisLevel)' != '' And
-                             $([MSBuild]::VersionGreaterThanOrEquals($(EffectiveAnalysisLevel), '6.0'))">
-    <WarningLevel Condition="'$(Language)' == 'C#' And '$(WarningLevel)' == ''">6</WarningLevel>
-  </PropertyGroup>
-
-  <!-- Set the default WarningLevel based on EffectiveAnalysisLevel
-       For .NET 7 we want the Warning level to be 7 -->
-  <PropertyGroup Condition="'$(EffectiveAnalysisLevel)' != '' And
-                             $([MSBuild]::VersionGreaterThanOrEquals($(EffectiveAnalysisLevel), '7.0'))">
-    <WarningLevel Condition="'$(Language)' == 'C#' And '$(WarningLevel)' == ''">7</WarningLevel>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == ''">false</EnableNETAnalyzers>
 
     <!-- EnforceCodeStyleInBuild Allows code style analyzers to be disabled in bulk via msbuild if the user wants to -->
     <EnforceCodeStyleInBuild Condition="'$(EnforceCodeStyleInBuild)' == ''">false</EnforceCodeStyleInBuild>
-    <!-- If the user specified 'preview' we want to pick a very high warning level to opt into the highest possible warning wave -->
-    <WarningLevel Condition="'$(Language)' == 'C#' And '$(AnalysisLevel)' == 'preview'">9999</WarningLevel>
   </PropertyGroup>
 
   <!-- Unconditionally import 'Microsoft.CodeAnalysis.NetAnalyzers.props' for all C# and VB projects for supporting https://github.com/dotnet/roslyn-analyzers/issues/3977 -->
