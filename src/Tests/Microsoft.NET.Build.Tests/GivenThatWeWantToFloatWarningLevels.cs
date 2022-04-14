@@ -19,6 +19,7 @@ namespace Microsoft.NET.Build.Tests
     {
         private const string targetFrameworkNet6 = "net6.0";
         private const string targetFrameworkNet7 = "net7.0";
+        private const string targetFrameworkNetFramework472 = "net472";
 
         public GivenThatWeWantToFloatWarningLevels(ITestOutputHelper log) : base(log)
         {
@@ -26,8 +27,9 @@ namespace Microsoft.NET.Build.Tests
 
         [InlineData(targetFrameworkNet6, 6)]
         [InlineData(targetFrameworkNet7, 7)]
+        [InlineData(targetFrameworkNetFramework472, 4)]
         [RequiresMSBuildVersionTheory("16.8")]
-        public void It_defaults_WarningLevel_To_The_Current_TFM(string tfm, int warningLevel)
+        public void It_defaults_WarningLevel_To_The_Current_TFM_When_Net(string tfm, int warningLevel)
         {
             var testProject = new TestProject
             {

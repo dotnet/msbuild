@@ -43,6 +43,15 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        '$(AnalysisLevelPrefix)' != ''">$(AnalysisLevelPrefix)</EffectiveAnalysisLevel>
     <EffectiveAnalysisLevel Condition="'$(EffectiveAnalysisLevel)' == '' And
                                        '$(AnalysisLevel)' != ''">$(AnalysisLevel)</EffectiveAnalysisLevel>
+
+    <!-- Set WarningLevel based on all we know about the project -->
+    <!-- NOTE: at this time only the C# compiler supports warning waves like this. -->
+    <!-- If the user specified 'preview' we want to pick a very high warning level to opt into the highest possible warning wave -->
+    <WarningLevel Condition="'$(Language)' == 'C#' And '$(WarningLevel)' == '' And '$(AnalysisLevel)' == 'preview'">9999</WarningLevel>
+    <!-- The CSharp.props used to hard-code WarningLevel to 4, so to maintain parity with .NET Framework projects we do that here. -->
+    <WarningLevel Condition="'$(Language)' == 'C#' And '$(WarningLevel)' == '' And '$(TargetFrameworkIdentifier)' == '.NETFramework' ">4</WarningLevel>
+    <!-- .NET projects, however, can float up to their TFM's major version -->
+    <WarningLevel Condition="'$(Language)' == 'C#' And '$(WarningLevel)' == '' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' ">$(_TargetFrameworkVersionWithoutV.Substring(0, 1))</WarningLevel>
   </PropertyGroup>
 
   <!-- Enable Analyzers based on EffectiveAnalysisLevel -->
@@ -59,15 +68,16 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Enable the trim analyzer when any trimming settings are enabled. Warnings may suppressed based on other settings. -->
     <EnableTrimAnalyzer Condition="'$(EnableTrimAnalyzer)' == '' And ('$(PublishTrimmed)' == 'true' Or '$(IsTrimmable)' == 'true')">true</EnableTrimAnalyzer>
 
-    <!-- If the user specified 'preview' we want to pick a very high warning level to opt into the highest possible warning wave -->
-    <WarningLevel Condition="'$(Language)' == 'C#' And '$(WarningLevel)' == '' And '$(AnalysisLevel)' == 'preview'">9999</WarningLevel>
-    <!-- NOTE: at this time only the C# compiler supports warning waves like this. -->
-    <WarningLevel Condition="'$(Language)' == 'C#' And '$(WarningLevel)' == ''">$(_TargetFrameworkVersionWithoutV.Substring(0, 1))</WarningLevel>
-
-    <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == ''">false</EnableNETAnalyzers>
-
     <!-- EnforceCodeStyleInBuild Allows code style analyzers to be disabled in bulk via msbuild if the user wants to -->
     <EnforceCodeStyleInBuild Condition="'$(EnforceCodeStyleInBuild)' == ''">false</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <!-- Establish good defaults for scenarios where no EffectiveAnalysisLevel was set (e.g. .NETFramework) -->
+  <PropertyGroup Condition="'$(EffectiveAnalysisLevel)' == '' Or ('$(EffectiveAnalysisLevel)' != '' And $([MSBuild]::VersionLessThanOrEquals($(EffectiveAnalysisLevel), '4.0')))">
+    <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == ''">false</EnableNETAnalyzers>
+    <EnforceCodeStyleInBuild Condition="'$(EnforceCodeStyleInBuild)' == ''">false</EnforceCodeStyleInBuild>
+    <EnableTrimAnalyzer Condition="'$(EnableTrimAnalyzer)' == ''">false</EnableTrimAnalyzer>
+    <EnableSingleFileAnalyzer Condition="'$(EnableSingleFileAnalyzer)' == ''">false</EnableSingleFileAnalyzer>
   </PropertyGroup>
 
   <!-- Unconditionally import 'Microsoft.CodeAnalysis.NetAnalyzers.props' for all C# and VB projects for supporting https://github.com/dotnet/roslyn-analyzers/issues/3977 -->
