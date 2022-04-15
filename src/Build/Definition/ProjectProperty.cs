@@ -648,7 +648,9 @@ namespace Microsoft.Build.Evaluation
             internal bool _loggedEnvProperty = false;
             internal LoggingContext loggingContext;
 
-            internal EnvironmentDerivedProjectProperty(Project project, string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext) : base(project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved)
+            internal EnvironmentDerivedProjectProperty(
+                Project project, string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext)
+                : base(project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved)
             {
                 this.loggingContext = loggingContext;
             }
