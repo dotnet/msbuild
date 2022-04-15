@@ -92,6 +92,7 @@
     <Reference Include="System.Core" />
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="$(MicrosoftVisualStudioSetupConfigurationInteropVersion)" PrivateAssets="All" ExcludeAssets="Runtime" />
     <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+    <PackageReference Update="System.Private.Uri" Version="4.3.2" />
   </ItemGroup>
 
   <ItemGroup>
