@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="DebugPathTooLong">
         <source>MSB6012: The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
-        <target state="new">MSB6012: The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</target>
+        <target state="translated">MSB6012: La ruta de acceso "{0}" usada para los registros de depuración es demasiado larga. Establézcalo en un valor más corto con la variable de entorno MSBUILDDEBUGPATH o cambie la configuración del sistema para permitir rutas de acceso largas.</target>
         <note>{StrBegin="MSB6012: "}</note>
       </trans-unit>
       <trans-unit id="General.InvalidToolSwitch">

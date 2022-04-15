@@ -1192,7 +1192,7 @@ Esempio:
       </trans-unit>
       <trans-unit id="MSBuildDebugPath">
         <source>MSBuild logs and debug information will be at "{0}"</source>
-        <target state="new">MSBuild logs and debug information will be at "{0}"</target>
+        <target state="translated">I log e le informazioni di debug di MSBuild sono contenuti in "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingLoggerError">

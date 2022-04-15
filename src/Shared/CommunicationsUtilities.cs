@@ -82,13 +82,17 @@ namespace Microsoft.Build.Internal
 
         internal Handshake(HandshakeOptions nodeType)
         {
+            const int handshakeVersion = (int)CommunicationsUtilities.handshakeVersion;
+
             // We currently use 7 bits of this 32-bit integer. Very old builds will instantly reject any handshake that does not start with F5 or 06; slightly old builds always lead with 00.
             // This indicates in the first byte that we are a modern build.
-            options = (int)nodeType | (((int)CommunicationsUtilities.handshakeVersion) << 24);
+            options = (int)nodeType | (handshakeVersion << 24);
+            CommunicationsUtilities.Trace("Building handshake for node type {0}, (version {1}): options {2}.", nodeType, handshakeVersion, options);
+
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
-            CommunicationsUtilities.Trace("Handshake salt is " + handshakeSalt);
+            CommunicationsUtilities.Trace("Handshake salt is \"{0}\"", handshakeSalt);
             string toolsDirectory = (nodeType & HandshakeOptions.X64) == HandshakeOptions.X64 ? BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64 : BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
-            CommunicationsUtilities.Trace("Tools directory is " + toolsDirectory);
+            CommunicationsUtilities.Trace("Tools directory is \"{0}\"", toolsDirectory);
             salt = CommunicationsUtilities.GetHashCode(handshakeSalt + toolsDirectory);
             Version fileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
             fileVersionMajor = fileVersion.Major;
@@ -502,7 +506,7 @@ namespace Microsoft.Build.Internal
                     if (runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.clr2, StringComparison.OrdinalIgnoreCase))
                     {
                         clrVersion = 2;
-                    } 
+                    }
                     else if (runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase))
                     {
                         clrVersion = 4;
