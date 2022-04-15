@@ -87,7 +87,7 @@ jobs:
         condition: succeededOrFailed()
         env:
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-            HelixAccessToken: $(HelixApiAccessToken)
+            HelixAccessToken: $(_HelixApiToken)
 
     - ${{ if eq(parameters.agentOs, 'Windows_NT_FullFramework') }}:
       - script: eng\CIBuild.cmd
@@ -113,7 +113,7 @@ jobs:
         env:
             TestFullMSBuild: 'true'
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-            HelixAccessToken: $(HelixApiAccessToken)
+            HelixAccessToken: $(_HelixApiToken)
 
     - ${{ if eq(parameters.agentOs, 'Windows_NT_TestAsTools') }}:
       - script: eng\CIBuild.cmd
