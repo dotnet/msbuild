@@ -61,9 +61,9 @@ namespace Microsoft.Build.Tasks
         public string SourceUrl { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of seconds to wait before the request times out.
+        /// Gets or sets the number of milliseconds to wait before the request times out.
         /// </summary>
-        public double Timeout { get; set; } = 100;
+        public int Timeout { get; set; } = 100_000;
 
         /// <summary>
         /// Gets or sets a <see cref="HttpMessageHandler"/> to use.  This is used by unit tests to mock a connection to a remote server.
@@ -142,7 +142,7 @@ namespace Microsoft.Build.Tasks
         private async Task DownloadAsync(Uri uri, CancellationToken cancellationToken)
         {
             // The main reason to use HttpClient vs WebClient is because we can pass a message handler for unit tests to mock
-            using (var client = new HttpClient(HttpMessageHandler ?? new HttpClientHandler(), disposeHandler: true) { Timeout = TimeSpan.FromSeconds(Timeout) })
+            using (var client = new HttpClient(HttpMessageHandler ?? new HttpClientHandler(), disposeHandler: true) { Timeout = TimeSpan.FromMilliseconds(Timeout) })
             {
                 // Only get the response without downloading the file so we can determine if the file is already up-to-date
                 using (HttpResponseMessage response = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
