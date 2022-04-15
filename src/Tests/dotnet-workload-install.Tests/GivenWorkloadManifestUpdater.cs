@@ -141,6 +141,73 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             manifestUpdates.Should().BeEquivalentTo(expectedManifestUpdates);
         }
 
+
+        [Fact]
+        public void ItFallsbackAfterAdvertising()
+        {
+            var testDir = _testAssetsManager.CreateTestDirectory().Path;
+            var currentFeatureBand = "6.0.100";
+            var dotnetRoot = Path.Combine(testDir, "dotnet");
+            var expectedManifestUpdates = new ManifestVersionUpdate[] {
+                new ManifestVersionUpdate(new ManifestId("test-manifest-1"), new ManifestVersion("5.0.0"), currentFeatureBand, new ManifestVersion("7.0.0"), currentFeatureBand),
+                new ManifestVersionUpdate(new ManifestId("test-manifest-2"), new ManifestVersion("3.0.0"), currentFeatureBand, new ManifestVersion("4.0.0"), currentFeatureBand) };
+            var expectedManifestNotUpdated = new ManifestId[] { new ManifestId("test-manifest-3"), new ManifestId("test-manifest-4") };
+
+            // Write mock manifests
+            var installedManifestDir = Path.Combine(testDir, "dotnet", "sdk-manifests", currentFeatureBand);
+            var adManifestDir = Path.Combine(testDir, ".dotnet", "sdk-advertising", currentFeatureBand);
+            Directory.CreateDirectory(installedManifestDir);
+            Directory.CreateDirectory(adManifestDir);
+            foreach (ManifestVersionUpdate manifestUpdate in expectedManifestUpdates)
+            {
+                Directory.CreateDirectory(Path.Combine(installedManifestDir, manifestUpdate.ManifestId.ToString()));
+                File.WriteAllText(Path.Combine(installedManifestDir, manifestUpdate.ManifestId.ToString(), _manifestFileName), GetManifestContent(manifestUpdate.ExistingVersion));
+                Directory.CreateDirectory(Path.Combine(adManifestDir, manifestUpdate.ManifestId.ToString()));
+                File.WriteAllText(Path.Combine(adManifestDir, manifestUpdate.ManifestId.ToString(), _manifestFileName), GetManifestContent(manifestUpdate.NewVersion));
+            }
+            foreach (var manifest in expectedManifestNotUpdated)
+            {
+                Directory.CreateDirectory(Path.Combine(installedManifestDir, manifest.ToString()));
+                File.WriteAllText(Path.Combine(installedManifestDir, manifest.ToString(), _manifestFileName), GetManifestContent(new ManifestVersion("5.0.0")));
+                Directory.CreateDirectory(Path.Combine(adManifestDir, manifest.ToString()));
+                File.WriteAllText(Path.Combine(adManifestDir, manifest.ToString(), _manifestFileName), GetManifestContent(new ManifestVersion("5.0.0")));
+            }
+
+            var manifestDirs = expectedManifestUpdates.Select(manifest => manifest.ManifestId)
+                .Concat(expectedManifestNotUpdated)
+                .Select(manifest => Path.Combine(installedManifestDir, manifest.ToString(), _manifestFileName))
+                .ToArray();
+            var workloadManifestProvider = new MockManifestProvider(manifestDirs);
+            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
+            var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, dotnetRoot);
+            var installationRepo = new MockInstallationRecordRepository();
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, userProfileDir: Path.Combine(testDir, ".dotnet"), testDir, installationRepo);
+
+            var manifestUpdates = manifestUpdater.CalculateManifestUpdates().Select(m => m.manifestUpdate);
+            manifestUpdates.Should().BeEquivalentTo(expectedManifestUpdates);
+        }
+
+
+
+        // Test to add:
+
+        // Tests after things are advertised
+            // Something like GivenWorkloadManifestUpdateItCanCalculateUpdates
+            // test where the updated manifest is falling back 
+            // would be mocking up the newly created file (AdvertisedManifestFeatureBand.txt)
+
+        // test the advertising
+        // update is available (newer package is available) -- could be newer or the same as the current manifest 
+        // or it could not be in the nuget downloader at all -- then it falls back
+        // if it falls back then it's basically the same 3 cases
+        // nothing advertised or something advertised
+        // doesn't find anything or it finds something and it can be newer, older, or the same 
+        // then you have to consider the feature bands because if it doesn't find the relevant feature band it will fall back
+
+        // normal update (using nuget downloader) versus using offline cache (will have to mock up nuget packages)
+        // do offline stuff after the other tests
+
+
         [Fact]
         public void GivenWorkloadManifestRollbackItCanCalculateUpdates()
         {
