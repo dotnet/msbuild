@@ -511,7 +511,9 @@ namespace Microsoft.Build.BackEnd.Logging
                     setColor(ConsoleColor.DarkGray);
                 }
 
-                string nonNullMessage;
+                string nonNullMessage = e is EnvironmentVariableReadEventArgs environmentDerivedProperty ?
+                    $"Property {environmentDerivedProperty.EnvironmentVariableName} with value {e.Message} expanded from the environment."
+                    : null;
 
                 // Include file information if present.
                 if (e.File != null)
@@ -521,7 +523,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 else
                 {
                     // null messages are ok -- treat as blank line
-                    nonNullMessage = e.Message ?? String.Empty;
+                    nonNullMessage ??= e.Message ?? String.Empty;
                 }
 
                 WriteLinePretty(nonNullMessage);
