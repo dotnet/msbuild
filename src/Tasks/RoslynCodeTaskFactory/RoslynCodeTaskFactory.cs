@@ -594,12 +594,7 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (string directory in directories)
                 {
-                    string path = Path.Combine(directory, name.Name + ".dll");
-                    if (File.Exists(path))
-                    {
-                        return Assembly.LoadFrom(path);
-                    }
-
+                    string path;
                     if (!string.IsNullOrEmpty(name.CultureName))
                     {
                         path = Path.Combine(directory, name.CultureName, name.Name + ".dll");
@@ -607,6 +602,12 @@ namespace Microsoft.Build.Tasks
                         {
                             return Assembly.LoadFrom(path);
                         }
+                    }
+
+                    path = Path.Combine(directory, name.Name + ".dll");
+                    if (File.Exists(path))
+                    {
+                        return Assembly.LoadFrom(path);
                     }
                 }
 
