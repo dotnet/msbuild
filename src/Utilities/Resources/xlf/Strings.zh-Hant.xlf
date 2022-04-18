@@ -7,11 +7,6 @@
         <target state="new">MSB6012: The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</target>
         <note>{StrBegin="MSB6012: "}</note>
       </trans-unit>
-      <trans-unit id="General.FunctionalityRequiresWindows">
-        <source>MSB6013: Functionality "{0}" is only supported when building on Windows.</source>
-        <target state="new">MSB6013: Functionality "{0}" is only supported when building on Windows.</target>
-        <note>{StrBegin="MSB6013: "}</note>
-      </trans-unit>
       <trans-unit id="General.InvalidToolSwitch">
         <source>MSB6001: Invalid command line switch for "{0}". {1}</source>
         <target state="translated">MSB6001: "{0}" 的命令列參數無效。{1}</target>

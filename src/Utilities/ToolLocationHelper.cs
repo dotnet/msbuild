@@ -18,6 +18,7 @@ using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFramework
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyFoldersFromConfig;
 using System.Runtime.Versioning;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -316,11 +317,6 @@ namespace Microsoft.Build.Utilities
         [SupportedOSPlatform("windows")]
         public static IList<AssemblyFoldersExInfo> GetAssemblyFoldersExInfo(string registryRoot, string targetFrameworkVersion, string registryKeySuffix, string osVersion, string platform, System.Reflection.ProcessorArchitecture targetProcessorArchitecture)
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                throw new PlatformNotSupportedException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.FunctionalityRequiresWindows", nameof(GetAssemblyFoldersExInfo)));
-            }
-
             ErrorUtilities.VerifyThrowArgumentLength(registryRoot, nameof(registryRoot));
             ErrorUtilities.VerifyThrowArgumentLength(registryKeySuffix, nameof(registryKeySuffix));
             ErrorUtilities.VerifyThrowArgumentLength(targetFrameworkVersion, nameof(targetFrameworkVersion));
@@ -2447,7 +2443,7 @@ namespace Microsoft.Build.Utilities
                     var monikers = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
                     GatherSDKListFromDirectory(sdkDiskRoots, monikers);
 
-                    if (NativeMethodsShared.IsWindows)
+                    if (NativeMethodsShared.IsWindows && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
                     {
                         GatherSDKListFromRegistry(registryRoot, monikers);
                     }

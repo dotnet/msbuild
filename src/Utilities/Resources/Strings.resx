@@ -137,10 +137,6 @@
     <data name="ToolLocationHelper.UnsupportedVisualStudioVersion" UESanitized="false" Visibility="Private_OM">
         <value>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</value>
     </data>
-    <data name="General.FunctionalityRequiresWindows">
-      <value>MSB6013: Functionality "{0}" is only supported when building on Windows.</value>
-      <comment>{StrBegin="MSB6013: "}</comment>
-    </data>
     <data name="ToolTask.CommandTooLong">
         <value>MSB6002: The command-line for the "{0}" task is too long. Command-lines longer than 32000 characters are likely to fail. Try reducing the length of the command-line by breaking down the call to "{0}" into multiple calls with fewer parameters per call.</value>
         <comment>{StrBegin="MSB6002: "}</comment>
@@ -298,7 +294,7 @@
   <!--
         The Utilities message bucket is: MSB6001 - MSB6200
 
-        Next message code should be MSB6014
+        Next message code should be MSB6013
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
