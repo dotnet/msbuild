@@ -213,7 +213,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp3.1")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         [InlineData("net48")]
         public void WhenNotTargetingNet5TargetPlatformMinVersionPropertyCanBeSet(string targetFramework)
         {
