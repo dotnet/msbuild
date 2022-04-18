@@ -39,7 +39,8 @@ namespace Microsoft.Build.Tasks
         {
             if (PropertiesAndValues != null)
             {
-                XElement root = UseAttributeForTargetFrameworkInfoPropertyNames ?
+                // When removing the change wave, also remove UseAttributeForTargetFrameworkInfoPropertyNames.
+                XElement root = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_2) || UseAttributeForTargetFrameworkInfoPropertyNames ?
                     new("TargetFramework", new XAttribute("Name", EscapingUtilities.Escape(RootElementName))) :
                     new(RootElementName);
 
