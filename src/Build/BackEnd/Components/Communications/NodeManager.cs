@@ -93,7 +93,7 @@ namespace Microsoft.Build.BackEnd
             // We will prefer to make nodes on the "closest" providers first; in-proc, then
             // out-of-proc, then remote.
             // When we support distributed build, we will also consider the remote provider.
-            List<NodeInfo> nodes = new();
+            List<NodeInfo> nodes = new(numberOfNodesToCreate);
             if ((nodeAffinity == NodeAffinity.Any || nodeAffinity == NodeAffinity.InProc) && !_componentHost!.BuildParameters.DisableInProcNode)
             {
                 nodes.AddRange(AttemptCreateNode(_inProcNodeProvider!, configuration, numberOfNodesToCreate));

@@ -196,7 +196,7 @@ namespace Microsoft.Build.BackEnd
                 NodeInfo nodeInfo = new(nodeId, ProviderType);
                 if (!CreateNode(nodeId, factory, configurationFactory(nodeInfo)))
                 {
-                    // If it fails let it return what we have crated so far to so caller can somehow acquire missing nodes.
+                    // If it fails let it return what we have created so far so caller can somehow acquire missing nodes.
                     break;
                 }
 
