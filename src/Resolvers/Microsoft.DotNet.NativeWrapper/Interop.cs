@@ -39,8 +39,7 @@ namespace Microsoft.DotNet.NativeWrapper
         private static void PreloadWindowsLibrary(string dllFileName)
         {
             string basePath = Path.GetDirectoryName(typeof(Interop).Assembly.Location);
-            string architecture = IntPtr.Size == 8 ? "x64" : "x86";
-            architecture = RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "arm64" : architecture;
+            string architecture = Enum.GetName(typeof(Architecture), RuntimeInformation.ProcessArchitecture).ToLowerInvariant();
             string dllPath = Path.Combine(basePath, architecture, $"{dllFileName}.dll");
 
             // return value is intentionally ignored as we let the subsequent P/Invokes fail naturally.
