@@ -73,6 +73,8 @@ namespace Microsoft.TemplateEngine.Cli
 
         public IReadOnlyList<Guid> PostActions => _templateInfo.PostActions;
 
+        public IReadOnlyList<TemplateConstraintInfo> Constraints => _templateInfo.Constraints;
+
         internal HostSpecificTemplateData CliData => _cliData;
 
         internal bool IsHidden => _cliData.IsHidden;
