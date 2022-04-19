@@ -301,6 +301,7 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_conditionally_references_project_based_on_tfm()
         {
+            string tfm = ToolsetInfo.CurrentTargetFramework;
             var testProjectA = new TestProject()
             {
                 Name = "ProjectA",
@@ -326,7 +327,7 @@ class Program
             {
                 Name = "ProjectC",
                 IsExe = true,
-                TargetFrameworks = $"netstandard2.1;{ToolsetInfo.CurrentTargetFramework}"
+                TargetFrameworks = $"netstandard2.1;{tfm}"
             };
             testProjectC.ReferencedProjects.Add(testProjectB);
             testProjectC.SourceFiles.Add("Program.cs", source);
@@ -337,7 +338,7 @@ class Program
                 {
                     var ns = p.Root.Name.Namespace;
                     var itemGroup = new XElement(ns + "ItemGroup",
-                        new XAttribute("Condition", $@"'$(TargetFramework)' == '{ToolsetInfo.CurrentTargetFramework}'"));
+                        new XAttribute("Condition", $@"'$(TargetFramework)' == '{tfm}'"));
                     var projRef = new XElement(ns + "ProjectReference",
                         new XAttribute("Include", Path.Combine(path, "..", "..", testProjectA.Name, $"{testProjectA.Name}.csproj")));
                     itemGroup.Add(projRef);

@@ -720,7 +720,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
-            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework).FullName, testProject.Name + ".dll");
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(testProject.TargetFrameworks).FullName, testProject.Name + ".dll");
 
             AssemblyInfo.Get(assemblyPath)["AssemblyMetadataAttribute"].Should().Be("RepositoryUrl:" + fakeUrl);
         }
