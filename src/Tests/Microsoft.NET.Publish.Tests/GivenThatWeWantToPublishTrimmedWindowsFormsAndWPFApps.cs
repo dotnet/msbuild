@@ -23,7 +23,7 @@ namespace Microsoft.NET.Publish.Tests
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_builds_windows_Forms_app_with_error()
         {
-            var targetFramework = "net6.0-windows";
+            var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "WinformsBuildErrorFailTest",
@@ -45,7 +45,7 @@ namespace Microsoft.NET.Publish.Tests
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_builds_windows_Forms_app_with_error_suppressed()
         {
-            var targetFramework = "net6.0-windows";
+            var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "WinformsBuildErrorSuppressPassTest",
@@ -69,7 +69,7 @@ namespace Microsoft.NET.Publish.Tests
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_publishes_windows_Forms_app_with_error()
         {
-            var targetFramework = "net6.0-windows";
+            var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "WinformsErrorPresentFailTest",
@@ -93,7 +93,7 @@ namespace Microsoft.NET.Publish.Tests
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_publishes_windows_Forms_app_with_error_suppressed()
         {
-            var targetFramework = "net6.0-windows";
+            var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "WinformsErrorSuppressedPassTest",
@@ -120,7 +120,7 @@ namespace Microsoft.NET.Publish.Tests
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_builds_wpf_app_with_error()
         {
-            var targetFramework = "net6.0-windows";
+            var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "WpfErrorPresentFailTest",
@@ -142,7 +142,7 @@ namespace Microsoft.NET.Publish.Tests
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_builds_wpf_app_with_error_suppressed()
         {
-            var targetFramework = "net6.0-windows";
+            var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "WpfErrorSuppressedPassTest",
@@ -166,7 +166,7 @@ namespace Microsoft.NET.Publish.Tests
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_publishes_wpf_app_with_error()
         {
-            var targetFramework = "net6.0-windows";
+            var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "WpfErrorPresentPassTest",
@@ -190,7 +190,7 @@ namespace Microsoft.NET.Publish.Tests
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_publishes_wpf_app_with_error_Suppressed()
         {
-            var targetFramework = "net6.0-windows";
+            var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "WpfPassTest",

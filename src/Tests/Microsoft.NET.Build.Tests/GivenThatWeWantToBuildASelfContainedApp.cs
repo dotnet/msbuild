@@ -163,7 +163,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 IsExe = true,
-                TargetFrameworks = "net6.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
             };
 
@@ -259,17 +259,17 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 IsExe = true,
-                TargetFrameworks = "net6.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
             };
 
             //  Set up test FrameworkReference that will use workload manifest to resolve versions
             testProject.ProjectChanges.Add(project =>
             {
-                var itemGroup = XElement.Parse(@"
+                var itemGroup = XElement.Parse($@"
   <ItemGroup>
     <KnownFrameworkReference Include='Microsoft.NETCore.App.Test'
-                          TargetFramework='net6.0'
+                          TargetFramework='{ToolsetInfo.CurrentTargetFramework}'
                           RuntimeFrameworkName='Microsoft.NETCore.App.Test'
                           DefaultRuntimeFrameworkVersion='**FromWorkload**'
                           LatestRuntimeFrameworkVersion='**FromWorkload**'
