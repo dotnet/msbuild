@@ -831,10 +831,19 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     Helpers.ResetStateForDriveEnumeratingWildcardTests(env, "0");
 
                     // Setup
+                    string content = @"
+                    <Project>
+                        <ItemGroup>
+                            <i Include='i1'/>
+                        </ItemGroup>
+                    </Project>
+                    ";
+
+                    TransientTestProjectWithFiles testProject = env.CreateTestProjectWithFiles("build.proj", content);
                     ProjectCollection projectCollection = new ProjectCollection();
                     MockLogger collectionLogger = new MockLogger();
                     projectCollection.RegisterLogger(collectionLogger);
-                    Project project = new Project(projectCollection);
+                    Project project = new Project(testProject.ProjectFile, null, null, projectCollection);
 
                     // Add item
                     _= project.AddItem("i", unevaluatedInclude);
@@ -842,6 +851,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     // Verify
                     collectionLogger.WarningCount.ShouldBe(1);
                     collectionLogger.AssertLogContains("MSB5029");
+                    collectionLogger.AssertLogContains(project.ProjectFileLocation.LocationString);
                     projectCollection.UnregisterAllLoggers();
                 }
                 finally
@@ -969,6 +979,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     // Verify
                     collectionLogger.WarningCount.ShouldBe(1);
                     collectionLogger.AssertLogContains("MSB5029");
+                    collectionLogger.AssertLogContains(testProjectFile);
                     options.ProjectCollection.UnregisterAllLoggers();
                 }
             }
