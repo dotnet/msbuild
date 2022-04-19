@@ -409,17 +409,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 // if we don't find the file then use the current feature band
                 var adManifestFeatureBandPath = Path.Combine(GetAdvertisingManifestPath(_sdkFeatureBand, manifestId), "AdvertisedManifestFeatureBand.txt");
 
+                SdkFeatureBand adManifestFeatureBand = _sdkFeatureBand;
                 if (File.Exists(adManifestFeatureBandPath))
                 {
-                    SdkFeatureBand adManifestFeatureBand = new SdkFeatureBand(File.ReadAllText(adManifestFeatureBandPath));
+                    adManifestFeatureBand = new SdkFeatureBand(File.ReadAllText(adManifestFeatureBandPath));
                 }
-                else
-                {
-                    SdkFeatureBand adManifestFeatureBand = _sdkFeatureBand;
-                }
-                
+                              
 
-                return (new ManifestVersion(manifest.Version), _sdkFeatureBand, manifest.Workloads.Values.OfType<WorkloadDefinition>().ToDictionary(w => w.Id));
+                return (new ManifestVersion(manifest.Version), adManifestFeatureBand, manifest.Workloads.Values.OfType<WorkloadDefinition>().ToDictionary(w => w.Id));
             }
         }
 

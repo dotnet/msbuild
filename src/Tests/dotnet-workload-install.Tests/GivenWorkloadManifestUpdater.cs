@@ -143,7 +143,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
 
         [Fact]
-        public void ItFallsbackAfterAdvertising()
+        public void GivenAdvertisedManifestsItCalculatesCorrectUpdates()
         {
             var testDir = _testAssetsManager.CreateTestDirectory().Path;
             var currentFeatureBand = "6.0.300";
@@ -155,9 +155,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var expectedManifestNotUpdated = new ManifestId[] { new ManifestId("test-manifest-4") };
 
             // Write mock manifests
-            //var installedManifestDir = Path.Combine(testDir, "dotnet", "sdk-manifests", currentFeatureBand);
             var adManifestDir = Path.Combine(testDir, ".dotnet", "sdk-advertising", currentFeatureBand);
-            //Directory.CreateDirectory(installedManifestDir);
             Directory.CreateDirectory(adManifestDir);
             foreach (ManifestVersionUpdate manifestUpdate in expectedManifestUpdates)
             {
@@ -193,10 +191,11 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 File.WriteAllText(Path.Combine(AdManifestPath, "AdvertisedManifestFeatureBand.txt"), currentFeatureBand);
             }
 
-            var manifestDirs = expectedManifestUpdates.Select(manifest => Path.Combine(testDir, "dotnet", "sdk-manifests", manifest.ExistingFeatureBand, manifest.ManifestId.ToString()))
-                .Concat(expectedManifestNotUpdated.Select(manifest => Path.Combine(testDir, "dotnet", "sdk-manifests", currentFeatureBand, manifest.ToString())))
+            var manifestDirs = expectedManifestUpdates.Select(manifest => Path.Combine(testDir, "dotnet", "sdk-manifests", manifest.ExistingFeatureBand, manifest.ManifestId.ToString(), "WorkloadManifest.json"))
+                .Concat(expectedManifestNotUpdated.Select(manifest => Path.Combine(testDir, "dotnet", "sdk-manifests", currentFeatureBand, manifest.ToString(), "WorkloadManifest.json")))
                 .ToArray();
             var workloadManifestProvider = new MockManifestProvider(manifestDirs);
+            workloadManifestProvider.SdkFeatureBand = new SdkFeatureBand(currentFeatureBand);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, dotnetRoot);
             var installationRepo = new MockInstallationRecordRepository();
@@ -208,11 +207,6 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
         // Test to add:
 
-        // Tests after things are advertised
-            // Something like GivenWorkloadManifestUpdateItCanCalculateUpdates
-            // test where the updated manifest is falling back 
-            // would be mocking up the newly created file (AdvertisedManifestFeatureBand.txt)
-
         // test the advertising
         // update is available (newer package is available) -- could be newer or the same as the current manifest 
         // or it could not be in the nuget downloader at all -- then it falls back
@@ -220,6 +214,12 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         // nothing advertised or something advertised
         // doesn't find anything or it finds something and it can be newer, older, or the same 
         // then you have to consider the feature bands because if it doesn't find the relevant feature band it will fall back
+
+        // add list of manifest IDs to the mock nuget downloader that it will not find
+            // when it calls the pakcage download, if it finds the ID in that list it should throw a nuget package not found exception
+            // example : downloads 6.0.300 and finds it in the list so it throws the excpetion and then it will try to download 6.0.200 (could be successfully downloaded or not)
+                // code will need to be updated to handle the case where it fails twice
+
 
         // normal update (using nuget downloader) versus using offline cache (will have to mock up nuget packages)
         // do offline stuff after the other tests
