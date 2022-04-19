@@ -20,6 +20,7 @@ namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToReferenceAProject : SdkTest
     {
+        const string tfm = ToolsetInfo.CurrentTargetFramework;
         public GivenThatWeWantToReferenceAProject(ITestOutputHelper log) : base(log)
         {
         }
@@ -170,7 +171,6 @@ namespace Microsoft.NET.Build.Tests
         [InlineData(false, false)]
         public void It_disables_copying_conflicting_transitive_content(bool copyConflictingTransitiveContent, bool explicitlySet)
         {
-            var tfm = ToolsetInfo.CurrentTargetFramework;
             var contentName = "script.sh";
             var childProject = new TestProject()
             {
@@ -301,7 +301,6 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_conditionally_references_project_based_on_tfm()
         {
-            string tfm = ToolsetInfo.CurrentTargetFramework;
             var testProjectA = new TestProject()
             {
                 Name = "ProjectA",
