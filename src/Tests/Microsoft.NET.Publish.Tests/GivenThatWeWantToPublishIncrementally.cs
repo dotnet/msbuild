@@ -170,7 +170,7 @@ namespace Microsoft.NET.Publish.Tests
             var runtimeId = "win-x86";
             var newCommand = new DotnetCommand(Log);
             newCommand.WorkingDirectory = testDir.Path;
-            newCommand.Execute("new", "mvc", "-n", assetName).Should().Pass();
+            newCommand.Execute("new", "mvc", "-n", assetName, "--debug:ephemeral-hive").Should().Pass();
 
             var expectedRegularFiles = new string[] { ".dll", ".deps.json", ".runtimeconfig.json" }
                 .Select(ending => assetName + ending);
