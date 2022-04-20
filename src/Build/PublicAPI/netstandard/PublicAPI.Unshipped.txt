@@ -7,6 +7,4 @@ Microsoft.Build.Execution.BuildParameters.WarningsNotAsErrors.get -> System.Coll
 Microsoft.Build.Execution.BuildParameters.WarningsNotAsErrors.set -> void
 Microsoft.Build.Execution.OutOfProcServerNode
 Microsoft.Build.Execution.OutOfProcServerNode.OutOfProcServerNode(System.Func<string, (int exitCode, string exitType)> buildFunction) -> void
-Microsoft.Build.Execution.OutOfProcServerNode.Run(bool enableReuse, bool lowPriority, out System.Exception shutdownException) -> Microsoft.Build.Execution.NodeEngineShutdownReason
-Microsoft.Build.Execution.OutOfProcServerNode.Run(bool enableReuse, out System.Exception shutdownException) -> Microsoft.Build.Execution.NodeEngineShutdownReason
 Microsoft.Build.Execution.OutOfProcServerNode.Run(out System.Exception shutdownException) -> Microsoft.Build.Execution.NodeEngineShutdownReason

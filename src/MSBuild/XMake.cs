@@ -2621,11 +2621,6 @@ namespace Microsoft.Build.CommandLine
                 }
                 else if (nodeModeNumber == 8)
                 {
-                    // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
-                    bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-                    string[] lowPriorityInput = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority];
-                    bool lowpriority = lowPriorityInput.Length > 0 && lowPriorityInput[0].Equals("true");
-
                     // Since build function has to reuse code from *this* class and OutOfProcServerNode is in different assembly
                     // we have to pass down xmake build invocation to avoid circular dependency
                     Func<string, (int exitCode, string exitType)> buildFunction = (commandLine) =>
@@ -2656,7 +2651,7 @@ namespace Microsoft.Build.CommandLine
                     OutOfProcServerNode node = new(buildFunction);
 
                     s_isServerNode = true;
-                    shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);
+                    shutdownReason = node.Run(out nodeException);
 
                     FileUtilities.ClearCacheDirectory();
                 }
