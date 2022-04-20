@@ -3646,6 +3646,20 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
+        [Theory]
+        [InlineData("easycase")]
+        [InlineData("")]
+        [InlineData("\"\n()\tsdfIR$%#*;==")]
+        public void TestBase64Conversion(string testCase)
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+            string intermediate = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertToBase64('{testCase}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
+            intermediate.Trim('=').All(c => char.IsLetterOrDigit(c) || c == '+' || c == '/').ShouldBeTrue();
+            string original = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertFromBase64('{intermediate}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
+            original.ShouldBe(testCase);
+        }
+
         /// <summary>
         /// A whole bunch error check tests
         /// </summary>
