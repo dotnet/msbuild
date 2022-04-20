@@ -292,9 +292,6 @@ namespace Microsoft.Build.Execution
                 case NodePacketType.ServerNodeBuildCommand:
                     HandleServerNodeBuildCommand((ServerNodeBuildCommand)packet);
                     break;
-                case NodePacketType.NodeBuildComplete:
-                    HandleNodeBuildComplete((NodeBuildComplete)packet);
-                    break;
             }
         }
 
@@ -392,15 +389,6 @@ namespace Microsoft.Build.Execution
 
                 base.Flush();
             }
-        }
-
-        /// <summary>
-        /// Handles the NodeBuildComplete packet.
-        /// </summary>
-        private void HandleNodeBuildComplete(NodeBuildComplete buildComplete)
-        {
-            _shutdownReason = buildComplete.PrepareForReuse ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
-            _shutdownEvent.Set();
         }
 
         internal sealed class ServerNamedMutex : IDisposable
