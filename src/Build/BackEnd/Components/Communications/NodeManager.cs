@@ -7,9 +7,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
 using System.Threading;
 using System.Diagnostics;
-using System.Linq;
-
-#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -352,7 +349,7 @@ namespace Microsoft.Build.BackEnd
 
         public IEnumerable<Process> GetProcesses()
         {
-            return _outOfProcNodeProvider.GetProcesses();
+            return _outOfProcNodeProvider?.GetProcesses() ?? new List<Process>(0);
         }
     }
 }
