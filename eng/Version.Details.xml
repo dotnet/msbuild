@@ -74,11 +74,11 @@
       <Uri>https://github.com/dotnet/msbuild</Uri>
       <Sha>41abc5629965e3f9e41f1e67fdf78345c0c5cc4b</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.FSharp.Compiler" Version="12.0.3-beta.22203.2">
+    <Dependency Name="Microsoft.FSharp.Compiler" Version="12.0.3-beta.22219.3">
       <Uri>https://github.com/dotnet/fsharp</Uri>
       <Sha>8854f5d1f3bd7e60d42565a18a2f8c06ae307474</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.fsharp" Version="6.0.4-beta.22203.2">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.fsharp" Version="6.0.4-beta.22219.3">
       <Uri>https://github.com/dotnet/fsharp</Uri>
       <Sha>8854f5d1f3bd7e60d42565a18a2f8c06ae307474</Sha>
       <SourceBuild RepoName="fsharp" ManagedOnly="true" />
@@ -271,13 +271,13 @@
       <Sha>c750b5a665adb75b528a93d844f238bd1360a91a</Sha>
       <SourceBuild RepoName="roslyn-analyzers" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="System.CommandLine" Version="2.0.0-beta3.22173.1">
+    <Dependency Name="System.CommandLine" Version="2.0.0-beta3.22219.1">
       <Uri>https://github.com/dotnet/command-line-api</Uri>
-      <Sha>6c71bd788d9c8f8628787792d865b9eb683f851f</Sha>
+      <Sha>3fef05578da428d3a54301d127bf47c2e49f2106</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.command-line-api" Version="0.1.317301">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.command-line-api" Version="0.1.321901">
       <Uri>https://github.com/dotnet/command-line-api</Uri>
-      <Sha>6c71bd788d9c8f8628787792d865b9eb683f851f</Sha>
+      <Sha>3fef05578da428d3a54301d127bf47c2e49f2106</Sha>
       <SourceBuild RepoName="command-line-api" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build" Version="0.1.0-alpha.1.21519.2">
