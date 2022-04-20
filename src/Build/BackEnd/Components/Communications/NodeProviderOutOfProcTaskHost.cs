@@ -9,6 +9,7 @@ using System.Threading;
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
+using System.Linq;
 
 #nullable disable
 
@@ -38,6 +39,11 @@ namespace Microsoft.Build.BackEnd
         private static string s_baseTaskHostPath64;
 
         /// <summary>
+        /// Store the 64-bit path for MSBuild / MSBuildTaskHost so that we don't have to keep recalculating it.
+        /// </summary>
+        private static string s_baseTaskHostPathArm64;
+
+        /// <summary>
         /// Store the path for the 32-bit MSBuildTaskHost so that we don't have to keep re-calculating it.
         /// </summary>
         private static string s_pathToX32Clr2;
@@ -56,6 +62,11 @@ namespace Microsoft.Build.BackEnd
         /// Store the path for the 64-bit MSBuild so that we don't have to keep re-calculating it.
         /// </summary>
         private static string s_pathToX64Clr4;
+
+        /// <summary>
+        /// Store the path for the 64-bit MSBuild so that we don't have to keep re-calculating it.
+        /// </summary>
+        private static string s_pathToArm64Clr4;
 
         /// <summary>
         /// Name for MSBuild.exe
@@ -353,8 +364,10 @@ namespace Microsoft.Build.BackEnd
             s_pathToX32Clr4 = null;
             s_pathToX64Clr2 = null;
             s_pathToX64Clr4 = null;
+            s_pathToArm64Clr4 = null;
             s_baseTaskHostPath = null;
             s_baseTaskHostPath64 = null;
+            s_baseTaskHostPathArm64 = null;
         }
 
         /// <summary>
@@ -392,13 +405,20 @@ namespace Microsoft.Build.BackEnd
         internal static string GetMSBuildLocationFromHostContext(HandshakeOptions hostContext)
         {
             string toolName = GetTaskHostNameFromHostContext(hostContext);
-            string toolPath;
+            string toolPath = null;
 
             s_baseTaskHostPath = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
             s_baseTaskHostPath64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64;
+            s_baseTaskHostPathArm64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryArm64;
+
             ErrorUtilities.VerifyThrowInternalErrorUnreachable((hostContext & HandshakeOptions.TaskHost) == HandshakeOptions.TaskHost);
 
-            if ((hostContext & HandshakeOptions.X64) == HandshakeOptions.X64 && (hostContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2)
+            if ((hostContext & HandshakeOptions.Arm64) == HandshakeOptions.Arm64 && (hostContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2)
+            {
+                // Unsupported, throw.
+                ErrorUtilities.ThrowInternalError("ARM64 CLR2 task hosts are not supported.");
+            }
+            else if ((hostContext & HandshakeOptions.X64) == HandshakeOptions.X64 && (hostContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2)
             {
                 if (s_pathToX64Clr2 == null)
                 {
@@ -433,6 +453,15 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 toolPath = s_pathToX64Clr4;
+            }
+            else if ((hostContext & HandshakeOptions.Arm64) == HandshakeOptions.Arm64)
+            {
+                if (s_pathToArm64Clr4 == null)
+                {
+                    s_pathToArm64Clr4 = s_baseTaskHostPathArm64;
+                }
+
+                toolPath = s_pathToArm64Clr4;
             }
             else
             {
@@ -509,7 +538,7 @@ namespace Microsoft.Build.BackEnd
 
             // Start the new process.  We pass in a node mode with a node number of 2, to indicate that we
             // want to start up an MSBuild task host node.
-            string commandLineArgs = $" /nologo /nodemode:2 /nodereuse:{ComponentHost.BuildParameters.EnableNodeReuse} ";
+            string commandLineArgs = $" /nologo /nodemode:2 /nodereuse:{ComponentHost.BuildParameters.EnableNodeReuse} /low:{ComponentHost.BuildParameters.LowPriority} ";
 
             string msbuildLocation = GetMSBuildLocationFromHostContext(hostContext);
 
@@ -571,6 +600,11 @@ namespace Microsoft.Build.BackEnd
                     _noNodesActiveEvent.Set();
                 }
             }
+        }
+
+        public IEnumerable<Process> GetProcesses()
+        {
+            return _nodeContexts.Values.Select(context => context.Process);
         }
     }
 }
