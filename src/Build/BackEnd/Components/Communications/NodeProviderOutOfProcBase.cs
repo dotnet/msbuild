@@ -665,6 +665,8 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private readonly Process _process;
 
+            internal Process Process { get { return _process; } }
+
             /// <summary>
             /// An array used to store the header byte for each packet when read.
             /// </summary>
