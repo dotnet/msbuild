@@ -24,6 +24,8 @@ namespace Microsoft.Build.BackEnd
 
         private readonly bool _lowPriority;
 
+        internal bool LowPriority { get { return _lowPriority; } }
+
         #endregion
 
         #region Constructors and Factories
