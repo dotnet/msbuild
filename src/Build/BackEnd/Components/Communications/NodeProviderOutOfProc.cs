@@ -5,7 +5,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
