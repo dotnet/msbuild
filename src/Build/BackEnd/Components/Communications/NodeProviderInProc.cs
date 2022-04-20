@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
 using Microsoft.Build.Internal;
@@ -460,6 +461,9 @@ namespace Microsoft.Build.BackEnd
                 _disposed = true;
             }
         }
+
+        // The process here is the same as in the main node.
+        public IEnumerable<Process> GetProcesses() => throw new NotImplementedException();
 
         #endregion
     }

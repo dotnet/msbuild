@@ -10,6 +10,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
+using System.Linq;
 
 #nullable disable
 
@@ -70,7 +71,7 @@ namespace Microsoft.Build.BackEnd
         internal static Handshake GetHandshake(bool enableNodeReuse, bool enableLowPriority)
         {
             CommunicationsUtilities.Trace("MSBUILDNODEHANDSHAKESALT=\"{0}\", msbuildDirectory=\"{1}\", enableNodeReuse={2}, enableLowPriority={3}", Traits.MSBuildNodeHandshakeSalt, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, enableNodeReuse, enableLowPriority);
-            return new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, nodeReuse: enableNodeReuse, lowPriority: enableLowPriority, is64Bit: EnvironmentUtilities.Is64BitProcess));
+            return new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse: enableNodeReuse, lowPriority: enableLowPriority));
         }
 
         /// <summary>
@@ -98,8 +99,7 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace("Starting to acquire {1} new or existing node(s) to establish nodes from ID {0} to {2}...", nextNodeId, numberOfNodesToCreate, nextNodeId + numberOfNodesToCreate - 1);
 
-            Handshake hostHandshake = new(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, nodeReuse: ComponentHost.BuildParameters.EnableNodeReuse, lowPriority: ComponentHost.BuildParameters.LowPriority, is64Bit: EnvironmentUtilities.Is64BitProcess));
-
+            Handshake hostHandshake = new(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse: ComponentHost.BuildParameters.EnableNodeReuse, lowPriority: ComponentHost.BuildParameters.LowPriority));
             IList<NodeContext> nodeContexts = GetNodes(null, commandLineArgs, nextNodeId, factory, hostHandshake, NodeContextCreated, NodeContextTerminated, numberOfNodesToCreate);
 
             if (nodeContexts.Count > 0)
@@ -205,6 +205,11 @@ namespace Microsoft.Build.BackEnd
         private void NodeContextTerminated(int nodeId)
         {
             _nodeContexts.TryRemove(nodeId, out _);
+        }
+
+        public IEnumerable<Process> GetProcesses()
+        {
+            return _nodeContexts.Values.Select(context => context.Process);
         }
     }
 }

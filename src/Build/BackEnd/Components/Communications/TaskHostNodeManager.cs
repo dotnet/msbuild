@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 #nullable disable
 
@@ -167,6 +169,11 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(type == BuildComponentType.TaskHostNodeManager, "Cannot create component of type {0}", type);
             return new TaskHostNodeManager();
+        }
+
+        IEnumerable<Process> INodeManager.GetProcesses()
+        {
+            return _outOfProcTaskHostNodeProvider.GetProcesses();
         }
     }
 }

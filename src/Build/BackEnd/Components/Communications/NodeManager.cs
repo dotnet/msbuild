@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
 using System.Threading;
+using System.Diagnostics;
+using System.Linq;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -344,6 +346,11 @@ namespace Microsoft.Build.BackEnd
                 config.NodeId = nodeInfo.NodeId;
                 return config;
             }
+        }
+
+        public IEnumerable<Process> GetProcesses()
+        {
+            return _outOfProcNodeProvider.GetProcesses();
         }
     }
 }

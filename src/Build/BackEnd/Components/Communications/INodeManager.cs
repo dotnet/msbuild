@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.BackEnd
@@ -51,6 +52,8 @@ namespace Microsoft.Build.BackEnd
         /// The node manager contains state which is not supposed to persist between builds, make sure this is cleared.
         /// </summary>
         void ClearPerBuildState();
+
+        IEnumerable<Process> GetProcesses();
         #endregion
     }
 }

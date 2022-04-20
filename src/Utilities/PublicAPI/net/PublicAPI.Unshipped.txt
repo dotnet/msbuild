@@ -1,2 +1,0 @@
-Microsoft.Build.Utilities.ExecutableType.ManagedARM64 = 7 -> Microsoft.Build.Utilities.ExecutableType
-Microsoft.Build.Utilities.ExecutableType.NativeARM64 = 6 -> Microsoft.Build.Utilities.ExecutableType
