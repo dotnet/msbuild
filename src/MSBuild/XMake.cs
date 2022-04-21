@@ -1960,6 +1960,11 @@ namespace Microsoft.Build.CommandLine
         internal static bool usingSwitchesFromAutoResponseFile = false;
 
         /// <summary>
+        /// Indicates that this process is working as a server.
+        /// </summary>
+        private static bool s_isServerNode;
+
+        /// <summary>
         /// Parses the auto-response file (assumes the "/noautoresponse" switch is not specified on the command line), and combines the
         /// switches from the auto-response file with the switches passed in.
         /// Returns true if the response file was found.
@@ -2629,6 +2634,42 @@ namespace Microsoft.Build.CommandLine
                     OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
                     shutdownReason = node.Run(out nodeException);
                 }
+                else if (nodeModeNumber == 8)
+                {
+                    // Since build function has to reuse code from *this* class and OutOfProcServerNode is in different assembly
+                    // we have to pass down xmake build invocation to avoid circular dependency
+                    Func<string, (int exitCode, string exitType)> buildFunction = (commandLine) =>
+                    {
+                        int exitCode;
+                        ExitType exitType;
+
+                        if (!s_initialized)
+                        {
+                            exitType = ExitType.InitializationError;
+                        }
+                        else
+                        {
+                            exitType = Execute(
+#if FEATURE_GET_COMMANDLINE
+                                    commandLine
+#else
+                                    QuotingUtilities.SplitUnquoted(commandLine).ToArray()
+#endif
+                                );
+                            exitCode = exitType == ExitType.Success ? 0 : 1;
+                        }
+                        exitCode = exitType == ExitType.Success ? 0 : 1;
+
+                        return (exitCode, exitType.ToString());
+                    };
+
+                    OutOfProcServerNode node = new(buildFunction);
+
+                    s_isServerNode = true;
+                    shutdownReason = node.Run(out nodeException);
+
+                    FileUtilities.ClearCacheDirectory();
+                }
                 else
                 {
                     CommandLineSwitchException.Throw("InvalidNodeNumberValue", nodeModeNumber.ToString());
@@ -3122,6 +3163,12 @@ namespace Microsoft.Build.CommandLine
                 if ((consoleLoggerParameters?.Length > 0))
                 {
                     consoleParameters = AggregateParameters(consoleParameters, consoleLoggerParameters);
+                }
+
+                // Always use ANSI escape codes when the build is initiated by server
+                if (s_isServerNode)
+                {
+                    consoleParameters = AggregateParameters(consoleParameters, new[] { "FORCECONSOLECOLOR" });
                 }
 
                 // Check to see if there is a possibility we will be logging from an out-of-proc node.
