@@ -1833,7 +1833,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (!sdkResult.Success)
                 {
-                    if (_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports) && (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10) || !_loadSettings.HasFlag(ProjectLoadSettings.FailOnUnresolvedSdk)))
+                    if (_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports) && !_loadSettings.HasFlag(ProjectLoadSettings.FailOnUnresolvedSdk))
                     {
                         ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
                             importElement.Location.Line,

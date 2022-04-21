@@ -884,6 +884,8 @@ Microsoft.Build.Tasks.DownloadFile.SkipUnchangedFiles.get -> bool
 Microsoft.Build.Tasks.DownloadFile.SkipUnchangedFiles.set -> void
 Microsoft.Build.Tasks.DownloadFile.SourceUrl.get -> string
 Microsoft.Build.Tasks.DownloadFile.SourceUrl.set -> void
+Microsoft.Build.Tasks.DownloadFile.Timeout.get -> int
+Microsoft.Build.Tasks.DownloadFile.Timeout.set -> void
 Microsoft.Build.Tasks.Error
 Microsoft.Build.Tasks.Error.Code.get -> string
 Microsoft.Build.Tasks.Error.Code.set -> void
