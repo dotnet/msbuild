@@ -122,10 +122,10 @@
     <Compile Include="..\Shared\NodeShutdown.cs" />
     <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\Shared\ProcessExtensions.cs" />
-    <!-- <Compile Include="..\Shared\PlatformNegotiation.cs">
+    <Compile Include="..\Shared\PlatformNegotiation.cs">
       <Link>PlatformNegotiation.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile> -->
+    </Compile>
     <Compile Include="..\Shared\TaskLoggingHelper.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelper.cs</Link>
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
