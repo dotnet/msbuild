@@ -632,7 +632,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "DuplicateFrameworkReference",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -707,7 +707,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "DuplicatePackageReference",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));

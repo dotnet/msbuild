@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using FluentAssertions;
+using Microsoft.NET.TestFramework;
 using Xunit;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
@@ -140,7 +141,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var task = new TestableGenerateRuntimeConfigurationFiles
             {
                 BuildEngine = new MockNeverCacheBuildEngine4(),
-                TargetFrameworkMoniker = ".NETCoreApp,Version=v3.0",
+                TargetFrameworkMoniker = $".NETCoreApp,Version=v3.0",
                 RuntimeConfigPath = _runtimeConfigPath,
                 RuntimeConfigDevPath = _runtimeConfigDevPath,
                 RuntimeFrameworks = new[]

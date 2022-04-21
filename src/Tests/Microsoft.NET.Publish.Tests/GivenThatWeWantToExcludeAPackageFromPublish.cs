@@ -23,7 +23,7 @@ namespace Microsoft.NET.Publish.Tests
         [Theory]
         [InlineData("netcoreapp1.1", false)]
         [InlineData("netcoreapp2.0", false)]
-        [InlineData("netcoreapp3.0", true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, true)]
         public void It_does_not_publish_a_PackageReference_with_PrivateAssets_All(string targetFramework, bool shouldIncludeExecutable)
         {
             var helloWorldAsset = _testAssetsManager
@@ -69,7 +69,7 @@ namespace Microsoft.NET.Publish.Tests
         [Theory]
         [InlineData("netcoreapp1.1", false)]
         [InlineData("netcoreapp2.0", false)]
-        [InlineData("netcoreapp3.0", true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, true)]
         public void It_does_not_publish_a_PackageReference_with_Publish_false(string targetFramework, bool shouldIncludeExecutable)
         {
             var helloWorldAsset = _testAssetsManager
@@ -114,7 +114,7 @@ namespace Microsoft.NET.Publish.Tests
         [Theory]
         [InlineData("netcoreapp1.1", false)]
         [InlineData("netcoreapp2.0", false)]
-        [InlineData("netcoreapp3.0", true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, true)]
         public void It_publishes_a_PackageReference_with_PrivateAssets_All_and_Publish_true(string targetFramework, bool shouldIncludeExecutable)
         {
             var helloWorldAsset = _testAssetsManager
@@ -178,7 +178,7 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "TestApp",
                 IsExe = true,
-                TargetFrameworks = "netcoreapp3.0"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1", privateAssets: "all"));

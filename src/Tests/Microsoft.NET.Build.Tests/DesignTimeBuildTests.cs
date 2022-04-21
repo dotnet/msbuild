@@ -25,7 +25,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("TestLibrary", null)]
         [InlineData("TestApp", null)]
         [InlineData("TestApp", "netcoreapp2.1")]
-        [InlineData("TestApp", "netcoreapp3.0")]
+        [InlineData("TestApp", ToolsetInfo.CurrentTargetFramework)]
         public void The_design_time_build_succeeds_before_nuget_restore(string relativeProjectPath, string targetFramework)
         {
             var args = GetDesignTimeMSBuildArgs();
@@ -193,7 +193,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "App",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 

@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 using System.Linq;
 using Xunit.Abstractions;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -188,11 +189,11 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyFact]
         public void It_chooses_lowest_netfx_in_default_atf()
         {
-            var testProjectName = "netcoreapp30_multiple_atf";
+            var testProjectName = $"{Regex.Replace(ToolsetInfo.CurrentTargetFramework, @"\.", "")}_multiple_atf";
 
             var (testProjectTestAsset, testPackageReference) = CreateTestAsset(
                testProjectName,
-               "netcoreapp3.0",
+               ToolsetInfo.CurrentTargetFramework,
                "net462;net472",
                new Dictionary<string, string> { ["CopyLocalLockFileAssemblies"] = "true" });
 
@@ -206,7 +207,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(testProjectTestAsset);
             buildCommand.Execute().Should().Pass();
 
-            var referencedDll = buildCommand.GetOutputDirectory("netcoreapp3.0").File("net462_net472_pkg.dll").FullName;
+            var referencedDll = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework).File("net462_net472_pkg.dll").FullName;
             var referencedTargetFramework = AssemblyInfo.Get(referencedDll)["TargetFrameworkAttribute"];
             referencedTargetFramework.Should().Be(".NETFramework,Version=v4.6.2");
         }
