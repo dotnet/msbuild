@@ -50,6 +50,10 @@ $BackupFolder = New-Item (Join-Path $destination -ChildPath "Backup-$(Get-Date -
 Write-Verbose "Copying $configuration MSBuild to $destination"
 Write-Host "Existing MSBuild assemblies backed up to $BackupFolder"
 
+if ($destination -like "*dotnet*sdk*") {
+    $runtime = "Core"
+}
+
 if ($runtime -eq "Desktop") {
     $targetFramework = "net472"
 } else {
