@@ -110,7 +110,7 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
 
         protected override string GenerateCommandLineCommands()
         {
-            return $"--warning:no-file-changed {GetDestinationArchive()} {GetSourceSpecification()}";
+            return $"--warning=no-file-changed {GetDestinationArchive()} {GetSourceSpecification()}";
         }
 
         private string GetSourceSpecification()
