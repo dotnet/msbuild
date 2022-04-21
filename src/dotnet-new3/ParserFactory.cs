@@ -22,7 +22,7 @@ namespace Dotnet_new3
             //.UseParseDirective()
             //.UseSuggestDirective()
             .UseParseErrorReporting()//TODO: discuss with SDK if it is possible to use it.
-            .DisablePosixBundling();
+            .EnablePosixBundling(false);
 
             if (!disableHelp)
             {
@@ -41,12 +41,6 @@ namespace Dotnet_new3
             {
                 return HelpBuilder.Default.GetLayout();
             }
-        }
-
-        private static CommandLineBuilder DisablePosixBundling(this CommandLineBuilder builder)
-        {
-            builder.EnablePosixBundling = false;
-            return builder;
         }
     }
 }

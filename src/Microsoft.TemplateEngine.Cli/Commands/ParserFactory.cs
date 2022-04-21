@@ -16,19 +16,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 //TODO: decide if it's needed to implement it; and implement if needed
                 //.UseParseDirective()
                 //.UseSuggestDirective()
-                .DisablePosixBundling();
+                .EnablePosixBundling(false);
 
             if (!disableHelp)
             {
                 builder = builder.UseHelp();
             }
             return builder.Build();
-        }
-
-        private static CommandLineBuilder DisablePosixBundling(this CommandLineBuilder builder)
-        {
-            builder.EnablePosixBundling = false;
-            return builder;
         }
 
     }
