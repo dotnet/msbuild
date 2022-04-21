@@ -40,7 +40,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var task = new TestableGenerateRuntimeConfigurationFiles
             {
                 BuildEngine = new MockNeverCacheBuildEngine4(),
-                TargetFrameworkMoniker = ".NETCoreApp,Version=v3.0",
+                TargetFrameworkMoniker = $".NETCoreApp,Version=v{ToolsetInfo.CurrentTargetFrameworkVersion}",
                 RuntimeConfigPath = _runtimeConfigPath,
                 RuntimeConfigDevPath = _runtimeConfigDevPath,
                 RuntimeFrameworks = new[]
@@ -61,16 +61,16 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             File.ReadAllText(_runtimeConfigPath).Should()
                 .Be(
-                    @"{
-  ""runtimeOptions"": {
-    ""tfm"": ""netcoreapp3.0"",
+                    $@"{{
+  ""runtimeOptions"": {{
+    ""tfm"": ""{ToolsetInfo.CurrentTargetFramework}"",
     ""rollForward"": ""LatestMinor"",
-    ""framework"": {
+    ""framework"": {{
       ""name"": ""Microsoft.NETCore.App"",
       ""version"": ""3.0.0-preview1.100""
-    }
-  }
-}");
+    }}
+  }}
+}}");
             File.Exists(_runtimeConfigDevPath).Should().BeFalse("No nuget involved, so no extra probing path");
         }
 
@@ -81,7 +81,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var task = new TestableGenerateRuntimeConfigurationFiles
             {
                 BuildEngine = new MockNeverCacheBuildEngine4(),
-                TargetFrameworkMoniker = ".NETCoreApp,Version=v3.0",
+                TargetFrameworkMoniker = $".NETCoreApp,Version=v{ToolsetInfo.CurrentTargetFrameworkVersion}",
                 RuntimeConfigPath = _runtimeConfigPath,
                 RuntimeConfigDevPath = _runtimeConfigDevPath,
                 RuntimeFrameworks = new[]
@@ -116,22 +116,22 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             File.ReadAllText(_runtimeConfigPath).Should()
                 .Be(
-                    @"{
-  ""runtimeOptions"": {
-    ""tfm"": ""netcoreapp3.0"",
+                    $@"{{
+  ""runtimeOptions"": {{
+    ""tfm"": ""{ToolsetInfo.CurrentTargetFramework}"",
     ""rollForward"": ""LatestMinor"",
     ""frameworks"": [
-      {
+      {{
         ""name"": ""Microsoft.WindowsDesktop.App"",
         ""version"": ""3.1.0""
-      },
-      {
+      }},
+      {{
         ""name"": ""Microsoft.AspNetCore.App"",
         ""version"": ""3.1.0""
-      }
+      }}
     ]
-  }
-}",
+  }}
+}}",
                     "There is no Microsoft.NETCore.App. And it is under frameworkS.");
         }
 
@@ -141,7 +141,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var task = new TestableGenerateRuntimeConfigurationFiles
             {
                 BuildEngine = new MockNeverCacheBuildEngine4(),
-                TargetFrameworkMoniker = $".NETCoreApp,Version=v3.0",
+                TargetFrameworkMoniker = $".NETCoreApp,Version=v{ToolsetInfo.CurrentTargetFrameworkVersion}",
                 RuntimeConfigPath = _runtimeConfigPath,
                 RuntimeConfigDevPath = _runtimeConfigDevPath,
                 RuntimeFrameworks = new[]
@@ -169,16 +169,16 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             File.ReadAllText(_runtimeConfigPath).Should()
                 .Be(
-                    @"{
-  ""runtimeOptions"": {
-    ""tfm"": ""netcoreapp3.0"",
+                    $@"{{
+  ""runtimeOptions"": {{
+    ""tfm"": ""{ToolsetInfo.CurrentTargetFramework}"",
     ""rollForward"": ""LatestMinor"",
-    ""framework"": {
+    ""framework"": {{
       ""name"": ""Microsoft.WindowsDesktop.App"",
       ""version"": ""3.1.0""
-    }
-  }
-}",
+    }}
+  }}
+}}",
                     "There is no Microsoft.NETCore.App.");
         }
 

@@ -77,7 +77,7 @@ namespace FrameworkReferenceTest
 
         [Theory]
         [InlineData("netcoreapp3.0", false)]
-        [InlineData("net6.0", true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, true)]
         public void Multiple_frameworks_are_written_to_runtimeconfig_for_self_contained_apps(string tfm, bool shouldHaveIncludedFrameworks)
         {
             var testProject = new TestProject()
@@ -90,7 +90,7 @@ namespace FrameworkReferenceTest
             // Specifying RID makes the produced app self-contained.
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
 
-            if (tfm == "net6.0")
+            if (tfm == ToolsetInfo.CurrentTargetFramework)
             {
                 testProject.FrameworkReferences.Add("Microsoft.ASPNETCORE.App");
             }
