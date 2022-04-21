@@ -15,11 +15,13 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         private readonly string _downloadPath;
         private readonly bool _manifestDownload;
 
-        public List<(PackageId, NuGetVersion, DirectoryPath?, PackageSourceLocation)> DownloadCallParams = new();
+        public List<(PackageId id, NuGetVersion version, DirectoryPath? downloadFolder, PackageSourceLocation packageSourceLocation)> DownloadCallParams = new();
 
         public List<string> DownloadCallResult = new List<string>();
 
         public List<(string, DirectoryPath)> ExtractCallParams = new List<(string, DirectoryPath)>();
+
+        public HashSet<string> PackageIdsToNotFind { get; set; } = new HashSet<string>();
 
         public MockNuGetPackageDownloader(string dotnetRoot = null, bool manifestDownload = false)
         {
@@ -38,6 +40,12 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             DirectoryPath? downloadFolder = null)
         {
             DownloadCallParams.Add((packageId, packageVersion, downloadFolder, packageSourceLocation));
+
+            if (PackageIdsToNotFind.Contains(packageId.ToString()))
+            {
+                return Task.FromException<string>(new NuGetPackageNotFoundException("Package not found: " + packageId.ToString()));
+            }
+
             var path = Path.Combine(_downloadPath, "mock.nupkg");
             DownloadCallResult.Add(path);
             if (_downloadPath != string.Empty)
@@ -54,6 +62,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             {
                 Directory.CreateDirectory(Path.Combine(targetFolder.Value, "data"));
             }
+            
             return Task.FromResult(new List<string>() as IEnumerable<string>);
         }
 

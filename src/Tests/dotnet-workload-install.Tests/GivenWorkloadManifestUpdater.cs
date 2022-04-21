@@ -4,6 +4,7 @@
 using System.IO;
 using System.Linq;
 using FluentAssertions;
+using FluentAssertions.Collections;
 using ManifestReaderTests;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.ToolPackage;
@@ -22,6 +23,7 @@ using System.Text.Json;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
+using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -210,6 +212,61 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         // normal update (using nuget downloader) versus using offline cache (will have to mock up nuget packages)
         // do offline stuff after the other tests
 
+
+        [Fact]
+        public void TestUpdateAcrossBands()
+        {
+            //  Currently installed - 6.0.200 workload manifest
+            //  Current SDK - 6.0.300
+            //  Run update
+            //  Should not find 6.0.300 manifest
+            //  Should fall back to 6.0.200 manifest and advertise it
+
+            //  Setup
+            //  NuGetDownloader should return not found when 6.0.300 manifest is requested
+            //  NuGetDownloader should return a manifest when 6.0.200 manifest is requested
+
+            string sdkFeatureBand = "6.0.300";
+            var testDir = _testAssetsManager.CreateTestDirectory().Path;
+            var dotnetRoot = Path.Combine(testDir, "dotnet");
+            var installedManifestDir6_0_200 = Path.Combine(dotnetRoot, "sdk-manifests", "6.0.200");
+            Directory.CreateDirectory(installedManifestDir6_0_200);
+            var adManifestDir = Path.Combine(testDir, ".dotnet", "sdk-advertising", sdkFeatureBand);
+            Directory.CreateDirectory(adManifestDir);
+
+            //  Write installed test-manifest with feature band 6.0.200
+            string testManifestName = "test-manifest";
+            Directory.CreateDirectory(Path.Combine(installedManifestDir6_0_200, testManifestName));
+            File.WriteAllText(Path.Combine(installedManifestDir6_0_200, testManifestName, _manifestFileName), GetManifestContent(new ManifestVersion("1.0.0")));
+
+            var workloadManifestProvider = new MockManifestProvider(Path.Combine(installedManifestDir6_0_200, testManifestName, _manifestFileName))
+            {
+                SdkFeatureBand = new SdkFeatureBand(sdkFeatureBand)
+            };
+
+            var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, dotnetRoot);
+            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot, manifestDownload: true);
+            nugetDownloader.PackageIdsToNotFind.Add($"{testManifestName}.Manifest-6.0.300");
+            var installationRepo = new MockInstallationRecordRepository();
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, testDir, testDir, installationRepo, getEnvironmentVariable: getEnvironmentVariable);
+
+
+            //  Act
+            manifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews: true).Wait();
+
+            //  Assert
+            //  6.0.300 manifest was requested and then 6.0.200 manifest was requested
+
+            nugetDownloader.DownloadCallParams.Select(p => p.version).ShouldAllBeEquivalentTo(null);
+            nugetDownloader.DownloadCallParams[0].id.ToString().Should().Be($"{testManifestName}.Manifest-6.0.300");
+            nugetDownloader.DownloadCallParams[0].id.ToString().Should().Be($"{testManifestName}.Manifest-6.0.200");
+
+            //  6.0.200 package was written to advertising manifest folder
+            //  AdvertisedManifestFeatureBand.txt file is set to 6.0.200
+        }
+
+        //  Next test case: Same as before, but doesn't find 6.0.300 manifest then also doesn't find 6.0.200 manifest
+        
 
         [Fact]
         public void GivenWorkloadManifestRollbackItCanCalculateUpdates()
