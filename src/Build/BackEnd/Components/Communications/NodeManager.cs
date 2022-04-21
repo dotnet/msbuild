@@ -349,7 +349,7 @@ namespace Microsoft.Build.BackEnd
 
         public IEnumerable<Process> GetProcesses()
         {
-            return _outOfProcNodeProvider?.GetProcesses() ?? IEnumerable.Empty();
+            return _outOfProcNodeProvider?.GetProcesses()!;
         }
     }
 }
