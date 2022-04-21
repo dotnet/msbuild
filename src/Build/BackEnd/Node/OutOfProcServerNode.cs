@@ -87,7 +87,7 @@ namespace Microsoft.Build.Execution
         {
             string msBuildLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
             var handshake = new ServerNodeHandshake(
-                CommunicationsUtilities.GetHandshakeOptions(taskHost: false, is64Bit: EnvironmentUtilities.Is64BitProcess),
+                CommunicationsUtilities.GetHandshakeOptions(taskHost: false, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()),
                 msBuildLocation);
 
             string pipeName = NamedPipeUtil.GetPipeNameOrPath("MSBuildServer-" + handshake.ComputeHash());
@@ -362,89 +362,6 @@ namespace Microsoft.Build.Execution
                 _writeCallback(captured);
 
                 base.Flush();
-            }
-        }
-
-        internal sealed class ServerNamedMutex : IDisposable
-        {
-            public const string RunningServerMutexNamePrefix = @"Global\server-running-";
-            public const string BusyServerMutexNamePrefix = @"Global\server-busy-";
-
-            private readonly Mutex _serverMutex;
-
-            public bool IsDisposed { get; private set; }
-
-            public bool IsLocked { get; private set; }
-
-            public ServerNamedMutex(string mutexName, out bool createdNew)
-            {
-                _serverMutex = new Mutex(
-                    initiallyOwned: true,
-                    name: mutexName,
-                    createdNew: out createdNew);
-
-                if (createdNew)
-                {
-                    IsLocked = true;
-                }
-            }
-
-            internal static ServerNamedMutex OpenOrCreateMutex(string name, out bool createdNew)
-            {
-                // TODO: verify it is not needed anymore
-                // if (PlatformInformation.IsRunningOnMono)
-                // {
-                //     return new ServerFileMutexPair(name, initiallyOwned: true, out createdNew);
-                // }
-                // else
-
-                return new ServerNamedMutex(name, out createdNew);
-            }
-
-            public static bool WasOpen(string mutexName)
-            {
-                bool result = Mutex.TryOpenExisting(mutexName, out Mutex? mutex);
-                mutex?.Dispose();
-
-                return result;
-            }
-
-            public bool TryLock(int timeoutMs)
-            {
-                if (IsDisposed)
-                {
-                    throw new ObjectDisposedException(nameof(ServerNamedMutex));
-                }
-
-                if (IsLocked)
-                {
-                    throw new InvalidOperationException("Lock already held");
-                }
-
-                return IsLocked = _serverMutex.WaitOne(timeoutMs);
-            }
-
-            public void Dispose()
-            {
-                if (IsDisposed)
-                {
-                    return;
-                }
-
-                IsDisposed = true;
-
-                try
-                {
-                    if (IsLocked)
-                    {
-                        _serverMutex.ReleaseMutex();
-                    }
-                }
-                finally
-                {
-                    _serverMutex.Dispose();
-                    IsLocked = false;
-                }
             }
         }
     }
