@@ -12,17 +12,17 @@ namespace Microsoft.Build.Shared
     /// </summary>
     static internal class PlatformNegotiation
     {
-        internal static string? GetNearestPlatform(string referencedProjectPlatform, string projectReferencePlatformsMetadata, string projectReferenceLookupTableMetadata, String PlatformLookupTable, TaskLoggingHelper? Log = null)
+        internal static string? GetNearestPlatform(string referencedProjectPlatform, string projectReferencePlatformsMetadata, string projectReferenceLookupTableMetadata, String platformLookupTable, String projectPath, String CurrentProjectPlatform, TaskLoggingHelper? Log = null)
         {
-            Dictionary<string, string>? currentProjectLookupTable = ExtractLookupTable(PlatformLookupTable);
+            Dictionary<string, string>? currentProjectLookupTable = ExtractLookupTable(platformLookupTable);
 
             if (string.IsNullOrEmpty(projectReferencePlatformsMetadata) && string.IsNullOrEmpty(referencedProjectPlatform))
                 {
-                    Log?.LogWarningWithCodeFromResources("GetCompatiblePlatform.NoPlatformsListed", AssignedProjectsWithPlatform[i].ItemSpec);
+                    Log?.LogWarningWithCodeFromResources("GetCompatiblePlatform.NoPlatformsListed", projectPath);
                     return null;
                 }
 
-                // Pull platformlookuptable metadata from the referenced project. This allows custom
+                // Pull platformLookupTable metadata from the referenced project. This allows custom
                 // mappings on a per-ProjectReference basis.
                 Dictionary<string, string>? projectReferenceLookupTable = ExtractLookupTable(projectReferenceLookupTableMetadata);
 
@@ -38,7 +38,7 @@ namespace Microsoft.Build.Shared
                 // Don't set `buildProjectReferenceAs` and the `_GetProjectReferencePlatformProperties` target will handle the rest.
                 if (!string.IsNullOrEmpty(referencedProjectPlatform) && referencedProjectPlatform.Equals(CurrentProjectPlatform, StringComparison.OrdinalIgnoreCase))
                 {
-                    Log?.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform", AssignedProjectsWithPlatform[i].ItemSpec, referencedProjectPlatform);
+                    Log?.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform", projectPath, referencedProjectPlatform);
                 }
                 // Prefer matching platforms
                 else if (projectReferencePlatforms.Contains(CurrentProjectPlatform))
@@ -46,7 +46,7 @@ namespace Microsoft.Build.Shared
                     buildProjectReferenceAs = CurrentProjectPlatform;
                     Log?.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.SamePlatform");
                 }
-                // Prioritize PlatformLookupTable **metadata** attached to the ProjectReference item
+                // Prioritize platformLookupTable **metadata** attached to the ProjectReference item
                 // before the current project's table. We do this to allow per-ProjectReference fine tuning.
                 else if (projectReferenceLookupTable != null &&
                         projectReferenceLookupTable.ContainsKey(CurrentProjectPlatform) &&
@@ -61,7 +61,7 @@ namespace Microsoft.Build.Shared
                         projectReferencePlatforms.Contains(currentProjectLookupTable[CurrentProjectPlatform]))
                 {
                     buildProjectReferenceAs = currentProjectLookupTable[CurrentProjectPlatform];
-                    Log?.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.FoundMappingInTable", CurrentProjectPlatform, buildProjectReferenceAs, PlatformLookupTable);
+                    Log?.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.FoundMappingInTable", CurrentProjectPlatform, buildProjectReferenceAs, platformLookupTable);
                 }
                 // AnyCPU if possible
                 else if (projectReferencePlatforms.Contains("AnyCPU"))
@@ -73,8 +73,9 @@ namespace Microsoft.Build.Shared
                 {
                     // Keep NearestPlatform empty, log a warning. Common.CurrentVersion.targets will undefine 
                     // Platform/PlatformTarget when this is the case.
-                    Log?.LogWarningWithCodeFromResources("GetCompatiblePlatform.NoCompatiblePlatformFound", AssignedProjectsWithPlatform[i].ItemSpec);
+                    Log?.LogWarningWithCodeFromResources("GetCompatiblePlatform.NoCompatiblePlatformFound", projectPath);
                 }
+            return buildProjectReferenceAs;
         }
         internal static Dictionary<string, string>? ExtractLookupTable(string stringTable, TaskLoggingHelper? Log = null)
         {
