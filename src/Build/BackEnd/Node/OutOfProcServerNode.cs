@@ -92,8 +92,8 @@ namespace Microsoft.Build.Execution
 
             string pipeName = NamedPipeUtil.GetPipeNameOrPath("MSBuildServer-" + handshake.ComputeHash());
 
-            string serverRunningMutexName = $@"Global\server-running-{pipeName}";
-            _serverBusyMutexName = $@"Global\server-busy-{pipeName}";
+            string serverRunningMutexName = $@"{ServerNamedMutex.RunningServerMutexNamePrefix}{pipeName}";
+            _serverBusyMutexName = $@"{ServerNamedMutex.BusyServerMutexNamePrefix}{pipeName}";
 
             // TODO: shall we address possible race condition. It is harmless as it, with acceptable probability, just cause unnecessary process spawning
             // and of two processes will become victim and fails, build will not be affected
@@ -367,7 +367,10 @@ namespace Microsoft.Build.Execution
 
         internal sealed class ServerNamedMutex : IDisposable
         {
-            public readonly Mutex _serverMutex;
+            public const string RunningServerMutexNamePrefix = @"Global\server-running-";
+            public const string BusyServerMutexNamePrefix = @"Global\server-busy-";
+
+            private readonly Mutex _serverMutex;
 
             public bool IsDisposed { get; private set; }
 

@@ -7,7 +7,7 @@ using Microsoft.Build.Internal;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// This is an implementation of INodeEndpoint for the out-of-proc nodes.  It acts only as a client.
+    /// This is an implementation of out-of-proc server node endpoint.
     /// </summary>
     internal sealed class ServerNodeEndpointOutOfProc : NodeEndpointOutOfProcBase
     {
