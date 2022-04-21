@@ -1174,7 +1174,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="MSBuildDebugPath">
         <source>MSBuild logs and debug information will be at "{0}"</source>
-        <target state="new">MSBuild logs and debug information will be at "{0}"</target>
+        <target state="translated">MSBuild günlükleri ve hata ayıklama bilgileri "{0}" yolunda olacak</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingLoggerError">
