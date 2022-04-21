@@ -1172,6 +1172,11 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
         <target state="translated">MSBuild sürümü = "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildDebugPath">
+        <source>MSBuild logs and debug information will be at "{0}"</source>
+        <target state="translated">MSBuild günlükleri ve hata ayıklama bilgileri "{0}" yolunda olacak</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MissingLoggerError">
         <source>MSBUILD : error MSB1007: Specify a logger.</source>
         <target state="translated">MSBUILD : error MSB1007: Günlükçü belirtin.</target>

@@ -1168,6 +1168,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <target state="translated">MSBuild 版本 = "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildDebugPath">
+        <source>MSBuild logs and debug information will be at "{0}"</source>
+        <target state="translated">MSBuild 日志和调试信息将位于"{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MissingLoggerError">
         <source>MSBUILD : error MSB1007: Specify a logger.</source>
         <target state="translated">MSBUILD : error MSB1007: 请指定记录器。</target>

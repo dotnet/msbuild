@@ -1,8 +1,3 @@
-Microsoft.Build.Construction.ProjectUsingTaskElement.Override.get -> string
-Microsoft.Build.Construction.ProjectUsingTaskElement.Override.set -> void
-Microsoft.Build.Construction.ProjectUsingTaskElement.OverrideLocation.get -> Microsoft.Build.Construction.ElementLocation
-Microsoft.Build.Execution.BuildParameters.WarningsNotAsErrors.get -> System.Collections.Generic.ISet<string>
-Microsoft.Build.Execution.BuildParameters.WarningsNotAsErrors.set -> void
 Microsoft.Build.Execution.OutOfProcServerNode
 Microsoft.Build.Execution.OutOfProcServerNode.OutOfProcServerNode(System.Func<string, (int exitCode, string exitType)> buildFunction) -> void
 Microsoft.Build.Execution.OutOfProcServerNode.Run(out System.Exception shutdownException) -> Microsoft.Build.Execution.NodeEngineShutdownReason

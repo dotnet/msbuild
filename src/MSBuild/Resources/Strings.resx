@@ -1323,6 +1323,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <data name="MSBVersion" UESanitized="true" Visibility="Public">
     <value>MSBuild version = "{0}"</value>
   </data>
+  <data name="MSBuildDebugPath" Visibility="Public">
+    <value>MSBuild logs and debug information will be at "{0}"</value>
+  </data>
   <data name="SwitchErrorWithArguments" Visibility="Public">
     <value>{0}
     Full command line: '{1}'

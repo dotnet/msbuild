@@ -308,6 +308,12 @@
         <target state="translated">Le paramètre "{0}" avec la valeur assignée "{1}" ne peut pas avoir un chemin non valide ou des caractères de fichier non valides.</target>
         <note />
       </trans-unit>
+      <trans-unit id="WildcardResultsInDriveEnumeration">
+        <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined.</source>
+        <target state="translated">MSB5029: La valeur "{0}" de l'attribut "{1}" de l'élément &lt;{2}&gt; est un caractère générique qui entraîne l'énumération de tous les fichiers du lecteur, ce qui n'était probablement pas prévu. Vérifiez que les propriétés référencées sont toujours définies.</target>
+        <note>{StrBegin="MSB5029: "}UE: This is a generic message that is displayed when we find a project element that has a drive enumerating wildcard value for one of its
+      attributes e.g. &lt;Compile Include="$(NotAlwaysDefined)\**\*.cs"&gt; -- if the property is undefined, the value of Include should not result in enumerating all files on drive.</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>

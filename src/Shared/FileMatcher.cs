@@ -114,49 +114,28 @@ namespace Microsoft.Build.Shared
                 ? getFileSystemEntries
                 : (type, path, pattern, directory, stripProjectDirectory) =>
                 {
-                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
+                    // Always hit the filesystem with "*" pattern, cache the results, and do the filtering here.
+                    string cacheKey = type switch
                     {
-                        // New behavior:
-                        // Always hit the filesystem with "*" pattern, cache the results, and do the filtering here.
-                        string cacheKey = type switch
-                        {
-                            FileSystemEntity.Files => "F",
-                            FileSystemEntity.Directories => "D",
-                            FileSystemEntity.FilesAndDirectories => "A",
-                            _ => throw new NotImplementedException()
-                        } + ";" + path;
-                        IReadOnlyList<string> allEntriesForPath = getFileSystemDirectoryEntriesCache.GetOrAdd(
-                                cacheKey,
-                                s => getFileSystemEntries(
-                                    type,
-                                    path,
-                                    "*",
-                                    directory,
-                                    false));
-                        IEnumerable<string> filteredEntriesForPath = (pattern != null && !IsAllFilesWildcard(pattern))
-                            ? allEntriesForPath.Where(o => IsFileNameMatch(o, pattern))
-                            : allEntriesForPath;
-                        return stripProjectDirectory
-                            ? RemoveProjectDirectory(filteredEntriesForPath, directory).ToArray()
-                            : filteredEntriesForPath.ToArray();
-                    }
-                    else
-                    {
-                        // Legacy behavior:
-                        // Cache only directories, for files we won't hit the cache because the file name patterns tend to be unique
-                        if (type == FileSystemEntity.Directories)
-                        {
-                            return getFileSystemDirectoryEntriesCache.GetOrAdd(
-                                $"D;{path};{pattern ?? "*"}",
-                                s => getFileSystemEntries(
-                                    type,
-                                    path,
-                                    pattern,
-                                    directory,
-                                    stripProjectDirectory).ToArray());
-                        }
-                    }
-                    return getFileSystemEntries(type, path, pattern, directory, stripProjectDirectory);
+                        FileSystemEntity.Files => "F",
+                        FileSystemEntity.Directories => "D",
+                        FileSystemEntity.FilesAndDirectories => "A",
+                        _ => throw new NotImplementedException()
+                    } + ";" + path;
+                    IReadOnlyList<string> allEntriesForPath = getFileSystemDirectoryEntriesCache.GetOrAdd(
+                            cacheKey,
+                            s => getFileSystemEntries(
+                                type,
+                                path,
+                                "*",
+                                directory,
+                                false));
+                    IEnumerable<string> filteredEntriesForPath = (pattern != null && !IsAllFilesWildcard(pattern))
+                        ? allEntriesForPath.Where(o => IsFileNameMatch(o, pattern))
+                        : allEntriesForPath;
+                    return stripProjectDirectory
+                        ? RemoveProjectDirectory(filteredEntriesForPath, directory).ToArray()
+                        : filteredEntriesForPath.ToArray();
                 };
         }
 
@@ -857,7 +836,7 @@ namespace Microsoft.Build.Shared
             Dictionary<string, List<RecursionState>> searchesToExcludeInSubdirs,
             TaskOptions taskOptions)
         {
-            ErrorUtilities.VerifyThrow((recursionState.SearchData.Filespec== null) || (recursionState.SearchData.RegexFileMatch == null),
+            ErrorUtilities.VerifyThrow((recursionState.SearchData.Filespec == null) || (recursionState.SearchData.RegexFileMatch == null),
                 "File-spec overrides the regular expression -- pass null for file-spec if you want to use the regular expression.");
 
             ErrorUtilities.VerifyThrow((recursionState.SearchData.Filespec != null) || (recursionState.SearchData.RegexFileMatch != null),
@@ -1034,7 +1013,7 @@ namespace Microsoft.Build.Shared
             {
                 Parallel.ForEach(
                     _getFileSystemEntries(FileSystemEntity.Directories, recursionState.BaseDirectory, nextStep.DirectoryPattern, null, false),
-                    new ParallelOptions {MaxDegreeOfParallelism = dop},
+                    new ParallelOptions { MaxDegreeOfParallelism = dop },
                     processSubdirectory);
             }
             if (dop <= 0)
@@ -1941,8 +1920,8 @@ namespace Microsoft.Build.Shared
         /// <param name="projectDirectoryUnescaped">The project directory.</param>
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
         /// <param name="excludeSpecsUnescaped">Exclude files that match this file spec.</param>
-        /// <returns>The array of files.</returns>
-        internal string[] GetFiles
+        /// <returns>The search action, array of files, and Exclude file spec (if applicable).</returns>
+        internal (string[] FileList, SearchAction Action, string ExcludeFileSpec) GetFiles
             (
             string projectDirectoryUnescaped,
             string filespecUnescaped,
@@ -1952,7 +1931,7 @@ namespace Microsoft.Build.Shared
             // For performance. Short-circuit iff there is no wildcard.
             if (!HasWildcards(filespecUnescaped))
             {
-                return CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped);
+                return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped), SearchAction.None, string.Empty);
             }
 
             if (_cachedGlobExpansions == null)
@@ -1966,6 +1945,9 @@ namespace Microsoft.Build.Shared
             var enumerationKey = ComputeFileEnumerationCacheKey(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
 
             IReadOnlyList<string> files;
+            string[] fileList;
+            SearchAction action = SearchAction.None;
+            string excludeFileSpec = string.Empty;
             if (!_cachedGlobExpansions.TryGetValue(enumerationKey, out files))
             {
                 // avoid parallel evaluations of the same wildcard by using a unique lock for each wildcard
@@ -1974,14 +1956,17 @@ namespace Microsoft.Build.Shared
                 {
                     if (!_cachedGlobExpansions.TryGetValue(enumerationKey, out files))
                     {
-                        files =
-                            _cachedGlobExpansions.GetOrAdd(
+                        files = _cachedGlobExpansions.GetOrAdd(
                                 enumerationKey,
                                 (_) =>
-                                    GetFilesImplementation(
+                                {
+                                    (fileList, action, excludeFileSpec) = GetFilesImplementation(
                                         projectDirectoryUnescaped,
                                         filespecUnescaped,
-                                        excludeSpecsUnescaped));
+                                        excludeSpecsUnescaped);
+
+                                    return fileList;
+                                });
                     }
                 }
             }
@@ -1989,7 +1974,7 @@ namespace Microsoft.Build.Shared
             // Copy the file enumerations to prevent outside modifications of the cache (e.g. sorting, escaping) and to maintain the original method contract that a new array is created on each call.
             var filesToReturn = files.ToArray();
 
-            return filesToReturn;
+            return (filesToReturn, action, excludeFileSpec);
         }
 
         private static string ComputeFileEnumerationCacheKey(string projectDirectoryUnescaped, string filespecUnescaped, List<string> excludes)
@@ -2067,11 +2052,14 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        enum SearchAction
+        public enum SearchAction
         {
+            None,
             RunSearch,
             ReturnFileSpec,
             ReturnEmptyList,
+            FailOnDriveEnumeratingWildcard,
+            LogDriveEnumeratingWildcard
         }
 
         private SearchAction GetFileSearchData(
@@ -2135,6 +2123,16 @@ namespace Microsoft.Build.Shared
                 return SearchAction.ReturnEmptyList;
             }
 
+            /*
+             * If a drive enumerating wildcard pattern is detected with the fixed directory and wildcard parts, then
+             * this should either be logged or an exception should be thrown.
+             */
+            bool logDriveEnumeratingWildcard = IsDriveEnumeratingWildcardPattern(fixedDirectoryPart, wildcardDirectoryPart);
+            if (logDriveEnumeratingWildcard && Traits.Instance.ThrowOnDriveEnumeratingWildcard)
+            {
+                return SearchAction.FailOnDriveEnumeratingWildcard;
+            }
+
             string directoryPattern = null;
             if (wildcardDirectoryPart.Length > 0)
             {
@@ -2143,6 +2141,7 @@ namespace Microsoft.Build.Shared
                 // "**/.*/**" for example, and is worth special-casing so it doesn't fall into the slow regex logic.
                 string wildcard = wildcardDirectoryPart.TrimTrailingSlashes();
                 int wildcardLength = wildcard.Length;
+
                 if (wildcardLength > 6 &&
                     wildcard[0] == '*' &&
                     wildcard[1] == '*' &&
@@ -2181,6 +2180,11 @@ namespace Microsoft.Build.Shared
             result.SearchData = searchData;
             result.BaseDirectory = Normalize(fixedDirectoryPart);
             result.RemainingWildcardDirectory = Normalize(wildcardDirectoryPart);
+
+            if (logDriveEnumeratingWildcard)
+            {
+                return SearchAction.LogDriveEnumeratingWildcard;
+            }
 
             return SearchAction.RunSearch;
         }
@@ -2259,6 +2263,76 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Returns true if drive enumerating wildcard patterns are detected using the directory and wildcard parts.
+        /// </summary>
+        /// <param name="directoryPart">Fixed directory string, portion of file spec info.</param>
+        /// <param name="wildcardPart">Wildcard string, portion of file spec info.</param>
+        internal static bool IsDriveEnumeratingWildcardPattern(string directoryPart, string wildcardPart)
+        {
+            int directoryPartLength = directoryPart.Length;
+            int wildcardPartLength = wildcardPart.Length;
+
+            // Handles detection of <drive letter>:<slashes>** pattern for Windows.
+            if (NativeMethodsShared.IsWindows &&
+                directoryPartLength >= 3 &&
+                wildcardPartLength >= 2 &&
+                IsDrivePatternWithoutSlash(directoryPart[0], directoryPart[1]))
+            {
+                return IsFullFileSystemScan(2, directoryPartLength, directoryPart, wildcardPart);
+            }
+
+            // Handles detection of <slashes>** pattern for any platform.
+            else if (directoryPartLength >= 1 &&
+                     wildcardPartLength >= 2)
+            {
+                return IsFullFileSystemScan(0, directoryPartLength, directoryPart, wildcardPart);
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Returns true if given characters follow a drive pattern without the slash (ex: C:).
+        /// </summary>
+        /// <param name="firstValue">First char from directory part of file spec string.</param>
+        /// <param name="secondValue">Second char from directory part of file spec string.</param>
+        private static bool IsDrivePatternWithoutSlash(char firstValue, char secondValue)
+        {
+            return IsValidDriveChar(firstValue) && (secondValue == ':');
+        }
+
+        /// <summary>
+        /// Returns true if selected characters from the fixed directory and wildcard pattern make up the "{any number of slashes}**" pattern.
+        /// </summary>
+        /// <param name="directoryPartIndex">Starting index to begin detecting slashes in directory part of file spec string.</param>
+        /// <param name="directoryPartLength">Length of directory part of file spec string.</param>
+        /// <param name="directoryPart">Fixed directory string, portion of file spec info.</param>
+        /// <param name="wildcardPart">Wildcard string, portion of file spec info.</param>
+        private static bool IsFullFileSystemScan(int directoryPartIndex, int directoryPartLength, string directoryPart, string wildcardPart)
+        {
+            for (int i = directoryPartIndex; i < directoryPartLength; i++)
+            {
+                if (!FileUtilities.IsAnySlash(directoryPart[i]))
+                {
+                    return false;
+                }
+            }
+
+            return (wildcardPart[0] == '*') && (wildcardPart[1] == '*');
+        }
+
+        /// <summary>
+        /// Returns true if the given character is a valid drive letter.
+        /// </summary>
+        /// <remarks>
+        /// Copied from https://github.com/dotnet/corefx/blob/master/src/Common/src/System/IO/PathInternal.Windows.cs#L77-L83
+        /// </remarks>
+        private static bool IsValidDriveChar(char value)
+        {
+            return (value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z');
+        }
+
+        /// <summary>
         /// Skips slash characters in a string.
         /// </summary>
         /// <param name="aString">The working string</param>
@@ -2274,15 +2348,6 @@ namespace Microsoft.Build.Shared
             }
 
             return index;
-        }
-
-        // copied from https://github.com/dotnet/corefx/blob/master/src/Common/src/System/IO/PathInternal.Windows.cs#L77-L83
-        /// <summary>
-        /// Returns true if the given character is a valid drive letter
-        /// </summary>
-        private static bool IsValidDriveChar(char value)
-        {
-            return (value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z');
         }
 
         private static string[] CreateArrayWithSingleItemIfNotExcluded(string filespecUnescaped, List<string> excludeSpecsUnescaped)
@@ -2317,8 +2382,8 @@ namespace Microsoft.Build.Shared
         /// <param name="projectDirectoryUnescaped">The project directory.</param>
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
         /// <param name="excludeSpecsUnescaped">Exclude files that match this file spec.</param>
-        /// <returns>The array of files.</returns>
-        private string[] GetFilesImplementation(
+        /// <returns>The search action, array of files, and Exclude file spec (if applicable).</returns>
+        private (string[] FileList, SearchAction Action, string ExcludeFileSpec) GetFilesImplementation(
             string projectDirectoryUnescaped,
             string filespecUnescaped,
             List<string> excludeSpecsUnescaped)
@@ -2333,13 +2398,17 @@ namespace Microsoft.Build.Shared
 
             if (action == SearchAction.ReturnEmptyList)
             {
-                return Array.Empty<string>();
+                return (Array.Empty<string>(), action, string.Empty);
             }
             else if (action == SearchAction.ReturnFileSpec)
             {
-                return CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped);
+                return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped), action, string.Empty);
             }
-            else if (action != SearchAction.RunSearch)
+            else if (action == SearchAction.FailOnDriveEnumeratingWildcard)
+            {
+                return (Array.Empty<string>(), action, string.Empty);
+            }
+            else if ((action != SearchAction.RunSearch) && (action != SearchAction.LogDriveEnumeratingWildcard))
             {
                 // This means the enum value wasn't valid (or a new one was added without updating code correctly)
                 throw new NotSupportedException(action.ToString());
@@ -2350,6 +2419,10 @@ namespace Microsoft.Build.Shared
             // Exclude searches which will become active when the recursive search reaches their BaseDirectory.
             //  The BaseDirectory of the exclude search is the key for this dictionary.
             Dictionary<string, List<RecursionState>> searchesToExcludeInSubdirs = null;
+
+            // Track the search action and exclude file spec for proper detection and logging of drive enumerating wildcards.
+            SearchAction trackSearchAction = action;
+            string trackExcludeFileSpec = string.Empty;
 
             HashSet<string> resultsToExclude = null;
             if (excludeSpecsUnescaped != null)
@@ -2376,7 +2449,16 @@ namespace Microsoft.Build.Shared
                         // Nothing to do
                         continue;
                     }
-                    else if (excludeAction != SearchAction.RunSearch)
+                    else if (excludeAction == SearchAction.FailOnDriveEnumeratingWildcard)
+                    {
+                        return (Array.Empty<string>(), excludeAction, excludeSpec);
+                    }
+                    else if (excludeAction == SearchAction.LogDriveEnumeratingWildcard)
+                    {
+                        trackSearchAction = excludeAction;
+                        trackExcludeFileSpec = excludeSpec;
+                    }
+                    else if ((excludeAction != SearchAction.RunSearch) && (excludeAction != SearchAction.LogDriveEnumeratingWildcard))
                     {
                         // This means the enum value wasn't valid (or a new one was added without updating code correctly)
                         throw new NotSupportedException(excludeAction.ToString());
@@ -2530,12 +2612,17 @@ namespace Microsoft.Build.Shared
             // Catch exceptions that are thrown inside the Parallel.ForEach
             catch (AggregateException ex) when (InnerExceptionsAreAllIoRelated(ex))
             {
-                return CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped);
+                // Flatten to get exceptions than are thrown inside a nested Parallel.ForEach
+                if (ex.Flatten().InnerExceptions.All(ExceptionHandling.IsIoRelatedException))
+                {
+                    return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped), trackSearchAction, trackExcludeFileSpec);
+                }
+                throw;
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
                 // Assume it's not meant to be a path
-                return CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped);
+                return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped), trackSearchAction, trackExcludeFileSpec);
             }
 
             /*
@@ -2545,7 +2632,7 @@ namespace Microsoft.Build.Shared
                 ? listOfFiles.SelectMany(list => list).Where(f => !resultsToExclude.Contains(f)).ToArray()
                 : listOfFiles.SelectMany(list => list).ToArray();
 
-            return files;
+            return (files, trackSearchAction, trackExcludeFileSpec);
         }
 
         private bool InnerExceptionsAreAllIoRelated(AggregateException ex)
