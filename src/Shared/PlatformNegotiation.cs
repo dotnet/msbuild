@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.Shared
 {
