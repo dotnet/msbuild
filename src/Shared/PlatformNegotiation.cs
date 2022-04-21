@@ -14,7 +14,7 @@ namespace Microsoft.Build.Shared
     {
         internal static string? GetNearestPlatform(string referencedProjectPlatform, string projectReferencePlatformsMetadata, string projectReferenceLookupTableMetadata, String platformLookupTable, String projectPath, String CurrentProjectPlatform, TaskLoggingHelper? log = null)
         {
-            Dictionary<string, string>? currentProjectLookupTable = ExtractLookupTable(platformLookupTable);
+            Dictionary<string, string>? currentProjectLookupTable = ExtractLookupTable(platformLookupTable, log);
 
             if (string.IsNullOrEmpty(projectReferencePlatformsMetadata) && string.IsNullOrEmpty(referencedProjectPlatform))
                 {
@@ -24,7 +24,7 @@ namespace Microsoft.Build.Shared
 
                 // Pull platformLookupTable metadata from the referenced project. This allows custom
                 // mappings on a per-ProjectReference basis.
-                Dictionary<string, string>? projectReferenceLookupTable = ExtractLookupTable(projectReferenceLookupTableMetadata);
+                Dictionary<string, string>? projectReferenceLookupTable = ExtractLookupTable(projectReferenceLookupTableMetadata, log);
 
                 HashSet<string> projectReferencePlatforms = new HashSet<string>();
                 foreach (string s in projectReferencePlatformsMetadata.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
