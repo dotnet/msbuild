@@ -130,6 +130,11 @@
       <Sha>137b7b994e410843b783cb5b04c92a6ca693b2e8</Sha>
       <SourceBuild RepoName="linker" ManagedOnly="true" />
     </Dependency>
+    <Dependency Name="Microsoft.DotNet.ILCompiler" Version="7.0.0-preview.4.22219.9">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>f1e10a53132cc648cea914e75f953ff5a5087399</Sha>
+      <SourceBuildTarball RepoName="runtime" ManagedOnly="true" />
+    </Dependency>
     <Dependency Name="Microsoft.NET.ILLink.Analyzers" Version="7.0.100-1.22221.3">
       <Uri>https://github.com/dotnet/linker</Uri>
       <Sha>137b7b994e410843b783cb5b04c92a6ca693b2e8</Sha>
