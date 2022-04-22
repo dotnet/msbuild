@@ -4258,9 +4258,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                     </Target>
                                 </Project>");
 
-            string projectDirectory = Path.Combine(Path.GetTempPath(), "VerifyDTDProcessingIsDisabled");
+            string projectDirectory = Path.Combine(Path.GetTempPath(), "VerifyDTDProcessingIsDisabled2");
 
-            Thread t = new Thread(HttpServerThread);
+            Thread t = new(HttpServerThread);
             t.IsBackground = true;
             t.Start();
 
@@ -4268,7 +4268,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 if (Directory.Exists(projectDirectory))
                 {
-                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
+                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, recursive: true);
                 }
 
                 Directory.CreateDirectory(projectDirectory);
@@ -4277,9 +4277,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 File.WriteAllText(projectFilename, projectContents);
 
-                Project project = new Project(projectFilename);
+                Project project = new(projectFilename);
 
-                MockLogger logger = new MockLogger();
+                MockLogger logger = new();
                 project.Build(logger);
             }
             finally
