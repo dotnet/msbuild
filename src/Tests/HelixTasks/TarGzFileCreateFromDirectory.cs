@@ -43,8 +43,9 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
         protected override int ExecuteTool(string pathToTool, string responseFileCommands, string commandLineCommands)
         {
             int returnCode = base.ExecuteTool(pathToTool, responseFileCommands, commandLineCommands);
-
-            if (IgnoreExitCode)
+            
+            // returnCode 1 indicates files changed during tar which is just a warning
+            if (IgnoreExitCode || returnCode == 1)
             {
                 returnCode = 0;
             }
@@ -110,7 +111,7 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
 
         protected override string GenerateCommandLineCommands()
         {
-            return $"--warning=no-file-changed {GetDestinationArchive()} {GetSourceSpecification()}";
+            return $"{GetDestinationArchive()} {GetSourceSpecification()}";
         }
 
         private string GetSourceSpecification()
