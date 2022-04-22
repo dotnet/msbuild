@@ -122,6 +122,11 @@
         <target state="translated">Privilèges insuffisants pour démarrer le serveur</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version for workload {0}: Invalid version {1}.</source>
+        <target state="new">Error parsing version for workload {0}: Invalid version {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
         <source>The settings file in the workload's NuGet package is invalid: {0}</source>
         <target state="translated">Le fichier de paramètres situé dans le package NuGet de la charge de travail n'est pas valide : {0}</target>

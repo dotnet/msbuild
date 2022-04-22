@@ -122,6 +122,11 @@
         <target state="translated">权限不足，无法启动服务器。</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version for workload {0}: Invalid version {1}.</source>
+        <target state="new">Error parsing version for workload {0}: Invalid version {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
         <source>The settings file in the workload's NuGet package is invalid: {0}</source>
         <target state="translated">工作负载的 NuGet 包中的设置文件无效: {0}</target>
