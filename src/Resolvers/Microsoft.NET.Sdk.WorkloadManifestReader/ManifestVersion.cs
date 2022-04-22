@@ -14,7 +14,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         {
             if (!FXVersion.TryParse(version, out _version))
             {
-                throw new Exception($"Error parsing version for workload : Invalid version {version}.");
+                throw new ArgumentNullException(nameof(version));
             }
         }
 

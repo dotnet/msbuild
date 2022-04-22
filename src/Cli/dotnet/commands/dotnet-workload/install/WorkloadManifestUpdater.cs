@@ -20,6 +20,7 @@ using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli;
 using System.Net;
 using System.Net.Http;
+using Microsoft.DotNet.MSBuildSdkResolver;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -471,6 +472,17 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     ManifestVersion manifestVersion;
                     SdkFeatureBand manifestFeatureBand;
                     var parts = manifest.Value.Split('/');
+                    
+                    string manifestVersionString = (parts[0]).ToString();
+                    FXVersion _version;
+                    if (!FXVersion.TryParse(manifestVersionString, out _version))
+                    {
+                        if (string.IsNullOrWhiteSpace(manifestVersionString))
+                        {
+                            throw new ArgumentNullException(nameof(manifestVersionString));
+                        }
+                        throw new FormatException($"Error parsing version for workload {manifest.Key}: Invalid version {manifestVersionString}.");
+                    }
                     manifestVersion = new ManifestVersion(parts[0]);
                     if (parts.Length == 1)
                     {
