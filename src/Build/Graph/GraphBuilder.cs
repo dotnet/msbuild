@@ -22,6 +22,10 @@ namespace Microsoft.Build.Graph
 {
     internal class GraphBuilder
     {
+        private const string PlatformLookupTableMetadataName = "PlatformLookupTable";
+        private const string PlatformMetadataName = "Platform";
+        private const string PlatformsMetadataName = "Platforms";
+        private const string EnableDynamicPlatformResolutionMetadataName = "EnableDynamicPlatformResolution";
         internal const string SolutionItemReference = "_SolutionReference";
         
         /// <summary>
@@ -495,12 +499,14 @@ namespace Microsoft.Build.Graph
             }
         }
 
-        private ParsedProject ParseProject(ConfigurationMetadata configurationMetadata)
+        private ParsedProject ParseProject(ConfigurationMetadata configurationMetadata, bool enableDynamicPlatformResolution)
         {
             // TODO: ProjectInstance just converts the dictionary back to a PropertyDictionary, so find a way to directly provide it.
             var globalProperties = configurationMetadata.GlobalProperties.ToDictionary();
+            ProjectGraphNode graphNode;
+            ProjectInstance projectInstance;
 
-            var projectInstance = _projectInstanceFactory(
+            projectInstance = _projectInstanceFactory(
                 configurationMetadata.ProjectFullPath,
                 globalProperties,
                 _projectCollection);
@@ -510,9 +516,32 @@ namespace Microsoft.Build.Graph
                 throw new InvalidOperationException(ResourceUtilities.GetResourceString("NullReferenceFromProjectInstanceFactory"));
             }
 
-            var graphNode = new ProjectGraphNode(projectInstance);
+            if (enableDynamicPlatformResolution)
+            {
+                string referencedProjectPlatform = projectInstance.GetPropertyValue(PlatformMetadataName);
+                string projectReferencePlatformsMetadata = projectInstance.GetPropertyValue(PlatformsMetadataName);
+                string projectReferenceLookupTableMetadata = projectInstance.GetPropertyValue(PlatformLookupTableMetadataName);
+                String projectPath = projectInstance.FullPath;
+                String platformLookupTable;
+                globalProperties.TryGetValue(PlatformLookupTableMetadataName, out platformLookupTable);
+                String CurrentProjectPlatform;
+                globalProperties.TryGetValue(PlatformMetadataName, out CurrentProjectPlatform);
+                var SelectedPlatform = PlatformNegotiation.GetNearestPlatform(referencedProjectPlatform, projectReferencePlatformsMetadata, projectReferenceLookupTableMetadata, platformLookupTable, projectPath, CurrentProjectPlatform);
 
-            var referenceInfos = ParseReferences(graphNode);
+                if (!string.IsNullOrEmpty(SelectedPlatform))
+                {
+                    globalProperties["platform"] = SelectedPlatform;
+                }
+
+                projectInstance = _projectInstanceFactory(
+                 configurationMetadata.ProjectFullPath,
+                 globalProperties,
+                 _projectCollection);
+            }
+
+            graphNode = new ProjectGraphNode(projectInstance);
+
+            var referenceInfos = ParseReferences(graphNode, ConversionUtilities.ValidBooleanTrue(projectInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)));
 
             return new ParsedProject(configurationMetadata, graphNode, referenceInfos);
         }
@@ -526,7 +555,7 @@ namespace Microsoft.Build.Graph
         {
             foreach (ConfigurationMetadata projectToEvaluate in _entryPointConfigurationMetadata)
             {
-                SubmitProjectForParsing(projectToEvaluate);
+                SubmitProjectForParsing(projectToEvaluate, false);
                                 /*todo: fix the following double check-then-act concurrency bug: one thread can pass the two checks, loose context,
                              meanwhile another thread passes the same checks with the same data and inserts its reference. The initial thread regains context
                              and duplicates the information, leading to wasted work
@@ -538,12 +567,12 @@ namespace Microsoft.Build.Graph
             return _graphWorkSet.CompletedWork;
         }
 
-        private void SubmitProjectForParsing(ConfigurationMetadata projectToEvaluate)
+        private void SubmitProjectForParsing(ConfigurationMetadata projectToEvaluate, bool enableDynamicPlatformResolution)
         {
-            _graphWorkSet.AddWork(projectToEvaluate, () => ParseProject(projectToEvaluate));
+            _graphWorkSet.AddWork(projectToEvaluate, () => ParseProject(projectToEvaluate, enableDynamicPlatformResolution));
         }
 
-        private List<ProjectInterpretation.ReferenceInfo> ParseReferences(ProjectGraphNode parsedProject)
+        private List<ProjectInterpretation.ReferenceInfo> ParseReferences(ProjectGraphNode parsedProject, bool enableDynamicPlatformResolution)
         {
             var referenceInfos = new List<ProjectInterpretation.ReferenceInfo>();
 
@@ -558,7 +587,7 @@ namespace Microsoft.Build.Graph
                         ));
                 }
                 
-                SubmitProjectForParsing(referenceInfo.ReferenceConfiguration);
+                SubmitProjectForParsing(referenceInfo.ReferenceConfiguration, enableDynamicPlatformResolution);
 
                 referenceInfos.Add(referenceInfo);
             }
