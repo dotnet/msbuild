@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="7.0.100-preview.4.22204.4">
+    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="7.0.100-preview.5.22222.1">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>619f465fa426ccb543fb16cbcdb8d9a7c4004fb9</Sha>
+      <Sha>df0d9900e094ad8c01b52357f21f272f2ae8ec9a</Sha>
       <SourceBuild RepoName="templating" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="7.0.100-preview.4.22204.4">
+    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="7.0.100-preview.5.22222.1">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>619f465fa426ccb543fb16cbcdb8d9a7c4004fb9</Sha>
+      <Sha>df0d9900e094ad8c01b52357f21f272f2ae8ec9a</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="7.0.100-preview.4.22204.4">
+    <Dependency Name="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="7.0.100-preview.5.22222.1">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>619f465fa426ccb543fb16cbcdb8d9a7c4004fb9</Sha>
+      <Sha>df0d9900e094ad8c01b52357f21f272f2ae8ec9a</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Utils" Version="7.0.100-preview.4.22204.4">
+    <Dependency Name="Microsoft.TemplateEngine.Utils" Version="7.0.100-preview.5.22222.1">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>619f465fa426ccb543fb16cbcdb8d9a7c4004fb9</Sha>
+      <Sha>df0d9900e094ad8c01b52357f21f272f2ae8ec9a</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateSearch.Common" Version="7.0.100-preview.4.22204.4">
+    <Dependency Name="Microsoft.TemplateSearch.Common" Version="7.0.100-preview.5.22222.1">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>619f465fa426ccb543fb16cbcdb8d9a7c4004fb9</Sha>
+      <Sha>df0d9900e094ad8c01b52357f21f272f2ae8ec9a</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="7.0.100-preview.4.22204.4">
+    <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="7.0.100-preview.5.22222.1">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>619f465fa426ccb543fb16cbcdb8d9a7c4004fb9</Sha>
+      <Sha>df0d9900e094ad8c01b52357f21f272f2ae8ec9a</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Ref" Version="7.0.0-preview.4.22219.9">
       <Uri>https://github.com/dotnet/runtime</Uri>
@@ -260,13 +260,13 @@
       <Sha>890b7e8d68e95a5b05a66c7662d13a17323d6937</Sha>
       <SourceBuild RepoName="roslyn-analyzers" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="System.CommandLine" Version="2.0.0-beta3.22219.1">
+    <Dependency Name="System.CommandLine" Version="2.0.0-beta3.22221.1">
       <Uri>https://github.com/dotnet/command-line-api</Uri>
-      <Sha>3fef05578da428d3a54301d127bf47c2e49f2106</Sha>
+      <Sha>689dff5d4ac75ad7a7ee655e7a2956eca75f6f05</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.command-line-api" Version="0.1.321901">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.command-line-api" Version="0.1.322101">
       <Uri>https://github.com/dotnet/command-line-api</Uri>
-      <Sha>3fef05578da428d3a54301d127bf47c2e49f2106</Sha>
+      <Sha>689dff5d4ac75ad7a7ee655e7a2956eca75f6f05</Sha>
       <SourceBuild RepoName="command-line-api" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-externals" Version="7.0.0-alpha.1.22207.1">
