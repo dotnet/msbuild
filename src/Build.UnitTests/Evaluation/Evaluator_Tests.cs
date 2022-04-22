@@ -4285,6 +4285,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             finally
             {
                 Thread.Sleep(500);
+                t.Join();
 
                 // Expect server to be alive and hung up unless a request originating from DTD processing was sent
                 _httpListenerThreadException.ShouldBeNull();
