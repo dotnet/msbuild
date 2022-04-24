@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.Cli
 
         private static CommandLineBuilder DisablePosixBinding(this CommandLineBuilder builder)
         {
-            builder.EnablePosixBundling = false;
+            builder.EnablePosixBundling(false);
             return builder;
         }
 
