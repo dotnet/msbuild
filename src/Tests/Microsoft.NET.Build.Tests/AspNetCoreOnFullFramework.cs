@@ -26,7 +26,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "AssemblyPartDiscovery",
-                TargetFrameworks = "net461",
+                TargetFrameworks = "net462",
                 IsExe = true
             };
 
@@ -51,7 +51,7 @@ public class Program
             TestProject referencedProjectWithPart = new TestProject()
             {
                 Name = "ReferencedProjectWithPart",
-                TargetFrameworks = "net461",
+                TargetFrameworks = "net462",
                 IsExe = false
             };
 
@@ -68,7 +68,7 @@ class Class1
             {
                 Name = "ReferencedProjectWithMVC",
                 ProjectSdk = "Microsoft.NET.Sdk.Web",
-                TargetFrameworks = "net461",
+                TargetFrameworks = "net462",
                 IsExe = false
             };
 
