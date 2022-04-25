@@ -66,7 +66,7 @@ namespace Microsoft.NET.Build.Tests
                 var ns = project.Root.Name.Namespace;
                 project.Root.Element(ns + "PropertyGroup")
                     .Element(ns + "TargetFramework")
-                    .SetValue("netcoreapp2.1");
+                    .SetValue(ToolsetInfo.CurrentTargetFramework);
             });
         }
 

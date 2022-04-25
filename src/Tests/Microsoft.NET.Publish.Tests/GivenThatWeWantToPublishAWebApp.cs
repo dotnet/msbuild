@@ -167,7 +167,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(true, true)]
         public void PublishWebAppWithPublishProfile(bool? selfContained, bool? useAppHost)
         {
-            var tfm = "netcoreapp2.2";
+            var tfm = ToolsetInfo.CurrentTargetFramework;
             var rid = EnvironmentInfo.GetCompatibleRid(tfm);
 
             var testProject = new TestProject()
