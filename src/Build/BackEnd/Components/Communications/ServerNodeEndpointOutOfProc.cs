@@ -11,7 +11,7 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal sealed class ServerNodeEndpointOutOfProc : NodeEndpointOutOfProcBase
     {
-        private readonly IHandshake _handshake;
+        private readonly Handshake _handshake;
 
         /// <summary>
         /// Instantiates an endpoint to act as a client
@@ -20,7 +20,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="handshake"></param>
         internal ServerNodeEndpointOutOfProc(
             string pipeName,
-            IHandshake handshake)
+            Handshake handshake)
         {
             _handshake = handshake;
 
@@ -30,7 +30,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the host handshake for this node endpoint
         /// </summary>
-        protected override IHandshake GetHandshake()
+        protected override Handshake GetHandshake()
         {
             return _handshake;
         }

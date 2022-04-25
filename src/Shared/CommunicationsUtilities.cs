@@ -77,34 +77,17 @@ namespace Microsoft.Build.Internal
         Arm64 = 128,
     }
 
-    internal interface IHandshake
+    internal class Handshake
     {
-        int[] RetrieveHandshakeComponents();
+        protected readonly int options;
+        protected readonly int salt;
+        protected readonly int fileVersionMajor;
+        protected readonly int fileVersionMinor;
+        protected readonly int fileVersionBuild;
+        protected readonly int fileVersionPrivate;
+        private readonly int sessionId;
 
-        /// <summary>
-        /// Get string key representing all handshake values. It does not need to be human readable.
-        /// </summary>
-        string GetKey();
-
-        /// <summary>
-        /// Some handshakes uses very 1st byte to encode version of handshake in it,
-        /// so if it does not match it can reject it early based on very first byte.
-        /// Null means that no such encoding is used
-        /// </summary>
-        byte? ExpectedVersionInFirstByte { get; }
-    }
-
-    internal readonly struct Handshake : IHandshake
-    {
-        readonly int options;
-        readonly int salt;
-        readonly int fileVersionMajor;
-        readonly int fileVersionMinor;
-        readonly int fileVersionBuild;
-        readonly int fileVersionPrivate;
-        readonly int sessionId;
-
-        internal Handshake(HandshakeOptions nodeType)
+        internal protected Handshake(HandshakeOptions nodeType)
         {
             const int handshakeVersion = (int)CommunicationsUtilities.handshakeVersion;
 
@@ -132,7 +115,7 @@ namespace Microsoft.Build.Internal
             return String.Format("{0} {1} {2} {3} {4} {5} {6}", options, salt, fileVersionMajor, fileVersionMinor, fileVersionBuild, fileVersionPrivate, sessionId);
         }
 
-        public int[] RetrieveHandshakeComponents()
+        public virtual int[] RetrieveHandshakeComponents()
         {
             return new int[]
             {
@@ -146,37 +129,19 @@ namespace Microsoft.Build.Internal
             };
         }
 
-        public string GetKey() => $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate} {sessionId}".ToString(CultureInfo.InvariantCulture);
+        public virtual string GetKey() => $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate} {sessionId}".ToString(CultureInfo.InvariantCulture);
 
-        public byte? ExpectedVersionInFirstByte => CommunicationsUtilities.handshakeVersion;
+        public virtual byte? ExpectedVersionInFirstByte => CommunicationsUtilities.handshakeVersion;
     }
 
-    internal sealed class ServerNodeHandshake : IHandshake
+    internal sealed class ServerNodeHandshake : Handshake
     {
-        readonly int _options;
-        readonly int _salt;
-        readonly int _fileVersionMajor;
-        readonly int _fileVersionMinor;
-        readonly int _fileVersionBuild;
-        readonly int _fileVersionRevision;
+        public override byte? ExpectedVersionInFirstByte => null;
 
-        internal ServerNodeHandshake(HandshakeOptions nodeType, string msBuildLocation)
+        internal ServerNodeHandshake(HandshakeOptions nodeType)
+            : base(nodeType)
         {
-            // We currently use 6 bits of this 32-bit integer. Very old builds will instantly reject any handshake that does not start with F5 or 06; slightly old builds always lead with 00.
-            // This indicates in the first byte that we are a modern build.
-            _options = (int)nodeType | (CommunicationsUtilities.handshakeVersion << 24);
-            string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
-            var msBuildFile = new FileInfo(msBuildLocation);
-            var msBuildDirectory = msBuildFile.DirectoryName;
-            _salt = ComputeHandshakeHash(handshakeSalt + msBuildDirectory);
-            Version fileVersion = new Version(FileVersionInfo.GetVersionInfo(msBuildLocation).FileVersion ?? string.Empty);
-            _fileVersionMajor = fileVersion.Major;
-            _fileVersionMinor = fileVersion.Minor;
-            _fileVersionBuild = fileVersion.Build;
-            _fileVersionRevision = fileVersion.Revision;
         }
-
-        internal const int EndOfHandshakeSignal = -0x2a2a2a2a;
 
         /// <summary>
         /// Compute stable hash as integer
@@ -189,31 +154,24 @@ namespace Microsoft.Build.Internal
             return BitConverter.ToInt32(bytes, 0);
         }
 
-        internal static int AvoidEndOfHandshakeSignal(int x)
-        {
-            return x == EndOfHandshakeSignal ? ~x : x;
-        }
-
-        public int[] RetrieveHandshakeComponents()
+        public override int[] RetrieveHandshakeComponents()
         {
             return new int[]
             {
-                AvoidEndOfHandshakeSignal(_options),
-                AvoidEndOfHandshakeSignal(_salt),
-                AvoidEndOfHandshakeSignal(_fileVersionMajor),
-                AvoidEndOfHandshakeSignal(_fileVersionMinor),
-                AvoidEndOfHandshakeSignal(_fileVersionBuild),
-                AvoidEndOfHandshakeSignal(_fileVersionRevision),
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(options),
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(salt),
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMajor),
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMinor),
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionBuild),
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionPrivate),
             };
         }
 
-        public string GetKey()
+        public override string GetKey()
         {
-            return $"{_options} {_salt} {_fileVersionMajor} {_fileVersionMinor} {_fileVersionBuild} {_fileVersionRevision}"
+            return $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate}"
                 .ToString(CultureInfo.InvariantCulture);
         }
-
-        public byte? ExpectedVersionInFirstByte => null;
 
         /// <summary>
         /// Computes Handshake stable hash string representing whole state of handshake.

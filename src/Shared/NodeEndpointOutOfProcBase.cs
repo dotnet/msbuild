@@ -246,7 +246,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the host handshake for this node endpoint
         /// </summary>
-        protected abstract IHandshake GetHandshake();
+        protected abstract Handshake GetHandshake();
 
         /// <summary>
         /// Updates the current link status if it has changed and notifies any registered delegates.
@@ -374,7 +374,7 @@ namespace Microsoft.Build.BackEnd
                     // The handshake protocol is a series of int exchanges.  The host sends us a each component, and we
                     // verify it. Afterwards, the host sends an "End of Handshake" signal, to which we respond in kind.
                     // Once the handshake is complete, both sides can be assured the other is ready to accept data.
-                    IHandshake handshake = GetHandshake();
+                    Handshake handshake = GetHandshake();
                     try
                     {
                         int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
