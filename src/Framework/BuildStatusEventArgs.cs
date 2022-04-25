@@ -90,4 +90,3 @@ namespace Microsoft.Build.Framework
         }
     }
 }
-
