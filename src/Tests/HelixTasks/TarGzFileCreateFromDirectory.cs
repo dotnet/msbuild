@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
         {
             int returnCode = base.ExecuteTool(pathToTool, responseFileCommands, commandLineCommands);
             
-            // returnCode 1 indicates files changed during tar which is just a warning
+            // returnCode 1 indicates that files changed during tar. In our case, it is likely being overwritten by another copy of the same file, so we can safely ignore this warning.
             if (IgnoreExitCode || returnCode == 1)
             {
                 returnCode = 0;
