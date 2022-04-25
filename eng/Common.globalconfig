@@ -1019,7 +1019,7 @@ dotnet_diagnostic.SA1516.severity = suggestion
 dotnet_diagnostic.SA1517.severity = none
 
 # Code should not contain blank lines at the end of the file
-dotnet_diagnostic.SA1518.severity = suggestion
+dotnet_diagnostic.SA1518.severity = warning
 
 # Braces should not be omitted from multi-line child statement
 dotnet_diagnostic.SA1519.severity = warning
