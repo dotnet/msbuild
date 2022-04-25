@@ -29,3 +29,7 @@ REM call dotnet new so the first run message doesn't interfere with the first te
 dotnet new
 REM avoid potetial cocurrency issues when nuget is creating nuget.config
 dotnet nuget list source
+
+mkdir %DOTNET_ROOT%\.nuget
+dotnet nuget add source %DOTNET_ROOT%\.nuget
+'PowerShell -ExecutionPolicy ByPass -File "%HELIX_CORRELATION_PAYLOAD%\t\eng\ExpandSDKTestPackages.ps1"'
