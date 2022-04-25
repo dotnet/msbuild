@@ -358,7 +358,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns></returns>
         internal static string ConvertToBase64(string toEncode)
         {
-            return Convert.ToBase64String(Encoding.Default.GetBytes(toEncode));
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(toEncode));
         }
 
         /// <summary>
@@ -368,7 +368,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns></returns>
         internal static string ConvertFromBase64(string toDecode)
         {
-            return Encoding.Default.GetString(Convert.FromBase64String(toDecode));
+            return Encoding.UTF8.GetString(Convert.FromBase64String(toDecode));
         }
 
         /// <summary>

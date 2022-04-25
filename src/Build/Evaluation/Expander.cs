@@ -3509,7 +3509,7 @@ namespace Microsoft.Build.Evaluation
 
                     // If the result of the function call is a string, then we need to escape the result
                     // so that we maintain the "engine contains escaped data" state.
-                    // The exception is that the user is explicitly calling MSBuild::Unescape or MSBuild::Escape
+                    // The exception is that the user is explicitly calling MSBuild::Unescape, MSBuild::Escape, or ConvertFromBase64
                     if (functionResult is string functionResultString &&
                         !String.Equals("Unescape", _methodMethodName, StringComparison.OrdinalIgnoreCase) &&
                         !String.Equals("Escape", _methodMethodName, StringComparison.OrdinalIgnoreCase) &&
