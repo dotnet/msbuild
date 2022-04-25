@@ -480,7 +480,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         {
                             throw new ArgumentNullException(nameof(manifestVersionString));
                         }
-                        //throw new FormatException($"Error parsing version for workload {manifest.Key}: Invalid version {manifestVersionString}.");
                         throw new FormatException(String.Format(LocalizableStrings.InvalidVersionForWorkload, manifest.Key, manifestVersionString));
                     }
                     manifestVersion = new ManifestVersion(parts[0]);
