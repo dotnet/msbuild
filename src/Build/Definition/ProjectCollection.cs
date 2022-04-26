@@ -226,6 +226,12 @@ namespace Microsoft.Build.Evaluation
         private int _maxNodeCount;
 
         /// <summary>
+        /// LoggingService Logger mode.
+        /// If Asynchronous mode is used
+        /// </summary>
+        private LoggerMode _loggerMode;
+
+        /// <summary>
         /// Instantiates a project collection with no global properties or loggers that reads toolset
         /// information from the configuration file and registry.
         /// </summary>
@@ -302,6 +308,27 @@ namespace Microsoft.Build.Evaluation
         /// <param name="onlyLogCriticalEvents">If set to true, only critical events will be logged.</param>
         /// <param name="loadProjectsReadOnly">If set to true, load all projects as read-only.</param>
         public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly)
+            : this(globalProperties, loggers, remoteLoggers, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly, useAsynchronousLogging: false)
+        {
+        }
+
+
+        /// <summary>
+        /// Instantiates a project collection with specified global properties and loggers and using the
+        /// specified toolset locations, node count, and setting of onlyLogCriticalEvents.
+        /// Global properties and loggers may be null.
+        /// Throws InvalidProjectFileException if any of the global properties are reserved.
+        /// May throw InvalidToolsetDefinitionException.
+        /// </summary>
+        /// <param name="globalProperties">The default global properties to use. May be null.</param>
+        /// <param name="loggers">The loggers to register. May be null and specified to any build instead.</param>
+        /// <param name="remoteLoggers">Any remote loggers to register. May be null and specified to any build instead.</param>
+        /// <param name="toolsetDefinitionLocations">The locations from which to load toolsets.</param>
+        /// <param name="maxNodeCount">The maximum number of nodes to use for building.</param>
+        /// <param name="onlyLogCriticalEvents">If set to true, only critical events will be logged.</param>
+        /// <param name="loadProjectsReadOnly">If set to true, load all projects as read-only.</param>
+        /// <param name="useAsynchronousLogging">If set to true, asynchronous logging will be used. <see cref="ProjectCollection.Dispose()"/> has to called to clear resources used by async logging.</param>
+        internal ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging)
         {
             _loadedProjects = new LoadedProjectCollection();
             ToolsetLocations = toolsetDefinitionLocations;
@@ -319,6 +346,7 @@ namespace Microsoft.Build.Evaluation
 
             try
             {
+                _loggerMode = useAsynchronousLogging ? LoggerMode.Asynchronous : LoggerMode.Synchronous;
                 CreateLoggingService(maxNodeCount, onlyLogCriticalEvents);
 
                 RegisterLoggers(loggers);
@@ -418,8 +446,14 @@ namespace Microsoft.Build.Evaluation
                 {
                     // Take care to ensure that there is never more than one value observed
                     // from this property even in the case of race conditions while lazily initializing.
-                    var local = new ProjectCollection();
-                    Interlocked.CompareExchange(ref s_globalProjectCollection, local, null);
+                    var local = new ProjectCollection(null, null, null, ToolsetDefinitionLocations.Default,
+                        maxNodeCount: 1, onlyLogCriticalEvents: false, loadProjectsReadOnly: false, useAsynchronousLogging: true);
+
+                    if (Interlocked.CompareExchange(ref s_globalProjectCollection, local, null) != null)
+                    {
+                        // Other thread beat us to it; dispose of this project collection
+                        local.Dispose();
+                    }
                 }
 
                 return s_globalProjectCollection;
@@ -1724,7 +1758,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void CreateLoggingService(int maxCPUCount, bool onlyLogCriticalEvents)
         {
-            _loggingService = BackEnd.Logging.LoggingService.CreateLoggingService(LoggerMode.Synchronous, 0 /*Evaluation can be done as if it was on node "0"*/);
+            _loggingService = BackEnd.Logging.LoggingService.CreateLoggingService(_loggerMode, 0 /*Evaluation can be done as if it was on node "0"*/);
             _loggingService.MaxCPUCount = maxCPUCount;
             _loggingService.OnlyLogCriticalEvents = onlyLogCriticalEvents;
         }
