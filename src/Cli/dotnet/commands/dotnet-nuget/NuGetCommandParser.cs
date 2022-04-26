@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Cli
         {
             var localsCommand = new Command("locals");
 
-            localsCommand.AddArgument(new Argument<string>("cache-locations")
+            localsCommand.AddArgument(new Argument<string>("folders")
                 .FromAmong(new string[] { "all", "http-cache", "global-packages", "plugins-cache", "temp" }));
 
             localsCommand.AddOption(new Option<bool>("--force-english-output"));
