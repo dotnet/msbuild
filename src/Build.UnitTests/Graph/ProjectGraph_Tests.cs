@@ -66,6 +66,60 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
+
+        [Fact]
+        public void AnyCPUSetPlatformMetaDataWasNotSet()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProjectFile(env, 1, extraContent: @"<PropertyGroup>
+                                                                                                <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
+                                                                                                <Platform>x86</Platform>
+                                                                                                <Platforms>x86</Platforms>
+                                                                                                <TargetFrameworks>netstandard2.0;net472</TargetFrameworks>
+                                                                                            </PropertyGroup>
+                                                                                            <ItemGroup>
+                                                                                                <ProjectReference Include=""$(MSBuildThisFileDirectory)2.proj"" >
+                                                                                                </ProjectReference>
+                                                                                            </ItemGroup>");
+                var file = env.CreateFile("2.proj", @"
+                                <Project>
+                                <PropertyGroup>
+                                    <TargetFrameworks>netstandard2.0;net472</TargetFrameworks>
+                                    <Platforms>AnyCPU</Platforms>
+                                </PropertyGroup>
+                                </Project>");
+                ProjectGraph graph = new ProjectGraph(entryProject.Path);
+                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GlobalProperties["Platform"].ShouldBe("AnyCPU");
+            }
+        }
+
+        [Fact]
+        public void SetPlatformMetaDataWasNotSet()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProjectFile(env, 1, extraContent: @"<PropertyGroup>
+                                                                                                <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
+                                                                                                <Platform>x86</Platform>
+                                                                                                <Platforms>x86</Platforms>
+                                                                                            </PropertyGroup>
+                                                                                            <ItemGroup>
+                                                                                                <ProjectReference Include=""$(MSBuildThisFileDirectory)2.proj"" >
+                                                                                                </ProjectReference>
+                                                                                            </ItemGroup>");
+                var file = env.CreateFile("2.proj", @"
+                                <Project>
+                                <PropertyGroup>
+                                    <Platforms>x86;x64</Platforms>
+                                </PropertyGroup>
+                                </Project>");
+                ProjectGraph graph = new ProjectGraph(entryProject.Path);
+                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
+            }
+        }
+
+
         [Fact]
         public void ConstructionMetricsAreAvailable()
         {
