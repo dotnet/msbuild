@@ -189,11 +189,9 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         internal static AssemblyNameExtension GetAssemblyNameEx(string path)
         {
-            AssemblyName assemblyName = null;
-#if !FEATURE_ASSEMBLYLOADCONTEXT
             try
             {
-                assemblyName = AssemblyName.GetAssemblyName(path);
+                return new AssemblyNameExtension(AssemblyName.GetAssemblyName(path));
             }
             catch (FileLoadException)
             {
@@ -207,33 +205,8 @@ namespace Microsoft.Build.Shared
             {
                 // Its pretty hard to get here, also since we do a file existence check right before calling this method so it can only happen if the file got deleted between that check and this call.
             }
-#else
-            using (var stream = File.OpenRead(path))
-            using (var peFile = new PEReader(stream))
-            {
-                bool hasMetadata = false;
-                try
-                {
-                    // This can throw if the stream is too small, which means
-                    // the assembly doesn't have metadata.
-                    hasMetadata = peFile.HasMetadata;
-                }
-                finally
-                {
-                    // If the file does not contain PE metadata, throw BadImageFormatException to preserve
-                    // behavior from AssemblyName.GetAssemblyName(). RAR will deal with this correctly.
-                    if (!hasMetadata)
-                    {
-                        throw new BadImageFormatException(string.Format(CultureInfo.CurrentCulture,
-                            AssemblyResources.GetString("ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata"),
-                            path));
-                    }
-                }
 
-                assemblyName = AssemblyName.GetAssemblyName(path);
-            }
-#endif
-            return assemblyName == null ? null : new AssemblyNameExtension(assemblyName);
+            return null;
         }
 
         /// <summary>
