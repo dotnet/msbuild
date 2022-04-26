@@ -3664,7 +3664,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [InlineData("easycase", "ZWFzeWNhc2U=")]
         [InlineData("", "")]
         [InlineData("\"\n()\tsdfIR$%#*;==", "IgooKQlzZGZJUiQlIyo7PT0=")]
-        public void TestExplicitToBase64Conversion(string testCase, string result)
+        public void TestExplicitToBase64Conversion(string plaintext, string base64)
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new();
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new(pg, FileSystems.Default);
@@ -3676,7 +3676,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [InlineData("easycase", "ZWFzeWNhc2U=")]
         [InlineData("", "")]
         [InlineData("\"\n()\tsdfIR$%#*;==", "IgooKQlzZGZJUiQlIyo7PT0=")]
-        public void TestExplicitFromBase64Conversion(string testCase, string intermediate)
+        public void TestExplicitFromBase64Conversion(string plaintext, string base64)
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new();
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new(pg, FileSystems.Default);
