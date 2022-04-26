@@ -348,7 +348,7 @@ public static class {project.Name}
             if (useFacades)
             {
                 string microsoftNETBuildExtensionsPath = TestContext.Current.ToolsetUnderTest.GetMicrosoftNETBuildExtensionsPath();
-                correctHttpReference = Path.Combine(microsoftNETBuildExtensionsPath, @"net462\lib\System.Net.Http.dll");
+                correctHttpReference = Path.Combine(microsoftNETBuildExtensionsPath, @"net461\lib\System.Net.Http.dll");
             }
             else
             {
