@@ -230,15 +230,7 @@ namespace Microsoft.Build.Shared
                     }
                 }
 
-                var metadataReader = peFile.GetMetadataReader();
-                var entry = metadataReader.GetAssemblyDefinition();
-
-                assemblyName = new AssemblyName();
-                assemblyName.Name = metadataReader.GetString(entry.Name);
-                assemblyName.Version = entry.Version;
-                assemblyName.CultureName = metadataReader.GetString(entry.Culture);
-                assemblyName.SetPublicKey(metadataReader.GetBlobBytes(entry.PublicKey));
-                assemblyName.Flags = (AssemblyNameFlags)(int)entry.Flags;
+                assemblyName = AssemblyName.GetAssemblyName(path);
             }
 #endif
             return assemblyName == null ? null : new AssemblyNameExtension(assemblyName);
