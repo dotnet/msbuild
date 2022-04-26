@@ -474,14 +474,15 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     var parts = manifest.Value.Split('/');
                     
                     string manifestVersionString = (parts[0]).ToString();
-                    if (!FXVersion.TryParse(manifestVersionString, out FXVersion _version))
+                    if (!FXVersion.TryParse(manifestVersionString, out FXVersion version))
                     {
                         if (string.IsNullOrWhiteSpace(manifestVersionString))
                         {
                             throw new ArgumentNullException(nameof(manifestVersionString));
                         }
                         throw new FormatException(String.Format(LocalizableStrings.InvalidVersionForWorkload, manifest.Key, manifestVersionString));
-                    }
+                    } 
+
                     manifestVersion = new ManifestVersion(parts[0]);
                     if (parts.Length == 1)
                     {

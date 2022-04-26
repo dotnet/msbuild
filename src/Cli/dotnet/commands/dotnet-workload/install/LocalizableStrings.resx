@@ -331,6 +331,6 @@
     <value>Checking for updated workload manifests.</value>
   </data>
   <data name="InvalidVersionForWorkload" xml:space="preserve">
-    <value>Error parsing version for workload {0}: Invalid version {1}.</value>
+    <value>Error parsing version '{1}' for workload manifest ID '{0}'</value>
   </data>
 </root>
