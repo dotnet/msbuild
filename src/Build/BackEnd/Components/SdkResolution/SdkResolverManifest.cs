@@ -13,6 +13,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     {
         internal string Path { get; set; }
 
+        internal string NamePattern { get; set; }
+
         /// <summary>
         /// Deserialize the file into an SdkResolverManifest.
         /// </summary>
@@ -47,22 +49,34 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return null;
         }
 
+        // This parsing code is very specific, but it should be all right as long as manifest has simple structure.
         private static SdkResolverManifest ParseSdkResolverElement(XmlReader reader)
         {
             SdkResolverManifest manifest = new SdkResolverManifest();
 
-            while (reader.Read())
+            reader.Read();
+            while (!reader.EOF)
             {
                 switch (reader.NodeType)
                 {
                     case XmlNodeType.Element:
                         {
-                            manifest.Path = reader.Name switch
+                            switch (reader.Name)
                             {
-                                "Path" => reader.ReadElementContentAsString(),
-                                _ => throw new XmlException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedElement", reader.Name)),
-                            };
+                                case "Path":
+                                    manifest.Path = reader.ReadElementContentAsString();
+                                    break;
+                                case "NamePattern":
+                                    manifest.NamePattern = reader.ReadElementContentAsString();
+                                    break;
+                                default:
+                                    throw new XmlException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedElement", reader.Name));
+                            }
+                            break;
                         }
+
+                    case XmlNodeType.EndElement:
+                        reader.Read();
                         break;
 
                     default:

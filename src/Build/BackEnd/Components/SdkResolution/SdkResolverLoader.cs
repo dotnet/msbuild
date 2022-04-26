@@ -143,6 +143,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             {
                 // <SdkResolver>
                 //   <Path>...</Path>
+                //   <NamePattern>(Optional field)</NamePattern>
                 // </SdkResolver>
                 var manifest = SdkResolverManifest.Load(pathToManifest);
 
