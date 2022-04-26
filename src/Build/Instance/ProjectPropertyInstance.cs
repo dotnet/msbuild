@@ -342,7 +342,7 @@ namespace Microsoft.Build.Execution
             public override bool IsImmutable => true;
         }
 
-        private class EnvironmentDerivedProjectPropertyInstance : ProjectPropertyInstance
+        internal class EnvironmentDerivedProjectPropertyInstance : ProjectPropertyInstance
         {
             internal EnvironmentDerivedProjectPropertyInstance(string name, string escapedValue, LoggingContext loggingContext)
                 : base(name, escapedValue)

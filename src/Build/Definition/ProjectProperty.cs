@@ -98,11 +98,11 @@ namespace Microsoft.Build.Evaluation
             [DebuggerStepThrough]
             get
             {
-                if (this is EnvironmentDerivedProjectProperty environmentProperty && environmentProperty.loggingContext?.IsValid == true && !environmentProperty._loggedEnvProperty)
+                if (this is EnvironmentDerivedProjectProperty environmentProperty && environmentProperty.loggingContext is { IsValid: true } loggingContext && !environmentProperty._loggedEnvProperty)
                 {
                     EnvironmentVariableReadEventArgs args = new(Name, EvaluatedValueEscapedInternal);
-                    args.BuildEventContext = environmentProperty.loggingContext.BuildEventContext;
-                    environmentProperty.loggingContext.LogBuildEvent(args);
+                    args.BuildEventContext = loggingContext.BuildEventContext;
+                    loggingContext.LogBuildEvent(args);
                     environmentProperty._loggedEnvProperty = true;
                 }
 

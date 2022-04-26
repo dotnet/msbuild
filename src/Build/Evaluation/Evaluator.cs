@@ -32,6 +32,7 @@ using Constants = Microsoft.Build.Internal.Constants;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using SdkReferencePropertyExpansionMode = Microsoft.Build.Framework.EscapeHatches.SdkReferencePropertyExpansionMode;
+using static Microsoft.Build.Execution.ProjectPropertyInstance;
 
 #nullable disable
 
@@ -811,11 +812,23 @@ namespace Microsoft.Build.Evaluation
             if (this._evaluationLoggingContext.LoggingService.IncludeEvaluationPropertiesAndItems)
             {
                 globalProperties = _data.GlobalPropertiesDictionary;
-                properties = _data.Properties;
+                properties = Traits.Instance.LogAllEnvironmentVariables ? _data.Properties : FilterOutEnvironmentDerivedProperties(_data.Properties);
                 items = _data.Items;
             }
 
             _evaluationLoggingContext.LogProjectEvaluationFinished(globalProperties, properties, items, _evaluationProfiler.ProfiledResult);
+        }
+
+        private IEnumerable FilterOutEnvironmentDerivedProperties(PropertyDictionary<P> dictionary)
+        {
+            foreach (P p in dictionary)
+            {
+                if (!((p is ProjectProperty pp && pp.IsEnvironmentProperty) ||
+                    (p is EnvironmentDerivedProjectPropertyInstance)))
+                {
+                    yield return p;
+                }
+            }
         }
 
         private void CollectProjectCachePlugins()
