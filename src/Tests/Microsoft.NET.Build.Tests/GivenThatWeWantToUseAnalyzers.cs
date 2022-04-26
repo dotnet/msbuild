@@ -69,8 +69,9 @@ namespace Microsoft.NET.Build.Tests
                         ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/cs/System.Text.RegularExpressions.Generator.dll"),
                         ("microsoft.codequality.analyzers", "2.6.0", "analyzers/dotnet/cs/Microsoft.CodeQuality.Analyzers.dll"),
                         ("microsoft.codequality.analyzers", "2.6.0", "analyzers/dotnet/cs/Microsoft.CodeQuality.CSharp.Analyzers.dll"),
-                        ("microsoft.dependencyvalidation.analyzers", "0.9.0", "analyzers/dotnet/Microsoft.DependencyValidation.Analyzers.dll")
-
+                        ("microsoft.dependencyvalidation.analyzers", "0.9.0", "analyzers/dotnet/Microsoft.DependencyValidation.Analyzers.dll"),
+                        ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/Microsoft.Interop.LibraryImportGenerator.dll"),
+                        ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/Microsoft.Interop.SourceGeneration.dll")
                         );
                     break;
 
@@ -80,12 +81,17 @@ namespace Microsoft.NET.Build.Tests
                         ("Microsoft.NET.Sdk", (string)null, "analyzers/Microsoft.CodeAnalysis.NetAnalyzers.dll"),
                         ("microsoft.codequality.analyzers", "2.6.0", "analyzers/dotnet/vb/Microsoft.CodeQuality.Analyzers.dll"),
                         ("microsoft.codequality.analyzers", "2.6.0", "analyzers/dotnet/vb/Microsoft.CodeQuality.VisualBasic.Analyzers.dll"),
-                        ("microsoft.dependencyvalidation.analyzers", "0.9.0", "analyzers/dotnet/Microsoft.DependencyValidation.Analyzers.dll")
+                        ("microsoft.dependencyvalidation.analyzers", "0.9.0", "analyzers/dotnet/Microsoft.DependencyValidation.Analyzers.dll"),
+                        ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/Microsoft.Interop.LibraryImportGenerator.dll"),
+                        ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/Microsoft.Interop.SourceGeneration.dll")
                         );
                     break;
 
                 case "F#":
-                    analyzers.Should().BeEmpty();
+                    analyzers.Select(x => GetPackageAndPath(x)).Should().BeEquivalentTo(
+                        ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/Microsoft.Interop.LibraryImportGenerator.dll"),
+                        ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/Microsoft.Interop.SourceGeneration.dll")
+                        );
                     break;
 
                 default:
@@ -132,7 +138,7 @@ namespace Microsoft.NET.Build.Tests
 
                 return getValuesCommand.GetValues().Select(x => GetPackageAndPath(x)).ToList();
             }
-            
+
             GetAnalyzersForTargetFramework("net6.0").Should().BeEquivalentTo(("system.text.json", "6.0.0-preview.4.21253.7", "analyzers/dotnet/cs/System.Text.Json.SourceGeneration.dll"));
             GetAnalyzersForTargetFramework("net472").Should().BeEmpty();
         }

@@ -123,6 +123,8 @@
   "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Dynamic.Runtime.dll.gz",
   "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Formats.Asn1.dll",
   "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Formats.Asn1.dll.gz",
+  "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Formats.Tar.dll",
+  "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Formats.Tar.dll.gz",
   "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Globalization.Calendars.dll",
   "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Globalization.Calendars.dll.gz",
   "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Globalization.Extensions.dll",
