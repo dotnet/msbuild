@@ -3668,8 +3668,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new();
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new(pg, FileSystems.Default);
-            string intermediate = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertToBase64('{testCase}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
-            intermediate.ShouldBe(result);
+            string intermediate = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertToBase64('{plaintext}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
+            intermediate.ShouldBe(base64);
         }
 
         [Theory]
@@ -3680,8 +3680,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new();
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new(pg, FileSystems.Default);
-            string original = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertFromBase64('{intermediate}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
-            original.ShouldBe(testCase);
+            string original = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertFromBase64('{base64}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
+            original.ShouldBe(plaintext);
         }
 
         /// <summary>
