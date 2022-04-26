@@ -269,7 +269,7 @@ namespace Microsoft.Build.Execution
             processStartInfo.CreateNoWindow = true;
             processStartInfo.UseShellExecute = false;
 
-            return Process.Start(processStartInfo) ?? throw new InvalidOperationException("MSBuild server node failed to lunch");
+            return Process.Start(processStartInfo) ?? throw new InvalidOperationException("MSBuild server node failed to launch");
         }
 
         private bool TrySendBuildCommand(string commandLine, NamedPipeClientStream nodeStream)
