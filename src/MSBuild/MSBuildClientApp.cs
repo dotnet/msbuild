@@ -27,7 +27,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="commandLine">The command line to process. The first argument
         /// on the command line is assumed to be the name/path of the executable, and
         /// is ignored.</param>
-        /// <param name="ct">Cancellation token.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A value of type <see cref="MSBuildApp.ExitType"/> that indicates whether the build succeeded,
         /// or the manner in which it failed.</returns>
         /// <remarks>
@@ -39,7 +39,7 @@ namespace Microsoft.Build.CommandLine
 #else
             string[] commandLine,
 #endif
-            CancellationToken ct
+            CancellationToken cancellationToken
             )
         {
             string? exeLocation;
@@ -67,7 +67,7 @@ namespace Microsoft.Build.CommandLine
 
             return Execute(
                 commandLine,
-                ct,
+                cancellationToken,
                 exeLocation,
                 dllLocation
             );
@@ -79,7 +79,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="commandLine">The command line to process. The first argument
         /// on the command line is assumed to be the name/path of the executable, and
         /// is ignored.</param>
-        /// <param name="ct">Cancellation token.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <param name="exeLocation">Location of executable file to launch the server process.
         /// That should be either dotnet.exe or MSBuild.exe location.</param>
         /// <param name="dllLocation">Location of dll file to launch the server process if needed.
@@ -92,7 +92,7 @@ namespace Microsoft.Build.CommandLine
 #else
             string[] commandLine,
 #endif
-            CancellationToken ct,
+            CancellationToken cancellationToken,
             string exeLocation,
             string dllLocation
         )
@@ -104,7 +104,7 @@ namespace Microsoft.Build.CommandLine
             string commandLineString = commandLine;
 #endif
             MSBuildClient msbuildClient = new MSBuildClient(exeLocation, dllLocation); 
-            MSBuildClientExitResult exitResult = msbuildClient.Execute(commandLineString, ct);
+            MSBuildClientExitResult exitResult = msbuildClient.Execute(commandLineString, cancellationToken);
 
             if (exitResult.MSBuildClientExitType == MSBuildClientExitType.ServerBusy
                 || exitResult.MSBuildClientExitType == MSBuildClientExitType.ConnectionError
