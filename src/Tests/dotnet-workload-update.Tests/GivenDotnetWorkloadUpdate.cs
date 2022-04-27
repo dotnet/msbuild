@@ -409,12 +409,9 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             Directory.CreateDirectory(userProfileDir);
 
             var sdkFeatureVersion = "6.0.200";
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot, userLocal: false, userProfileDir);
-            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
-            
+           
             var mockRollbackFileContent = @"{""mock.workload"":""6.0.0.15/6.0.100""}";
             var rollbackFilePath = Path.Combine(testDirectory, "rollback.json");
-            var manifestUpdater = new MockWorkloadManifestUpdater();
             File.WriteAllText(rollbackFilePath, mockRollbackFileContent);
             
             var updateParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--from-rollback-file", rollbackFilePath });

@@ -475,10 +475,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     string manifestVersionString = (parts[0]);
                     if (!FXVersion.TryParse(manifestVersionString, out FXVersion version))
                     {
-                        if (string.IsNullOrWhiteSpace(manifestVersionString))
-                        {
-                            throw new ArgumentNullException(nameof(manifestVersionString));
-                        }
                         throw new FormatException(String.Format(LocalizableStrings.InvalidVersionForWorkload, manifest.Key, manifestVersionString));
                     } 
 
