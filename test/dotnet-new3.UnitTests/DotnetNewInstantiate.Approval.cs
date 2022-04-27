@@ -238,11 +238,45 @@ namespace Dotnet_new3.IntegrationTests
         }
 
         [Fact]
+        public Task DryRunRespectsTargetPathAndOutputDir()
+        {
+            const string _OUT_FOLDER = "folderF";
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            Helpers.InstallTestTemplate("TemplateWithSourceNameAndCustomTargetPath", _log, home, workingDirectory);
+
+            var commandResult = new DotnetNewCommand(_log, "TestAssets.TemplateWithSourceNameAndCustomTargetPath", "-o", _OUT_FOLDER, "--dry-run")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr();
+
+            string[] expectedFiles = new[] { $"{_OUT_FOLDER}.name.txt", $"{_OUT_FOLDER}/{_OUT_FOLDER}.cs" };
+
+            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+                .AddScrubber(output =>
+                {
+                    //unify directory separators
+                    output = output.Replace("\\", "/");
+                    //order of files may vary, replace filename with placeholders
+                    //filenames are verified above
+                    foreach (var file in expectedFiles)
+                    {
+                        output = output.Replace(file, "%FILENAME%");
+                    }
+                });
+        }
+
+        [Fact]
         public Task CannotOverwriteFilesWithoutForce()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
-            new DotnetNewCommand(_log, "console", "--name", "overwrite-test")
+            new DotnetNewCommand(_log, "console", "--name", "overwrite-test", "-o", "folderA")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
@@ -251,7 +285,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("The template \"Console App\" was created successfully.");
 
-            var commandResult = new DotnetNewCommand(_log, "console", "--name", "overwrite-test")
+            var commandResult = new DotnetNewCommand(_log, "console", "--name", "overwrite-test", "-o", "folderA")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -270,7 +304,7 @@ namespace Dotnet_new3.IntegrationTests
                 .AddScrubber(output =>
                 {
                     //unify directory separators
-                    output = output.Replace("\\", " / ");
+                    output = output.Replace("\\", "/");
                     //order of files may vary, replace filename with placeholders
                     //filenames are verified above
                     foreach (var file in expectedFiles)

@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Commands;
@@ -106,6 +107,39 @@ namespace Microsoft.TemplateEngine.Cli
             };
         }
 
+        private static string AdjustReportedPath(string targetPath, string? requestedOutputPath)
+        {
+            if (string.IsNullOrEmpty(requestedOutputPath))
+            {
+                return targetPath;
+            }
+
+            return TryGetRelativePath(Path.Combine(requestedOutputPath, targetPath), Directory.GetCurrentDirectory());
+        }
+
+        /// <summary>
+        /// Attempts to reconstruct the path relative to `basePath`. If `path` is not subfolder of `basePath` or if error occurs, original path is returned.
+        /// </summary>
+        /// <param name="path">Path to attempt to make relative.</param>
+        /// <param name="basePath">base folder to relativize the path.</param>
+        /// <returns></returns>
+        private static string TryGetRelativePath(string path, string basePath)
+        {
+            try
+            {
+                string sourceFullPath = Path.GetFullPath(path);
+                if (sourceFullPath.StartsWith(basePath, StringComparison.CurrentCulture))
+                {
+                    return sourceFullPath.Substring(basePath.Length + 1);
+                }
+            }
+            catch (Exception)
+            {
+            }
+
+            return path;
+        }
+
         private async Task<NewCommandStatus> CreateTemplateAsync(TemplateCommandArgs templateArgs, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -189,7 +223,8 @@ namespace Microsoft.TemplateEngine.Cli
                         {
                             foreach (IFileChange change in instantiateResult.CreationEffects.FileChanges)
                             {
-                                Reporter.Output.WriteLine($"  {GetChangeString(change.ChangeKind)}: {change.TargetRelativePath}");
+                                string targetPathToReport = AdjustReportedPath(change.TargetRelativePath, templateArgs.OutputPath);
+                                Reporter.Output.WriteLine($"  {GetChangeString(change.ChangeKind)}: {targetPathToReport}");
                             }
                         }
                     }
@@ -240,7 +275,8 @@ namespace Microsoft.TemplateEngine.Cli
                         foreach (IFileChange change in destructiveChanges)
                         {
                             string changeKind = GetChangeString(change.ChangeKind);
-                            Reporter.Error.WriteLine(($"  {changeKind}".PadRight(padLen) + change.TargetRelativePath).Bold().Red());
+                            string targetPathToReport = AdjustReportedPath(change.TargetRelativePath, templateArgs.OutputPath);
+                            Reporter.Error.WriteLine(($"  {changeKind}".PadRight(padLen) + targetPathToReport).Bold().Red());
                         }
                         Reporter.Error.WriteLine();
                     }
