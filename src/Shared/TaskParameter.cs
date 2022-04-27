@@ -107,7 +107,8 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow
                 (
                     TaskParameterTypeVerifier.IsValidInputParameter(wrappedParameterType) || TaskParameterTypeVerifier.IsValidOutputParameter(wrappedParameterType),
-                    "How did we manage to get a task parameter that isn't a valid parameter type?"
+                    "How did we manage to get a task parameter of type {0} that isn't a valid parameter type?",
+                    wrappedParameterType
                 );
 
             if (wrappedParameterType.IsArray)
