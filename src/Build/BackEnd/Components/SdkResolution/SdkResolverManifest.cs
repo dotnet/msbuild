@@ -11,6 +11,16 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     /// </summary>
     internal class SdkResolverManifest
     {
+        public SdkResolverManifest()
+        {
+        }
+
+        public SdkResolverManifest(string path, string namePattern)
+        {
+            Path = path;
+            NamePattern = namePattern;
+        }
+
         internal string Path { get; set; }
 
         internal string NamePattern { get; set; }

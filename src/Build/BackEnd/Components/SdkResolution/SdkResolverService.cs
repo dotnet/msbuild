@@ -44,6 +44,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         private IList<SdkResolver> _resolvers;
 
         /// <summary>
+        /// Stores the list of SDK resolvers which were loaded.
+        /// </summary>
+        private IList<SdkResolverManifest> _resolversRegistry;
+
+        /// <summary>
         /// Stores an <see cref="SdkResolverLoader"/> which can load registered SDK resolvers.
         /// </summary>
         private SdkResolverLoader _sdkResolverLoader = new SdkResolverLoader();
@@ -92,7 +97,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
         public virtual SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
         {
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_3))
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_3))
             {
                 return ResolveSdkUsingMostSpecificResolvers(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
             }
@@ -104,6 +109,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         private SdkResult ResolveSdkUsingMostSpecificResolvers(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
         {
+            if (_resolversRegistry == null)
+            {
+                RegisterResolvers(loggingContext, sdkReferenceLocation);
+            }
+
             throw new NotImplementedException();
         }
 
@@ -257,6 +267,18 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 MSBuildEventSource.Log.SdkResolverServiceInitializeStart();
                 _resolvers = _sdkResolverLoader.LoadResolvers(loggingContext, location);
                 MSBuildEventSource.Log.SdkResolverServiceInitializeStop(_resolvers.Count);
+            }
+        }
+
+        private void RegisterResolvers(LoggingContext loggingContext, ElementLocation location)
+        {
+            lock (_lockObject)
+            {
+                if (_resolversRegistry != null)
+                {
+                    return;
+                }
+                _resolversRegistry = _sdkResolverLoader.GetResolversManifests(loggingContext, location);
             }
         }
 
