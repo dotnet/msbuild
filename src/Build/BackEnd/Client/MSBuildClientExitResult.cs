@@ -20,7 +20,5 @@ namespace Microsoft.Build.Execution
         /// This field is null if MSBuild client execution was not successful.
         /// </summary>
         public string? MSBuildAppExitTypeString { get; set; }
-
-        public MSBuildClientExitResult() { }
     }
 }

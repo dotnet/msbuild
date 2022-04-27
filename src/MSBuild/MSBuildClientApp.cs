@@ -47,7 +47,7 @@ namespace Microsoft.Build.CommandLine
 
 #if RUNTIME_TYPE_NETCORE || MONO
             // Run the child process with the same host as the currently-running process.
-            // Mono automagically uses the current mono, to execute a managed assembly.
+            // Mono automatically uses the current mono, to execute a managed assembly.
             if (!NativeMethodsShared.IsMono)
             {
                 // _exeFileLocation consists the msbuild dll instead.
@@ -106,18 +106,18 @@ namespace Microsoft.Build.CommandLine
             MSBuildClient msbuildClient = new MSBuildClient(exeLocation, dllLocation); 
             MSBuildClientExitResult exitResult = msbuildClient.Execute(commandLineString, cancellationToken);
 
-            if (exitResult.MSBuildClientExitType == MSBuildClientExitType.ServerBusy
-                || exitResult.MSBuildClientExitType == MSBuildClientExitType.ConnectionError
-            )
+            if (exitResult.MSBuildClientExitType == MSBuildClientExitType.ServerBusy ||
+                exitResult.MSBuildClientExitType == MSBuildClientExitType.ConnectionError)
             {
                 // Server is busy, fallback to old behavior.
                 return MSBuildApp.Execute(commandLine);
             }
-            else if ((exitResult.MSBuildClientExitType == MSBuildClientExitType.Success)
-                    && Enum.TryParse(exitResult.MSBuildAppExitTypeString, out MSBuildApp.ExitType MSBuildAppExitType))
+
+            if (exitResult.MSBuildClientExitType == MSBuildClientExitType.Success &&
+                Enum.TryParse(exitResult.MSBuildAppExitTypeString, out MSBuildApp.ExitType MSBuildAppExitType))
             {
-                // The client successfully set up a build task for MSBuild server and recieved the result.
-                // (Which could be a failure as well). Return the recieved exit type. 
+                // The client successfully set up a build task for MSBuild server and received the result.
+                // (Which could be a failure as well). Return the received exit type. 
                 return MSBuildAppExitType;
             }
 

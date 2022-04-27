@@ -222,7 +222,7 @@ namespace Microsoft.Build.CommandLine
             }
 
             int exitCode;
-            if (Environment.GetEnvironmentVariable("MSBUILDUSESERVER") == "1")
+            if (Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName) == "1")
             {
                 // Use the client app to execute build in msbuild server. Opt-in feature.
                 exitCode = ((s_initialized && MSBuildClientApp.Execute(

@@ -1,5 +1,5 @@
 Microsoft.Build.Execution.MSBuildClient
-Microsoft.Build.Execution.MSBuildClient.Execute(string commandLine, System.Threading.CancellationToken ct) -> Microsoft.Build.Execution.MSBuildClientExitResult
+Microsoft.Build.Execution.MSBuildClient.Execute(string commandLine, System.Threading.CancellationToken cancellationToken) -> Microsoft.Build.Execution.MSBuildClientExitResult
 Microsoft.Build.Execution.MSBuildClient.MSBuildClient(string exeLocation, string dllLocation) -> void
 Microsoft.Build.Execution.MSBuildClient.ServerEnvironmentVariables.get -> System.Collections.Generic.Dictionary<string, string>
 Microsoft.Build.Execution.MSBuildClient.ServerEnvironmentVariables.set -> void

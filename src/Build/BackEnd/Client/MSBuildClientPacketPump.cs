@@ -8,14 +8,13 @@ using System.IO;
 using System.Threading;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-
 #if !FEATURE_APM
 using System.Threading.Tasks;
 #endif
 
-namespace Microsoft.Build.BackEnd.Node
+namespace Microsoft.Build.BackEnd.Client
 {
-    internal sealed class MSBuildClientPacketPump : INodePacketHandler, INodePacketFactory
+    internal sealed class MSBuildClientPacketPump : INodePacketHandler, INodePacketFactory, IDisposable
     {
         /// <summary>
         /// The queue of packets we have received but which have not yet been processed.
@@ -28,20 +27,19 @@ namespace Microsoft.Build.BackEnd.Node
         public AutoResetEvent PacketReceivedEvent { get; }
 
         /// <summary>
-        /// Set when packet pump should shutdown.
-        /// </summary>
-        public ManualResetEvent PacketPumpShutdownEvent { get; }
-
-        /// <summary>
-        /// Set when the packet pump enexpectedly terminates (due to connection problems or becuase of desearilization issues).
+        /// Set when the packet pump unexpectedly terminates (due to connection problems or because of deserialization issues).
         /// </summary>
         public ManualResetEvent PacketPumpErrorEvent { get; }
 
         /// <summary>
-        /// Exception appeared when the packet pump enexpectedly terminates.
+        /// Exception appeared when the packet pump unexpectedly terminates.
         /// </summary>
         public Exception? PacketPumpException { get; set; }
 
+        /// <summary>
+        /// Set when packet pump should shutdown.
+        /// </summary>
+        private readonly ManualResetEvent _packetPumpShutdownEvent;
 
         /// <summary>
         /// The packet factory.
@@ -51,7 +49,7 @@ namespace Microsoft.Build.BackEnd.Node
         /// <summary>
         /// The memory stream for a read buffer.
         /// </summary>
-        private MemoryStream _readBufferMemoryStream;
+        private readonly MemoryStream _readBufferMemoryStream;
 
         /// <summary>
         /// The thread which runs the asynchronous packet pump
@@ -61,18 +59,12 @@ namespace Microsoft.Build.BackEnd.Node
         /// <summary>
         /// The stream from where to read packets.
         /// </summary>
-        private Stream _stream;
+        private readonly Stream _stream;
 
         /// <summary>
         /// The binary translator for reading packets.
         /// </summary>
-        ITranslator _binaryReadTranslator;
-
-        /// <summary>
-        /// Shared read buffer for binary reader.
-        /// </summary>
-        SharedReadBuffer _sharedReadBuffer;
-
+        readonly ITranslator _binaryReadTranslator;
 
         public MSBuildClientPacketPump(Stream stream)
         {
@@ -81,13 +73,12 @@ namespace Microsoft.Build.BackEnd.Node
 
             ReceivedPacketsQueue = new ConcurrentQueue<INodePacket>();
             PacketReceivedEvent = new AutoResetEvent(false);
-            PacketPumpShutdownEvent = new ManualResetEvent(false);
             PacketPumpErrorEvent = new ManualResetEvent(false);
+            _packetPumpShutdownEvent = new ManualResetEvent(false);
 
             _readBufferMemoryStream = new MemoryStream();
-            _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
-            _binaryReadTranslator = BinaryTranslator.GetReadTranslator(_readBufferMemoryStream, _sharedReadBuffer);
-       }
+            _binaryReadTranslator = BinaryTranslator.GetReadTranslator(_readBufferMemoryStream, InterningBinaryReader.CreateSharedBuffer());
+        }
 
         #region INodePacketFactory Members
 
@@ -155,9 +146,11 @@ namespace Microsoft.Build.BackEnd.Node
         /// </summary>
         public void Start()
         {
-            _packetPumpThread = new Thread(PacketPumpProc);
-            _packetPumpThread.IsBackground = true;
-            _packetPumpThread.Name = "MSBuild Client Packet Pump";
+            _packetPumpThread = new Thread(PacketPumpProc)
+            {
+                IsBackground = true,
+                Name = "MSBuild Client Packet Pump"
+            };
             _packetPumpThread.Start();
         }
 
@@ -166,7 +159,7 @@ namespace Microsoft.Build.BackEnd.Node
         /// </summary>
         public void Stop()
         {
-            PacketPumpShutdownEvent.Set();
+            _packetPumpShutdownEvent.Set();
             _packetPumpThread?.Join();
         }
 
@@ -179,7 +172,7 @@ namespace Microsoft.Build.BackEnd.Node
         /// </remarks>
         private void PacketPumpProc()
         {
-            RunReadLoop(_stream, PacketPumpShutdownEvent);
+            RunReadLoop(_stream, _packetPumpShutdownEvent);
         }
 
         private void RunReadLoop(Stream localStream, ManualResetEvent localPacketPumpShutdownEvent)
@@ -266,7 +259,7 @@ namespace Microsoft.Build.BackEnd.Node
                                 catch
                                 {
                                     // Error while deserializing or handling packet. Logging additional info.
-                                    CommunicationsUtilities.Trace("Packet factory failed to recieve package. Exception while deserializing packet {0}.", packetType);
+                                    CommunicationsUtilities.Trace("Packet factory failed to receive package. Exception while deserializing packet {0}.", packetType);
                                     throw;
                                 }
 
@@ -303,5 +296,7 @@ namespace Microsoft.Build.BackEnd.Node
             CommunicationsUtilities.Trace("Ending read loop.");
         }
         #endregion
+
+        public void Dispose() => Stop();
     }
 }
