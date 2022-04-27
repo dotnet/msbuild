@@ -63,7 +63,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netstandard1.2", true, "netstandard1.5", true, false, false)]
         [InlineData("netcoreapp1.1", true, "net45;netstandard1.5", true, true, true)]
         [InlineData("netcoreapp1.1", true, "net45;net46", true, false, false)]
-        [InlineData("netcoreapp1.1;net461", true, "netstandard1.4", true, true, true)]
+        [InlineData("netcoreapp1.1;net462", true, "netstandard1.4", true, true, true)]
         [InlineData("netcoreapp1.1;net45", true, "netstandard1.4", true, false, false)]
         [InlineData("netcoreapp1.1;net46", true, "net45;netstandard1.6", true, true, true)]
         [InlineData("netcoreapp1.1;net45", true, "net46;netstandard1.6", true, false, false)]

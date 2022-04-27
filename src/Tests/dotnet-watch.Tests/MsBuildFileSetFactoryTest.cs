@@ -132,7 +132,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         {
             var project = _testAssets.CreateTestProject(new TestProject("Project1")
             {
-                TargetFrameworks = "netcoreapp2.1;net461",
+                TargetFrameworks = "netcoreapp2.1;net462",
                 AdditionalProperties =
                 {
                     ["EnableDefaultCompileItems"] = "false",
@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             project.WithProjectChanges(d => d.Root.Add(XElement.Parse(
 @"<ItemGroup>
     <Compile Include=""Class1.netcore.cs"" Condition=""'$(TargetFramework)'=='netcoreapp2.1'"" />
-    <Compile Include=""Class1.desktop.cs"" Condition=""'$(TargetFramework)'=='net461'"" />
+    <Compile Include=""Class1.desktop.cs"" Condition=""'$(TargetFramework)'=='net462'"" />
 </ItemGroup>")));
 
             WriteFile(project, "Class1.netcore.cs");
@@ -250,7 +250,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var project1 = _testAssets.CreateTestProject(new TestProject("Project1")
             {
-                TargetFrameworks = "netcoreapp2.1;net461",
+                TargetFrameworks = "netcoreapp2.1;net462",
                 ReferencedProjects = { project2.TestProject, },
             });
 
@@ -285,7 +285,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var project1 = _testAssets.CreateTestProject(new TestProject("Project1")
             {
-                TargetFrameworks = "netcoreapp2.1;net461",
+                TargetFrameworks = "netcoreapp2.1;net462",
                 ReferencedProjects = { project2.TestProject, },
             });
 

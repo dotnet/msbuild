@@ -81,7 +81,7 @@ public class NETStandard
             var netFrameworkLibrary = new TestProject()
             {
                 Name = "NETFrameworkLibrary",
-                TargetFrameworks = "net461",
+                TargetFrameworks = "net462",
             };
 
             netFrameworkLibrary.ReferencedProjects.Add(netStandardLibrary);
@@ -142,7 +142,7 @@ public class NETStandard
             var netFrameworkLibrary = new TestProject()
             {
                 Name = "NETFrameworkLibrary",
-                TargetFrameworks = "net461",
+                TargetFrameworks = "net462",
             };
             netFrameworkLibrary.ReferencedProjects.Add(netStandardLibrary);
 
@@ -428,7 +428,7 @@ public static class {project.Name}
             TestProject testProject = new TestProject()
             {
                 Name = "DependsOnPublish",
-                TargetFrameworks = "net461",
+                TargetFrameworks = "net462",
                 IsExe = false
             };
 
