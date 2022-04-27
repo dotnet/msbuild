@@ -170,9 +170,15 @@ namespace Dotnet_new3.IntegrationTests
 
             Assert.True(File.Exists(Path.Combine(home, "packages", "Microsoft.DotNet.Web.ProjectTemplates.5.0.5.0.0.nupkg")));
 
-            new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Web.ProjectTemplates.5.0")
+            // This tests proper uninstallation of package even if there is a clash with existing folder name
+            //  (this used to fail - see #4613)
+            string packageNameToUnisntall = "Microsoft.DotNet.Web.ProjectTemplates.5.0";
+            string workingDir = TestUtils.CreateTemporaryFolder();
+            Directory.CreateDirectory(Path.Combine(workingDir, packageNameToUnisntall));
+
+            new DotnetNewCommand(_log, commandName, packageNameToUnisntall)
                 .WithCustomHive(home)
-                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithWorkingDirectory(workingDir)
                 .Execute()
                 .Should()
                 .ExitWith(0)

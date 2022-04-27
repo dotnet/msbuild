@@ -425,20 +425,15 @@ namespace Microsoft.TemplateEngine.Cli
             NewCommandStatus result = NewCommandStatus.Success;
             IReadOnlyList<IManagedTemplatePackage> templatePackages = await _templatePackageManager.GetManagedTemplatePackagesAsync(false, cancellationToken).ConfigureAwait(false);
 
-            List<string> parsedIdentifiers = new List<string>();
-            foreach (string entry in commandArgs.TemplatePackages)
-            {
-                parsedIdentifiers.AddRange(InstallRequestPathResolution.ExpandMaskedPath(entry, _engineEnvironmentSettings));
-            }
-
             var packagesToUninstall = new Dictionary<IManagedTemplatePackageProvider, List<IManagedTemplatePackage>>();
-            foreach (string templatePackageIdentifier in parsedIdentifiers)
+            List<string> notFoundPackages = new List<string>();
+            foreach (var requestedPackageIdentifier in commandArgs.TemplatePackages)
             {
                 bool templatePackageIdentified = false;
-
+                // First try to search for installed packages that have identical identifier as requested to be unistalled
                 foreach (IManagedTemplatePackage templatePackage in templatePackages)
                 {
-                    if (templatePackage.Identifier.Equals(templatePackageIdentifier, StringComparison.OrdinalIgnoreCase))
+                    if (templatePackage.Identifier.Equals(requestedPackageIdentifier, StringComparison.OrdinalIgnoreCase))
                     {
                         templatePackageIdentified = true;
                         if (packagesToUninstall.TryGetValue(templatePackage.ManagedProvider, out List<IManagedTemplatePackage>? packages))
@@ -452,26 +447,53 @@ namespace Microsoft.TemplateEngine.Cli
                     }
                 }
 
-                if (templatePackageIdentified)
+                if (!templatePackageIdentified)
                 {
-                    continue;
-                }
+                    // If not found - try to expand path and search with expanded path for all local packages (folders and nugets)
+                    foreach (string expandedIdentifier in InstallRequestPathResolution.ExpandMaskedPath(requestedPackageIdentifier, _engineEnvironmentSettings))
+                    {
+                        templatePackageIdentified = false;
+                        foreach (IManagedTemplatePackage templatePackage in templatePackages.Where(pm => pm.IsLocalPackage))
+                        {
+                            if (templatePackage.Identifier.Equals(expandedIdentifier, StringComparison.OrdinalIgnoreCase))
+                            {
+                                templatePackageIdentified = true;
+                                if (packagesToUninstall.TryGetValue(templatePackage.ManagedProvider, out List<IManagedTemplatePackage>? packages))
+                                {
+                                    packages.Add(templatePackage);
+                                }
+                                else
+                                {
+                                    packagesToUninstall[templatePackage.ManagedProvider] = new List<IManagedTemplatePackage>() { templatePackage };
+                                }
+                            }
+                        }
 
+                        if (!templatePackageIdentified)
+                        {
+                            notFoundPackages.Add(expandedIdentifier);
+                        }
+                    }
+                }
+            }
+
+            foreach (string notFoundPackage in notFoundPackages)
+            {
                 result = NewCommandStatus.NotFound;
                 Reporter.Error.WriteLine(
                     string.Format(
                         LocalizableStrings.TemplatePackageCoordinator_Error_PackageNotFound,
-                        templatePackageIdentifier).Bold().Red());
-                if (await IsTemplateShortNameAsync(templatePackageIdentifier, cancellationToken).ConfigureAwait(false))
+                        notFoundPackage).Bold().Red());
+                if (await IsTemplateShortNameAsync(notFoundPackage, cancellationToken).ConfigureAwait(false))
                 {
-                    var packages = await GetTemplatePackagesByShortNameAsync(templatePackageIdentifier, cancellationToken).ConfigureAwait(false);
+                    var packages = await GetTemplatePackagesByShortNameAsync(notFoundPackage, cancellationToken).ConfigureAwait(false);
                     var managedPackages = packages.OfType<IManagedTemplatePackage>();
                     if (managedPackages.Any())
                     {
                         Reporter.Error.WriteLine(
                               string.Format(
                                   LocalizableStrings.TemplatePackageCoordinator_Error_TemplateIncludedToPackages,
-                                  templatePackageIdentifier));
+                                  notFoundPackage));
                         foreach (IManagedTemplatePackage managedPackage in managedPackages)
                         {
                             IEnumerable<ITemplateInfo> templates = await _templatePackageManager.GetTemplatesAsync(managedPackage, cancellationToken).ConfigureAwait(false);
@@ -523,6 +545,7 @@ namespace Microsoft.TemplateEngine.Cli
                 }
                 Reporter.Error.WriteLine();
             }
+
             return (result, packagesToUninstall);
         }
 
