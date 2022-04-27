@@ -301,12 +301,12 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.Environment::GetFolderPath", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::GetLogicalDrives", environmentType);
 
-// All the following properties only have getters
+                        // All the following properties only have getters
                         availableStaticMethods.TryAdd("System.Environment::CommandLine", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::Is64BitOperatingSystem", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::Is64BitProcess", environmentType);
-
                         availableStaticMethods.TryAdd("System.Environment::MachineName", environmentType);
+                        availableStaticMethods.TryAdd("System.Environment::NewLine", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::OSVersion", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::ProcessorCount", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::StackTrace", environmentType);
@@ -341,6 +341,7 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.Char", new Tuple<string, Type>(null, typeof(Char)));
                         availableStaticMethods.TryAdd("System.Convert", new Tuple<string, Type>(null, typeof(Convert)));
                         availableStaticMethods.TryAdd("System.DateTime", new Tuple<string, Type>(null, typeof(DateTime)));
+                        availableStaticMethods.TryAdd("System.DateTimeOffset", new Tuple<string, Type>(null, typeof(DateTimeOffset)));
                         availableStaticMethods.TryAdd("System.Decimal", new Tuple<string, Type>(null, typeof(Decimal)));
                         availableStaticMethods.TryAdd("System.Double", new Tuple<string, Type>(null, typeof(Double)));
                         availableStaticMethods.TryAdd("System.Enum", new Tuple<string, Type>(null, typeof(Enum)));

@@ -1012,6 +1012,7 @@ namespace Microsoft.Build.UnitTests
                                         new StringWriter(),
                                         false,
                                         warningsAsErrors: null,
+                                        warningsNotAsErrors: null,
                                         warningsAsMessages: null,
                                         enableRestore: false,
                                         profilerLogger: null,
@@ -1195,9 +1196,34 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "/warnasmessage" }), commandLineSwitches);
+            // Set "expanded" content to match the placeholder so the verify can use the exact resource string as "expected."
+            string command = "{0}";
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "/warnasmessage" }), commandLineSwitches, command);
 
             VerifySwitchError(commandLineSwitches, "/warnasmessage", AssemblyResources.GetString("MissingWarnAsMessageParameterError"));
+        }
+
+        /// <summary>
+        /// Verify that environment variables cannot be passed in as command line switches.
+        /// Also verifies that the full command line is properly passed when a switch error occurs.
+        /// </summary>
+        [Fact]
+        public void ProcessEnvironmentVariableSwitch()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("ENVIRONMENTVARIABLE", string.Empty);
+
+                CommandLineSwitches commandLineSwitches = new();
+                string fullCommandLine = "msbuild validProject.csproj %ENVIRONMENTVARIABLE%";
+                MSBuildApp.GatherCommandLineSwitches(new List<string>() { "validProject.csproj", "%ENVIRONMENTVARIABLE%" }, commandLineSwitches, fullCommandLine);
+                VerifySwitchError(commandLineSwitches, "%ENVIRONMENTVARIABLE%", String.Format(AssemblyResources.GetString("EnvironmentVariableAsSwitch"), fullCommandLine));
+
+                commandLineSwitches = new();
+                fullCommandLine = "msbuild %ENVIRONMENTVARIABLE% validProject.csproj";
+                MSBuildApp.GatherCommandLineSwitches(new List<string>() { "%ENVIRONMENTVARIABLE%", "validProject.csproj" }, commandLineSwitches, fullCommandLine);
+                VerifySwitchError(commandLineSwitches, "%ENVIRONMENTVARIABLE%", String.Format(AssemblyResources.GetString("EnvironmentVariableAsSwitch"), fullCommandLine));
+            }
         }
 
         /// <summary>

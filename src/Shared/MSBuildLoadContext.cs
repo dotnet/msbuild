@@ -51,20 +51,22 @@ namespace Microsoft.Build.Shared
                 // bare search directory if that fails.
                 : new[] { assemblyName.CultureName, string.Empty })
             {
-                var candidatePath = Path.Combine(_directory,
-                    cultureSubfolder,
-                    $"{assemblyName.Name}.dll");
+                    var candidatePath = Path.Combine(_directory,
+                        cultureSubfolder,
+                        $"{assemblyName.Name}.dll");
 
-                if (!FileSystems.Default.FileExists(candidatePath))
-                {
-                    continue;
-                }
+                    if (!FileSystems.Default.FileExists(candidatePath))
+                    {
+                        continue;
+                    }
 
-                AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
-                if (candidateAssemblyName.Version >= assemblyName.Version)
-                {
+                    AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
+                    if (candidateAssemblyName.Version != assemblyName.Version)
+                    {
+                        continue;
+                    }
+
                     return LoadFromAssemblyPath(candidatePath);
-                }
             }
 
             // If the Assembly is provided via a file path, the following rules are used to load the assembly:

@@ -164,7 +164,7 @@ dotnet_diagnostic.CA1069.severity = none
 dotnet_diagnostic.CA1070.severity = warning
 
 # Avoid using cref tags with a prefix
-dotnet_diagnostic.CA1200.severity = suggestion
+dotnet_diagnostic.CA1200.severity = warning
 
 # Do not pass literals as localized parameters
 dotnet_diagnostic.CA1303.severity = none
@@ -319,7 +319,7 @@ dotnet_diagnostic.CA1836.severity = warning
 dotnet_diagnostic.CA1837.severity = suggestion
 
 # Avoid 'StringBuilder' parameters for P/Invokes
-dotnet_diagnostic.CA1838.severity = suggestion
+dotnet_diagnostic.CA1838.severity = warning
 
 # Dispose objects before losing scope
 dotnet_diagnostic.CA2000.severity = none

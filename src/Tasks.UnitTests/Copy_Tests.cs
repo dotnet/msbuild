@@ -822,9 +822,11 @@ namespace Microsoft.Build.UnitTests
                     engine.AssertLogContains("MSB3021"); // copy failed
                     engine.AssertLogContains("MSB3026"); // DID retry
 
-#if !RUNTIME_TYPE_NETCORE && !MONO
-                    engine.AssertLogContains(Process.GetCurrentProcess().Id.ToString()); // the file is locked by the current process
-#endif
+                    if (NativeMethodsShared.IsWindows)
+                    {
+                        engine.AssertLogContains(Process.GetCurrentProcess().Id.ToString()); // the file is locked by the current process
+                    }
+
                     Assert.Equal(2, engine.Errors); // retries failed and the actual failure
                     Assert.Equal(10, engine.Warnings);
                 }
@@ -2399,9 +2401,7 @@ namespace Microsoft.Build.UnitTests
 
             if (NativeMethodsShared.IsWindows)
             {
-#pragma warning disable CA1416 // Suppress Warning saying that WindowsPrincipal might not be compatible on Windows (Which shouldn't be an issue...)
                 if (!new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null)))
-#pragma warning restore CA1416 // Suppress Warning saying that WindowsPrincipal might not be compatible on Windows (Which shouldn't be an issue...)
                 {
                     isPrivileged = false;
                     Assert.True(true, "It seems that you don't have the permission to create symbolic links. Try to run this test again with higher privileges");

@@ -164,6 +164,15 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Set of warnings to not treat as errors. Only has any effect if WarningsAsErrors is non-null but empty.
+        /// </summary>
+        ISet<string> WarningsNotAsErrors
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// A list of warnings to treat as low importance messages.
         /// </summary>
         ISet<string> WarningsAsMessages
@@ -235,6 +244,13 @@ namespace Microsoft.Build.BackEnd.Logging
         void AddWarningsAsErrors(BuildEventContext buildEventContext, ISet<string> codes);
 
         /// <summary>
+        /// Adds a set of warning codes to not treat as errors for the specified project instance ID.
+        /// </summary>
+        /// <param name="buildEventContext">A <see cref="BuildEventContext"/> to associate with the list of warning codes.</param>
+        /// <param name="codes">The list of warning codes not to treat as errors.</param>
+        void AddWarningsNotAsErrors(BuildEventContext buildEventContext, ISet<string> codes);
+
+        /// <summary>
         /// Determines if the specified submission has logged an errors.
         /// </summary>
         /// <param name="submissionId">The ID of the build submission.  A value of "0" means that an error was logged outside of any build submission.</param>
@@ -242,17 +258,24 @@ namespace Microsoft.Build.BackEnd.Logging
         bool HasBuildSubmissionLoggedErrors(int submissionId);
 
         /// <summary>
-        /// Returns a hashset of warnings to be logged as errors for the specified project instance ID.
+        /// Get the warnings that will be promoted to errors for the specified context.
         /// </summary>
         /// <param name="context">The build context through which warnings will be logged as errors.</param>
-        /// <returns>A Hashset containing warning codes that should be treated as errors.</returns>
+        /// <returns>A collection of warning codes that should be treated as errors.</returns>
         ICollection<string> GetWarningsAsErrors(BuildEventContext context);
 
         /// <summary>
-        /// Returns a hashset of warnings to be logged as messages for the specified project instance ID.
+        /// Get the warnings that will not be promoted to error for the specified context.
+        /// </summary>
+        /// <param name="context">The build context through which warnings will not be logged as errors.</param>
+        /// <returns>A collection of warning codes that should not be treated as errors.</returns>
+        ICollection<string> GetWarningsNotAsErrors(BuildEventContext context);
+
+        /// <summary>
+        /// Get the warnings that will be demoted to messages for the specified context.
         /// </summary>
         /// <param name="context">The build context through which warnings will be logged as errors.</param>
-        /// <returns>A Hashset containing warning codes that should be treated as messages.</returns>
+        /// <returns>A collection of warning codes that should be treated as messages.</returns>
         ICollection<string> GetWarningsAsMessages(BuildEventContext context);
 
         #region Register

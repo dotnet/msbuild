@@ -450,7 +450,8 @@ namespace Microsoft.Build.Evaluation
                 {
                     for (int i = 0; i < items.Count; i++)
                     {
-                        if (itemsWithNoWildcards.TryGetValue(FileUtilities.GetFullPath(items[i].Item.EvaluatedInclude, items[i].Item.ProjectDirectory), out UpdateOperation op))
+                        string fullPath = FileUtilities.GetFullPath(items[i].Item.EvaluatedIncludeEscaped, items[i].Item.ProjectDirectory);
+                        if (itemsWithNoWildcards.TryGetValue(fullPath, out UpdateOperation op))
                         {
                             items[i] = op.UpdateItem(items[i]);
                         }

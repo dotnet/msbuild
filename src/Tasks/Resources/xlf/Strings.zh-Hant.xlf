@@ -514,6 +514,11 @@
         <target state="translated">MSB3667: "{0}" 上已有檔案。若要嘗試建立預先計算的快取，請務必建立一個需要使用組件的專案，而非建立組件本身。若是正常執行 ResolveAssemblyReference 工作，請勿為 ResolveAssemblyReference 工作設定 "AssemblyInformationCacheOutputPath" 參數。</target>
         <note>{StrBegin="MSB3667: "}</note>
       </trans-unit>
+      <trans-unit id="General.TaskRequiresWindows">
+        <source>MSB3096: Task "{0}" is only supported when building on Windows.</source>
+        <target state="translated">MSB3096: 只有在 Windows 上建置時，才支援工作 "{0}"。</target>
+        <note>{StrBegin="MSB3096: "}</note>
+      </trans-unit>
       <trans-unit id="General.UndefineProperties">
         <source>Removing Properties:</source>
         <target state="translated">正在移除屬性:</target>

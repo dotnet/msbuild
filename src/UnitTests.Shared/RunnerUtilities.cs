@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests.Shared
             var pathToExecutable = pathToMsBuildExe;
 #else
             var pathToExecutable = ResolveRuntimeExecutableName();
-            msbuildParameters = "\"" + pathToMsBuildExe + "\"" + " " + msbuildParameters;
+            msbuildParameters = FileUtilities.EnsureDoubleQuotes(pathToMsBuildExe) + " " + msbuildParameters;
 #endif
 
             return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper);

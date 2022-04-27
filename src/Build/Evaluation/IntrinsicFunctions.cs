@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 
 using Microsoft.Build.Framework;
@@ -348,6 +349,26 @@ namespace Microsoft.Build.Evaluation
             {
                 return conditionValue;
             }
+        }
+
+        /// <summary>
+        /// Returns the string after converting all bytes to base 64 (alphanumeric characters plus '+' and '/'), ending in one or two '='.
+        /// </summary>
+        /// <param name="toEncode">String to encode in base 64.</param>
+        /// <returns>The encoded string.</returns>
+        internal static string ConvertToBase64(string toEncode)
+        {
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(toEncode));
+        }
+
+        /// <summary>
+        /// Returns the string after converting from base 64 (alphanumeric characters plus '+' and '/'), ending in one or two '='.
+        /// </summary>
+        /// <param name="toDecode">The string to decode.</param>
+        /// <returns>The decoded string.</returns>
+        internal static string ConvertFromBase64(string toDecode)
+        {
+            return Encoding.UTF8.GetString(Convert.FromBase64String(toDecode));
         }
 
         /// <summary>

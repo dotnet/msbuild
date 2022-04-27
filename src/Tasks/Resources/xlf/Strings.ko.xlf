@@ -514,6 +514,11 @@
         <target state="translated">MSB3667: "{0}"에 파일이 이미 있습니다. 사전 계산 캐시를 만들려면 어셈블리 자체를 빌드하는 대신 어셈블리에 종속되는 단일 프로젝트를 빌드하고 있는지 확인하세요. ResolveAssemblyReference 작업을 정상적으로 실행 중인 경우 ResolveAssemblyReference 작업의 "AssemblyInformationCacheOutputPath" 매개 변수를 설정하지 마세요.</target>
         <note>{StrBegin="MSB3667: "}</note>
       </trans-unit>
+      <trans-unit id="General.TaskRequiresWindows">
+        <source>MSB3096: Task "{0}" is only supported when building on Windows.</source>
+        <target state="translated">MSB3096: 작업 "{0}"은(는) Windows에서 빌드할 때만 지원됩니다.</target>
+        <note>{StrBegin="MSB3096: "}</note>
+      </trans-unit>
       <trans-unit id="General.UndefineProperties">
         <source>Removing Properties:</source>
         <target state="translated">속성 제거:</target>
@@ -1141,7 +1146,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.InvalidHexEscapeValue">
         <source>MSB3569: Invalid hex value after '\u' in resource "{0}", value '{1}'.</source>
-        <target state="translated">MSB3569: "{0}" 리소스에서 '\u' 뒤의 16진수가 잘못되었습니다. '{1}' 값</target>
+        <target state="translated">MSB3569: 리소스 "{0}", 값 '{1}'에서 '\u' 뒤의 16진수 값이 잘못되었습니다.</target>
         <note>{StrBegin="MSB3569: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CannotWriteSTRFile">

@@ -3,9 +3,12 @@
 
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
+using Microsoft.Build.Shared.FileSystem;
+
+#if FEATURE_COM_INTEROP
 using System.Text;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using System.Collections;
@@ -13,7 +16,7 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
-using Microsoft.Build.Shared.FileSystem;
+#endif
 
 #nullable disable
 
@@ -522,7 +525,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     internal static class NativeMethods
     {
-        #region Constants
+#region Constants
 
         internal static readonly IntPtr NullPtr = IntPtr.Zero;
         internal static readonly IntPtr InvalidIntPtr = new IntPtr(-1);
@@ -627,9 +630,9 @@ namespace Microsoft.Build.Tasks
             MOVEFILE_FAIL_IF_NOT_TRACKABLE = 0x00000020
         }
 
-        #endregion
+#endregion
 
-        #region NT header stuff
+#region NT header stuff
 
         internal const uint IMAGE_NT_OPTIONAL_HDR32_MAGIC = 0x10b;
         internal const uint IMAGE_NT_OPTIONAL_HDR64_MAGIC = 0x20b;
@@ -780,9 +783,9 @@ namespace Microsoft.Build.Tasks
             internal IntPtr pbData;
         }
 
-        #endregion
+#endregion
 
-        #region PInvoke
+#region PInvoke
         private const string Crypt32DLL = "crypt32.dll";
         private const string Advapi32DLL = "advapi32.dll";
 #if !RUNTIME_TYPE_NETCORE
@@ -1053,13 +1056,15 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// GetCachePath from fusion.dll.
-        /// Using StringBuilder here is a way to pass a preallocated buffer of characters to (native) functions that require it.
         /// A common design pattern in unmanaged C++ is calling a function twice, once to determine the length of the string
-        /// and then again to pass the client-allocated character buffer. StringBuilder is the most straightforward way
-        /// to allocate a mutable buffer of characters and pass it around.
+        /// and then again to pass the client-allocated character buffer.
         /// </summary>
+        /// <param name="cacheFlags">Value that indicates the source of the cached assembly.</param>
+        /// <param name="cachePath">The returned pointer to the path.</param>
+        /// <param name="pcchPath">The requested maximum length of CachePath, and upon return, the actual length of CachePath.</param>
+        /// 
         [DllImport("fusion.dll", CharSet = CharSet.Unicode)]
-        internal static extern int GetCachePath(AssemblyCacheFlags cacheFlags, StringBuilder cachePath, ref int pcchPath);
+        internal static extern unsafe int GetCachePath(AssemblyCacheFlags cacheFlags, [Out] char* cachePath, ref int pcchPath);
 #endif
 
         //------------------------------------------------------------------------------
@@ -1125,15 +1130,15 @@ namespace Microsoft.Build.Tasks
 
 #if FEATURE_MSCOREE
         /// <summary>
-        /// Get the runtime version for a given file
+        /// Get the runtime version for a given file.
         /// </summary>
-        /// <param name="szFullPath">The path of the file to be examined</param>
+        /// <param name="szFileName">The path of the file to be examined.</param>
         /// <param name="szBuffer">The buffer allocated for the version information that is returned.</param>
-        /// <param name="cchBuffer">The size, in wide characters, of szBuffer</param>
+        /// <param name="cchBuffer">The size, in wide characters, of szBuffer.</param>
         /// <param name="dwLength">The size, in bytes, of the returned szBuffer.</param>
-        /// <returns>HResult</returns>
+        /// <returns>HResult.</returns>
         [DllImport(MscoreeDLL, SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static extern uint GetFileVersion(String szFullPath, StringBuilder szBuffer, int cchBuffer, out uint dwLength);
+        internal static extern unsafe uint GetFileVersion([MarshalAs(UnmanagedType.LPWStr)] string szFileName, [Out] char* szBuffer, int cchBuffer, out int dwLength);
 #endif
 #endregion
 

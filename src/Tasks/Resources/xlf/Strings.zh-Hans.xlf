@@ -514,6 +514,11 @@
         <target state="translated">MSB3667: “{0}”处已存在文件。若要尝试创建预计算缓存，请务必生成单个依赖于程序集的项目，而不是生成程序集本身。如果在正常运行 ResolveAssemblyReference 任务，请不要设置 ResolveAssemblyReference 任务的 "AssemblyInformationCacheOutputPath" 参数。</target>
         <note>{StrBegin="MSB3667: "}</note>
       </trans-unit>
+      <trans-unit id="General.TaskRequiresWindows">
+        <source>MSB3096: Task "{0}" is only supported when building on Windows.</source>
+        <target state="translated">MSB3096: 仅在 Windows 上生成时才支持任务 "{0}"。</target>
+        <note>{StrBegin="MSB3096: "}</note>
+      </trans-unit>
       <trans-unit id="General.UndefineProperties">
         <source>Removing Properties:</source>
         <target state="translated">移除属性:</target>
