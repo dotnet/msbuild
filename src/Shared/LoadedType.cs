@@ -62,7 +62,7 @@ namespace Microsoft.Build.Shared
             {
 #if !NET35
                 Type t = type;
-                while (type is not null)
+                while (t is not null)
                 {
                     if (CustomAttributeData.GetCustomAttributes(t).Any(attr => attr.AttributeType.Name.Equals("LoadInSeparateAppDomainAttribute")))
                     {
