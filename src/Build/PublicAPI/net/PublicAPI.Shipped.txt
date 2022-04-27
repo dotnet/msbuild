@@ -528,6 +528,9 @@ Microsoft.Build.Construction.ProjectUsingTaskElement.AssemblyFileLocation.get ->
 Microsoft.Build.Construction.ProjectUsingTaskElement.AssemblyName.get -> string
 Microsoft.Build.Construction.ProjectUsingTaskElement.AssemblyName.set -> void
 Microsoft.Build.Construction.ProjectUsingTaskElement.AssemblyNameLocation.get -> Microsoft.Build.Construction.ElementLocation
+Microsoft.Build.Construction.ProjectUsingTaskElement.Override.get -> string
+Microsoft.Build.Construction.ProjectUsingTaskElement.Override.set -> void
+Microsoft.Build.Construction.ProjectUsingTaskElement.OverrideLocation.get -> Microsoft.Build.Construction.ElementLocation
 Microsoft.Build.Construction.ProjectUsingTaskElement.ParameterGroup.get -> Microsoft.Build.Construction.UsingTaskParameterGroupElement
 Microsoft.Build.Construction.ProjectUsingTaskElement.Runtime.get -> string
 Microsoft.Build.Construction.ProjectUsingTaskElement.Runtime.set -> void
@@ -1031,6 +1034,8 @@ Microsoft.Build.Execution.BuildParameters.WarningsAsErrors.get -> System.Collect
 Microsoft.Build.Execution.BuildParameters.WarningsAsErrors.set -> void
 Microsoft.Build.Execution.BuildParameters.WarningsAsMessages.get -> System.Collections.Generic.ISet<string>
 Microsoft.Build.Execution.BuildParameters.WarningsAsMessages.set -> void
+Microsoft.Build.Execution.BuildParameters.WarningsNotAsErrors.get -> System.Collections.Generic.ISet<string>
+Microsoft.Build.Execution.BuildParameters.WarningsNotAsErrors.set -> void
 Microsoft.Build.Execution.BuildRequestData
 Microsoft.Build.Execution.BuildRequestData.BuildRequestData(Microsoft.Build.Execution.ProjectInstance projectInstance, string[] targetsToBuild) -> void
 Microsoft.Build.Execution.BuildRequestData.BuildRequestData(Microsoft.Build.Execution.ProjectInstance projectInstance, string[] targetsToBuild, Microsoft.Build.Execution.HostServices hostServices) -> void

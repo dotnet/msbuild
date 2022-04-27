@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
 using Microsoft.Build.Internal;
@@ -184,13 +186,34 @@ namespace Microsoft.Build.BackEnd
             ShutdownConnectedNodes(false /* no node reuse */);
         }
 
+        public IList<NodeInfo> CreateNodes(int nextNodeId, INodePacketFactory factory, Func<NodeInfo, NodeConfiguration> configurationFactory, int numberOfNodesToCreate)
+        {
+            var nodes = new List<NodeInfo>(numberOfNodesToCreate);
+
+            for (int i = 0; i < numberOfNodesToCreate; i++)
+            {
+                int nodeId = nextNodeId + i;
+
+                NodeInfo nodeInfo = new(nodeId, ProviderType);
+                if (!CreateNode(nodeId, factory, configurationFactory(nodeInfo)))
+                {
+                    // If it fails let it return what we have created so far so caller can somehow acquire missing nodes.
+                    break;
+                }
+
+                nodes.Add(nodeInfo);
+            }
+
+            return nodes;
+        }
+
         /// <summary>
         /// Requests that a node be created on the specified machine.
         /// </summary>
         /// <param name="nodeId">The id of the node to create.</param>
         /// <param name="factory">The factory to use to create packets from this node.</param>
         /// <param name="configuration">The configuration for the node.</param>
-        public bool CreateNode(int nodeId, INodePacketFactory factory, NodeConfiguration configuration)
+        private bool CreateNode(int nodeId, INodePacketFactory factory, NodeConfiguration configuration)
         {
             ErrorUtilities.VerifyThrow(nodeId != InvalidInProcNodeId, "Cannot create in-proc node.");
 
@@ -438,6 +461,9 @@ namespace Microsoft.Build.BackEnd
                 _disposed = true;
             }
         }
+
+        // The process here is the same as in the main node.
+        public IEnumerable<Process> GetProcesses() => throw new NotImplementedException();
 
         #endregion
     }

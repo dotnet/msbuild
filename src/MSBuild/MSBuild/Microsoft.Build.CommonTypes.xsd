@@ -6078,6 +6078,7 @@ elementFormDefault="qualified">
                     <xs:attribute name="RetryDelayMilliseconds" />
                     <xs:attribute name="SkipUnchangedFiles" />
                     <xs:attribute name="SourceUrl" use="required" />
+                    <xs:attribute name="Timeout" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>

@@ -13,8 +13,15 @@
     <PackageReference Update="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.3" />
     <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.36" />
     <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="3.1.2196" PrivateAssets="All" />
+    <PackageReference Update="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Update="PdbGit" Version="3.0.41" />
     <PackageReference Update="Shouldly" Version="3.0.0" />
+    <PackageReference Update="System.CodeDom" Version="6.0.0" />
+    <PackageReference Update="System.Private.Uri" Version="4.3.2" />
+    <PackageReference Update="System.Runtime" Version="4.3.1" />
+    <PackageReference Update="System.Security.Cryptography.Pkcs" Version="6.0.0" />
+    <PackageReference Update="System.Security.Cryptography.Xml" Version="6.0.0" />
+    <PackageReference Update="System.Security.Cryptography.X509Certificates" Version="4.3.2" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true' AND $(ProjectIsDeprecated) != 'true'">
