@@ -198,8 +198,6 @@ namespace Microsoft.Build.Shared
                 // Its pretty hard to get here, you need an assembly that contains a valid reference
                 // to a dependent assembly that, in turn, throws a FileLoadException during GetAssemblyName.
                 // Still it happened once, with an older version of the CLR. 
-
-                // ...falling through and relying on the assemblyName == null behavior below...
             }
             catch (FileNotFoundException)
             {
