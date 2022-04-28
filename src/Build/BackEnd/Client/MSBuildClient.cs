@@ -312,10 +312,7 @@ namespace Microsoft.Build.Execution
 
         private ServerNodeHandshake GetHandshake()
         {
-            return new ServerNodeHandshake(
-                CommunicationsUtilities.GetHandshakeOptions(taskHost: false, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()),
-                string.IsNullOrEmpty(_dllLocation) ? _exeLocation : _dllLocation
-            );
+            return new ServerNodeHandshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
         }
 
         /// <summary>
@@ -400,7 +397,7 @@ namespace Microsoft.Build.Execution
                 }
 
                 // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
-                _nodeStream.WriteIntForHandshake(ServerNodeHandshake.EndOfHandshakeSignal);
+                _nodeStream.WriteEndOfHandshakeSignal();
 
                 CommunicationsUtilities.Trace("Reading handshake from pipe {0}", _pipeName);
 

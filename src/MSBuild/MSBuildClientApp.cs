@@ -51,7 +51,7 @@ namespace Microsoft.Build.CommandLine
             if (!NativeMethodsShared.IsMono)
             {
                 // _exeFileLocation consists the msbuild dll instead.
-                dllLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;;
+                dllLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
                 exeLocation = GetCurrentHost();
             }
             else
