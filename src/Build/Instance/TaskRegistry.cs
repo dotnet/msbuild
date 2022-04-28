@@ -1691,7 +1691,6 @@ namespace Microsoft.Build.Execution
                                         Type.GetType(expandedType + "," + typeof(ITaskItem).GetTypeInfo().Assembly.FullName, false /* don't throw on error */, true /* case-insensitive */);
                         }
 
-                        // The type could not be got directly try and see if the type can be found by appending the FrameworkAssemblyName to it.
                         ProjectErrorUtilities.VerifyThrowInvalidProject
                         (
                             paramType != null,
