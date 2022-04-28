@@ -24,6 +24,13 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal class TypeLoader
     {
+#if FEATURE_ASSEMBLYLOADCONTEXT
+        /// <summary>
+        /// AssemblyContextLoader used to load DLLs outside of msbuild.exe directory
+        /// </summary>
+        private static readonly CoreClrAssemblyLoader s_coreClrAssemblyLoader = new CoreClrAssemblyLoader();
+#endif
+
         /// <summary>
         /// Cache to keep track of the assemblyLoadInfos based on a given type filter.
         /// </summary>
@@ -145,7 +152,13 @@ namespace Microsoft.Build.Shared
                 }
                 else
                 {
+#if !FEATURE_ASSEMBLYLOADCONTEXT
                     return Assembly.UnsafeLoadFrom(assemblyLoadInfo.AssemblyFile);
+#else
+                    string baseDir = Path.GetDirectoryName(assemblyLoadInfo.AssemblyFile);
+                    s_coreClrAssemblyLoader.AddDependencyLocation(baseDir);
+                    return s_coreClrAssemblyLoader.LoadFromPath(assemblyLoadInfo.AssemblyFile);
+#endif
                 }
             }
             catch (ArgumentException e)
