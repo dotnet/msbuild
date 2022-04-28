@@ -877,7 +877,7 @@ namespace InlineCode {{
 
             buildEngine.Errors.ShouldBe(1);
 
-            buildEngine.Log.ShouldContain(expectedErrorMessage, () => buildEngine.Log);
+            buildEngine.Log.ShouldContain(expectedErrorMessage, customMessage: buildEngine.Log);
         }
 
         private void TryLoadTaskBodyAndExpectSuccess(
@@ -911,7 +911,7 @@ namespace InlineCode {{
 
                 foreach (string expectedWarningMessage in expectedWarningMessages)
                 {
-                    output.ShouldContain(expectedWarningMessage, () => output);
+                    output.ShouldContain(expectedWarningMessage, customMessage: output);
                 }
             }
 

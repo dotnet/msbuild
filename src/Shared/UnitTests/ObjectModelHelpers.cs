@@ -303,7 +303,7 @@ namespace Microsoft.Build.UnitTests
             }
 
             items.Count.ShouldBe(expectedItems.Length,
-                () => $"got items \"{string.Join(", ", items)}\", expected \"{string.Join(", ", expectedItems)}\"");
+                $"got items \"{string.Join(", ", items)}\", expected \"{string.Join(", ", expectedItems)}\"");
 
             expectedItems.Length.ShouldBe(expectedDirectMetadataPerItem.Length);
         }
@@ -465,7 +465,7 @@ namespace Microsoft.Build.UnitTests
 
         internal static void AssertItemHasMetadata(string key, string value, ProjectItem item)
         {
-            item.DirectMetadataCount.ShouldBe(1, () => $"Expected 1 metadata, ({key}), got {item.DirectMetadataCount}");
+            item.DirectMetadataCount.ShouldBe(1, $"Expected 1 metadata, ({key}), got {item.DirectMetadataCount}");
             item.GetMetadataValue(key).ShouldBe(value);
         }
 
@@ -473,7 +473,7 @@ namespace Microsoft.Build.UnitTests
         {
             expected ??= new Dictionary<string, string>();
 
-            item.DirectMetadataCount.ShouldBe(expected.Keys.Count, () => $"Expected {expected.Keys.Count} metadata, ({string.Join(", ", expected.Keys)}), got {item.DirectMetadataCount}");
+            item.DirectMetadataCount.ShouldBe(expected.Keys.Count, $"Expected {expected.Keys.Count} metadata, ({string.Join(", ", expected.Keys)}), got {item.DirectMetadataCount}");
 
             foreach (var key in expected.Keys)
             {
@@ -1416,7 +1416,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify that a drive enumerating wildcard warning is logged or exception is thrown. 
+        /// Verify that a drive enumerating wildcard warning is logged or exception is thrown.
         /// </summary>
         internal static void CleanContentsAndBuildTargetWithDriveEnumeratingWildcard(string content, string failOnDriveEnumerationEnvVar, string targetName, ExpectedBuildResult expectedBuildResult, ITestOutputHelper testOutput = null)
         {

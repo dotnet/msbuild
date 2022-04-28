@@ -41,9 +41,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                     SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) }
                 };
 
-                unzip.Execute().ShouldBeTrue(() => _mockEngine.Log);
+                unzip.Execute().ShouldBeTrue(_mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain("638AF4AE88A146E09CB69FE1CA7083DC", () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain("638AF4AE88A146E09CB69FE1CA7083DC", customMessage: _mockEngine.Log);
             }
         }
 
@@ -68,10 +68,10 @@ namespace Microsoft.Build.Tasks.UnitTests
                     SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) }
                 };
 
-                unzip.Execute().ShouldBeTrue(() => _mockEngine.Log);
+                unzip.Execute().ShouldBeTrue(_mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "BE78A17D30144B549D21F71D5C633F7D.txt"), () => _mockEngine.Log);
-                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "A04FF4B88DF14860B7C73A8E75A4FB76.txt"), () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "BE78A17D30144B549D21F71D5C633F7D.txt"), customMessage: _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "A04FF4B88DF14860B7C73A8E75A4FB76.txt"), customMessage: _mockEngine.Log);
             }
         }
 
@@ -100,12 +100,12 @@ namespace Microsoft.Build.Tasks.UnitTests
                     SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) }
                 };
 
-                unzip.Execute().ShouldBeTrue(() => _mockEngine.Log);
+                unzip.Execute().ShouldBeTrue(_mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "BE78A17D30144B549D21F71D5C633F7D.txt"), () => _mockEngine.Log);
-                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "A04FF4B88DF14860B7C73A8E75A4FB76.txt"), () => _mockEngine.Log);
-                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "subdir", "F83E9633685494E53BEF3794EDEEE6A6.txt"), () => _mockEngine.Log);
-                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "subdir", "21D6D4596067723B3AC5DF9A8B3CBFE7.txt"), () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "BE78A17D30144B549D21F71D5C633F7D.txt"), customMessage: _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "A04FF4B88DF14860B7C73A8E75A4FB76.txt"), customMessage: _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "subdir", "F83E9633685494E53BEF3794EDEEE6A6.txt"), customMessage: _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "subdir", "21D6D4596067723B3AC5DF9A8B3CBFE7.txt"), customMessage: _mockEngine.Log);
                 Directory.Exists(Path.Combine(destination.Path, "emptyDir"));
             }
         }
@@ -120,9 +120,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                 DestinationFolder = new TaskItem(String.Empty)
             };
 
-            unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
+            unzip.Execute().ShouldBeFalse(_mockEngine.Log);
 
-            _mockEngine.Log.ShouldContain("MSB3931", () => _mockEngine.Log);
+            _mockEngine.Log.ShouldContain("MSB3931", customMessage: _mockEngine.Log);
         }
 
         public static bool NotRunningAsRoot()
@@ -169,9 +169,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                     SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) }
                 };
 
-                unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
+                unzip.Execute().ShouldBeFalse(_mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain($"D6DFD219DACE48F8B86EFCDF98433333.txt{ (NativeMethodsShared.IsMono ? "\"" : "'") } is denied", () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain($"D6DFD219DACE48F8B86EFCDF98433333.txt{ (NativeMethodsShared.IsMono ? "\"" : "'") } is denied", customMessage: _mockEngine.Log);
             }
         }
 
@@ -191,9 +191,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                     SourceFiles = new ITaskItem[] { new TaskItem(file.Path), }
                 };
 
-                unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
+                unzip.Execute().ShouldBeFalse(_mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain("MSB3933", () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain("MSB3933", customMessage: _mockEngine.Log);
             }
         }
 
@@ -211,9 +211,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                     SourceFiles = new ITaskItem[] { new TaskItem(Path.Combine(testEnvironment.DefaultTestDirectory.Path, "foo.zip")), }
                 };
 
-                unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
+                unzip.Execute().ShouldBeFalse(_mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain("MSB3932", () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain("MSB3932", customMessage: _mockEngine.Log);
             }
         }
 
@@ -239,10 +239,10 @@ namespace Microsoft.Build.Tasks.UnitTests
                                       Include = "BE78A17D30144B549D21F71D5C633F7D.txt"
                                   };
 
-                unzip.Execute().ShouldBeTrue(() => _mockEngine.Log);
+                unzip.Execute().ShouldBeTrue(_mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "BE78A17D30144B549D21F71D5C633F7D.txt"), () => _mockEngine.Log);
-                _mockEngine.Log.ShouldNotContain(Path.Combine(destination.Path, "A04FF4B88DF14860B7C73A8E75A4FB76.txt"), () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "BE78A17D30144B549D21F71D5C633F7D.txt"), customMessage: _mockEngine.Log);
+                _mockEngine.Log.ShouldNotContain(Path.Combine(destination.Path, "A04FF4B88DF14860B7C73A8E75A4FB76.txt"), customMessage: _mockEngine.Log);
             }
         }
 
@@ -268,10 +268,10 @@ namespace Microsoft.Build.Tasks.UnitTests
                                       Exclude = "BE78A17D30144B549D21F71D5C633F7D.txt"
                                   };
 
-                unzip.Execute().ShouldBeTrue(() => _mockEngine.Log);
+                unzip.Execute().ShouldBeTrue(_mockEngine.Log);
 
-                _mockEngine.Log.ShouldNotContain(Path.Combine(destination.Path, "BE78A17D30144B549D21F71D5C633F7D.txt"), () => _mockEngine.Log);
-                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "A04FF4B88DF14860B7C73A8E75A4FB76.txt"), () => _mockEngine.Log);
+                _mockEngine.Log.ShouldNotContain(Path.Combine(destination.Path, "BE78A17D30144B549D21F71D5C633F7D.txt"), customMessage: _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "A04FF4B88DF14860B7C73A8E75A4FB76.txt"), customMessage: _mockEngine.Log);
             }
         }
 
@@ -302,13 +302,13 @@ namespace Microsoft.Build.Tasks.UnitTests
                                       Exclude = "*.js.map;sub\\*.js"
                                   };
 
-                unzip.Execute().ShouldBeTrue(() => _mockEngine.Log);
+                unzip.Execute().ShouldBeTrue(_mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "file1.js"), () => _mockEngine.Log);
-                _mockEngine.Log.ShouldNotContain(Path.Combine(destination.Path, "file1.js.map"), () => _mockEngine.Log);
-                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "file2.js"), () => _mockEngine.Log);
-                _mockEngine.Log.ShouldNotContain(Path.Combine(destination.Path, "readme.txt"), () => _mockEngine.Log);
-                _mockEngine.Log.ShouldNotContain(Path.Combine(destination.Path, "sub", "subfile.js"), () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "file1.js"), customMessage: _mockEngine.Log);
+                _mockEngine.Log.ShouldNotContain(Path.Combine(destination.Path, "file1.js.map"), customMessage: _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "file2.js"), customMessage: _mockEngine.Log);
+                _mockEngine.Log.ShouldNotContain(Path.Combine(destination.Path, "readme.txt"), customMessage: _mockEngine.Log);
+                _mockEngine.Log.ShouldNotContain(Path.Combine(destination.Path, "sub", "subfile.js"), customMessage: _mockEngine.Log);
             }
         }
 
@@ -334,9 +334,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                                       Include = "<BE78A17D30144B|549D21F71D5C633F7D/.txt"
                                   };
 
-                unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
+                unzip.Execute().ShouldBeFalse(_mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain("MSB3937", () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain("MSB3937", customMessage: _mockEngine.Log);
             }
         }
 
@@ -362,9 +362,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                                       Include = "$(Include)"
                                   };
 
-                unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
+                unzip.Execute().ShouldBeFalse(_mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain("MSB3938", () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain("MSB3938", customMessage: _mockEngine.Log);
             }
         }
 
@@ -390,9 +390,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                                       Exclude = "<BE78A17D30144B|549D21F71D5C633F7D/.txt"
                                   };
 
-                unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
+                unzip.Execute().ShouldBeFalse(_mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain("MSB3937", () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain("MSB3937", customMessage: _mockEngine.Log);
             }
         }
 
@@ -418,9 +418,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                                       Exclude = "$(Include)"
                                   };
 
-                unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
+                unzip.Execute().ShouldBeFalse(_mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain("MSB3938", () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain("MSB3938", customMessage: _mockEngine.Log);
             }
         }
     }

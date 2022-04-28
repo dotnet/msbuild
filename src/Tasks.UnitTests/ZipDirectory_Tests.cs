@@ -38,10 +38,10 @@ namespace Microsoft.Build.Tasks.UnitTests
                     SourceDirectory = new TaskItem(sourceFolder.Path)
                 };
 
-                zipDirectory.Execute().ShouldBeTrue(() => _mockEngine.Log);
+                zipDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain(sourceFolder.Path, () => _mockEngine.Log);
-                _mockEngine.Log.ShouldContain(zipFilePath, () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(sourceFolder.Path, customMessage: _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(zipFilePath, customMessage: _mockEngine.Log);
 
                 using (FileStream stream = new FileStream(zipFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
                 using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Read))
@@ -80,10 +80,10 @@ namespace Microsoft.Build.Tasks.UnitTests
                     SourceDirectory = new TaskItem(sourceFolder.Path)
                 };
 
-                zipDirectory.Execute().ShouldBeTrue(() => _mockEngine.Log);
+                zipDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain(sourceFolder.Path, () => _mockEngine.Log);
-                _mockEngine.Log.ShouldContain(file.Path, () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(sourceFolder.Path, customMessage: _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(file.Path, customMessage: _mockEngine.Log);
 
                 using (FileStream stream = new FileStream(file.Path, FileMode.Open, FileAccess.Read, FileShare.Read))
                 using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Read))
@@ -118,9 +118,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                     SourceDirectory = new TaskItem(folder.Path)
                 };
 
-                zipDirectory.Execute().ShouldBeFalse(() => _mockEngine.Log);
+                zipDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain("MSB3942", () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain("MSB3942", customMessage: _mockEngine.Log);
             }
         }
 
@@ -133,9 +133,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                 SourceDirectory = new TaskItem(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")))
             };
 
-            zipDirectory.Execute().ShouldBeFalse(() => _mockEngine.Log);
+            zipDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
 
-            _mockEngine.Log.ShouldContain("MSB3941", () => _mockEngine.Log);
+            _mockEngine.Log.ShouldContain("MSB3941", customMessage: _mockEngine.Log);
         }
     }
 }

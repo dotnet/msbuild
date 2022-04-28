@@ -76,7 +76,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(".resources", Path.GetExtension(resourcesFile));
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(".resources", Path.GetExtension(resourcesFile));
-                
+
                 Utilities.AssertStateFileWasWritten(t);
 
                 Utilities.AssertLogContainsResource(t, "GenerateResource.ProcessingFile", resxFile, resourcesFile);
@@ -162,7 +162,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(".resources", Path.GetExtension(resourcesFile));
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(".resources", Path.GetExtension(resourcesFile));
-                
+
                 Utilities.AssertStateFileWasWritten(t);
 
                 Utilities.AssertLogContainsResource(t, "GenerateResource.ProcessingFile", textFile, resourcesFile);
@@ -324,7 +324,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             Path.GetExtension(t.FilesWritten[0].ItemSpec).ShouldBe(".resources");
 
             Utilities.AssertLogContainsResource(t, "GenerateResource.OutputDoesntExist", t.OutputResources[0].ItemSpec);
-            
+
             Utilities.AssertStateFileWasWritten(t);
 
             GenerateResource t2 = Utilities.CreateTask(_output);
@@ -446,7 +446,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 usePreserialized,
                 _env,
                 useSystemResourcesExtensions);
- 
+
             try
             {
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
@@ -730,7 +730,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t.FilesWritten[0].ItemSpec, resourcesFile1);
                 Assert.Equal(t.OutputResources[1].ItemSpec, resourcesFile2);
                 Assert.Equal(t.FilesWritten[1].ItemSpec, resourcesFile2);
-                
+
                 Utilities.AssertStateFileWasWritten(t);
 
                 // Repeat, and it should do nothing as they are up to date
@@ -749,7 +749,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t2.FilesWritten[0].ItemSpec, resourcesFile1);
                 Assert.Equal(t2.OutputResources[1].ItemSpec, resourcesFile2);
                 Assert.Equal(t2.FilesWritten[1].ItemSpec, resourcesFile2);
-                
+
                 Utilities.AssertStateFileWasWritten(t2);
 
                 Assert.True(time.Equals(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec)));
@@ -1448,10 +1448,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 string generatedSource = File.ReadAllText(t.StronglyTypedFileName);
 
-                generatedSource.ShouldNotContain("object Image1", "Strongly-typed resource accessor is returning type `object` instead of `System.Drawing.Bitmap`");
+                generatedSource.ShouldNotContain("object Image1", customMessage: "Strongly-typed resource accessor is returning type `object` instead of `System.Drawing.Bitmap`");
                 generatedSource.ShouldContain("Bitmap Image1");
 
-                generatedSource.ShouldNotContain("object MyString", "Strongly-typed resource accessor is returning type `object` instead of `string`");
+                generatedSource.ShouldNotContain("object MyString", customMessage: "Strongly-typed resource accessor is returning type `object` instead of `string`");
                 generatedSource.ShouldContain("static string MyString");
                 generatedSource.ShouldMatch("//.*Looks up a localized string similar to MyValue", "Couldn't find a comment in the usual format for a string resource.");
             }
@@ -1602,7 +1602,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 bool success = t.Execute();
                 // Task should have failed
                 Assert.False(success);
-                
+
                 Utilities.AssertStateFileWasWritten(t);
 
                 // Should not have created an output for the invalid resx
@@ -1655,7 +1655,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 bool success = t.Execute();
                 // Task should have failed
                 Assert.False(success);
-                
+
                 Utilities.AssertStateFileWasWritten(t);
 
                 // Should not have created an output for the invalid resx
@@ -2023,7 +2023,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t.FilesWritten[i].ItemSpec, t.OutputResources[i].ItemSpec);
                 Assert.True(File.Exists(t.FilesWritten[i].ItemSpec));
             }
-            
+
             Utilities.AssertStateFileWasWritten(t);
 
             // Done, so clean up.
@@ -2084,7 +2084,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t.FilesWritten[0].ItemSpec, Path.ChangeExtension(t.Sources[0].ItemSpec, ".resources"));
                 Assert.Equal(t.FilesWritten[1].ItemSpec, Path.ChangeExtension(t.Sources[1].ItemSpec, ".resources"));
                 Assert.Equal(t.FilesWritten[2].ItemSpec, Path.ChangeExtension(t.Sources[3].ItemSpec, ".resources"));
-                
+
                 Utilities.AssertStateFileWasWritten(t);
 
                 // Make sure there was an error on the second resource

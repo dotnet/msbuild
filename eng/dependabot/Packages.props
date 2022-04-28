@@ -15,7 +15,7 @@
     <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="3.1.2196" PrivateAssets="All" />
     <PackageReference Update="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Update="PdbGit" Version="3.0.41" />
-    <PackageReference Update="Shouldly" Version="3.0.0" />
+    <PackageReference Update="Shouldly" Version="4.0.2" />
     <PackageReference Update="System.CodeDom" Version="6.0.0" />
     <PackageReference Update="System.Private.Uri" Version="4.3.2" />
     <PackageReference Update="System.Runtime" Version="4.3.1" />
