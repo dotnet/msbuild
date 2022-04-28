@@ -4,7 +4,7 @@ Param(
   [string] $destination,
   [ValidateSet('Debug','Release')]
   [string] $configuration = "Debug",
-  [ValidateSet('Core','Desktop')]
+  [ValidateSet('Core','Desktop', 'Detect', 'Full')]
   [string] $runtime = "Detect"
 )
 
