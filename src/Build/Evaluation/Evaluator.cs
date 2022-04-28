@@ -4,7 +4,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using ObjectModel = System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -25,14 +24,15 @@ using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using static Microsoft.Build.Execution.ProjectPropertyInstance;
 using Constants = Microsoft.Build.Internal.Constants;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
+using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using ObjectModel = System.Collections.ObjectModel;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using SdkReferencePropertyExpansionMode = Microsoft.Build.Framework.EscapeHatches.SdkReferencePropertyExpansionMode;
-using static Microsoft.Build.Execution.ProjectPropertyInstance;
+using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 #nullable disable
 
