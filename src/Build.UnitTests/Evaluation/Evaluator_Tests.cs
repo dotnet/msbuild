@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 
 using Microsoft.Build.Collections;
@@ -4243,7 +4244,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// If DTD processing is disabled, the server should not receive any connection request.
         /// </summary>
         [Fact]
-        public void VerifyDTDProcessingIsDisabled2()
+        public async void VerifyDTDProcessingIsDisabled2()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-8""?>
                                 <!DOCTYPE Project [
@@ -4284,10 +4285,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
             finally
             {
-                Thread.Sleep(500);
+                await Task.Delay(500);
                 t.IsAlive.ShouldBeTrue();
                 t.Abort();
-                Thread.Sleep(500);
+                await Task.Delay(500);
 
                 // Expect server to be alive and hung up unless a request originating from DTD processing was sent
                 _httpListenerThreadException.ShouldBeNull();
