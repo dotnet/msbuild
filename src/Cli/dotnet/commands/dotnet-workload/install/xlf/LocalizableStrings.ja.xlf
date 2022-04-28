@@ -122,6 +122,11 @@
         <target state="translated">サーバーを起動するための十分な特権がありません。</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="new">Error parsing version '{1}' for workload manifest ID '{0}'</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
         <source>The settings file in the workload's NuGet package is invalid: {0}</source>
         <target state="translated">ワークロードの NuGet パッケージ内の設定ファイルが無効です: {0}</target>

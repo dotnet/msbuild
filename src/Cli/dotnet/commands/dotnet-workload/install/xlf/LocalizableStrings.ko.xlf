@@ -122,6 +122,11 @@
         <target state="translated">서버를 시작할 권한이 없습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="new">Error parsing version '{1}' for workload manifest ID '{0}'</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
         <source>The settings file in the workload's NuGet package is invalid: {0}</source>
         <target state="translated">워크로드의 NuGet 패키지에 있는 설정 파일이 잘못되었습니다. {0}</target>
