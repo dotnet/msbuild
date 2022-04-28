@@ -102,6 +102,11 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public readonly int DictionaryBasedItemRemoveThreshold = ParseIntFromEnvironmentVariableOrDefault("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", 100);
 
+        /// <summary>
+        /// Name of environment variables used to enable MSBuild server.
+        /// </summary>
+        public const string UseMSBuildServerEnvVarName = "MSBUILDUSESERVER";
+
         public readonly bool DebugEngine = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine"));
         public readonly bool DebugScheduler;
         public readonly bool DebugNodeCommunication;

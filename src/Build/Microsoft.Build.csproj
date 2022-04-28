@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -142,6 +142,10 @@
     <Compile Include="BackEnd\BuildManager\BuildParameters.cs" />
     <Compile Include="BackEnd\BuildManager\CacheSerialization.cs" />
     <Compile Include="BackEnd\BuildManager\CacheAggregator.cs" />
+    <Compile Include="BackEnd\Client\MSBuildClientPacketPump.cs" />
+    <Compile Include="BackEnd\Client\MSBuildClientExitType.cs" />
+    <Compile Include="BackEnd\Client\MSBuildClientExitResult.cs" />
+    <Compile Include="BackEnd\Client\MSBuildClient.cs" />
     <Compile Include="BackEnd\Components\Caching\ConfigCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\ProjectCache\*.cs" />

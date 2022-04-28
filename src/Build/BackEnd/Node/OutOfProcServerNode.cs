@@ -88,7 +88,7 @@ namespace Microsoft.Build.Execution
             var handshake = new ServerNodeHandshake(
                 CommunicationsUtilities.GetHandshakeOptions(taskHost: false, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
 
-            string pipeName = NamedPipeUtil.GetPipeNameOrPath("MSBuildServer-" + handshake.ComputeHash());
+            string pipeName = GetPipeName(handshake);
 
             string serverRunningMutexName = $@"{ServerNamedMutex.RunningServerMutexNamePrefix}{pipeName}";
             _serverBusyMutexName = $@"{ServerNamedMutex.BusyServerMutexNamePrefix}{pipeName}";
@@ -136,6 +136,8 @@ namespace Microsoft.Build.Execution
         }
 
         #endregion
+
+        internal static string GetPipeName(ServerNodeHandshake handshake) => NamedPipeUtil.GetPipeNameOrPath("MSBuildServer-" + handshake.ComputeHash());
 
         #region INodePacketFactory Members
 
