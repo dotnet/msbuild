@@ -433,17 +433,18 @@ namespace Microsoft.Build.Construction
                 }
             }
 
-            // If this element has pure text content, copy that over.
-            if (appendFrom.ChildNodes.Count == 1 && appendFrom.FirstChild.NodeType == XmlNodeType.Text)
-            {
-                appendTo.AppendChild(appendTo.OwnerDocument.CreateTextNode(appendFrom.FirstChild.Value));
-            }
-
             foreach (XmlNode child in appendFrom.ChildNodes)
             {
-                XmlNode childClone = appendTo.OwnerDocument.CreateNode(child.NodeType, child.Prefix, child.Name, child.NamespaceURI);
-                appendTo.AppendChild(childClone);
-                AppendAttributesAndChildren(childClone, child);
+                if (child.NodeType == XmlNodeType.Text)
+                {
+                    appendTo.AppendChild(appendTo.OwnerDocument.CreateTextNode(child.Value));
+                }
+                else
+                {
+                    XmlNode childClone = appendTo.OwnerDocument.CreateNode(child.NodeType, child.Prefix, child.Name, child.NamespaceURI);
+                    appendTo.AppendChild(childClone);
+                    AppendAttributesAndChildren(childClone, child);
+                }
             }
         }
 

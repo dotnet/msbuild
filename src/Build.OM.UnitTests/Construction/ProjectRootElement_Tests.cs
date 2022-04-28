@@ -1932,6 +1932,11 @@ true, true, true)]
             pre3.AddPropertyGroup(); // this should get wiped out in the DeepCopyFrom
             pre3.DeepCopyFrom(pre);
             Assert.Equal(pre.RawXml, pre3.RawXml);
+
+            // DeepCopying from a DeepCopy should work fine (regression test)
+            var pre4 = ProjectRootElement.Create();
+            pre4.DeepCopyFrom(pre2);
+            Assert.Equal(pre.RawXml, pre4.RawXml);
         }
 
         /// <summary>
