@@ -29,7 +29,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "CopyLocalFalseReferences",
-                TargetFrameworks = "net461",
+                TargetFrameworks = "net462",
                 IsExe = true
             };
 
@@ -69,7 +69,7 @@ namespace Microsoft.NET.Build.Tests
             }
             else
             {
-                outputDirectory.Sub("refs").Should().OnlyHaveFiles(Net461ReferenceOnlyAssemblies);
+                outputDirectory.Sub("refs").Should().OnlyHaveFiles(net462ReferenceOnlyAssemblies);
             }
 
             using (var depsJsonFileStream = File.OpenRead(Path.Combine(outputDirectory.FullName, $"{testProject.Name}.deps.json")))
@@ -81,7 +81,7 @@ namespace Microsoft.NET.Build.Tests
                     .ToList();
 
                 compileLibraryAssemblyNames.Should().BeEquivalentTo(
-                    Net461CompileAssemblies.Concat(new[] { testReference.Name + ".dll" }));
+                    net462CompileAssemblies.Concat(new[] { testReference.Name + ".dll" }));
             }
         }
 
@@ -116,7 +116,7 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
-        private static readonly string[] Net461ReferenceOnlyAssemblies = new []
+        private static readonly string[] net462ReferenceOnlyAssemblies = new []
         {
             "Microsoft.Win32.Primitives.dll",
             "netfx.force.conflicts.dll",
@@ -217,7 +217,7 @@ namespace Microsoft.NET.Build.Tests
             "System.Xml.XPath.XDocument.dll",
         };
 
-        private static readonly string[] Net461CompileAssemblies = Net461ReferenceOnlyAssemblies.Concat(new[]
+        private static readonly string[] net462CompileAssemblies = net462ReferenceOnlyAssemblies.Concat(new[]
         {
             "CopyLocalFalseReferences.exe",
             "mscorlib.dll",

@@ -835,4 +835,8 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</value>
     <comment>{StrBegin="NETSDK1182: "}</comment>
   </data>
+  <data name="AotNoValidRuntimePackageError" xml:space="preserve">
+    <value>NETSDK1183: Unable to optimize assemblies for Ahead of time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing. When targeting .NET 7 or higher, make sure to restore packages with the PublishAot property set to true.</value>
+    <comment>{StrBegin="NETSDK1094: "}</comment>
+  </data>
 </root>

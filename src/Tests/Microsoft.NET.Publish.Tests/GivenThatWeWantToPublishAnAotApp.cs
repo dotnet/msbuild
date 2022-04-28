@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
 using System.Text;
 using FluentAssertions;
@@ -64,6 +66,41 @@ namespace Microsoft.NET.Publish.Tests
                 .And.NotHaveStdOutContaining("IL2026");
         }
 
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(LatestTfm)]
+        public void NativeAot_only_runs_when_switch_is_enabled(string targetFramework)
+        {
+
+            // Need to enable this in a Linux distro by adding the pre-reqs to a suitable container
+            // https://github.com/dotnet/sdk/issues/24983
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var projectName = "AotPublishWithWarnings";
+                var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+                // PublishAot should enable the EnableAotAnalyzer
+                var testProject = CreateTestProjectWithAotAnalyzerWarnings(targetFramework, projectName, true);
+                testProject.AdditionalProperties["PublishAot"] = "true";
+                testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
+                var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                publishCommand
+                    .Execute()
+                    .Should().Pass()
+                    .And.HaveStdOutContaining("warning IL3050");
+
+                var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+
+                var publishedExe = Path.Combine(publishDirectory, $"{projectName}.exe");
+
+                // The exe exist and should be native
+                File.Exists(publishedExe).Should().BeTrue();
+                IsNativeImage(publishedExe).Should().BeTrue();
+            }
+
+        }
+
         private TestProject CreateTestProjectWithAotAnalyzerWarnings(string targetFramework, string projectName, bool isExecutable)
         {
             var testProject = new TestProject()
@@ -102,5 +139,25 @@ class C
 
             return testProject;
         }
+
+        private static bool IsNativeImage(string path)
+        {
+            bool returnValue=false;
+            using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
+            using (var peReader = new PEReader(fs))
+            {
+                try
+                {
+                    var metadataReader = peReader.GetMetadataReader();
+                }catch(InvalidOperationException)
+                {
+                    returnValue = true;
+                }
+                catch(Exception){}
+            }
+            return returnValue;
+        }
+
+
     }
 }

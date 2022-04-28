@@ -297,7 +297,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "DefaultReferences",
                 //  TODO: Add net35 to the TargetFrameworks list once https://github.com/Microsoft/msbuild/issues/1333 is fixed
-                TargetFrameworks = "net40;net45;net461",
+                TargetFrameworks = "net40;net45;net462",
                 IsExe = true
             };
 
@@ -366,7 +366,7 @@ namespace DefaultReferences
             var testProject = new TestProject()
             {
                 Name = "DuplicateFrameworkReferences",
-                TargetFrameworks = "net461",
+                TargetFrameworks = "net462",
                 IsExe = true
             };
 
@@ -397,7 +397,7 @@ namespace DefaultReferences
             var testProject = new TestProject()
             {
                 Name = "DesktopConflictsNuGet",
-                TargetFrameworks = "net461",
+                TargetFrameworks = "net462",
                 IsExe = true
             };
 
@@ -435,7 +435,7 @@ namespace DefaultReferences
             var testProject = new TestProject()
             {
                 Name = "DesktopConflictsHttp4_1",
-                TargetFrameworks = "net461",
+                TargetFrameworks = "net462",
                 IsExe = true
             };
 
@@ -460,7 +460,7 @@ namespace DefaultReferences
             var testProject = new TestProject()
             {
                 Name = "DesktopConflictsRuntimeTargets",
-                TargetFrameworks = "net461",
+                TargetFrameworks = "net462",
                 IsExe = true
             };
 
@@ -603,7 +603,7 @@ class Program
             {
                 Name = "OverriddenAlias",
                 IsExe = true,
-                TargetFrameworks = "net461"
+                TargetFrameworks = "net462"
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("System.Net.Http", "4.3.3"));
@@ -838,7 +838,7 @@ class Program
                 Name = "UppercaseTargetFrameworkVersion",
                 IsSdkProject = false,
                 IsExe = true,
-                TargetFrameworkVersion = "V4.6.1"
+                TargetFrameworkVersion = "V4.6.2"
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);

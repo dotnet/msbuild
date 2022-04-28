@@ -92,6 +92,12 @@
       <ItemsToSignPostBuild Remove="@(ItemsToSignPostBuild)" />
       <ItemsToSignPostBuild Include="@(ToolsetAssetsToPublish->'%(Filename)%(Extension)')" />
     </ItemGroup>
+    
+    <PropertyGroup>
+      <IsStableBuild>false</IsStableBuild>
+      <IsStableBuild Condition="'$(DotNetFinalVersionKind)' == 'release'">true</IsStableBuild>
+    </PropertyGroup>
+    
 
     <MakeDir Directories="$(TempWorkingDirectory)"/>
 
@@ -113,7 +119,8 @@
       PublishFlatContainer="true"
       AssetManifestPath="$(SdkAssetsManifestFilePath)"
       AssetsTemporaryDirectory="$(TempWorkingDirectory)" 
-      PublishingVersion="3"/>
+      PublishingVersion="3"
+      IsStableBuild="$(IsStableBuild)" />
 
     <Copy
       SourceFiles="$(SdkAssetsManifestFilePath)"

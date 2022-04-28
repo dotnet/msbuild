@@ -1169,6 +1169,23 @@
       "OriginalItemSpec": "${RestorePath}\\microsoft.netcore.app.runtime.mono.browser-wasm\\${RuntimeVersion}\\runtimes\\browser-wasm\\lib\\${Tfm}\\System.Formats.Asn1.dll"
     },
     {
+      "Identity": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Formats.Tar.dll",
+      "SourceId": "blazorwasm",
+      "SourceType": "Computed",
+      "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
+      "BasePath": "/",
+      "RelativePath": "_framework/System.Formats.Tar.dll",
+      "AssetKind": "Build",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitValue": "runtime",
+      "CopyToOutputDirectory": "PreserveNewest",
+      "CopyToPublishDirectory": "Never",
+      "OriginalItemSpec": "${RestorePath}\\microsoft.netcore.app.runtime.mono.browser-wasm\\${RuntimeVersion}\\runtimes\\browser-wasm\\lib\\${Tfm}\\System.Formats.Tar.dll"
+    },
+    {
       "Identity": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Globalization.Calendars.dll",
       "SourceId": "blazorwasm",
       "SourceType": "Computed",
@@ -5162,6 +5179,23 @@
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Formats.Asn1.dll"
+    },
+    {
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\[[_framework/System.Formats.Tar.dll.gz]]",
+      "SourceId": "blazorwasm",
+      "SourceType": "Computed",
+      "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
+      "BasePath": "/",
+      "RelativePath": "_framework/System.Formats.Tar.dll.gz",
+      "AssetKind": "Build",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "RelatedAsset": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Formats.Tar.dll",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "CopyToOutputDirectory": "PreserveNewest",
+      "CopyToPublishDirectory": "Never",
+      "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Formats.Tar.dll"
     },
     {
       "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\[[_framework/System.Globalization.Calendars.dll.gz]]",

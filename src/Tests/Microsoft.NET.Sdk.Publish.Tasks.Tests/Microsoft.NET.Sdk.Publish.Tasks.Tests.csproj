@@ -34,7 +34,7 @@
 
   <ItemGroup>
     <None Include="Resources\TestPublishContents.zip">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
