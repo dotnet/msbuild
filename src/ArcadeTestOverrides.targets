@@ -1,0 +1,112 @@
+<Project>
+    <Target Name="PrepareRunTests"
+        Outputs="%(TestToRun.ResultsStdOutPath)"
+        Condition="'@(TestToRun)' != ''">
+        <Telemetry EventName="NETCORE_ENGINEERING_TELEMETRY" EventData="Category=Test" />
+        <PropertyGroup>
+            <_TestEnvironment>%(TestToRun.EnvironmentDisplay)</_TestEnvironment>
+            <_TestAssembly>%(TestToRun.Identity)</_TestAssembly>
+            <_TestRuntime>%(TestToRun.TestRuntime)</_TestRuntime>
+            <_TestTimeout>%(TestToRun.TestTimeout)</_TestTimeout>
+            <_TestRunnerAdditionalArguments>%(TestToRun.TestRunnerAdditionalArguments)</_TestRunnerAdditionalArguments>
+
+            <!-- Always use net472 for desktop to enable displaying source location from Portable PDBs in stack traces -->
+            <_TestRunnerTargetFramework>net472</_TestRunnerTargetFramework>
+            <_TestRunnerTargetFramework Condition="'$(_TestRuntime)' == 'Core'">netcoreapp2.0</_TestRunnerTargetFramework>
+            <_TestRunnerTargetFramework Condition="%(TestToRun.TargetFramework) == 'netcoreapp1.1' or %(TestToRun.TargetFramework) == 'netcoreapp1.0'">netcoreapp1.0</_TestRunnerTargetFramework>
+        </PropertyGroup>
+
+        <PropertyGroup Condition="'$(_TestRuntime)' == 'Core'">
+            <_TargetFileNameNoExt>$([System.IO.Path]::GetFileNameWithoutExtension('$(_TestAssembly)'))</_TargetFileNameNoExt>
+            <_TargetDir>$([System.IO.Path]::GetDirectoryName('$(_TestAssembly)'))\</_TargetDir>
+            <_CoreRuntimeConfigPath>$(_TargetDir)$(_TargetFileNameNoExt).runtimeconfig.json</_CoreRuntimeConfigPath>
+            <_CoreDepsPath>$(_TargetDir)$(_TargetFileNameNoExt).deps.json</_CoreDepsPath>
+
+            <_TestRunner Condition="'%(TestToRun.Architecture)'=='x86' And Exists('$(DotNetRoot)x86\dotnet.exe')">$(DotNetRoot)x86\dotnet.exe</_TestRunner>
+            <_TestRunner Condition="'$(_TestRunner)'==''">$(DotNetTool)</_TestRunner>
+
+            <_TestRunnerArgs>exec --depsfile "$(_CoreDepsPath)" --runtimeconfig "$(_CoreRuntimeConfigPath)" $(TestRuntimeAdditionalArguments) "$(NuGetPackageRoot)xunit.runner.console/$(XUnitVersion)/tools/$(_TestRunnerTargetFramework)/xunit.console.dll" "$(_TestAssembly)" -noautoreporters -xml "%(TestToRun.ResultsXmlPath)" -html "%(TestToRun.ResultsHtmlPath)" $(_TestRunnerAdditionalArguments)</_TestRunnerArgs>
+        </PropertyGroup>
+
+        <PropertyGroup Condition="'$(_TestRuntime)' != 'Core'">
+            <_XUnitConsoleExe>xunit.console.exe</_XUnitConsoleExe>
+            <_XUnitConsoleExe Condition="'%(TestToRun.Architecture)' == 'x86'">xunit.console.x86.exe</_XUnitConsoleExe>
+            <_XUnitConsoleExePath>$(NuGetPackageRoot)xunit.runner.console\$(XUnitVersion)\tools\$(_TestRunnerTargetFramework)\$(_XUnitConsoleExe)</_XUnitConsoleExePath>
+
+            <_TestRunnerArgs>"$(_TestAssembly)" -noshadow -xml "%(TestToRun.ResultsXmlPath)" -html "%(TestToRun.ResultsHtmlPath)" $(_TestRunnerAdditionalArguments)</_TestRunnerArgs>
+            <_TestRunnerArgs Condition="'$(_TestRuntime)' == 'Mono'">$(TestRuntimeAdditionalArguments) "$(_XUnitConsoleExePath)" $(_TestRunnerArgs)</_TestRunnerArgs>
+
+            <_TestRunner Condition="'$(_TestRuntime)' == 'Mono'">$(MonoTool)</_TestRunner>
+            <_TestRunner Condition="'$(_TestRuntime)' != 'Mono'">$(_XUnitConsoleExePath)</_TestRunner>
+        </PropertyGroup>
+
+        <PropertyGroup>
+            <_TestRunnerCommand>"$(_TestRunner)" $(_TestRunnerArgs)</_TestRunnerCommand>
+
+            <!--
+        Redirect std output of the runner.
+        Note that xUnit outputs failure info to both STDOUT (stack trace, message) and STDERR (failed test name)
+      -->
+            <_TestRunnerCommand Condition="'$(TestCaptureOutput)' != 'false'">$(_TestRunnerCommand) > "%(TestToRun.ResultsStdOutPath)" 2>&amp;1</_TestRunnerCommand>
+        </PropertyGroup>
+
+        <ItemGroup>
+            <_OutputFiles Include="%(TestToRun.ResultsXmlPath)" />
+            <_OutputFiles Include="%(TestToRun.ResultsHtmlPath)" />
+            <_OutputFiles Include="%(TestToRun.ResultsStdOutPath)" />
+
+            <TestCommands Include="$(MSBuildThisFileFullPath)"
+                AdditionalProperties="_TestRunnerCommand=$(_TestRunnerCommand);StdOutPath=%(TestToRun.ResultsStdOutPath);_TestAssembly=$(_TestAssembly);_TestEnvironment=$(_TestEnvironment);ResultsHtmlPath=%(TestToRun.ResultsHtmlPath);_TargetDir=$(_TargetDir);_TestTimeout=$(_TestTimeout)" />
+        </ItemGroup>
+
+        <MakeDir Directories="@(_OutputFiles->'%(RootDir)%(Directory)')" />
+        <Delete Files="@(_OutputFiles)" />
+    </Target>
+
+    <Target Name="RunTests"
+        DependsOnTargets="PrepareRunTests">
+        <MSBuild Projects="@(TestCommands)"
+            Targets="RunSingleTest"
+            BuildInParallel="true" />
+    </Target>
+
+    <Target Name="RunSingleTest">
+        <Message Text="Running tests: $(_TestAssembly) [$(_TestEnvironment)]" Importance="high" />
+        <Exec Command='$(_TestRunnerCommand)'
+            LogStandardErrorAsError="false"
+            WorkingDirectory="$(_TargetDir)"
+            IgnoreExitCode="true"
+            Timeout="$(_TestTimeout)"
+            ContinueOnError="WarnAndContinue">
+            <Output TaskParameter="ExitCode" PropertyName="_TestErrorCode" />
+        </Exec>
+
+        <!--
+      Add command line to the log.
+    -->
+        <WriteLinesToFile File="$(StdOutPath)"
+            Overwrite="false"
+            Lines=";=== COMMAND LINE ===;$(_TestRunnerCommand)"
+            Condition="'$(TestCaptureOutput)' != 'false'" />
+
+        <!--
+      Report test status.
+    -->
+        <Message Text="Tests succeeded: $(_TestAssembly) [$(_TestEnvironment)]" Condition="'$(_TestErrorCode)' == '0'" Importance="high" />
+
+        <PropertyGroup>
+            <_ResultsFileToDisplay>$(ResultsHtmlPath)</_ResultsFileToDisplay>
+            <_ResultsFileToDisplay Condition="!Exists('$(_ResultsFileToDisplay)')">$(ResultsStdOutPath)</_ResultsFileToDisplay>
+        </PropertyGroup>
+
+        <!--
+      Ideally we would set ContinueOnError="ErrorAndContinue" so that when a test fails in multi-targeted test project
+      we'll still run tests for all target frameworks. ErrorAndContinue doesn't work well on Linux though: https://github.com/Microsoft/msbuild/issues/3961.
+    -->
+        <Error Text="Tests failed: $(_ResultsFileToDisplay) [$(_TestEnvironment)]" Condition="'$(_TestErrorCode)' != '0' and '$(_ErrorOnTestFailure)' != 'false'" File="XUnit" />
+
+        <ItemGroup>
+            <FileWrites Include="@(_OutputFiles)" />
+        </ItemGroup>
+    </Target>
+</Project>

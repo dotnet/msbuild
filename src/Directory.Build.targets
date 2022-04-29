@@ -161,4 +161,7 @@
   <!-- Import parent targets -->
   <Import Project="..\Directory.Build.targets"/>
 
+  <!-- Override Arcade SDK targets with parallel test goodness -->
+  <Import Project="ArcadeTestOverrides.targets" Condition="'$(IsUnitTestProject)' == 'true'" />
+
 </Project>
