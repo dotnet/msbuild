@@ -122,6 +122,11 @@
         <target state="translated">Niewystarczające uprawnienia do uruchomienia serwera.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="new">Error parsing version '{1}' for workload manifest ID '{0}'</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
         <source>The settings file in the workload's NuGet package is invalid: {0}</source>
         <target state="translated">Plik ustawień w pakiecie NuGet obciążenia jest nieprawidłowy: {0}</target>

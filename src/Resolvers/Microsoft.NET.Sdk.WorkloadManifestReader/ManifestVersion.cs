@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.DotNet.MSBuildSdkResolver;
+using Strings = Microsoft.NET.Sdk.Localization.Strings;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
@@ -14,7 +15,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         {
             if (!FXVersion.TryParse(version, out _version))
             {
-                throw new ArgumentNullException(nameof(version));
+                throw new ArgumentException(Strings.InvalidManifestVersion, version);     
             }
         }
 
