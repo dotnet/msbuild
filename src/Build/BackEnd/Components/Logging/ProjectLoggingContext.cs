@@ -76,7 +76,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             foreach (ProjectPropertyInstance property in properties)
             {
-                if (!(property is EnvironmentDerivedProjectPropertyInstance))
+                if (property is not EnvironmentDerivedProjectPropertyInstance)
                 {
                     yield return new DictionaryEntry(property.Name, property.EvaluatedValue);
                 }
