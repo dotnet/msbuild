@@ -821,14 +821,17 @@ namespace Microsoft.Build.Evaluation
 
         private IEnumerable FilterOutEnvironmentDerivedProperties(PropertyDictionary<P> dictionary)
         {
+            List<P> list = new();
             foreach (P p in dictionary)
             {
                 if (!((p is ProjectProperty pp && pp.IsEnvironmentProperty) ||
                     (p is EnvironmentDerivedProjectPropertyInstance)))
                 {
-                    yield return p;
+                    list.Add(p);
                 }
             }
+
+            return list;
         }
 
         private void CollectProjectCachePlugins()
