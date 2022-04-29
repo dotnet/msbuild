@@ -70,11 +70,10 @@ Template options:
   -rrc, --razor-runtime-compilation                                       Determines if the project is configured to use Razor runtime compilation in Debug builds.
                                                                           Type: bool
                                                                           Default: false
-  -f, --framework <net5.0|netcoreapp2.1|netcoreapp3.1>                    The target framework for the project.
+  -f, --framework <net5.0|netcoreapp3.1>                                  The target framework for the project.
                                                                           Type: choice
                                                                             net5.0         Target net5.0
                                                                             netcoreapp3.1  Target netcoreapp3.1
-                                                                            netcoreapp2.1  Target netcoreapp2.1
                                                                           Default: net5.0
   --no-restore                                                            If specified, skips the automatic restore of the project on create.
                                                                           Type: bool
@@ -88,9 +87,6 @@ Template options:
   --called-api-scopes <called-api-scopes>                                 Scopes to request to call the API from the web app. This option only applies if --auth SingleOrg, --auth MultiOrg or --auth IndividualB2C is specified.
                                                                           Type: string
                                                                           Default: user.read
-  --use-browserlink                                                       Whether or not to include BrowserLink in the project
-                                                                          Type: bool
-                                                                          Default: false
 
 To see help for other template languages (F#), use --language option:
    dotnet-new3 new3 mvc -h --language F#

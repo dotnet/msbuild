@@ -138,7 +138,6 @@ namespace Dotnet_new3.IntegrationTests
                 .And
                 .NotHaveStdErr();
 
-            InstallPackage(TemplatePackagesPaths.MicrosoftDotNetWebProjectTemplates21Path, BaseWorkingDirectory);
             InstallPackage(TemplatePackagesPaths.MicrosoftDotNetWebProjectTemplates31Path, BaseWorkingDirectory);
             InstallPackage(TemplatePackagesPaths.MicrosoftDotNetWebProjectTemplates50Path, BaseWorkingDirectory);
         }
