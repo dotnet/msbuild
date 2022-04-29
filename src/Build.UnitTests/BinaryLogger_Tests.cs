@@ -74,8 +74,6 @@ namespace Microsoft.Build.UnitTests
 
             // this is needed to ensure the binary logger does not pollute the environment
             _env.WithEnvironmentInvariant();
-
-            _logFile = _env.ExpectFile(".binlog").Path;
         }
 
         [Theory]
@@ -165,7 +163,7 @@ namespace Microsoft.Build.UnitTests
 
 </Project>";
                 TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
-                TransientTestFile projectFile = env.CreateFile(logFolder, ".proj", contents);
+                TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
                 BinaryLogger logger = new();
                 logger.Parameters = Path.Combine(logFolder.Path, "binlog.binlog");
                 RunnerUtilities.ExecMSBuild($"{projectFile.Path} -bl:{logger.Parameters}", out bool success);
