@@ -70,7 +70,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData("netcoreapp3.0", true)]
         [InlineData("netcoreapp3.0", false)]
         [InlineData("net5.0", false)]
-        [InlineData("net6.0", false)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, false)]
         public void ILLink_runs_and_creates_linked_app(string targetFramework, bool referenceClassLibAsPackage)
         {
             var projectName = "HelloWorld";
@@ -186,7 +186,7 @@ namespace Microsoft.NET.Publish.Tests
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData("net5.0", "link")]
-        [InlineData("net6.0", "copyused")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "copyused")]
         public void ILLink_respects_global_TrimMode(string targetFramework, string trimMode)
         {
             var projectName = "HelloWorld";
@@ -1270,8 +1270,8 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
-        [InlineData("net6.0", true)]
-        [InlineData("net6.0", false)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, false)]
         public void Build_respects_IsTrimmable_property(string targetFramework, bool isExe)
         {
             var projectName = "AnalysisWarnings";

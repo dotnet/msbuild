@@ -233,7 +233,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = nameof(AnalyzersAreConflictResolved),
-                TargetFrameworks = "net5.0"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
 
             // add the package referenced analyzers
