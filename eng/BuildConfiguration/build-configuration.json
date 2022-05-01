@@ -1,5 +1,5 @@
 {
-   "RetryCountLimit":0,
+   "RetryCountLimit":1,
    "RetryByPipeline":{
       "RetryStages":[
          {
