@@ -34,13 +34,13 @@
   <Target Name="CopyHelixFiles" AfterTargets="Publish">
 
     <ItemGroup>
-      <BuiltSdks Include="$(reporoot)artifacts\bin\$(Configuration)\Sdks\**\*.*"/>
+      <BuiltSdks Include="$(RepoRoot)artifacts\bin\$(Configuration)\Sdks\**\*.*"/>
 
       <!-- All the following files are just to get full framework msbuild while avoid to duplicated arcade logic by copying
       arcade and run it -->
-      <Engfolder Include="$(reporoot)eng\**\*.*"/>
-      <DotToolsFolder Include="$(reporoot).tools\**\*.*"/>
-      <GlobalJson Include="$(reporoot)global.json"/>
+      <Engfolder Include="$(RepoRoot)eng\**\*.*"/>
+      <DotToolsFolder Include="$(RepoRoot).tools\**\*.*"/>
+      <GlobalJson Include="$(RepoRoot)global.json"/>
       <!-- Get full framework msbuild end -->
 
       <!-- include .dotnet folder. So there is no extra first run experience run during the test -->
@@ -57,13 +57,13 @@
         <DestinationFolder>eng/</DestinationFolder>
       </TestExecutionDirectoryFiles>
 
-      <FilesInHelixRoot Include="$(reporoot)artifacts\tmp\$(Configuration)\NuGet.config"/>
-      <FilesInHelixRoot Condition="$([MSBuild]::IsOSPlatform(`Windows`))" Include="$(reporoot)build\RunTestsOnHelix.cmd"/>
-      <FilesInHelixRoot Condition=" '$([MSBuild]::IsOSPlatform(`Windows`))' == 'false' " Include="$(reporoot)build\RunTestsOnHelix.sh"/>
+      <FilesInHelixRoot Include="$(RepoRoot)artifacts\tmp\$(Configuration)\NuGet.config"/>
+      <FilesInHelixRoot Condition="$([MSBuild]::IsOSPlatform(`Windows`))" Include="$(RepoRoot)build\RunTestsOnHelix.cmd"/>
+      <FilesInHelixRoot Condition=" '$([MSBuild]::IsOSPlatform(`Windows`))' == 'false' " Include="$(RepoRoot)build\RunTestsOnHelix.sh"/>
     </ItemGroup>
 
     <PropertyGroup>
-      <HelixPayloadOnHost>$(reporoot)artifacts\tmp\Helixpayload</HelixPayloadOnHost>
+      <HelixPayloadOnHost>$(RepoRoot)artifacts\tmp\Helixpayload</HelixPayloadOnHost>
     </PropertyGroup>
 
     <Copy SourceFiles="@(Engfolder)" DestinationFiles="@(Engfolder->'$(HelixPayloadOnHost)\eng\%(RecursiveDir)%(Filename)%(Extension)')" />
@@ -82,11 +82,11 @@
     <PropertyGroup>
       <HelixPreCommands Condition="!$(IsPosixShell)">call %HELIX_CORRELATION_PAYLOAD%\t\RunTestsOnHelix.cmd $(TestFullMSBuild);$(HelixPreCommands)</HelixPreCommands>
       <HelixPreCommands Condition="$(IsPosixShell)">. $HELIX_CORRELATION_PAYLOAD/t/RunTestsOnHelix.sh;$(HelixPreCommands)</HelixPreCommands>
-      <TestDotnetRoot>$(reporoot)artifacts\bin\redist\$(Configuration)\dotnet</TestDotnetRoot>
+      <TestDotnetRoot>$(RepoRoot)artifacts\bin\redist\$(Configuration)\dotnet</TestDotnetRoot>
       <TestDotnetVersion>$(Version)</TestDotnetVersion>
-      <MSBuildSdkResolverDir>$(reporoot)artifacts\bin\Microsoft.DotNet.MSBuildSdkResolver</MSBuildSdkResolverDir>
-      <HelixStage0Targz>$(reporoot)artifacts\tmp\HelixStage0.tar.gz</HelixStage0Targz>
-      <MicrosoftNETBuildExtensions>$(reporoot)artifacts\bin\$(Configuration)\Sdks\Microsoft.NET.Build.Extensions</MicrosoftNETBuildExtensions>
+      <MSBuildSdkResolverDir>$(RepoRoot)artifacts\bin\Microsoft.DotNet.MSBuildSdkResolver</MSBuildSdkResolverDir>
+      <HelixStage0Targz>$(RepoRoot)artifacts\tmp\HelixStage0.tar.gz</HelixStage0Targz>
+      <MicrosoftNETBuildExtensions>$(RepoRoot)artifacts\bin\$(Configuration)\Sdks\Microsoft.NET.Build.Extensions</MicrosoftNETBuildExtensions>
     </PropertyGroup>
 
     <TarGzFileCreateFromDirectory
@@ -126,6 +126,6 @@
   <Target Name="CreateLocalHelixTestLayout" DependsOnTargets="AppendHelixPreCommand">
     <CreateLocalHelixTestLayout
         HelixCorrelationPayload="@(HelixCorrelationPayload)"
-        TestOutputDirectory="$(reporoot)artifacts\bin\localHelixTestLayout" />
+        TestOutputDirectory="$(RepoRoot)artifacts\bin\localHelixTestLayout" />
   </Target>
 </Project>
