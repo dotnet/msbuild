@@ -18,7 +18,7 @@ namespace Microsoft.Build.UnitTests.Shared
         /// </summary>
         public static string ExecMSBuild(string msbuildParameters, out bool successfulExit, ITestOutputHelper outputHelper = null)
         {
-            return ExecMSBuild(PathToCurrentlyRunningMsBuildExe, msbuildParameters, out successfulExit, false, outputHelper);
+            return ExecMSBuild(PathToCurrentlyRunningMsBuildExe, msbuildParameters, out successfulExit, outputHelper: outputHelper);
         }
 
         /// <summary>
@@ -27,6 +27,11 @@ namespace Microsoft.Build.UnitTests.Shared
         /// </summary>
         public static string ExecMSBuild(string pathToMsBuildExe, string msbuildParameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
         {
+            return ExecMSBuild(pathToMsBuildExe, msbuildParameters, out successfulExit, out _, shellExecute, outputHelper);
+        }
+
+        public static string ExecMSBuild(string pathToMsBuildExe, string msbuildParameters, out bool successfulExit, out bool exitedWithoutTimeout, bool shellExecute = false, ITestOutputHelper outputHelper = null)
+        {
 #if FEATURE_RUN_EXE_IN_TESTS
             var pathToExecutable = pathToMsBuildExe;
 #else
@@ -34,7 +39,7 @@ namespace Microsoft.Build.UnitTests.Shared
             msbuildParameters = FileUtilities.EnsureDoubleQuotes(pathToMsBuildExe) + " " + msbuildParameters;
 #endif
 
-            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper);
+            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, out exitedWithoutTimeout, shellExecute, outputHelper);
         }
 
         private static void AdjustForShellExecution(ref string pathToExecutable, ref string arguments)
@@ -70,7 +75,7 @@ namespace Microsoft.Build.UnitTests.Shared
         /// <summary>
         /// Run the process and get stdout and stderr
         /// </summary>
-        public static string RunProcessAndGetOutput(string process, string parameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
+        public static string RunProcessAndGetOutput(string process, string parameters, out bool successfulExit, out bool exitedWithoutTimeout, bool shellExecute = false, ITestOutputHelper outputHelper = null, bool waitForExit = true)
         {
             if (shellExecute)
             {
@@ -114,9 +119,18 @@ namespace Microsoft.Build.UnitTests.Shared
                 p.BeginOutputReadLine();
                 p.BeginErrorReadLine();
                 p.StandardInput.Dispose();
-                p.WaitForExit();
 
-                successfulExit = p.ExitCode == 0;
+                if (waitForExit)
+                {
+                    exitedWithoutTimeout = p.WaitForExit(30000);
+                    output += "Process ID is " + p.Id + "\r\n";
+                    successfulExit = p.ExitCode == 0;
+                }
+                else
+                {
+                    exitedWithoutTimeout = true;
+                    successfulExit = true;
+                }
             }
 
             outputHelper?.WriteLine("==== OUTPUT ====");
