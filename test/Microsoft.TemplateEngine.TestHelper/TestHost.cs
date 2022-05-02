@@ -19,6 +19,7 @@ namespace Microsoft.TemplateEngine.TestHelper
         private readonly ILogger _logger;
         private readonly string _hostIdentifier;
         private readonly string _version;
+        private readonly List<(LogLevel, string)> _messagesCollection = new List<(LogLevel, string)>();
         private IReadOnlyList<(Type, IIdentifiedComponent)> _builtIns;
         private IReadOnlyList<string> _fallbackNames;
 
@@ -51,6 +52,7 @@ namespace Microsoft.TemplateEngine.TestHelper
                 Microsoft.Extensions.Logging.LoggerFactory.Create(builder =>
                     builder
                         .SetMinimumLevel(LogLevel.Trace)
+                        .AddProvider(new InMemoryLoggerProvider(_messagesCollection))
                         .AddSimpleConsole(options =>
                         {
                             options.SingleLine = true;
@@ -76,6 +78,8 @@ namespace Microsoft.TemplateEngine.TestHelper
         ILogger ITemplateEngineHost.Logger => _logger;
 
         ILoggerFactory ITemplateEngineHost.LoggerFactory => _loggerFactory;
+
+        public IReadOnlyList<(LogLevel, string)> LoggedMessages => _messagesCollection;
 
         public static ITemplateEngineHost GetVirtualHost(
             [CallerMemberName] string hostIdentifier = "",
@@ -164,6 +168,48 @@ namespace Microsoft.TemplateEngine.TestHelper
         void ITemplateEngineHost.LogTiming(string label, TimeSpan duration, int depth)
         {
             //do nothing
+        }
+
+        private class InMemoryLoggerProvider : ILoggerProvider
+        {
+            private readonly List<(LogLevel, string)> _messagesCollection;
+
+            public InMemoryLoggerProvider(List<(LogLevel, string)> messagesCollection)
+            {
+                _messagesCollection = messagesCollection;
+            }
+
+            public ILogger CreateLogger(string categoryName)
+            {
+                return new InMemoryLogger(_messagesCollection);
+            }
+
+            public void Dispose() => throw new NotImplementedException();
+
+            private class InMemoryLogger : ILogger
+            {
+                private List<(LogLevel, string)> _messagesCollection;
+
+                public InMemoryLogger(List<(LogLevel, string)> messagesCollection) => _messagesCollection = messagesCollection;
+
+                public IDisposable? BeginScope<TState>(TState state) where TState : notnull
+                {
+                    return new Scope();
+                }
+
+                public bool IsEnabled(LogLevel logLevel) => true;
+
+                public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+                {
+                    _messagesCollection.Add((logLevel, formatter(state, exception)));
+                }
+
+                private class Scope : IDisposable
+                {
+                    public void Dispose() { }
+                }
+            }
+
         }
     }
 }
