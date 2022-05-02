@@ -15,11 +15,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
         }
 
-        public SdkResolverManifest(string path, string namePattern)
+        public SdkResolverManifest(string name, string path, string namePattern)
         {
+            Name = name;
             Path = path;
             NamePattern = namePattern;
         }
+
+        internal string Name { get; set; }
 
         internal string Path { get; set; }
 

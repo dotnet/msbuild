@@ -34,11 +34,20 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 #endif
             ) ?? Environment.GetEnvironmentVariable("MSBUILDADDITIONALSDKRESOLVERSFOLDER");
 
+        internal virtual IList<SdkResolver> LoadDefaultResolvers(LoggingContext loggingContext, ElementLocation location)
+        {
+            var resolvers = !String.Equals(IncludeDefaultResolver, "false", StringComparison.OrdinalIgnoreCase) ?
+                new List<SdkResolver> {new DefaultSdkResolver()}
+                : new List<SdkResolver>();
+
+            return resolvers.OrderBy(t => t.Priority).ToList();
+        }
+
         internal virtual IList<SdkResolver> LoadResolvers(LoggingContext loggingContext,
             ElementLocation location)
         {
             var resolvers = !String.Equals(IncludeDefaultResolver, "false", StringComparison.OrdinalIgnoreCase) ?
-                new List<SdkResolver> { new DefaultSdkResolver() }
+                new List<SdkResolver> {new DefaultSdkResolver()}
                 : new List<SdkResolver>();
 
             var potentialResolvers = FindPotentialSdkResolvers(
@@ -60,12 +69,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         internal virtual IList<SdkResolverManifest> GetResolversManifests(LoggingContext loggingContext,
             ElementLocation location)
         {
-            List<SdkResolverManifest> manifests = new List<SdkResolverManifest>();
-
-            var potentialResolvers = FindPotentialSdkResolversManifests(
+            return FindPotentialSdkResolversManifests(
                 Path.Combine(BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, "SdkResolvers"), location);
-
-            return manifests;
         }
 
         /// <summary>
@@ -188,6 +193,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(location), "SdkResolverDllInManifestMissing", pathToManifest, manifest.Path);
             }
 
+            if (string.IsNullOrEmpty(manifest.NamePattern))
+            {
+                manifest.NamePattern = ".*";
+            }
+
             manifestsList.Add(manifest);
 
             return true;
@@ -197,7 +207,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
             if (string.IsNullOrEmpty(assemblyPath) || !FileUtilities.FileExistsNoThrow(assemblyPath)) return false;
 
-            manifestsList.Add(new SdkResolverManifest(assemblyPath, "*"));
+            manifestsList.Add(new SdkResolverManifest(null, assemblyPath, ".*"));
             return true;
         }
 
@@ -216,6 +226,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 #else
             return s_loader.LoadFromPath(resolverPath);
 #endif
+        }
+
+        protected internal virtual IList<SdkResolver> LoadResolvers(SdkResolverManifest manifest, LoggingContext loggingContext, ElementLocation location)
+        {
+            var resolvers = new List<SdkResolver>();
+            LoadResolvers(manifest.Path, loggingContext, location, resolvers);
+            return resolvers;
         }
 
         protected virtual void LoadResolvers(string resolverPath, LoggingContext loggingContext, ElementLocation location, List<SdkResolver> resolvers)

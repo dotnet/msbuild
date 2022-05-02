@@ -432,7 +432,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 return base.FindPotentialSdkResolvers(rootFolder, location);
             }
 
-            protected override void LoadResolvers(string resolverPath, LoggingContext loggingContext, ElementLocation location, List<SdkResolver> resolvers)
+            protected internal override void LoadResolvers(string resolverPath, LoggingContext loggingContext, ElementLocation location, List<SdkResolver> resolvers)
             {
                 if (LoadResolversAction != null)
                 {
