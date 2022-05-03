@@ -124,12 +124,12 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/roslyn -->
-    <MicrosoftNetCompilersToolsetPackageVersion>4.3.0-2.22252.15</MicrosoftNetCompilersToolsetPackageVersion>
-    <MicrosoftCodeAnalysisPackageVersion>4.3.0-2.22252.15</MicrosoftCodeAnalysisPackageVersion>
-    <MicrosoftCodeAnalysisCSharpPackageVersion>4.3.0-2.22252.15</MicrosoftCodeAnalysisCSharpPackageVersion>
-    <MicrosoftCodeAnalysisCSharpFeaturesPackageVersion>4.3.0-2.22252.15</MicrosoftCodeAnalysisCSharpFeaturesPackageVersion>
-    <MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>4.3.0-2.22252.15</MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>
-    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>4.3.0-2.22252.15</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
+    <MicrosoftNetCompilersToolsetPackageVersion>4.3.0-1.22252.16</MicrosoftNetCompilersToolsetPackageVersion>
+    <MicrosoftCodeAnalysisPackageVersion>4.3.0-1.22252.16</MicrosoftCodeAnalysisPackageVersion>
+    <MicrosoftCodeAnalysisCSharpPackageVersion>4.3.0-1.22252.16</MicrosoftCodeAnalysisCSharpPackageVersion>
+    <MicrosoftCodeAnalysisCSharpFeaturesPackageVersion>4.3.0-1.22252.16</MicrosoftCodeAnalysisCSharpFeaturesPackageVersion>
+    <MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>4.3.0-1.22252.16</MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>
+    <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>4.3.0-1.22252.16</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore -->
