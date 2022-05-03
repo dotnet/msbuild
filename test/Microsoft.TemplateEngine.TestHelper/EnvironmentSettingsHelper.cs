@@ -5,16 +5,25 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Logging;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Utils;
+using Xunit.Abstractions;
 
 namespace Microsoft.TemplateEngine.TestHelper
 {
     public class EnvironmentSettingsHelper : IDisposable
     {
         private readonly List<string> _foldersToCleanup = new List<string>();
+        private SharedTestOutputHelper _testOutputHelper;
+
+        public EnvironmentSettingsHelper(IMessageSink messageSink)
+        {
+            _testOutputHelper = new SharedTestOutputHelper(messageSink);
+        }
 
         public IEngineEnvironmentSettings CreateEnvironment(
             string? locale = null,
@@ -22,7 +31,8 @@ namespace Microsoft.TemplateEngine.TestHelper
             [CallerMemberName] string hostIdentifier = "",
             bool loadDefaultGenerator = true,
             IEnvironment? environment = null,
-            IReadOnlyList<(Type, IIdentifiedComponent)>? additionalComponents = null)
+            IReadOnlyList<(Type, IIdentifiedComponent)>? additionalComponents = null,
+            IEnumerable<ILoggerProvider>? addLoggerProviders = null)
         {
             if (string.IsNullOrEmpty(locale))
             {
@@ -39,11 +49,17 @@ namespace Microsoft.TemplateEngine.TestHelper
                 builtIns.AddRange(Orchestrator.RunnableProjects.Components.AllComponents);
             }
 
+            IEnumerable<ILoggerProvider> loggerProviders = new[] { new XunitLoggerProvider(_testOutputHelper) };
+            if (addLoggerProviders != null)
+            {
+                loggerProviders = loggerProviders.Concat(addLoggerProviders);
+            }
             ITemplateEngineHost host = new TestHost(
                 hostIdentifier: hostIdentifier,
                 additionalComponents: additionalComponents,
                 fileSystem: new MonitoredFileSystem(new PhysicalFileSystem()),
-                fallbackNames: new[] { "dotnetcli" });
+                fallbackNames: new[] { "dotnetcli" },
+                addLoggerProviders: loggerProviders);
 
             CultureInfo.CurrentUICulture = new CultureInfo(locale);
             EngineEnvironmentSettings engineEnvironmentSettings;

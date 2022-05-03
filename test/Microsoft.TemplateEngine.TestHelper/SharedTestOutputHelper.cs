@@ -4,13 +4,13 @@
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace Dotnet_new3.IntegrationTests
+namespace Microsoft.TemplateEngine.TestHelper
 {
     /// <summary>
     /// This is so we can pass ITestOutputHelper to TestCommand constructor
     /// when calling from SharedHomeDirectory.
     /// </summary>
-    internal class SharedTestOutputHelper : ITestOutputHelper
+    public class SharedTestOutputHelper : ITestOutputHelper
     {
         private readonly IMessageSink sink;
 
