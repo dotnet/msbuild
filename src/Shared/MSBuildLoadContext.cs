@@ -37,7 +37,9 @@ namespace Microsoft.Build.Shared
         {
             _directory = Directory.GetParent(assemblyPath)!.FullName;
 
-            _resolver = File.Exists(assemblyPath) ? new AssemblyDependencyResolver(assemblyPath) : null;
+            _resolver = File.Exists(assemblyPath) && File.Exists(Path.Combine(_directory, Path.GetFileNameWithoutExtension(assemblyPath) + ".deps.json"))
+                ? new AssemblyDependencyResolver(assemblyPath) :
+                null;
         }
 
         protected override Assembly? Load(AssemblyName assemblyName)
