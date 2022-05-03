@@ -313,6 +313,7 @@ folder InstallDir:\MSBuild\Current\Bin\arm64
   file source=$(Arm64BinPath)MSBuild.exe vs.file.ngenArchitecture=x64
   file source=$(Arm64BinPath)MSBuild.exe.config
 
+  file source=$(FrameworkBinPath)x64\Microsoft.Build.Framework.tlb
   file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.Common.CrossTargeting.targets
