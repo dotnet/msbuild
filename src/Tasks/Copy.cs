@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -899,20 +899,22 @@ namespace Microsoft.Build.Tasks
         private static string GetLockedFileMessage(string file)
         {
             string message = string.Empty;
-#if !RUNTIME_TYPE_NETCORE && !MONO
 
             try
             {
-                var processes = LockCheck.GetProcessesLockingFile(file);
-                message = !string.IsNullOrEmpty(processes)
-                    ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("Copy.FileLocked", processes)
-                    : String.Empty;
+                if (NativeMethodsShared.IsWindows && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+                {
+                    var processes = LockCheck.GetProcessesLockingFile(file);
+                    message = !string.IsNullOrEmpty(processes)
+                        ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("Copy.FileLocked", processes)
+                        : String.Empty;
+                }
             }
             catch (Exception)
             {
                 // Never throw if we can't get the processes locking the file.
             }
-#endif
+
             return message;
         }
 

@@ -1111,6 +1111,3 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
-
-
-

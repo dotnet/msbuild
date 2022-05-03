@@ -576,13 +576,20 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         public async Task ShutDown()
         {
+            bool shouldInitiateShutdownState = _serviceState != ProjectCacheServiceState.ShutdownStarted && _serviceState != ProjectCacheServiceState.ShutdownFinished;
+
+            if (!shouldInitiateShutdownState)
+            {
+                return;
+            }
+
             BuildEventContext buildEventContext = BuildEventContext.Invalid;
             BuildEventFileInfo buildEventFileInfo = BuildEventFileInfo.Empty;
             var pluginLogger = new LoggingServiceToPluginLoggerAdapter(
                 _loggingService,
                 BuildEventContext.Invalid,
                 BuildEventFileInfo.Empty);
-
+            
             try
             {
                 SetState(ProjectCacheServiceState.ShutdownStarted);
