@@ -25,7 +25,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             {
                 using (var xmlReader = new XmlTextReader(s))
                 {
-                    xmlReader.WhitespaceHandling = WhitespaceHandling.None;
+                    xmlReader.WhitespaceHandling = WhitespaceHandling.All;
 
                     XDocument doc = XDocument.Load(xmlReader, LoadOptions.PreserveWhitespace);
                     foreach (XElement elem in doc.Element("root").Elements())
@@ -105,6 +105,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         {
             string name = elem.Attribute("name").Value;
             string value;
+            bool preserve = elem.Attribute(XName.Get("space", "http://www.w3.org/XML/1998/namespace"))?.Value == "preserve";
 
             XElement valueElement = elem.Element("value");
             if (valueElement is null)
@@ -119,6 +120,10 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             else
             {
                 value = valueElement.Value;
+                if (!preserve && string.IsNullOrWhiteSpace(value))
+                {
+                    value = string.Empty;
+                }
             }
 
             string typename = elem.Attribute("type")?.Value;

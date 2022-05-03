@@ -629,20 +629,6 @@ namespace Microsoft.Build.CommandLine
                         Environment.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", "1");
                     }
 
-                    // Honor the low priority flag, we place our selves below normal priority and let sub processes inherit
-                    // that priority. Idle priority would prevent the build from proceeding as the user does normal actions.
-                    try
-                    {
-                        if (lowPriority && Process.GetCurrentProcess().PriorityClass != ProcessPriorityClass.Idle)
-                        {
-                            Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.BelowNormal;
-                        }
-                    }
-                    // We avoid increasing priority because that causes failures on mac/linux, but there is no good way to
-                    // verify that a particular priority is lower than "BelowNormal." If the error appears, ignore it and
-                    // leave priority where it was.
-                    catch (Win32Exception) { }
-
                     DateTime t1 = DateTime.Now;
 
                     // If the primary file passed to MSBuild is a .binlog file, play it back into passed loggers
@@ -2091,6 +2077,27 @@ namespace Microsoft.Build.CommandLine
                 DisplayCopyrightMessage();
             }
 
+
+            // Idle priority would prevent the build from proceeding as the user does normal actions.
+            // This switch is processed early to capture both the command line case (main node should
+            // also be low priority) and the Visual Studio case in which the main node starts and stays
+            // at normal priority (not through XMake.cs) but worker nodes still need to honor this switch.
+            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.LowPriority))
+            {
+                lowPriority = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority], defaultValue: true, resourceName: "InvalidLowPriorityValue");
+            }
+            try
+            {
+                if (lowPriority && Process.GetCurrentProcess().PriorityClass != ProcessPriorityClass.Idle)
+                {
+                    Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.BelowNormal;
+                }
+            }
+            // We avoid increasing priority because that causes failures on mac/linux, but there is no good way to
+            // verify that a particular priority is lower than "BelowNormal." If the error appears, ignore it and
+            // leave priority where it was.
+            catch (Win32Exception) { }
+
             // if help switch is set (regardless of switch errors), show the help message and ignore the other switches
             if (commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Help])
             {
@@ -2098,7 +2105,7 @@ namespace Microsoft.Build.CommandLine
             }
             else if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode))
             {
-                StartLocalNode(commandLineSwitches);
+                StartLocalNode(commandLineSwitches, lowPriority);
             }
             else
             {
@@ -2234,11 +2241,6 @@ namespace Microsoft.Build.CommandLine
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GraphBuild))
                     {
                         graphBuild = ProcessGraphBuildSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GraphBuild]);
-                    }
-
-                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.LowPriority))
-                    {
-                        lowPriority = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority], defaultValue: true, resourceName: "InvalidLowPriorityValue");
                     }
 
                     inputResultsCaches = ProcessInputResultsCaches(commandLineSwitches);
@@ -2580,7 +2582,7 @@ namespace Microsoft.Build.CommandLine
         /// Uses the input from thinNodeMode switch to start a local node server
         /// </summary>
         /// <param name="commandLineSwitches"></param>
-        private static void StartLocalNode(CommandLineSwitches commandLineSwitches)
+        private static void StartLocalNode(CommandLineSwitches commandLineSwitches, bool lowpriority)
         {
             string[] input = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeMode];
             int nodeModeNumber = 0;
@@ -2608,22 +2610,22 @@ namespace Microsoft.Build.CommandLine
             {
                 Exception nodeException = null;
                 NodeEngineShutdownReason shutdownReason = NodeEngineShutdownReason.Error;
+
                 // normal OOP node case
                 if (nodeModeNumber == 1)
                 {
-                    OutOfProcNode node = new OutOfProcNode();
-
                     // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
                     bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-                    string[] lowPriorityInput = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority];
-                    bool lowpriority = lowPriorityInput.Length > 0 && lowPriorityInput[0].Equals("true");
-
+                    OutOfProcNode node = new OutOfProcNode();
                     shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);
 
                     FileUtilities.ClearCacheDirectory();
                 }
                 else if (nodeModeNumber == 2)
                 {
+                    // TaskHost nodes don't need to worry about node reuse or low priority. Node reuse is always off, and TaskHosts
+                    // receive a connection immediately after being launched and shut down as soon as their work is over, so
+                    // whatever our priority is is correct.
                     OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
                     shutdownReason = node.Run(out nodeException);
                 }
