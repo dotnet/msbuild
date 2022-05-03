@@ -10,7 +10,7 @@
   </PropertyGroup>
   <!-- Repo Version Information -->
   <PropertyGroup>
-    <VersionPrefix>6.0.300</VersionPrefix>
+    <VersionPrefix>6.0.301</VersionPrefix>
     <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
     <!-- Enable to remove prerelease label. -->
     <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">true</StabilizePackageVersion>
