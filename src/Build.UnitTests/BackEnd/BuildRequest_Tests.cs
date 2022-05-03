@@ -2,10 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Runtime.Versioning;
+
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
@@ -138,9 +139,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-#if FEATURE_COM_INTEROP
         [Fact]
-        [SkipOnMono("disable com tests on mono")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void TestTranslationRemoteHostObjects()
         {
             var stateInHostObject = 3;
@@ -180,7 +181,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 hostObject.GetState().ShouldBe(stateInHostObject);
             }
         }
-#endif
 
         [Fact]
         public void TestTranslationHostObjectsWhenEmpty()
