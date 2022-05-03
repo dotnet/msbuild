@@ -8,7 +8,7 @@ namespace Microsoft.Build.Shared
 {
     internal static class NamedPipeUtil
     {
-        internal static string GetPipeNameOrPath(int? processId = null)
+        internal static string GetPlatformSpecificPipeName(int? processId = null)
         {
             if (processId is null)
             {
@@ -17,10 +17,10 @@ namespace Microsoft.Build.Shared
 
             string pipeName = $"MSBuild{processId}";
 
-            return GetPipeNameOrPath(pipeName);
+            return GetPlatformSpecificPipeName(pipeName);
         }
 
-        internal static string GetPipeNameOrPath(string pipeName)
+        internal static string GetPlatformSpecificPipeName(string pipeName)
         {
             if (NativeMethodsShared.IsUnixLike)
             {

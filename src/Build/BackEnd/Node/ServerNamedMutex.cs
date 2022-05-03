@@ -8,9 +8,6 @@ namespace Microsoft.Build.Execution
 {
     internal sealed class ServerNamedMutex : IDisposable
     {
-        public const string RunningServerMutexNamePrefix = @"Global\server-running-";
-        public const string BusyServerMutexNamePrefix = @"Global\server-busy-";
-
         private readonly Mutex _serverMutex;
 
         public bool IsDisposed { get; private set; }

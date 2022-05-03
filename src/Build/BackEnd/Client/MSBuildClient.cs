@@ -115,8 +115,8 @@ namespace Microsoft.Build.Execution
         /// or the manner in which it failed.</returns>
         public MSBuildClientExitResult Execute(string commandLine, CancellationToken cancellationToken)
         {
-            string serverRunningMutexName = $@"{ServerNamedMutex.RunningServerMutexNamePrefix}{_pipeName}";
-            string serverBusyMutexName = $@"{ServerNamedMutex.BusyServerMutexNamePrefix}{_pipeName}";
+            string serverRunningMutexName = OutOfProcServerNode.GetRunningServerMutexName(_handshake);
+            string serverBusyMutexName = OutOfProcServerNode.GetBusyServerMutexName(_handshake);
 
             // Start server it if is not running.
             bool serverIsAlreadyRunning = ServerNamedMutex.WasOpen(serverRunningMutexName);
@@ -213,7 +213,7 @@ namespace Microsoft.Build.Execution
         /// <returns> Whether MSBuild server was started successfully.</returns>
         private bool TryLaunchServer()
         {
-            string serverLaunchMutexName = $@"Global\server-launch-{_pipeName}";
+            string serverLaunchMutexName = $@"Global\server-launch-{_handshake.ComputeHash()}";
             using var serverLaunchMutex = ServerNamedMutex.OpenOrCreateMutex(serverLaunchMutexName, out bool mutexCreatedNew);
             if (!mutexCreatedNew)
             {

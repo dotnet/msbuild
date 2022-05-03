@@ -77,32 +77,29 @@ namespace Microsoft.Build.Execution
         }
 
         #region INode Members
-
+        
         /// <summary>
         /// Starts up the node and processes messages until the node is requested to shut down.
         /// </summary>
-        /// <param name="shutdownException">The exception which caused shutdown, if any.</param>
+        /// <param name="shutdownException">The exception which caused shutdown, if any.</param> 
         /// <returns>The reason for shutting down.</returns>
         public NodeEngineShutdownReason Run(out Exception? shutdownException)
         {
             var handshake = new ServerNodeHandshake(
                 CommunicationsUtilities.GetHandshakeOptions(taskHost: false, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
 
-            string pipeName = GetPipeName(handshake);
+            _serverBusyMutexName = GetBusyServerMutexName(handshake);
 
-            string serverRunningMutexName = $@"{ServerNamedMutex.RunningServerMutexNamePrefix}{pipeName}";
-            _serverBusyMutexName = $@"{ServerNamedMutex.BusyServerMutexNamePrefix}{pipeName}";
-
-            // TODO: shall we address possible race condition. It is harmless as it, with acceptable probability, just cause unnecessary process spawning
-            // and of two processes will become victim and fails, build will not be affected
-            using var serverRunningMutex = ServerNamedMutex.OpenOrCreateMutex(serverRunningMutexName, out bool mutexCreatedNew);
+            // Handled race condition. If two processes spawn to start build Server one will die while
+            // one Server client connects to the other one and run build on it.
+            using var serverRunningMutex = ServerNamedMutex.OpenOrCreateMutex(GetRunningServerMutexName(handshake), out bool mutexCreatedNew);
             if (!mutexCreatedNew)
             {
                 shutdownException = new InvalidOperationException("MSBuild server is already running!");
                 return NodeEngineShutdownReason.Error;
             }
 
-            _nodeEndpoint = new ServerNodeEndpointOutOfProc(pipeName, handshake);
+            _nodeEndpoint = new ServerNodeEndpointOutOfProc(GetPipeName(handshake), handshake);
             _nodeEndpoint.OnLinkStatusChanged += OnLinkStatusChanged;
             _nodeEndpoint.Listen(this);
 
@@ -137,7 +134,14 @@ namespace Microsoft.Build.Execution
 
         #endregion
 
-        internal static string GetPipeName(ServerNodeHandshake handshake) => NamedPipeUtil.GetPipeNameOrPath("MSBuildServer-" + handshake.ComputeHash());
+        internal static string GetPipeName(ServerNodeHandshake handshake)
+            => NamedPipeUtil.GetPlatformSpecificPipeName($"MSBuildServer-{handshake.ComputeHash()}");
+
+        internal static string GetRunningServerMutexName(ServerNodeHandshake handshake)
+            => $@"Global\server-running-{handshake.ComputeHash()}";
+
+        internal static string GetBusyServerMutexName(ServerNodeHandshake handshake)
+            => $@"Global\server-busy-{handshake.ComputeHash()}";
 
         #region INodePacketFactory Members
 

@@ -136,6 +136,11 @@ namespace Microsoft.Build.Internal
 
     internal sealed class ServerNodeHandshake : Handshake
     {
+        /// <summary>
+        /// Caching computed hash.
+        /// </summary>
+        private string _computedHash = null;
+
         public override byte? ExpectedVersionInFirstByte => null;
 
         internal ServerNodeHandshake(HandshakeOptions nodeType)
@@ -178,12 +183,16 @@ namespace Microsoft.Build.Internal
         /// </summary>
         public string ComputeHash()
         {
-            var input = GetKey();
-            using var sha = SHA256.Create();
-            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
-            return Convert.ToBase64String(bytes)
-                .Replace("/", "_")
-                .Replace("=", string.Empty);
+            if (_computedHash == null)
+            {
+                var input = GetKey();
+                using var sha = SHA256.Create();
+                var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
+                _computedHash = Convert.ToBase64String(bytes)
+                    .Replace("/", "_")
+                    .Replace("=", string.Empty);
+            }
+            return _computedHash;
         }
     }
 

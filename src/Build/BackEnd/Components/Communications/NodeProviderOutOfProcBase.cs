@@ -378,7 +378,7 @@ namespace Microsoft.Build.BackEnd
         private Stream TryConnectToProcess(int nodeProcessId, int timeout, Handshake handshake)
         {
             // Try and connect to the process.
-            string pipeName = NamedPipeUtil.GetPipeNameOrPath(nodeProcessId);
+            string pipeName = NamedPipeUtil.GetPlatformSpecificPipeName(nodeProcessId);
 
             NamedPipeClientStream nodeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
