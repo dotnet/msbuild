@@ -208,6 +208,33 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
+        public void SdkResolverLoaderReadsManifestFileWithNamePattern()
+        {
+            using (var env = TestEnvironment.Create(_output))
+            {
+                var root = env.CreateFolder().Path;
+                var resolverPath = Path.Combine(root, "MyTestResolver");
+                var resolverManifest = Path.Combine(resolverPath, "MyTestResolver.xml");
+
+                var assemblyToLoad = env.CreateFile(".dll").Path;
+
+                Directory.CreateDirectory(resolverPath);
+                File.WriteAllText(resolverManifest, $@"
+                    <SdkResolver>
+                      <NamePattern>1.*</NamePattern>
+                      <Path>{assemblyToLoad}</Path>
+                    </SdkResolver>");
+
+                SdkResolverLoader loader = new SdkResolverLoader();
+                var resolversManifestsFound = loader.FindPotentialSdkResolversManifests(root, new MockElementLocation("file"));
+
+                resolversManifestsFound.Count.ShouldBe(1);
+                resolversManifestsFound.First().Path.ShouldBe(assemblyToLoad);
+                resolversManifestsFound.First().NamePattern.ShouldBe("1.*");
+            }
+        }
+
+        [Fact]
         public void SdkResolverLoaderErrorsWithInvalidManifestFile()
         {
             using (var env = TestEnvironment.Create(_output))
@@ -432,7 +459,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 return base.FindPotentialSdkResolvers(rootFolder, location);
             }
 
-            protected internal override void LoadResolvers(string resolverPath, LoggingContext loggingContext, ElementLocation location, List<SdkResolver> resolvers)
+            protected override void LoadResolvers(string resolverPath, LoggingContext loggingContext, ElementLocation location, List<SdkResolver> resolvers)
             {
                 if (LoadResolversAction != null)
                 {

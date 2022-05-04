@@ -129,8 +129,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             if (matchingResolversManifests.Count == 0)
             {
-                // No resolvers apply. This should not happen: we always have the generic default resolver.
-                return new SdkResult(sdk, null, null);
+                // No resolvers apply.
+                throw new NotImplementedException();
+                // return new SdkResult(sdk, null, null);
             }
 
             int patternMaxLength = matchingResolversManifests[0].NamePattern.Length;
@@ -152,25 +153,21 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             {
                 return sdkResult;
             }
-            else
-            {
-                // Fallback. The most specific resolvers should be able to resolve the sdk. If this did not happen, let's use all other resovers.
-                resolvers = GetResolvers(_resolversRegistry, loggingContext, sdkReferenceLocation).ToList().Except(resolvers).ToList();
-                TryResolveSdkUsingSpecifiedResolvers(
-                    resolvers,
-                    submissionId,
-                    sdk,
-                    loggingContext,
-                    sdkReferenceLocation,
-                    solutionPath,
-                    projectPath,
-                    interactive,
-                    isRunningInVisualStudio,
-                    out sdkResult);
-                return sdkResult;
-            }
 
-            throw new NotImplementedException();
+            // Fallback. The most specific resolvers should be able to resolve the sdk. If this did not happen, let's use all other resovers.
+            resolvers = GetResolvers(_resolversRegistry, loggingContext, sdkReferenceLocation).ToList().Except(resolvers).ToList();
+            TryResolveSdkUsingSpecifiedResolvers(
+                resolvers,
+                submissionId,
+                sdk,
+                loggingContext,
+                sdkReferenceLocation,
+                solutionPath,
+                projectPath,
+                interactive,
+                isRunningInVisualStudio,
+                out sdkResult);
+            return sdkResult;
         }
 
         private List<SdkResolver> GetResolvers(IList<SdkResolverManifest> resolversManifests, LoggingContext loggingContext, ElementLocation sdkReferenceLocation)
@@ -317,8 +314,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 _sdkResolverLoader = resolverLoader;
             }
 
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_3)) {
-                if (resolvers != null)
+            _resolversRegistry = null;
+            _resolversDict = null;
+            _resolversList = null;
+
+            if (resolvers != null)
+            {
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_3))
                 {
                     _resolversRegistry = new List<SdkResolverManifest>();
                     _resolversDict = new Dictionary<SdkResolverManifest, IList<SdkResolver>>();
@@ -326,10 +328,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     _resolversRegistry.Add(sdkResolverManifest);
                     _resolversDict[sdkResolverManifest] = resolvers;
                 }
-            }
-            else
-            {
-                _resolversList = resolvers;
+                else
+                {
+                    _resolversList = resolvers;
+                }
             }
         }
 
