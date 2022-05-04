@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests
                 _outputHelper.WriteLine($"Building project {projFile}");
 
                 var executionOutput = useDesktopMSBuild
-                    ? RunnerUtilities.RunProcessAndGetOutput("msbuild", projFile, out successfulExit, out _,
+                    ? RunnerUtilities.RunProcessAndGetOutput("msbuild", projFile, out successfulExit,
                         shellExecute: true, outputHelper: _outputHelper)
                     : RunnerUtilities.ExecMSBuild(projFile, out successfulExit);
 
