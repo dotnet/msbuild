@@ -32,31 +32,31 @@
     </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Ref" Version="6.0.6">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
-      <Sha>441e2988976b7e102c5182b274f13559625c13f6</Sha>
+      <Sha>569d8e3cf66bbc7b579612f90133dafc9cd708ee</Sha>
     </Dependency>
-    <Dependency Name="VS.Redist.Common.NetCore.SharedFramework.x64.6.0" Version="6.0.6-servicing.22253.12">
+    <Dependency Name="VS.Redist.Common.NetCore.SharedFramework.x64.6.0" Version="6.0.6-servicing.22254.5">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
-      <Sha>441e2988976b7e102c5182b274f13559625c13f6</Sha>
+      <Sha>569d8e3cf66bbc7b579612f90133dafc9cd708ee</Sha>
     </Dependency>
-    <Dependency Name="VS.Redist.Common.NetCore.TargetingPack.x64.6.0" Version="6.0.6-servicing.22253.12">
+    <Dependency Name="VS.Redist.Common.NetCore.TargetingPack.x64.6.0" Version="6.0.6-servicing.22254.5">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
-      <Sha>441e2988976b7e102c5182b274f13559625c13f6</Sha>
+      <Sha>569d8e3cf66bbc7b579612f90133dafc9cd708ee</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Runtime.win-x64" Version="6.0.6">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
-      <Sha>441e2988976b7e102c5182b274f13559625c13f6</Sha>
+      <Sha>569d8e3cf66bbc7b579612f90133dafc9cd708ee</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Host.win-x64" Version="6.0.6">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
-      <Sha>441e2988976b7e102c5182b274f13559625c13f6</Sha>
+      <Sha>569d8e3cf66bbc7b579612f90133dafc9cd708ee</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.Platforms" Version="6.0.3">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
       <Sha>be98e88c760526452df94ef452fff4602fb5bded</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.HostModel" Version="6.0.6-servicing.22253.12">
+    <Dependency Name="Microsoft.NET.HostModel" Version="6.0.6-servicing.22254.5">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
-      <Sha>441e2988976b7e102c5182b274f13559625c13f6</Sha>
+      <Sha>569d8e3cf66bbc7b579612f90133dafc9cd708ee</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.DependencyModel" Version="6.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
@@ -64,7 +64,7 @@
     </Dependency>
     <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="6.0.6">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
-      <Sha>441e2988976b7e102c5182b274f13559625c13f6</Sha>
+      <Sha>569d8e3cf66bbc7b579612f90133dafc9cd708ee</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Build" Version="17.0.0">
       <Uri>https://github.com/dotnet/msbuild</Uri>
