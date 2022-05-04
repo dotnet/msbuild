@@ -116,10 +116,10 @@
         <Destination>r</Destination>
       </HelixCorrelationPayload>
 
-      <HelixCorrelationPayload Condition="$([MSBuild]::IsOSPlatform(`Windows`))" Include="SDKTestPackages.zip">
+      <HelixCorrelationPayload Condition="$([MSBuild]::IsOSPlatform(`Windows`))" Include="SDKTestPackages.System.zip">
         <PayloadDirectory>$(TestDotnetRoot)</PayloadDirectory>
         <Destination>.nuget</Destination>
-        <Uri>https://netcorenativeassets.blob.core.windows.net/resource-packages/external/any/sdk-test-assets/SDKTestPackages.zip</Uri>
+        <Uri>https://netcorenativeassets.blob.core.windows.net/resource-packages/external/any/sdk-test-assets/SDKTestPackages.System.zip</Uri>
       </HelixCorrelationPayload>
     </ItemGroup>
   </Target>
