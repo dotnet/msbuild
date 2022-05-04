@@ -51,7 +51,7 @@ GlobalSection(SolutionProperties) = preSolution
 EndGlobalSection
 EndGlobal
 ");
-            RunnerUtilities.RunProcessAndGetOutput(Path.Combine(msbuildExePath, "nuget", "NuGet.exe"), "restore " + sln.Path + " -MSBuildPath \"" + msbuildExePath + "\"", out bool success, out _, outputHelper: _output);
+            RunnerUtilities.RunProcessAndGetOutput(Path.Combine(msbuildExePath, "nuget", "NuGet.exe"), "restore " + sln.Path + " -MSBuildPath \"" + msbuildExePath + "\"", out bool success, outputHelper: _output);
             success.ShouldBeTrue();
         }
 #endif
