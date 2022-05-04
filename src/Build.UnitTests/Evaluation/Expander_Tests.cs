@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Xml;
 
@@ -1712,8 +1713,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
            );
         }
-#if FEATURE_WIN32_REGISTRY
+
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void RegistryPropertyString()
         {
             try
@@ -1735,6 +1738,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void RegistryPropertyBinary()
         {
             try
@@ -1759,6 +1764,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void RegistryPropertyDWord()
         {
             try
@@ -1780,6 +1787,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void RegistryPropertyExpandString()
         {
             try
@@ -1802,6 +1811,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void RegistryPropertyQWord()
         {
             try
@@ -1823,6 +1834,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void RegistryPropertyMultiString()
         {
             try
@@ -1842,7 +1855,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Registry.CurrentUser.DeleteSubKey(@"Software\Microsoft\MSBuild_test");
             }
         }
-#endif
 
         [Fact]
         public void TestItemSpecModiferEscaping()
@@ -3901,12 +3913,10 @@ $(
             }
 #endif
 
-#if FEATURE_WIN32_REGISTRY
             if (NativeMethodsShared.IsWindows)
             {
                 errorTests.Add("$(Registry:X)");
             }
-#endif
 
             if (!NativeMethodsShared.IsWindows)
             {
