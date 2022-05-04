@@ -109,11 +109,11 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/templating -->
-    <MicrosoftTemplateEngineCliPackageVersion>6.0.105-servicing.22214.6</MicrosoftTemplateEngineCliPackageVersion>
-    <MicrosoftTemplateEngineAbstractionsPackageVersion>6.0.105</MicrosoftTemplateEngineAbstractionsPackageVersion>
-    <MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>6.0.105</MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>
-    <MicrosoftTemplateEngineUtilsPackageVersion>6.0.105</MicrosoftTemplateEngineUtilsPackageVersion>
-    <MicrosoftTemplateSearchCommonPackageVersion>6.0.105</MicrosoftTemplateSearchCommonPackageVersion>
+    <MicrosoftTemplateEngineCliPackageVersion>6.0.106-servicing.22254.5</MicrosoftTemplateEngineCliPackageVersion>
+    <MicrosoftTemplateEngineAbstractionsPackageVersion>6.0.106</MicrosoftTemplateEngineAbstractionsPackageVersion>
+    <MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>6.0.106</MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>
+    <MicrosoftTemplateEngineUtilsPackageVersion>6.0.106</MicrosoftTemplateEngineUtilsPackageVersion>
+    <MicrosoftTemplateSearchCommonPackageVersion>6.0.106</MicrosoftTemplateSearchCommonPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/Microsoft/visualfsharp -->
