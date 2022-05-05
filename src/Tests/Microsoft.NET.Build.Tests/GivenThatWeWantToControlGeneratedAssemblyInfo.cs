@@ -14,6 +14,7 @@ using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using System.Xml.Linq;
 using Xunit.Sdk;
+using System.Reflection;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -758,5 +759,58 @@ namespace Microsoft.NET.Build.Tests
                 AssemblyInfo.Get(assemblyPath).ContainsKey("AssemblyMetadataAttribute").Should().Be(false);
             }
         }
+
+        [Theory]
+        [InlineData("netcoreapp3.1", ".NET Core 3.1")]
+        [InlineData("netcoreapp2.1", ".NET Core 2.1")]
+        [InlineData("netstandard2.1", ".NET Standard 2.1")]
+        [InlineData("net5.0", ".NET 5.0")]
+        public void CheckTargetFrameworkDisplayName(string targetFrameworkVersion, string expectedVersion)
+        {
+            TestProject libraryProject = new TestProject()
+            {
+                Name = "LibraryProject",
+                TargetFrameworks = targetFrameworkVersion
+            };
+            libraryProject.SourceFiles["Class.cs"] = @"
+public class LibraryClass{}
+";
+
+            TestProject testProject = new TestProject()
+            {
+                Name = "HelloWorld",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true
+            };
+
+            testProject.ReferencedProjects.Add(libraryProject);
+            testProject.SourceFiles["Program.cs"] = @"
+using System;
+using System.Reflection;
+using System.Runtime.Versioning;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        var str = typeof(LibraryClass).Assembly.GetCustomAttribute<TargetFrameworkAttribute>().FrameworkDisplayName;
+        Console.WriteLine(str);
+    }
+}";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.WithWorkingDirectory(testAsset.Path)
+                .Execute()
+                .Should()
+                .Pass();
+
+            var result = new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(Path.Combine(testAsset.Path, testProject.Name))
+                .Execute();
+            result.Should().Pass();
+            result.StdOut.Should().Contain(expectedVersion);
+
+        }
+
     }
 }
