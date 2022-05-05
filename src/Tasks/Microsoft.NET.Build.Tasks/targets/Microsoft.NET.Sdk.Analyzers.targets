@@ -15,11 +15,19 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Analysis level is a single property that can be used to control both the compiler warning waves
          and enable .NET analyzers. Valid values are 'none', 'latest', 'preview', or a version number  -->
 
-    <!-- If not specified and greater than or equal to .NET 5, default the AnalysisLevel to latest -->
+    <!-- If not specified and equal to the current most-recent TFM, default the AnalysisLevel to latest.
+         Otherwise, default AnalysisLevel to the TFM. We set 'latest' indirectly here because the
+         next chunk of logic handles user-defined prefix/suffix, which can also set 'latest', so
+         we choose to only do the 'latest' => actual value translation one time. -->
+    <_AnalysisLevelWasSet Condition="'$(AnalysisLevel)' == ''">true</_AnalysisLevelWasSet>
+    <!-- TODO: a test that automatically validates this would be great -->
+    <_LatestAnalysisLevel>7.0</_LatestAnalysisLevel>
     <AnalysisLevel Condition="'$(AnalysisLevel)' == '' And
                               '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
-                              $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">latest</AnalysisLevel>
-
+                              $([MSBuild]::VersionEquals($(_TargetFrameworkVersionWithoutV), '$(_LatestAnalysisLevel)'))">latest</AnalysisLevel>
+    <AnalysisLevel Condition="'$(AnalysisLevel)' == '' And
+                              '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
+                              $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">$(_TargetFrameworkVersionWithoutV)</AnalysisLevel>
 
     <!-- AnalysisLevel can also contain compound values with a prefix and suffix separated by a '-' character.
          The prefix indicates the core AnalysisLevel and the suffix indicates the bucket of
@@ -35,7 +43,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- EffectiveAnalysisLevel is used to differentiate from user specified strings (such as 'none')
          and an implied numerical option (such as '4')-->
     <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'none' or '$(AnalysisLevelPrefix)' == 'none'">4.0</EffectiveAnalysisLevel>
-    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'latest' or '$(AnalysisLevelPrefix)' == 'latest'">7.0</EffectiveAnalysisLevel>
+    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'latest' or '$(AnalysisLevelPrefix)' == 'latest'">$(_LatestAnalysisLevel)</EffectiveAnalysisLevel>
     <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'preview' or '$(AnalysisLevelPrefix)' == 'preview'">8.0</EffectiveAnalysisLevel>
 
     <!-- Set EffectiveAnalysisLevel to the value of AnalysisLevel if it is a version number -->
