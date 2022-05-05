@@ -19,9 +19,12 @@ Copyright (c) .NET Foundation. All rights reserved.
          Otherwise, default AnalysisLevel to the TFM. We set 'latest' indirectly here because the
          next chunk of logic handles user-defined prefix/suffix, which can also set 'latest', so
          we choose to only do the 'latest' => actual value translation one time. -->
-    <_AnalysisLevelWasSet Condition="'$(AnalysisLevel)' == ''">true</_AnalysisLevelWasSet>
-    <!-- TODO: a test that automatically validates this would be great -->
+
+    <_NoneAnalysisLevel>4.0</_NoneAnalysisLevel>
+    <!-- When the base TFM of the platform bumps, these must be bumped as well. Preview should always be the 'next' TFM. -->
     <_LatestAnalysisLevel>7.0</_LatestAnalysisLevel>
+    <_PreviewAnalysisLevel>8.0</_PreviewAnalysisLevel>
+
     <AnalysisLevel Condition="'$(AnalysisLevel)' == '' And
                               '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
                               $([MSBuild]::VersionEquals($(_TargetFrameworkVersionWithoutV), '$(_LatestAnalysisLevel)'))">latest</AnalysisLevel>
@@ -42,9 +45,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- EffectiveAnalysisLevel is used to differentiate from user specified strings (such as 'none')
          and an implied numerical option (such as '4')-->
-    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'none' or '$(AnalysisLevelPrefix)' == 'none'">4.0</EffectiveAnalysisLevel>
+    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'none' or '$(AnalysisLevelPrefix)' == 'none'">$(_NoneAnalysisLevel)</EffectiveAnalysisLevel>
     <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'latest' or '$(AnalysisLevelPrefix)' == 'latest'">$(_LatestAnalysisLevel)</EffectiveAnalysisLevel>
-    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'preview' or '$(AnalysisLevelPrefix)' == 'preview'">8.0</EffectiveAnalysisLevel>
+    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'preview' or '$(AnalysisLevelPrefix)' == 'preview'">$(PreviewAnalysisLevel)</EffectiveAnalysisLevel>
 
     <!-- Set EffectiveAnalysisLevel to the value of AnalysisLevel if it is a version number -->
     <EffectiveAnalysisLevel Condition="'$(EffectiveAnalysisLevel)' == '' And
