@@ -3509,8 +3509,11 @@ namespace Microsoft.Build.Evaluation
 
                     // If the result of the function call is a string, then we need to escape the result
                     // so that we maintain the "engine contains escaped data" state.
-                    // The exception is that the user is explicitly calling MSBuild::Unescape or MSBuild::Escape
-                    if (functionResult is string functionResultString && !String.Equals("Unescape", _methodMethodName, StringComparison.OrdinalIgnoreCase) && !String.Equals("Escape", _methodMethodName, StringComparison.OrdinalIgnoreCase))
+                    // The exception is that the user is explicitly calling MSBuild::Unescape, MSBuild::Escape, or ConvertFromBase64
+                    if (functionResult is string functionResultString &&
+                        !String.Equals("Unescape", _methodMethodName, StringComparison.OrdinalIgnoreCase) &&
+                        !String.Equals("Escape", _methodMethodName, StringComparison.OrdinalIgnoreCase) &&
+                        !String.Equals("ConvertFromBase64", _methodMethodName, StringComparison.OrdinalIgnoreCase))
                     {
                         functionResult = EscapingUtilities.Escape(functionResultString);
                     }
@@ -4071,6 +4074,22 @@ namespace Microsoft.Build.Evaluation
                             if (TryGetArgs(args, out string arg1, out int arg2))
                             {
                                 returnVal = IntrinsicFunctions.GetTargetPlatformVersion(arg1, arg2);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.ConvertToBase64), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.ConvertToBase64(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.ConvertFromBase64), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.ConvertFromBase64(arg0);
                                 return true;
                             }
                         }
