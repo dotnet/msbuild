@@ -107,7 +107,7 @@ namespace Microsoft.Build.Shared
 
                         if (loadedType.LoadedAssembly != null)
                         {
-                            taskAppDomain.Load(loadedType.LoadedAssembly.GetName());
+                            taskAppDomain.Load(loadedType.LoadedAssemblyName);
                         }
 
                         // Hook up last minute dumping of any exceptions 
@@ -176,13 +176,9 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static Assembly AssemblyResolver(object sender, ResolveEventArgs args)
         {
-            if ((s_resolverLoadedType?.LoadedAssembly != null))
+            if (args.Name.Equals(s_resolverLoadedType.LoadedAssemblyName.FullName, StringComparison.OrdinalIgnoreCase))
             {
-                // Match the name being requested by the resolver with the FullName of the assembly we have loaded
-                if (args.Name.Equals(s_resolverLoadedType.LoadedAssembly.FullName, StringComparison.Ordinal))
-                {
-                    return s_resolverLoadedType.LoadedAssembly;
-                }
+                return s_resolverLoadedType.LoadedAssembly ?? Assembly.Load(s_resolverLoadedType.Path);
             }
 
             return null;

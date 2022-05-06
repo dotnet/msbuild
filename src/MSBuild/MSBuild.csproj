@@ -76,6 +76,7 @@
       <Link>FileUtilities.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Build\Instance\ReflectableTaskPropertyInfo.cs" />
     <Compile Include="..\Shared\FileUtilitiesRegex.cs">
       <Link>FileUtilitiesRegex.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

@@ -126,6 +126,7 @@ namespace Microsoft.Build.Shared
         /// Loads the specified type if it exists in the given assembly. If the type name is fully qualified, then a match (if
         /// any) is unambiguous; otherwise, if there are multiple types with the same name in different namespaces, the first type
         /// found will be returned.
+        /// The unusued bool is to match the signature of the Shared copy of TypeLoader.
         /// </summary>
         internal LoadedType Load
         (
@@ -285,7 +286,7 @@ namespace Microsoft.Build.Shared
                     return null;
                 });
 
-                return type != null ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly) : null;
+                return type != null ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly ?? type.Assembly) : null;
             }
 
             /// <summary>
