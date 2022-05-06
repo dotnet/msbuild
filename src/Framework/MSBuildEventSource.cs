@@ -599,6 +599,18 @@ namespace Microsoft.Build.Eventing
             WriteEvent(80, submissionId, sdkName, solutionPath, projectPath, success, wasResultCached);
         }
 
+        [Event(81, Keywords = Keywords.All)]
+        public void MSBuildServerBuildStart(string commandLine)
+        {
+            WriteEvent(81, commandLine);
+        }
+
+        [Event(82, Keywords = Keywords.All)]
+        public void MSBuildServerBuildStop(string commandLine)
+        {
+            WriteEvent(82, commandLine);
+        }
+
         #endregion
     }
 }
