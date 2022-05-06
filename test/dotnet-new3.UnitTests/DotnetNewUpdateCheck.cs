@@ -75,7 +75,6 @@ namespace Dotnet_new3.IntegrationTests
                 .Execute()
                 .Should()
                 .Fail()
-                .And.NotHaveStdOut()
                 .And.HaveStdErr($"Failed to check update for {nugetFullName}: the package is not available in configured NuGet feeds.");
         }
 
@@ -108,7 +107,7 @@ namespace Dotnet_new3.IntegrationTests
                 .ExitWith(0)
                 .And
                 .NotHaveStdErr()
-                .And.HaveStdOut("All template packages are up-to-date.");
+                .And.HaveStdOutContaining("All template packages are up-to-date.");
         }
 
         [Fact]
@@ -212,6 +211,41 @@ namespace Dotnet_new3.IntegrationTests
                   .And.NotHaveStdOutMatching("An update for template package 'Microsoft.DotNet.Common.ProjectTemplates.5.0::([\\d\\.a-z-])+' is available")
                   .And.NotHaveStdOutContaining("To update the package use:")
                   .And.NotHaveStdOutMatching("   dotnet-new3 new3 install Microsoft.DotNet.Common.ProjectTemplates.5.0::([\\d\\.a-z-])+");
+        }
+
+        [Fact]
+        public void CanShowDeprecationMessage_WhenLegacyCommandIsUsed()
+        {
+            const string deprecationMessage =
+@"Warning: use of 'dotnet-new3 new3 --update-check' is deprecated. Use 'dotnet-new3 new3 update --check-only' instead.
+For more information, run: 
+   dotnet-new3 new3 update -h";
+
+            var home = TestUtils.CreateTemporaryFolder("Home");
+            var commandResult = new DotnetNewCommand(_log, "--update-check")
+                .WithCustomHive(home)
+                .Execute();
+
+            commandResult.Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr();
+
+            Assert.StartsWith(deprecationMessage, commandResult.StdOut);
+        }
+
+        [Fact]
+        public void DoNotShowDeprecationMessage_WhenNewCommandIsUsed()
+        {
+            var home = TestUtils.CreateTemporaryFolder("Home");
+            var commandResult = new DotnetNewCommand(_log, "update", "--check-only")
+                .WithCustomHive(home)
+                .Execute();
+
+            commandResult.Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.NotHaveStdOutContaining("Warning")
+                .And.NotHaveStdOutContaining("deprecated");
         }
     }
 }

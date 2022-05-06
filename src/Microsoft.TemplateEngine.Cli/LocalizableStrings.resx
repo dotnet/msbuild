@@ -793,4 +793,12 @@ The header is followed by the list of parameters and their errors (might be seve
     <value>To use built-in template package, uninstall manually installed template package using:</value>
     <comment>followed by command to uninstall package</comment>
   </data>
+  <data name="Commands_Warning_DeprecatedCommand" xml:space="preserve">
+    <value>Warning: use of '{0}' is deprecated. Use '{1}' instead.</value>
+    <comment>{0} - deprecated command ('dotnet new --install'); {1} - new command ('dotnet new install).</comment>
+  </data>
+  <data name="Commands_Warning_DeprecatedCommand_Info" xml:space="preserve">
+    <value>For more information, run: </value>
+    <comment>followed by command example (at new line, without quotes)</comment>
+  </data>
 </root>

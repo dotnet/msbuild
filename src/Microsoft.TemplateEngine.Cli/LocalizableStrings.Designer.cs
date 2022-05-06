@@ -743,6 +743,24 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Warning: use of &apos;{0}&apos; is deprecated. Use &apos;{1}&apos; instead..
+        /// </summary>
+        internal static string Commands_Warning_DeprecatedCommand {
+            get {
+                return ResourceManager.GetString("Commands_Warning_DeprecatedCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to For more information, run: .
+        /// </summary>
+        internal static string Commands_Warning_DeprecatedCommand_Info {
+            get {
+                return ResourceManager.GetString("Commands_Warning_DeprecatedCommand_Info", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Command succeeded..
         /// </summary>
         internal static string CommandSucceeded {

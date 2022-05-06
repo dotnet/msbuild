@@ -89,7 +89,7 @@ namespace Dotnet_new3.IntegrationTests
                 .ExitWith(0)
                 .And
                 .NotHaveStdErr()
-                .And.HaveStdOut($"Currently installed items:{Environment.NewLine}(No Items)");
+                .And.HaveStdOutContaining($"Currently installed items:{Environment.NewLine}(No Items)");
         }
 
         [Theory]
@@ -121,7 +121,7 @@ namespace Dotnet_new3.IntegrationTests
                 .ExitWith(0)
                 .And
                 .NotHaveStdErr()
-                .And.HaveStdOut($"Success: {templateLocation} was uninstalled.");
+                .And.HaveStdOutContaining($"Success: {templateLocation} was uninstalled.");
 
             new DotnetNewCommand(_log, commandName)
                 .WithCustomHive(home)
@@ -131,7 +131,7 @@ namespace Dotnet_new3.IntegrationTests
                 .ExitWith(0)
                 .And
                 .NotHaveStdErr()
-                .And.HaveStdOut($"Currently installed items:{Environment.NewLine}(No Items)");
+                .And.HaveStdOutContaining($"Currently installed items:{Environment.NewLine}(No Items)");
 
             Assert.True(Directory.Exists(templateLocation));
         }
@@ -184,7 +184,7 @@ namespace Dotnet_new3.IntegrationTests
                 .ExitWith(0)
                 .And
                 .NotHaveStdErr()
-                .And.HaveStdOut($"Success: Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0 was uninstalled.");
+                .And.HaveStdOutContaining($"Success: Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0 was uninstalled.");
 
             new DotnetNewCommand(_log, commandName)
                 .WithCustomHive(home)
@@ -194,7 +194,7 @@ namespace Dotnet_new3.IntegrationTests
                 .ExitWith(0)
                 .And
                 .NotHaveStdErr()
-                .And.HaveStdOut($"Currently installed items:{Environment.NewLine}(No Items)");
+                .And.HaveStdOutContaining($"Currently installed items:{Environment.NewLine}(No Items)");
 
             Assert.False(File.Exists(Path.Combine(home, "packages", "Microsoft.DotNet.Web.ProjectTemplates.5.0.5.0.0.nupkg")));
         }
@@ -507,6 +507,43 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining($"         dotnet-new3 new3 uninstall '{testFolderWithSpace}'")
                 .And.HaveStdOutContaining($"Basic VB (basic) VB")
                 .And.HaveStdOutContaining($"         dotnet-new3 new3 uninstall {testFolderWithoutSpace}");
+        }
+
+        [Theory]
+        [InlineData("-u")]
+        [InlineData("--uninstall")]
+        public void CanShowDeprecationMessage_WhenLegacyCommandIsUsed(string commandName)
+        {
+            const string deprecationMessage =
+@"Warning: use of 'dotnet-new3 new3 --uninstall' is deprecated. Use 'dotnet-new3 new3 uninstall' instead.
+For more information, run: 
+   dotnet-new3 new3 uninstall -h";
+
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            var commandResult = new DotnetNewCommand(_log, commandName)
+                .WithCustomHive(home)
+                .Execute();
+
+            commandResult.Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr();
+
+            Assert.StartsWith(deprecationMessage, commandResult.StdOut);
+        }
+
+        [Fact]
+        public void DoNotShowDeprecationMessage_WhenNewCommandIsUsed()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            var commandResult = new DotnetNewCommand(_log, "uninstall")
+                .WithCustomHive(home)
+                .Execute();
+
+            commandResult.Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.NotHaveStdOutContaining("Warning")
+                .And.NotHaveStdOutContaining("deprecated");
         }
     }
 }

@@ -28,22 +28,35 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             var commandResult = parseResult.CommandResult;
 
+            //check for parent commands first
             while (commandResult?.Command != null && commandResult.Command is not T)
             {
                 commandResult = (commandResult.Parent as CommandResult);
             }
-            if (commandResult == null || commandResult.Command is not T typedCommand)
+
+            if (commandResult?.Command is T typedCommand)
             {
-                throw new Exception($"Command structure is not correct: {nameof(T)} is not found.");
+                List<string> parentCommands = new List<string>();
+                while (commandResult?.Command != null)
+                {
+                    parentCommands.Add(commandResult.Command.Name);
+                    commandResult = (commandResult.Parent as CommandResult);
+                }
+                parentCommands.Reverse();
+                return new Example(typedCommand, parentCommands.ToArray());
             }
-            List<string> parentCommands = new List<string>();
-            while (commandResult?.Command != null)
+
+            // if the command is not found in parents of command result, try to search it in the whole command tree
+            Command siblingCommand = SearchForSiblingCommand<T>(parseResult.CommandResult.Command);
+            List<string> parentCommands2 = new List<string>();
+            Command? nextCommand = siblingCommand;
+            while (nextCommand != null)
             {
-                parentCommands.Add(commandResult.Command.Name);
-                commandResult = (commandResult.Parent as CommandResult);
+                parentCommands2.Add(nextCommand.Name);
+                nextCommand = nextCommand.Parents.OfType<Command>().FirstOrDefault();
             }
-            parentCommands.Reverse();
-            return new Example(typedCommand, parentCommands.ToArray());
+            parentCommands2.Reverse();
+            return new Example(siblingCommand, parentCommands2.ToArray());
         }
 
         internal Example WithOption(Option option, params string[] args)
@@ -112,6 +125,34 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             _commandParts.Add(Constants.KnownHelpAliases.First());
             return this;
+        }
+
+        private static T SearchForSiblingCommand<T>(Command currentCommand) where T : Command
+        {
+            Command? next = currentCommand;
+            Command root = currentCommand;
+
+            while (next != null)
+            {
+                root = next;
+                next = next?.Parents.OfType<Command>().FirstOrDefault();
+            }
+
+            Queue<Command> probes = new Queue<Command>();
+            probes.Enqueue(root);
+            while (probes.Count > 0)
+            {
+                Command current = probes.Dequeue();
+                if (current is T typedCommand)
+                {
+                    return typedCommand;
+                }
+                foreach (var child in current.Children.OfType<Command>())
+                {
+                    probes.Enqueue(child);
+                }
+            }
+            throw new Exception($"Command structure is not correct: {nameof(T)} is not found.");
         }
     }
 

@@ -20,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.AddOption(CheckOnlyOption);
         }
 
-        internal Option<bool> CheckOnlyOption { get; } = new(new[] { "--check-only", "--dry-run" })
+        internal static Option<bool> CheckOnlyOption { get; } = new(new[] { "--check-only", "--dry-run" })
         {
             Description = SymbolStrings.Command_Update_Option_CheckOnly
         };

@@ -62,8 +62,7 @@ namespace Dotnet_new3.IntegrationTests
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .Execute();
 
-            commandResult.Should().Fail()
-                .And.NotHaveStdOut();
+            commandResult.Should().Fail();
 
             return Verifier.Verify(commandResult.StdErr, _verifySettings)
                 .UseTextForParameters("common")
@@ -79,7 +78,6 @@ namespace Dotnet_new3.IntegrationTests
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .Execute()
                 .Should().Fail()
-                .And.NotHaveStdOut()
                 .And.HaveStdErrContaining("Search failed: template name is too short, minimum 2 characters are required.");
         }
 
@@ -774,6 +772,39 @@ namespace Dotnet_new3.IntegrationTests
                     .NotHaveStdErrContaining($"Unrecognized command or argument '{arg}'")
                     .And.NotHaveStdErrContaining($"Unrecognized command or argument(s): '{arg}'");
             }
+        }
+
+        [Fact]
+        public void CanShowDeprecationMessage_WhenLegacyCommandIsUsed()
+        {
+            const string deprecationMessage =
+@"Warning: use of 'dotnet-new3 new3 --search' is deprecated. Use 'dotnet-new3 new3 search' instead.
+For more information, run: 
+   dotnet-new3 new3 search -h";
+
+            var commandResult = new DotnetNewCommand(_log, "--search", "console")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute();
+
+            commandResult.Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr();
+
+            Assert.StartsWith(deprecationMessage, commandResult.StdOut);
+        }
+
+        [Fact]
+        public void DoNotShowDeprecationMessage_WhenNewCommandIsUsed()
+        {
+            var commandResult = new DotnetNewCommand(_log, "search", "console")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute();
+
+            commandResult.Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.NotHaveStdOutContaining("Warning")
+                .And.NotHaveStdOutContaining("deprecated");
         }
 
         private static bool AllRowsContain(List<List<string>> tableOutput, string[] columnsNames, string value)

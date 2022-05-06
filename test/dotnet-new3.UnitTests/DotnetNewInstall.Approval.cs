@@ -67,5 +67,39 @@ namespace Dotnet_new3.IntegrationTests
                     output.ScrubByRegex("   Microsoft\\.DotNet\\.Common\\.ItemTemplates::[A-Za-z0-9.-]+", "   Microsoft.DotNet.Common.ItemTemplates::%VERSION%");
                 });
         }
+
+        [Theory]
+        [InlineData("-i")]
+        [InlineData("--install")]
+        public Task CanShowDeprecationMessage_WhenLegacyCommandIsUsed(string commandName)
+        {
+            var commandResult = new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Web.ItemTemplates::5.0.0")
+                .WithCustomHive()
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute();
+
+            commandResult
+                .Should()
+                .Pass();
+
+            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+                .UseTextForParameters("common")
+                .DisableRequireUniquePrefix();
+        }
+
+        [Fact]
+        public Task DoNotShowDeprecationMessage_WhenNewCommandIsUsed()
+        {
+            var commandResult = new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Web.ItemTemplates::5.0.0")
+                .WithCustomHive()
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute();
+
+            commandResult
+                .Should()
+                .Pass();
+
+            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+        }
     }
 }

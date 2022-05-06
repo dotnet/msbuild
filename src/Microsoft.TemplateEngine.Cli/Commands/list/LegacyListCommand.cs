@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 
@@ -30,6 +31,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override Option GetFilterOption(FilterOptionDefinition def)
         {
             return ParentCommand.LegacyFilters[def];
+        }
+
+        protected override Task<NewCommandStatus> ExecuteAsync(ListCommandArgs args, IEngineEnvironmentSettings environmentSettings, ITelemetryLogger telemetryLogger, InvocationContext context)
+        {
+            PrintDeprecationMessage<LegacyListCommand, ListCommand>(args.ParseResult);
+            return base.ExecuteAsync(args, environmentSettings, telemetryLogger, context);
         }
 
         private void ValidateParentCommandArguments(CommandResult commandResult)

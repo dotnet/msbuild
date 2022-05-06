@@ -183,6 +183,25 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.AddOption(command.ColumnsOption);
         }
 
+        protected void PrintDeprecationMessage<TDepr, TNew>(ParseResult parseResult, Option? additionalOption = null) where TDepr : Command where TNew : Command
+        {
+            var newCommandExample = Example.For<TNew>(parseResult);
+            if (additionalOption != null)
+            {
+                newCommandExample.WithOption(additionalOption);
+            }
+
+            Reporter.Output.WriteLine(string.Format(
+             LocalizableStrings.Commands_Warning_DeprecatedCommand,
+             Example.For<TDepr>(parseResult),
+             newCommandExample).Yellow());
+
+            Reporter.Output.WriteLine(LocalizableStrings.Commands_Warning_DeprecatedCommand_Info.Yellow());
+            Reporter.Output.WriteCommand(Example.For<TNew>(parseResult).WithHelpOption().ToString().Yellow());
+            Reporter.Output.WriteLine();
+
+        }
+
         private static async Task HandleGlobalOptionsAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken)
         {
             HandleDebugAttach(args);

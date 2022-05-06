@@ -398,6 +398,16 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
         <target state="translated">Nerozpoznaný příkaz nebo argument(y): {0}.</target>
         <note>{0} - wrong token or comma-separated tokens (if multiple). Each token is enclosed with single quotes: 'token'.</note>
       </trans-unit>
+      <trans-unit id="Commands_Warning_DeprecatedCommand">
+        <source>Warning: use of '{0}' is deprecated. Use '{1}' instead.</source>
+        <target state="new">Warning: use of '{0}' is deprecated. Use '{1}' instead.</target>
+        <note>{0} - deprecated command ('dotnet new --install'); {1} - new command ('dotnet new install).</note>
+      </trans-unit>
+      <trans-unit id="Commands_Warning_DeprecatedCommand_Info">
+        <source>For more information, run: </source>
+        <target state="new">For more information, run: </target>
+        <note>followed by command example (at new line, without quotes)</note>
+      </trans-unit>
       <trans-unit id="ConfiguredValue">
         <source>Configured Value: {0}</source>
         <target state="translated">Nakonfigurovaná hodnota: {0}</target>

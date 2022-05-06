@@ -398,6 +398,16 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <target state="translated">Tanınmayan komut veya bağımsız değişken: {0}</target>
         <note>{0} - wrong token or comma-separated tokens (if multiple). Each token is enclosed with single quotes: 'token'.</note>
       </trans-unit>
+      <trans-unit id="Commands_Warning_DeprecatedCommand">
+        <source>Warning: use of '{0}' is deprecated. Use '{1}' instead.</source>
+        <target state="new">Warning: use of '{0}' is deprecated. Use '{1}' instead.</target>
+        <note>{0} - deprecated command ('dotnet new --install'); {1} - new command ('dotnet new install).</note>
+      </trans-unit>
+      <trans-unit id="Commands_Warning_DeprecatedCommand_Info">
+        <source>For more information, run: </source>
+        <target state="new">For more information, run: </target>
+        <note>followed by command example (at new line, without quotes)</note>
+      </trans-unit>
       <trans-unit id="ConfiguredValue">
         <source>Configured Value: {0}</source>
         <target state="translated">Yapılandırılan Değer: {0}</target>

@@ -3,20 +3,25 @@
 
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.TestHelper;
+using VerifyTests;
+using VerifyXunit;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Dotnet_new3.IntegrationTests
 {
-    public class DotnetNewList : IClassFixture<SharedHomeDirectory>
+    [UsesVerify]
+    public partial class DotnetNewList : IClassFixture<SharedHomeDirectory>, IClassFixture<VerifySettingsFixture>
     {
+        private readonly VerifySettings _verifySettings;
         private readonly SharedHomeDirectory _sharedHome;
         private readonly ITestOutputHelper _log;
 
-        public DotnetNewList(SharedHomeDirectory sharedHome, ITestOutputHelper log)
+        public DotnetNewList(SharedHomeDirectory sharedHome, VerifySettingsFixture verifySettings, ITestOutputHelper log)
         {
             _sharedHome = sharedHome;
             _log = log;
+            _verifySettings = verifySettings.Settings;
         }
 
         [Theory]

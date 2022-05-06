@@ -95,7 +95,42 @@ namespace Dotnet_new3.IntegrationTests
                 .ExitWith(0)
                 .And
                 .NotHaveStdErr()
-                .And.HaveStdOut("All template packages are up-to-date.");
+                .And.HaveStdOutContaining("All template packages are up-to-date.");
+        }
+
+        [Fact]
+        public void CanShowDeprecationMessage_WhenLegacyCommandIsUsed()
+        {
+            const string deprecationMessage =
+@"Warning: use of 'dotnet-new3 new3 --update-apply' is deprecated. Use 'dotnet-new3 new3 update' instead.
+For more information, run: 
+   dotnet-new3 new3 update -h";
+
+            var home = TestUtils.CreateTemporaryFolder("Home");
+            var commandResult = new DotnetNewCommand(_log, "--update-apply")
+                .WithCustomHive(home)
+                .Execute();
+
+            commandResult.Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr();
+
+            Assert.StartsWith(deprecationMessage, commandResult.StdOut);
+        }
+
+        [Fact]
+        public void DoNotShowDeprecationMessage_WhenNewCommandIsUsed()
+        {
+            var home = TestUtils.CreateTemporaryFolder("Home");
+            var commandResult = new DotnetNewCommand(_log, "update")
+                .WithCustomHive(home)
+                .Execute();
+
+            commandResult.Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.NotHaveStdOutContaining("Warning")
+                .And.NotHaveStdOutContaining("deprecated");
         }
     }
 }
