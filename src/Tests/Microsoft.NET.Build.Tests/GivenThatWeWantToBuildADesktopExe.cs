@@ -162,9 +162,9 @@ namespace Microsoft.NET.Build.Tests
         // implicit rid with option to append rid to output path on -> do not append (never append implicit rid irrespective of option)
         [InlineData("implicitOn", "", true, false)]
         // explicit  rid with option to append rid to output path off -> do not append
-        [InlineData("explicitOff", "win7-x86", false, false)]
+        [InlineData("explicitOff", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86", false, false)]
         // explicit rid with option to append rid to output path on -> append
-        [InlineData("explicitOn", "win7-x64", true, true)]
+        [InlineData("explicitOn", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64", true, true)]
         public void It_appends_rid_to_outdir_correctly(string identifier, string rid, bool useAppendOption, bool shouldAppend)
         {
             foreach (bool multiTarget in new[] { false, true })
@@ -206,11 +206,11 @@ namespace Microsoft.NET.Build.Tests
                         expectedOutput = "Native code was not used (MSIL)";
                         break;
 
-                    case "win7-x86":
+                    case $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86":
                         expectedOutput = "Native code was not used (X86)";
                         break;
 
-                    case "win7-x64":
+                    case $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64":
                         expectedOutput = "Native code was not used (Amd64)";
                         break;
 
@@ -241,10 +241,10 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("win8-x86-aot", "x86")]
         [InlineData("win7-x64", "x64")]
         [InlineData("win8-x64-aot", "x64")]
-        [InlineData("win10-arm", "arm")]
-        [InlineData("win10-arm-aot", "arm")]
-        [InlineData("win10-arm64", "arm64")]
-        [InlineData("win10-arm64-aot", "arm64")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-arm", "arm")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-arm-aot", "arm")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-arm64", "arm64")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-arm64-aot", "arm64")]
         // cpu architecture is never expected at the front
         [InlineData("x86-something", "AnyCPU")]
         [InlineData("x64-something", "AnyCPU")]
@@ -280,7 +280,7 @@ namespace Microsoft.NET.Build.Tests
                 "net46", "PlatformTarget", GetValuesCommand.ValueType.Property);
 
             getValuesCommand
-                .Execute($"/p:RuntimeIdentifier=win7-x86", "/p:PlatformTarget=x64")
+                .Execute($"/p:RuntimeIdentifier={ToolsetInfo.LatestWinRuntimeIdentifier}-x86", "/p:PlatformTarget=x64")
                 .Should()
                 .Pass();
 
@@ -657,7 +657,7 @@ class Program
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("net452", runtimeIdentifier: "win7-x86");
+            var outputDirectory = buildCommand.GetOutputDirectory("net452", runtimeIdentifier: $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86");
 
             outputDirectory.Should().HaveFiles(new[] {
                 "DesktopNeedsBindingRedirects.exe",
@@ -694,7 +694,7 @@ class Program
                 .Pass();
 
             FileInfo outputfile = buildCommand
-                .GetIntermediateDirectory("net452", runtimeIdentifier: "win7-x86")
+                .GetIntermediateDirectory("net452", runtimeIdentifier: $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86")
                 .GetFiles("DesktopNeedsBindingRedirects.exe.withSupportedRuntime.config").Single();
 
             DateTime firstBuildWriteTime = File.GetLastWriteTimeUtc(outputfile.FullName);
@@ -782,7 +782,7 @@ class Program
                 .Should()
                 .Pass();
 
-            DirectoryInfo outputDirectory = buildCommand.GetOutputDirectory("net452", runtimeIdentifier: "win7-x86");
+            DirectoryInfo outputDirectory = buildCommand.GetOutputDirectory("net452", runtimeIdentifier: $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86");
 
             return XElement.Load(outputDirectory.GetFiles("DesktopNeedsBindingRedirects.exe.config").Single().FullName);
         }

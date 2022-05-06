@@ -80,7 +80,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory("net452", "Debug", "win7-x86");
+            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory("net452", "Debug", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86");
 
             publishDirectory.Should().HaveFiles(new[]
             {
