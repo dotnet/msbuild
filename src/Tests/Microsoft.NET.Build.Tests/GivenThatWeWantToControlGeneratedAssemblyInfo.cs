@@ -794,7 +794,7 @@ class Program
         Console.WriteLine(str);
     }
 }";
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFrameworkVersion);
             var buildCommand = new BuildCommand(testAsset);
             buildCommand.WithWorkingDirectory(testAsset.Path)
                 .Execute()
