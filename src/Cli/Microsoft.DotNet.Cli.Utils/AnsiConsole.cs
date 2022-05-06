@@ -9,6 +9,7 @@ namespace Microsoft.DotNet.Cli.Utils
     public class AnsiConsole
     {
         private const int Light = 0x08;
+        private readonly bool _ansiEnabled;
 
         private AnsiConsole(TextWriter writer)
         {
@@ -16,6 +17,8 @@ namespace Microsoft.DotNet.Cli.Utils
     
             OriginalForegroundColor = Console.ForegroundColor;
             _boldRecursion = ((int)OriginalForegroundColor & Light) != 0 ? 1 : 0;
+
+            _ansiEnabled = string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("NO_COLOR"));
         }
     
         private int _boldRecursion;
@@ -36,6 +39,11 @@ namespace Microsoft.DotNet.Cli.Utils
     
         private void SetColor(ConsoleColor color)
         {
+            if (!_ansiEnabled)
+            {
+                return;
+            }
+
             int c = (int)color;
 
             Console.ForegroundColor = 
@@ -46,6 +54,11 @@ namespace Microsoft.DotNet.Cli.Utils
     
         private void SetBold(bool bold)
         {
+            if (!_ansiEnabled)
+            {
+                return;
+            }
+
             _boldRecursion += bold ? 1 : -1;
             if (_boldRecursion > 1 || (_boldRecursion == 1 && !bold))
             {
@@ -53,7 +66,7 @@ namespace Microsoft.DotNet.Cli.Utils
             }
             
             // switches on _boldRecursion to handle boldness
-            SetColor(Console.ForegroundColor);        
+            SetColor(Console.ForegroundColor);
         }
 
         public void WriteLine(string message)
@@ -92,7 +105,7 @@ namespace Microsoft.DotNet.Cli.Utils
                     {
                         break;
                     }
-    
+
                     switch (message[endIndex])
                     {
                         case 'm':
