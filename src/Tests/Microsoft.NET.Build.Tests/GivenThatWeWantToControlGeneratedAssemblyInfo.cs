@@ -2,19 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
+using System.Linq;
+using System.Xml.Linq;
+using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using Xunit;
-using FluentAssertions;
-using System.Runtime.InteropServices;
-using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.ProjectConstruction;
-using System.Xml.Linq;
-using Xunit.Sdk;
-using System.Reflection;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -765,7 +762,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp2.1", ".NET Core 2.1")]
         [InlineData("netstandard2.1", ".NET Standard 2.1")]
         [InlineData("net5.0", ".NET 5.0")]
-        public void CheckTargetFrameworkDisplayName(string targetFrameworkVersion, string expectedVersion)
+        public void CheckTargetFrameworkDisplayName(string targetFrameworkVersion, string expectedFrameworkDisplayName)
         {
             TestProject libraryProject = new TestProject()
             {
@@ -808,7 +805,7 @@ class Program
                 .WithWorkingDirectory(Path.Combine(testAsset.Path, testProject.Name))
                 .Execute();
             result.Should().Pass();
-            result.StdOut.Should().Contain(expectedVersion);
+            result.StdOut.Should().Contain(expectedFrameworkDisplayName);
 
         }
 
