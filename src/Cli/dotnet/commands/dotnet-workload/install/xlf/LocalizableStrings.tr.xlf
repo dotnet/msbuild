@@ -122,6 +122,11 @@
         <target state="translated">Sunucuyu başlatmak için yeterli ayrıcalığa sahip değilsiniz.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="new">Error parsing version '{1}' for workload manifest ID '{0}'</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
         <source>The settings file in the workload's NuGet package is invalid: {0}</source>
         <target state="translated">İş yükünün NuGet paketindeki ayar dosyası geçersiz: {0}</target>

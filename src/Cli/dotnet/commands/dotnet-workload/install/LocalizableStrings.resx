@@ -330,4 +330,7 @@
   <data name="CheckForUpdatedWorkloadManifests" xml:space="preserve">
     <value>Checking for updated workload manifests.</value>
   </data>
+  <data name="InvalidVersionForWorkload" xml:space="preserve">
+    <value>Error parsing version '{1}' for workload manifest ID '{0}'</value>
+  </data>
 </root>

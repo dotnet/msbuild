@@ -99,7 +99,7 @@ namespace Microsoft.NET.Build.Tasks
                 return;
             }
 
-            var packagesToDownload = new List<ITaskItem>();
+            var packagesToDownload = new Dictionary<string,string>();
 
             if (!string.IsNullOrEmpty(AppHostRuntimeIdentifier))
             {
@@ -204,13 +204,19 @@ namespace Microsoft.NET.Build.Tasks
 
             if (packagesToDownload.Any())
             {
-                PackagesToDownload = packagesToDownload.ToArray();
+                PackagesToDownload = packagesToDownload.Select(ToPackageDownload).ToArray();
             }
+        }
+
+        private ITaskItem ToPackageDownload(KeyValuePair<string, string> packageInformation) {
+            var item = new TaskItem(packageInformation.Key);
+            item.SetMetadata(MetadataKeys.Version, packageInformation.Value);
+            return item;
         }
 
         private ITaskItem GetHostItem(string runtimeIdentifier,
                                          List<ITaskItem> knownAppHostPacksForTargetFramework,
-                                         List<ITaskItem> packagesToDownload,
+                                         IDictionary<string, string> packagesToDownload,
                                          string hostNameWithoutExtension,
                                          string itemName,
                                          bool isExecutable,
@@ -286,7 +292,7 @@ namespace Microsoft.NET.Build.Tasks
                 else
                 {
                     // C++/CLI does not support package download && dedup error
-                    if (!NuGetRestoreSupported && !packagesToDownload.Any(p => p.ItemSpec == hostPackName))
+                    if (!NuGetRestoreSupported && !packagesToDownload.ContainsKey(hostPackName))
                     {
                         Log.LogError(
                                     Strings.TargetingApphostPackMissingCannotRestore,
@@ -298,11 +304,10 @@ namespace Microsoft.NET.Build.Tasks
                                     );
                     }
 
-                    //  Download apphost pack
-                    TaskItem packageToDownload = new TaskItem(hostPackName);
-                    packageToDownload.SetMetadata(MetadataKeys.Version, appHostPackVersion);
-
-                    packagesToDownload.Add(packageToDownload);
+                    // use the first one added
+                    if (!packagesToDownload.ContainsKey(hostPackName)) {
+                        packagesToDownload.Add(hostPackName, appHostPackVersion);
+                    }
 
                     appHostItem.SetMetadata(MetadataKeys.NuGetPackageId, hostPackName);
                     appHostItem.SetMetadata(MetadataKeys.NuGetPackageVersion, appHostPackVersion);

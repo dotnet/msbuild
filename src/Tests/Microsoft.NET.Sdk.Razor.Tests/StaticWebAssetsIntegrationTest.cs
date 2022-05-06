@@ -16,6 +16,7 @@ using NuGet.Packaging;
 using System;
 using System.Collections.Generic;
 using Microsoft.NET.TestFramework.Utilities;
+using Microsoft.NET.TestFramework;
 
 namespace Microsoft.NET.Sdk.Razor.Tests
 {
@@ -1144,12 +1145,12 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 var parse = XDocument.Parse($@"<Project Sdk=""Microsoft.NET.Sdk.Razor"">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0</TargetFrameworks>
+    <TargetFrameworks>{ToolsetInfo.CurrentTargetFramework};net5.0</TargetFrameworks>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <SupportedPlatform Condition=""'$(TargetFramework)' == 'net6.0'"" Include=""browser"" />
+    <SupportedPlatform Condition=""'$(TargetFramework)' == '{ToolsetInfo.CurrentTargetFramework}'"" Include=""browser"" />
   </ItemGroup>
 
   <ItemGroup>
@@ -1221,12 +1222,12 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 var parse = XDocument.Parse($@"<Project Sdk=""Microsoft.NET.Sdk.Razor"">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0</TargetFrameworks>
+    <TargetFrameworks>{ToolsetInfo.CurrentTargetFramework};net5.0</TargetFrameworks>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <SupportedPlatform Condition=""'$(TargetFramework)' == 'net6.0'"" Include=""browser"" />
+    <SupportedPlatform Condition=""'$(TargetFramework)' == '{ToolsetInfo.CurrentTargetFramework}'"" Include=""browser"" />
   </ItemGroup>
 
   <ItemGroup>
@@ -1300,12 +1301,12 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 var parse = XDocument.Parse($@"<Project Sdk=""Microsoft.NET.Sdk.Razor"">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0</TargetFrameworks>
+    <TargetFrameworks>{ToolsetInfo.CurrentTargetFramework};net5.0</TargetFrameworks>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <SupportedPlatform Condition=""'$(TargetFramework)' == 'net6.0'"" Include=""browser"" />
+    <SupportedPlatform Condition=""'$(TargetFramework)' == '{ToolsetInfo.CurrentTargetFramework}'"" Include=""browser"" />
   </ItemGroup>
 
   <ItemGroup>

@@ -105,6 +105,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 IEnumerable<WorkloadId> installedWorkloads = RecordRepository.GetInstalledWorkloads(_sdkFeatureBand);
                 Dictionary<(WorkloadPackId id, string version),PackInfo> expectedWorkloadPacks = installedWorkloads
                     .SelectMany(workload => _workloadResolver.GetPacksInWorkload(workload))
+                    .Distinct()
                     .Select(pack => _workloadResolver.TryGetPackInfo(pack))
                     .Where(pack => pack != null)
                     .ToDictionary(p => (new WorkloadPackId(p.ResolvedPackageId), p.Version));
