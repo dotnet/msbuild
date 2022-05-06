@@ -200,7 +200,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "MismatchFrameworkTest",
-                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                TargetFrameworks = "netcoreapp2.0",
                 IsExe = true,
             };
 
