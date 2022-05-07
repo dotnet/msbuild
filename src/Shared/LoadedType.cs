@@ -41,46 +41,11 @@ namespace Microsoft.Build.Shared
             LoadedAssemblyName = loadedAssembly.GetName();
             Path = loadedAssembly.Location;
             LoadedAssembly = loadedAssembly;
+
 #if !NET35
-            PropertyInfo[] props = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
-            Properties = new ReflectableTaskPropertyInfo[props.Length];
-            if (loadedViaMetadataLoadContext)
-            {
-                PropertyAssemblyQualifiedNames = new string[props.Length];
-            }
-
-            for (int i = 0; i < props.Length; i++)
-            {
-                bool outputAttribute = CustomAttributeData.GetCustomAttributes(props[i]).Any(attr => attr.AttributeType.Name.Equals(nameof(OutputAttribute)));
-                bool requiredAttribute = CustomAttributeData.GetCustomAttributes(props[i]).Any(attr => attr.AttributeType.Name.Equals(nameof(RequiredAttribute)));
-                bool IsAssignableToITask = false;
-
-                Type pt = props[i].PropertyType;
-                if (pt.IsArray)
-                {
-                    pt = pt.GetElementType();
-                }
-
-                while (pt is not null)
-                {
-                    if (pt.FullName.Equals("Microsoft.Build.Framework.ITaskItem"))
-                    {
-                        IsAssignableToITask = true;
-                        break;
-                    }
-                    else
-                    {
-                        pt = pt.BaseType;
-                    }
-                }
-
-                Properties[i] = new ReflectableTaskPropertyInfo(props[i], outputAttribute, requiredAttribute, IsAssignableToITask);
-                if (loadedViaMetadataLoadContext)
-                {
-                    PropertyAssemblyQualifiedNames[i] = Properties[i].PropertyType.AssemblyQualifiedName;
-                }
-            }
-
+            // Properties set in this block aren't used by TaskHosts. Properties below are only used on the NodeProvider side to get information about the
+            // properties and reflect over them without needing them to be fully loaded, so it also isn't need for TaskHosts.
+            // MetadataLoadContext-loaded Type objects don't support testing for inherited attributes, so we manually walk the BaseType chain.
             Type t = type;
             while (t is not null)
             {
@@ -100,6 +65,60 @@ namespace Microsoft.Build.Shared
                 }
 
                 t = t.BaseType;
+            }
+
+            PropertyInfo[] props = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
+            Properties = new ReflectableTaskPropertyInfo[props.Length];
+            if (loadedViaMetadataLoadContext)
+            {
+                PropertyAssemblyQualifiedNames = new string[props.Length];
+            }
+
+            for (int i = 0; i < props.Length; i++)
+            {
+                bool outputAttribute = false;
+                bool requiredAttribute = false;
+                foreach (CustomAttributeData attr in CustomAttributeData.GetCustomAttributes(props[i]))
+                {
+                    if (attr.AttributeType.Name.Equals(nameof(OutputAttribute)))
+                    {
+                        outputAttribute = true;
+                    }
+                    else if (attr.AttributeType.Name.Equals(nameof(RequiredAttribute)))
+                    {
+                        requiredAttribute = true;
+                    }
+                }
+
+                bool isAssignableToITask = false;
+
+                // Check whether it's assignable to ITaskItem or ITaskItem[]. Simplify to just checking for ITaskItem.
+                Type pt = props[i].PropertyType;
+                if (pt.IsArray)
+                {
+                    pt = pt.GetElementType();
+                }
+
+                // Microsoft.Build.Framework.ITaskItem is different when loaded normally versus via MetadataLoadContext. This is the only reliable way to see
+                // whether this property derives from ITaskItem.
+                while (pt is not null)
+                {
+                    if (pt.FullName.Equals("Microsoft.Build.Framework.ITaskItem"))
+                    {
+                        isAssignableToITask = true;
+                        break;
+                    }
+                    else
+                    {
+                        pt = pt.BaseType;
+                    }
+                }
+
+                Properties[i] = new ReflectableTaskPropertyInfo(props[i], outputAttribute, requiredAttribute, isAssignableToITask);
+                if (loadedViaMetadataLoadContext)
+                {
+                    PropertyAssemblyQualifiedNames[i] = Properties[i].PropertyType.AssemblyQualifiedName;
+                }
             }
 #endif
         }
