@@ -52,7 +52,7 @@ namespace Microsoft.Build.Execution
             _propertyInfo = propertyInfo;
         }
 
-        internal ReflectableTaskPropertyInfo(PropertyInfo propertyInfo, bool output, bool required)
+        internal ReflectableTaskPropertyInfo(PropertyInfo propertyInfo, bool output, bool required, bool IsAssignableToITaskItemType)
             : base(
             propertyInfo.Name,
             propertyInfo.PropertyType,
@@ -60,6 +60,7 @@ namespace Microsoft.Build.Execution
             required)
         {
             _propertyInfo = propertyInfo;
+            IsAssignableToITask = IsAssignableToITaskItemType;
         }
 
         /// <summary>

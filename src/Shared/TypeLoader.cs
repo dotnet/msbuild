@@ -5,9 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 #if !NETFRAMEWORK
@@ -45,6 +43,8 @@ namespace Microsoft.Build.Shared
         /// Type filter for this typeloader
         /// </summary>
         private Func<Type, object, bool> _isDesiredType;
+
+        private static MetadataLoadContext _context;
 
         /// <summary>
         /// Constructor.
@@ -193,8 +193,8 @@ namespace Microsoft.Build.Shared
             List<string> localPaths = new(Directory.GetFiles(Path.GetDirectoryName(path), "*.dll"));
             localPaths.AddRange(runtimePaths);
 
-            MetadataLoadContext loadContext = new(new PathAssemblyResolver(localPaths));
-            return loadContext.LoadFromAssemblyPath(path);
+            _context = new(new PathAssemblyResolver(localPaths));
+            return _context.LoadFromAssemblyPath(path);
         }
 
         /// <summary>
@@ -281,6 +281,8 @@ namespace Microsoft.Build.Shared
             /// </summary>
             private Dictionary<string, Type> _publicTypeNameToType;
 
+            private ConcurrentDictionary<string, LoadedType> _publicTypeNameToLoadedType;
+
             /// <summary>
             /// Have we scanned the public types for this assembly yet.
             /// </summary>
@@ -305,6 +307,7 @@ namespace Microsoft.Build.Shared
                 _assemblyLoadInfo = loadInfo;
                 _typeNameToType = new(StringComparer.OrdinalIgnoreCase);
                 _publicTypeNameToType = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+                _publicTypeNameToLoadedType = new(StringComparer.OrdinalIgnoreCase);
             }
 
             /// <summary>
@@ -313,6 +316,11 @@ namespace Microsoft.Build.Shared
             internal LoadedType GetLoadedTypeByTypeName(string typeName, bool useTaskHost)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(typeName, nameof(typeName));
+
+                if (useTaskHost)
+                {
+                    return GetLoadedTypeFromTypeNameUsingMetadataLoadContext(typeName);
+                }
 
                 // Only one thread should be doing operations on this instance of the object at a time.
                 Type type = _typeNameToType.GetOrAdd(typeName, (key) =>
@@ -342,7 +350,7 @@ namespace Microsoft.Build.Shared
                         {
                             if (Interlocked.Read(ref _haveScannedPublicTypes) == 0)
                             {
-                                ScanAssemblyForPublicTypes(useTaskHost);
+                                ScanAssemblyForPublicTypes();
                                 Interlocked.Exchange(ref _haveScannedPublicTypes, ~0);
                             }
                         }
@@ -360,17 +368,37 @@ namespace Microsoft.Build.Shared
                     return null;
                 });
 
-                return type != null ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly) : null;
+                return type != null ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly ?? type.Assembly, loadedViaMetadataLoadContext: false) : null;
+            }
+
+            private LoadedType GetLoadedTypeFromTypeNameUsingMetadataLoadContext(string typeName)
+            {
+                return _publicTypeNameToLoadedType.GetOrAdd(typeName, typeName =>
+                {
+                    Assembly loadedAssembly = LoadAssemblyUsingMetadataLoadContext(_assemblyLoadInfo);
+                    foreach (Type publicType in loadedAssembly.GetExportedTypes())
+                    {
+                        if (_isDesiredType(publicType, null) && (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(publicType.FullName, typeName)))
+                        {
+                            LoadedType loadedType = new(publicType, _assemblyLoadInfo, loadedAssembly, loadedViaMetadataLoadContext: true);
+                            _context?.Dispose();
+                            _context = null;
+                            return loadedType;
+                        }
+                    }
+
+                    return null;
+                });
             }
 
             /// <summary>
             /// Scan the assembly pointed to by the assemblyLoadInfo for public types. We will use these public types to do partial name matching on 
             /// to find tasks, loggers, and task factories.
             /// </summary>
-            private void ScanAssemblyForPublicTypes(bool useTaskHost)
+            private void ScanAssemblyForPublicTypes()
             {
                 // we need to search the assembly for the type...
-                _loadedAssembly = useTaskHost ? LoadAssemblyUsingMetadataLoadContext(_assemblyLoadInfo) : LoadAssembly(_assemblyLoadInfo);
+                _loadedAssembly = LoadAssembly(_assemblyLoadInfo);
 
                 // only look at public types
                 Type[] allPublicTypesInAssembly = _loadedAssembly.GetExportedTypes();

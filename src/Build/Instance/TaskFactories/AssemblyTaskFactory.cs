@@ -150,23 +150,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public TaskPropertyInfo[] GetTaskParameters()
         {
-            PropertyInfo[] properties = (_loadedType.LoadedAssembly?.GetType(_loadedType.Type.Name) ?? _loadedType.Type).GetProperties(BindingFlags.Instance | BindingFlags.Public);
-            var propertyInfos = new TaskPropertyInfo[properties.Length];
-            for (int i = 0; i < properties.Length; i++)
-            {
-                if (_loadedType.LoadedAssembly is null)
-                {
-                    propertyInfos[i] = new ReflectableTaskPropertyInfo(properties[i]);
-                }
-                else
-                {
-                    bool output = CustomAttributeData.GetCustomAttributes(properties[i]).Any(attr => attr.AttributeType.Name.Equals("OutputAttribute"));
-                    bool required = CustomAttributeData.GetCustomAttributes(properties[i]).Any(attr => attr.AttributeType.Name.Equals("RequiredAttribute"));
-                    propertyInfos[i] = new ReflectableTaskPropertyInfo(properties[i], output, required);
-                }
-            }
-
-            return propertyInfos;
+            return _loadedType.Properties;
         }
 
         /// <summary>
