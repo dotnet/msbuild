@@ -14,6 +14,7 @@ using System.Reflection;
 using Microsoft.Build.Eventing;
 using System.Linq;
 using System.Xml.Schema;
+using System.Text.RegularExpressions;
 
 #nullable disable
 
@@ -54,6 +55,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// Stores the list of manifests of SDK resolvers which could be loaded.
         /// </summary>
         private IList<SdkResolverManifest> _resolversRegistry;
+
+        /// <summary>
+        /// The regex time-out interval for the  name pattern in milliseconds.
+        /// </summary>
+        private const int ResolverNamePatternRegexTimeoutMsc = 500;
 
         /// <summary>
         /// Stores an <see cref="SdkResolverLoader"/> which can load registered SDK resolvers.
@@ -104,7 +110,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
         public virtual SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
         {
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_3))
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
             {
                 return ResolveSdkUsingMostSpecificResolvers(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
             }
@@ -123,7 +129,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             // Pick up the most specific resolvers (i.e. resolvers with the longest pattern that matches) from the list of resolvers.
             List<SdkResolverManifest> matchingResolversManifests = _resolversRegistry
-                .Where(r => !string.IsNullOrEmpty(r.NamePattern) && System.Text.RegularExpressions.Regex.IsMatch(sdk.Name, r.NamePattern))
+                .Where(r => !string.IsNullOrEmpty(r.NamePattern) && Regex.IsMatch(sdk.Name, r.NamePattern, RegexOptions.None, TimeSpan.FromMilliseconds(ResolverNamePatternRegexTimeoutMsc)))
                 .ToList();
 
             List<SdkResolver> resolvers = new List<SdkResolver>();
@@ -323,7 +329,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             if (resolvers != null)
             {
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_3))
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
                 {
                     _resolversRegistry = new List<SdkResolverManifest>();
                     _resolversDict = new Dictionary<SdkResolverManifest, IList<SdkResolver>>();
@@ -415,7 +421,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     submissionId,
                     _ => new ConcurrentDictionary<SdkResolver, object>(
                         NativeMethodsShared.GetLogicalCoreCount(),
-                        ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_3) ? _resolversRegistry.Count : _resolversList.Count));
+                        ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4) ? _resolversRegistry.Count : _resolversList.Count));
 
                 resolverState.AddOrUpdate(resolver, state, (sdkResolver, obj) => state);
             }

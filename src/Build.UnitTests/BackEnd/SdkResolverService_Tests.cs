@@ -138,12 +138,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
         [Fact]
         // MockSdkResolver1 has higher priority than MockSdkResolverWithNamePattern1 and resolves sdk.
-        public void AssertFirstResolverWithPatternCantResolveChangeWave17_3()
+        public void AssertFirstResolverWithPatternCantResolveChangeWave17_4()
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 ChangeWaves.ResetStateForTests();
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_3.ToString());
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_4.ToString());
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy(includeNameSpecificResolvers: true));
