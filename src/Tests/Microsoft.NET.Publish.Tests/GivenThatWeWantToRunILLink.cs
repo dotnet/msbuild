@@ -1169,6 +1169,8 @@ namespace Microsoft.NET.Publish.Tests
 
             var publishCommand = new PublishCommand(testAsset);
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
+                                    // This tests the linker only. The analyzer doesn't respect ILLinkWarningLevel.
+                                    "/p:EnableTrimAnalyzer=false",
                                     "/p:ILLinkWarningLevel=0")
                 .Should().Pass()
                 .And.NotHaveStdOutContaining("warning IL2075");
