@@ -22,6 +22,10 @@
       <TargetFramework>net472</TargetFramework>
       <RuntimeTargetFramework>net472</RuntimeTargetFramework>
     </SDKCustomXUnitProject>
+    <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true' And $(_AGENTOSNAME) == 'Windows_NT_FullFramework'"  Include="Microsoft.NET.Sdk.Publish.Tasks.Tests\Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj">
+      <TargetFramework>net472</TargetFramework>
+      <RuntimeTargetFramework>net472</RuntimeTargetFramework>
+    </SDKCustomXUnitProject>
   </ItemGroup>
 
   <ItemGroup Condition=" '$(_CustomHelixTargetQueue)' != '' ">

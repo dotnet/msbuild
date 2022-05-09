@@ -1,2 +1,1 @@
 dotnet.Tests
-Microsoft.NET.Sdk.Publish.Tasks.Tests
