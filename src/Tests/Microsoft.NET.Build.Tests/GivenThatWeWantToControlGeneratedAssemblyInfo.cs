@@ -769,6 +769,7 @@ namespace Microsoft.NET.Build.Tests
                 Name = "LibraryProject",
                 TargetFrameworks = targetFrameworkVersion
             };
+            libraryProject.AdditionalProperties["NoWarn"] = "NETSDK1138";
             libraryProject.SourceFiles["Class.cs"] = @"
 public class LibraryClass{}
 ";
@@ -805,7 +806,7 @@ class Program
                 .WithWorkingDirectory(Path.Combine(testAsset.Path, testProject.Name))
                 .Execute();
             result.Should().Pass();
-            result.StdOut.Should().Contain(expectedFrameworkDisplayName);
+            result.StdOut.Should().Equals(expectedFrameworkDisplayName);
 
         }
 
