@@ -80,20 +80,22 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
             private readonly string _assemblyPath;
             private readonly int _methodLimit;
             private readonly bool _hasEventListenerGuard;
+            private readonly bool _netFramework;
             private int _currentId;
             private List<TypeInfo> _currentTypeInfoList = new List<TypeInfo>();
 
-            private AssemblyInfoBuilder(string assemblyPath, int methodLimit, bool hasEventListenerGuard)
+            private AssemblyInfoBuilder(string assemblyPath, int methodLimit, bool hasEventListenerGuard, bool netFramework = false)
             {
                 _assemblyPath = assemblyPath;
                 _methodLimit = methodLimit;
                 _hasEventListenerGuard = hasEventListenerGuard;
+                _netFramework = netFramework;
             }
 
-            internal static void Build(string assemblyPath, int methodLimit, List<TypeInfo> typeInfoList, out List<Partition> partitionList, out List<AssemblyPartitionInfo> assemblyInfoList)
+            internal static void Build(string assemblyPath, int methodLimit, List<TypeInfo> typeInfoList, out List<Partition> partitionList, out List<AssemblyPartitionInfo> assemblyInfoList, bool netFramework = false)
             {
                 var hasEventListenerGuard = typeInfoList.Any(x => x.FullName == EventListenerGuardFullName);
-                var builder = new AssemblyInfoBuilder(assemblyPath, methodLimit, hasEventListenerGuard);
+                var builder = new AssemblyInfoBuilder(assemblyPath, methodLimit, hasEventListenerGuard, netFramework);
                 builder.Build(typeInfoList);
                 partitionList = builder._partitionList;
                 assemblyInfoList = builder._assemblyInfoList;
@@ -106,7 +108,19 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
                 foreach (var typeInfo in typeInfoList)
                 {
                     _currentTypeInfoList.Add(typeInfo);
-                    _builder.Append($@"-class ""{typeInfo.FullName}"" ");
+                    if (_netFramework)
+                    {
+                        if (_builder.Length > 0)
+                        {
+                            _builder.Append("|");
+                        }
+                        _builder.Append($@"{typeInfo.FullName}");
+
+                    }
+                    else
+                    {
+                        _builder.Append($@"-class ""{typeInfo.FullName}"" ");
+                    }
                     CheckForPartitionLimit(done: false);
                 }
 
@@ -188,12 +202,12 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
             return list;
         }
 
-        public IEnumerable<AssemblyPartitionInfo> Schedule(string assemblyPath, bool force = false)
+        public IEnumerable<AssemblyPartitionInfo> Schedule(string assemblyPath, bool force = false, bool netFramework = false)
         {
             var typeInfoList = GetTypeInfoList(assemblyPath);
             var assemblyInfoList = new List<AssemblyPartitionInfo>();
             var partitionList = new List<Partition>();
-            AssemblyInfoBuilder.Build(assemblyPath, _methodLimit, typeInfoList, out partitionList, out assemblyInfoList);
+            AssemblyInfoBuilder.Build(assemblyPath, _methodLimit, typeInfoList, out partitionList, out assemblyInfoList, netFramework);
 
             // If the scheduling didn't actually produce multiple partition then send back an unpartitioned
             // representation.

@@ -177,7 +177,7 @@ Options:
         [Theory]
         [InlineData("idontexist.csproj")]
         [InlineData("ihave?inv@lid/char\\acters")]
-        public void WhenNonExistingProjectIsPassedItPrintsErrorAndUsage(string projName)
+        public void WhenNonExistingProjectIsPassedItPrintsError(string projName)
         {
             var setup = Setup(identifier: projName.GetHashCode().ToString());
 
@@ -187,11 +187,11 @@ Options:
                     .Execute(setup.ValidRefCsprojPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindProjectOrDirectory, projName));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
-        public void WhenBrokenProjectIsPassedItPrintsErrorAndUsage()
+        public void WhenBrokenProjectIsPassedItPrintsError()
         {
             string projName = "Broken/Broken.csproj";
             var setup = Setup();
@@ -216,11 +216,11 @@ Options:
                     .Execute(setup.ValidRefCsprojPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.ProjectIsInvalid, projName));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
-        public void WhenMoreThanOneProjectExistsInTheDirectoryItPrintsErrorAndUsage()
+        public void WhenMoreThanOneProjectExistsInTheDirectoryItPrintsError()
         {
             var setup = Setup();
 
@@ -230,11 +230,11 @@ Options:
                     .Execute(setup.ValidRefCsprojRelToOtherProjPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneProjectInDirectory, workingDir + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(workingDir));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
-        public void WhenNoProjectsExistsInTheDirectoryItPrintsErrorAndUsage()
+        public void WhenNoProjectsExistsInTheDirectoryItPrintsError()
         {
             var setup = Setup();
 
@@ -243,7 +243,7 @@ Options:
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, setup.TestRoot + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
@@ -570,7 +570,7 @@ Options:
                     .Execute(reference);
 
             result.Should().Fail();
-            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot));
+            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
             result.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, Path.Combine(setup.TestRoot, reference)));
         }
 
@@ -587,7 +587,7 @@ Options:
                     .Execute(reference);
 
             result.Should().Fail();
-            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot));
+            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
             result.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneProjectInDirectory, Path.Combine(setup.TestRoot, reference)));
         }
     }

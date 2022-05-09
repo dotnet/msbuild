@@ -1,4 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
   <PropertyGroup>
     <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
     <OutputType>Exe</OutputType>
@@ -122,7 +128,12 @@
   <Target Name="CopyAssetToPublishFolder" BeforeTargets="Publish" DependsOnTargets="CreateNupkgWithShimFromSource;CreateNupkgFromSource;CreateNupkgWithShimFromSource;CreateNupkgWithPreviewFromSource">
     <ItemGroup>
        <TestAssetFiles Include="$(BaseOutputPath)\TestAsset\**\*.*" />
+       <TestAssetLocalNugetFeed Include="$(BaseOutputPath)\$(Configuration)\TestAssetLocalNugetFeed\**\*.*" />
     </ItemGroup>
     <Copy SourceFiles="@(TestAssetFiles)" DestinationFiles="@(TestAssetFiles->'$(PublishDir)\TestAsset\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(TestAssetLocalNugetFeed)" DestinationFiles="@(TestAssetLocalNugetFeed->'$(PublishDir)\TestAssetLocalNugetFeed\%(RecursiveDir)%(Filename)%(Extension)')" />
+
   </Target>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 </Project>

@@ -267,11 +267,6 @@
         <target state="translated">開発証明書を作成し、管理します。</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">SQL Server キャッシュ コマンドライン ツール。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
         <target state="translated">開発ユーザーのシークレットを管理します。</target>

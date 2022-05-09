@@ -525,5 +525,67 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             appBundle.Should().Contain("_content/ClassLibrary/ClassLibrary.bundle.scp.css");
             appBundle.Should().Contain("_content/PackageLibraryDirectDependency/PackageLibraryDirectDependency.bundle.scp.css");
         }
+
+        // This test verifies if the targets that VS calls to update scoped css works to update these files
+        [Fact]
+        public void RegeneratingScopedCss_ForProject()
+        {
+            // Arrange
+            var testAsset = "RazorComponentApp";
+            ProjectDirectory = CreateAspNetSdkTestAsset(testAsset);
+
+            var build = new BuildCommand(ProjectDirectory);
+            build.Execute().Should().Pass();
+
+            var intermediateOutputPath = build.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
+            var bundlePath = Path.Combine(intermediateOutputPath, "scopedcss", "bundle", "ComponentApp.styles.css");
+
+            new FileInfo(bundlePath).Should().Exist();
+
+            // Make an edit
+            var scopedCssFile = Path.Combine(ProjectDirectory.TestRoot, "Components", "Pages", "Index.razor.css");
+            File.WriteAllLines(scopedCssFile, File.ReadAllLines(scopedCssFile).Concat(new[] { "body { background-color: orangered; }" }));
+
+            build = new BuildCommand(ProjectDirectory);
+            build.Execute("/t:UpdateStaticWebAssetsDesignTime").Should().Pass();
+
+            var fileInfo = new FileInfo(bundlePath);
+            fileInfo.Should().Exist();
+            // Verify the generated file contains newly added css
+            fileInfo.ReadAllText().Should().Contain("background-color: orangered");
+        }
+
+        // Regression test for https://github.com/dotnet/aspnetcore/issues/37592
+        [Fact]
+        public void RegeneratingScopedCss_ForProjectWithReferences()
+        {
+            var testAsset = "RazorAppWithPackageAndP2PReference";
+            ProjectDirectory = CreateAspNetSdkTestAsset(testAsset);
+
+            var scopedCssFile = Path.Combine(ProjectDirectory.Path, "AppWithPackageAndP2PReference", "Index.razor.css");
+            File.WriteAllText(scopedCssFile, "/* Empty css */");
+            File.WriteAllText(Path.Combine(ProjectDirectory.Path, "AppWithPackageAndP2PReference", "Index.razor"), "This is a test razor component.");
+
+            var build = new BuildCommand(ProjectDirectory, "AppWithPackageAndP2PReference");
+            build.Execute().Should().Pass();
+
+            var intermediateOutputPath = build.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
+            var bundlePath = Path.Combine(intermediateOutputPath, "scopedcss", "bundle", "AppWithPackageAndP2PReference.styles.css");
+
+            new FileInfo(bundlePath).Should().Exist();
+
+            // Make an edit to a scoped css file
+            File.WriteAllLines(scopedCssFile, File.ReadAllLines(scopedCssFile).Concat(new[] { "body { background-color: orangered; }" }));
+
+            build = new BuildCommand(ProjectDirectory, "AppWithPackageAndP2PReference");
+            build.Execute("/t:UpdateStaticWebAssetsDesignTime").Should().Pass();
+
+            var fileInfo = new FileInfo(bundlePath);
+            fileInfo.Should().Exist();
+            // Verify the generated file contains newly added css
+            var text = fileInfo.ReadAllText();
+            text.Should().Contain("background-color: orangered");
+            text.Should().Contain("@import '_content/ClassLibrary/ClassLibrary.bundle.scp.css");
+        }
     }
 }

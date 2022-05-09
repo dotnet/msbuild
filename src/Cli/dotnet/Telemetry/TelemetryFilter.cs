@@ -91,11 +91,6 @@ namespace Microsoft.DotNet.Cli.Telemetry
             new AllowListToSendFirstAppliedOptions(new HashSet<string> {"add", "remove", "list", "sln", "nuget"}),
             new TopLevelCommandNameAndOptionToLog
             (
-                topLevelCommandName: new HashSet<string> {"new"},
-                optionsToLog: new HashSet<Option> { NewCommandParser.LanguageOption }
-            ),
-            new TopLevelCommandNameAndOptionToLog
-            (
                 topLevelCommandName: new HashSet<string> {"build", "publish"},
                 optionsToLog: new HashSet<Option> { BuildCommandParser.FrameworkOption, PublishCommandParser.FrameworkOption,
                     BuildCommandParser.RuntimeOption, PublishCommandParser.RuntimeOption, BuildCommandParser.ConfigurationOption,

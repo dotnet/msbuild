@@ -14,6 +14,7 @@ namespace Microsoft.DotNet.Watcher
         public bool List { get; set; }
         public bool NoHotReload { get; set; }
 
+        public bool NonInteractive { get; set; }
         public IReadOnlyList<string> RemainingArguments { get; set; }
 
         public static bool IsPollingEnabled

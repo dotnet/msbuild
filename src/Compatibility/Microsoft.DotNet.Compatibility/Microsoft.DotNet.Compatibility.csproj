@@ -2,11 +2,10 @@
 
   <PropertyGroup>
     <TargetFrameworks>net6.0;net472</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(DotNetBuildFromSource)' == 'true' ">net6.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
     <IsShippingPackage>true</IsShippingPackage>
     <StrongNameKeyId>Open</StrongNameKeyId>
-    <VersionPrefix>1.0.0</VersionPrefix>
+    <VersionPrefix>2.0.0</VersionPrefix>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <!-- This package doesnot contain any lib or ref assemblies because its a tooling package.-->
     <NoWarn>$(NoWarn);NU5128</NoWarn>

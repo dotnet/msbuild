@@ -72,6 +72,10 @@ namespace Microsoft.DotNet.Tools.Run
                         //NOTE: MSBuild variables are not expanded like they are in VS
                         targetCommand.EnvironmentVariable(entry.Key, value);
                     }
+                    if (String.IsNullOrEmpty(targetCommand.CommandArgs) && launchSettings.CommandLineArgs != null)
+                    {
+                        targetCommand.SetCommandArgs(launchSettings.CommandLineArgs);
+                    }
                 }
 
                 // Ignore Ctrl-C for the remainder of the command's execution
@@ -329,7 +333,7 @@ namespace Microsoft.DotNet.Tools.Run
         private static bool TryGetTargetArchitecture(string runtimeIdentifier, out Architecture? targetArchitecture)
         {
             targetArchitecture = null;
-            int separator = runtimeIdentifier.LastIndexOf("-");
+            int separator = runtimeIdentifier.LastIndexOf("-", StringComparison.InvariantCulture);
             if (separator < 0)
             {
                 return false;

@@ -29,16 +29,16 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 var manifests = new SdkDirectoryWorkloadManifestProvider(dotnetPath, versionOption, userProfileDir).GetManifests();
                 if (!manifests.Any())
                 {
-                    throw new GracefulException(string.Format(LocalizableStrings.NoManifestsExistForFeatureBand, versionOption), isUserError: false);
+                    throw new GracefulException(string.Format(LocalizableStrings.NoManifestsExistForFeatureBand, new SdkFeatureBand(versionOption).ToString()), isUserError: false);
                 }
                 try
                 {
-                    foreach ((string manifestId, string informationalPath, Func<Stream> openManifestStream, Func<Stream> openLocalizationStream) in manifests)
+                    foreach (var readableManifest in manifests)
                     {
-                        using (var manifestStream = openManifestStream())
-                        using (var localizationStream = openLocalizationStream())
+                        using (var manifestStream = readableManifest.OpenManifestStream())
+                        using (var localizationStream = readableManifest.OpenLocalizationStream())
                         {
-                            var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId, manifestStream, localizationStream, informationalPath);
+                            var manifest = WorkloadManifestReader.ReadWorkloadManifest(readableManifest.ManifestId, manifestStream, localizationStream, readableManifest.ManifestPath);
                         }
                     }
                 }

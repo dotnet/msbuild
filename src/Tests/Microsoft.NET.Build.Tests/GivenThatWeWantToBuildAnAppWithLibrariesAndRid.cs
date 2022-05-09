@@ -99,19 +99,6 @@ namespace Microsoft.NET.Build.Tests
 
             outputDirectory.Should().NotHaveSubDirectories();
 
-            var sqlFile = "";
-            if (OperatingSystem.IsWindows())
-            {
-                sqlFile = "sqlite3.dll";
-            }
-            else if (OperatingSystem.IsLinux())
-            {
-                sqlFile = "libsqlite3.so";
-            }
-            else if (OperatingSystem.IsMacOS())
-            {
-                sqlFile = "libsqlite3.dylib";
-            }
             string[] expectedFiles = new[] {
                 $"App{Constants.ExeSuffix}",
                 "App.dll",
@@ -124,7 +111,7 @@ namespace Microsoft.NET.Build.Tests
                 "LibraryWithRid.pdb",
                 "LibraryWithRids.dll",
                 "LibraryWithRids.pdb",
-                sqlFile
+                $"{FileConstants.DynamicLibPrefix}sqlite3{FileConstants.DynamicLibSuffix}"
             };
 
             outputDirectory.Should().OnlyHaveFiles(expectedFiles.Where(x => !String.IsNullOrEmpty(x)).ToList() );

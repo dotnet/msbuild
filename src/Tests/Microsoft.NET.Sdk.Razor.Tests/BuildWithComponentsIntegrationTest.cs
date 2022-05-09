@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.NET.TestFramework;
@@ -20,7 +21,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         [CoreMSBuildOnlyFact]
         public void Build_Components_WithDotNetCoreMSBuild_Works() => Build_ComponentsWorks();
 
-        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/aspnetcore/issues/33796")]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void Build_Components_WithDesktopMSBuild_Works() => Build_ComponentsWorks();
 
         [Fact]
@@ -42,10 +43,10 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             new FileInfo(Path.Combine(outputPath, "ComponentLibrary.Views.pdb")).Should().NotExist();
         }
 
-        private void Build_ComponentsWorks()
+        private void Build_ComponentsWorks([CallerMemberName] string callerName = "")
         {
             var testAsset = "RazorMvcWithComponents";
-            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset, callerName);
 
             var build = new BuildCommand(projectDirectory);
             build.Execute().Should().Pass();

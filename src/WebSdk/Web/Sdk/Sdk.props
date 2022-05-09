@@ -51,9 +51,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       IsImplicitlyDefined="true" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(DisableImplicitComponentsAnalyzers)' != 'true' And '$(DisableImplicitAspNetCoreAnalyzers)' != 'true' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' >= '3.0'">
+  <ItemGroup Condition="'$(DisableImplicitComponentsAnalyzers)' != 'true' And '$(DisableImplicitAspNetCoreAnalyzers)' != 'true'
+      And '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
+      And $([MSBuild]::VersionGreaterThanOrEquals('$(TargetFrameworkVersion)', '3.0'))
+      And $([MSBuild]::VersionLessThanOrEquals('$(TargetFrameworkVersion)', '6.0'))">
     <Analyzer
-      Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))\analyzers\cs\Microsoft.AspNetCore.Components.Analyzers.dll"
+      Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))\analyzers\cs\Microsoft.AspNetCore.Components.SdkAnalyzers.dll"
       Condition="'$(Language)'=='C#'"
       IsImplicitlyDefined="true" />
   </ItemGroup>

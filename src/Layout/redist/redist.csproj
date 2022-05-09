@@ -25,16 +25,17 @@
     <PackageReference Include="dotnet-format" Version="$(DotnetFormatVersion)" GeneratePathProperty="true" ExcludeAssets="All" />
     <PackageReference Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksPackageVersion)" />
     <PackageReference Include="NuGet.Build.Tasks.Console" Version="$(NuGetBuildTasksConsolePackageVersion)" />
+    <PackageReference Include="NuGet.Common" Version="$(NuGetCommonPackageVersion)" /><!-- Keeps this from being bumped by transitive refs (templating) -->
     <PackageReference Include="Microsoft.Build.NuGetSdkResolver" Version="$(MicrosoftBuildNuGetSdkResolverPackageVersion)" />
     <PackageReference Include="Microsoft.TestPlatform.CLI" Version="$(MicrosoftTestPlatformCLIPackageVersion)" ExcludeAssets="All" />
     <PackageReference Include="Microsoft.TestPlatform.Build" Version="$(MicrosoftTestPlatformBuildPackageVersion)" />
     <PackageReference Condition=" '$(DotNetBuildFromSource)' != 'true' " Include="NuGet.Localization" Version="$(NuGetLocalizationPackageVersion)" />
     <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelPackageVersion)" />
-    <PackageReference Include="Microsoft.Net.Compilers.Toolset" Version="$(MicrosoftNetCompilersToolsetPackageVersion)" ExcludeAssets="All" />
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="$(MicrosoftCodeAnalysisNetAnalyzersVersion)" ExcludeAssets="All" GeneratePathProperty="true"/>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="$(MicrosoftNetCompilersToolsetPackageVersion)" ExcludeAssets="All" GeneratePathProperty="true"/>
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.CodeStyle" Version="$(MicrosoftNetCompilersToolsetPackageVersion)" ExcludeAssets="All" GeneratePathProperty="true"/>
     <PackageReference Include="Microsoft.NET.ILLink.Analyzers" Version="$(MicrosoftNETILLinkAnalyzerPackageVersion)" ExcludeAssets="All" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.FSharp.Compiler" Version="$(MicrosoftFSharpCompilerPackageVersion)" ExcludeAssets="All" GeneratePathProperty="true" />
 
     <!-- Lift up dependencies of dependencies to prevent build tasks from getting pinned to older versions -->
     <PackageReference Include="System.CodeDom" Version="$(SystemCodeDomPackageVersion)" />
@@ -69,4 +70,30 @@
       <Analyzer Remove="@(Analyzer)"/>
     </ItemGroup>
   </Target>
+
+  <Target Name="RemoveMSBuildRef" AfterTargets="ResolvePackageAssets">
+    <!-- MSBuild.dll is now in the ref folder of the Microsoft.Build.Runtime NuGet package.
+           This counter-intuitively was stopping it from being written to the deps.json file.
+           (This may have been because there wasn't a corresponding implementation in the lib
+           folder).
+
+           This target works around that by removing the item that is generated from the
+           ref assembly in the NuGet package. -->
+    <ItemGroup>
+      <ResolvedCompileFileDefinitions Remove="@(ResolvedCompileFileDefinitions)" Condition="'%(FileName)' == 'MSBuild'" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_ResolvePublishFSharpNuGetPackages"
+       AfterTargets="CoreCompile">
+
+    <PropertyGroup>
+        <FSharpCorePath Condition="'$(DotNetFinalVersionKind)'!='release'">Shipping</FSharpCorePath>
+        <FSharpCorePath Condition="'$(DotNetFinalVersionKind)'=='release'">Release</FSharpCorePath>
+    </PropertyGroup>
+    <ItemGroup>
+        <ItemsToPushToBlobFeed Include="$(PkgMicrosoft_FSharp_Compiler)\contentFiles\$(FSharpCorePath)\FSharp.Core.*.nupkg"/>
+        <ItemsToPushToBlobFeed Include="$(PkgMicrosoft_FSharp_Compiler)\contentFiles\$(FSharpCorePath)\FSharp.Compiler.Service.*.nupkg" />
+    </ItemGroup>
+ </Target>
 </Project>

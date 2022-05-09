@@ -99,6 +99,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 SelfContained="$(SelfContained)"
                                 ReadyToRunEnabled="$(PublishReadyToRun)"
                                 ReadyToRunUseCrossgen2="$(PublishReadyToRunUseCrossgen2)"
+                                AotEnabled="$(PublishAot)"
                                 RuntimeIdentifier="$(RuntimeIdentifier)"
                                 RuntimeIdentifiers="$(RuntimeIdentifiers)"
                                 RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
@@ -107,6 +108,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 EnableTargetingPackDownload="$(EnableTargetingPackDownload)"
                                 EnableRuntimePackDownload="$(EnableRuntimePackDownload)"
                                 KnownCrossgen2Packs="@(KnownCrossgen2Pack)"
+                                KnownILCompilerPacks="@(KnownILCompilerPack)"
                                 NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"
                                 NetCoreRoot="$(NetCoreRoot)"
                                 NETCoreSdkVersion="$(NETCoreSdkVersion)">
@@ -116,6 +118,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="TargetingPacks" ItemName="TargetingPack" />
       <Output TaskParameter="RuntimePacks" ItemName="RuntimePack" />
       <Output TaskParameter="Crossgen2Packs" ItemName="Crossgen2Pack" />
+      <Output TaskParameter="ILCompilerPacks" ItemName="ILCompilerPack" />
       <Output TaskParameter="UnavailableRuntimePacks" ItemName="UnavailableRuntimePack" />
 
     </ProcessFrameworkReferences>
@@ -246,6 +249,13 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     </GetPackageDirectory>
 
+    <GetPackageDirectory
+      Items="@(ILCompilerPack)"
+      PackageFolders="@(AssetsFilePackageFolder)">
+
+      <Output TaskParameter="Output" ItemName="ResolvedILCompilerPack" />
+    </GetPackageDirectory>
+    
     <GetPackageDirectory
       Items="@(PackAsToolShimAppHostPack)"
       PackageFolders="@(AssetsFilePackageFolder)">

@@ -27,7 +27,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Analyzers" Version="$(MicrosoftAspNetCoreAnalyzersPackageVersion)" PrivateAssets="All" BundleAsAnalyzer="true" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Analyzers" Version="$(MicrosoftAspNetCoreComponentsAnalyzersPackageVersion)" PrivateAssets="All" BundleAsAnalyzer="true" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.SdkAnalyzers" Version="$(MicrosoftAspNetCoreComponentsSdkAnalyzersPackageVersion)" PrivateAssets="All" BundleAsAnalyzer="true" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Analyzers" Version="$(MicrosoftAspNetCoreMvcAnalyzersPackageVersion)" PrivateAssets="All" BundleAsAnalyzer="true" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Api.Analyzers" Version="$(MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion)" PrivateAssets="All" BundleAsAnalyzer="true" />
   </ItemGroup>

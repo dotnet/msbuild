@@ -26,10 +26,10 @@ variables:
   - ${{ if ne(variables['System.TeamProject'], 'public') }}:
     - name: _DotNetPublishToBlobFeed
       value: true
-    - group: DotNet-MSRC-Storage
+    - group: DotNetBuilds storage account read tokens
     - name: _InternalRuntimeDownloadArgs
-      value: /p:DotNetRuntimeSourceFeed=https://dotnetclimsrc.blob.core.windows.net/dotnet
-        /p:DotNetRuntimeSourceFeedKey=$(dotnetclimsrc-read-sas-token-base64)
+      value: /p:DotNetRuntimeSourceFeed=https://dotnetbuilds.blob.core.windows.net/internal 
+        /p:DotNetRuntimeSourceFeedKey=$(dotnetbuilds-internal-container-read-token-base64)
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - group: DotNet-CLI-SDLValidation-Params
 
@@ -38,6 +38,13 @@ stages:
   displayName: Build
   jobs:
   - job: Publish_Build_Configuration
+    pool:
+      ${{ if eq(variables['System.TeamProject'], 'public') }}:
+        name: NetCore1ESPool-Public
+        demands: ImageOverride -equals build.windows.10.amd64.vs2019.open
+      ${{ if eq(variables['System.TeamProject'], 'internal') }}:
+        name: NetCore1ESPool-Internal
+        demands: ImageOverride -equals build.windows.10.amd64.vs2019
     steps:
       - publish: $(Build.SourcesDirectory)\eng\BuildConfiguration
         artifact: BuildConfiguration
@@ -47,12 +54,12 @@ stages:
       agentOs: Windows_NT
       pool:
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          name: NetCore1ESPool-Svc-Public
-          demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre.Open
+          name: NetCore1ESPool-Public
+          demands: ImageOverride -equals Build.Windows.Amd64.VS2022.Pre.Open
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
-          name: NetCore1ESPool-Svc-Internal
-          demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre
-      helixTargetQueue: Windows.Server.Amd64.VS2019.Pre.Open
+          name: NetCore1ESPool-Internal
+          demands: ImageOverride -equals Build.Windows.Amd64.VS2022.Pre
+      helixTargetQueue: Windows.Amd64.VS2022.Pre.Open
       strategy:
         matrix:
           Build_Release:
@@ -75,15 +82,15 @@ stages:
         agentOs: Windows_NT_FullFramework
         pool:
           ${{ if eq(variables['System.TeamProject'], 'public') }}:
-            name: NetCore1ESPool-Svc-Public
-            demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre.Open
+            name: NetCore1ESPool-Public
+            demands: ImageOverride -equals Build.Windows.Amd64.VS2022.Pre.Open
           ${{ if ne(variables['System.TeamProject'], 'public') }}:
-            name: NetCore1ESPool-Svc-Internal
-            demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre
+            name: NetCore1ESPool-Internal
+            demands: ImageOverride -equals Build.Windows.Amd64.VS2022.Pre
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: Windows.Server.Amd64.VS2019.Pre.Open
+          helixTargetQueue: Windows.Amd64.VS2022.Pre.Open
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: Windows.Server.Amd64.VS2019.Pre.Open
+          helixTargetQueue: Windows.Amd64.VS2022.Pre
         strategy:
           matrix:
             Build_Debug:
@@ -102,10 +109,10 @@ stages:
         agentOs: Windows_NT_TestAsTools
         pool:
           ${{ if eq(variables['System.TeamProject'], 'public') }}:
-            name: NetCore1ESPool-Svc-Public
+            name: NetCore1ESPool-Public
             demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre.Open
           ${{ if ne(variables['System.TeamProject'], 'public') }}:
-            name: NetCore1ESPool-Svc-Internal
+            name: NetCore1ESPool-Internal
             demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre
         strategy:
           matrix:
@@ -119,10 +126,10 @@ stages:
         agentOs: Ubuntu_18_04
         pool:
           ${{ if eq(variables['System.TeamProject'], 'public') }}:
-            name: NetCore1ESPool-Svc-Public
+            name: NetCore1ESPool-Public
             demands: ImageOverride -equals Build.Ubuntu.1804.Amd64.Open
           ${{ if ne(variables['System.TeamProject'], 'public') }}:
-            name: NetCore1ESPool-Svc-Internal
+            name: NetCore1ESPool-Internal
             demands: ImageOverride -equals Build.Ubuntu.1804.Amd64
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
           helixTargetQueue: Ubuntu.1804.Amd64.Open
@@ -159,8 +166,10 @@ stages:
         publishUsingPipelines: true
         dependsOn:
           - Windows_NT
-        queue:
-          name: Hosted VS2017
+          - Source_Build_Managed
+        pool:
+          name: NetCore1ESPool-Internal
+          demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: /eng/common/templates/post-build/post-build.yml
     parameters:

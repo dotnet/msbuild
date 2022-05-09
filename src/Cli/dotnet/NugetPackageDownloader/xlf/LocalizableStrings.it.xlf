@@ -27,9 +27,9 @@
         <target state="translated">{0} non è stato trovato nei feed NuGet {1}“.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SkipNuGetpackageSigningValidationSDKNotFirstParty">
-        <source>Skip NuGet package signing validation. The current .NET SDK is not signed by first party.</source>
-        <target state="translated">Ignorare la convalida della firma del pacchetto NuGet. .NET SDK corrente non firmato da primo gruppo.</target>
+      <trans-unit id="NuGetPackageSignatureVerificationSkipped">
+        <source>Skipping NuGet package signature verification.</source>
+        <target state="new">Skipping NuGet package signature verification.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipNuGetpackageSigningValidationmacOSLinux">

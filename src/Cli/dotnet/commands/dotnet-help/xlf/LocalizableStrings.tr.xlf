@@ -267,11 +267,6 @@
         <target state="translated">Geliştirme sertifikaları oluşturun ve yönetin.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">SQL Server önbellek komut satırı araçları.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
         <target state="translated">Kullanıcı gizli dizilerini yönetin.</target>

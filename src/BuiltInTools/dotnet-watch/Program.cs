@@ -145,18 +145,25 @@ Examples:
             var noHotReloadOption = new Option<bool>(
                 new[] { "--no-hot-reload" },
                 "Suppress hot reload for supported apps.");
+            var nonInteractiveOption = new Option<bool>(
+                new[] { "--non-interactive" },
+                "Runs dotnet-watch in non-interative mode. This option is only supported when running with Hot Reload enabled. " +
+                "Use this option to prevent console input from being captured.");
+            var forwardedArguments = new Argument<string[]>("forwardedArgs", "Arguments to pass to the child dotnet process");
+
             var root = new RootCommand(Description)
             {
                  quiet,
                  verbose,
                  noHotReloadOption,
+                 nonInteractiveOption,
                  longProjectOption,
                  shortProjectOption,
-                 listOption
+                 listOption,
+                 forwardedArguments
             };
 
-            root.TreatUnmatchedTokensAsErrors = false;
-            var binder = new CommandLineOptionsBinder(longProjectOption, shortProjectOption, quiet, listOption, noHotReloadOption, verbose, reporter);
+            var binder = new CommandLineOptionsBinder(longProjectOption, shortProjectOption, quiet, listOption, noHotReloadOption, nonInteractiveOption, verbose, forwardedArguments, reporter);
             root.SetHandler((CommandLineOptions options) => handler(options), binder);
             return root;
         }
@@ -241,6 +248,7 @@ Examples:
             }
 
             var watchOptions = DotNetWatchOptions.Default;
+            watchOptions.NonInteractive = options.NonInteractive;
 
             var fileSetFactory = new MsBuildFileSetFactory(_reporter,
                 watchOptions,
@@ -419,17 +427,31 @@ Examples:
             private readonly Option<bool> _quietOption;
             private readonly Option<bool> _listOption;
             private readonly Option<bool> _noHotReloadOption;
+            private readonly Option<bool> _nonInteractiveOption;
             private readonly Option<bool> _verboseOption;
+
+            private readonly Argument<string[]> _argumentsToForward;
             private readonly IReporter _reporter;
 
-            internal CommandLineOptionsBinder(Option<string> longProjectOption, Option<string> shortProjectOption, Option<bool> quietOption, Option<bool> listOption, Option<bool> noHotReloadOption, Option<bool> verboseOption, IReporter reporter)
+            internal CommandLineOptionsBinder(
+                Option<string> longProjectOption,
+                Option<string> shortProjectOption,
+                Option<bool> quietOption,
+                Option<bool> listOption,
+                Option<bool> noHotReloadOption,
+                Option<bool> nonInteractiveOption,
+                Option<bool> verboseOption,
+                Argument<string[]> argumentsToForward,
+                IReporter reporter)
             {
                 _longProjectOption = longProjectOption;
                 _shortProjectOption = shortProjectOption;
                 _quietOption = quietOption;
                 _listOption = listOption;
                 _noHotReloadOption = noHotReloadOption;
+                _nonInteractiveOption = nonInteractiveOption;
                 _verboseOption = verboseOption;
+                _argumentsToForward = argumentsToForward;
                 _reporter = reporter;
             }
 
@@ -448,27 +470,16 @@ Examples:
                         projectValue = projectShortValue;
                     }
                 }
-                var remainingArguments = new List<string>();
-                if (parseResults.UnparsedTokens.Any() && parseResults.UnmatchedTokens.Any())
-                {
-                    remainingArguments.AddRange(parseResults.UnmatchedTokens);
-                    remainingArguments.Add("--");
-                    remainingArguments.AddRange(parseResults.UnparsedTokens);
-                }
-                else
-                {
-                    remainingArguments.AddRange(parseResults.UnmatchedTokens);
-                    remainingArguments.AddRange(parseResults.UnparsedTokens);
-                }
 
                 var options = new CommandLineOptions
                 {
                     Quiet = parseResults.GetValueForOption(_quietOption),
                     List = parseResults.GetValueForOption(_listOption),
                     NoHotReload = parseResults.GetValueForOption(_noHotReloadOption),
+                    NonInteractive = parseResults.GetValueForOption(_nonInteractiveOption),
                     Verbose = parseResults.GetValueForOption(_verboseOption),
                     Project = projectValue,
-                    RemainingArguments = remainingArguments.AsReadOnly(),
+                    RemainingArguments = parseResults.GetValueForArgument(_argumentsToForward),
                 };
                 return options;
             }

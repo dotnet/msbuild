@@ -267,11 +267,6 @@
         <target state="translated">개발 인증서를 만들고 관리합니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">SQL Server 캐시 명령줄 도구입니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
         <target state="translated">개발 사용자 비밀을 관리합니다.</target>

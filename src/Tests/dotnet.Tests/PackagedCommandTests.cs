@@ -215,12 +215,15 @@ namespace Microsoft.DotNet.Tests
                 .And.NotHaveStdErr();
         }
 
-        [Fact(Skip="https://github.com/dotnet/cli/issues/9688")]
+        [Fact]
         public void ToolsCanAccessDependencyContextProperly()
         {
             var testInstance = _testAssetsManager.CopyTestAsset("DependencyContextFromTool")
-                .WithSource()
-                .Restore(Log);
+                .WithSource();
+
+            NuGetConfigWriter.Write(testInstance.Path, TestContext.Current.TestPackages);
+
+            testInstance.Restore(Log);
 
             new DotnetCommand(Log, "dependency-context-test")
                 .WithWorkingDirectory(testInstance.Path)

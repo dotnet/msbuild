@@ -16,12 +16,12 @@ namespace Microsoft.DotNet.Compatibility
         private readonly bool _baselineAllErrors;
 
         public CompatibilityLogger(Logger log, string suppressionsFile)
-            : this(log, suppressionsFile, false) {}
+            : this(log, suppressionsFile, false, string.Empty) {}
 
-        public CompatibilityLogger(Logger log, string suppressionsFile, bool baselineAllErrors)
+        public CompatibilityLogger(Logger log, string suppressionsFile, bool baselineAllErrors, string noWarn)
         {
             _log = log;
-            _suppressionEngine = baselineAllErrors && !File.Exists(suppressionsFile) ? SuppressionEngine.Create() : SuppressionEngine.CreateFromFile(suppressionsFile);
+            _suppressionEngine = baselineAllErrors && !File.Exists(suppressionsFile) ? SuppressionEngine.Create(noWarn) : SuppressionEngine.CreateFromFile(suppressionsFile, noWarn);
             _baselineAllErrors = baselineAllErrors;
         }
 

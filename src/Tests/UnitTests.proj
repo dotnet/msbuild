@@ -8,12 +8,20 @@
 
     <EnableAzurePipelinesReporter Condition="'$(BUILD_BUILDNUMBER)' != ''">true</EnableAzurePipelinesReporter>
 
-    <EnableXUnitReporter>true</EnableXUnitReporter>
     <XUnitWorkItemTimeout>2:00:00</XUnitWorkItemTimeout>
   </PropertyGroup>
 
   <ItemGroup>
-    <SDKCustomXUnitProject Include="**\*.Tests.csproj"/>
+    <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true'" Include="**\*.Tests.csproj" Exclude="**\*.AoT.Tests.csproj" />
+    <SDKCustomXUnitProject Condition="'$(RunAoTTests)' == 'true'" Include="**\*.AoT.Tests.csproj" />
+    <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true' And $(_AGENTOSNAME) == 'Windows_NT_FullFramework'"  Include="Microsoft.DotNet.MSBuildSdkResolver.Tests\Microsoft.DotNet.MSBuildSdkResolver.Tests.csproj">
+      <TargetFramework>net472</TargetFramework>
+      <RuntimeTargetFramework>net472</RuntimeTargetFramework>
+    </SDKCustomXUnitProject>
+    <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true' And $(_AGENTOSNAME) == 'Windows_NT_FullFramework'"  Include="Microsoft.DotNet.PackageValidation.Tests\Microsoft.DotNet.PackageValidation.Tests.csproj">
+      <TargetFramework>net472</TargetFramework>
+      <RuntimeTargetFramework>net472</RuntimeTargetFramework>
+    </SDKCustomXUnitProject>
   </ItemGroup>
 
   <ItemGroup Condition=" '$(_CustomHelixTargetQueue)' != '' ">

@@ -41,21 +41,29 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void ItCanShowHelp()
         {
-            var tempDir = _testAssetsManager.CreateTestDirectory();
             var cmd = new DotnetCommand(Log).Execute("new", "--help");
             cmd.Should().Pass()
-                .And.HaveStdOutContaining("Usage: new [options]");
+                .And.HaveStdOutContaining("Usage:")
+                .And.HaveStdOutContaining("dotnet new [command] [options]");
         }
 
         [Fact]
         public void ItCanShowHelpForTemplate()
         {
-            var tempDir = _testAssetsManager.CreateTestDirectory();
             var cmd = new DotnetCommand(Log).Execute("new", "classlib", "--help");
             cmd.Should().Pass()
                 .And.NotHaveStdOutContaining("Usage: new [options]")
                 .And.HaveStdOutContaining("Class Library (C#)")
                 .And.HaveStdOutContaining("--framework");
+        }
+
+        [Fact]
+        public void ItCanShowParseError()
+        {
+            var cmd = new DotnetCommand(Log).Execute("new", "update", "--bla");
+            cmd.Should().ExitWith(127)
+                .And.HaveStdErrContaining("Unrecognized command or argument '--bla'")
+                .And.HaveStdOutContaining("dotnet new update [options]");
         }
 
         [Fact(Skip = "https://github.com/dotnet/templating/issues/1971")]

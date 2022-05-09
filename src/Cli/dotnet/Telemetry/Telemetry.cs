@@ -15,6 +15,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
     public class Telemetry : ITelemetry
     {
         internal static string CurrentSessionId = null;
+        internal static bool DisabledForTests = false;
         private readonly int _senderCount;
         private TelemetryClient _client = null;
         private Dictionary<string, string> _commonProperties = null;
@@ -37,6 +38,12 @@ namespace Microsoft.DotNet.Cli.Telemetry
             IEnvironmentProvider environmentProvider = null,
             int senderCount = 3)
         {
+
+            if (DisabledForTests)
+            {
+                return;
+            }
+
             if (environmentProvider == null)
             {
                 environmentProvider = new EnvironmentProvider();
@@ -61,6 +68,17 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 //initialize in task to offload to parallel thread
                 _trackEventTask = Task.Run(() => InitializeTelemetry());
             }
+        }
+
+        internal static void DisableForTests()
+        {
+            DisabledForTests = true;
+            CurrentSessionId = null;
+        }
+
+        internal static void EnableForTests()
+        {
+            DisabledForTests = false;
         }
 
         private bool PermissionExists(IFirstTimeUseNoticeSentinel sentinel)
@@ -97,6 +115,16 @@ namespace Microsoft.DotNet.Cli.Telemetry
             _trackEventTask.Wait();
         }
 
+        // Adding dispose on graceful shutdown per https://github.com/microsoft/ApplicationInsights-dotnet/issues/1152#issuecomment-518742922
+        public void Dispose()
+        {
+            if (_client != null)
+            {
+                _client.TelemetryConfiguration.Dispose();
+                _client = null;
+            }
+        }
+
         public void ThreadBlockingTrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)
         {
             if (!Enabled)
@@ -112,9 +140,10 @@ namespace Microsoft.DotNet.Cli.Telemetry
             {
                 var persistenceChannel = new PersistenceChannel.PersistenceChannel(sendersCount: _senderCount);
                 persistenceChannel.SendingInterval = TimeSpan.FromMilliseconds(1);
-                TelemetryConfiguration.Active.TelemetryChannel = persistenceChannel;
 
-                _client = new TelemetryClient();
+                var config = TelemetryConfiguration.CreateDefault();
+                config.TelemetryChannel = persistenceChannel;
+                _client = new TelemetryClient(config);
                 _client.InstrumentationKey = InstrumentationKey;
                 _client.Context.Session.Id = CurrentSessionId;
                 _client.Context.Device.OperatingSystem = RuntimeEnvironment.OperatingSystem;

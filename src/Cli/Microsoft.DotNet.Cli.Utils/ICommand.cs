@@ -26,6 +26,8 @@ namespace Microsoft.DotNet.Cli.Utils
 
         ICommand OnErrorLine(Action<string> handler);
 
+        ICommand SetCommandArgs(string commandArgs);
+
         string CommandName { get; }
 
         string CommandArgs { get; }

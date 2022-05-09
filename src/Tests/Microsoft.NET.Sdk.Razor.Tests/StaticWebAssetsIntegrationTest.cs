@@ -564,8 +564,8 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 intermediateOutputPath);
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/17979")]
-        public void Build_DeployOnPublish_GeneratesPublishJsonManifestAndCopiesPublishAssets()
+        [Fact]
+        public void Build_DeployOnBuild_GeneratesPublishJsonManifestAndCopiesPublishAssets()
         {
             var expectedManifest = LoadBuildManifest();
             var testAsset = "RazorComponentApp";
@@ -581,19 +581,22 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var path = Path.Combine(intermediateOutputPath, "staticwebassets.build.json");
             new FileInfo(path).Should().Exist();
             var manifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path));
-            AssertManifest(manifest, expectedManifest);
+            AssertManifest(manifest, LoadBuildManifest());
 
             // GenerateStaticWebAssetsManifest should copy the file to the output folder.
             var finalPath = Path.Combine(outputPath, "ComponentApp.staticwebassets.runtime.json");
             new FileInfo(finalPath).Should().Exist();
-            var finalManifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(Path.Combine(intermediateOutputPath, "staticwebassets.build.json")));
-            AssertManifest(finalManifest, expectedManifest);
 
             // GenerateStaticWebAssetsManifest should generate the publish manifest file.
             var intermediatePublishManifestPath = Path.Combine(intermediateOutputPath, "staticwebassets.publish.json");
             new FileInfo(path).Should().Exist();
             var publishManifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath));
             AssertManifest(publishManifest, LoadPublishManifest());
+
+            AssertPublishAssets(
+                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath)),
+                Path.Combine(outputPath, "publish"),
+                intermediateOutputPath);
         }
 
         [Fact]
@@ -777,8 +780,8 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 intermediateOutputPath);
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/17979")]
-        public void BuildProjectWithReferences_DeployOnPublish_GeneratesPublishJsonManifestAndCopiesPublishAssets()
+        [Fact]
+        public void BuildProjectWithReferences_DeployOnBuild_GeneratesPublishJsonManifestAndCopiesPublishAssets()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
             ProjectDirectory = CreateAspNetSdkTestAsset(testAsset);
@@ -801,16 +804,16 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var finalPath = Path.Combine(outputPath, "AppWithPackageAndP2PReference.staticwebassets.runtime.json");
             new FileInfo(finalPath).Should().Exist();
 
-            var manifest = File.ReadAllText(finalPath);
-            AssertManifest(
-                StaticWebAssetsManifest.FromJsonString(manifest),
-                LoadBuildManifest());
-
             // GenerateStaticWebAssetsManifest should generate the publish manifest file.
             var intermediatePublishManifestPath = Path.Combine(intermediateOutputPath, "staticwebassets.publish.json");
             new FileInfo(path).Should().Exist();
             var publishManifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath));
             AssertManifest(publishManifest, LoadPublishManifest());
+
+            AssertPublishAssets(
+                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath)),
+                Path.Combine(outputPath, "publish"),
+                intermediateOutputPath);
         }
 
         // Pack
@@ -1144,12 +1147,12 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 var parse = XDocument.Parse($@"<Project Sdk=""Microsoft.NET.Sdk.Razor"">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0</TargetFrameworks>
+    <TargetFrameworks>net7.0;net6.0;net5.0</TargetFrameworks>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <SupportedPlatform Condition=""'$(TargetFramework)' == 'net6.0'"" Include=""browser"" />
+    <SupportedPlatform Condition=""'$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net7.0'"" Include=""browser"" />
   </ItemGroup>
 
   <ItemGroup>
@@ -1221,12 +1224,12 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 var parse = XDocument.Parse($@"<Project Sdk=""Microsoft.NET.Sdk.Razor"">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0</TargetFrameworks>
+    <TargetFrameworks>net7.0;net6.0;net5.0</TargetFrameworks>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <SupportedPlatform Condition=""'$(TargetFramework)' == 'net6.0'"" Include=""browser"" />
+    <SupportedPlatform Condition=""'$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net7.0'"" Include=""browser"" />
   </ItemGroup>
 
   <ItemGroup>
@@ -1300,12 +1303,12 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 var parse = XDocument.Parse($@"<Project Sdk=""Microsoft.NET.Sdk.Razor"">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0</TargetFrameworks>
+    <TargetFrameworks>net7.0;net6.0;net5.0</TargetFrameworks>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <SupportedPlatform Condition=""'$(TargetFramework)' == 'net6.0'"" Include=""browser"" />
+    <SupportedPlatform Condition=""'$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net7.0'"" Include=""browser"" />
   </ItemGroup>
 
   <ItemGroup>
@@ -1389,10 +1392,10 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 Path.Combine(projectDirectory.Path, "PackageLibraryDirectDependency", "bin", "Debug", "PackageLibraryDirectDependency.1.0.0.nupkg"),
                 filePaths: new[]
                 {
-                    Path.Combine("content", "js", "pkg-direct-dep.js"),
-                    Path.Combine("content", "css", "site.css"),
-                    Path.Combine("contentFiles", "js", "pkg-direct-dep.js"),
-                    Path.Combine("contentFiles", "css", "site.css"),
+                    Path.Combine("content", "wwwroot", "js", "pkg-direct-dep.js"),
+                    Path.Combine("content", "wwwroot", "css", "site.css"),
+                    Path.Combine("contentFiles", "wwwroot", "js", "pkg-direct-dep.js"),
+                    Path.Combine("contentFiles", "wwwroot", "css", "site.css"),
                 });
         }
 
@@ -1441,14 +1444,14 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 Path.Combine(projectDirectory.Path, "PackageLibraryDirectDependency", "bin", "Debug", "PackageLibraryDirectDependency.1.0.0.nupkg"),
                 filePaths: new[]
                 {
-                    Path.Combine("content", "js", "pkg-direct-dep.js"),
-                    Path.Combine("content", "css", "site.css"),
+                    Path.Combine("content", "wwwroot", "js", "pkg-direct-dep.js"),
+                    Path.Combine("content", "wwwroot", "css", "site.css"),
                     Path.Combine("content", "Components", "App.razor.css"),
                     // This is to make sure we don't include the unscoped css file on the package.
                     Path.Combine("content", "Components", "App.razor.css"),
                     Path.Combine("content", "Components", "App.razor.rz.scp.css"),
-                    Path.Combine("contentFiles", "js", "pkg-direct-dep.js"),
-                    Path.Combine("contentFiles", "css", "site.css"),
+                    Path.Combine("contentFiles", "wwwroot", "js", "pkg-direct-dep.js"),
+                    Path.Combine("contentFiles", "wwwroot", "css", "site.css"),
                     Path.Combine("contentFiles", "Components", "App.razor.css"),
                     Path.Combine("contentFiles", "Components", "App.razor.rz.scp.css"),
                 });
@@ -1485,7 +1488,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 });
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/38371")]
         public void Pack_NoBuild_DoesNotIncludeFilesAsContent()
         {
             var testAsset = "PackageLibraryDirectDependency";
@@ -1506,12 +1509,12 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 Path.Combine(projectDirectory.Path, "PackageLibraryDirectDependency", "bin", "Debug", "PackageLibraryDirectDependency.1.0.0.nupkg"),
                 filePaths: new[]
                 {
-                    Path.Combine("content", "js", "pkg-direct-dep.js"),
+                    Path.Combine("content", "wwwroot", "js", "pkg-direct-dep.js"),
                     Path.Combine("content", "PackageLibraryDirectDependency.bundle.scp.css"),
-                    Path.Combine("content", "css", "site.css"),
-                    Path.Combine("contentFiles", "js", "pkg-direct-dep.js"),
+                    Path.Combine("content", "wwwroot", "css", "site.css"),
+                    Path.Combine("contentFiles", "wwwroot", "js", "pkg-direct-dep.js"),
                     Path.Combine("contentFiles", "PackageLibraryDirectDependency.bundle.scp.css"),
-                    Path.Combine("contentFiles", "css", "site.css"),
+                    Path.Combine("contentFiles", "wwwroot", "css", "site.css"),
                 });
         }
 
@@ -1551,8 +1554,8 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             pack.WithWorkingDirectory(projectDirectory.TestRoot);
             var result = pack.Execute("/bl");
 
-            var intermediateOutputPath = pack.GetIntermediateDirectory("net6.0", "Debug").ToString();
-            var outputPath = pack.GetOutputDirectory("net6.0", "Debug").ToString();
+            var intermediateOutputPath = pack.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
+            var outputPath = pack.GetOutputDirectory(DefaultTfm, "Debug").ToString();
 
             new FileInfo(Path.Combine(outputPath, "PackageLibraryTransitiveDependency.dll")).Should().Exist();
 

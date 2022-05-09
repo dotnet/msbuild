@@ -1,9 +1,10 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
+using System;
 using System.Security.Cryptography;
 using System.Text;
+
 namespace Microsoft.DotNet.Cli.Telemetry
 {
     internal static class Sha256Hasher
@@ -13,25 +14,14 @@ namespace Microsoft.DotNet.Cli.Telemetry
         /// </summary>
         public static string Hash(string text)
         {
-            var sha256 = SHA256.Create();
-            return HashInFormat(sha256, text);
+            byte[] bytes = Encoding.UTF8.GetBytes(text);
+            byte[] hash = SHA256.HashData(bytes);
+            return Convert.ToHexString(hash).ToLowerInvariant();
         }
 
         public static string HashWithNormalizedCasing(string text)
         {
             return Hash(text.ToUpperInvariant());
-        }
-
-        private static string HashInFormat(SHA256 sha256, string text)
-        {
-            byte[] bytes = Encoding.UTF8.GetBytes(text);
-            byte[] hash = sha256.ComputeHash(bytes);
-            StringBuilder hashString = new StringBuilder();
-            foreach (byte x in hash)
-            {
-                hashString.AppendFormat("{0:x2}", x);
-            }
-            return hashString.ToString();
         }
     }
 }

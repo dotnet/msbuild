@@ -21,7 +21,7 @@ using Product = Microsoft.DotNet.Cli.Utils.Product;
 
 namespace Microsoft.DotNet.Workloads.Workload.List
 {
-    internal class WorkloadListCommand : CommandBase
+    internal class WorkloadListCommand : WorkloadCommandBase
     {
         private readonly SdkFeatureBand _currentSdkFeatureBand;
         private readonly string _dotnetPath;
@@ -35,6 +35,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         private readonly VerbosityOptions _verbosity;
         private readonly IWorkloadManifestUpdater _workloadManifestUpdater;
         private readonly IWorkloadInstallationRecordRepository _workloadRecordRepo;
+        private readonly IWorkloadResolver _workloadResolver;
 
         public WorkloadListCommand(
             ParseResult result,
@@ -79,14 +80,15 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                                           new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, nullLogger),
                                           verboseLogger: nullLogger,
                                           restoreActionConfig: _parseResult.ToRestoreActionConfig());
-            workloadResolver ??= WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, currentSdkReleaseVersion.ToString(), _userProfileDir);
+            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, currentSdkReleaseVersion.ToString(), _userProfileDir);
 
             _workloadRecordRepo = workloadRecordRepo ??
-                WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand, workloadResolver, _verbosity, _userProfileDir,
+                WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand, _workloadResolver, _verbosity, _userProfileDir,
+                VerifySignatures,
                 elevationRequired: false).GetWorkloadInstallationRecordRepository();
 
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter,
-                workloadResolver, _nugetPackageDownloader, _userProfileDir, _tempDirPath, _workloadRecordRepo);
+                _workloadResolver, _nugetPackageDownloader, _userProfileDir, _tempDirPath, _workloadRecordRepo);
         }
 
         public override int Execute()
@@ -115,17 +117,20 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             }
             else
             {
+                InstalledWorkloadsCollection installedWorkloads = new(installedList, $"SDK {_currentSdkFeatureBand}");
+
                 if (OperatingSystem.IsWindows())
                 {
-                    _reporter.WriteLine();
-                    _reporter.WriteLine(LocalizableStrings.WorkloadListHeader);
+                    VisualStudioWorkloads.GetInstalledWorkloads(_workloadResolver, _currentSdkFeatureBand, installedWorkloads);
                 }
+                
                 _reporter.WriteLine();
 
-                PrintableTable<WorkloadId> table = new();
-                table.AddColumn(LocalizableStrings.WorkloadIdColumn, workloadId => workloadId.ToString());
+                PrintableTable<KeyValuePair<string, string>> table = new();
+                table.AddColumn(LocalizableStrings.WorkloadIdColumn, workload => workload.Key);
+                table.AddColumn(LocalizableStrings.WorkloadSourceColumn, workload => workload.Value);
 
-                table.PrintRows(installedList, l => _reporter.WriteLine(l));
+                table.PrintRows(installedWorkloads.AsEnumerable(), l => _reporter.WriteLine(l));
 
                 _reporter.WriteLine();
                 _reporter.WriteLine(LocalizableStrings.WorkloadListFooter);
@@ -146,21 +151,20 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         {
             HashSet<WorkloadId> installedWorkloads = installedList.ToHashSet();
             _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(_includePreviews).Wait();
-            IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion,
-                Dictionary<WorkloadId, WorkloadDefinition> Workloads)> manifestsToUpdate =
+            var manifestsToUpdate =
                 _workloadManifestUpdater.CalculateManifestUpdates();
 
             List<UpdateAvailableEntry> updateList = new();
-            foreach ((ManifestId _, ManifestVersion existingVersion, ManifestVersion newVersion,
-                Dictionary<WorkloadId, WorkloadDefinition> workloads) in manifestsToUpdate)
+            foreach ((ManifestVersionUpdate manifestUpdate, Dictionary<WorkloadId, WorkloadDefinition> workloads) in manifestsToUpdate)
             {
                 foreach ((WorkloadId WorkloadId, WorkloadDefinition workloadDefinition) in
                     workloads)
                 {
                     if (installedWorkloads.Contains(new WorkloadId(WorkloadId.ToString())))
                     {
-                        updateList.Add(new UpdateAvailableEntry(existingVersion.ToString(),
-                            newVersion.ToString(),
+                        //  TODO: Potentially show existing and new feature bands
+                        updateList.Add(new UpdateAvailableEntry(manifestUpdate.ExistingVersion.ToString(),
+                            manifestUpdate.NewVersion.ToString(),
                             workloadDefinition.Description, WorkloadId.ToString()));
                     }
                 }

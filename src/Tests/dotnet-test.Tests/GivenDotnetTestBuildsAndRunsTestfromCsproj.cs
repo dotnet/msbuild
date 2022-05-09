@@ -1,25 +1,19 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Tools.Test.Utilities;
-using Xunit;
-using FluentAssertions;
-using Microsoft.DotNet.Cli.Utils;
-using System.IO;
 using System;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Xml;
-using System.Xml.Linq;
-using System.Reflection;
-using dotnet.Tests;
-using System.Runtime.InteropServices;
+using FluentAssertions;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.Utilities;
-using System.Collections.Generic;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.Test.Tests
 {
@@ -254,7 +248,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Call test with trx logger enabled and results directory explicitly specified.
             CommandResult result = new DotnetTestCommand(Log)
                                        .WithWorkingDirectory(testProjectDirectory)
-                                       .Execute("--logger", "trx", "-r", trxLoggerDirectory);
+                                       .Execute("--logger", "trx", "--results-directory", trxLoggerDirectory);
 
             // Verify
             String[] trxFiles = Directory.GetFiles(trxLoggerDirectory, "*.trx");
@@ -508,7 +502,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
-        [PlatformSpecificFact(TestPlatforms.Windows)]
+        [PlatformSpecificFact(TestPlatforms.Windows | TestPlatforms.OSX | TestPlatforms.Linux)]
         public void ItCreatesCoberturaFileProvidedByCommandInResultsDirectory()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("15");
@@ -624,7 +618,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Verify test results
             if (!TestContext.IsLocalized())
             {
-                result.StdOut.Should().Contain("No code coverage data available. Code coverage is currently supported only on Windows, Linux x64 and macOS x64.");
+               result.StdOut.Should().Contain("No code coverage data available. Code coverage is currently supported only on Windows, Linux x64 and macOS x64.");
                 result.StdOut.Should().Contain("Total:     1");
                 result.StdOut.Should().Contain("Passed:     1");
                 result.StdOut.Should().NotContain("Failed!");
@@ -704,6 +698,107 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             }
 
             result.ExitCode.Should().Be(1);
+        }
+
+        [Theory] // See issue https://github.com/dotnet/sdk/issues/10423
+        [InlineData("TestCategory=CategoryA,CategoryB", "_comma")]
+        [InlineData("TestCategory=CategoryA%2cCategoryB", "_comma_encoded")]
+        [InlineData("\"TestCategory=CategoryA,CategoryB\"", "_already_escaped")]
+        public void FilterPropertyCorrectlyHandlesComma(string filter, string folderSuffix)
+        {
+            string testAppName = "TestCategoryWithComma";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName, folderSuffix)
+                .WithSource()
+                .WithVersionVariables();
+
+            var testProjectDirectory = testInstance.Path;
+
+            // Call test
+            CommandResult result = new DotnetTestCommand(Log)
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("--filter", filter);
+
+            // Verify
+            if (!TestContext.IsLocalized())
+            {
+                result.StdOut.Should().Contain("Total:     1");
+                result.StdOut.Should().Contain("Passed:     1");
+            }
+        }
+
+        [Theory]
+        [InlineData("--output")]
+        [InlineData("--diag")]
+        [InlineData("--results-directory")]
+        public void EnsureOutputPathEscaped(string flag)
+        {
+            var testProjectDirectory = CopyAndRestoreVSTestDotNetCoreTestApp(flag);
+
+            var pathWithComma = Path.Combine(AppContext.BaseDirectory, "a,b");
+
+            // Call test
+            CommandResult result = new DotnetTestCommand(Log)
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute(flag, pathWithComma);
+
+            // Verify
+            if (!TestContext.IsLocalized())
+            {
+                result.StdOut.Should().Contain("Total:     2");
+                result.StdOut.Should().Contain("Passed:     1");
+                result.StdOut.Should().Contain("Failed:     1");
+            }
+        }
+
+        [Theory]
+        // Even count of slash/backslash
+        [InlineData("--output", "\\\\")]
+        [InlineData("--output", "\\\\\\\\")]
+        [InlineData("--output", "//")]
+        [InlineData("--output", "////")]
+        [InlineData("--diag", "\\\\")]
+        [InlineData("--diag", "\\\\\\\\")]
+        [InlineData("--diag", "//")]
+        [InlineData("--diag", "////")]
+        [InlineData("--results-directory", "\\\\")]
+        [InlineData("--results-directory", "\\\\\\\\")]
+        [InlineData("--results-directory", "//")]
+        [InlineData("--results-directory", "////")]
+        // Odd count of slash/backslash
+        [InlineData("--output", "\\")]
+        [InlineData("--output", "\\\\\\")]
+        [InlineData("--output", "/")]
+        [InlineData("--output", "///")]
+        [InlineData("--diag", "\\")]
+        [InlineData("--diag", "\\\\\\")]
+        [InlineData("--diag", "/")]
+        [InlineData("--diag", "///")]
+        [InlineData("--results-directory", "\\")]
+        [InlineData("--results-directory", "\\\\\\")]
+        [InlineData("--results-directory", "/")]
+        [InlineData("--results-directory", "///")]
+        public void PathEndsWithSlashOrBackslash(string flag, string slashesOrBackslashes)
+        {
+            // NOTE: We also want to test with forward slashes because on Windows they
+            // are converted to backslashes and so need to be handled correctly.
+            string testProjectDirectory = CopyAndRestoreVSTestDotNetCoreTestApp(Guid.NewGuid().ToString());
+            string flagDirectory = Path.Combine(testProjectDirectory, "flag-dir");
+
+            // Call test
+            CommandResult result = new DotnetTestCommand(Log)
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute(flag, flagDirectory + slashesOrBackslashes);
+
+            // Verify
+            if (!TestContext.IsLocalized())
+            {
+                result.StdOut.Should().Contain("Total:     2");
+                result.StdOut.Should().Contain("Passed:     1");
+                result.StdOut.Should().Contain("Failed:     1");
+            }
+
+            Directory.Exists(flagDirectory).Should().BeTrue("folder '{0}' should exist.", flagDirectory);
+            Directory.EnumerateFileSystemEntries(flagDirectory).Should().NotBeEmpty();
         }
 
         private string CopyAndRestoreVSTestDotNetCoreTestApp([CallerMemberName] string callingMethod = "")

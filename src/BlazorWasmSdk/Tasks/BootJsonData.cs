@@ -100,22 +100,24 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         public Dictionary<string, ResourceHashesByNameDictionary> extensions { get; set; }
     }
 
-    public enum ICUDataMode
+    public enum ICUDataMode : int
     {
+        // Note that the numeric values are serialized and used in JS code, so don't change them without also updating the JS code
+    
         /// <summary>
         /// Load optimized icu data file based on the user's locale
         /// </summary>
-        Sharded,
+        Sharded = 0,
 
         /// <summary>
         /// Use the combined icudt.dat file
         /// </summary>
-        All,
+        All = 1,
 
         /// <summary>
         /// Do not load any icu data files.
         /// </summary>
-        Invariant,
+        Invariant = 2,
     }
 #pragma warning restore IDE1006 // Naming Styles
 }

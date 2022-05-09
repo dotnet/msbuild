@@ -65,6 +65,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Enable the trim analyzer when any trimming settings are enabled. Warnings may suppressed based on other settings. -->
     <EnableTrimAnalyzer Condition="'$(EnableTrimAnalyzer)' == '' And ('$(PublishTrimmed)' == 'true' Or '$(IsTrimmable)' == 'true')">true</EnableTrimAnalyzer>
 
+    <!-- Enable the trim analyzer when any trimming settings are enabled. Warnings may suppressed based on other settings. -->
+    <EnableAotAnalyzer Condition="'$(EnableTrimAnalyzer)' == '' And ('$(PublishAot)' == 'true')">true</EnableAotAnalyzer>
+
     <!-- Compiler warning level, defaulted to 4. We promote it to 5 if the user has set analysis level to 5 or higher
          NOTE: at this time only the C# compiler supports warning waves -->
     <WarningLevel Condition="'$(Language)' == 'C#'">5</WarningLevel>
@@ -92,7 +95,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.targets"
           Condition="$(EnableNETAnalyzers)" />
   <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.NET.ILLink.Analyzers.props"
-          Condition="'$(EnableSingleFileAnalyzer)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true'" />
+          Condition="'$(EnableSingleFileAnalyzer)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true' Or '$(EnableAotAnalyzer)' == 'true'" />
 
   <Import Project="$(MSBuildThisFileDirectory)..\codestyle\cs\build\Microsoft.CodeAnalysis.CSharp.CodeStyle.targets"
           Condition="$(EnforceCodeStyleInBuild) And '$(Language)' == 'C#'" />
@@ -115,7 +118,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </ItemGroup>
 
   <!-- ILLinker Analyzers -->
-  <ItemGroup Condition="'$(EnableSingleFileAnalyzer)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true'">
+  <ItemGroup Condition="'$(EnableSingleFileAnalyzer)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true' Or '$(EnableAotAnalyzer)' == 'true'">
     <Analyzer
       Include="$(MSBuildThisFileDirectory)..\analyzers\ILLink.*.dll"
       IsImplicitlyDefined="true" />

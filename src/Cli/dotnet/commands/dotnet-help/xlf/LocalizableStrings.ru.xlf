@@ -267,11 +267,6 @@
         <target state="translated">Создание сертификатов разработки и управление ими.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">Инструменты командной строки кэша SQL Server.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
         <target state="translated">Управление развертыванием секретов пользователей.</target>

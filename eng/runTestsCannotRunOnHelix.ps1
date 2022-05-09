@@ -1,5 +1,9 @@
+Write-Host "Sleeping for 90 seconds..."
+
 #hack to make sure build of helix run is done, so no file lock
 Start-Sleep -Seconds 90
+
+Write-Host "Running tests that can't run on Helix..."
 
 $repoRoot = (get-item $PSScriptRoot).parent
 $allTests = Get-Childitem -Path $repoRoot.GetDirectories("src").GetDirectories("Tests").FullName -Recurse '*.Tests.csproj'
@@ -16,7 +20,9 @@ foreach($line in ([System.IO.File]::ReadLines($testsProjectCannotRunOnHelixListP
     foreach ($testProject in $allTests)
     {
         if ($testProject.FullName.Contains($line.Trim())) {
-            $passInArgs = @("-test") + $args + @("-projects", $testProject.FullName)
+            $baseName = $testProject.BaseName
+
+            $passInArgs = @("-test") + $args + @("-projects", $testProject.FullName, "/bl:$buildSourcesDirectory\artifacts\log\$configuration\$baseName.binlog")
             $anyError = $false
             try {
                 Invoke-Expression "& $buildshScriptPath $passInArgs"
@@ -32,3 +38,5 @@ foreach($line in ([System.IO.File]::ReadLines($testsProjectCannotRunOnHelixListP
         }
     }
 }
+
+Write-Host "Done running tests that can't run on Helix..."

@@ -17,9 +17,9 @@
         <target state="translated">Use 'pesquisa de carga de trabalho do dotnet' para encontrar cargas de trabalho adicionais a serem instaladas.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WorkloadListHeader">
-        <source>This command lists only workloads that were installed via `dotnet workload install` in this version of the SDK and not those that were installed via Visual Studio.</source>
-        <target state="translated">Este comando lista somente as cargas de trabalho que foram instaladas por meio da ' instalação de carga de trabalho 'dotnet nesta versão do SDK e não aquelas que foram instaladas via Visual Studio.</target>
+      <trans-unit id="WorkloadSourceColumn">
+        <source>Installation Source</source>
+        <target state="translated">Origem da Instalação</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">

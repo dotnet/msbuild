@@ -194,6 +194,27 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                .HaveStdOutContaining("NETSDK1179");
         }
 
+        [Fact]
+        public void It_does_not_warn_on_rid_with_self_contained_set_in_project()
+        {
+            var testProject = new TestProject()
+            {
+                IsExe = true,
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+            };
+            testProject.AdditionalProperties["SelfContained"] = "true";
+            
+            var testInstance = _testAssetsManager.CreateTestProject(testProject);
+
+            new DotnetBuildCommand(Log)
+               .WithWorkingDirectory(Path.Combine(testInstance.Path, testProject.Name))
+               .Execute("-r", "win-x64")
+               .Should()
+               .Pass()
+               .And
+               .NotHaveStdOutContaining("NETSDK1179");
+        }
+
         [WindowsOnlyTheory]
         [InlineData("build")]
         [InlineData("run")]
@@ -228,6 +249,23 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                .Pass()
                .And
                .NotHaveStdOutContaining("NETSDK1179");
+        }
+
+        [Fact]
+        public void It_builds_with_implicit_rid_with_self_contained_option()
+        {
+            var testInstance = _testAssetsManager.CopyTestAsset("HelloWorld")
+                .WithSource()
+                .WithTargetFrameworkOrFrameworks("net6.0", false)
+                .Restore(Log);
+
+            new DotnetBuildCommand(Log)
+               .WithWorkingDirectory(testInstance.Path)
+               .Execute("--self-contained")
+               .Should()
+               .Pass()
+               .And
+               .NotHaveStdOutContaining("NETSDK1031");
         }
 
         [Theory]

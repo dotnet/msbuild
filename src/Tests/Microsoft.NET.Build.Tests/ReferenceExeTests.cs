@@ -304,7 +304,7 @@ namespace Microsoft.NET.Build.Tests
             var testConsoleProject = new TestProject("ConsoleApp")
             {
                 IsExe = true,
-                TargetFrameworks = "net6.0",
+                TargetFrameworks = "net7.0",
                 RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
             };
 

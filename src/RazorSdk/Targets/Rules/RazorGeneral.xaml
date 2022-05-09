@@ -23,7 +23,7 @@
     DisplayName="Razor Language Version"
     Name="RazorLangVersion"
     ReadOnly="True"
-    Visible="True" />
+    Visible="False" />
 
   <StringProperty
     Category="General"
@@ -31,6 +31,6 @@
     DisplayName="Razor Configuration Name"
     Name="RazorDefaultConfiguration"
     ReadOnly="True"
-    Visible="True" />
+    Visible="False" />
 
 </Rule>

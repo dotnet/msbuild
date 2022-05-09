@@ -48,4 +48,3 @@
   foreach ($processName in $processesToStopOnExit) {
     Get-Process -Name $processName -ErrorAction SilentlyContinue | Stop-Process
   }
-

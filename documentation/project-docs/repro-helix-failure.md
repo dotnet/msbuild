@@ -63,3 +63,5 @@ Due to Helix long path problem. The folders under localHelixTestLayout all have 
 - Helix machine does not have the same pre-installed dependencies as the host machine. Ideally the dependencies should be declared by the SDK repo itself. At the time the document is written. The build queue and the helix queue should have the same Visual Studio version. If they are diverged, we should contact arcade team.
 
 - New test environment variable introduced has not been reflected in RunTestsOnHelix.cmd.
+
+- To test out changes to the Helix tasks, you can run the unit test project directly: `dotnet -t:Test .\src\Tests\UnitTests.proj /p:_CustomHelixTargetQueue=foo /bl` It won't be able to push the files into helix but it will let you view what helix work items are getting created.

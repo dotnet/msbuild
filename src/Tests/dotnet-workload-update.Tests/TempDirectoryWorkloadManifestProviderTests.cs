@@ -66,11 +66,11 @@ namespace dotnet.Tests
 
             TempDirectoryWorkloadManifestProvider tempDirectoryWorkloadManifestProvider =
                 new TempDirectoryWorkloadManifestProvider(_manifestDirectory, mockWorkloadResolver.GetSdkFeatureBand());
-            IEnumerable<(string manifestId, string informationalPath, Func<Stream> openManifestStream, Func<Stream> openLocalizationStream)> manifest =
+            IEnumerable<ReadableWorkloadManifest> manifest =
                 tempDirectoryWorkloadManifestProvider.GetManifests();
-            manifest.First().manifestId.Should()
+            manifest.First().ManifestId.Should()
                 .NotBe("microsoft.net.workload.emscripten.manifest-6.0.100.6.0.0-preview.7.21377.2");
-            manifest.First().manifestId.Should()
+            manifest.First().ManifestId.Should()
                 .BeEquivalentTo("microsoft.net.workload.emscripten");
         }
 

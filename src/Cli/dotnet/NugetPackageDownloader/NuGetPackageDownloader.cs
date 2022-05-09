@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
     {
         private readonly SourceCacheContext _cacheSettings;
         private readonly IFilePermissionSetter _filePermissionSetter;
-        
+
         /// <summary>
         /// In many commands we don't passing NuGetConsoleLogger and pass NullLogger instead to reduce the verbosity
         /// </summary>
@@ -43,13 +43,16 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         private bool _validationMessagesDisplayed = false;
         private IDictionary<PackageSource, SourceRepository> _sourceRepositories;
 
+        private bool _verifySignatures;
+
         public NuGetPackageDownloader(DirectoryPath packageInstallDir,
             IFilePermissionSetter filePermissionSetter = null,
             IFirstPartyNuGetPackageSigningVerifier firstPartyNuGetPackageSigningVerifier = null,
             ILogger verboseLogger = null,
             IReporter reporter = null,
             RestoreActionConfig restoreActionConfig = null,
-            Func<IEnumerable<Task>> timer = null)
+            Func<IEnumerable<Task>> timer = null,
+            bool verifySignatures = false)
         {
             _packageInstallDir = packageInstallDir;
             _reporter = reporter ?? Reporter.Output;
@@ -61,6 +64,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             _restoreActionConfig = restoreActionConfig ?? new RestoreActionConfig();
             _retryTimer = timer;
             _sourceRepositories = new Dictionary<PackageSource, SourceRepository>();
+            _verifySignatures = verifySignatures;
 
             _cacheSettings = new SourceCacheContext
             {
@@ -128,36 +132,26 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
         private void VerifySigning(string nupkgPath)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                if (_firstPartyNuGetPackageSigningVerifier.IsExecutableIsFirstPartySignedWithoutValidation(new FilePath(
-                    typeof(DotNet.Cli.Program).Assembly.Location)))
-                {
-                    if (!_firstPartyNuGetPackageSigningVerifier.Verify(new FilePath(nupkgPath),
-                        out string commandOutput))
-                    {
-                        throw new NuGetPackageInstallerException(LocalizableStrings.FailedToValidatePackageSigning +
-                                                                 Environment.NewLine +
-                                                                 commandOutput);
-                    }
-                }
-                else
-                {
-                    if (!_validationMessagesDisplayed)
-                    {
-                        _reporter.WriteLine(
-                            LocalizableStrings.SkipNuGetpackageSigningValidationSDKNotFirstParty);
-                        _validationMessagesDisplayed = true;
-                    }
-                }
-            }
-            else
+            if (!_verifySignatures)
             {
                 if (!_validationMessagesDisplayed)
                 {
                     _reporter.WriteLine(
-                        LocalizableStrings.SkipNuGetpackageSigningValidationmacOSLinux);
+                        LocalizableStrings.NuGetPackageSignatureVerificationSkipped);
                     _validationMessagesDisplayed = true;
+                }
+
+                return;
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (!_firstPartyNuGetPackageSigningVerifier.Verify(new FilePath(nupkgPath),
+                    out string commandOutput))
+                {
+                    throw new NuGetPackageInstallerException(LocalizableStrings.FailedToValidatePackageSigning +
+                                                             Environment.NewLine +
+                                                             commandOutput);
                 }
             }
         }

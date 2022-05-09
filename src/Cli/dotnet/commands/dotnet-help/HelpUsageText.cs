@@ -60,7 +60,6 @@ sdk-options:
 {LocalizableStrings.AdditionalTools}
   dev-certs         {LocalizableStrings.DevCertsDefinition}
   fsi               {LocalizableStrings.FsiDefinition}
-  sql-cache         {LocalizableStrings.SqlCacheDefinition}
   user-secrets      {LocalizableStrings.UserSecretsDefinition}
   watch             {LocalizableStrings.WatchDefinition}
 

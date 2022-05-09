@@ -1,3 +1,9 @@
+
+REM make NuGet network operations more robust
+set NUGET_ENABLE_EXPERIMENTAL_HTTP_RETRY=true
+set NUGET_EXPERIMENTAL_MAX_NETWORK_TRY_COUNT=6
+set NUGET_EXPERIMENTAL_NETWORK_RETRY_DELAY_MILLISECONDS=1000
+
 set MicrosoftNETBuildExtensionsTargets=%HELIX_CORRELATION_PAYLOAD%\ex\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\Microsoft.NET.Build.Extensions.targets
 set DOTNET_ROOT=%HELIX_CORRELATION_PAYLOAD%\d
 set PATH=%DOTNET_ROOT%;%PATH%
@@ -18,3 +24,8 @@ set TestExecutionDirectory=%TEMP%\dotnetSdkTests\%RandomDirectoryName%
 set DOTNET_CLI_HOME=%TestExecutionDirectory%\.dotnet
 mkdir %TestExecutionDirectory%
 robocopy %HELIX_CORRELATION_PAYLOAD%\t\TestExecutionDirectoryFiles %TestExecutionDirectory%
+
+REM call dotnet new so the first run message doesn't interfere with the first test
+dotnet new
+REM avoid potetial cocurrency issues when nuget is creating nuget.config
+dotnet nuget list source

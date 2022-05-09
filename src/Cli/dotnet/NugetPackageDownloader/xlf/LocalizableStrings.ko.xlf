@@ -27,9 +27,9 @@
         <target state="translated">NuGet 피드 {1}"에서 {0}을(를) 찾을 수 없습니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SkipNuGetpackageSigningValidationSDKNotFirstParty">
-        <source>Skip NuGet package signing validation. The current .NET SDK is not signed by first party.</source>
-        <target state="translated">NuGet 패키지 서명 유효성 검사를 건너뜁니다. 현재 .NET SDK는 당사자가 서명하지 않았습니다.</target>
+      <trans-unit id="NuGetPackageSignatureVerificationSkipped">
+        <source>Skipping NuGet package signature verification.</source>
+        <target state="new">Skipping NuGet package signature verification.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipNuGetpackageSigningValidationmacOSLinux">

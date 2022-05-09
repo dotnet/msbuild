@@ -42,6 +42,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <BuiltInComInteropSupport Condition="'$(BuiltInComInteropSupport)' == ''">false</BuiltInComInteropSupport>
     <AutoreleasePoolSupport Condition="'$(AutoreleasePoolSupport)' == ''">false</AutoreleasePoolSupport>
     <EnableCppCLIHostActivation Condition="'$(EnableCppCLIHostActivation)' == ''">false</EnableCppCLIHostActivation>
+    <!-- C++/CLI activation requires native hosting -->
+    <_EnableConsumingManagedCodeFromNativeHosting Condition="'$(EnableCppCLIHostActivation)' == 'true'">true</_EnableConsumingManagedCodeFromNativeHosting>
     <_EnableConsumingManagedCodeFromNativeHosting Condition="'$(_EnableConsumingManagedCodeFromNativeHosting)' == ''">false</_EnableConsumingManagedCodeFromNativeHosting>
     <VerifyDependencyInjectionOpenGenericServiceTrimmability Condition="'$(VerifyDependencyInjectionOpenGenericServiceTrimmability)' == ''">true</VerifyDependencyInjectionOpenGenericServiceTrimmability>
   </PropertyGroup>
@@ -101,10 +103,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="ILLink"
           Condition=" '$(PublishTrimmed)' == 'true' And
+                      '$(RunILLink)' != 'false' And
                       '$(_TargetFrameworkVersionWithoutV)' >= '3.0' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' "
           DependsOnTargets="_RunILLink">
-
-    <NETSdkInformation ResourceName="ILLink_Info" />
 
     <NETSdkError Condition="'$(_ILLinkExitCode)' != '' And '$(_ILLinkExitCode)' != '0'" ResourceName="ILLinkFailed" />
 
@@ -143,7 +144,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_ComputeManagedAssemblyToLink;PrepareForILLink"
           Inputs="$(MSBuildAllProjects);@(ManagedAssemblyToLink);@(TrimmerRootDescriptor);@(ReferencePath)"
           Outputs="$(_LinkSemaphore)">
-
+    <NETSdkInformation ResourceName="ILLinkRunning" />
     <!-- When running from Desktop MSBuild, DOTNET_HOST_PATH is not set.
          In this case, explicitly specify the path to the dotnet host. -->
     <PropertyGroup Condition=" '$(DOTNET_HOST_PATH)' == '' ">
@@ -206,11 +207,16 @@ Copyright (c) .NET Foundation. All rights reserved.
    <Target Name="PrepareForILLink"
            DependsOnTargets="_ComputeManagedAssemblyToLink">
 
+    <!-- We print a message to the user to explain that trimming is
+         potentially problematic when warnings are suppressed. -->
+    <NETSdkInformation Condition="'$(PublishTrimmed)' == 'true' And '$(SuppressTrimAnalysisWarnings)' == 'true'" ResourceName="ILLinkOptimizedAssemblies" />
+
     <!-- The defaults currently root non-framework assemblies, which
          is a no-op for portable apps. If we later support more ways
          to customize the behavior we can allow linking portable apps
-         in some cases. -->
-    <NETSdkError Condition="'$(SelfContained)' != 'true'" ResourceName="ILLinkNotSupportedError" />
+         in some cases. If we're not running ILLink because e.g. this
+         is a NativeAOT app, value of SelfContained doesn't matter. -->
+    <NETSdkError Condition="'$(RunILLink)' != 'false' And '$(SelfContained)' != 'true'" ResourceName="ILLinkNotSupportedError" />
 
     <PropertyGroup Condition=" '$(ILLinkWarningLevel)' == '' ">
       <ILLinkWarningLevel Condition=" '$(EffectiveAnalysisLevel)' != '' And

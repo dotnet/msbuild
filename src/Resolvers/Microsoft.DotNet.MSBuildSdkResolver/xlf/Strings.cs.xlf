@@ -28,8 +28,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UnableToLocateNETCoreSdk">
-        <source>Unable to locate the .NET SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.</source>
-        <target state="translated">Nejde najít sadu .NET SDK. Zkontrolujte, jestli je nainstalovaná a jestli verze zadaná v souboru global.json (pokud je zadaná) odpovídá nainstalované verzi.</target>
+        <source>Unable to locate the .NET SDK. Check that it is installed, your PATH is configured for the correct architecture, and that the version specified in global.json (if any) matches the installed version.</source>
+        <target state="needs-review-translation">Nejde najít sadu .NET SDK. Zkontrolujte, jestli je nainstalovaná a jestli verze zadaná v souboru global.json (pokud je zadaná) odpovídá nainstalované verzi.</target>
         <note />
       </trans-unit>
     </body>

@@ -295,7 +295,7 @@ EndGlobal
                 .Execute($"sln", solutionName, "remove", "p.csproj");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindSolutionOrDirectory, solutionName));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(Directory.GetCurrentDirectory()));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
@@ -312,7 +312,7 @@ EndGlobal
                 .Execute($"sln", "InvalidSolution.sln", "remove", projectToRemove);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.InvalidSolutionFormatString, "InvalidSolution.sln", LocalizableStrings.FileHeaderMissingError));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
@@ -330,7 +330,7 @@ EndGlobal
                 .Execute($"sln", "remove", projectToRemove);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.InvalidSolutionFormatString, solutionPath, LocalizableStrings.FileHeaderMissingError));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
@@ -346,7 +346,7 @@ EndGlobal
                 .Execute(@"sln", "App.sln", "remove");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(CommonLocalizableStrings.SpecifyAtLeastOneProjectToRemove);
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
@@ -363,7 +363,7 @@ EndGlobal
                 .Execute(@"sln", "remove", "App.csproj");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.SolutionDoesNotExist, solutionPath + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(solutionPath));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
@@ -380,7 +380,7 @@ EndGlobal
                 .Execute($"sln", "remove", projectToRemove);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneSolutionInDirectory, projectDirectory + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
@@ -566,7 +566,7 @@ EndGlobal
                 string.Format(
                     CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory,
                     Path.Combine(projectDirectory, directoryToRemove)));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
@@ -586,7 +586,7 @@ EndGlobal
                 string.Format(
                     CommonLocalizableStrings.MoreThanOneProjectInDirectory,
                     Path.Combine(projectDirectory, directoryToRemove)));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
@@ -614,7 +614,7 @@ EndGlobal
 
             new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
-                .Execute("build", "App.sln", "--configuration", "Release")
+                .Execute("build", "App.sln", "--configuration", "Release","/p:ProduceReferenceAssembly=false")
                 .Should().Pass();
 
             var reasonString = "should be built in release mode, otherwise it means build configurations are missing from the sln file";

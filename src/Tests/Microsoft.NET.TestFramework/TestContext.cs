@@ -61,8 +61,6 @@ namespace Microsoft.NET.TestFramework
             //  Set NUGET_PACKAGES environment variable to match value from build.ps1
             command.Environment["NUGET_PACKAGES"] = NuGetCachePath;
 
-            command.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "1";
-
             command.Environment["GenerateResourceMSBuildArchitecture"] = "CurrentArchitecture";
             command.Environment["GenerateResourceMSBuildRuntime"] = "CurrentRuntime";
 
@@ -128,6 +126,10 @@ namespace Microsoft.NET.TestFramework
             if (!string.IsNullOrEmpty(commandLine.TestExecutionDirectory))
             {
                 testContext.TestExecutionDirectory = commandLine.TestExecutionDirectory;
+            }
+            else if (Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_EXECUTION_DIRECTORY") != null)
+            {
+                testContext.TestExecutionDirectory = Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_EXECUTION_DIRECTORY");
             }
             else if (runAsTool)
             {
