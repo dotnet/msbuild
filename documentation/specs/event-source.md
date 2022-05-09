@@ -11,6 +11,7 @@ EventSource is primarily used to profile code. For MSBuild specifically, a major
 | Build | Sets up a BuildManager to receive build requests. |
 | BuildProject | Builds a project file. |
 | CachedSdkResolverServiceResolveSdk | The caching SDK resolver service is resolving an SDK. |
+| CreateLoadedType | Creates a LoadedType object from an assembly loaded via MetadataLoadContext. |
 | CopyUpToDate | Checks whether the Copy task needs to execute. |
 | Evaluate | Evaluates a project, running several other parts of MSBuild in the process. |
 | EvaluateCondition | Checks whether a condition is true and removes false conditionals. |

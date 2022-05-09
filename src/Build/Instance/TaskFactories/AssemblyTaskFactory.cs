@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 #if FEATURE_APPDOMAIN
 using System.Threading.Tasks;
@@ -149,14 +150,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public TaskPropertyInfo[] GetTaskParameters()
         {
-            PropertyInfo[] infos = _loadedType.Type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
-            var propertyInfos = new TaskPropertyInfo[infos.Length];
-            for (int i = 0; i < infos.Length; i++)
-            {
-                propertyInfos[i] = new ReflectableTaskPropertyInfo(infos[i]);
-            }
-
-            return propertyInfos;
+            return _loadedType.Properties;
         }
 
         /// <summary>
@@ -279,7 +273,7 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
                 _taskName = taskName;
-                _loadedType = _typeLoader.Load(taskName, loadInfo);
+                _loadedType = _typeLoader.Load(taskName, loadInfo, _taskHostFactoryExplicitlyRequested);
                 ProjectErrorUtilities.VerifyThrowInvalidProject(_loadedType != null, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, String.Empty);
             }
             catch (TargetInvocationException e)

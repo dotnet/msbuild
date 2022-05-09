@@ -599,6 +599,18 @@ namespace Microsoft.Build.Eventing
             WriteEvent(80, submissionId, sdkName, solutionPath, projectPath, success, wasResultCached);
         }
 
+        [Event(81, Keywords = Keywords.All)]
+        public void CreateLoadedTypeStart(string assemblyName)
+        {
+            WriteEvent(81, assemblyName);
+        }
+
+        [Event(82, Keywords = Keywords.All)]
+        public void CreateLoadedTypeStop(string assemblyName)
+        {
+            WriteEvent(82, assemblyName);
+        }
+
         #endregion
     }
 }
