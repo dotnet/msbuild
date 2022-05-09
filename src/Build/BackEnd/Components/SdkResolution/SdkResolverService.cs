@@ -123,21 +123,36 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             // Pick up the most specific resolvers (i.e. resolvers with the longest pattern that matches) from the list of resolvers.
             List<SdkResolverManifest> matchingResolversManifests = _resolversRegistry
-                .Where(r => System.Text.RegularExpressions.Regex.IsMatch(sdk.Name, r.NamePattern))
-                .OrderByDescending(r => r.NamePattern.Length)
+                .Where(r => !string.IsNullOrEmpty(r.NamePattern) && System.Text.RegularExpressions.Regex.IsMatch(sdk.Name, r.NamePattern))
                 .ToList();
 
-            if (matchingResolversManifests.Count == 0)
+            List<SdkResolver> resolvers = new List<SdkResolver>();
+            SdkResult sdkResult;
+            if (matchingResolversManifests.Count != 0)
             {
-                // No resolvers apply.
-                throw new NotImplementedException();
-                // return new SdkResult(sdk, null, null);
+                resolvers = GetResolvers(matchingResolversManifests, loggingContext, sdkReferenceLocation);
+
+                if (TryResolveSdkUsingSpecifiedResolvers(
+                    resolvers,
+                    submissionId,
+                    sdk,
+                    loggingContext,
+                    sdkReferenceLocation,
+                    solutionPath,
+                    projectPath,
+                    interactive,
+                    isRunningInVisualStudio,
+                    out sdkResult))
+                {
+                    return sdkResult;
+                }
             }
 
-            int patternMaxLength = matchingResolversManifests[0].NamePattern.Length;
-            matchingResolversManifests = matchingResolversManifests.Where(r => (r.NamePattern.Length == patternMaxLength)).ToList();
-
-            List<SdkResolver> resolvers = GetResolvers(matchingResolversManifests, loggingContext, sdkReferenceLocation);
+            // Fallback to non-specific resolvers. 
+            resolvers = GetResolvers(
+                _resolversRegistry.Where(r => string.IsNullOrEmpty(r.NamePattern)).ToList(),
+                loggingContext,
+                sdkReferenceLocation).ToList();
 
             if (TryResolveSdkUsingSpecifiedResolvers(
                 resolvers,
@@ -149,25 +164,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 projectPath,
                 interactive,
                 isRunningInVisualStudio,
-                out SdkResult sdkResult))
+                out sdkResult))
             {
                 return sdkResult;
             }
 
-            // Fallback. The most specific resolvers should be able to resolve the sdk. If this did not happen, let's use all other resovers.
-            resolvers = GetResolvers(_resolversRegistry, loggingContext, sdkReferenceLocation).ToList().Except(resolvers).ToList();
-            TryResolveSdkUsingSpecifiedResolvers(
-                resolvers,
-                submissionId,
-                sdk,
-                loggingContext,
-                sdkReferenceLocation,
-                solutionPath,
-                projectPath,
-                interactive,
-                isRunningInVisualStudio,
-                out sdkResult);
-            return sdkResult;
+            // No resolvers resolved the sdk.
+            return new SdkResult(sdk, null, null);
         }
 
         private List<SdkResolver> GetResolvers(IList<SdkResolverManifest> resolversManifests, LoggingContext loggingContext, ElementLocation sdkReferenceLocation)
@@ -397,7 +400,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 _resolversDict = new Dictionary<SdkResolverManifest, IList<SdkResolver>>();
 
                 IList<SdkResolver> defaultResolvers = _sdkResolverLoader.LoadDefaultResolvers(loggingContext, location);
-                SdkResolverManifest sdkResolverManifest = new SdkResolverManifest("Default Resolvers", null, ".*");
+                SdkResolverManifest sdkResolverManifest = new SdkResolverManifest("Default Resolvers", null, null);
                 _resolversRegistry.Add(sdkResolverManifest);
                 _resolversDict[sdkResolverManifest] = defaultResolvers;
             }

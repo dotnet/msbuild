@@ -193,11 +193,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(location), "SdkResolverDllInManifestMissing", pathToManifest, manifest.Path);
             }
 
-            if (string.IsNullOrEmpty(manifest.NamePattern))
-            {
-                manifest.NamePattern = ".*";
-            }
-
             manifestsList.Add(manifest);
 
             return true;
@@ -207,7 +202,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
             if (string.IsNullOrEmpty(assemblyPath) || !FileUtilities.FileExistsNoThrow(assemblyPath)) return false;
 
-            manifestsList.Add(new SdkResolverManifest(null, assemblyPath, ".*"));
+            manifestsList.Add(new SdkResolverManifest(null, assemblyPath, null));
             return true;
         }
 
