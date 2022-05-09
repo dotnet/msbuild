@@ -1027,6 +1027,12 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
+                // For most tasks, finding the parameter in our list of known properties is equivalent to
+                // saying the task was properly invoked, as far as this parameter is concerned. However,
+                // that is not true for CodeTaskFactories like RoslynCodeTaskFactory. In that case, they
+                // will often have a list of parameters under the UsingTask declaration. Fortunately, if
+                // your TaskFactory is RoslynCodeTaskFactory, it isn't TaskHostFactory, which means the
+                // types are fully loaded at this stage, and we can access them as we had in the past.
                 TaskPropertyInfo parameter = null;
                 Type parameterType = null;
                 if (indexOfParameter != -1)

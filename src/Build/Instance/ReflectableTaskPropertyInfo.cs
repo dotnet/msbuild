@@ -52,7 +52,12 @@ namespace Microsoft.Build.Execution
             _propertyInfo = propertyInfo;
         }
 
-        internal ReflectableTaskPropertyInfo(PropertyInfo propertyInfo, bool output, bool required, bool IsAssignableToITaskItemType)
+        /// <summary>
+        /// Initializes a new <see cref="ReflectableTaskPropertyInfo"/> with three precomputed parameters. This is specifically
+        /// used with MetadataLoadContext, as these parameters cannot be computed for the property type passed in directly but
+        /// rather the relevant base type.
+        /// </summary>
+        internal ReflectableTaskPropertyInfo(PropertyInfo propertyInfo, bool output, bool required, bool isAssignableToITaskItemType)
             : base(
             propertyInfo.Name,
             propertyInfo.PropertyType,
@@ -60,7 +65,7 @@ namespace Microsoft.Build.Execution
             required)
         {
             _propertyInfo = propertyInfo;
-            IsAssignableToITask = IsAssignableToITaskItemType;
+            IsAssignableToITask = isAssignableToITaskItemType;
         }
 
         /// <summary>

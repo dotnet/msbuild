@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 #endif
 using System.Threading;
+using Microsoft.Build.Eventing;
 
 #nullable disable
 
@@ -380,9 +381,11 @@ namespace Microsoft.Build.Shared
                     {
                         if (_isDesiredType(publicType, null) && (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(publicType.FullName, typeName)))
                         {
+                            MSBuildEventSource.Log.CreateLoadedTypeStart(loadedAssembly.FullName);
                             LoadedType loadedType = new(publicType, _assemblyLoadInfo, loadedAssembly, loadedViaMetadataLoadContext: true);
                             _context?.Dispose();
                             _context = null;
+                            MSBuildEventSource.Log.CreateLoadedTypeStop(loadedAssembly.FullName);
                             return loadedType;
                         }
                     }
