@@ -1387,10 +1387,6 @@ namespace Microsoft.Build.Construction
             {
                 task.SetParameter("Properties", GetPropertiesAttributeForDirectMSBuildTask(projectConfiguration));
             }
-            else
-            {
-                task.SetParameter("Properties", SolutionProperties);
-            }
 
             if (!string.IsNullOrEmpty(outputItem))
             {
