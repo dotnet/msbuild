@@ -9,6 +9,7 @@ using System.Threading;
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
+using System.Linq;
 
 #nullable disable
 
@@ -38,6 +39,11 @@ namespace Microsoft.Build.BackEnd
         private static string s_baseTaskHostPath64;
 
         /// <summary>
+        /// Store the 64-bit path for MSBuild / MSBuildTaskHost so that we don't have to keep recalculating it.
+        /// </summary>
+        private static string s_baseTaskHostPathArm64;
+
+        /// <summary>
         /// Store the path for the 32-bit MSBuildTaskHost so that we don't have to keep re-calculating it.
         /// </summary>
         private static string s_pathToX32Clr2;
@@ -56,6 +62,11 @@ namespace Microsoft.Build.BackEnd
         /// Store the path for the 64-bit MSBuild so that we don't have to keep re-calculating it.
         /// </summary>
         private static string s_pathToX64Clr4;
+
+        /// <summary>
+        /// Store the path for the 64-bit MSBuild so that we don't have to keep re-calculating it.
+        /// </summary>
+        private static string s_pathToArm64Clr4;
 
         /// <summary>
         /// Name for MSBuild.exe
@@ -151,7 +162,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Instantiates a new MSBuild process acting as a child node.
         /// </summary>
-        public bool CreateNode(int nodeId, INodePacketFactory factory, NodeConfiguration configuration)
+        public IList<NodeInfo> CreateNodes(int nextNodeId, INodePacketFactory packetFactory, Func<NodeInfo, NodeConfiguration> configurationFactory, int numberOfNodesToCreate)
         {
             throw new NotImplementedException("Use the other overload of CreateNode instead");
         }
@@ -353,8 +364,10 @@ namespace Microsoft.Build.BackEnd
             s_pathToX32Clr4 = null;
             s_pathToX64Clr2 = null;
             s_pathToX64Clr4 = null;
+            s_pathToArm64Clr4 = null;
             s_baseTaskHostPath = null;
             s_baseTaskHostPath64 = null;
+            s_baseTaskHostPathArm64 = null;
         }
 
         /// <summary>
@@ -392,13 +405,20 @@ namespace Microsoft.Build.BackEnd
         internal static string GetMSBuildLocationFromHostContext(HandshakeOptions hostContext)
         {
             string toolName = GetTaskHostNameFromHostContext(hostContext);
-            string toolPath;
+            string toolPath = null;
 
             s_baseTaskHostPath = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
             s_baseTaskHostPath64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64;
+            s_baseTaskHostPathArm64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryArm64;
+
             ErrorUtilities.VerifyThrowInternalErrorUnreachable((hostContext & HandshakeOptions.TaskHost) == HandshakeOptions.TaskHost);
 
-            if ((hostContext & HandshakeOptions.X64) == HandshakeOptions.X64 && (hostContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2)
+            if ((hostContext & HandshakeOptions.Arm64) == HandshakeOptions.Arm64 && (hostContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2)
+            {
+                // Unsupported, throw.
+                ErrorUtilities.ThrowInternalError("ARM64 CLR2 task hosts are not supported.");
+            }
+            else if ((hostContext & HandshakeOptions.X64) == HandshakeOptions.X64 && (hostContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2)
             {
                 if (s_pathToX64Clr2 == null)
                 {
@@ -433,6 +453,15 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 toolPath = s_pathToX64Clr4;
+            }
+            else if ((hostContext & HandshakeOptions.Arm64) == HandshakeOptions.Arm64)
+            {
+                if (s_pathToArm64Clr4 == null)
+                {
+                    s_pathToArm64Clr4 = s_baseTaskHostPathArm64;
+                }
+
+                toolPath = s_pathToArm64Clr4;
             }
             else
             {
@@ -509,7 +538,7 @@ namespace Microsoft.Build.BackEnd
 
             // Start the new process.  We pass in a node mode with a node number of 2, to indicate that we
             // want to start up an MSBuild task host node.
-            string commandLineArgs = $" /nologo /nodemode:2 /nodereuse:{ComponentHost.BuildParameters.EnableNodeReuse} ";
+            string commandLineArgs = $" /nologo /nodemode:2 /nodereuse:{ComponentHost.BuildParameters.EnableNodeReuse} /low:{ComponentHost.BuildParameters.LowPriority} ";
 
             string msbuildLocation = GetMSBuildLocationFromHostContext(hostContext);
 
@@ -521,31 +550,36 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace("For a host context of {0}, spawning executable from {1}.", hostContext.ToString(), msbuildLocation ?? "MSBuild.exe");
 
-            // Make it here.
-            NodeContext context = GetNode
-                                    (
-                                        msbuildLocation,
-                                        commandLineArgs,
-                                        (int)hostContext,
-                                        this,
-                                        new Handshake(hostContext),
-                                        NodeContextTerminated
-                                    );
+            // There is always one task host per host context so we always create just 1 one task host node here.
+            int nodeId = (int)hostContext;
+            IList<NodeContext> nodeContexts = GetNodes(
+                msbuildLocation,
+                commandLineArgs,
+                nodeId,
+                this,
+                new Handshake(hostContext),
+                NodeContextCreated,
+                NodeContextTerminated,
+                1);
 
-            if (context != null)
+            return nodeContexts.Count == 1;
+        }
+
+        /// <summary>
+        /// Method called when a context created.
+        /// </summary>
+        private void NodeContextCreated(NodeContext context)
+        {
+            _nodeContexts[(HandshakeOptions)context.NodeId] = context;
+
+            // Start the asynchronous read.
+            context.BeginAsyncPacketRead();
+
+            lock (_activeNodes)
             {
-                _nodeContexts[hostContext] = context;
-
-                // Start the asynchronous read.
-                context.BeginAsyncPacketRead();
-
-                _activeNodes.Add((int)hostContext);
-                _noNodesActiveEvent.Reset();
-
-                return true;
+                _activeNodes.Add(context.NodeId);
             }
-
-            return false;
+            _noNodesActiveEvent.Reset();
         }
 
         /// <summary>
@@ -571,6 +605,11 @@ namespace Microsoft.Build.BackEnd
                     _noNodesActiveEvent.Set();
                 }
             }
+        }
+
+        public IEnumerable<Process> GetProcesses()
+        {
+            return _nodeContexts.Values.Select(context => context.Process);
         }
     }
 }

@@ -4,8 +4,8 @@ Param(
   [string] $destination,
   [ValidateSet('Debug','Release')]
   [string] $configuration = "Debug",
-  [ValidateSet('Core','Desktop')]
-  [string] $runtime = "Desktop"
+  [ValidateSet('Core','Desktop', 'Detect', 'Full')]
+  [string] $runtime = "Detect"
 )
 
 Set-StrictMode -Version "Latest"
@@ -49,6 +49,22 @@ $BackupFolder = New-Item (Join-Path $destination -ChildPath "Backup-$(Get-Date -
 
 Write-Verbose "Copying $configuration MSBuild to $destination"
 Write-Host "Existing MSBuild assemblies backed up to $BackupFolder"
+
+if ($runtime -eq "Detect") {
+    if ($destination -like "*dotnet*sdk*") {
+        $runtime = "Core"
+        Write-Host "Detected path that looks like an sdk. Writing .NET Core assemblies."
+    }
+    else {
+        $runtime = "Desktop"
+        Write-Host "Detected path that does not look like an sdk. Writing .NET Framework assemblies."
+    }
+}
+else {
+    if ($runtime -eq "Full") {
+        $runtime = "Desktop"
+    }
+}
 
 if ($runtime -eq "Desktop") {
     $targetFramework = "net472"
