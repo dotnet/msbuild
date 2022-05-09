@@ -51,6 +51,12 @@ namespace Microsoft.Build.Tasks
 
             foreach (ITaskItem directory in Directories)
             {
+                if (string.IsNullOrEmpty(directory.ItemSpec))
+                {
+                    Log.LogWarning("RemoveDir.EmptyPath");
+                    continue;
+                }
+
                 if (FileSystems.Default.DirectoryExists(directory.ItemSpec))
                 {
                     // Do not log a fake command line as well, as it's superfluous, and also potentially expensive

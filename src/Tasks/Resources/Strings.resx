@@ -1338,6 +1338,10 @@
   <data name="RemoveDir.SkippingNonexistentDirectory">
     <value>Directory "{0}" doesn't exist. Skipping.</value>
   </data>
+  <data name="RemoveDir.EmptyPath">
+    <value>MSB3232: Detected an empty directory. Skipping.</value>
+    <comment>{StrBegin="MSB3232: "}</comment>
+  </data>
   <!--
         The ResGen message bucket is: MSB3451 - MSB3460
 
