@@ -28,6 +28,7 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TaskItemFactory;
 
 using Microsoft.NET.StringTools;
+using Microsoft.Build.BackEnd.Logging;
 
 #nullable disable
 
@@ -420,9 +421,9 @@ namespace Microsoft.Build.Evaluation
         ///
         /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.
         /// </summary>
-        internal string ExpandIntoStringAndUnescape(string expression, ExpanderOptions options, IElementLocation elementLocation)
+        internal string ExpandIntoStringAndUnescape(string expression, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext = null)
         {
-            string result = ExpandIntoStringLeaveEscaped(expression, options, elementLocation);
+            string result = ExpandIntoStringLeaveEscaped(expression, options, elementLocation, loggingContext);
 
             return (result == null) ? null : EscapingUtilities.UnescapeAll(result);
         }
@@ -434,7 +435,7 @@ namespace Microsoft.Build.Evaluation
         ///
         /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.
         /// </summary>
-        internal string ExpandIntoStringLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
+        internal string ExpandIntoStringLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext = null)
         {
             if (expression.Length == 0)
             {
@@ -444,7 +445,7 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
 
             string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
-            result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _usedUninitializedProperties, _fileSystem);
+            result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _usedUninitializedProperties, _fileSystem, loggingContext);
             result = ItemExpander.ExpandItemVectorsIntoString<I>(this, result, _items, options, elementLocation);
             result = FileUtilities.MaybeAdjustFilePath(result);
 
@@ -1078,7 +1079,8 @@ namespace Microsoft.Build.Evaluation
                 ExpanderOptions options,
                 IElementLocation elementLocation,
                 UsedUninitializedProperties usedUninitializedProperties,
-                IFileSystem fileSystem)
+                IFileSystem fileSystem,
+                LoggingContext loggingContext = null)
             {
                 return
                     ConvertToString(
@@ -1088,7 +1090,8 @@ namespace Microsoft.Build.Evaluation
                             options,
                             elementLocation,
                             usedUninitializedProperties,
-                            fileSystem));
+                            fileSystem,
+                            loggingContext));
             }
 
             /// <summary>
@@ -1114,7 +1117,8 @@ namespace Microsoft.Build.Evaluation
                 ExpanderOptions options,
                 IElementLocation elementLocation,
                 UsedUninitializedProperties usedUninitializedProperties,
-                IFileSystem fileSystem)
+                IFileSystem fileSystem,
+                LoggingContext loggingContext = null)
             {
                 if (((options & ExpanderOptions.ExpandProperties) == 0) || String.IsNullOrEmpty(expression))
                 {
@@ -1229,7 +1233,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         else // This is a regular property
                         {
-                            propertyValue = LookupProperty(properties, expression, propertyStartIndex + 2, propertyEndIndex - 1, elementLocation, usedUninitializedProperties);
+                            propertyValue = LookupProperty(properties, expression, propertyStartIndex + 2, propertyEndIndex - 1, elementLocation, usedUninitializedProperties, loggingContext);
                         }
 
                         if (propertyValue != null)
@@ -1467,7 +1471,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Look up a simple property reference by the name of the property, e.g. "Foo" when expanding $(Foo).
             /// </summary>
-            private static object LookupProperty(IPropertyProvider<T> properties, string propertyName, int startIndex, int endIndex, IElementLocation elementLocation, UsedUninitializedProperties usedUninitializedProperties)
+            private static object LookupProperty(IPropertyProvider<T> properties, string propertyName, int startIndex, int endIndex, IElementLocation elementLocation, UsedUninitializedProperties usedUninitializedProperties, LoggingContext loggingContext = null)
             {
                 T property = properties.GetProperty(propertyName, startIndex, endIndex);
 
@@ -1512,6 +1516,11 @@ namespace Microsoft.Build.Evaluation
                 }
                 else
                 {
+                    if (property is ProjectPropertyInstance.EnvironmentDerivedProjectPropertyInstance environmentDerivedProperty)
+                    {
+                        environmentDerivedProperty.loggingContext = loggingContext;
+                    }
+
                     propertyValue = property.EvaluatedValueEscaped;
                 }
 
