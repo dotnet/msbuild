@@ -103,10 +103,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 var assembly = Path.Combine(subfolder.FullName, $"{subfolder.Name}.dll");
                 var manifest = Path.Combine(subfolder.FullName, $"{subfolder.Name}.xml");
 
-                var assemblyAdded = TryAddAssembly(assembly, manifestsList);
+                var assemblyAdded = TryAddAssemblyManifestFromDll(assembly, manifestsList);
                 if (!assemblyAdded)
                 {
-                    assemblyAdded = TryAddAssemblyFromManifest(manifest, subfolder.FullName, manifestsList, location);
+                    assemblyAdded = TryAddAssemblyManifestFromXml(manifest, subfolder.FullName, manifestsList, location);
                 }
 
                 if (!assemblyAdded)
@@ -156,7 +156,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             }
         }
 
-        private bool TryAddAssemblyFromManifest(string pathToManifest, string manifestFolder, List<SdkResolverManifest> manifestsList, ElementLocation location)
+        private bool TryAddAssemblyManifestFromXml(string pathToManifest, string manifestFolder, List<SdkResolverManifest> manifestsList, ElementLocation location)
         {
             if (!string.IsNullOrEmpty(pathToManifest) && !FileUtilities.FileExistsNoThrow(pathToManifest)) return false;
 
@@ -198,7 +198,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return true;
         }
 
-        private bool TryAddAssembly(string assemblyPath, List<SdkResolverManifest> manifestsList)
+        private bool TryAddAssemblyManifestFromDll(string assemblyPath, List<SdkResolverManifest> manifestsList)
         {
             if (string.IsNullOrEmpty(assemblyPath) || !FileUtilities.FileExistsNoThrow(assemblyPath)) return false;
 

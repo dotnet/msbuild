@@ -40,10 +40,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        // Sdk is not resolved.
+        // Scenario: Sdk is not resolved.
         public void AssertAllResolverErrorsLoggedWhenSdkNotResolved()
         {
-            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy(includeNameSpecificResolvers: true));
+            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy(includeResolversWithPatterns: true));
 
             SdkReference sdk = new SdkReference("notfound", "referencedVersion", "minimumVersion");
 
@@ -105,10 +105,11 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
 
         [Fact]
-        // MockSdkResolverWithNamePattern2 is specific resolver and successfully resolves sdk.
+        // Scenario: MockSdkResolverWithNamePattern2 is a specific resolver (i.e. resolver with pattern)
+        // and it successfully resolves sdk.
         public void AssertSecondResolverWithPatternCanResolve()
         {
-            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy(includeNameSpecificResolvers: true));
+            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy(includeResolversWithPatterns: true));
 
             SdkReference sdk = new SdkReference("2sdkName", "referencedVersion", "minimumVersion");
 
@@ -121,8 +122,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        // MockSdkResolverWithNamePattern1 is specific resolver, it is loaded but did not resolve sdk.
-        // MockSdkResolver1 (default) resolver resolves on a fallback. 
+        // Scenario: MockSdkResolverWithNamePattern1 is a specific resolver, it is loaded but did not resolve sdk.
+        // MockSdkResolver1 is a general resolver (i.e. resolver without pattern), it resolves sdk on a fallback. 
         public void AssertFirstResolverCanResolve()
         {
             SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy());
@@ -137,7 +138,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        // MockSdkResolver1 has higher priority than MockSdkResolverWithNamePattern1 and resolves sdk.
+        // Scenario: MockSdkResolver1 has higher priority than MockSdkResolverWithNamePattern1 and resolves sdk.
         public void AssertFirstResolverWithPatternCantResolveChangeWave17_4()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -146,7 +147,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_4.ToString());
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
-                SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy(includeNameSpecificResolvers: true));
+                SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy(includeResolversWithPatterns: true));
 
                 SdkReference sdk = new SdkReference("1sdkName", "referencedVersion", "minimumVersion");
 
@@ -160,10 +161,11 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        // MockSdkResolver1 has higher priority than MockSdkResolverWithNamePattern1 but does not resolve sdk becuase it is default and MockSdkResolverWithNamePattern1 is specific.
+        // Scenario: MockSdkResolver1 has higher priority than MockSdkResolverWithNamePattern1 but MockSdkResolverWithNamePattern1 resolves sdk,
+        // becuase MockSdkResolver1 is general and MockSdkResolverWithNamePattern1 is specific.
         public void AssertFirstResolverWithPatternCanResolve()
         {
-            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy(includeNameSpecificResolvers: true));
+            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy(includeResolversWithPatterns: true));
 
             SdkReference sdk = new SdkReference("11sdkName", "referencedVersion", "minimumVersion");
 
@@ -602,20 +604,20 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         private class MockLoaderStrategy : SdkResolverLoader
         {
             private List<SdkResolver> _resolvers;
-            private List<Tuple<string, SdkResolver>> _nameSpecificResolvers;
+            private List<Tuple<string, SdkResolver>> _resolversWithPatterns;
 
 
-            public MockLoaderStrategy(bool includeErrorResolver = false, bool includeNameSpecificResolvers = false) : this()
+            public MockLoaderStrategy(bool includeErrorResolver = false, bool includeResolversWithPatterns = false) : this()
             {
                 if (includeErrorResolver)
                 {
                     _resolvers.Add(new MockSdkResolverThrows());
                 }
 
-                if (includeNameSpecificResolvers)
+                if (includeResolversWithPatterns)
                 {
-                    _nameSpecificResolvers.Add(new Tuple<string, SdkResolver>("1.*", new MockSdkResolverWithNamePattern1()));
-                    _nameSpecificResolvers.Add(new Tuple<string, SdkResolver>(".*", new MockSdkResolverWithNamePattern2()));
+                    _resolversWithPatterns.Add(new Tuple<string, SdkResolver>("1.*", new MockSdkResolverWithNamePattern1()));
+                    _resolversWithPatterns.Add(new Tuple<string, SdkResolver>(".*", new MockSdkResolverWithNamePattern2()));
                 }
             }
 
@@ -629,7 +631,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     new MockSdkResolverWithState()
                 };
 
-                _nameSpecificResolvers = new List<Tuple<string, SdkResolver>>();
+                _resolversWithPatterns = new List<Tuple<string, SdkResolver>>();
             }
 
             internal override IList<SdkResolver> LoadResolvers(LoggingContext loggingContext, ElementLocation location)
@@ -646,7 +648,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     SdkResolverManifest sdkResolverManifest = new SdkResolverManifest(resolver.Name, null, null);
                     manifests.Add(sdkResolverManifest);
                 }
-                foreach (var pair in _nameSpecificResolvers)
+                foreach (var pair in _resolversWithPatterns)
                 {
                     SdkResolverManifest sdkResolverManifest = new SdkResolverManifest(pair.Item2.Name, null, pair.Item1);
                     manifests.Add(sdkResolverManifest);
@@ -664,7 +666,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                         resolvers.Add(resolver);
                     }
                 }
-                foreach (var pair in _nameSpecificResolvers)
+                foreach (var pair in _resolversWithPatterns)
                 {
                     if (pair.Item2.Name == manifest.Name)
                     {
@@ -734,7 +736,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 resolverContext.Logger.LogMessage("MockSdkResolverWithNamePattern1 running", MessageImportance.Normal);
 
                 if (sdk.Name.StartsWith("11"))
-                    return factory.IndicateSuccess("resolverpathwithnamepattern1", "version1");
+                    return factory.IndicateSuccess("resolverpathwithnamepattern1", "version3");
 
                 return factory.IndicateFailure(new[] { "ERROR3" });
             }
@@ -751,7 +753,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 resolverContext.Logger.LogMessage("MockSdkResolverWithNamePattern2 running", MessageImportance.Normal);
 
                 if (sdk.Name.StartsWith("2"))
-                    return factory.IndicateSuccess("resolverpathwithnamepattern2", "version2", new[] { "WARNING4" });
+                    return factory.IndicateSuccess("resolverpathwithnamepattern2", "version4", new[] { "WARNING4" });
 
                 return factory.IndicateFailure(new[] { "ERROR4" }, new[] { "WARNING4" });
             }

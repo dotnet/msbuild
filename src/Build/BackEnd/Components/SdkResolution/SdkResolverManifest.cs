@@ -62,7 +62,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return null;
         }
 
-        // This parsing code is very specific, but it should be all right as long as manifest has simple structure.
+        // This parsing code is very specific and not forward compatible, but it should be all right.
         private static SdkResolverManifest ParseSdkResolverElement(XmlReader reader)
         {
             SdkResolverManifest manifest = new SdkResolverManifest();
