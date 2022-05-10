@@ -606,9 +606,9 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(82, Keywords = Keywords.All)]
-        public void MSBuildServerBuildStop(string commandLine)
+        public void MSBuildServerBuildStop(string commandLine, int countOfConsoleMessages, long sumSizeOfConsoleMessages, string clientExitType, string serverExitType)
         {
-            WriteEvent(82, commandLine);
+            WriteEvent(82, commandLine, countOfConsoleMessages, sumSizeOfConsoleMessages, clientExitType, serverExitType);
         }
 
         #endregion

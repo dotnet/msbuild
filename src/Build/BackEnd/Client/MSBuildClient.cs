@@ -158,6 +158,9 @@ namespace Microsoft.Build.Execution
                 return _exitResult;
             }
 
+            int numConsoleWritePackets = 0;
+            long sizeOfConsoleWritePackets = 0;
+
             try
             {
                 // Start packet pump
@@ -194,7 +197,12 @@ namespace Microsoft.Build.Execution
                             {
                                 if (packet != null)
                                 {
-                                    HandlePacket(packet);
+                                    int size = HandlePacket(packet);
+                                    if (size > -1)
+                                    {
+                                        numConsoleWritePackets++;
+                                        sizeOfConsoleWritePackets += size;
+                                    }
                                 }
                             }
 
@@ -208,7 +216,7 @@ namespace Microsoft.Build.Execution
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.Unexpected;
             }
 
-            MSBuildEventSource.Log.MSBuildServerBuildStop(commandLine);
+            MSBuildEventSource.Log.MSBuildServerBuildStop(commandLine, numConsoleWritePackets, sizeOfConsoleWritePackets, _exitResult.MSBuildClientExitType.ToString(), _exitResult.MSBuildAppExitTypeString);
             CommunicationsUtilities.Trace("Build finished.");
             return _exitResult;
         }
@@ -351,16 +359,17 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Dispatches the packet to the correct handler.
         /// </summary>
-        private void HandlePacket(INodePacket packet)
+        private int HandlePacket(INodePacket packet)
         {
             switch (packet.Type)
             {
                 case NodePacketType.ServerNodeConsoleWrite:
-                    HandleServerNodeConsoleWrite((ServerNodeConsoleWrite)packet);
-                    break;
+                    ServerNodeConsoleWrite writePacket = (packet as ServerNodeConsoleWrite)!;
+                    HandleServerNodeConsoleWrite(writePacket);
+                    return writePacket.Text.Length;
                 case NodePacketType.ServerNodeBuildResult:
                     HandleServerNodeBuildResult((ServerNodeBuildResult)packet);
-                    break;
+                    return -1;
                 default: throw new InvalidOperationException($"Unexpected packet type {packet.GetType().Name}");
             }
         }
