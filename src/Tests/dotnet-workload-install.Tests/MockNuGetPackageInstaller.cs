@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             if (PackageIdsToNotFind.Contains(packageId.ToString()))
             {
-                return Task.FromException<string>(new NuGetPackageNotFoundException("Package not found: " + packageId.ToString()));
+                return Task.FromException<string>(new NuGetPackageNotFoundException("Package not found: " + packageId.ToString()));     // THIS is the exception that's being thrown
             }
 
             var path = Path.Combine(_downloadPath, "mock.nupkg");

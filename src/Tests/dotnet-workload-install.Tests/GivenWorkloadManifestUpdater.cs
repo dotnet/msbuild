@@ -276,8 +276,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             //  Run update
             //  Should not find 6.0.300 manifest
             //  Should not find 6.0.200 manifest
-                // what should the behavior be after that?
-                    // it should request 6.0.300 and 6.0.200... then do nothing?
+            //  Manifest Updater should not fail
 
             //  Arrange
             string sdkFeatureBand = "6.0.300";
@@ -306,7 +305,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             nugetDownloader.PackageIdsToNotFind.Add($"{testManifestName}.Manifest-6.0.200");
             var installationRepo = new MockInstallationRecordRepository();
             var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, Path.Combine(testDir, ".dotnet"), testDir, installationRepo);
-
+                // make it not fail -- can figure out something else to output
 
             //  Act
             manifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews: true).Wait();
@@ -317,6 +316,9 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             nugetDownloader.DownloadCallParams[0].version.ShouldBeEquivalentTo(null);
             nugetDownloader.DownloadCallParams[1].id.ToString().Should().Be($"{testManifestName}.manifest-6.0.200");
             nugetDownloader.DownloadCallParams[1].version.ShouldBeEquivalentTo(null);
+
+            // check that output lines from _reporter do not say failed
+            _reporter.Lines.Should().NotContain("fail");
         }
 
         [Fact]

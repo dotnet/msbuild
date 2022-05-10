@@ -317,7 +317,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         // then try downloading the manifest's feature band
                         if (!(manifest.ManifestFeatureBand).Equals(_sdkFeatureBand))
                         {
-                            packagePath = await GetOnlinePackagePath(new SdkFeatureBand(manifest.ManifestFeatureBand), manifestId, includePreviews);
+                            packagePath = await GetOnlinePackagePath(new SdkFeatureBand(manifest.ManifestFeatureBand), manifestId, includePreviews);        // goes to failure message from here
                             currentFeatureBand = manifest.ManifestFeatureBand.ToString();
                         }
                         else
@@ -365,7 +365,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
             catch (Exception e)
             {
-                _reporter.WriteLine(string.Format(LocalizableStrings.FailedAdManifestUpdate, manifestId, e.Message));
+                if (!(e.Message.Contains("Package not found")))
+                {
+                    _reporter.WriteLine(string.Format(LocalizableStrings.FailedAdManifestUpdate, manifestId, e.Message));       // this is where it says it failed
+                }
             }
             finally
             {
