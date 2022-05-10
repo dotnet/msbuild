@@ -95,6 +95,7 @@ namespace Dotnet_new3.IntegrationTests
             var workingDir = TestUtils.CreateTemporaryFolder("Home");
             var testTemplateLocation = TestUtils.GetTestTemplateLocation("Invalid/Localization/InvalidFormat");
             new DotnetNewCommand(_log, "-i", testTemplateLocation)
+                .WithDebug()
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDir)
                 .Execute()
@@ -127,6 +128,7 @@ namespace Dotnet_new3.IntegrationTests
   };
 
             var commandResult = new DotnetNewCommand(_log, "-i", testTemplateLocation)
+                .WithDebug()
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDir)
                 .Execute();

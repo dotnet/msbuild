@@ -2,8 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
+using Xunit.Abstractions;
 
 namespace Microsoft.TemplateEngine.TestHelper
 {
@@ -145,6 +149,42 @@ $@"<?xml version=""1.0"" encoding=""utf-8""?>
             }
             while ((file1byte == file2byte) && (file1byte != -1));
             return ((file1byte - file2byte) == 0);
+        }
+
+        public static async Task<T> AttemptSearch<T, E>(int count, TimeSpan interval, Func<Task<T>> execute) where E : Exception
+        {
+            T? result = default;
+            int attempt = 0;
+            while (attempt < count)
+            {
+                try
+                {
+                    result = await execute();
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    if (attempt + 1 == count)
+                    {
+                        throw ex;
+                    }
+
+                    if (ex is AggregateException agEx)
+                    {
+                        if (!agEx.InnerExceptions.Any(e => e is E))
+                        {
+                            throw ex;
+                        }
+                    }
+                    else if (ex is not E)
+                    {
+                        throw ex;
+                    }
+                }
+                await Task.Delay(interval);
+                attempt++;
+            }
+            return result!;
         }
     }
 }
