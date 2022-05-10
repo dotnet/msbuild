@@ -402,24 +402,6 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             packInstaller.InstalledManifests[0].offlineCache.Should().Be(null);
         }
 
-        /* Tests to add:
-        // For updating advertising manifests: 
-
-        // test the advertising
-            // update is available (newer package is available) -- could be newer or the same as the current manifest 
-            // or it could not be in the nuget downloader at all -- then it falls back
-            // if it falls back then it's basically the same 3 cases
-            // nothing advertised or something advertised
-            // doesn't find anything or it finds something and it can be newer, older, or the same 
-            // then you have to consider the feature bands because if it doesn't find the relevant feature band it will fall back
-
-        // add list of manifest IDs to the mock nuget downloader that it will not find
-            // when it calls the pakcage download, if it finds the ID in that list it should throw a nuget package not found exception
-            // example : downloads 6.0.300 and finds it in the list so it throws the excpetion and then it will try to download 6.0.200 (could be successfully downloaded or not)
-                // code will need to be updated to handle the case where it fails twice
-
-        */
-
         internal (string, WorkloadUpdateCommand, MockPackWorkloadInstaller, IWorkloadResolver, MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
             ParseResult parseResult,
             [CallerMemberName] string testName = "",
