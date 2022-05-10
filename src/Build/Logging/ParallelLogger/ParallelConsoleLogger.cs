@@ -1208,7 +1208,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (e is EnvironmentVariableReadEventArgs environmentPropertyReadEventArgs)
             {
-                nonNullMessage = $"Property {environmentPropertyReadEventArgs.EnvironmentVariableName} with value {e.Message} expanded from the environment.";
+                nonNullMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EnvironmentDerivedPropertyRead", environmentPropertyReadEventArgs.EnvironmentVariableName, e.Message);
             }
 
             // Include file information if present.

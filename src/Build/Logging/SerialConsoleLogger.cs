@@ -512,18 +512,13 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
 
                 string nonNullMessage = e is EnvironmentVariableReadEventArgs environmentDerivedProperty ?
-                    $"Property {environmentDerivedProperty.EnvironmentVariableName} with value {e.Message} expanded from the environment."
-                    : null;
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EnvironmentDerivedPropertyRead", environmentDerivedProperty.EnvironmentVariableName, e.Message)
+                    : e.Message ?? String.Empty;
 
                 // Include file information if present.
                 if (e.File != null)
                 {
                     nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile);
-                }
-                else
-                {
-                    // null messages are ok -- treat as blank line
-                    nonNullMessage ??= e.Message ?? String.Empty;
                 }
 
                 WriteLinePretty(nonNullMessage);

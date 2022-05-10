@@ -821,14 +821,16 @@ namespace Microsoft.Build.Evaluation
 
         private IEnumerable FilterOutEnvironmentDerivedProperties(PropertyDictionary<P> dictionary)
         {
-            List<P> list = new();
+            List<P> list = new(dictionary.Count);
             foreach (P p in dictionary)
             {
-                if (!((p is ProjectProperty pp && pp.IsEnvironmentProperty) ||
-                    (p is EnvironmentDerivedProjectPropertyInstance)))
+                if (p is EnvironmentDerivedProjectPropertyInstance ||
+                    (p is ProjectProperty pp && pp.IsEnvironmentProperty))
                 {
-                    list.Add(p);
+                    continue;
                 }
+
+                list.Add(p);
             }
 
             return list;
@@ -1314,7 +1316,7 @@ namespace Microsoft.Build.Evaluation
                 // it is the same as what we are setting the value on. Note: This needs to be set before we expand the property we are currently setting.
                 _expander.UsedUninitializedProperties.CurrentlyEvaluatingPropertyElementName = propertyElement.Name;
 
-                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(propertyElement.Value, ExpanderOptions.ExpandProperties, propertyElement.Location);
+                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(propertyElement.Value, ExpanderOptions.ExpandProperties, propertyElement.Location, _evaluationLoggingContext);
 
                 // If we are going to set a property to a value other than null or empty we need to check to see if it has been used
                 // during evaluation.
