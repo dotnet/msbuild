@@ -18,10 +18,12 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void ProjectConfigurationDescription_DefaultTest()
         {
+            const string errorTargetFramework = "net48";
+
             var testProj = new TestProject()
             {
-                Name = "CompilationConstants",
-                TargetFrameworks = "netcoreapp2.1;netcoreapp3.1",
+                Name = "MultitargetingConfigurationDescription",
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework};{errorTargetFramework}",
                 IsExe = true,
                 IsSdkProject = true
             };
@@ -33,11 +35,11 @@ namespace Microsoft.NET.Build.Tests
             {
                 static void Main(string[] args)
                 {
-                    #if NETCOREAPP2_1
-                        Consol.WriteLine(""NETCOREAPP2_1"");
+                    #if NET472_OR_GREATER
+                        Consol.WriteLine(""NET472"");
                     #endif
-                    #if NETCOREAPP3_1
-                        Console.WriteLine(""NETCOREAPP3_1"");
+                    #if NETCOREAPP
+                        Console.WriteLine(""NETCOREAPP"");
                     #endif
                 }
             }");
@@ -48,7 +50,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining(":: TargetFramework");
+                .HaveStdOutContaining($"::TargetFramework={errorTargetFramework}");
         }
     }
 }
