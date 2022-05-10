@@ -740,6 +740,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1112: Balíček modulu runtime pro {0} se nestáhl. Zkuste spustit obnovení NuGet s identifikátorem RuntimeIdentifier {1}.</target>
         <note>{StrBegin="NETSDK1112: "}</note>
       </trans-unit>
+      <trans-unit id="RuntimePackNotRestored_TransitiveDisabled">
+        <source>NETSDK1184: The Runtime Pack for FrameworkReference '{0}' was not available.  This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
+        <target state="new">NETSDK1184: The Runtime Pack for FrameworkReference '{0}' was not available.  This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</target>
+        <note>{StrBegin="NETSDK1184: "}</note>
+      </trans-unit>
       <trans-unit id="SelfContainedExeCannotReferenceNonSelfContained">
         <source>NETSDK1150: The referenced project '{0}' is a non self-contained executable.  A non self-contained executable cannot be referenced by a self-contained executable.  For more information, see https://aka.ms/netsdk1150</source>
         <target state="translated">NETSDK1150: odkazovaný projekt {0} je spustitelný soubor, který není samostatně obsažený.  Na spustitelný soubor, který není samostatně obsažený, nelze odkazovat pomocí samostatně obsaženého spustitelného souboru. Další informace najdete na https://aka.ms/netsdk1150</target>
@@ -774,6 +779,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1127: The targeting pack {0} is not installed. Please restore and try again.</source>
         <target state="translated">NETSDK1127: Targeting Pack {0} není nainstalovaný. Obnovte ho prosím a zkuste to znovu.</target>
         <note>{StrBegin="NETSDK1127: "}</note>
+      </trans-unit>
+      <trans-unit id="TargetingPackNotRestored_TransitiveDisabled">
+        <source>NETSDK1183: The Targeting Pack for FrameworkReference '{0}' was not available.  This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
+        <target state="new">NETSDK1183: The Targeting Pack for FrameworkReference '{0}' was not available.  This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</target>
+        <note>{StrBegin="NETSDK1183: "}</note>
       </trans-unit>
       <trans-unit id="TrimmingWindowsFormsIsNotSupported">
         <source>NETSDK1175: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</source>
