@@ -136,8 +136,8 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 if (expected)
                 {
                     // Test equality in both directions
-                    a.ShouldBe(b);
-                    b.ShouldBe(a);
+                    a.ShouldBeEquivalentTo(b);
+                    b.ShouldBeEquivalentTo(a);
                 }
                 else
                 {
@@ -210,6 +210,8 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             {
                 return other != null && Key == other.Key;
             }
+
+            public override string ToString() => $"MockValue({Key})";
         }
     }
 }
