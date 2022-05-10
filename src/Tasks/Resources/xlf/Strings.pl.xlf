@@ -1548,8 +1548,8 @@
         <note>{StrBegin="MSB3216: "}</note>
       </trans-unit>
       <trans-unit id="RemoveDir.EmptyPath">
-        <source>MSB3232: Detected an empty directory. Skipping.</source>
-        <target state="new">MSB3232: Detected an empty directory. Skipping.</target>
+        <source>MSB3232: An empty directory was passed to RemoveDir and was ignored.</source>
+        <target state="new">MSB3232: An empty directory was passed to RemoveDir and was ignored.</target>
         <note>{StrBegin="MSB3232: "}</note>
       </trans-unit>
       <trans-unit id="RemoveDir.Error">

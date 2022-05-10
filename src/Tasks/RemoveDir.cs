@@ -53,6 +53,8 @@ namespace Microsoft.Build.Tasks
             {
                 if (string.IsNullOrEmpty(directory.ItemSpec))
                 {
+                    // Skip any empty ItemSpecs, otherwise RemoveDir will wipe the root of the current drive (!).
+                    // https://github.com/dotnet/msbuild/issues/7563
                     Log.LogWarning("RemoveDir.EmptyPath");
                     continue;
                 }
