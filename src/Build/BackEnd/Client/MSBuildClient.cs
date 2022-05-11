@@ -76,6 +76,12 @@ namespace Microsoft.Build.Execution
         private readonly BinaryWriter _binaryWriter;
 
         /// <summary>
+        /// Used to estimate the size of the build with an ETW trace.
+        /// </summary>
+        private int _numConsoleWritePackets;
+        private long _sizeOfConsoleWritePackets;
+
+        /// <summary>
         /// Public constructor with parameters.
         /// </summary>
         /// <param name="exeLocation">Location of executable file to launch the server process.
@@ -158,8 +164,8 @@ namespace Microsoft.Build.Execution
                 return _exitResult;
             }
 
-            int numConsoleWritePackets = 0;
-            long sizeOfConsoleWritePackets = 0;
+            _numConsoleWritePackets = 0;
+            _sizeOfConsoleWritePackets = 0;
 
             try
             {
@@ -197,12 +203,7 @@ namespace Microsoft.Build.Execution
                             {
                                 if (packet != null)
                                 {
-                                    int size = HandlePacket(packet);
-                                    if (size > -1)
-                                    {
-                                        numConsoleWritePackets++;
-                                        sizeOfConsoleWritePackets += size;
-                                    }
+                                    HandlePacket(packet);
                                 }
                             }
 
@@ -216,7 +217,7 @@ namespace Microsoft.Build.Execution
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.Unexpected;
             }
 
-            MSBuildEventSource.Log.MSBuildServerBuildStop(commandLine, numConsoleWritePackets, sizeOfConsoleWritePackets, _exitResult.MSBuildClientExitType.ToString(), _exitResult.MSBuildAppExitTypeString);
+            MSBuildEventSource.Log.MSBuildServerBuildStop(commandLine, _numConsoleWritePackets, _sizeOfConsoleWritePackets, _exitResult.MSBuildClientExitType.ToString(), _exitResult.MSBuildAppExitTypeString);
             CommunicationsUtilities.Trace("Build finished.");
             return _exitResult;
         }
@@ -359,17 +360,19 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Dispatches the packet to the correct handler.
         /// </summary>
-        private int HandlePacket(INodePacket packet)
+        private void HandlePacket(INodePacket packet)
         {
             switch (packet.Type)
             {
                 case NodePacketType.ServerNodeConsoleWrite:
                     ServerNodeConsoleWrite writePacket = (packet as ServerNodeConsoleWrite)!;
                     HandleServerNodeConsoleWrite(writePacket);
-                    return writePacket.Text.Length;
+                    _numConsoleWritePackets++;
+                    _sizeOfConsoleWritePackets += writePacket.Text.Length;
+                    break;
                 case NodePacketType.ServerNodeBuildResult:
                     HandleServerNodeBuildResult((ServerNodeBuildResult)packet);
-                    return -1;
+                    break;
                 default: throw new InvalidOperationException($"Unexpected packet type {packet.GetType().Name}");
             }
         }
