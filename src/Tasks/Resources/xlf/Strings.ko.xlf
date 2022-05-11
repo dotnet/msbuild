@@ -1363,7 +1363,7 @@
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.NoPlatformsListed">
         <source>MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</source>
-        <target state="needs-review-translation">MSB3982: EnableDynamicPlatformResolution이 true이지만 참조된 프로젝트 '{0}'에 '플랫폼' 메타데이터 세트가 없습니다. 지정된 플랫폼 없이 구축됩니다.</target>
+        <target state="new">MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</target>
         <note>{StrBegin="MSB3982: "}</note>
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform">
