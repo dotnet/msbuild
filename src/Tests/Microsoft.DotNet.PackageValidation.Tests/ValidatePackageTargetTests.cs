@@ -142,9 +142,9 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             TestProject testSubDependency = CreateTestProject(@"namespace PackageValidationTests { public interface IBaseInterface { } }", "netstandard2.0");
             TestProject testDependency = CreateTestProject(
                                             testDependencySource,
-                                            "netstandard2.0;net5.0",
+                                            $"netstandard2.0;{ToolsetInfo.CurrentTargetFramework}",
                                             new[] { testSubDependency });
-            TestProject testProject = CreateTestProject(@"namespace PackageValidationTests { public class First : ItermediateBaseClass { } }", "netstandard2.0;net5.0", new[] { testDependency });
+            TestProject testProject = CreateTestProject(@"namespace PackageValidationTests { public class First : ItermediateBaseClass { } }", $"netstandard2.0;{ToolsetInfo.CurrentTargetFramework}", new[] { testDependency });
 
             TestAsset asset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
             PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
@@ -163,12 +163,12 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             Dictionary<string, HashSet<string>> references = new()
             {
                 { "netstandard2.0", new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } },
-                { "net5.0", new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "net5.0") } }
+                { ToolsetInfo.CurrentTargetFramework, new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", ToolsetInfo.CurrentTargetFramework) } }
             };
             new CompatibleFrameworkInPackageValidator(false, log, references).Validate(package);
             Assert.NotEmpty(log.errors);
 
-            Assert.Contains($"CP0008 Type 'PackageValidationTests.First' does not implement interface 'PackageValidationTests.IBaseInterface' on lib/net5.0/{asset.TestProject.Name}.dll but it does on lib/netstandard2.0/{asset.TestProject.Name}.dll" ,log.errors);
+            Assert.Contains($"CP0008 Type 'PackageValidationTests.First' does not implement interface 'PackageValidationTests.IBaseInterface' on lib/{ToolsetInfo.CurrentTargetFramework}/{asset.TestProject.Name}.dll but it does on lib/netstandard2.0/{asset.TestProject.Name}.dll" ,log.errors);
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
@@ -186,7 +186,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
 
             TestProject testDummyDependency = CreateTestProject(@"namespace PackageValidationTests { public interface IDummyInterface { } }", "netstandard2.0");
             TestProject testDependency = CreateTestProject( testDependencyCode, "netstandard2.0", new[] { testDummyDependency });
-            TestProject testProject = CreateTestProject(@"namespace PackageValidationTests { public class First : SomeBaseClass { } }", "netstandard2.0;net5.0", new[] { testDependency });
+            TestProject testProject = CreateTestProject(@"namespace PackageValidationTests { public class First : SomeBaseClass { } }", $"netstandard2.0;{ToolsetInfo.CurrentTargetFramework}", new[] { testDependency });
 
             TestAsset asset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
             PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
@@ -197,10 +197,10 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             Dictionary<string, HashSet<string>> references = new()
             {
                 { "netstandard2.0", new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } },
-                { "net5.0", new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "net5.0") } }
+                { ToolsetInfo.CurrentTargetFramework, new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", ToolsetInfo.CurrentTargetFramework) } }
             };
 
-            File.Delete(Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "net5.0", $"{testDummyDependency.Name}.dll"));
+            File.Delete(Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, $"{testDummyDependency.Name}.dll"));
 
             // First we run without references. Without references, ApiCompat should not be able to see that class First
             // removed an interface due to it's base class removing that implementation. We validate that APICompat doesn't
@@ -231,8 +231,8 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
 #else
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(PackageValidationTests.MyForwardedType))]
 #endif";
-            TestProject dependency = CreateTestProject(dependencySourceCode, "netstandard2.0;net5.0");
-            TestProject testProject = CreateTestProject(testSourceCode, "netstandard2.0;net5.0", new[] { dependency });
+            TestProject dependency = CreateTestProject(dependencySourceCode, $"netstandard2.0;{ToolsetInfo.CurrentTargetFramework}");
+            TestProject testProject = CreateTestProject(testSourceCode, $"netstandard2.0;{ToolsetInfo.CurrentTargetFramework}", new[] { dependency });
 
             TestAsset asset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
             PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
@@ -243,16 +243,16 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
             Dictionary<string, HashSet<string>> references = new()
             {
                 { "netstandard2.0", new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } },
-                { "net5.0", new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "net5.0") } }
+                { ToolsetInfo.CurrentTargetFramework, new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", ToolsetInfo.CurrentTargetFramework) } }
             };
 
             if (deleteFile)
-                File.Delete(Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "net5.0", $"{dependency.Name}.dll"));
+                File.Delete(Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, $"{dependency.Name}.dll"));
 
             new CompatibleFrameworkInPackageValidator(false, log, useReferences ? references : null).Validate(package);
 
             if (expectCP0001)
-                Assert.Contains($"CP0001 Type 'PackageValidationTests.MyForwardedType' exists on lib/netstandard2.0/{testProject.Name}.dll but not on lib/net5.0/{testProject.Name}.dll", log.errors);
+                Assert.Contains($"CP0001 Type 'PackageValidationTests.MyForwardedType' exists on lib/netstandard2.0/{testProject.Name}.dll but not on lib/{ToolsetInfo.CurrentTargetFramework}/{testProject.Name}.dll", log.errors);
 
             if (expectCP1002)
                 Assert.Contains($"CP1002 Could not find matching assembly: '{dependency.Name}.dll' in any of the search directories.", log.errors);
@@ -277,8 +277,8 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(PackageValidationTests.MySecondForwardedType))]
 #endif";
 
-            TestProject dependency = CreateTestProject(dependencySourceCode, "netstandard2.0;net5.0");
-            TestProject testProject = CreateTestProject(testSourceCode, "netstandard2.0;net5.0", new[] { dependency });
+            TestProject dependency = CreateTestProject(dependencySourceCode, $"netstandard2.0;{ToolsetInfo.CurrentTargetFramework}");
+            TestProject testProject = CreateTestProject(testSourceCode, $"netstandard2.0;{ToolsetInfo.CurrentTargetFramework}", new[] { dependency });
 
             TestAsset asset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
             PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
@@ -289,10 +289,10 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
             Dictionary<string, HashSet<string>> references = new()
             {
                 { "netstandard2.0", new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } },
-                { "net5.0", new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "net5.0") } }
+                { ToolsetInfo.CurrentTargetFramework, new HashSet<string> { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", ToolsetInfo.CurrentTargetFramework) } }
             };
 
-            File.Delete(Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "net5.0", $"{dependency.Name}.dll"));
+            File.Delete(Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, $"{dependency.Name}.dll"));
 
             new CompatibleFrameworkInPackageValidator(false, log, references).Validate(package);
 
@@ -306,7 +306,7 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
         {
             TestLogger log = new TestLogger();
 
-            TestProject testProject = CreateTestProject("public class MyType { }", "netstandard2.0;net5.0");
+            TestProject testProject = CreateTestProject("public class MyType { }", $"netstandard2.0;{ToolsetInfo.CurrentTargetFramework}");
             TestAsset asset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
             PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
             var result = packCommand.Execute();

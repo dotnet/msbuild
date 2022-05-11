@@ -247,7 +247,7 @@ namespace Microsoft.NET.Build.Tests
         [RequiresMSBuildVersionFact("16.8.0")]
         public void It_copies_content_transitively()
         {
-            var targetFramework = "net5.0";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
             var testProjectA = new TestProject()
             {
                 Name = "ProjectA",

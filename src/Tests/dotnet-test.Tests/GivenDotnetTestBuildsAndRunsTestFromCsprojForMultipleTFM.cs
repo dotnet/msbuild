@@ -152,13 +152,13 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             var libraryProject = new TestProject()
             {
                 Name = "LibraryProject",
-                TargetFrameworks = "netcoreapp3.1;net5.0",
+                TargetFrameworks = $"netcoreapp3.1;{ToolsetInfo.CurrentTargetFramework}",
             };
 
             var testProject = new TestProject()
             {
                 Name = "TestProject",
-                TargetFrameworks = "net5.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("Microsoft.NET.Test.Sdk", "16.7.1"));

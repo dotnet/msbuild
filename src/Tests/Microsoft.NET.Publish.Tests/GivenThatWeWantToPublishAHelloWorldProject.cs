@@ -701,7 +701,7 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "PublishMultitarget",
-                TargetFrameworks = "net472;net5.0"
+                TargetFrameworks = $"net472;{ToolsetInfo.CurrentTargetFramework}"
             };
             testProject.AdditionalProperties.Add("IsPublishable", "false");
             var testAsset = _testAssetsManager.CreateTestProject(testProject);

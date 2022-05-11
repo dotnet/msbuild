@@ -104,7 +104,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testProject = new TestProject()
             {
-                TargetFrameworks = "net6.0;net472"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework};net472"
             };
 
             //  Disable analyzers built in to the SDK so we can more easily test the ones coming from NuGet packages
@@ -114,10 +114,10 @@ namespace Microsoft.NET.Build.Tests
             {
                 var ns = project.Root.Name.Namespace;
 
-                var itemGroup = XElement.Parse(@"
+                var itemGroup = XElement.Parse($@"
   <ItemGroup>
     <PackageReference Include=""System.Text.Json"" Version=""4.7.0"" Condition="" '$(TargetFramework)' == 'net472' "" />
-    <PackageReference Include=""System.Text.Json"" Version=""6.0.0-preview.4.21253.7"" Condition="" '$(TargetFramework)' == 'net6.0' "" />
+    <PackageReference Include=""System.Text.Json"" Version=""6.0.0-preview.4.21253.7"" Condition="" '$(TargetFramework)' == '{ToolsetInfo.CurrentTargetFramework}' "" />
   </ItemGroup>");
 
                 project.Root.Add(itemGroup);
@@ -139,7 +139,7 @@ namespace Microsoft.NET.Build.Tests
                 return getValuesCommand.GetValues().Select(x => GetPackageAndPath(x)).ToList();
             }
 
-            GetAnalyzersForTargetFramework("net6.0").Should().BeEquivalentTo(("system.text.json", "6.0.0-preview.4.21253.7", "analyzers/dotnet/cs/System.Text.Json.SourceGeneration.dll"));
+            GetAnalyzersForTargetFramework(ToolsetInfo.CurrentTargetFramework).Should().BeEquivalentTo(("system.text.json", "6.0.0-preview.4.21253.7", "analyzers/dotnet/cs/System.Text.Json.SourceGeneration.dll"));
             GetAnalyzersForTargetFramework("net472").Should().BeEmpty();
         }
 
