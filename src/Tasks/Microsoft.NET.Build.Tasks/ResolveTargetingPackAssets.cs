@@ -138,7 +138,15 @@ namespace Microsoft.NET.Build.Tasks
                     {
                         if (!foundTargetingPack)
                         {
-                            errors.Add(string.Format(Strings.UnknownFrameworkReference, frameworkReference.Name));
+                            if (frameworkReference.Name.Equals("Microsoft.Maui.Essentials", StringComparison.OrdinalIgnoreCase))
+                            {
+                                errors.Add(Strings.UnknownFrameworkReference_MauiEssentials);
+                            }
+                            else
+                            {
+                                errors.Add(string.Format(Strings.UnknownFrameworkReference, frameworkReference.Name));
+                            }
+                            
                         }
                         else
                         {

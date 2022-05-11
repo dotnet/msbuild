@@ -820,6 +820,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1073: FrameworkReference '{0}' は認識されませんでした</target>
         <note>{StrBegin="NETSDK1073: "}</note>
       </trans-unit>
+      <trans-unit id="UnknownFrameworkReference_MauiEssentials">
+        <source>NETSDK1185: This project depends on Maui Essentials through a project or NuGet package reference.  To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</source>
+        <target state="new">NETSDK1185: This project depends on Maui Essentials through a project or NuGet package reference.  To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</target>
+        <note>{StrBegin="NETSDK1185: "}</note>
+      </trans-unit>
       <trans-unit id="UnnecessaryWindowsDesktopSDK">
         <source>NETSDK1137: It is no longer necessary to use the Microsoft.NET.Sdk.WindowsDesktop SDK. Consider changing the Sdk attribute of the root Project element to 'Microsoft.NET.Sdk'.</source>
         <target state="translated">NETSDK1137: Microsoft.NET.Sdk.WindowsDesktop SDK を使用する必要はなくなりました。ルート プロジェクト要素の SDK 属性を 'Microsoft.NET.Sdk' に変更することをご検討ください。</target>
