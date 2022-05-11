@@ -503,7 +503,7 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1099: "}</comment>
   </data>
   <data name="WindowsDesktopFrameworkRequiresWindows" xml:space="preserve">
-    <value>NETSDK1100: Windows is required to build Windows desktop applications.</value>
+    <value>NETSDK1100: To build a project targeting Windows on this operating system, set the EnableWindowsTargeting property to true.</value>
     <comment>{StrBegin="NETSDK1100: "}</comment>
   </data>
   <data name="ILLink_Info" xml:space="preserve">

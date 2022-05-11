@@ -97,6 +97,44 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining(Strings.WindowsDesktopFrameworkRequiresWindows);
         }
 
+        [PlatformSpecificFact(TestPlatforms.Linux | TestPlatforms.OSX | TestPlatforms.FreeBSD)]
+        public void AppTargetingWindows10CanBuildOnNonWindows()
+        {
+            var testProject = new TestProject()
+            {
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework + "-windows10.0.19041.0",
+                IsWinExe = true
+            };
+            testProject.AdditionalProperties["EnableWindowsTargeting"] = "true";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            new BuildCommand(testAsset)
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
+        [PlatformSpecificFact(TestPlatforms.Linux | TestPlatforms.OSX | TestPlatforms.FreeBSD)]
+        public void WindowsFormsAppCanBuildOnNonWindows()
+        {
+            var testDirectory = _testAssetsManager.CreateTestDirectory();
+
+            new DotnetCommand(Log, "new", "winforms")
+                .WithWorkingDirectory(testDirectory.Path)
+                .WithEnvironmentVariable("EnableWindowsTargeting", "true")
+                .Execute()
+                .Should()
+                .Pass();
+
+            new DotnetBuildCommand(Log)
+                .WithWorkingDirectory(testDirectory.Path)
+                .WithEnvironmentVariable("EnableWindowsTargeting", "true")
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
         [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_builds_on_windows_with_the_windows_desktop_sdk_5_0_with_ProjectSdk_set()
         {

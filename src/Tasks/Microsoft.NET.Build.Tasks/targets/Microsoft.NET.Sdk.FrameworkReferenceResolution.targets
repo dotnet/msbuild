@@ -106,6 +106,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 TargetLatestRuntimePatchIsDefault="$(_TargetLatestRuntimePatchIsDefault)"
                                 EnableTargetingPackDownload="$(EnableTargetingPackDownload)"
                                 EnableRuntimePackDownload="$(EnableRuntimePackDownload)"
+                                EnableWindowsTargeting="$(EnableWindowsTargeting)"
                                 DisableTransitiveFrameworkReferenceDownloads="$(DisableTransitiveFrameworkReferenceDownloads)"
                                 KnownCrossgen2Packs="@(KnownCrossgen2Pack)"
                                 NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"

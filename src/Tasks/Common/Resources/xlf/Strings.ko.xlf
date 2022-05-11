@@ -901,8 +901,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1105: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresWindows">
-        <source>NETSDK1100: Windows is required to build Windows desktop applications.</source>
-        <target state="translated">NETSDK1100: Windows 데스크톱 애플리케이션을 빌드하려면 Windows가 필요합니다.</target>
+        <source>NETSDK1100: To build a project targeting Windows on this operating system, set the EnableWindowsTargeting property to true.</source>
+        <target state="needs-review-translation">NETSDK1100: Windows 데스크톱 애플리케이션을 빌드하려면 Windows가 필요합니다.</target>
         <note>{StrBegin="NETSDK1100: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopTargetPlatformMustBeWindows">

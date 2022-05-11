@@ -58,6 +58,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool EnableRuntimePackDownload { get; set; }
 
+        public bool EnableWindowsTargeting { get; set; }
+
         public bool DisableTransitiveFrameworkReferenceDownloads { get; set; }
 
         public ITaskItem[] FrameworkReferences { get; set; } = Array.Empty<ITaskItem>();
@@ -146,7 +148,8 @@ namespace Microsoft.NET.Build.Tasks
 
                 // Handle Windows-only frameworks on non-Windows platforms
                 if (knownFrameworkReference.IsWindowsOnly &&
-                    !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    !RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
+                    !EnableWindowsTargeting)
                 {
                     // It is an error to reference the framework from non-Windows
                     if (!windowsOnlyErrorLogged && frameworkReference != null)
