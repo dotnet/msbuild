@@ -235,7 +235,7 @@
     <value>Failed to update the advertising manifest {0}: {1}.</value>
   </data>
   <data name="AdManifestPackageDoesNotExist" xml:space="preserve">
-    <value>Failed to update advertising manifest. Manifest package {0} doesn't exist.</value>
+    <value>Advertising manifest not updated. Manifest package for {0} doesn't exist.</value>
   </data>
   <data name="ManifestDoesNotExist" xml:space="preserve">
     <value>No manifest with ID {0} exists.</value>

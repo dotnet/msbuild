@@ -303,7 +303,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             try
             {
                 var adManifestPath = GetAdvertisingManifestPath(_sdkFeatureBand, manifestId);
-                // maybe try abstracting this part out
+                
                 if (offlineCache == null || !offlineCache.HasValue)
                 {
                     try
@@ -317,12 +317,20 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         // then try downloading the manifest's feature band
                         if (!(manifest.ManifestFeatureBand).Equals(_sdkFeatureBand))
                         {
-                            packagePath = await GetOnlinePackagePath(new SdkFeatureBand(manifest.ManifestFeatureBand), manifestId, includePreviews);        // goes to failure message from here
-                            currentFeatureBand = manifest.ManifestFeatureBand.ToString();
+                            try
+                            {
+                                packagePath = await GetOnlinePackagePath(new SdkFeatureBand(manifest.ManifestFeatureBand), manifestId, includePreviews);        // goes to failure message from here
+                            }
+                            catch (NuGetPackageNotFoundException)
+                            {
+                                _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestPackageDoesNotExist, manifestId));
+                                return;
+                            }
                         }
                         else
                         {
                             _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestPackageDoesNotExist, manifestId));
+                            return;
                         }
                     }
                 }
@@ -343,7 +351,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         }
                     }
                 }
-                // abstract through here
+                
                 extractionPath = Path.Combine(_tempDirPath, "dotnet-sdk-advertising-temp", $"{manifestId}-extracted");
                 Directory.CreateDirectory(extractionPath);
                 var resultingFiles = await _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(extractionPath));
@@ -365,10 +373,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
             catch (Exception e)
             {
-                if (!(e.Message.Contains("Package not found")))
-                {
-                    _reporter.WriteLine(string.Format(LocalizableStrings.FailedAdManifestUpdate, manifestId, e.Message));       // this is where it says it failed
-                }
+                _reporter.WriteLine(string.Format(LocalizableStrings.FailedAdManifestUpdate, manifestId, e.Message));       // this is where it says it failed
             }
             finally
             {
@@ -381,15 +386,18 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 {
                     File.Delete(packagePath);
                 }
-
-                var versionDir = Path.GetDirectoryName(packagePath);
-                if (Directory.Exists(versionDir) && !Directory.GetFileSystemEntries(versionDir).Any())
+                if (!string.IsNullOrEmpty(packagePath))
                 {
-                    Directory.Delete(versionDir);
-                    var idDir = Path.GetDirectoryName(versionDir);
-                    if (Directory.Exists(idDir) && !Directory.GetFileSystemEntries(idDir).Any())
+                    var versionDir = Path.GetDirectoryName(packagePath);
+
+                    if (Directory.Exists(versionDir) && !Directory.GetFileSystemEntries(versionDir).Any())
                     {
-                        Directory.Delete(idDir);
+                        Directory.Delete(versionDir);
+                        var idDir = Path.GetDirectoryName(versionDir);
+                        if (Directory.Exists(idDir) && !Directory.GetFileSystemEntries(idDir).Any())
+                        {
+                            Directory.Delete(idDir);
+                        }
                     }
                 }
             }

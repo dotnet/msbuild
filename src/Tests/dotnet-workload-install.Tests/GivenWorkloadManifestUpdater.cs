@@ -318,7 +318,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             nugetDownloader.DownloadCallParams[1].version.ShouldBeEquivalentTo(null);
 
             // check that output lines from _reporter do not say failed
-            _reporter.Lines.Should().NotContain("fail");
+            _reporter.Lines.Should().NotContain(l => l.ToLowerInvariant().Contains("fail"));
+
         }
 
         [Fact]
