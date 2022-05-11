@@ -118,17 +118,10 @@ namespace Microsoft.NET.Build.Tests
         [PlatformSpecificFact(TestPlatforms.Linux | TestPlatforms.OSX | TestPlatforms.FreeBSD)]
         public void WindowsFormsAppCanBuildOnNonWindows()
         {
-            var testDirectory = _testAssetsManager.CreateTestDirectory();
+            var testInstance = _testAssetsManager.CopyTestAsset("WindowsFormsTestApp")
+                .WithSource();
 
-            new DotnetCommand(Log, "new", "winforms")
-                .WithWorkingDirectory(testDirectory.Path)
-                .WithEnvironmentVariable("EnableWindowsTargeting", "true")
-                .Execute()
-                .Should()
-                .Pass();
-
-            new DotnetBuildCommand(Log)
-                .WithWorkingDirectory(testDirectory.Path)
+            new BuildCommand(Log, testInstance.Path)
                 .WithEnvironmentVariable("EnableWindowsTargeting", "true")
                 .Execute()
                 .Should()
