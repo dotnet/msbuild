@@ -125,7 +125,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
 
         protected virtual FileStream WritePidFile()
         {
-            var path = GetPidFilePath(env => Environment.GetEnvironmentVariable(env));
+            var path = GetPidFilePath();
             return WritePidFile(path);
         }
 
@@ -167,12 +167,12 @@ namespace Microsoft.NET.Sdk.Razor.Tool
         }
 
         // Internal for testing.
-        internal virtual string GetPidFilePath(Func<string, string> getEnvironmentVariable)
+        internal static string GetPidFilePath()
         {
-            var path = getEnvironmentVariable("DOTNET_BUILD_PIDFILE_DIRECTORY");
+            var path = Environment.GetEnvironmentVariable("DOTNET_BUILD_PIDFILE_DIRECTORY");
             if (string.IsNullOrEmpty(path))
             {
-                var homePath = CliFolderPathCalculatorCore.GetDotnetHomePath(getEnvironmentVariable);
+                var homePath = CliFolderPathCalculatorCore.GetDotnetHomePath();
                 if (homePath is null)
                 {
                     // Couldn't locate the user profile directory. Bail.

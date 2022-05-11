@@ -43,16 +43,16 @@ namespace Microsoft.DotNet.Tests
         [Theory]
         [InlineData("")]
         [InlineData(null)]
-        public void GivenAMissingHomeVariableItPrintsErrorMessage(string value)
+        public void GivenAMissingHomeVariableItExecutesHelpCommandSuccessfully(string value)
         {
             new DotnetCommand(Log)
                 .WithEnvironmentVariable(CliFolderPathCalculator.PlatformHomeVariableName, value)
                 .WithEnvironmentVariable(CliFolderPathCalculator.DotnetHomeVariableName, "")
                 .Execute("--help")
                 .Should()
-                .Fail()
+                .Pass()
                 .And
-                .HaveStdErrContaining(CliFolderPathCalculator.DotnetHomeVariableName);
+                .HaveStdOutContaining(LocalizableStrings.DotNetSdkInfo);
         }
 
         [Fact]
