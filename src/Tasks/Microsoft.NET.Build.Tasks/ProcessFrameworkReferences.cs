@@ -728,7 +728,7 @@ namespace Microsoft.NET.Build.Tasks
             var packInfo = _workloadResolver.TryGetPackInfo(new WorkloadPackId(packID));
             if (packInfo == null)
             {
-                Log.LogError("NETSDKZZZZ: Error getting pack version: Pack '{0}' was not present in workload manifests.", packID);
+                Log.LogError(Strings.CouldNotGetPackVersionFromWorkloadManifests, packID);
                 return packVersion;
             }
             return packInfo.Version;
