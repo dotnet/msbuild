@@ -1461,11 +1461,11 @@ namespace Microsoft.Build.UnitTests
                 // Verify result based on value of ExpectedBuildResult
                 if (expectedBuildResult == ExpectedBuildResult.FailWithError)
                 {
-                    VerifyErrorLoggedForDriveEnumeratingWildcard(buildResult, mockLogger, targetName);
+                    VerifyErrorLoggedForDriveEnumeratingWildcard(buildResult, mockLogger, targetName, testProjectFile);
                 }
                 else if (expectedBuildResult == ExpectedBuildResult.SucceedWithWarning)
                 {
-                    VerifyWarningLoggedForDriveEnumeratingWildcard(buildResult, mockLogger, targetName);
+                    VerifyWarningLoggedForDriveEnumeratingWildcard(buildResult, mockLogger, targetName, testProjectFile);
                 }
                 else if (expectedBuildResult == ExpectedBuildResult.SucceedWithNoErrorsAndWarnings)
                 {
@@ -1478,19 +1478,21 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        private static void VerifyErrorLoggedForDriveEnumeratingWildcard(BuildResult buildResult, MockLogger mockLogger, string targetName)
+        private static void VerifyErrorLoggedForDriveEnumeratingWildcard(BuildResult buildResult, MockLogger mockLogger, string targetName, string testProjectFile)
         {
             buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
             buildResult[targetName].ResultCode.ShouldBe(TargetResultCode.Failure);
             mockLogger.ErrorCount.ShouldBe(1);
             mockLogger.Errors[0].Code.ShouldBe("MSB5029");
+            mockLogger.Errors[0].Message.ShouldContain(testProjectFile);
         }
 
-        private static void VerifyWarningLoggedForDriveEnumeratingWildcard(BuildResult buildResult, MockLogger mockLogger, string targetName)
+        private static void VerifyWarningLoggedForDriveEnumeratingWildcard(BuildResult buildResult, MockLogger mockLogger, string targetName, string testProjectFile)
         {
             VerifySuccessOfBuildAndTargetResults(buildResult, targetName);
             mockLogger.WarningCount.ShouldBe(1);
             mockLogger.Warnings[0].Code.ShouldBe("MSB5029");
+            mockLogger.Warnings[0].Message.ShouldContain(testProjectFile);
         }
 
         private static void VerifyNoErrorsAndWarningsForDriveEnumeratingWildcard(BuildResult buildResult, MockLogger mockLogger, string targetName)
