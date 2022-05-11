@@ -153,7 +153,8 @@ namespace Microsoft.Build.Tasks
                     "WildcardResultsInDriveEnumeration",
                     EscapingUtilities.UnescapeAll(fileSpec),
                     attributeType,
-                    CreateItemTask);
+                    CreateItemTask,
+                    BuildEngine.ProjectFileOfTaskNode);
             }
             else if (searchAction == FileMatcher.SearchAction.FailOnDriveEnumeratingWildcard)
             {
@@ -161,7 +162,8 @@ namespace Microsoft.Build.Tasks
                     "WildcardResultsInDriveEnumeration",
                     EscapingUtilities.UnescapeAll(fileSpec),
                     attributeType,
-                    CreateItemTask);
+                    CreateItemTask,
+                    BuildEngine.ProjectFileOfTaskNode);
             }
 
             return (expand, !Log.HasLoggedErrors);

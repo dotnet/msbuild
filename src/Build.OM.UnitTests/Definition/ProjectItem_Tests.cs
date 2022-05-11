@@ -969,6 +969,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     // Verify
                     collectionLogger.WarningCount.ShouldBe(1);
                     collectionLogger.AssertLogContains("MSB5029");
+                    collectionLogger.AssertLogContains(testProjectFile);
                     options.ProjectCollection.UnregisterAllLoggers();
                 }
             }
