@@ -221,7 +221,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 Directory.CreateDirectory(resolverPath);
                 File.WriteAllText(resolverManifest, $@"
                     <SdkResolver>
-                      <NamePattern>1.*</NamePattern>
+                      <NamePattern>1&lt;.*</NamePattern>
                       <Path>{assemblyToLoad}</Path>
                     </SdkResolver>");
 
@@ -230,7 +230,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
                 resolversManifestsFound.Count.ShouldBe(1);
                 resolversManifestsFound.First().Path.ShouldBe(assemblyToLoad);
-                resolversManifestsFound.First().NamePattern.ShouldBe("1.*");
+                resolversManifestsFound.First().NamePattern.ShouldBe("1<.*");
             }
         }
 
