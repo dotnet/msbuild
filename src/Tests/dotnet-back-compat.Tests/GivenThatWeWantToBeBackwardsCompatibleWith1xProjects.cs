@@ -21,8 +21,8 @@ namespace Microsoft.DotNet.Cli.Build.Tests
         {
         }
 
-        [RequiresSpecificFrameworkTheory("netcoreapp1.1")]
-        [InlineData("netcoreapp1.1")]
+        [RequiresSpecificFrameworkTheory(ToolsetInfo.CurrentTargetFramework)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void ItRestoresBuildsAndRuns(string target)
         {
 
