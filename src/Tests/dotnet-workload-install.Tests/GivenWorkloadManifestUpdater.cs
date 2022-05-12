@@ -1,29 +1,27 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
 using FluentAssertions;
-using FluentAssertions.Collections;
 using ManifestReaderTests;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Workloads.Workload.Install;
+using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
+using Microsoft.Extensions.EnvironmentAbstractions;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.Utilities;
 using NuGet.Versioning;
 using Xunit;
 using Xunit.Abstractions;
-using Microsoft.Extensions.EnvironmentAbstractions;
-using Microsoft.NET.Sdk.WorkloadManifestReader;
-using System;
-using System.Runtime.CompilerServices;
-using System.Collections.Generic;
-using System.Text.Json;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
-using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -220,7 +218,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             //  Arrange
             string sdkFeatureBand = "6.0.300";
-            var testDir = _testAssetsManager.CreateTestDirectory().Path;
+            var testDir = _testAssetsManager.CreateTestDirectory(identifier: useOfflineCache.ToString()).Path;
             var dotnetRoot = Path.Combine(testDir, "dotnet");
             var installedManifestDir6_0_200 = Path.Combine(dotnetRoot, "sdk-manifests", "6.0.200");
             Directory.CreateDirectory(installedManifestDir6_0_200);
@@ -251,9 +249,6 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 File.Create(Path.Combine(offlineCacheDir, $"{testManifestName}.Manifest-6.0.200.nupkg"));
 
                 manifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews: true, offlineCache: new DirectoryPath(offlineCacheDir)).Wait();
-
-                nugetDownloader.DownloadCallParams[0].id.ToString().Should().Be($"{testManifestName}.manifest-6.0.200");
-                nugetDownloader.DownloadCallParams[0].version.ShouldBeEquivalentTo(null);
             }
             else
             {
@@ -268,18 +263,22 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 nugetDownloader.DownloadCallParams[0].version.ShouldBeEquivalentTo(null);
                 nugetDownloader.DownloadCallParams[1].id.ToString().Should().Be($"{testManifestName}.manifest-6.0.200");
                 nugetDownloader.DownloadCallParams[1].version.ShouldBeEquivalentTo(null);
-
-                // these can't be asserted for 
-                //  6.0.200 package was written to advertising manifest folder
-                var advertisedManifestContents = File.ReadAllText(Path.Combine(adManifestDir, testManifestName, "WorkloadManifest.json"));
-                advertisedManifestContents.Should().NotBeEmpty();
+                nugetDownloader.DownloadCallParams.Count.Should().Be(2);    
                 
-                //  AdvertisedManifestFeatureBand.txt file is set to 6.0.200
-                var savedFeatureBand = File.ReadAllText(Path.Combine(adManifestDir, testManifestName, "AdvertisedManifestFeatureBand.txt"));
-                savedFeatureBand.Should().Be("6.0.200");
             }
 
-            
+            //  6.0.200 package was written to advertising manifest folder
+            var advertisedManifestContents = File.ReadAllText(Path.Combine(adManifestDir, testManifestName, "WorkloadManifest.json"));
+            advertisedManifestContents.Should().NotBeEmpty();
+
+            //  AdvertisedManifestFeatureBand.txt file is set to 6.0.200
+            var savedFeatureBand = File.ReadAllText(Path.Combine(adManifestDir, testManifestName, "AdvertisedManifestFeatureBand.txt"));
+            savedFeatureBand.Should().Be("6.0.200");
+                   
+            // check that update did not fail
+            _reporter.Lines.Should().NotContain(l => l.ToLowerInvariant().Contains("fail"));
+            _reporter.Lines.Should().NotContain(String.Format(Workloads.Workload.Install.LocalizableStrings.AdManifestPackageDoesNotExist, testManifestName));
+
         }
 
         [Theory]
@@ -341,6 +340,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 nugetDownloader.DownloadCallParams[0].version.ShouldBeEquivalentTo(null);
                 nugetDownloader.DownloadCallParams[1].id.ToString().Should().Be($"{testManifestName}.manifest-6.0.200");
                 nugetDownloader.DownloadCallParams[1].version.ShouldBeEquivalentTo(null);
+                nugetDownloader.DownloadCallParams.Count.Should().Be(2);
             }
 
             //  Assert
@@ -348,7 +348,6 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             _reporter.Lines.Should().Contain(String.Format(Workloads.Workload.Install.LocalizableStrings.AdManifestPackageDoesNotExist, testManifestName));
         }
 
-        // test for when it's not falling back and there aren't any updates
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -401,13 +400,16 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 manifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews: true).Wait();
 
 
-                //  6.0.300 manifest was requested and then 6.0.200 manifest was requested
+                // only 6.0.300 manifest was requested
                 // we can't assert this for the offline cache
                 nugetDownloader.DownloadCallParams[0].id.ToString().Should().Be($"{testManifestName}.manifest-6.0.300");
                 nugetDownloader.DownloadCallParams[0].version.ShouldBeEquivalentTo(null);
             }
 
             //  Assert
+            //  Check nothing was written to advertising manifest folder
+            Directory.GetFiles(adManifestDir).Should().BeEmpty();
+
             _reporter.Lines.Should().NotContain(l => l.ToLowerInvariant().Contains("fail"));
             _reporter.Lines.Should().Contain(String.Format(Workloads.Workload.Install.LocalizableStrings.AdManifestPackageDoesNotExist, testManifestName));
         }

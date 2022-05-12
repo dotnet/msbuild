@@ -3,24 +3,22 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.NET.Sdk.WorkloadManifestReader;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.Cli.NuGetPackageDownloader;
-using Microsoft.DotNet.ToolPackage;
+using System.Net.Http;
+using System.Runtime.InteropServices;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.NuGetPackageDownloader;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Configurer;
+using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using NuGet.Versioning;
-using Microsoft.DotNet.Configurer;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 using NuGet.Common;
-using System.Text.Json;
-using System.Runtime.InteropServices;
-using Microsoft.DotNet.Cli;
-using System.Net;
-using System.Net.Http;
-using System.Globalization;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -341,7 +339,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
             catch (Exception e)
             {
-                _reporter.WriteLine(string.Format(LocalizableStrings.FailedAdManifestUpdate, manifestId, e.Message));       // this is where it says it failed
+                _reporter.WriteLine(string.Format(LocalizableStrings.FailedAdManifestUpdate, manifestId, e.Message));
             }
             finally
             {
@@ -513,9 +511,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         private string GetOfflinePackagePath(SdkFeatureBand sdkFeatureBand, ManifestId manifestId, DirectoryPath? offlineCache = null)
         {
-            string packagePath = Directory.GetFiles(offlineCache.Value.Value)         // why isn't this getting the actual package path? (it returns up to offlinceCache but not the .nupkg
+            string packagePath = Directory.GetFiles(offlineCache.Value.Value)
                 .Where(path => path.EndsWith(".nupkg"))
-                .Where(path => Path.GetFileName(path).StartsWith(GetManifestPackageId(sdkFeatureBand, manifestId).ToString()))
+                .Where(path =>
+                {
+                    var manifestPackageId = GetManifestPackageId(sdkFeatureBand, manifestId).ToString();
+                    return Path.GetFileName(path).StartsWith(manifestPackageId, StringComparison.OrdinalIgnoreCase);
+                })
                 .Max();
 
             return packagePath;
