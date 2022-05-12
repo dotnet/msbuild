@@ -65,7 +65,7 @@ namespace Microsoft.Build.Engine.UnitTests
 <Project>
 <UsingTask TaskName=""SleepingTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
     <Target Name='Sleep'>
-        <ProcessIdTask SleepTime=""100000"" />
+        <SleepingTask SleepTime=""100000"" />
     </Target>
 </Project>";
 
@@ -176,14 +176,13 @@ namespace Microsoft.Build.Engine.UnitTests
                 Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
                 output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
                 success.ShouldBeTrue();
-                _output.WriteLine("output from third call is: " + output);
                 ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
 
                 Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
                 output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
                 success.ShouldBeTrue();
-                pidOfServerProcess.ShouldBe(ParseNumber(output, "Server ID is "), "Server should be the same as before.");
-                pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Process ID is "), "There should be a server node for this build.");
+                pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Server ID is "), "The server should be otherwise occupied.");
+                pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
             }
             finally
             {
