@@ -59,6 +59,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return new Example(siblingCommand, parentCommands2.ToArray());
         }
 
+        internal static Example FromExistingTokens(ParseResult parseResult)
+        {
+            // root command name is not part of the tokens
+            var commandParts = parseResult.Tokens.Select(t => t.Value).Prepend(parseResult.RootCommandResult.Command.Name);
+            return new Example(parseResult.CommandResult.Command, commandParts.ToArray());
+        }
+
         internal Example WithOption(Option option, params string[] args)
         {
             if (!_currentCommand.Options.Contains(option) && !_currentCommand.Options.Any(o => o.Name == option.Name))

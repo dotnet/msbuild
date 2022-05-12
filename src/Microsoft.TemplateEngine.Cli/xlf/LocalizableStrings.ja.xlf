@@ -801,6 +801,26 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">次のオプションまたはその値は、指定された他のオプションまたは値と組み合わせて有効ではありません:</target>
         <note />
       </trans-unit>
+      <trans-unit id="TemplateCommand_DisplayConstraintResults_Error">
+        <source>Failed to instatiate template '{0}', the following constraints are not met:</source>
+        <target state="new">Failed to instatiate template '{0}', the following constraints are not met:</target>
+        <note>{0} - template name (user friendly)</note>
+      </trans-unit>
+      <trans-unit id="TemplateCommand_DisplayConstraintResults_Hint">
+        <source>To run the template anyway, use '{0}' option:</source>
+        <target state="new">To run the template anyway, use '{0}' option:</target>
+        <note>{0} - additional option name (--force)</note>
+      </trans-unit>
+      <trans-unit id="TemplateCommand_DisplayConstraintResults_Hint_TemplateNotUsable">
+        <source>The template might not be usable.</source>
+        <target state="new">The template might not be usable.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_DisplayConstraintResults_Warning">
+        <source>Warning: the following constraints for the template '{0}' are not met:</source>
+        <target state="new">Warning: the following constraints for the template '{0}' are not met:</target>
+        <note>{0} - template name (user friendly)</note>
+      </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_Description">
         <source>The '{0}' command creates a .NET project based on a template.</source>
         <target state="translated">'{0}' コマンドを実行すると、テンプレートに基づいて .NET プロジェクトが作成されます。</target>

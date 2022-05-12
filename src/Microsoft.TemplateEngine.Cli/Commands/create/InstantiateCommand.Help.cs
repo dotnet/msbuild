@@ -284,7 +284,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 preferredTemplate.NameOption,
                 preferredTemplate.OutputOption,
                 preferredTemplate.DryRunOption,
-                preferredTemplate.ForceOption,
+                TemplateCommand.ForceOption,
                 preferredTemplate.NoUpdateCheckOption
             };
 

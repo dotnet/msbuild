@@ -1438,6 +1438,42 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to instatiate template &apos;{0}&apos;, the following constraints are not met:.
+        /// </summary>
+        internal static string TemplateCommand_DisplayConstraintResults_Error {
+            get {
+                return ResourceManager.GetString("TemplateCommand_DisplayConstraintResults_Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To run the template anyway, use &apos;{0}&apos; option:.
+        /// </summary>
+        internal static string TemplateCommand_DisplayConstraintResults_Hint {
+            get {
+                return ResourceManager.GetString("TemplateCommand_DisplayConstraintResults_Hint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The template might not be usable..
+        /// </summary>
+        internal static string TemplateCommand_DisplayConstraintResults_Hint_TemplateNotUsable {
+            get {
+                return ResourceManager.GetString("TemplateCommand_DisplayConstraintResults_Hint_TemplateNotUsable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Warning: the following constraints for the template &apos;{0}&apos; are not met:.
+        /// </summary>
+        internal static string TemplateCommand_DisplayConstraintResults_Warning {
+            get {
+                return ResourceManager.GetString("TemplateCommand_DisplayConstraintResults_Warning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The &apos;{0}&apos; command creates a .NET project based on a template..
         /// </summary>
         internal static string TemplateInformationCoordinator_DotnetNew_Description {

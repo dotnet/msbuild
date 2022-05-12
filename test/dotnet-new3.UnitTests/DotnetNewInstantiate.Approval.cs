@@ -460,5 +460,40 @@ namespace Dotnet_new3.IntegrationTests
             });
         }
 
+        [Fact]
+        public Task Constraints_Error_IfTemplateIsRestricted()
+        {
+            var customHivePath = TestUtils.CreateTemporaryFolder();
+            Helpers.InstallTestTemplate("Constraints/RestrictedTemplate", _log, customHivePath);
+
+            var commandResult = new DotnetNewCommand(_log, "Constraints.RestrictedTemplate")
+                  .WithCustomHive(customHivePath)
+                  .Execute();
+
+            commandResult
+                .Should()
+                .Fail();
+
+            return Verifier.Verify(commandResult.StdErr, _verifySettings)
+                .AddScrubber(output => output.ScrubByRegex("\\-\\-debug\\:custom\\-hive [A-Za-z0-9\\-\\.\\\\\\/\\{\\}]+", "--debug:custom-hive %SETTINGS DIRECTORY%"));
+        }
+
+        [Fact]
+        public Task Constraints_CanIgnoreConstraints_WhenForceIsSpecified()
+        {
+            var customHivePath = TestUtils.CreateTemporaryFolder();
+            Helpers.InstallTestTemplate("Constraints/RestrictedTemplate", _log, customHivePath);
+
+            var commandResult = new DotnetNewCommand(_log, "Constraints.RestrictedTemplate", "--force")
+                  .WithCustomHive(customHivePath)
+                  .Execute();
+
+            commandResult
+                .Should()
+                .Pass();
+
+            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+        }
+
     }
 }

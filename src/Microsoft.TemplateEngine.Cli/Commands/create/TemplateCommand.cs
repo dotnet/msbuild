@@ -4,9 +4,12 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using System.Threading;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.Constraints;
 using Microsoft.TemplateEngine.Abstractions.Installer;
 using Microsoft.TemplateEngine.Cli.PostActionProcessors;
+using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
 
@@ -14,6 +17,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class TemplateCommand : Command
     {
+        private static readonly TimeSpan ConstraintEvaluationTimeout = TimeSpan.FromMilliseconds(1000);
         private static readonly string[] _helpAliases = new[] { "-h", "/h", "--help", "-?", "/?" };
         private readonly TemplatePackageManager _templatePackageManager;
         private readonly IEngineEnvironmentSettings _environmentSettings;
@@ -112,6 +116,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal static IReadOnlyList<string> KnownHelpAliases => _helpAliases;
 
+        internal static Option<bool> ForceOption { get; } = new Option<bool>("--force")
+        {
+            Description = SymbolStrings.TemplateCommand_Option_Force,
+            Arity = new ArgumentArity(0, 1)
+        };
+
         internal Option<string> OutputOption { get; } = SharedOptionsFactory.CreateOutputOption();
 
         internal Option<string> NameOption { get; } = new Option<string>(new string[] { "-n", "--name" })
@@ -123,12 +133,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal Option<bool> DryRunOption { get; } = new Option<bool>("--dry-run")
         {
             Description = SymbolStrings.TemplateCommand_Option_DryRun,
-            Arity = new ArgumentArity(0, 1)
-        };
-
-        internal Option<bool> ForceOption { get; } = new Option<bool>("--force")
-        {
-            Description = SymbolStrings.TemplateCommand_Option_Force,
             Arity = new ArgumentArity(0, 1)
         };
 
@@ -150,11 +154,46 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal CliTemplateInfo Template => _template;
 
+        internal static async Task<IReadOnlyList<TemplateConstraintResult>> ValidateConstraintsAsync(TemplateConstraintManager constraintManager, ITemplateInfo template, CancellationToken cancellationToken)
+        {
+            if (!template.Constraints.Any())
+            {
+                return Array.Empty<TemplateConstraintResult>();
+            }
+
+            IReadOnlyList<(ITemplateInfo Template, IReadOnlyList<TemplateConstraintResult> Result)> result = await constraintManager.EvaluateConstraintsAsync(new[] { template }, cancellationToken).ConfigureAwait(false);
+            IReadOnlyList<TemplateConstraintResult> templateConstraints = result.Single().Result;
+
+            if (templateConstraints.IsTemplateAllowed())
+            {
+                return Array.Empty<TemplateConstraintResult>();
+            }
+            return templateConstraints.Where(cr => cr.EvaluationStatus != TemplateConstraintResult.Status.Allowed).ToList();
+        }
+
         internal async Task<NewCommandStatus> InvokeAsync(ParseResult parseResult, ITelemetryLogger telemetryLogger, CancellationToken cancellationToken)
         {
             TemplateCommandArgs args = new TemplateCommandArgs(this, _instantiateCommand, parseResult);
             TemplateInvoker invoker = new TemplateInvoker(_environmentSettings, telemetryLogger, () => Console.ReadLine() ?? string.Empty, _instantiateCommand.Callbacks);
             TemplatePackageCoordinator packageCoordinator = new TemplatePackageCoordinator(telemetryLogger, _environmentSettings, _templatePackageManager);
+            TemplateConstraintManager constraintManager = new TemplateConstraintManager(_environmentSettings);
+
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.CancelAfter(ConstraintEvaluationTimeout);
+
+            Task<IReadOnlyList<TemplateConstraintResult>> constraintsEvaluation = ValidateConstraintsAsync(constraintManager, args.Template, args.IsForceFlagSpecified ? cancellationTokenSource.Token : cancellationToken);
+
+            if (!args.IsForceFlagSpecified)
+            {
+                var constraintResults = await constraintsEvaluation.ConfigureAwait(false);
+                if (constraintResults.Any())
+                {
+                    DisplayConstraintResults(constraintResults, args);
+                    return NewCommandStatus.CreateFailed;
+                }
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             Task<NewCommandStatus> instantiateTask = invoker.InvokeTemplateAsync(args, cancellationToken);
             Task<(string Id, string Version, string Provider)> builtInPackageCheck = packageCoordinator.ValidateBuiltInPackageAvailabilityAsync(args.Template, cancellationToken);
@@ -164,6 +203,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             await Task.WhenAll(tasksToWait).ConfigureAwait(false);
             Reporter.Output.WriteLine();
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             if (checkForUpdateTask.Result != null)
             {
@@ -181,7 +222,54 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     args);
             }
 
+            if (args.IsForceFlagSpecified)
+            {
+                // print warning about the constraints that were not met.
+                try
+{
+                    IReadOnlyList<TemplateConstraintResult> constraintResults = await constraintsEvaluation.WaitAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+                    if (constraintResults.Any())
+                    {
+                        DisplayConstraintResults(constraintResults, args);
+                    }
+                }
+                catch (TaskCanceledException)
+                {
+                    // do nothing
+                }
+            }
+
             return instantiateTask.Result;
+        }
+
+        private void DisplayConstraintResults(IReadOnlyList<TemplateConstraintResult> constraintResults, TemplateCommandArgs templateArgs)
+        {
+            var reporter = templateArgs.IsForceFlagSpecified ? Reporter.Output : Reporter.Error;
+
+            if (templateArgs.IsForceFlagSpecified)
+            {
+                reporter.WriteLine(string.Format(LocalizableStrings.TemplateCommand_DisplayConstraintResults_Warning, templateArgs.Template.Name));
+            }
+            else
+            {
+                reporter.WriteLine(string.Format(LocalizableStrings.TemplateCommand_DisplayConstraintResults_Error, templateArgs.Template.Name));
+            }
+
+            foreach (var constraint in constraintResults.Where(cr => cr.EvaluationStatus != TemplateConstraintResult.Status.Allowed))
+            {
+                reporter.WriteLine(constraint.ToDisplayString().Indent());
+            }
+            reporter.WriteLine();
+
+            if (!templateArgs.IsForceFlagSpecified)
+            {
+                reporter.WriteLine(string.Format(LocalizableStrings.TemplateCommand_DisplayConstraintResults_Hint, TemplateCommand.ForceOption.Aliases.First()));
+                reporter.WriteCommand(Example.FromExistingTokens(templateArgs.ParseResult).WithOption(TemplateCommand.ForceOption));
+            }
+            else
+            {
+                reporter.WriteLine(LocalizableStrings.TemplateCommand_DisplayConstraintResults_Hint_TemplateNotUsable);
+            }
         }
 
         private bool HasRunScriptPostActionDefined(CliTemplateInfo template)

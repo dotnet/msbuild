@@ -1,0 +1,5 @@
+﻿Failed to instatiate template 'Constraints - Restricted Template', the following constraints are not met:
+   Template engine host: Running template on dotnetcli-preview (version: v2.0.0) is not supported, supported hosts is/are: do-not-exist((1.0.0, )).
+
+To run the template anyway, use '--force' option:
+   dotnet-new3 new3 Constraints.RestrictedTemplate --debug:custom-hive %SETTINGS DIRECTORY% --force

@@ -3,6 +3,10 @@
 
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using System.Threading;
+using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.Constraints;
+using Microsoft.TemplateEngine.Edge;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -48,6 +52,26 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             option.AddValidator(optionResult => ValidateAllowedValues(optionResult, allowedValues));
             option.AddCompletions(allowedValues);
+        }
+
+        /// <summary>
+        /// Gets the list of allowed templates from <paramref name="templateGroup"/> as the result of constraints evaluation.
+        /// </summary>
+        internal static async Task<IEnumerable<CliTemplateInfo>> GetAllowedTemplatesAsync(this TemplateGroup templateGroup,  TemplateConstraintManager constraintManager, CancellationToken cancellationToken)
+        {
+            IReadOnlyList<(ITemplateInfo Template, IReadOnlyList<TemplateConstraintResult> Result)> results =
+                await constraintManager.EvaluateConstraintsAsync(templateGroup.Templates, cancellationToken).ConfigureAwait(false);
+
+            cancellationToken.ThrowIfCancellationRequested();
+            return results.Where(r => r.Result.IsTemplateAllowed()).Select(r => r.Template).Cast<CliTemplateInfo>();
+        }
+
+        /// <summary>
+        /// Returns true if the execution is allowed based on <paramref name="constraintResult"/>.
+        /// </summary>
+        internal static bool IsTemplateAllowed(this IEnumerable<TemplateConstraintResult> constraintResult)
+        {
+            return constraintResult.All(s => s.EvaluationStatus == TemplateConstraintResult.Status.Allowed);
         }
 
         private static void ValidateAllowedValues(OptionResult optionResult, string[] allowedValues)

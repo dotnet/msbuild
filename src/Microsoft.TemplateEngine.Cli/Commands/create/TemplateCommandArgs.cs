@@ -20,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             Name = parseResult.GetValueForOptionOrNull(command.NameOption);
             OutputPath = parseResult.GetValueForOptionOrNull(command.OutputOption);
-            IsForceFlagSpecified = parseResult.GetValueForOption(command.ForceOption);
+            IsForceFlagSpecified = parseResult.GetValueForOption(TemplateCommand.ForceOption);
             IsDryRun = parseResult.GetValueForOption(command.DryRunOption);
             NoUpdateCheck = parseResult.GetValueForOption(command.NoUpdateCheckOption);
 

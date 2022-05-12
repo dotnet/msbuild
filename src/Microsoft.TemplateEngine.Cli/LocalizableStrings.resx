@@ -813,4 +813,19 @@ The header is followed by the list of parameters and their errors (might be seve
     <value>To reinstall the same version of the template package, use '{0}' option:</value>
     <comment>{0} - option name (--force). Followed by command example on new line.</comment>
   </data>
+  <data name="TemplateCommand_DisplayConstraintResults_Error" xml:space="preserve">
+    <value>Failed to instatiate template '{0}', the following constraints are not met:</value>
+    <comment>{0} - template name (user friendly)</comment>
+  </data>
+  <data name="TemplateCommand_DisplayConstraintResults_Hint" xml:space="preserve">
+    <value>To run the template anyway, use '{0}' option:</value>
+    <comment>{0} - additional option name (--force)</comment>
+  </data>
+  <data name="TemplateCommand_DisplayConstraintResults_Hint_TemplateNotUsable" xml:space="preserve">
+    <value>The template might not be usable.</value>
+  </data>
+  <data name="TemplateCommand_DisplayConstraintResults_Warning" xml:space="preserve">
+    <value>Warning: the following constraints for the template '{0}' are not met:</value>
+    <comment>{0} - template name (user friendly)</comment>
+  </data>
 </root>
