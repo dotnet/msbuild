@@ -167,7 +167,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 t = Task.Run(() =>
                 {
-                    RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, sleepProject.Path, out _);
+                    RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, sleepProject.Path, out _, false, _output);
                 });
 
                 // The server will soon be in use; make sure we don't try to use it before that happens.
@@ -176,6 +176,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
                 output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
                 success.ShouldBeTrue();
+                _output.WriteLine("output from third call is: " + output);
                 ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
 
                 Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
