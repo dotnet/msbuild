@@ -98,6 +98,11 @@ Si la commande est spécifiée sans l’argument, elle répertorie tous les pack
         <target state="translated">Recherchez uniquement les mises à jour et affichez les packages de modèles à mettre à jour sans appliquer la mise à jour.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ListCommand_Option_IgnoreConstraints">
+        <source>Disables checking if the template meets the constraints to be run.</source>
+        <target state="new">Disables checking if the template meets the constraints to be run.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Option_AddSource">
         <source>Specifies a NuGet source to use during install.</source>
         <target state="translated">Spécifie une source NuGet à utiliser lors de l’installation.</target>

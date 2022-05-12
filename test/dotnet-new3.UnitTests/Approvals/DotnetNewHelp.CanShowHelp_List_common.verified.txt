@@ -12,6 +12,7 @@ Options:
   -lang, --language <language>           Filters templates based on language.
   --type <type>                          Filters templates based on available types. Predefined values are "project" and "item".
   --tag <tag>                            Filters the templates based on the tag.
+  --ignore-constraints                   Disables checking if the template meets the constraints to be run.
   --columns-all                          Display all columns in the output.
   --columns <author|language|tags|type>  Specifies the columns to display in the output.
   -?, -h, --help                         Show help and usage information

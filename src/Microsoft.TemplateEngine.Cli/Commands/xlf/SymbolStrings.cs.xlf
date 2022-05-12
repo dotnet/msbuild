@@ -98,6 +98,11 @@ Pokud je příkaz zadán bez argumentu, zobrazí seznam všech nainstalovaných 
         <target state="translated">Zkontrolujte pouze aktualizace a zobrazte balíčky šablon, které se mají aktualizovat bez použití aktualizace.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ListCommand_Option_IgnoreConstraints">
+        <source>Disables checking if the template meets the constraints to be run.</source>
+        <target state="new">Disables checking if the template meets the constraints to be run.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Option_AddSource">
         <source>Specifies a NuGet source to use during install.</source>
         <target state="translated">Určuje zdroj NuGet, který se má použít během instalace.</target>

@@ -98,6 +98,11 @@ If command is specified without the argument, it lists all the template packages
         <target state="translated">Только проверяет наличие обновлений и отображает пакеты шаблонов, подлежащие обновлению. Не применяет обновления.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ListCommand_Option_IgnoreConstraints">
+        <source>Disables checking if the template meets the constraints to be run.</source>
+        <target state="new">Disables checking if the template meets the constraints to be run.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Option_AddSource">
         <source>Specifies a NuGet source to use during install.</source>
         <target state="translated">Указывает источник NuGet, который будет применяться во время установки.</target>

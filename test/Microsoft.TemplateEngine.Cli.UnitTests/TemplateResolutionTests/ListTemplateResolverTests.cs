@@ -2,10 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using FakeItEasy;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.Constraints;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
+using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Mocks;
 using Microsoft.TemplateEngine.TestHelper;
 using Xunit;
@@ -510,6 +513,68 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.False(matchResult.HasLanguageMismatch);
             Assert.True(matchResult.HasTypeMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
+        }
+
+        [Fact]
+        public async Task TestGetTemplateResolutionResult_ConstraintsMismatch()
+        {
+            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
+            templatesToSearch.Add(
+                new MockTemplateInfo("console", identity: "Console.App.T1")
+                    .WithConstraints(new TemplateConstraintInfo("test", "no")));
+            templatesToSearch.Add(
+             new MockTemplateInfo("console2", identity: "Console.App.T2")
+                 .WithConstraints(new TemplateConstraintInfo("test", "bad-param")));
+
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: new[] { (typeof(ITemplateConstraintFactory), (IIdentifiedComponent)new TestConstraintFactory("test")) });
+            IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
+
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+
+            var parseResult = myCommand.Parse("new list");
+            var args = new ListCommandArgs((ListCommand)parseResult.CommandResult.Command, parseResult);
+
+            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader(), new TemplateConstraintManager(settings));
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
+                     args,
+                     defaultLanguage: null,
+                     default).ConfigureAwait(false);
+
+            Assert.Equal(2, matchResult.ContraintsMismatchGroupCount);
+            Assert.Equal(0, matchResult.TemplateGroupsWithMatchingTemplateInfoAndParameters.Count());
+            Assert.True(matchResult.HasTemplateGroupMatches);
+            Assert.Equal(2, matchResult.TemplateGroups.Count());
+        }
+
+        [Fact]
+        public async Task TestGetTemplateResolutionResult_IgnoreConstraintsMismatch()
+        {
+            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
+            templatesToSearch.Add(
+                new MockTemplateInfo("console", identity: "Console.App.T1")
+                    .WithConstraints(new TemplateConstraintInfo("test", "no")));
+            templatesToSearch.Add(
+             new MockTemplateInfo("console2", identity: "Console.App.T2")
+                 .WithConstraints(new TemplateConstraintInfo("test", "bad-param")));
+
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: new[] { (typeof(ITemplateConstraintFactory), (IIdentifiedComponent)new TestConstraintFactory("test")) });
+            IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
+
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+
+            var parseResult = myCommand.Parse("new list --ignore-constraints");
+            var args = new ListCommandArgs((ListCommand)parseResult.CommandResult.Command, parseResult);
+
+            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader(), new TemplateConstraintManager(settings));
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
+                     args,
+                     defaultLanguage: null,
+                     default).ConfigureAwait(false);
+
+            Assert.Equal(0, matchResult.ContraintsMismatchGroupCount);
+            Assert.Equal(2, matchResult.TemplateGroupsWithMatchingTemplateInfoAndParameters.Count());
+            Assert.True(matchResult.HasTemplateGroupMatches);
+            Assert.Equal(2, matchResult.TemplateGroups.Count());
         }
 
         private static ListCommandArgs GetListCommandArgsFor(string commandInput)

@@ -28,6 +28,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 Language = GetFilterValue(FilterOptionDefinition.LanguageFilter);
             }
+            IgnoreConstraints = parseResult.GetValueForOption(ListCommand.IgnoreConstraintsOption);
         }
 
         public bool DisplayAllColumns { get; }
@@ -37,5 +38,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal string? ListNameCriteria { get; }
 
         internal string? Language { get; }
+
+        internal bool IgnoreConstraints { get; }
     }
 }

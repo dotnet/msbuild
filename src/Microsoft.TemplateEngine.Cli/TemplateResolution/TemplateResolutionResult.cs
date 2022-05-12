@@ -242,6 +242,16 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         internal bool HasTemplateGroupWithTemplateInfoMatches => TemplateGroupsWithMatchingTemplateInfo.Any();
 
         /// <summary>
+        /// Returns count of groups that would be a match but failed on constraints.
+        /// </summary>
+        internal int ContraintsMismatchGroupCount => _matchedTemplateGroups.Count(groupMatchInfo => groupMatchInfo.TemplateMatchInfos.Any(mi => mi.HasMismatchOnConstraints()));
+
+        /// <summary>
+        /// Returns count of groups that would be a match but failed on filters.
+        /// </summary>
+        internal int ListFilterMismatchGroupCount => _matchedTemplateGroups.Count(groupMatchInfo => groupMatchInfo.TemplateMatchInfos.Any(mi => mi.HasMismatchOnListFilters()));
+
+        /// <summary>
         /// Returns true when there is at least one template group that matches group filters. Template info filters and parameters matches are not considered.
         /// </summary>
         internal bool HasTemplateGroupMatches => TemplateGroups.Any();

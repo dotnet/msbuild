@@ -98,6 +98,11 @@ If command is specified without the argument, it lists all the template packages
         <target state="translated">업데이트를 확인하고 업데이트를 적용하지 않고 업데이트할 템플릿 패키지만 표시합니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ListCommand_Option_IgnoreConstraints">
+        <source>Disables checking if the template meets the constraints to be run.</source>
+        <target state="new">Disables checking if the template meets the constraints to be run.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Option_AddSource">
         <source>Specifies a NuGet source to use during install.</source>
         <target state="translated">설치 중에 사용할 NuGet 소스를 지정합니다.</target>

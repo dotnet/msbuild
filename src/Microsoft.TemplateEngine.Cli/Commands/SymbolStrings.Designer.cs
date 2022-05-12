@@ -226,6 +226,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Disables checking if the template meets the constraints to be run..
+        /// </summary>
+        internal static string ListCommand_Option_IgnoreConstraints {
+            get {
+                return ResourceManager.GetString("ListCommand_Option_IgnoreConstraints", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Specifies a NuGet source to use during install..
         /// </summary>
         internal static string Option_AddSource {

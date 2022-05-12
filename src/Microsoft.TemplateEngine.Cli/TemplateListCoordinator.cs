@@ -7,6 +7,7 @@ using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Cli.Extensions;
 using Microsoft.TemplateEngine.Cli.TabularOutput;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
+using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 
 namespace Microsoft.TemplateEngine.Cli
@@ -18,6 +19,7 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly IHostSpecificDataLoader _hostSpecificDataLoader;
         private readonly ITelemetryLogger _telemetryLogger;
         private readonly string? _defaultLanguage;
+        private readonly TemplateConstraintManager _constraintManager;
 
         internal TemplateListCoordinator(
             IEngineEnvironmentSettings engineEnvironmentSettings,
@@ -31,6 +33,7 @@ namespace Microsoft.TemplateEngine.Cli
             _hostSpecificDataLoader = hostSpecificDataLoader ?? throw new ArgumentNullException(nameof(hostSpecificDataLoader));
             _telemetryLogger = telemetryLogger ?? throw new ArgumentNullException(nameof(telemetryLogger));
             _defaultLanguage = engineEnvironmentSettings.GetDefaultLanguage();
+            _constraintManager = new TemplateConstraintManager(_engineEnvironmentSettings);
         }
 
         /// <summary>
@@ -45,7 +48,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            ListTemplateResolver resolver = new ListTemplateResolver(_templatePackageManager, _hostSpecificDataLoader);
+            ListTemplateResolver resolver = new ListTemplateResolver(_constraintManager, _templatePackageManager, _hostSpecificDataLoader);
             TemplateResolutionResult resolutionResult = await resolver.ResolveTemplatesAsync(args, _defaultLanguage, cancellationToken).ConfigureAwait(false);
 
             //IReadOnlyDictionary<string, string?>? appliedParameterMatches = resolutionResult.GetAllMatchedParametersList();
@@ -94,14 +97,26 @@ namespace Microsoft.TemplateEngine.Cli
                         GetInputParametersString(args/*, appliedParameterMatches*/))
                     .Bold().Red());
 
-                if (resolutionResult.HasTemplateGroupMatches)
+                if (resolutionResult.HasTemplateGroupMatches && resolutionResult.ListFilterMismatchGroupCount > 0)
                 {
                     // {0} template(s) partially matched, but failed on {1}.
                     Reporter.Error.WriteLine(
                         string.Format(
                             LocalizableStrings.TemplatesNotValidGivenTheSpecifiedFilter,
-                            resolutionResult.TemplateGroups.Count(),
+                            resolutionResult.ListFilterMismatchGroupCount,
                             GetPartialMatchReason(resolutionResult, args/*, appliedParameterMatches*/))
+                        .Bold().Red());
+                }
+
+                if (resolutionResult.HasTemplateGroupMatches && resolutionResult.ContraintsMismatchGroupCount > 0)
+                {
+                    // {0} template(s) are not displayed due to their constraints are not satisfied.
+                    // To display them add "--ignore-constraints" option.
+                    Reporter.Error.WriteLine(
+                        string.Format(
+                            LocalizableStrings.TemplateListCoordinator_Error_FailedConstraints,
+                            resolutionResult.ContraintsMismatchGroupCount,
+                            ListCommand.IgnoreConstraintsOption.Aliases.First())
                         .Bold().Red());
                 }
 

@@ -98,6 +98,11 @@ Jeśli polecenie jest określone bez argumentu, wyświetla wszystkie zainstalowa
         <target state="translated">Wyszukaj tylko aktualizacje i wyświetl pakiety szablonów do zaktualizowania bez stosowania aktualizacji.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ListCommand_Option_IgnoreConstraints">
+        <source>Disables checking if the template meets the constraints to be run.</source>
+        <target state="new">Disables checking if the template meets the constraints to be run.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Option_AddSource">
         <source>Specifies a NuGet source to use during install.</source>
         <target state="translated">Określa źródło NuGet do użycia podczas instalacji.</target>

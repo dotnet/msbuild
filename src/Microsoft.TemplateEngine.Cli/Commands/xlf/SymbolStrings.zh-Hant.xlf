@@ -98,6 +98,11 @@ If command is specified without the argument, it lists all the template packages
         <target state="translated">只檢查更新並顯示要更新的範本套件，而不套用更新。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ListCommand_Option_IgnoreConstraints">
+        <source>Disables checking if the template meets the constraints to be run.</source>
+        <target state="new">Disables checking if the template meets the constraints to be run.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Option_AddSource">
         <source>Specifies a NuGet source to use during install.</source>
         <target state="translated">指定安裝期間使用的 NuGet 來源。</target>

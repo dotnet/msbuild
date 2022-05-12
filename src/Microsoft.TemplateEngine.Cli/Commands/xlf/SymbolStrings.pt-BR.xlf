@@ -98,6 +98,11 @@ Se o comando for especificado sem o argumento, ele listará todos os pacotes de 
         <target state="translated">Verificar apenas se há atualizações e exibir os pacotes de modelos a serem atualizados sem aplicar a atualização.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ListCommand_Option_IgnoreConstraints">
+        <source>Disables checking if the template meets the constraints to be run.</source>
+        <target state="new">Disables checking if the template meets the constraints to be run.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Option_AddSource">
         <source>Specifies a NuGet source to use during install.</source>
         <target state="translated">Especifica uma fonte do NuGet a ser usada durante a instalação.</target>

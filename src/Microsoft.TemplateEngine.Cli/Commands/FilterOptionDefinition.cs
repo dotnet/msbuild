@@ -25,31 +25,36 @@ namespace Microsoft.TemplateEngine.Cli.Commands
              new TemplateFilterOptionDefinition(
                  optionFactory: () => SharedOptionsFactory.CreateAuthorOption(),
                  matchFilter: authorArg => WellKnownSearchFilters.AuthorFilter(authorArg),
-                 mismatchCriteria: resolutionResult => resolutionResult.HasAuthorMismatch);
+                 mismatchCriteria: resolutionResult => resolutionResult.HasAuthorMismatch,
+                 matchInfoName: MatchInfo.BuiltIn.Author);
 
         internal static FilterOptionDefinition BaselineFilter { get; } =
             new TemplateFilterOptionDefinition(
                 optionFactory: () => SharedOptionsFactory.CreateBaselineOption(),
                 matchFilter: baselineArg => WellKnownSearchFilters.BaselineFilter(baselineArg),
-                mismatchCriteria: resolutionResult => resolutionResult.HasBaselineMismatch);
+                mismatchCriteria: resolutionResult => resolutionResult.HasBaselineMismatch,
+                matchInfoName: MatchInfo.BuiltIn.Baseline);
 
         internal static FilterOptionDefinition LanguageFilter { get; } =
             new TemplateFilterOptionDefinition(
                 optionFactory: () => SharedOptionsFactory.CreateLanguageOption(),
                 matchFilter: languageArg => WellKnownSearchFilters.LanguageFilter(languageArg),
-                mismatchCriteria: resolutionResult => resolutionResult.HasLanguageMismatch);
+                mismatchCriteria: resolutionResult => resolutionResult.HasLanguageMismatch,
+                matchInfoName: MatchInfo.BuiltIn.Language);
 
         internal static FilterOptionDefinition TagFilter { get; } =
             new TemplateFilterOptionDefinition(
                 optionFactory: () => SharedOptionsFactory.CreateTagOption(),
                 matchFilter: tagArg => WellKnownSearchFilters.ClassificationFilter(tagArg),
-                mismatchCriteria: resolutionResult => resolutionResult.HasClassificationMismatch);
+                mismatchCriteria: resolutionResult => resolutionResult.HasClassificationMismatch,
+                matchInfoName: MatchInfo.BuiltIn.Classification);
 
         internal static FilterOptionDefinition TypeFilter { get; } =
             new TemplateFilterOptionDefinition(
                 optionFactory: () => SharedOptionsFactory.CreateTypeOption(),
                 matchFilter: typeArg => WellKnownSearchFilters.TypeFilter(typeArg),
-                mismatchCriteria: resolutionResult => resolutionResult.HasTypeMismatch);
+                mismatchCriteria: resolutionResult => resolutionResult.HasTypeMismatch,
+                matchInfoName: MatchInfo.BuiltIn.Type);
 
         internal static FilterOptionDefinition PackageFilter { get; } =
             new PackageFilterOptionDefinition(
@@ -82,10 +87,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal TemplateFilterOptionDefinition(
             Func<Option> optionFactory,
             Func<string?, Func<ITemplateInfo, MatchInfo?>> matchFilter,
-            Func<TemplateResolutionResult, bool> mismatchCriteria) : base(optionFactory)
+            Func<TemplateResolutionResult, bool> mismatchCriteria,
+            string matchInfoName) : base(optionFactory)
         {
             TemplateMatchFilter = matchFilter ?? throw new ArgumentNullException(nameof(matchFilter));
             MismatchCriteria = mismatchCriteria ?? throw new ArgumentNullException(nameof(mismatchCriteria));
+            MatchInfoName = matchInfoName ?? throw new ArgumentNullException(nameof(matchInfoName));
         }
 
         /// <summary>
@@ -101,6 +108,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         /// A predicate that returns if the filter option caused a mismatch in <see cref="TemplateResolutionResult"/> in case of partial match.
         /// </summary>
         internal Func<TemplateResolutionResult, bool> MismatchCriteria { get; set; }
+
+        /// <summary>
+        /// A <see cref="MatchInfo"/> name used in match dispositions.
+        /// </summary>
+        internal string MatchInfoName { get; set; }
     }
 
     /// <summary>

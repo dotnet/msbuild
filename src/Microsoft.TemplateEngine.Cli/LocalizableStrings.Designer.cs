@@ -1492,6 +1492,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} template(s) are hidden because their constraints are not satisfied. To show them, use the &apos;{1}&apos; option..
+        /// </summary>
+        internal static string TemplateListCoordinator_Error_FailedConstraints {
+            get {
+                return ResourceManager.GetString("TemplateListCoordinator_Error_FailedConstraints", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Allowed values for &apos;{0}&apos; option are: {1}..
         /// </summary>
         internal static string TemplateOptions_Error_AllowedValuesForOptionList {

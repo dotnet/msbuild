@@ -98,6 +98,11 @@ Wenn der Befehl ohne Argument angegeben wird, werden alle installierten Vorlagen
         <target state="translated">Nur auf Updates überprüfen, und die zu aktualisierenden Vorlagenpakete anzeigen, ohne das Update anzuwenden.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ListCommand_Option_IgnoreConstraints">
+        <source>Disables checking if the template meets the constraints to be run.</source>
+        <target state="new">Disables checking if the template meets the constraints to be run.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Option_AddSource">
         <source>Specifies a NuGet source to use during install.</source>
         <target state="translated">Gibt eine NuGet-Quelle an, die während dem Installieren verwendet werden soll.</target>

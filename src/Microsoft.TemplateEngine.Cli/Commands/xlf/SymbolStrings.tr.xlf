@@ -98,6 +98,11 @@ Eğer komut bağımsız değişken olmadan belirtilirse, yüklü tüm şablon pa
         <target state="translated">Yalnızca güncelleştirmeleri denetleyin ve güncelleştirmeyi uygulamadan, sadece güncelleştirilecek şablon paketlerini görüntüleyin.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ListCommand_Option_IgnoreConstraints">
+        <source>Disables checking if the template meets the constraints to be run.</source>
+        <target state="new">Disables checking if the template meets the constraints to be run.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Option_AddSource">
         <source>Specifies a NuGet source to use during install.</source>
         <target state="translated">Yükleme sırasında kullanılacak NuGet kaynağını belirtir.</target>

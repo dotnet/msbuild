@@ -21,6 +21,13 @@
     Detail: Display all columns in the output.
   },
   {
+    Label: --ignore-constraints,
+    Kind: Keyword,
+    SortText: --ignore-constraints,
+    InsertText: --ignore-constraints,
+    Detail: Disables checking if the template meets the constraints to be run.
+  },
+  {
     Label: --language,
     Kind: Keyword,
     SortText: --language,

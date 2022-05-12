@@ -32,6 +32,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Filters = SetupFilterOptions(SupportedFilters);
 
             this.AddArgument(NameArgument);
+            this.AddOption(IgnoreConstraintsOption);
             SetupTabularOutputOptions(this);
         }
 
@@ -40,6 +41,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         public virtual Option<string[]> ColumnsOption { get; } = SharedOptionsFactory.CreateColumnsOption();
 
         public IReadOnlyDictionary<FilterOptionDefinition, Option> Filters { get; protected set; }
+
+        internal static Option<bool> IgnoreConstraintsOption { get; } = new("--ignore-constraints")
+        {
+            Description = SymbolStrings.ListCommand_Option_IgnoreConstraints,
+            Arity = new ArgumentArity(0, 1)
+        };
 
         internal Argument<string> NameArgument { get; } = new("template-name")
         {

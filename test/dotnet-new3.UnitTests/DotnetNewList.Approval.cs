@@ -49,5 +49,41 @@ namespace Dotnet_new3.IntegrationTests
 
             return Verifier.Verify(commandResult.StdOut, _verifySettings);
         }
+
+        [Fact]
+        public Task Constraints_CanShowMessageIfTemplateGroupIsRestricted()
+        {
+            var customHivePath = TestUtils.CreateTemporaryFolder();
+            Helpers.InstallTestTemplate("Constraints/RestrictedTemplate", _log, customHivePath);
+            Helpers.InstallTestTemplate("TemplateWithSourceName", _log, customHivePath);
+
+            var commandResult = new DotnetNewCommand(_log, "list", "RestrictedTemplate")
+                  .WithCustomHive(customHivePath)
+                  .Execute();
+
+            commandResult
+                .Should()
+                .Fail();
+
+            return Verifier.Verify(commandResult.StdErr, _verifySettings);
+        }
+
+        [Fact]
+        public Task Constraints_CanIgnoreConstraints()
+        {
+            var customHivePath = TestUtils.CreateTemporaryFolder();
+            Helpers.InstallTestTemplate("Constraints/RestrictedTemplate", _log, customHivePath);
+            Helpers.InstallTestTemplate("TemplateWithSourceName", _log, customHivePath);
+
+            var commandResult = new DotnetNewCommand(_log, "list", "RestrictedTemplate", "--ignore-constraints")
+                  .WithCustomHive(customHivePath)
+                  .Execute();
+
+            commandResult
+                .Should()
+                .Pass();
+
+            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+        }
     }
 }

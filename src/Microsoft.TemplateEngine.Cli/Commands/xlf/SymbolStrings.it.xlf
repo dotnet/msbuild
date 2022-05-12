@@ -98,6 +98,11 @@ Se il comando è specificato senza l'argomento, elenca tutti i pacchetti di mode
         <target state="translated">Controlla solo la disponibilità di aggiornamenti e visualizza i pacchetti di modelli da aggiornare senza applicare l'aggiornamento.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ListCommand_Option_IgnoreConstraints">
+        <source>Disables checking if the template meets the constraints to be run.</source>
+        <target state="new">Disables checking if the template meets the constraints to be run.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Option_AddSource">
         <source>Specifies a NuGet source to use during install.</source>
         <target state="translated">Specifica un’origine NuGet da usare durante l’installazione.</target>

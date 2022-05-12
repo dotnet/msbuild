@@ -831,6 +831,11 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">Typowymi szablonami są:</target>
         <note />
       </trans-unit>
+      <trans-unit id="TemplateListCoordinator_Error_FailedConstraints">
+        <source>{0} template(s) are hidden because their constraints are not satisfied. To show them, use the '{1}' option.</source>
+        <target state="new">{0} template(s) are hidden because their constraints are not satisfied. To show them, use the '{1}' option.</target>
+        <note>{0} - the count of templates that are not shown. {1} - option to be used (--ignore-constraints).</note>
+      </trans-unit>
       <trans-unit id="TemplateOptions_Error_AllowedValuesForOptionList">
         <source>Allowed values for '{0}' option are: {1}.</source>
         <target state="translated">Dozwolone wartości opcji „{0}” to: {1}.</target>
