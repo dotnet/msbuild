@@ -1390,4 +1390,3 @@ namespace System.Deployment.Internal.CodeSigning
         }
     }
 }
-
