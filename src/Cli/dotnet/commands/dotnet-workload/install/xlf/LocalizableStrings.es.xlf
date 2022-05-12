@@ -19,12 +19,12 @@
       </trans-unit>
       <trans-unit id="CannotCombineSkipManifestAndRollback">
         <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
-        <target state="new">Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</target>
+        <target state="translated">No se pueden usar las opciones {0} y {1} juntas. Si se instala desde un archivo de reversión, quite {0}. De lo contrario, quite {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="CheckForUpdatedWorkloadManifests">
         <source>Checking for updated workload manifests.</source>
-        <target state="new">Checking for updated workload manifests.</target>
+        <target state="translated">Comprobando si hay manifiestos de carga de trabajo actualizados.</target>
         <note />
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
@@ -122,6 +122,11 @@
         <target state="translated">Insuficientes privilegios para iniciar el servidor.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="new">Error parsing version '{1}' for workload manifest ID '{0}'</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
         <source>The settings file in the workload's NuGet package is invalid: {0}</source>
         <target state="translated">El archivo de configuración del paquete NuGet de la carga de trabajo no es válido: {0}</target>
@@ -215,6 +220,11 @@
       <trans-unit id="SkipManifestUpdateOptionDescription">
         <source>Skip updating the workload manifests.</source>
         <target state="translated">Omitir la actualización de los manifiestos de carga de trabajo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipSignCheckOptionDescription">
+        <source>Skip signature verification of workload packages and installers.</source>
+        <target state="translated">Omita la comprobación de firma de los paquetes de carga de trabajo y los instaladores.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingManifestUpdate">

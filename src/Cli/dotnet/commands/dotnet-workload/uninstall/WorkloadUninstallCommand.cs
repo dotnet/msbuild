@@ -20,7 +20,7 @@ using Product = Microsoft.DotNet.Cli.Utils.Product;
 
 namespace Microsoft.DotNet.Workloads.Workload.Uninstall
 {
-    internal class WorkloadUninstallCommand : CommandBase
+    internal class WorkloadUninstallCommand : WorkloadCommandBase
     {
         private readonly IReporter _reporter;
         private readonly IReadOnlyCollection<WorkloadId> _workloadIds;
@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Uninstall
             workloadResolver ??= WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString(), userProfileDir);
             nugetPackageDownloader ??= new NuGetPackageDownloader(new DirectoryPath(Path.GetTempPath()), filePermissionSetter: null, verboseLogger: new NullLogger());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
-            _workloadInstaller = WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, workloadResolver, verbosity, userProfileDir, nugetPackageDownloader, dotnetPath);
+            _workloadInstaller = WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, workloadResolver, verbosity, userProfileDir, VerifySignatures, nugetPackageDownloader, dotnetPath);
         }
 
         public override int Execute()

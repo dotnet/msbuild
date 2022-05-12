@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
         [Theory]
         [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void ItShouldSetDotnetRootToDirectoryOfMuxer(string targetFramework)
         {
             string expectDotnetRoot = TestContext.Current.ToolsetUnderTest.DotNetRoot;

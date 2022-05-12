@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Cli;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
@@ -33,6 +34,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         Dictionary<(string packId, string packVersion), List<WorkloadPackGroupJson>> GetWorkloadPackGroups()
         {
             Dictionary<(string packId, string packVersion), List<WorkloadPackGroupJson>> ret = new();
+
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_DISABLE_PACK_GROUPS)))
+            {
+                //  If workload pack groups are disabled via environment variable, then just return an empty Dictionary
+                return ret;
+            }
 
             var manifests = _workloadResolver.GetInstalledManifests();
             foreach (var manifest in manifests)

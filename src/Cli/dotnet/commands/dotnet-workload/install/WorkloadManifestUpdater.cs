@@ -13,6 +13,7 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
+using Microsoft.DotNet.MSBuildSdkResolver;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
@@ -70,7 +71,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                           new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, new NullLogger()),
                                           new NullLogger(),
                                           reporter);
-            var workloadRecordRepo = WorkloadInstallerFactory.GetWorkloadInstaller(reporter, new SdkFeatureBand(sdkVersion), workloadResolver, Cli.VerbosityOptions.normal, userProfileDir)
+            var workloadRecordRepo = WorkloadInstallerFactory.GetWorkloadInstaller(reporter, new SdkFeatureBand(sdkVersion),
+                workloadResolver, Cli.VerbosityOptions.normal, userProfileDir, verifySignatures: false)
                 .GetWorkloadInstallationRecordRepository();
 
             return new WorkloadManifestUpdater(reporter, workloadResolver, nugetPackageDownloader, userProfileDir, tempPackagesDir.Value, workloadRecordRepo);
@@ -477,6 +479,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     ManifestVersion manifestVersion;
                     SdkFeatureBand manifestFeatureBand;
                     var parts = manifest.Value.Split('/');
+                    
+                    string manifestVersionString = (parts[0]);
+                    if (!FXVersion.TryParse(manifestVersionString, out FXVersion version))
+                    {
+                        throw new FormatException(String.Format(LocalizableStrings.InvalidVersionForWorkload, manifest.Key, manifestVersionString));
+                    } 
+
                     manifestVersion = new ManifestVersion(parts[0]);
                     if (parts.Length == 1)
                     {

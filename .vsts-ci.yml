@@ -40,10 +40,10 @@ stages:
   - job: Publish_Build_Configuration
     pool:
       ${{ if eq(variables['System.TeamProject'], 'public') }}:
-        name: NetCore1ESPool-Public
+        name: NetCore1ESPool-Svc-Public
         demands: ImageOverride -equals build.windows.10.amd64.vs2019.open
       ${{ if eq(variables['System.TeamProject'], 'internal') }}:
-        name: NetCore1ESPool-Internal
+        name: NetCore1ESPool-Svc-Internal
         demands: ImageOverride -equals build.windows.10.amd64.vs2019
     steps:
       - publish: $(Build.SourcesDirectory)\eng\BuildConfiguration
@@ -59,7 +59,10 @@ stages:
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
           name: NetCore1ESPool-Svc-Internal
           demands: ImageOverride -equals Build.Windows.Amd64.VS2022.Pre
-      helixTargetQueue: Windows.Amd64.VS2022.Pre.Open
+      ${{ if eq(variables['System.TeamProject'], 'public') }}:
+        helixTargetQueue: Windows.Amd64.VS2022.Pre.Open
+      ${{ if ne(variables['System.TeamProject'], 'public') }}:
+        helixTargetQueue: Windows.Amd64.VS2022.Pre
       strategy:
         matrix:
           Build_Release:

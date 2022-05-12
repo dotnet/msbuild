@@ -561,8 +561,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1115: "}</note>
       </trans-unit>
       <trans-unit id="Net6NotCompatibleWithDev16">
-        <source>NETSDK1182: Targeting .NET 6.0 in Visual Studio 2019 is not supported.</source>
-        <target state="translated">NETSDK1182: Cílení na .NET 6.0 ve Visual Studiu 2019 se nepodporuje.</target>
+        <source>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</source>
+        <target state="translated">NETSDK1182: Cílení na .NET 6.0 nebo vyšší ve Visual Studio 2019 se nepodporuje.</target>
         <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
@@ -910,8 +910,8 @@ Možná bude nutné sestavit projekt v jiném operačním systému nebo architek
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
 To install these workloads, run the following command: dotnet workload restore</source>
-        <target state="new">NETSDK1147: To build this project, the following workloads must be installed: {0}
-To install these workloads, run the following command: dotnet workload restore</target>
+        <target state="translated">NETSDK1147: k sestavení tohoto projektu musí být nainstalované následující úlohy: {0}
+Pokud chcete nainstalovat tyto úlohy, spusťte následující příkaz: dotnet workload restore</target>
         <note>{StrBegin="NETSDK1147: "} LOCALIZATION: Do not localize "dotnet workload restore"</note>
       </trans-unit>
     </body>

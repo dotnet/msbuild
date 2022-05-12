@@ -19,7 +19,7 @@ using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 namespace Microsoft.DotNet.Workloads.Workload.Restore
 {
-    internal class WorkloadRestoreCommand : CommandBase
+    internal class WorkloadRestoreCommand : WorkloadCommandBase
     {
         private readonly ParseResult _result;
         private readonly IReporter _reporter;

@@ -22,6 +22,7 @@ using Microsoft.DotNet.Cli.Workload.Install.Tests;
 using Microsoft.DotNet.Workloads.Workload.Update;
 using Microsoft.DotNet.Cli.Utils;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
+using System;
 
 namespace Microsoft.DotNet.Cli.Workload.Update.Tests
 {
@@ -400,6 +401,31 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             packInstaller.InstalledManifests[1].manifestUpdate.ExistingFeatureBand.Should().Be("6.0.100");
             packInstaller.InstalledManifests[2].manifestUpdate.ExistingFeatureBand.Should().Be("5.0.100");
             packInstaller.InstalledManifests[0].offlineCache.Should().Be(null);
+        }
+
+        [Fact]
+        public void GivenInvalidVersionInRollbackFileItErrors()
+        {
+            _reporter.Clear();
+            
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            var userProfileDir = Path.Combine(testDirectory, "user-profile");
+            Directory.CreateDirectory(userProfileDir);
+
+            var sdkFeatureVersion = "6.0.200";
+           
+            var mockRollbackFileContent = @"{""mock.workload"":""6.0.0.15/6.0.100""}";
+            var rollbackFilePath = Path.Combine(testDirectory, "rollback.json");
+            File.WriteAllText(rollbackFilePath, mockRollbackFileContent);
+            
+            var updateParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--from-rollback-file", rollbackFilePath });
+            
+            var updateCommand = new WorkloadUpdateCommand(updateParseResult, reporter: _reporter, userProfileDir: userProfileDir, dotnetDir: dotnetRoot, version: sdkFeatureVersion, tempDirPath: testDirectory);
+
+            var exception = Assert.Throws<GracefulException>(() => updateCommand.Execute());
+            exception.InnerException.Should().BeOfType<FormatException>();
+            exception.InnerException.Message.Should().Contain(string.Format(Workloads.Workload.Install.LocalizableStrings.InvalidVersionForWorkload, "mock.workload", "6.0.0.15"));
         }
 
         internal (string, WorkloadUpdateCommand, MockPackWorkloadInstaller, IWorkloadResolver, MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
