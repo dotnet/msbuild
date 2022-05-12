@@ -400,12 +400,12 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="Commands_Warning_DeprecatedCommand">
         <source>Warning: use of '{0}' is deprecated. Use '{1}' instead.</source>
-        <target state="new">Warning: use of '{0}' is deprecated. Use '{1}' instead.</target>
+        <target state="translated">경고: '{0}' 사용은 중단되었습니다. 대신 '{1}'을(를) 사용하세요.</target>
         <note>{0} - deprecated command ('dotnet new --install'); {1} - new command ('dotnet new install).</note>
       </trans-unit>
       <trans-unit id="Commands_Warning_DeprecatedCommand_Info">
         <source>For more information, run: </source>
-        <target state="new">For more information, run: </target>
+        <target state="translated">자세한 내용은 다음을 실행하세요. </target>
         <note>followed by command example (at new line, without quotes)</note>
       </trans-unit>
       <trans-unit id="ConfiguredValue">

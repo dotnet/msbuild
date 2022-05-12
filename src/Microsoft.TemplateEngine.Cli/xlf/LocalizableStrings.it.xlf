@@ -400,12 +400,12 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
       </trans-unit>
       <trans-unit id="Commands_Warning_DeprecatedCommand">
         <source>Warning: use of '{0}' is deprecated. Use '{1}' instead.</source>
-        <target state="new">Warning: use of '{0}' is deprecated. Use '{1}' instead.</target>
+        <target state="translated">Avviso: l'uso di '{0}' è deprecato. In alternativa, usare '{1}'.</target>
         <note>{0} - deprecated command ('dotnet new --install'); {1} - new command ('dotnet new install).</note>
       </trans-unit>
       <trans-unit id="Commands_Warning_DeprecatedCommand_Info">
         <source>For more information, run: </source>
-        <target state="new">For more information, run: </target>
+        <target state="translated">Per altre informazioni, eseguire: </target>
         <note>followed by command example (at new line, without quotes)</note>
       </trans-unit>
       <trans-unit id="ConfiguredValue">
