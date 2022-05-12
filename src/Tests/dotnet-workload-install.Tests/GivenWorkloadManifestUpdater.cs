@@ -207,14 +207,10 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             manifestUpdates.Should().BeEquivalentTo(expectedManifestUpdates);
         }
 
-        // Test to add:
-
-        // normal update (using nuget downloader) versus using offline cache (will have to mock up nuget packages)
-        // do offline stuff after the other tests
-
-
-        [Fact]
-        public void ItCanFallbackAndAdvertiseCorrectUpdate()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ItCanFallbackAndAdvertiseCorrectUpdate(bool useOfflineCache)
         {
             //  Currently installed - 6.0.200 workload manifest
             //  Current SDK - 6.0.300
@@ -247,36 +243,56 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var installationRepo = new MockInstallationRecordRepository();
             var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, Path.Combine(testDir, ".dotnet"), testDir, installationRepo);
 
-            //  Act
-            manifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews: true).Wait();
+            var offlineCacheDir = "";
+            if (useOfflineCache)
+            {
+                offlineCacheDir = Path.Combine(testDir, "offlineCache");
+                Directory.CreateDirectory(offlineCacheDir);
+                File.Create(Path.Combine(offlineCacheDir, $"{testManifestName}.Manifest-6.0.200.nupkg"));
 
-            //  Assert
-            //  6.0.300 manifest was requested and then 6.0.200 manifest was requested
-            nugetDownloader.DownloadCallParams[0].id.ToString().Should().Be($"{testManifestName}.manifest-6.0.300");
-            nugetDownloader.DownloadCallParams[0].version.ShouldBeEquivalentTo(null);
-            nugetDownloader.DownloadCallParams[1].id.ToString().Should().Be($"{testManifestName}.manifest-6.0.200");
-            nugetDownloader.DownloadCallParams[1].version.ShouldBeEquivalentTo(null);
+                manifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews: true, offlineCache: new DirectoryPath(offlineCacheDir)).Wait();
 
+                nugetDownloader.DownloadCallParams[0].id.ToString().Should().Be($"{testManifestName}.manifest-6.0.200");
+                nugetDownloader.DownloadCallParams[0].version.ShouldBeEquivalentTo(null);
+            }
+            else
+            {
+                nugetDownloader.PackageIdsToNotFind.Add($"{testManifestName}.Manifest-6.0.300");
 
-            //  6.0.200 package was written to advertising manifest folder
-            var advertisedManifestContents = File.ReadAllText(Path.Combine(adManifestDir, testManifestName, "WorkloadManifest.json"));
-            advertisedManifestContents.Should().NotBeEmpty();
+                manifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews: true).Wait();
 
-            //  AdvertisedManifestFeatureBand.txt file is set to 6.0.200
-            var savedFeatureBand = File.ReadAllText(Path.Combine(adManifestDir, testManifestName, "AdvertisedManifestFeatureBand.txt"));
-            savedFeatureBand.Should().Be("6.0.200");
+                //  Assert
+                //  6.0.300 manifest was requested and then 6.0.200 manifest was requested
+                // we can't assert this for the offline cache
+                nugetDownloader.DownloadCallParams[0].id.ToString().Should().Be($"{testManifestName}.manifest-6.0.300");
+                nugetDownloader.DownloadCallParams[0].version.ShouldBeEquivalentTo(null);
+                nugetDownloader.DownloadCallParams[1].id.ToString().Should().Be($"{testManifestName}.manifest-6.0.200");
+                nugetDownloader.DownloadCallParams[1].version.ShouldBeEquivalentTo(null);
+
+                // these can't be asserted for 
+                //  6.0.200 package was written to advertising manifest folder
+                var advertisedManifestContents = File.ReadAllText(Path.Combine(adManifestDir, testManifestName, "WorkloadManifest.json"));
+                advertisedManifestContents.Should().NotBeEmpty();
+                
+                //  AdvertisedManifestFeatureBand.txt file is set to 6.0.200
+                var savedFeatureBand = File.ReadAllText(Path.Combine(adManifestDir, testManifestName, "AdvertisedManifestFeatureBand.txt"));
+                savedFeatureBand.Should().Be("6.0.200");
+            }
+
+            
         }
 
-        //  Next test case: Same as before, but doesn't find 6.0.300 manifest then also doesn't find 6.0.200 manifest
-        [Fact]
-        public void ItCanFallbackWithNoUpdates()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ItCanFallbackWithNoUpdates(bool useOfflineCache)
         {
-            //  Currently installed - none ? 
+            //  Currently installed - none
             //  Current SDK - 6.0.300
             //  Run update
             //  Should not find 6.0.300 manifest
             //  Should not find 6.0.200 manifest
-            //  Manifest Updater should not fail
+            //  Manifest Updater should give appropriate message
 
             //  Arrange
             string sdkFeatureBand = "6.0.300";
@@ -296,30 +312,104 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var workloadManifestProvider = new MockManifestProvider(Path.Combine(emptyInstalledManifestsDir, testManifestName, _manifestFileName)) 
             {
                 SdkFeatureBand = new SdkFeatureBand(sdkFeatureBand)
-            };
-            
+            };        
 
             var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, dotnetRoot);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot, manifestDownload: true);
-            nugetDownloader.PackageIdsToNotFind.Add($"{testManifestName}.Manifest-6.0.300");
-            nugetDownloader.PackageIdsToNotFind.Add($"{testManifestName}.Manifest-6.0.200");
             var installationRepo = new MockInstallationRecordRepository();
             var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, Path.Combine(testDir, ".dotnet"), testDir, installationRepo);
-                // make it not fail -- can figure out something else to output
 
-            //  Act
-            manifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews: true).Wait();
+            var offlineCacheDir = "";
+            if (useOfflineCache)
+            {
+                offlineCacheDir = Path.Combine(testDir, "offlineCache");
+                Directory.CreateDirectory(offlineCacheDir);             // empty dir because it shouldn't find any manifests to update
+
+                manifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews: true, offlineCache: new DirectoryPath(offlineCacheDir)).Wait();
+            }
+            else
+            {
+                nugetDownloader.PackageIdsToNotFind.Add($"{testManifestName}.Manifest-6.0.300");
+                nugetDownloader.PackageIdsToNotFind.Add($"{testManifestName}.Manifest-6.0.200");
+
+                manifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews: true).Wait();
+
+
+                //  6.0.300 manifest was requested and then 6.0.200 manifest was requested
+                // we can't assert this for the offline cache
+                nugetDownloader.DownloadCallParams[0].id.ToString().Should().Be($"{testManifestName}.manifest-6.0.300");
+                nugetDownloader.DownloadCallParams[0].version.ShouldBeEquivalentTo(null);
+                nugetDownloader.DownloadCallParams[1].id.ToString().Should().Be($"{testManifestName}.manifest-6.0.200");
+                nugetDownloader.DownloadCallParams[1].version.ShouldBeEquivalentTo(null);
+            }
 
             //  Assert
-            //  6.0.300 manifest was requested and then 6.0.200 manifest was requested
-            nugetDownloader.DownloadCallParams[0].id.ToString().Should().Be($"{testManifestName}.manifest-6.0.300");
-            nugetDownloader.DownloadCallParams[0].version.ShouldBeEquivalentTo(null);
-            nugetDownloader.DownloadCallParams[1].id.ToString().Should().Be($"{testManifestName}.manifest-6.0.200");
-            nugetDownloader.DownloadCallParams[1].version.ShouldBeEquivalentTo(null);
-
-            // check that output lines from _reporter do not say failed
             _reporter.Lines.Should().NotContain(l => l.ToLowerInvariant().Contains("fail"));
+            _reporter.Lines.Should().Contain(String.Format(Workloads.Workload.Install.LocalizableStrings.AdManifestPackageDoesNotExist, testManifestName));
+        }
 
+        // test for when it's not falling back and there aren't any updates
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void GivenNoUpdatesAreAvailableAndNoRollbackItGivesAppropriateMessage(bool useOfflineCache)
+        {
+            //  Currently installed - none
+            //  Current SDK - 6.0.300
+            //  Run update
+            //  Should not find 6.0.300 manifest
+            //  Should not rollback
+            //  Manifest updater should give appropriate message
+
+            //  Arrange
+            string sdkFeatureBand = "6.0.300";
+            var testDir = _testAssetsManager.CreateTestDirectory().Path;
+            var dotnetRoot = Path.Combine(testDir, "dotnet");
+
+            var emptyInstalledManifestsDir = Path.Combine(dotnetRoot, "sdk-manifests", "6.0.300");
+            Directory.CreateDirectory(emptyInstalledManifestsDir);
+
+            var adManifestDir = Path.Combine(testDir, ".dotnet", "sdk-advertising", sdkFeatureBand);
+            Directory.CreateDirectory(adManifestDir);
+
+            string testManifestName = "test-manifest";
+            Directory.CreateDirectory(Path.Combine(emptyInstalledManifestsDir, testManifestName));
+            File.WriteAllText(Path.Combine(emptyInstalledManifestsDir, testManifestName, _manifestFileName), GetManifestContent(new ManifestVersion("1.0.0")));
+
+            var workloadManifestProvider = new MockManifestProvider(Path.Combine(emptyInstalledManifestsDir, testManifestName, _manifestFileName))
+            {
+                SdkFeatureBand = new SdkFeatureBand(sdkFeatureBand)
+            };
+
+            var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, dotnetRoot);
+            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot, manifestDownload: true);
+            var installationRepo = new MockInstallationRecordRepository();
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, Path.Combine(testDir, ".dotnet"), testDir, installationRepo);
+
+            var offlineCacheDir = "";
+            if (useOfflineCache)
+            {
+                offlineCacheDir = Path.Combine(testDir, "offlineCache");
+                Directory.CreateDirectory(offlineCacheDir);             // empty dir because it shouldn't find any manifests to update
+
+                manifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews: true, offlineCache: new DirectoryPath(offlineCacheDir)).Wait();
+            }
+            else
+            {
+                nugetDownloader.PackageIdsToNotFind.Add($"{testManifestName}.Manifest-6.0.300");
+
+                manifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews: true).Wait();
+
+
+                //  6.0.300 manifest was requested and then 6.0.200 manifest was requested
+                // we can't assert this for the offline cache
+                nugetDownloader.DownloadCallParams[0].id.ToString().Should().Be($"{testManifestName}.manifest-6.0.300");
+                nugetDownloader.DownloadCallParams[0].version.ShouldBeEquivalentTo(null);
+            }
+
+            //  Assert
+            _reporter.Lines.Should().NotContain(l => l.ToLowerInvariant().Contains("fail"));
+            _reporter.Lines.Should().Contain(String.Format(Workloads.Workload.Install.LocalizableStrings.AdManifestPackageDoesNotExist, testManifestName));
         }
 
         [Fact]

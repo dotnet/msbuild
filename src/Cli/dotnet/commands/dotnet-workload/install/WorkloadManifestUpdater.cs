@@ -304,52 +304,20 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 var adManifestPath = GetAdvertisingManifestPath(_sdkFeatureBand, manifestId);
                 
-                if (offlineCache == null || !offlineCache.HasValue)
+                bool success;
+                (success, packagePath) = await GetManifestPackageUpdate(_sdkFeatureBand, manifestId, includePreviews, offlineCache);
+                if (!success)
                 {
-                    try
+                    if (!(manifest.ManifestFeatureBand).Equals(_sdkFeatureBand))
                     {
-                        packagePath = await GetOnlinePackagePath(_sdkFeatureBand, manifestId, includePreviews);
-                    }
-                    catch (NuGetPackageNotFoundException)
-                    {
-                        // this is where we want to fallback
-                        // if the feature band from the manifest info is different from the current sdk feature band,
-                        // then try downloading the manifest's feature band
-                        if (!(manifest.ManifestFeatureBand).Equals(_sdkFeatureBand))
-                        {
-                            try
-                            {
-                                packagePath = await GetOnlinePackagePath(new SdkFeatureBand(manifest.ManifestFeatureBand), manifestId, includePreviews);        // goes to failure message from here
-                            }
-                            catch (NuGetPackageNotFoundException)
-                            {
-                                _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestPackageDoesNotExist, manifestId));
-                                return;
-                            }
-                        }
-                        else
-                        {
-                            _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestPackageDoesNotExist, manifestId));
-                            return;
-                        }
+                        (success, packagePath) = await GetManifestPackageUpdate(new SdkFeatureBand(manifest.ManifestFeatureBand), manifestId, includePreviews, offlineCache);
+                        currentFeatureBand = manifest.ManifestFeatureBand.ToString();
                     }
                 }
-                else
+                if (!success)
                 {
-                    packagePath = GetOfflinePackagePath(_sdkFeatureBand, manifestId, offlineCache);
-                    if (!File.Exists(packagePath))
-                    {
-                        // add similar fallback logic
-                        if (!(manifest.ManifestFeatureBand).Equals(_sdkFeatureBand))
-                        {
-                            packagePath = GetOfflinePackagePath(new SdkFeatureBand(manifest.ManifestFeatureBand), manifestId, offlineCache);
-                            currentFeatureBand = manifest.ManifestFeatureBand.ToString();
-                        }
-                        else
-                        {
-                            throw new Exception(string.Format(LocalizableStrings.CacheMissingPackage, GetManifestPackageId(_sdkFeatureBand, manifestId), "*", offlineCache));
-                        }
-                    }
+                    _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestPackageDoesNotExist, manifestId));
+                    return;
                 }
                 
                 extractionPath = Path.Combine(_tempDirPath, "dotnet-sdk-advertising-temp", $"{manifestId}-extracted");
@@ -545,12 +513,33 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         private string GetOfflinePackagePath(SdkFeatureBand sdkFeatureBand, ManifestId manifestId, DirectoryPath? offlineCache = null)
         {
-            string packagePath = Directory.GetFiles(offlineCache.Value.Value)
+            string packagePath = Directory.GetFiles(offlineCache.Value.Value)         // why isn't this getting the actual package path? (it returns up to offlinceCache but not the .nupkg
                 .Where(path => path.EndsWith(".nupkg"))
                 .Where(path => Path.GetFileName(path).StartsWith(GetManifestPackageId(sdkFeatureBand, manifestId).ToString()))
                 .Max();
 
             return packagePath;
+        }
+
+        private async Task<(bool, string)> GetManifestPackageUpdate(SdkFeatureBand sdkFeatureBand, ManifestId manifestId, bool includePreviews, DirectoryPath? offlineCache = null)
+        {
+            if (offlineCache == null || !offlineCache.HasValue)
+            {
+                try 
+                {
+                    string packagePath = await GetOnlinePackagePath(sdkFeatureBand, manifestId, includePreviews);
+                    return (true, packagePath);
+                }
+                catch (NuGetPackageNotFoundException)
+                {
+                    return (false, null);
+                }
+            }
+            else
+            {
+                string packagePath = GetOfflinePackagePath(sdkFeatureBand, manifestId, offlineCache);
+                return (packagePath != null, packagePath);
+            }
         }
 
         private string GetAdvertisingManifestPath(SdkFeatureBand featureBand, ManifestId manifestId) =>

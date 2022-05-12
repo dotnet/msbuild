@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
     {
         private readonly string _downloadPath;
         private readonly bool _manifestDownload;
-        private NuGetVersion _lastPackageVersion;
+        private NuGetVersion _lastPackageVersion = new NuGetVersion("1.0.0");
 
         public List<(PackageId id, NuGetVersion version, DirectoryPath? downloadFolder, PackageSourceLocation packageSourceLocation)> DownloadCallParams = new();
 
