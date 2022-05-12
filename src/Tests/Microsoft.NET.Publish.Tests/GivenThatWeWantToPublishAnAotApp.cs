@@ -47,7 +47,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Execute(RuntimeIdentifier)
                 .Should().Pass()
                 .And.HaveStdOutContaining("warning IL3050")
-                .And.HaveStdOutContaining("warning IL3052")
+                .And.HaveStdOutContaining("warning IL3056")
                 .And.NotHaveStdOutContaining("warning IL2026")
                 .And.NotHaveStdOutContaining("warning IL3002");
         }
@@ -76,7 +76,7 @@ namespace Microsoft.NET.Publish.Tests
                     .Execute()
                     .Should().Pass()
                     .And.HaveStdOutContaining("warning IL3050")
-                    .And.HaveStdOutContaining("warning IL3052")
+                    .And.HaveStdOutContaining("warning IL3056")
                     .And.HaveStdOutContaining("warning IL2026")
                     .And.HaveStdOutContaining("warning IL3002");
             }
@@ -103,7 +103,7 @@ namespace Microsoft.NET.Publish.Tests
                     .Execute()
                     .Should().Pass()
                     .And.HaveStdOutContaining("warning IL3050")
-                    .And.HaveStdOutContaining("warning IL3052")
+                    .And.HaveStdOutContaining("warning IL3056")
                     .And.HaveStdOutContaining("warning IL2026")
                     .And.HaveStdOutContaining("warning IL3002");
 
