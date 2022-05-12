@@ -575,7 +575,7 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "AppUsingPackageWithSatellites",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
