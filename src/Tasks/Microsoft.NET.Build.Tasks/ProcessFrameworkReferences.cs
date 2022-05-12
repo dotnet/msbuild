@@ -305,7 +305,7 @@ namespace Microsoft.NET.Build.Tasks
                         }
                     }
 
-                    ProcessRuntimeIdentifier(hasRuntimePackAlwaysCopyLocal ? "any" : RuntimeIdentifier, runtimePackForRuntimeIDProcessing, runtimePackVersion, additionalFrameworkReferencesForRuntimePack,
+                    ProcessRuntimeIdentifier(string.IsNullOrEmpty(RuntimeIdentifier) ? "any" : RuntimeIdentifier, runtimePackForRuntimeIDProcessing, runtimePackVersion, additionalFrameworkReferencesForRuntimePack,
                         unrecognizedRuntimeIdentifiers, unavailableRuntimePacks, runtimePacks, packagesToDownload, isTrimmable, EnableRuntimePackDownload && useRuntimePackAndDownloadIfNecessary,
                         wasReferencedDirectly: frameworkReference != null);
 
