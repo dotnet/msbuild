@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.Remoting.Messaging;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
@@ -165,6 +166,12 @@ namespace Microsoft.Build.Engine.UnitTests
                 string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success, false, _output);
                 pidOfServerProcess = ParseNumber(output, "Server ID is ");
 
+                foreach (Process p in Process.GetProcesses())
+                {
+                    _output.WriteLine($"Process number {p.Id} is {p.ProcessName}");
+                    p.OutputDataReceived += (object sender, DataReceivedEventArgs args) => _output.WriteLine(args is null ? "empty" : args.Data);
+                }
+
                 t = Task.Run(() =>
                 {
                     RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, sleepProject.Path, out _, false, _output);
@@ -172,6 +179,13 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 // The server will soon be in use; make sure we don't try to use it before that happens.
                 Thread.Sleep(1000);
+
+                _output.WriteLine("next batch");
+                foreach (Process p in Process.GetProcesses())
+                {
+                    _output.WriteLine($"Process number {p.Id} is {p.ProcessName}");
+                    p.OutputDataReceived += (object sender, DataReceivedEventArgs args) => _output.WriteLine(args is null ? "empty" : args.Data);
+                }
 
                 Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
                 output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);

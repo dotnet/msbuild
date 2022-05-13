@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests.Shared
                 UseShellExecute = false,
                 Arguments = parameters
             };
-            var output = string.Empty;
+            string output = string.Empty;
             int pid = -1;
 
             using (var p = new Process { EnableRaisingEvents = true, StartInfo = psi })
@@ -120,16 +120,17 @@ namespace Microsoft.Build.UnitTests.Shared
                 successfulExit = p.ExitCode == 0;
             }
 
-            output += "Process ID is " + pid + "\r\n";
-
             outputHelper?.WriteLine("==== OUTPUT ====");
             outputHelper?.WriteLine(output);
+            outputHelper?.WriteLine("Process ID is " + pid + "\r\n");
             outputHelper?.WriteLine("==============");
 
             Console.WriteLine("==== OUTPUT ====");
             Console.WriteLine(output);
+            Console.WriteLine("Process ID is " + pid + "\r\n");
             Console.WriteLine("==============");
 
+            output += "Process ID is " + pid + "\r\n";
             return output;
         }
     }
