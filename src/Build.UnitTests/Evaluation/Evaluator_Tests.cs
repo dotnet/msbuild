@@ -4244,7 +4244,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// If DTD processing is disabled, the server should not receive any connection request.
         /// </summary>
         [Fact]
-        [SkipOnPlatform(TestPlatforms.Windows, "This test is flaky. We should try to fix it if possible. https://github.com/dotnet/msbuild/issues/7623")]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7623")]
         public async void VerifyDTDProcessingIsDisabled2()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-8""?>
