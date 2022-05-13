@@ -10,6 +10,11 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
+#if NETFRAMEWORK
+using Microsoft.IO;
+#else
+using System.IO;
+#endif
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -156,6 +161,8 @@ namespace Microsoft.Build.Engine.UnitTests
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
             TransientTestFile sleepProject = _env.CreateFile("napProject.proj", sleepingTaskContents);
+            _env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
+            _env.SetEnvironmentVariable("MSBUILDDEBUGPATH", Path.Combine(Path.GetDirectoryName(project.Path)!, "myFolder"));
 
             int pidOfServerProcess = -1;
             Task? t = null;
@@ -199,6 +206,15 @@ namespace Microsoft.Build.Engine.UnitTests
             }
             finally
             {
+                foreach (string? file in Directory.GetFiles(Path.Combine(Path.GetDirectoryName(project.Path)!, "myFolder")))
+                {
+                    _output.WriteLine($"New file: {file}");
+                    foreach (string line in File.ReadLines(file!))
+                    {
+                        _output.WriteLine(line);
+                    }
+                }
+
                 if (pidOfServerProcess > -1)
                 {
                     ProcessExtensions.KillTree(Process.GetProcessById(pidOfServerProcess), 1000);
