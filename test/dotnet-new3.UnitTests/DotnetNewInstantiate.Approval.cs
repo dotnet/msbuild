@@ -238,6 +238,29 @@ namespace Dotnet_new3.IntegrationTests
         }
 
         [Fact]
+        public Task CanInstantiateTemplate_MultiValueChoiceParameterConditions()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            Helpers.InstallTestTemplate("TemplateWithMultiValueChoice", _log, home, workingDirectory);
+
+            var commandResult = new DotnetNewCommand(_log, "TestAssets.TemplateWithMultiValueChoice", "--Platform", "MacOS", "--Platform", "iOS")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult
+                .Should()
+                .Pass()
+                .And.NotHaveStdErr()
+                .And.HaveStdOutMatching("The template \"TemplateWithMultiValueChoice\" was created successfully\\.");
+
+            string resultFileContent = File.ReadAllText(Path.Combine(workingDirectory, "Test.cs"));
+
+            return Verifier.Verify(resultFileContent, _verifySettings);
+        }
+
+        [Fact]
         public Task DryRunRespectsTargetPathAndOutputDir()
         {
             const string _OUT_FOLDER = "folderF";

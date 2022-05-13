@@ -208,6 +208,22 @@ namespace Dotnet_new3.IntegrationTests
         }
 
         [Fact]
+        public Task CannotShowHelpForTemplate_MultipleValueChoice()
+        {
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            Helpers.InstallTestTemplate("TemplateWithMultiValueChoice", _log, _fixture.HomeDirectory, workingDirectory);
+
+            var commandResult = new DotnetNewCommand(_log, "TestAssets.TemplateWithMultiValueChoice", "--help")
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            //help command should not fail, therefore the output is written to stdout
+            commandResult.Should().Pass().And.NotHaveStdErr();
+            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+        }
+
+        [Fact]
         public Task CanShowHelpForTemplate_MatchOnChoice()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();

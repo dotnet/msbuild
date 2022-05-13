@@ -27,6 +27,11 @@
         <target state="translated">Bu şablon Microsoft dışındaki tarafların teknolojilerini içeriyor. Ayrıntılar için {0} sayfasına bakın.</target>
         <note />
       </trans-unit>
+      <trans-unit id="RowHeader_AllowMultiValue">
+        <source>Allow multiple values: {0}</source>
+        <target state="new">Allow multiple values: {0}</target>
+        <note>{0} is a boolean flag</note>
+      </trans-unit>
       <trans-unit id="RowHeader_DefaultIfOptionWithoutValue">
         <source>Default if option is provided without a value: {0}</source>
         <target state="translated">Seçenek bir değer olmadan sağlanırsa varsayılan: {0}</target>

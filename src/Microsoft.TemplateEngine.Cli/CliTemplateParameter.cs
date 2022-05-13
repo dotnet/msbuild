@@ -49,6 +49,7 @@ namespace Microsoft.TemplateEngine.Cli
             IsRequired = parameter.Priority == TemplateParameterPriority.Required && parameter.DefaultValue == null;
             IsHidden = parameter.Priority == TemplateParameterPriority.Implicit || data.HiddenParameterNames.Contains(parameter.Name);
             AlwaysShow = data.ParametersToAlwaysShow.Contains(parameter.Name);
+            AllowMultipleValues = parameter.AllowMultipleValues;
 
             if (data.ShortNameOverrides.ContainsKey(parameter.Name))
             {
@@ -96,6 +97,7 @@ namespace Microsoft.TemplateEngine.Cli
             _shortNameOverrides = other.ShortNameOverrides.ToList();
             _longNameOverrides = other.LongNameOverrides.ToList();
             DefaultIfOptionWithoutValue = other.DefaultIfOptionWithoutValue;
+            AllowMultipleValues = other.AllowMultipleValues;
 
         }
 
@@ -120,6 +122,8 @@ namespace Microsoft.TemplateEngine.Cli
         internal IReadOnlyList<string> LongNameOverrides => _longNameOverrides;
 
         internal string? DefaultIfOptionWithoutValue { get; private set; }
+
+        protected bool AllowMultipleValues { get; private init; }
 
         /// <summary>
         /// Creates <see cref="Option"/> for template parameter.
@@ -375,6 +379,10 @@ namespace Microsoft.TemplateEngine.Cli
             else
             {
                 displayValue.AppendLine(string.Format(HelpStrings.RowHeader_Type, string.IsNullOrWhiteSpace(DataType) ? "string" : DataType));
+            }
+            if (AllowMultipleValues)
+            {
+                displayValue.AppendLine(string.Format(HelpStrings.RowHeader_AllowMultiValue, AllowMultipleValues));
             }
             //display the default value if there is one
             if (!string.IsNullOrWhiteSpace(DefaultValue))

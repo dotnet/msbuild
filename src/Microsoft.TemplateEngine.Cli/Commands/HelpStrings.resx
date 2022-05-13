@@ -136,6 +136,10 @@
   <data name="Info_TemplateThirdPartyNotice" xml:space="preserve">
     <value>This template contains technologies from parties other than Microsoft, see {0} for details.</value>
   </data>
+  <data name="RowHeader_AllowMultiValue" xml:space="preserve">
+    <value>Allow multiple values: {0}</value>
+    <comment>{0} is a boolean flag</comment>
+  </data>
   <data name="RowHeader_DefaultIfOptionWithoutValue" xml:space="preserve">
     <value>Default if option is provided without a value: {0}</value>
     <comment>{0} is default value if option was provided without a value</comment>

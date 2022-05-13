@@ -27,6 +27,11 @@
         <target state="translated">此模板包含除 Microsoft 以外其他方的技术，请参阅 {0} 以获取详细信息。</target>
         <note />
       </trans-unit>
+      <trans-unit id="RowHeader_AllowMultiValue">
+        <source>Allow multiple values: {0}</source>
+        <target state="new">Allow multiple values: {0}</target>
+        <note>{0} is a boolean flag</note>
+      </trans-unit>
       <trans-unit id="RowHeader_DefaultIfOptionWithoutValue">
         <source>Default if option is provided without a value: {0}</source>
         <target state="translated">如果提供的选项没有值，则默认为: {0}</target>

@@ -27,6 +27,11 @@
         <target state="translated">このテンプレートには、Microsoft 以外のパーティのテクノロジが含まれています。詳しくは、{0} をご覧ください。</target>
         <note />
       </trans-unit>
+      <trans-unit id="RowHeader_AllowMultiValue">
+        <source>Allow multiple values: {0}</source>
+        <target state="new">Allow multiple values: {0}</target>
+        <note>{0} is a boolean flag</note>
+      </trans-unit>
       <trans-unit id="RowHeader_DefaultIfOptionWithoutValue">
         <source>Default if option is provided without a value: {0}</source>
         <target state="translated">値なしで指定された場合の既定の if オプション: {0}</target>

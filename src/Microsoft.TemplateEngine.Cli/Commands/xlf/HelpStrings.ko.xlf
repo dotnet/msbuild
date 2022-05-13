@@ -27,6 +27,11 @@
         <target state="translated">이 템플릿에는 Microsoft 이외의 타사 기술이 포함되어 있습니다. 자세한 내용은{0}를 참조하세요.</target>
         <note />
       </trans-unit>
+      <trans-unit id="RowHeader_AllowMultiValue">
+        <source>Allow multiple values: {0}</source>
+        <target state="new">Allow multiple values: {0}</target>
+        <note>{0} is a boolean flag</note>
+      </trans-unit>
       <trans-unit id="RowHeader_DefaultIfOptionWithoutValue">
         <source>Default if option is provided without a value: {0}</source>
         <target state="translated">옵션이 값 없이 제공되는 경우 기본값 :{0}</target>

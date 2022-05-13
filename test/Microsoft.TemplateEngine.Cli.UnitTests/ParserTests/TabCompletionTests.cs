@@ -128,6 +128,35 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             Assert.Equal(new[] { "val1", "val2", "val3" }, result);
         }
 
+        [Theory]
+        [InlineData(" new foo --testChoice val2 --testChoice va", new[] { "val1", "val2", "val3" })]
+        [InlineData(" new foo --testC", new[] { "--testChoice" })]
+        // [InlineData(" new foo --testChoice val2 --testC", new[] { "--testChoice" },
+        //  Skip = "Multiple arity option completion does not work. https://github.com/dotnet/command-line-api/issues/1727")]
+        public void CanCompleteChoice_MultichoiceTabCompletion(string command, string[] suggestions)
+        {
+            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+                .WithMultiChoiceParameter("testChoice", "val1", "val2", "val3");
+
+            var templateGroups = TemplateGroup.FromTemplateList(
+                CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()));
+
+            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
+            TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
+
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var parseResult = myCommand.Parse(command);
+            var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
+            Assert.NotNull(completionContext);
+
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+
+            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+
+            Assert.Equal(suggestions, result);
+        }
+
         [Fact]
         public void CanCompleteChoice_FromSingleTemplate_StartsWith()
         {

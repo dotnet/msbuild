@@ -106,6 +106,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Allow multiple values: {0}.
+        /// </summary>
+        internal static string RowHeader_AllowMultiValue {
+            get {
+                return ResourceManager.GetString("RowHeader_AllowMultiValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Default if option is provided without a value: {0}.
         /// </summary>
         internal static string RowHeader_DefaultIfOptionWithoutValue {

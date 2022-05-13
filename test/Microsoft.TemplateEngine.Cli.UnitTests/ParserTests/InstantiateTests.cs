@@ -383,6 +383,50 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             }
         }
 
+        public static IEnumerable<object?[]> CanParseMultiChoiceTemplateOptionsData =>
+            new object?[][]
+            {
+                new [] { "foo --framework net5.0 --framework net7.0", "framework", "net5.0|net6.0|net7.0", null, "net5.0|net7.0" },
+                new [] { "foo -f net5.0", "framework", "net5.0|net6.0|net7.0", null, "net5.0" },
+                new [] { "foo -f net5.0 -f net7.0 -f net6.0", "framework", "net5.0|net6.0|net7.0", null, "net5.0|net7.0|net6.0" },
+                new [] { "foo --framework net6.0", "framework", "net5.0|net6.0|net7.0", null, "net6.0" },
+                new [] { "foo --framework ", "framework", "net5.0|net6.0|net7.0", "net5.0|net6.0", "net5.0|net6.0" },
+            };
+
+        [Theory]
+        [MemberData(nameof(CanParseMultiChoiceTemplateOptionsData))]
+        internal void CanParseMultiChoiceTemplateOptions(string command, string parameterName, string parameterValues, string? defaultIfNoOptionValue, string? expectedValue)
+        {
+            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+                .WithChoiceParameter(parameterName, parameterValues.Split("|"), defaultIfNoOptionValue: defaultIfNoOptionValue, allowMultipleValues: true);
+
+            TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
+                CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
+                .Single();
+
+            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
+            TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
+
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var parseResult = myCommand.Parse($" new {command}");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            Parser parser = ParserFactory.CreateParser(templateCommand);
+            ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
+            var templateArgs = new TemplateCommandArgs(templateCommand, myCommand, templateParseResult);
+
+            if (string.IsNullOrWhiteSpace(expectedValue))
+            {
+                Assert.False(templateArgs.TemplateParameters.ContainsKey(parameterName));
+            }
+            else
+            {
+                Assert.True(templateArgs.TemplateParameters.ContainsKey(parameterName));
+                Assert.Equal(expectedValue, templateArgs.TemplateParameters[parameterName]);
+            }
+        }
+
         public static IEnumerable<object?[]> CanDetectParseErrorsTemplateOptionsData =>
             new object?[][]
             {
