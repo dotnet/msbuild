@@ -382,7 +382,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             using (FileStream fsSource = new FileStream(manifestPath, FileMode.Open, FileAccess.Read))
             {
                 var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId.ToString(), fsSource, manifestPath);
-                // we need to know the feature band of the advertised manifest (read it from the AvertisedManifestFeatureBand.txt file)
+                // we need to know the feature band of the advertised manifest (read it from the AdvertisedManifestFeatureBand.txt file)
                 // if we don't find the file then use the current feature band
                 var adManifestFeatureBandPath = Path.Combine(GetAdvertisingManifestPath(_sdkFeatureBand, manifestId), "AdvertisedManifestFeatureBand.txt");
 
