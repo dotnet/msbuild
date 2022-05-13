@@ -54,7 +54,7 @@ namespace Microsoft.NET.Build.Tests
         [RequiresMSBuildVersionTheory("17.1.0.60101")]
         [InlineData("netcoreapp3.1")]
         [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_builds_a_runnable_apphost_by_default(string targetFramework)
         {
             var testAsset = _testAssetsManager
@@ -95,7 +95,7 @@ namespace Microsoft.NET.Build.Tests
         [PlatformSpecificTheory(TestPlatforms.OSX)]
         [InlineData("netcoreapp3.1")]
         [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_can_disable_codesign_if_opt_out(string targetFramework)
         {
             var testAsset = _testAssetsManager
@@ -106,7 +106,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute(new string[] {
-                    "/p:_EnableMacOSCodeSign=false",
+                    "/p:_EnableMacOSCodeSign=false;ProduceReferenceAssembly=false",
                 })
                 .Should()
                 .Pass();
@@ -129,10 +129,10 @@ namespace Microsoft.NET.Build.Tests
         [PlatformSpecificTheory(TestPlatforms.OSX)]
         [InlineData("netcoreapp3.1", "win-x64")]
         [InlineData("net5.0", "win-x64")]
-        [InlineData("net6.0", "win-x64")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "win-x64")]
         [InlineData("netcoreapp3.1", "linux-x64")]
         [InlineData("net5.0", "linux-x64")]
-        [InlineData("net6.0", "linux-x64")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "linux-x64")]
         public void It_does_not_try_to_codesign_non_osx_app_hosts(string targetFramework, string rid)
         {
             var testAsset = _testAssetsManager
@@ -168,7 +168,7 @@ namespace Microsoft.NET.Build.Tests
         [PlatformSpecificTheory(TestPlatforms.OSX)]
         [InlineData("netcoreapp3.1")]
         [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_codesigns_a_framework_dependent_app(string targetFramework)
         {
             var testAsset = _testAssetsManager
@@ -200,8 +200,8 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp3.1", true)]
         [InlineData("net5.0", false)]
         [InlineData("net5.0", true)]
-        [InlineData("net6.0", false)]
-        [InlineData("net6.0", true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, false)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, true)]
         public void It_codesigns_an_app_targeting_osx(string targetFramework, bool selfContained)
         {
             var testAsset = _testAssetsManager
@@ -388,12 +388,10 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_retries_on_failure_to_create_apphost()
         {
-            const string TFM = "net5.0";
-
             var testProject = new TestProject()
             {
                 Name = "RetryAppHost",
-                TargetFrameworks = TFM,
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
             };
 
@@ -408,7 +406,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var intermediateDirectory = buildCommand.GetIntermediateDirectory(targetFramework: TFM).FullName;
+            var intermediateDirectory = buildCommand.GetIntermediateDirectory(targetFramework: ToolsetInfo.CurrentTargetFramework).FullName;
 
             File.SetLastWriteTimeUtc(
                 Path.Combine(

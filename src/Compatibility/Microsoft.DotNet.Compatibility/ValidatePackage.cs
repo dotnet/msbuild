@@ -23,6 +23,8 @@ namespace Microsoft.DotNet.Compatibility
         [Required]
         public string RoslynAssembliesPath { get; set; }
 
+        public string AssemblyName { get; set; }
+
         public string RuntimeGraph { get; set; }
 
         public string NoWarn { get; set; }
@@ -96,7 +98,7 @@ namespace Microsoft.DotNet.Compatibility
                 }
             }
 
-            Package package = NupkgParser.CreatePackage(PackageTargetPath, runtimeGraph);
+            Package package = NupkgParser.CreatePackage(PackageTargetPath, runtimeGraph, AssemblyName);
             CompatibilityLogger logger = new(Log, CompatibilitySuppressionFilePath, GenerateCompatibilitySuppressionFile);
 
             new CompatibleTfmValidator(NoWarn, null, RunApiCompat, EnableStrictModeForCompatibleTfms, logger, apiCompatReferences).Validate(package);
@@ -104,7 +106,7 @@ namespace Microsoft.DotNet.Compatibility
 
             if (!DisablePackageBaselineValidation && !string.IsNullOrEmpty(BaselinePackageTargetPath))
             {
-                Package baselinePackage = NupkgParser.CreatePackage(BaselinePackageTargetPath, runtimeGraph);
+                Package baselinePackage = NupkgParser.CreatePackage(BaselinePackageTargetPath, runtimeGraph, AssemblyName);
                 new BaselinePackageValidator(baselinePackage, NoWarn, null, RunApiCompat, logger, apiCompatReferences).Validate(package);
             }
 

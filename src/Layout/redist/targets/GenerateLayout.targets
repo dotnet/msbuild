@@ -30,35 +30,6 @@
     <Delete Files="@(RoslynFrameworkAssemblies)" />
   </Target>
 
-  <Target Name="PublishRoslynCommonAssemblies" BeforeTargets="Build">
-    <PropertyGroup>
-      <RoslynCommonAssembliesDirectory>$(OutputPath)/Roslyn/bincore</RoslynCommonAssembliesDirectory>
-    </PropertyGroup>
-    <ItemGroup>
-      <CSharpFeaturesAssemblies Include="$(PkgMicrosoft_CodeAnalysis_CSharp_Features)/lib/netcoreapp3.1/**/*.dll" />
-      <CSharpWorkspacesAssemblies Include="$(PkgMicrosoft_CodeAnalysis_CSharp_Workspaces)/lib/netcoreapp3.1/**/*.dll" />
-      <FeaturesAssemblies Include="$(PkgMicrosoft_CodeAnalysis_Features)/lib/netcoreapp3.1/**/*.dll" />
-      <VisualBasicFeaturesAssemblies Include="$(PkgMicrosoft_CodeAnalysis_VisualBasic_Features)/lib/netcoreapp3.1/**/*.dll" />
-      <VisualBasicWorkspacesAssemblies Include="$(PkgMicrosoft_CodeAnalysis_VisualBasic_Workspaces)/lib/netcoreapp3.1/**/*.dll" />
-      <WorkspacesCommonAssemblies Include="$(PkgMicrosoft_CodeAnalysis_Workspaces_Common)/lib/netcoreapp3.1/**/*.dll" />
-      <WorkspacesMSBuildAssemblies Include="$(PkgMicrosoft_CodeAnalysis_Workspaces_MSBuild)/lib/netcoreapp3.1/**/*.dll" />
-    </ItemGroup>
-    <Error Condition="'@(CSharpFeaturesAssemblies)' == ''" Text="Something moved around in Microsoft.CodeAnalysis.CSharp.Features package, adjust code here accordingly. TFM change?" />
-    <Error Condition="'@(CSharpWorkspacesAssemblies)' == ''" Text="Something moved around in Microsoft.CodeAnalysis.CSharp.Workspaces package, adjust code here accordingly. TFM change?" />
-    <Error Condition="'@(FeaturesAssemblies)' == ''" Text="Something moved around in Microsoft.CodeAnalysis.Features package, adjust code here accordingly. TFM change?" />
-    <Error Condition="'@(VisualBasicFeaturesAssemblies)' == ''" Text="Something moved around in Microsoft.CodeAnalysis.VisualBasic.Features package, adjust code here accordingly. TFM change?" />
-    <Error Condition="'@(VisualBasicWorkspacesAssemblies)' == ''" Text="Something moved around in Microsoft.CodeAnalysis.VisualBasic.Workspaces package, adjust code here accordingly. TFM change?" />
-    <Error Condition="'@(WorkspacesCommonAssemblies)' == ''" Text="Something moved around in Microsoft.CodeAnalysis.Workspaces.Common package, adjust code here accordingly. TFM change?" />
-    <Error Condition="'@(WorkspacesMSBuildAssemblies)' == ''" Text="Something moved around in Microsoft.CodeAnalysis.Workspaces.MSBuild package, adjust code here accordingly. TFM change?" />
-    <Copy SourceFiles="@(CSharpFeaturesAssemblies)" DestinationFiles="@(CSharpFeaturesAssemblies->'$(RoslynCommonAssembliesDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
-    <Copy SourceFiles="@(CSharpWorkspacesAssemblies)" DestinationFiles="@(CSharpWorkspacesAssemblies->'$(RoslynCommonAssembliesDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
-    <Copy SourceFiles="@(FeaturesAssemblies)" DestinationFiles="@(FeaturesAssemblies->'$(RoslynCommonAssembliesDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
-    <Copy SourceFiles="@(VisualBasicFeaturesAssemblies)" DestinationFiles="@(VisualBasicFeaturesAssemblies->'$(RoslynCommonAssembliesDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
-    <Copy SourceFiles="@(VisualBasicWorkspacesAssemblies)" DestinationFiles="@(VisualBasicWorkspacesAssemblies->'$(RoslynCommonAssembliesDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
-    <Copy SourceFiles="@(WorkspacesCommonAssemblies)" DestinationFiles="@(WorkspacesCommonAssemblies->'$(RoslynCommonAssembliesDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
-    <Copy SourceFiles="@(WorkspacesMSBuildAssemblies)" DestinationFiles="@(WorkspacesMSBuildAssemblies->'$(RoslynCommonAssembliesDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
-  </Target>
-
   <Target Name="PublishNETAnalyzers"
           BeforeTargets="Build;PublishNetSdk">
      <PropertyGroup>

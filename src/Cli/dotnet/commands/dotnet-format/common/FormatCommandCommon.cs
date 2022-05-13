@@ -31,13 +31,15 @@ namespace Microsoft.DotNet.Tools.Format
         internal static readonly Option<string[]> ExcludeOption = new(new[] { "--exclude" }, () => Array.Empty<string>(), LocalizableStrings.A_list_of_relative_file_or_folder_paths_to_exclude_from_formatting);
         internal static readonly Option<bool> IncludeGeneratedOption = new(new[] { "--include-generated" }, LocalizableStrings.Format_files_generated_by_the_SDK);
         internal static readonly Option<string> VerbosityOption = new Option<string>(new[] { "--verbosity", "-v" }, LocalizableStrings.Set_the_verbosity_level_Allowed_values_are_quiet_minimal_normal_detailed_and_diagnostic).FromAmong(VerbosityLevels);
-        internal static readonly Option BinarylogOption = new Option(new[] { "--binarylog" }, LocalizableStrings.Log_all_project_or_solution_load_information_to_a_binary_log_file, argumentType: typeof(string), arity: ArgumentArity.ZeroOrOne)
+        internal static readonly Option<string> BinarylogOption = new Option<string>(new[] { "--binarylog" }, LocalizableStrings.Log_all_project_or_solution_load_information_to_a_binary_log_file)
         {
-            ArgumentHelpName = "binary-log-path"
+            ArgumentHelpName = "binary-log-path",
+            Arity = ArgumentArity.ZeroOrOne
         }.LegalFilePathsOnly();
-        internal static readonly Option ReportOption = new Option(new[] { "--report" }, LocalizableStrings.Accepts_a_file_path_which_if_provided_will_produce_a_json_report_in_the_given_directory, argumentType: typeof(string), arity: ArgumentArity.ZeroOrOne)
+        internal static readonly Option<string> ReportOption = new Option<string>(new[] { "--report" }, LocalizableStrings.Accepts_a_file_path_which_if_provided_will_produce_a_json_report_in_the_given_directory)
         {
-            ArgumentHelpName = "report-path"
+            ArgumentHelpName = "report-path",
+            Arity = ArgumentArity.ZeroOrOne
         }.LegalFilePathsOnly();
 
 

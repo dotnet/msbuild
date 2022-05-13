@@ -15,7 +15,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Workloads.Workload.Search
 {
-    internal class WorkloadSearchCommand : CommandBase
+    internal class WorkloadSearchCommand : WorkloadCommandBase
     {
         private readonly IReporter _reporter;
         private readonly VerbosityOptions _verbosity;

@@ -28,7 +28,6 @@ namespace Microsoft.DotNet.Cli
 
             command.AddOption(new Option<bool>("--version"));
             command.AddOption(new Option<string>(new string[] { "-v", "--verbosity" }));
-            command.AddArgument(new Argument() { IsHidden = true });
 
             command.AddCommand(GetDeleteCommand());
             command.AddCommand(GetLocalsCommand());
@@ -45,7 +44,7 @@ namespace Microsoft.DotNet.Cli
         private static Command GetDeleteCommand()
         {
             var deleteCommand = new Command("delete");
-            deleteCommand.AddArgument(new Argument<IEnumerable<string>>() { Arity = ArgumentArity.OneOrMore });
+            deleteCommand.AddArgument(new Argument<IEnumerable<string>>("package-paths") { Arity = ArgumentArity.OneOrMore });
             deleteCommand.AddOption(new Option<bool>("--force-english-output"));
             deleteCommand.AddOption(new Option<string>(new string[] { "-s", "--source" }));
             deleteCommand.AddOption(new Option<bool>("--non-interactive"));
@@ -62,7 +61,7 @@ namespace Microsoft.DotNet.Cli
         {
             var localsCommand = new Command("locals");
 
-            localsCommand.AddArgument(new Argument<string>()
+            localsCommand.AddArgument(new Argument<string>("folders")
                 .FromAmong(new string[] { "all", "http-cache", "global-packages", "plugins-cache", "temp" }));
 
             localsCommand.AddOption(new Option<bool>("--force-english-output"));
@@ -78,7 +77,7 @@ namespace Microsoft.DotNet.Cli
         {
             var pushCommand = new Command("push");
 
-            pushCommand.AddArgument(new Argument<IEnumerable<string>>() { Arity = ArgumentArity.OneOrMore });
+            pushCommand.AddArgument(new Argument<IEnumerable<string>>("package-paths") { Arity = ArgumentArity.OneOrMore });
 
             pushCommand.AddOption(new Option<bool>("--force-english-output"));
             pushCommand.AddOption(new Option<string>(new string[] { "-s", "--source" }));
@@ -102,7 +101,7 @@ namespace Microsoft.DotNet.Cli
             const string fingerprint = "--certificate-fingerprint";
             var verifyCommand = new Command("verify");
 
-            verifyCommand.AddArgument(new Argument<IEnumerable<string>>() { Arity = ArgumentArity.OneOrMore });
+            verifyCommand.AddArgument(new Argument<IEnumerable<string>>("package-paths") { Arity = ArgumentArity.OneOrMore });
 
             verifyCommand.AddOption(new Option<bool>("--all"));
             verifyCommand.AddOption(new ForwardedOption<IEnumerable<string>>(fingerprint)
@@ -119,7 +118,7 @@ namespace Microsoft.DotNet.Cli
         {
             var trustCommand = new Command("trust");
 
-            trustCommand.AddArgument(new Argument<string>() { Arity = ArgumentArity.ZeroOrOne }
+            trustCommand.AddArgument(new Argument<string>("command") { Arity = ArgumentArity.ZeroOrOne }
                          .FromAmong(new string[] { "list", "author", "repository", "source", "certificate", "remove", "sync" }));
 
             trustCommand.AddOption(new Option<string>("--algorithm"));
@@ -137,7 +136,7 @@ namespace Microsoft.DotNet.Cli
         {
             var signCommand = new Command("sign");
 
-            signCommand.AddArgument(new Argument<IEnumerable<string>>() { Arity = ArgumentArity.OneOrMore });
+            signCommand.AddArgument(new Argument<IEnumerable<string>>("package-paths") { Arity = ArgumentArity.OneOrMore });
 
             signCommand.AddOption(new Option<string>(new string[] { "-o", "--output" }));
             signCommand.AddOption(new Option<string>("--certificate-path"));

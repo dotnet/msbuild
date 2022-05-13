@@ -42,12 +42,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public NetSdkMsiInstallerClient(InstallElevationContextBase elevationContext,
             ISetupLogger logger,
+            bool verifySignatures,
             IWorkloadResolver workloadResolver,
             SdkFeatureBand sdkFeatureBand,
             INuGetPackageDownloader nugetPackageDownloader = null,
             VerbosityOptions verbosity = VerbosityOptions.normal,
             PackageSourceLocation packageSourceLocation = null,
-            IReporter reporter = null) : base(elevationContext, logger, reporter)
+            IReporter reporter = null) : base(elevationContext, logger, verifySignatures, reporter)
         {
             _packageSourceLocation = packageSourceLocation;
             _nugetPackageDownloader = nugetPackageDownloader;
@@ -64,6 +65,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             Log?.LogMessage($"{nameof(ProcessorArchitecture)}: {ProcessorArchitecture}");
             Log?.LogMessage($"{nameof(HostArchitecture)}: {HostArchitecture}");
             Log?.LogMessage($"{nameof(SdkDirectory)}: {SdkDirectory}");
+            Log?.LogMessage($"{nameof(VerifySignatures)}: {VerifySignatures}");
             Log?.LogMessage($"SDK feature band: {_sdkFeatureBand}");
 
             if (IsElevated)
@@ -101,13 +103,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 Log?.LogMessage("Starting garbage collection.");
                 IEnumerable<SdkFeatureBand> installedFeatureBands = GetInstalledFeatureBands();
                 IEnumerable<WorkloadId> installedWorkloads = RecordRepository.GetInstalledWorkloads(_sdkFeatureBand);
-                IEnumerable<PackInfo> expectedWorkloadPacks = installedWorkloads
+                Dictionary<(WorkloadPackId id, string version),PackInfo> expectedWorkloadPacks = installedWorkloads
                     .SelectMany(workload => _workloadResolver.GetPacksInWorkload(workload))
+                    .Distinct()
                     .Select(pack => _workloadResolver.TryGetPackInfo(pack))
-                    .Where(pack => pack != null);
-                IEnumerable<WorkloadPackId> expectedPackIds = expectedWorkloadPacks.Select(p => p.Id);
+                    .Where(pack => pack != null)
+                    .ToDictionary(p => (new WorkloadPackId(p.ResolvedPackageId), p.Version));
 
-                foreach (PackInfo expectedPack in expectedWorkloadPacks)
+                foreach (PackInfo expectedPack in expectedWorkloadPacks.Values)
                 {
                     Log?.LogMessage($"Expected workload pack, ID: {expectedPack.ResolvedPackageId}, version: {expectedPack.Version}.");
                 }
@@ -117,7 +120,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     Log?.LogMessage($"Installed feature band: {installedFeatureBand}");
                 }
 
-                IEnumerable<WorkloadPackRecord> installedWorkloadPacks = WorkloadPackRecords.Values.SelectMany(r => r);
+                IEnumerable<WorkloadPackRecord> installedWorkloadPacks = GetWorkloadPackRecords();
 
                 List<WorkloadPackRecord> packsToRemove = new List<WorkloadPackRecord>();
 
@@ -137,7 +140,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                     foreach (string dependent in sdkDependents)
                     {
-                        Log?.LogMessage($"Evaluating dependent for workload pack, dependent: {dependent}, pack ID: {packRecord.PackId}, pack version: {packRecord.PackVersion}");
+                        Log?.LogMessage($"Evaluating dependent for workload pack, dependent: {dependent}, MSI ID: {packRecord.MsiId}, MSI version: {packRecord.MsiNuGetVersion}");
 
                         // Dependents created by the SDK should have 3 parts, for example, "Microsoft.NET.Sdk,6.0.100,x86".
                         string[] dependentParts = dependent.Split(',');
@@ -161,11 +164,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             if (dependentFeatureBand.Equals(_sdkFeatureBand))
                             {
                                 // If the current SDK feature band is listed as a dependent, we can validate
-                                // the workload pack against the expected pack IDs and versions to potentially remove it.
-                                if (!expectedWorkloadPacks.Where(p => packRecord.PackId.ToString().Equals(p.ResolvedPackageId))
-                                    .Where(p => p.Version.Equals(packRecord.PackVersion.ToString())).Any())
+                                // the workload packs against the expected pack IDs and versions to potentially remove it.
+                                if (packRecord.InstalledPacks.All(p => !expectedWorkloadPacks.ContainsKey((p.id, p.version.ToString()))))
                                 {
-                                    Log?.LogMessage($"Removing dependent '{dependent}' because the pack record does not match any expected packs.");
+                                    //  None of the packs installed by this MSI are necessary any longer for this feature band, so we can remove the reference count
+                                    Log?.LogMessage($"Removing dependent '{dependent}' because the pack record(s) do not match any expected packs.");
                                     UpdateDependent(InstallRequestType.RemoveDependent, depProvider.ProviderKeyName, dependent);
                                 }
                             }
@@ -184,7 +187,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                     if (remainingDependents.Any())
                     {
-                        Log?.LogMessage($"{packRecord.PackId} ({packRecord.PackVersion}) will not be removed because other dependents remain: {string.Join(", ", remainingDependents)}.");
+                        Log?.LogMessage($"{packRecord.MsiId} ({packRecord.MsiNuGetVersion}) will not be removed because other dependents remain: {string.Join(", ", remainingDependents)}.");
                     }
                     else
                     {
@@ -203,8 +206,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     if (state == DetectState.Present)
                     {
                         // Manually construct the MSI payload package details
-                        string id = $"{record.PackId}.Msi.{HostArchitecture}";
-                        MsiPayload msi = GetCachedMsiPayload(id, record.PackVersion.ToString(), offlineCache);
+                        string id = $"{record.MsiId}.Msi.{HostArchitecture}";
+                        MsiPayload msi = GetCachedMsiPayload(id, record.MsiNuGetVersion.ToString(), offlineCache);
 
                         // Make sure the package we have in the cache matches with the record. If it doesn't, we'll do the uninstall
                         // the hard way
@@ -234,13 +237,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public InstallationUnit GetInstallationUnit() => InstallationUnit.Packs;
 
-        public IEnumerable<(WorkloadPackId, string)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
+        public IEnumerable<(WorkloadPackId Id, string Version)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
         {
             string dependent = $"{DependentPrefix},{sdkFeatureBand},{HostArchitecture}";
 
-            return WorkloadPackRecords.Values.SelectMany(packRecord => packRecord)
+            return GetWorkloadPackRecords()
                 .Where(packRecord => new DependencyProvider(packRecord.ProviderKeyName).Dependents.Contains(dependent))
-                .Select(packRecord => (packRecord.PackId, packRecord.PackVersion.ToString()));
+                .SelectMany(packRecord => packRecord.InstalledPacks)
+                .Select(p => (p.id, p.version.ToString()));
         }
 
         public IWorkloadPackInstaller GetPackInstaller() => this;
@@ -846,6 +850,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         /// <param name="packageSourceLocation"></param>
         /// <returns></returns>
         public static NetSdkMsiInstallerClient Create(
+            bool verifySignatures,
             SdkFeatureBand sdkFeatureBand,
             IWorkloadResolver workloadResolver,
             INuGetPackageDownloader nugetPackageDownloader = null,
@@ -867,7 +872,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     new NullLogger(), restoreActionConfig: restoreActionConfig);
             }
 
-            return new NetSdkMsiInstallerClient(elevationContext, logger, workloadResolver, sdkFeatureBand, nugetPackageDownloader,
+            return new NetSdkMsiInstallerClient(elevationContext, logger, verifySignatures, workloadResolver, sdkFeatureBand, nugetPackageDownloader,
                 verbosity, packageSourceLocation, reporter);
         }
 

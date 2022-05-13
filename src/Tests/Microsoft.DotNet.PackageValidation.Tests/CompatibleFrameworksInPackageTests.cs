@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             TestProject testProject = new()
             {
                 Name = name,
-                TargetFrameworks = "netstandard2.0;net5.0",
+                TargetFrameworks = $"netstandard2.0;{ToolsetInfo.CurrentTargetFramework}",
             };
 
             string sourceCode = @"
@@ -45,12 +45,12 @@ namespace PackageValidationTests
             PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
-            Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null);
+            Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null, testProject.Name);
             new CompatibleFrameworkInPackageValidator(string.Empty, null, false, _log, null).Validate(package);
             Assert.NotEmpty(_log.errors);
             // TODO: add asserts for assembly and header metadata.
             string assemblyName = $"{asset.TestProject.Name}.dll";
-            Assert.Contains($"CP0002 Member 'PackageValidationTests.First.test(string)' exists on lib/netstandard2.0/{assemblyName} but not on lib/net5.0/{assemblyName}", _log.errors);
+            Assert.Contains($"CP0002 Member 'PackageValidationTests.First.test(string)' exists on lib/netstandard2.0/{assemblyName} but not on lib/{ToolsetInfo.CurrentTargetFramework}/{assemblyName}", _log.errors);
         }
         
         [Fact]
@@ -60,7 +60,7 @@ namespace PackageValidationTests
             TestProject testProject = new()
             {
                 Name = name,
-                TargetFrameworks = "netstandard2.0;netcoreapp3.1;net5.0",
+                TargetFrameworks = $"netstandard2.0;netcoreapp3.1;{ToolsetInfo.CurrentTargetFramework}",
             };
 
             string sourceCode = @"
@@ -83,14 +83,14 @@ namespace PackageValidationTests
             PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
-            Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null);
+            Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null, testProject.Name);
             new CompatibleFrameworkInPackageValidator(string.Empty, null, false, _log, null).Validate(package);
             Assert.NotEmpty(_log.errors);
 
             string assemblyName = $"{asset.TestProject.Name}.dll";
             // TODO: add asserts for assembly and header metadata.
             Assert.Contains($"CP0002 Member 'PackageValidationTests.First.test(string)' exists on lib/netstandard2.0/{assemblyName} but not on lib/netcoreapp3.1/{assemblyName}", _log.errors);
-            Assert.Contains($"CP0002 Member 'PackageValidationTests.First.test(bool)' exists on lib/netcoreapp3.1/{assemblyName} but not on lib/net5.0/{assemblyName}", _log.errors);
+            Assert.Contains($"CP0002 Member 'PackageValidationTests.First.test(bool)' exists on lib/netcoreapp3.1/{assemblyName} but not on lib/{ToolsetInfo.CurrentTargetFramework}/{assemblyName}", _log.errors);
         }
     }
 }

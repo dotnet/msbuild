@@ -129,4 +129,7 @@
   <data name="WasmToolsDescription" xml:space="preserve">
     <value>.NET WebAssembly build tools</value>
   </data>
+  <data name="SkipSignCheckInvalidOption" xml:space="preserve">
+    <value>Unable to bypass signature verification. The specified option conflicts with a global policy.</value>
+  </data>
 </root>
