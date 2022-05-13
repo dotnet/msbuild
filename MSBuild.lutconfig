@@ -1,0 +1,7 @@
+<LUTConfig Version="1.0">
+  <Repository />
+  <ParallelBuilds>true</ParallelBuilds>
+  <ParallelTestRuns>true</ParallelTestRuns>
+  <EnablePdbs>true</EnablePdbs>
+  <TestCaseTimeout>180000</TestCaseTimeout>
+</LUTConfig>

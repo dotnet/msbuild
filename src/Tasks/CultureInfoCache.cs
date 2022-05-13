@@ -921,4 +921,3 @@ namespace Microsoft.Build.Tasks
 #endif
     }
 }
-

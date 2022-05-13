@@ -3646,6 +3646,44 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
+        [Theory]
+        [InlineData("easycase")]
+        [InlineData("")]
+        [InlineData("\"\n()\tsdfIR$%#*;==")]
+        public void TestBase64Conversion(string testCase)
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new();
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new(pg, FileSystems.Default);
+            string intermediate = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertToBase64('{testCase}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
+            intermediate.Trim('=').All(c => char.IsLetterOrDigit(c) || c == '+' || c == '/').ShouldBeTrue();
+            string original = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertFromBase64('{intermediate}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
+            original.ShouldBe(testCase);
+        }
+
+        [Theory]
+        [InlineData("easycase", "ZWFzeWNhc2U=")]
+        [InlineData("", "")]
+        [InlineData("\"\n()\tsdfIR$%#*;==", "IgooKQlzZGZJUiQlIyo7PT0=")]
+        public void TestExplicitToBase64Conversion(string plaintext, string base64)
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new();
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new(pg, FileSystems.Default);
+            string intermediate = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertToBase64('{plaintext}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
+            intermediate.ShouldBe(base64);
+        }
+
+        [Theory]
+        [InlineData("easycase", "ZWFzeWNhc2U=")]
+        [InlineData("", "")]
+        [InlineData("\"\n()\tsdfIR$%#*;==", "IgooKQlzZGZJUiQlIyo7PT0=")]
+        public void TestExplicitFromBase64Conversion(string plaintext, string base64)
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new();
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new(pg, FileSystems.Default);
+            string original = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertFromBase64('{base64}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
+            original.ShouldBe(plaintext);
+        }
+
         /// <summary>
         /// A whole bunch error check tests
         /// </summary>
