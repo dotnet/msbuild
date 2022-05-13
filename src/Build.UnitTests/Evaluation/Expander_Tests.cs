@@ -3483,8 +3483,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(String.Empty, result);
         }
 
-#if FEATURE_WIN32_REGISTRY
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void PropertyFunctionGetRegitryValue()
         {
             try
@@ -3508,6 +3509,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void PropertyFunctionGetRegitryValueDefault()
         {
             try
@@ -3531,6 +3534,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void PropertyFunctionGetRegistryValueFromView1()
         {
             try
@@ -3554,6 +3559,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void PropertyFunctionGetRegistryValueFromView2()
         {
             try
@@ -3575,7 +3582,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Registry.CurrentUser.DeleteSubKey(@"Software\Microsoft\MSBuild_test");
             }
         }
-#endif
 
         /// <summary>
         /// Expand a property function that references item metadata
