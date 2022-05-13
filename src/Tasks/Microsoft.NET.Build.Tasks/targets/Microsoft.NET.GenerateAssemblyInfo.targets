@@ -106,8 +106,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       <AssemblyAttribute Include="System.Resources.NeutralResourcesLanguageAttribute" Condition="'$(NeutralLanguage)' != '' and '$(GenerateNeutralResourcesLanguageAttribute)' == 'true'">
         <_Parameter1>$(NeutralLanguage)</_Parameter1>
       </AssemblyAttribute>
-      <InternalsVisibleTo Update="@(InternalsVisibleTo)" Condition="'%(PublicKey)' != '' and '%(Key)' == ''">
-        <Key>%(PublicKey)</Key>
+      <InternalsVisibleTo Condition="'%(InternalsVisibleTo.PublicKey)' != ''">
+        <Key>%(InternalsVisibleTo.PublicKey)</Key>
       </InternalsVisibleTo>
       <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo" Condition="%(InternalsVisibleTo.Identity) != '' and '$(GenerateInternalsVisibleToAttributes)' == 'true'">
         <_Parameter1 Condition="'%(InternalsVisibleTo.Key)' != ''">%(InternalsVisibleTo.Identity), PublicKey=%(InternalsVisibleTo.Key)</_Parameter1>
