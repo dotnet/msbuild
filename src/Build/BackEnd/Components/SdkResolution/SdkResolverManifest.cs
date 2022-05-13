@@ -1,5 +1,7 @@
 ﻿using Microsoft.Build.Shared;
+using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 #nullable disable
@@ -15,18 +17,36 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
         }
 
-        public SdkResolverManifest(string name, string path, string namePattern)
+        public SdkResolverManifest(string name, string path, Regex resolvableSdkPattern)
         {
             Name = name;
             Path = path;
-            NamePattern = namePattern;
+            ResolvableSdkRegex = resolvableSdkPattern;
         }
 
-        internal string Name { get; set; }
+        /// <summary>
+        /// Sdk resolver manifest name.
+        /// </summary>
+        public string Name { get; set; }
 
-        internal string Path { get; set; }
+        /// <summary>
+        /// Path for resolvers dll location.
+        /// </summary>
+        public string Path { get; set; }
 
-        internal string NamePattern { get; set; }
+        /// <summary>
+        /// Regex which matches all the sdk names that could be resolved by the resolvers associated with given manifest.  
+        /// </summary>
+        public Regex ResolvableSdkRegex { get; set; }
+
+        /// <summary>
+        /// The time-out interval for the name pattern regex in milliseconds.
+        /// </summary>
+        /// <remarks>
+        /// This number should notify us when the name matching regex executes unreasonable amount of time (for example, have an infinite recursive regex expression).
+        /// One should avoid to put such a regex into a resolver's xml and we want to catch this situation early. Half a second seems to be a reasonable time in which regex should finish.
+        /// </remarks>
+        private const int SdkResolverPatternRegexTimeoutMsc = 500;
 
         /// <summary>
         /// Deserialize the file into an SdkResolverManifest.
@@ -50,7 +70,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     if (reader.NodeType == XmlNodeType.Element && reader.Name == "SdkResolver")
                     {
-                        return ParseSdkResolverElement(reader);
+                        return ParseSdkResolverElement(reader, filePath);
                     }
                     else
                     {
@@ -62,10 +82,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return null;
         }
 
-        // This parsing code is very specific and not forward compatible, but it should be all right.
-        private static SdkResolverManifest ParseSdkResolverElement(XmlReader reader)
+        // This parsing code is very specific and not forward compatible, but since resolvers generally ship in the same release vehicle as MSBuild itself, only backward compatibility is required.
+        private static SdkResolverManifest ParseSdkResolverElement(XmlReader reader, string filePath)
         {
             SdkResolverManifest manifest = new SdkResolverManifest();
+            manifest.Name = filePath;
 
             reader.Read();
             while (!reader.EOF)
@@ -79,8 +100,16 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                                 case "Path":
                                     manifest.Path = reader.ReadElementContentAsString();
                                     break;
-                                case "NamePattern":
-                                    manifest.NamePattern = reader.ReadElementContentAsString();
+                                case "ResolvableSdkPattern":
+                                    string pattern = reader.ReadElementContentAsString();
+                                    try
+                                    {
+                                        manifest.ResolvableSdkRegex = new Regex(pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(SdkResolverPatternRegexTimeoutMsc));
+                                    }
+                                    catch (ArgumentException ex)
+                                    {
+                                        ErrorUtilities.ThrowInternalError("A regular expression parsing error occurred while parsing {0}. Error message: {1}", filePath, ex.Message);
+                                    }
                                     break;
                                 default:
                                     throw new XmlException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedElement", reader.Name));

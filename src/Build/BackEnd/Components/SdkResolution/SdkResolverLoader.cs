@@ -43,7 +43,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return resolvers.OrderBy(t => t.Priority).ToList();
         }
 
-        internal virtual IList<SdkResolver> LoadResolvers(LoggingContext loggingContext,
+        internal virtual IList<SdkResolver> LoadAllResolvers(LoggingContext loggingContext,
             ElementLocation location)
         {
             var resolvers = !String.Equals(IncludeDefaultResolver, "false", StringComparison.OrdinalIgnoreCase) ?
@@ -165,7 +165,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             {
                 // <SdkResolver>
                 //   <Path>...</Path>
-                //   <NamePattern>(Optional field)</NamePattern>
+                //   <ResolvableSdkPattern>(Optional field)</ResolvableSdkPattern>
                 // </SdkResolver>
                 manifest = SdkResolverManifest.Load(pathToManifest);
 
@@ -202,7 +202,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
             if (string.IsNullOrEmpty(assemblyPath) || !FileUtilities.FileExistsNoThrow(assemblyPath)) return false;
 
-            manifestsList.Add(new SdkResolverManifest(null, assemblyPath, null));
+            manifestsList.Add(new SdkResolverManifest(assemblyPath, assemblyPath, null));
             return true;
         }
 
@@ -223,7 +223,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 #endif
         }
 
-        protected internal virtual IList<SdkResolver> LoadResolvers(SdkResolverManifest manifest, LoggingContext loggingContext, ElementLocation location)
+        protected internal virtual IList<SdkResolver> LoadResolversFromManifest(SdkResolverManifest manifest, LoggingContext loggingContext, ElementLocation location)
         {
             var resolvers = new List<SdkResolver>();
             LoadResolvers(manifest.Path, loggingContext, location, resolvers);

@@ -54,14 +54,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         private Dictionary<SdkResolverManifest, IList<SdkResolver>> _resolversDict;
 
         /// <summary>
-        /// Stores the list of manifests of SDK resolvers which could be loaded.
+        /// Stores the list of manifests of specific SDK resolvers which could be loaded.
         /// </summary>
-        private IList<SdkResolverManifest> _resolversManifestsRegistry;
+        private IList<SdkResolverManifest> _specificResolversManifestsRegistry;
 
         /// <summary>
-        /// The time-out interval for the name pattern regex in milliseconds.
+        /// Stores the list of manifests of general SDK resolvers which could be loaded.
         /// </summary>
-        private const int ResolverNamePatternRegexTimeoutMsc = 500;
+        private IList<SdkResolverManifest> _generalResolversManifestsRegistry;
 
         /// <summary>
         /// Stores an <see cref="SdkResolverLoader"/> which can load registered SDK resolvers.
@@ -130,17 +130,29 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// </remarks>
         private SdkResult ResolveSdkUsingResolversWithPatternsFirst(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
         {
-            if (_resolversManifestsRegistry == null)
+            if (_specificResolversManifestsRegistry == null || _generalResolversManifestsRegistry == null)
             {
                 RegisterResolversManifests(loggingContext, sdkReferenceLocation);
             }
 
             // Pick up the matching specific resolvers from the list of resolvers.
-            List<SdkResolverManifest> matchingResolversManifests = _resolversManifestsRegistry
-                .Where(r => !string.IsNullOrEmpty(r.NamePattern) && Regex.IsMatch(sdk.Name, r.NamePattern, RegexOptions.None, TimeSpan.FromMilliseconds(ResolverNamePatternRegexTimeoutMsc)))
-                .ToList();
+            List<SdkResolverManifest> matchingResolversManifests = new();
+            foreach (SdkResolverManifest manifest in _specificResolversManifestsRegistry)
+            {
+                try
+                {
+                    if (manifest.ResolvableSdkRegex.IsMatch(sdk.Name))
+                    {
+                        matchingResolversManifests.Add(manifest);
+                    }
+                }
+                catch (RegexMatchTimeoutException ex)
+                {
+                    ErrorUtilities.ThrowInternalError("Regular expression parsing exceeds timeout for manifest {0}. Error message: {1}", manifest.Name, ex.Message);
+                }
+            }
 
-            List<SdkResolver> resolvers = new List<SdkResolver>();
+            List<SdkResolver> resolvers;
             SdkResult sdkResult;
             if (matchingResolversManifests.Count != 0)
             {
@@ -165,7 +177,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             // Second pass: fallback to general resolvers. 
             resolvers = GetResolvers(
-                _resolversManifestsRegistry.Where(r => string.IsNullOrEmpty(r.NamePattern)).ToList(),
+                _generalResolversManifestsRegistry,
                 loggingContext,
                 sdkReferenceLocation).ToList();
 
@@ -201,8 +213,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                         if (!_resolversDict.ContainsKey(resolverManifest))
                         {
                             // Loading of the needed resolvers.
-                            IList<SdkResolver> newResolvers = _sdkResolverLoader.LoadResolvers(resolverManifest, loggingContext, sdkReferenceLocation);
+                            MSBuildEventSource.Log.SdkResolverServiceLoadResolversStart();
+                            IList<SdkResolver> newResolvers = _sdkResolverLoader.LoadResolversFromManifest(resolverManifest, loggingContext, sdkReferenceLocation);
                             _resolversDict[resolverManifest] = newResolvers;
+                            MSBuildEventSource.Log.SdkResolverServiceLoadResolversStop(newResolvers.Count);
                         }
                     }
                 }
@@ -332,7 +346,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 _sdkResolverLoader = resolverLoader;
             }
 
-            _resolversManifestsRegistry = null;
+            _specificResolversManifestsRegistry = null;
+            _generalResolversManifestsRegistry = null;
             _resolversDict = null;
             _resolversList = null;
 
@@ -340,10 +355,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             {
                 if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
                 {
-                    _resolversManifestsRegistry = new List<SdkResolverManifest>();
+                    _specificResolversManifestsRegistry = new List<SdkResolverManifest>();
+                    _generalResolversManifestsRegistry = new List<SdkResolverManifest>();
                     _resolversDict = new Dictionary<SdkResolverManifest, IList<SdkResolver>>();
-                    SdkResolverManifest sdkResolverManifest = new SdkResolverManifest("TestResolvers", null, ".*");
-                    _resolversManifestsRegistry.Add(sdkResolverManifest);
+
+                    SdkResolverManifest sdkResolverManifest = new SdkResolverManifest("TestResolversManifest", null, null);
+                    _generalResolversManifestsRegistry.Add(sdkResolverManifest);
                     _resolversDict[sdkResolverManifest] = resolvers;
                 }
                 else
@@ -397,7 +414,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 }
 
                 MSBuildEventSource.Log.SdkResolverServiceInitializeStart();
-                _resolversList = _sdkResolverLoader.LoadResolvers(loggingContext, location);
+                _resolversList = _sdkResolverLoader.LoadAllResolvers(loggingContext, location);
                 MSBuildEventSource.Log.SdkResolverServiceInitializeStop(_resolversList.Count);
             }
         }
@@ -406,18 +423,34 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
             lock (_lockObject)
             {
-                if (_resolversManifestsRegistry != null)
+                if (_specificResolversManifestsRegistry != null && _generalResolversManifestsRegistry != null)
                 {
                     return;
                 }
 
-                _resolversManifestsRegistry = _sdkResolverLoader.GetResolversManifests(loggingContext, location);
-                _resolversDict = new Dictionary<SdkResolverManifest, IList<SdkResolver>>();
-
+                MSBuildEventSource.Log.SdkResolverServiceFindResolversManifestsStart();
+                var allResolversManifests = _sdkResolverLoader.GetResolversManifests(loggingContext, location);
                 IList<SdkResolver> defaultResolvers = _sdkResolverLoader.LoadDefaultResolvers(loggingContext, location);
-                SdkResolverManifest sdkResolverManifest = new SdkResolverManifest("Default Resolvers", null, null);
-                _resolversManifestsRegistry.Add(sdkResolverManifest);
+                SdkResolverManifest sdkResolverManifest = new SdkResolverManifest("DefaultResolversManifest", null, null);
+                allResolversManifests.Add(sdkResolverManifest);
+
+                _resolversDict = new Dictionary<SdkResolverManifest, IList<SdkResolver>>();
                 _resolversDict[sdkResolverManifest] = defaultResolvers;
+
+                _specificResolversManifestsRegistry = new List<SdkResolverManifest>();
+                _generalResolversManifestsRegistry = new List<SdkResolverManifest>();
+                foreach (SdkResolverManifest manifest in allResolversManifests)
+                {
+                    if (manifest.ResolvableSdkRegex == null)
+                    {
+                        _generalResolversManifestsRegistry.Add(manifest);
+                    }
+                    else
+                    {
+                        _specificResolversManifestsRegistry.Add(manifest);
+                    }
+                }
+                MSBuildEventSource.Log.SdkResolverServiceFindResolversManifestsStop(allResolversManifests.Count);
             }
         }
 
@@ -430,7 +463,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     submissionId,
                     _ => new ConcurrentDictionary<SdkResolver, object>(
                         NativeMethodsShared.GetLogicalCoreCount(),
-                        ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4) ? _resolversManifestsRegistry.Count : _resolversList.Count));
+                        ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4) ? _specificResolversManifestsRegistry.Count + _generalResolversManifestsRegistry.Count : _resolversList.Count));
 
                 resolverState.AddOrUpdate(resolver, state, (sdkResolver, obj) => state);
             }
