@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.CommandLine.Completions;
 using System.CommandLine.Parsing;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
@@ -10,12 +11,19 @@ namespace Microsoft.DotNet.Cli
 {
     public class CompleteCommand
     {
-        public static int Run(string[] args)
+        public static int Run(ParseResult parseResult)
         {
-            return RunWithReporter(args, Reporter.Output);
+            return RunWithReporter(parseResult, Reporter.Output);
         }
 
-        public static int RunWithReporter(string [] args, IReporter reporter)
+        public static int RunWithReporter(string[] args, IReporter reporter)
+        {
+            var parser = Parser.Instance;
+            var result = parser.ParseFrom("dotnet complete", args);
+            return RunWithReporter(result, reporter);
+        }
+
+        public static int RunWithReporter(ParseResult result, IReporter reporter)
         {
             if (reporter == null)
             {
@@ -24,19 +32,13 @@ namespace Microsoft.DotNet.Cli
 
             try
             {
-                DebugHelper.HandleDebugSwitch(ref args);
+                result.HandleDebugSwitch();
 
-                // get the parser for the current subcommand
-                var parser = Parser.Instance;
+                var completions = Completions(result);
 
-                // parse the arguments
-                var result = parser.ParseFrom("dotnet complete", args);
-
-                var suggestions = Suggestions(result);
-
-                foreach (var suggestion in suggestions)
+                foreach (var completion in completions)
                 {
-                    reporter.WriteLine(suggestion);
+                    reporter.WriteLine(completion.Label);
                 }
             }
             catch (Exception)
@@ -47,11 +49,11 @@ namespace Microsoft.DotNet.Cli
             return 0;
         }
 
-        private static string[] Suggestions(ParseResult complete)
+        private static CompletionItem[] Completions(ParseResult complete)
         {
-            var input = complete.ValueForArgument(CompleteCommandParser.PathArgument) ?? string.Empty;
+            var input = complete.GetValueForArgument(CompleteCommandParser.PathArgument) ?? string.Empty;
 
-            var position = complete.ValueForOption(CompleteCommandParser.PositionOption);
+            var position = complete.GetValueForOption(CompleteCommandParser.PositionOption);
 
             if (position > input.Length)
             {
@@ -60,7 +62,7 @@ namespace Microsoft.DotNet.Cli
 
             var result = Parser.Instance.Parse(input);
 
-            return result.GetSuggestions(position)
+            return result.GetCompletions(position)
                 .Distinct()
                 .ToArray();
         }

@@ -3,13 +3,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.DotNet.PackageValidation;
 using Microsoft.NET.Build.Tasks;
 using NuGet.RuntimeModel;
+#if NETCOREAPP
+using System.Runtime.Loader;
+#endif
 
 namespace Microsoft.DotNet.Compatibility
 {
@@ -20,6 +22,8 @@ namespace Microsoft.DotNet.Compatibility
 
         [Required]
         public string RoslynAssembliesPath { get; set; }
+
+        public string AssemblyName { get; set; }
 
         public string RuntimeGraph { get; set; }
 
@@ -43,14 +47,23 @@ namespace Microsoft.DotNet.Compatibility
 
         public override bool Execute()
         {
+#if NETCOREAPP
+            AssemblyLoadContext currentContext = AssemblyLoadContext.GetLoadContext(Assembly.GetExecutingAssembly());
+            currentContext.Resolving += ResolverForRoslyn;
+#else
             AppDomain.CurrentDomain.AssemblyResolve += ResolverForRoslyn;
+#endif
             try
             {
                 return base.Execute();
             }
             finally
             {
+#if NETCOREAPP
+                currentContext.Resolving -= ResolverForRoslyn;
+#else
                 AppDomain.CurrentDomain.AssemblyResolve -= ResolverForRoslyn;
+#endif
             }
         }
 
@@ -85,7 +98,7 @@ namespace Microsoft.DotNet.Compatibility
                 }
             }
 
-            Package package = NupkgParser.CreatePackage(PackageTargetPath, runtimeGraph);
+            Package package = NupkgParser.CreatePackage(PackageTargetPath, runtimeGraph, AssemblyName);
             CompatibilityLogger logger = new(Log, CompatibilitySuppressionFilePath, GenerateCompatibilitySuppressionFile);
 
             new CompatibleTfmValidator(NoWarn, null, RunApiCompat, EnableStrictModeForCompatibleTfms, logger, apiCompatReferences).Validate(package);
@@ -93,7 +106,7 @@ namespace Microsoft.DotNet.Compatibility
 
             if (!DisablePackageBaselineValidation && !string.IsNullOrEmpty(BaselinePackageTargetPath))
             {
-                Package baselinePackage = NupkgParser.CreatePackage(BaselinePackageTargetPath, runtimeGraph);
+                Package baselinePackage = NupkgParser.CreatePackage(BaselinePackageTargetPath, runtimeGraph, AssemblyName);
                 new BaselinePackageValidator(baselinePackage, NoWarn, null, RunApiCompat, logger, apiCompatReferences).Validate(package);
             }
 
@@ -103,19 +116,41 @@ namespace Microsoft.DotNet.Compatibility
             }
         }
 
+#if NETCOREAPP
+        private Assembly ResolverForRoslyn(AssemblyLoadContext context, AssemblyName assemblyName)
+        {
+            return LoadRoslyn(assemblyName, path => context.LoadFromAssemblyPath(path));
+        }
+#else
         private Assembly ResolverForRoslyn(object sender, ResolveEventArgs args)
         {
             AssemblyName name = new(args.Name);
-            if (name.Name == "Microsoft.CodeAnalysis" || name.Name == "Microsoft.CodeAnalysis.CSharp")
+            return LoadRoslyn(name, path => Assembly.LoadFrom(path));
+        }
+#endif
+
+        private Assembly LoadRoslyn(AssemblyName name, Func<string, Assembly> loadFromPath)
+        {
+            const string codeAnalysisName = "Microsoft.CodeAnalysis";
+            const string codeAnalysisCsharpName = "Microsoft.CodeAnalysis.CSharp";
+            if (name.Name == codeAnalysisName || name.Name == codeAnalysisCsharpName)
             {
-                Assembly asm = Assembly.LoadFrom(Path.Combine(RoslynAssembliesPath, $"{name.Name}.dll"));
-                Version version = asm.GetName().Version;
-                if (version < name.Version)
+                Assembly asm = loadFromPath(Path.Combine(RoslynAssembliesPath, $"{name.Name}.dll"));
+                Version resolvedVersion = asm.GetName().Version;
+                if (resolvedVersion < name.Version)
                 {
-                    throw new Exception(string.Format(Resources.UpdateSdkVersion, version, name.Version));
+                    throw new Exception(string.Format(Resources.UpdateSdkVersion, resolvedVersion, name.Version));
                 }
+
+                // Being extra defensive but we want to avoid that we accidentally load two different versions of either
+                // of the roslyn assemblies from a different location, so let's load them both on the first request.
+                Assembly _ = name.Name == codeAnalysisName ?
+                    loadFromPath(Path.Combine(RoslynAssembliesPath, $"{codeAnalysisCsharpName}.dll")) :
+                    loadFromPath(Path.Combine(RoslynAssembliesPath, $"{codeAnalysisName}.dll"));
+
                 return asm;
             }
+
             return null;
         }
     }

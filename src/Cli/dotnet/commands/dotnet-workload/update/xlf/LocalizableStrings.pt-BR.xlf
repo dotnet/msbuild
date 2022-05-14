@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="FromPreviousSdkOptionDescription">
         <source>Include workloads installed with earlier SDK versions in update.</source>
-        <target state="new">Include workloads installed with earlier SDK versions in update.</target>
+        <target state="translated">Inclua cargas de trabalho instaladas com versões anteriores do SDK na atualização.</target>
         <note />
       </trans-unit>
       <trans-unit id="FromRollbackDefinitionOptionDescription">
@@ -24,17 +24,17 @@
       </trans-unit>
       <trans-unit id="NoWorkloadsToUpdate">
         <source>No workloads installed for this feature band. To update workloads installed with earlier SDK versions, include the --from-previous-sdk option.</source>
-        <target state="new">No workloads installed for this feature band. To update workloads installed with earlier SDK versions, include the --from-previous-sdk option.</target>
+        <target state="translated">Nenhuma carga de trabalho instalada para esta faixa de recursos. Para atualizar cargas de trabalho instaladas com versões anteriores do SDK, inclua a opção --from-previous-sdk.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollBackFailedMessage">
         <source>Installation rollback failed: {0}</source>
-        <target state="new">Installation rollback failed: {0}</target>
+        <target state="translated">Falha na reversão da instalação: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RollingBackInstall">
         <source>Workload installation failed. Rolling back installed packs...</source>
-        <target state="new">Workload installation failed. Rolling back installed packs...</target>
+        <target state="translated">A instalação da carga de trabalho falhou, revertendo os pacotes instalados...</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateFailed">

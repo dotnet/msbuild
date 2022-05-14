@@ -327,7 +327,6 @@ namespace Microsoft.DotNet.Tests.Commands
             var expected = new[] {
                 "install",
                 "uninstall",
-                "--info"
             };
 
             var reporter = new BufferedReporter();

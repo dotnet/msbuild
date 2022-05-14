@@ -34,7 +34,7 @@ namespace Microsoft.NET.Publish.Tests
             var rid = RuntimeInformation.RuntimeIdentifier;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                _testArch = rid.Substring(rid.LastIndexOf("-") + 1);
+                _testArch = rid.Substring(rid.LastIndexOf("-", StringComparison.InvariantCulture) + 1);
                 _runtimeRid = "win7-" + _testArch;
             }
             else

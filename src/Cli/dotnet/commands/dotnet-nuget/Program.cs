@@ -2,12 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Linq;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.InternalAbstractions;
-using Microsoft.DotNet.Tools;
 
 namespace Microsoft.DotNet.Tools.NuGet
 {
@@ -16,6 +13,11 @@ namespace Microsoft.DotNet.Tools.NuGet
         public static int Run(string[] args)
         {
             return Run(args, new NuGetCommandRunner());
+        }
+
+        public static int Run(ParseResult parseResult)
+        {
+            return Run(parseResult.GetArguments(), new NuGetCommandRunner());
         }
 
         public static int Run(string[] args, ICommandRunner nugetCommandRunner)

@@ -20,7 +20,7 @@ using Product = Microsoft.DotNet.Cli.Utils.Product;
 
 namespace Microsoft.DotNet.Workloads.Workload.Uninstall
 {
-    internal class WorkloadUninstallCommand : CommandBase
+    internal class WorkloadUninstallCommand : WorkloadCommandBase
     {
         private readonly IReporter _reporter;
         private readonly IReadOnlyCollection<WorkloadId> _workloadIds;
@@ -38,17 +38,17 @@ namespace Microsoft.DotNet.Workloads.Workload.Uninstall
             : base(parseResult)
         {
             _reporter = reporter ?? Reporter.Output;
-            _workloadIds = parseResult.ValueForArgument<IEnumerable<string>>(WorkloadUninstallCommandParser.WorkloadIdArgument)
+            _workloadIds = parseResult.GetValueForArgument(WorkloadUninstallCommandParser.WorkloadIdArgument)
                 .Select(workloadId => new WorkloadId(workloadId)).ToList().AsReadOnly();
             var dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.ValueForOption<string>(WorkloadUninstallCommandParser.VersionOption), version, dotnetPath, userProfileDir);
-            var verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadUninstallCommandParser.VerbosityOption);
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(WorkloadUninstallCommandParser.VersionOption), version, dotnetPath, userProfileDir);
+            var verbosity = parseResult.GetValueForOption(WorkloadUninstallCommandParser.VerbosityOption);
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString(), userProfileDir);
             workloadResolver ??= WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString(), userProfileDir);
             nugetPackageDownloader ??= new NuGetPackageDownloader(new DirectoryPath(Path.GetTempPath()), filePermissionSetter: null, verboseLogger: new NullLogger());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
-            _workloadInstaller = WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, workloadResolver, verbosity, userProfileDir, nugetPackageDownloader, dotnetPath);
+            _workloadInstaller = WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, workloadResolver, verbosity, userProfileDir, VerifySignatures, nugetPackageDownloader, dotnetPath);
         }
 
         public override int Execute()

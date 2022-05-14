@@ -17,9 +17,9 @@
         <target state="translated">'dotnet 워크로드 검색'을 사용하여 설치할 추가 워크로드를 찾습니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WorkloadListHeader">
-        <source>This command lists only workloads that were installed via `dotnet workload install` in this version of the SDK and not those that were installed via Visual Studio.</source>
-        <target state="translated">이 명령은 이 버전의 SDK에서 'dotnet 워크로드 설치'를 통해 설치된 워크로드만 나열하고 Visual Studio를 통해 설치된 워크로드는 나열하지 않습니다.</target>
+      <trans-unit id="WorkloadSourceColumn">
+        <source>Installation Source</source>
+        <target state="translated">설치 원본</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">

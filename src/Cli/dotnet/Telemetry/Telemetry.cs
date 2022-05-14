@@ -15,6 +15,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
     public class Telemetry : ITelemetry
     {
         internal static string CurrentSessionId = null;
+        internal static bool DisabledForTests = false;
         private readonly int _senderCount;
         private TelemetryClient _client = null;
         private Dictionary<string, string> _commonProperties = null;
@@ -37,6 +38,12 @@ namespace Microsoft.DotNet.Cli.Telemetry
             IEnvironmentProvider environmentProvider = null,
             int senderCount = 3)
         {
+
+            if (DisabledForTests)
+            {
+                return;
+            }
+
             if (environmentProvider == null)
             {
                 environmentProvider = new EnvironmentProvider();
@@ -61,6 +68,17 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 //initialize in task to offload to parallel thread
                 _trackEventTask = Task.Run(() => InitializeTelemetry());
             }
+        }
+
+        internal static void DisableForTests()
+        {
+            DisabledForTests = true;
+            CurrentSessionId = null;
+        }
+
+        internal static void EnableForTests()
+        {
+            DisabledForTests = false;
         }
 
         private bool PermissionExists(IFirstTimeUseNoticeSentinel sentinel)

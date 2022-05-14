@@ -3,14 +3,19 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.Linq;
 using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Tools.Test;
 using LocalizableStrings = Microsoft.DotNet.Tools.Test.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class TestCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-test";
+
         public static readonly Argument<IEnumerable<string>> SlnOrProjectArgument = new Argument<IEnumerable<string>>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
         {
             Description = CommonLocalizableStrings.SolutionOrProjectArgumentDescription,
@@ -72,7 +77,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<IEnumerable<string>> CollectOption = new ForwardedOption<IEnumerable<string>>("--collect", LocalizableStrings.cmdCollectDescription)
         {
             ArgumentHelpName = LocalizableStrings.cmdCollectFriendlyName
-        }.ForwardAsSingle(o => $"-property:VSTestCollect=\"{string.Join(";", o)}\"")
+        }.ForwardAsSingle(o => $"-property:VSTestCollect=\"{string.Join(";", GetSemiColonEscapedArgs(o))}\"")
         .AllowSingleArgPerToken();
 
         public static readonly Option<bool> BlameOption = new ForwardedOption<bool>("--blame", LocalizableStrings.CmdBlameDescription)
@@ -105,11 +110,22 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<bool> NoLogoOption = new ForwardedOption<bool>("--nologo", LocalizableStrings.CmdNoLogo)
             .ForwardAs("-property:VSTestNoLogo=nologo");
 
-        public static readonly Option<bool> NoRestoreOption = CommonOptions.NoRestoreOption();
+        public static readonly Option<bool> NoRestoreOption = CommonOptions.NoRestoreOption;
+
+        public static readonly Option<string> FrameworkOption = CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription);
+
+        public static readonly Option ConfigurationOption = CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription);
+
+        private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
         {
-            var command = new Command("test", LocalizableStrings.AppFullName);
+            return Command;
+        }
+
+        private static Command ConstructCommand()
+        {
+            var command = new DocumentedCommand("test", DocsLink, LocalizableStrings.AppFullName);
 
             command.AddArgument(SlnOrProjectArgument);
 
@@ -132,14 +148,16 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(BlameHangDumpOption);
             command.AddOption(BlameHangTimeoutOption);
             command.AddOption(NoLogoOption);
-            command.AddOption(CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription));
-            command.AddOption(CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription));
-            command.AddOption(CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription, withShortOption: false));
+            command.AddOption(ConfigurationOption);
+            command.AddOption(FrameworkOption);
+            command.AddOption(CommonOptions.LongFormRuntimeOption.WithHelpDescription(command, LocalizableStrings.RuntimeOptionDescription));
             command.AddOption(NoRestoreOption);
-            command.AddOption(CommonOptions.InteractiveMsBuildForwardOption());
-            command.AddOption(CommonOptions.VerbosityOption());
-            command.AddOption(CommonOptions.ArchitectureOption(false));
-            command.AddOption(CommonOptions.OperatingSystemOption());
+            command.AddOption(CommonOptions.InteractiveMsBuildForwardOption);
+            command.AddOption(CommonOptions.VerbosityOption);
+            command.AddOption(CommonOptions.LongFormArchitectureOption);
+            command.AddOption(CommonOptions.OperatingSystemOption);
+
+            command.SetHandler(TestCommand.Run);
 
             return command;
         }

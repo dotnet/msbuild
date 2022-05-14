@@ -38,6 +38,26 @@ namespace Microsoft.DotNet.New.Tests
             cmd.Should().Pass();
         }
 
+        [Fact]
+        public void ItCanShowHelp()
+        {
+            var tempDir = _testAssetsManager.CreateTestDirectory();
+            var cmd = new DotnetCommand(Log).Execute("new", "--help");
+            cmd.Should().Pass()
+                .And.HaveStdOutContaining("Usage: new [options]");
+        }
+
+        [Fact]
+        public void ItCanShowHelpForTemplate()
+        {
+            var tempDir = _testAssetsManager.CreateTestDirectory();
+            var cmd = new DotnetCommand(Log).Execute("new", "classlib", "--help");
+            cmd.Should().Pass()
+                .And.NotHaveStdOutContaining("Usage: new [options]")
+                .And.HaveStdOutContaining("Class Library (C#)")
+                .And.HaveStdOutContaining("--framework");
+        }
+
         [Fact(Skip = "https://github.com/dotnet/templating/issues/1971")]
         public void WhenTemplateNameIsNotUniquelyMatchedThenItIndicatesProblemToUser()
         {

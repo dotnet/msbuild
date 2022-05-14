@@ -127,11 +127,14 @@ namespace Microsoft.NET.Build.Tasks
                     break;
 
                 default:
+
                     if (code != null)
                     {
-                       throw new ArgumentException(
-                           "Message is prefixed with NETSDK error, but error codes should not be used for informational messages: "
-                           + $"{code}:{message}");
+                        //  Previously we would throw an error here, but that makes it hard to allow errors to be turned off but still displayed as messages
+                        //  (which ResolveApppHosts does).  So let's just let messages have NETSDK error codes if they want to also.
+                        //throw new ArgumentException(
+                        //    "Message is prefixed with NETSDK error, but error codes should not be used for informational messages: "
+                        //    + $"{code}:{message}");
                     }
                     break;
             }

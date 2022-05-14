@@ -118,12 +118,12 @@ namespace Microsoft.AspNetCore.Razor.Tasks
 
                 if (matchPath)
                 {
-                    Log.LogMessage("Found project reference '{0}' for configuration item '{1}'.", configurationFullPath, projectReferenceFullPath);
+                    Log.LogMessage(MessageImportance.Low, "Found project reference '{0}' for configuration item '{1}'.", configurationFullPath, projectReferenceFullPath);
                     return projectReference;
                 }
                 else
                 {
-                    Log.LogMessage("Rejected project reference '{0}' for configuration item '{1}' because paths don't match.", configurationFullPath, projectReferenceFullPath);
+                    Log.LogMessage(MessageImportance.Low, "Rejected project reference '{0}' for configuration item '{1}' because paths don't match.", configurationFullPath, projectReferenceFullPath);
                 }
             }
 

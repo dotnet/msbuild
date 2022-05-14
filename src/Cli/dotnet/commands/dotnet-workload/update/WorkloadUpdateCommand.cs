@@ -24,7 +24,7 @@ using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 
 namespace Microsoft.DotNet.Workloads.Workload.Update
 {
-    internal class WorkloadUpdateCommand : CommandBase
+    internal class WorkloadUpdateCommand : WorkloadCommandBase
     {
         private readonly bool _printDownloadLinkOnly;
         private readonly string _fromCacheOption;
@@ -60,25 +60,25 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             : base(parseResult)
         {
             _printDownloadLinkOnly =
-                parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.PrintDownloadLinkOnlyOption);
-            _fromCacheOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.FromCacheOption);
+                parseResult.GetValueForOption(WorkloadUpdateCommandParser.PrintDownloadLinkOnlyOption);
+            _fromCacheOption = parseResult.GetValueForOption(WorkloadUpdateCommandParser.FromCacheOption);
             _reporter = reporter ?? Reporter.Output;
-            _includePreviews = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.IncludePreviewsOption);
-            _fromPreviousSdk = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.FromPreviousSdkOption);
-            _adManifestOnlyOption = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.AdManifestOnlyOption);
-            _downloadToCacheOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.DownloadToCacheOption);
-            _verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadUpdateCommandParser.VerbosityOption);
+            _includePreviews = parseResult.GetValueForOption(WorkloadUpdateCommandParser.IncludePreviewsOption);
+            _fromPreviousSdk = parseResult.GetValueForOption(WorkloadUpdateCommandParser.FromPreviousSdkOption);
+            _adManifestOnlyOption = parseResult.GetValueForOption(WorkloadUpdateCommandParser.AdManifestOnlyOption);
+            _downloadToCacheOption = parseResult.GetValueForOption(WorkloadUpdateCommandParser.DownloadToCacheOption);
+            _verbosity = parseResult.GetValueForOption(WorkloadUpdateCommandParser.VerbosityOption);
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.VersionOption), version, _dotnetPath, _userProfileDir);
-            _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption)) ?
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(WorkloadUpdateCommandParser.VersionOption), version, _dotnetPath, _userProfileDir);
+            _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.GetValueForOption(WorkloadUpdateCommandParser.TempDirOption)) ?
                 Path.GetTempPath() :
-                parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption));
-            _printRollbackDefinitionOnly = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.PrintRollbackOption);
-            _fromRollbackDefinition = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.FromRollbackFileOption);
+                parseResult.GetValueForOption(WorkloadUpdateCommandParser.TempDirOption));
+            _printRollbackDefinitionOnly = parseResult.GetValueForOption(WorkloadUpdateCommandParser.PrintRollbackOption);
+            _fromRollbackDefinition = parseResult.GetValueForOption(WorkloadUpdateCommandParser.FromRollbackFileOption);
 
-            var configOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.ConfigOption);
-            var sourceOption = parseResult.ValueForOption<string[]>(WorkloadUpdateCommandParser.SourceOption);
+            var configOption = parseResult.GetValueForOption(WorkloadUpdateCommandParser.ConfigOption);
+            var sourceOption = parseResult.GetValueForOption<string[]>(WorkloadUpdateCommandParser.SourceOption);
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides:  sourceOption);
 
@@ -87,9 +87,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             var restoreActionConfig = _parseResult.ToRestoreActionConfig();
             _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter,
-                sdkFeatureBand, _workloadResolver, _verbosity, _userProfileDir, nugetPackageDownloader,
+                sdkFeatureBand, _workloadResolver, _verbosity, _userProfileDir, VerifySignatures, nugetPackageDownloader,
                 dotnetDir, _tempDirPath, packageSourceLocation: _packageSourceLocation, restoreActionConfig,
-                elevationRequired: !_printDownloadLinkOnly && string.IsNullOrWhiteSpace(_downloadToCacheOption));
+                elevationRequired: !_printDownloadLinkOnly && !_printRollbackDefinitionOnly && string.IsNullOrWhiteSpace(_downloadToCacheOption));
             var tempPackagesDir = new DirectoryPath(Path.Combine(_tempDirPath, "dotnet-sdk-advertising-temp"));
             _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir,
                 filePermissionSetter: null, new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, _verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger()),
@@ -127,7 +127,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             }
             else if (_printRollbackDefinitionOnly)
             {
-                var manifests = _workloadResolver.GetInstalledManifests().ToDictionary(m => m.Id, m => m.Version, StringComparer.OrdinalIgnoreCase);
+                var manifests = _workloadResolver.GetInstalledManifests().ToDictionary(m => m.Id, m => m.Version + "/" + m.ManifestFeatureBand, StringComparer.OrdinalIgnoreCase);
 
                 _reporter.WriteLine("==workloadRollbackDefinitionJsonOutputStart==");
                 _reporter.WriteLine(JsonSerializer.Serialize(manifests));
@@ -159,7 +159,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews, offlineCache).Wait();
             
             var manifestsToUpdate = string.IsNullOrWhiteSpace(_fromRollbackDefinition) ?
-                _workloadManifestUpdater.CalculateManifestUpdates().Select(m => (m.manifestId, m.existingVersion, m.newVersion)) :
+                _workloadManifestUpdater.CalculateManifestUpdates().Select(m => m.manifestUpdate) :
                 _workloadManifestUpdater.CalculateManifestRollbacks(_fromRollbackDefinition);
 
             UpdateWorkloadsWithInstallRecord(workloadIds, featureBand, manifestsToUpdate, offlineCache);
@@ -176,7 +176,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
         private void UpdateWorkloadsWithInstallRecord(
             IEnumerable<WorkloadId> workloadIds,
             SdkFeatureBand sdkFeatureBand,
-            IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> manifestsToUpdate,
+            IEnumerable<ManifestVersionUpdate> manifestsToUpdate,
             DirectoryPath? offlineCache = null)
         {
             if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
@@ -184,45 +184,36 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 var installer = _workloadInstaller.GetPackInstaller();
                 IEnumerable<PackInfo> workloadPackToUpdate = new List<PackInfo>();
 
-                TransactionalAction.Run(
-                    action: () =>
+                var transaction = new CliTransaction();
+
+                transaction.RollbackStarted = () =>
+                {
+                    _reporter.WriteLine(LocalizableStrings.RollingBackInstall);
+                };
+                // Don't hide the original error if roll back fails, but do log the rollback failure
+                transaction.RollbackFailed = ex =>
+                {
+                    _reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, ex.Message));
+                };
+
+                transaction.Run(
+                    action: context =>
                     {
                         bool rollback = !string.IsNullOrWhiteSpace(_fromRollbackDefinition);
 
-                        foreach (var manifest in manifestsToUpdate)
+                        foreach (var manifestUpdate in manifestsToUpdate)
                         {
-                            _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.newVersion, sdkFeatureBand, offlineCache, rollback);
+                            _workloadInstaller.InstallWorkloadManifest(manifestUpdate, context, offlineCache, rollback);
                         }
 
                         _workloadResolver.RefreshWorkloadManifests();
 
                         workloadPackToUpdate = GetUpdatablePacks(installer);
 
-                        foreach (var packId in workloadPackToUpdate)
-                        {
-                            installer.InstallWorkloadPack(packId, sdkFeatureBand, offlineCache);
-                        }
+                        installer.InstallWorkloadPacks(workloadPackToUpdate, sdkFeatureBand, context, offlineCache);
                     },
                     rollback: () => {
-                        try
-                        {
-                            _reporter.WriteLine(LocalizableStrings.RollingBackInstall);
-
-                            foreach (var manifest in manifestsToUpdate)
-                            {
-                                _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.existingVersion, sdkFeatureBand, offlineCache: null, isRollback: true);
-                            }
-
-                            foreach (var packId in workloadPackToUpdate)
-                            {
-                                installer.RollBackWorkloadPackInstall(packId, sdkFeatureBand);
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            // Don't hide the original error if roll back fails
-                            _reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, e.Message));
-                        }
+                        //  Nothing to roll back at this level, InstallWorkloadManifest and InstallWorkloadPacks handle the transaction rollback
                     });
             }
             else

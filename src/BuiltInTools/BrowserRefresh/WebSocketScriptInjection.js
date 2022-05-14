@@ -133,7 +133,7 @@ setTimeout(async function () {
     let applyFailed = false;
     deltas.forEach(d => {
       try {
-        window.Blazor._internal.applyHotReload(d.moduleId, d.metadataDelta, d.ilDelta)
+        window.Blazor._internal.applyHotReload(d.moduleId, d.metadataDelta, d.ilDelta, d.pdbDelta)
       } catch (error) {
         console.warn(error);
         applyFailed = true;

@@ -48,14 +48,14 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             IReporter reporter = null)
             : base(parseResult)
         {
-            _packageId = new PackageId(parseResult.ValueForArgument<string>(ToolUninstallCommandParser.PackageIdArgument));
-            _configFilePath = parseResult.ValueForOption<string>(ToolUpdateCommandParser.ConfigOption);
-            _framework = parseResult.ValueForOption<string>(ToolUpdateCommandParser.FrameworkOption);
-            _additionalFeeds = parseResult.ValueForOption<string[]>(ToolUpdateCommandParser.AddSourceOption);
-            _packageVersion = parseResult.ValueForOption<string>(ToolUpdateCommandParser.VersionOption);
-            _global = parseResult.ValueForOption<bool>(ToolUpdateCommandParser.GlobalOption);
-            _verbosity = Enum.GetName(parseResult.ValueForOption<VerbosityOptions>(ToolUpdateCommandParser.VerbosityOption));
-            _toolPath = parseResult.ValueForOption<string>(ToolUpdateCommandParser.ToolPathOption);
+            _packageId = new PackageId(parseResult.GetValueForArgument(ToolUninstallCommandParser.PackageIdArgument));
+            _configFilePath = parseResult.GetValueForOption(ToolUpdateCommandParser.ConfigOption);
+            _framework = parseResult.GetValueForOption(ToolUpdateCommandParser.FrameworkOption);
+            _additionalFeeds = parseResult.GetValueForOption(ToolUpdateCommandParser.AddSourceOption);
+            _packageVersion = parseResult.GetValueForOption(ToolUpdateCommandParser.VersionOption);
+            _global = parseResult.GetValueForOption(ToolUpdateCommandParser.GlobalOption);
+            _verbosity = Enum.GetName(parseResult.GetValueForOption(ToolUpdateCommandParser.VerbosityOption));
+            _toolPath = parseResult.GetValueForOption(ToolUpdateCommandParser.ToolPathOption);
             _forwardRestoreArguments = parseResult.OptionValuesToBeForwarded(ToolUpdateCommandParser.GetCommand());
 
             _createToolPackageStoreInstallerUninstaller = createToolPackageStoreInstallerUninstaller ??

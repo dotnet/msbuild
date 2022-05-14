@@ -19,7 +19,7 @@ using NuGet.Common;
 
 namespace Microsoft.DotNet.Workloads.Workload.Repair
 {
-    internal class WorkloadRepairCommand : CommandBase
+    internal class WorkloadRepairCommand : WorkloadCommandBase
     {
         private readonly IReporter _reporter;
         private readonly PackageSourceLocation _packageSourceLocation;
@@ -42,22 +42,22 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
             : base(parseResult)
         {
             _reporter = reporter ?? Reporter.Output;
-            _verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadRepairCommandParser.VerbosityOption);
+            _verbosity = parseResult.GetValueForOption(WorkloadRepairCommandParser.VerbosityOption);
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.ValueForOption<string>(WorkloadRepairCommandParser.VersionOption), version, _dotnetPath, userProfileDir);
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(WorkloadRepairCommandParser.VersionOption), version, _dotnetPath, userProfileDir);
 
-            var configOption = parseResult.ValueForOption<string>(WorkloadRepairCommandParser.ConfigOption);
-            var sourceOption = parseResult.ValueForOption<string[]>(WorkloadRepairCommandParser.SourceOption);
+            var configOption = parseResult.GetValueForOption(WorkloadRepairCommandParser.ConfigOption);
+            var sourceOption = parseResult.GetValueForOption(WorkloadRepairCommandParser.SourceOption);
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides: sourceOption);
 
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString(), userProfileDir);
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, _sdkVersion.ToString(), userProfileDir);
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
-            tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadInstallCommandParser.TempDirOption)) ?
+            tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.GetValueForOption(WorkloadInstallCommandParser.TempDirOption)) ?
                 Path.GetTempPath() :
-                parseResult.ValueForOption<string>(WorkloadInstallCommandParser.TempDirOption));
+                parseResult.GetValueForOption(WorkloadInstallCommandParser.TempDirOption));
             var tempPackagesDir = new DirectoryPath(Path.Combine(tempDirPath, "dotnet-sdk-advertising-temp"));
             NullLogger nullLogger = new NullLogger();
             nugetPackageDownloader ??= new NuGetPackageDownloader(
@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
                 new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, nullLogger), nullLogger, restoreActionConfig: _parseResult.ToRestoreActionConfig());
             _workloadInstaller = workloadInstaller ??
                                  WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand,
-                                     _workloadResolver, _verbosity, userProfileDir, nugetPackageDownloader, dotnetDir, tempDirPath,
+                                     _workloadResolver, _verbosity, userProfileDir, VerifySignatures, nugetPackageDownloader, dotnetDir, tempDirPath,
                                      _packageSourceLocation, _parseResult.ToRestoreActionConfig());
         }
 
@@ -121,7 +121,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
 
                 foreach (var packId in packsToInstall)
                 {
-                    installer.RepairWorkloadPack(packId, sdkFeatureBand);
+                    CliTransaction.RunNew(context => installer.RepairWorkloadPack(packId, sdkFeatureBand, context));
                 }
             }
             else

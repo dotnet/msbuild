@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Help.Tests
   .NET CLI help utility
 
 Usage:
-  dotnet [options] help [<COMMAND_NAME>]
+  dotnet help [<COMMAND_NAME>] [options]
 
 Arguments:
   <COMMAND_NAME>  The SDK command to launch online help for.

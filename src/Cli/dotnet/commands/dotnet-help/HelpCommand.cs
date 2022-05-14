@@ -4,10 +4,9 @@
 using System;
 using System.CommandLine.Parsing;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
+using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
-using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tools.Help
 {
@@ -20,16 +19,13 @@ namespace Microsoft.DotNet.Tools.Help
             _parseResult = parseResult;
         }
 
-        public static int Run(string[] args)
+        public static int Run(ParseResult result)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
-
-            var parser = Parser.Instance;
-            var result = parser.ParseFrom("dotnet help", args);
+            result.HandleDebugSwitch();
 
             result.ShowHelpOrErrorIfAppropriate();
 
-            if (!string.IsNullOrEmpty(result.ValueForArgument<string>(HelpCommandParser.Argument)))
+            if (!string.IsNullOrEmpty(result.GetValueForArgument(HelpCommandParser.Argument)))
             {
                 return new HelpCommand(result).Execute();
             }
@@ -86,12 +82,12 @@ namespace Microsoft.DotNet.Tools.Help
 
         public int Execute()
         {
-            if (BuiltInCommandsCatalog.Commands.TryGetValue(
-                _parseResult.ValueForArgument<string>(HelpCommandParser.Argument),
-                out BuiltInCommandMetadata builtIn) &&
-                !string.IsNullOrEmpty(builtIn.DocLink))
+            if (TryGetDocsLink(
+                _parseResult.GetValueForArgument(HelpCommandParser.Argument),
+                out var docsLink) &&
+                !string.IsNullOrEmpty(docsLink))
             {
-                var process = ConfigureProcess(builtIn.DocLink);
+                var process = ConfigureProcess(docsLink);
                 process.Start();
                 process.WaitForExit();
                 return 0;
@@ -101,10 +97,22 @@ namespace Microsoft.DotNet.Tools.Help
                 Reporter.Error.WriteLine(
                     string.Format(
                         LocalizableStrings.CommandDoesNotExist,
-                        _parseResult.ValueForArgument<string>(HelpCommandParser.Argument)).Red());
+                        _parseResult.GetValueForArgument(HelpCommandParser.Argument)).Red());
                 Reporter.Output.WriteLine(HelpUsageText.UsageText);
                 return 1;
             }
+        }
+
+        private bool TryGetDocsLink(string commandName, out string docsLink)
+        {
+            var command = Cli.Parser.GetBuiltInCommand(commandName);
+            if (command != null && command as DocumentedCommand != null)
+            {
+                docsLink = (command as DocumentedCommand).DocsLink;
+                return true;
+            }
+            docsLink = null;
+            return false;
         }
     }
 }

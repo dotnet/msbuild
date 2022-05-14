@@ -98,7 +98,7 @@ Integration with static web assets:
   NOTE: This target is called as part of an incremental build scenario in VS. Do not perform any work
   outside of calculating RazorComponent items in this target.
   -->
-  <DiscoverDefaultScopedCssItems Condition="'$(EnableDefaultScopedCssItems)' == 'true'" Content="@(None);@(Content)">
+  <DiscoverDefaultScopedCssItems Condition="'$(EnableDefaultScopedCssItems)' == 'true'" Content="@(None);@(Content)" SupportsScopedCshtmlCss="true">
     <Output TaskParameter="DiscoveredScopedCssInputs" ItemName="_DiscoveredScopedCssInputs" />
   </DiscoverDefaultScopedCssItems>
 
@@ -243,7 +243,7 @@ Integration with static web assets:
     SourceType="Computed"
     SourceId="$(PackageId)"
     ContentRoot="$(_ScopedCssBundleContentRoot)"
-    BasePath="$(StaticWebAssetBasePath)"    
+    BasePath="$(StaticWebAssetBasePath)"
     AssetKind="All"
     AssetMode="CurrentProject"
     AssetRole="Primary"
@@ -284,7 +284,7 @@ Integration with static web assets:
     <Output TaskParameter="ScopedCssAssets" ItemName="_DiscoveredScopedCssFiles" />
     <Output TaskParameter="ScopedCssProjectBundles" ItemName="_ScopedCssProjectBundles" />
   </ResolveAllScopedCssAssets>
-  
+
   <ItemGroup>
     <_AllScopedCss Include="@(_ScopedCssProjectBundles);@(_DiscoveredScopedCssFiles)" />
   </ItemGroup>
@@ -339,7 +339,7 @@ Integration with static web assets:
   <!-- This is the bundle for the app, we will always generate it when there are scoped css files for the current project or
        we detected existing bundles available. If some other project/package didn't bundle their assets, we will not be including
        them in this bundle. -->
-  
+
   <ConcatenateCssFiles
     Condition="'@(_ScopedCssProjectBundles)' != '' or '@(_ScopedCss)' != ''"
     ScopedCssFiles="@(_CurrentProjectDiscoveredScopedCssFiles)"
@@ -401,11 +401,11 @@ Integration with static web assets:
     <ItemGroup>
       <StaticWebAsset Remove="@(_UpdatedLegacyProjectBundles->'%(OriginalItemSpec)')" />
       <StaticWebAsset Include="@(_UpdatedLegacyProjectBundles)" />
-      
+
       <StaticWebAsset Remove="@(_UpdatedLegacyAppBundles->'%(OriginalItemSpec)')" />
       <StaticWebAsset Include="@(_UpdatedLegacyAppBundles)" />
     </ItemGroup>
-  
+
   </Target>
 
 </Project>

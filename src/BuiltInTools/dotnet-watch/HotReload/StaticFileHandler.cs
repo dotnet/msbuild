@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             _reporter.Verbose($"Handling file change event for static content {file.FilePath}.");
             await HandleBrowserRefresh(context.BrowserRefreshServer, file, cancellationToken);
             HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.StaticHandler);
-            _reporter.Output("Hot reload of static file succeeded.");
+            _reporter.Output("Hot reload of static file succeeded.", emoji: "🔥");
             return true;
         }
 

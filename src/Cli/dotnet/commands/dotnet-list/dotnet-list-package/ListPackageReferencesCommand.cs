@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Tools.List.PackageReferences
             ParseResult parseResult) : base(parseResult)
         {
             _fileOrDirectory = PathUtility.GetAbsolutePath(PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()),
-                parseResult.ValueForArgument<string>(ListCommandParser.SlnOrProjectArgument));
+                parseResult.GetValueForArgument(ListCommandParser.SlnOrProjectArgument));
         }
 
         public override int Execute()
