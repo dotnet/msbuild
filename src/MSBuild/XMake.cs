@@ -3081,6 +3081,12 @@ namespace Microsoft.Build.CommandLine
             // Join the logger parameters into one string separated by semicolons
             string result = anyPrefixingParameter ?? string.Empty;
 
+            // Ensure traling ';' so parametersToAggregate are properly separated
+            if (!string.IsNullOrEmpty(result) && result[result.Length - 1] != ';')
+            {
+                result += ';';
+            }
+
             result += string.Join(";", parametersToAggregate);
 
             return result;
