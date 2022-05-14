@@ -60,6 +60,5 @@
   <ItemGroup>
     <PackageReference Include="System.Text.Json" Version="$(SystemTextJsonVersion)" Condition="'$(UseSystemTextJson)'=='True'"/>
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" Condition="'$(UseSystemTextJson)'!='True'"/>
-    <PackageReference Include="System.Private.Uri" Version="4.3.2" />
   </ItemGroup>
 </Project>
