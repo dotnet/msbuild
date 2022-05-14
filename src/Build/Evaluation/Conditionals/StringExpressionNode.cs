@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -30,9 +31,9 @@ namespace Microsoft.Build.Evaluation
             _expandable = expandable;
         }
 
-        internal override bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result)
+        internal override bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result, LoggingContext loggingContext = null)
         {
-            return ConversionUtilities.TryConvertStringToBool(GetExpandedValue(state), out result);
+            return ConversionUtilities.TryConvertStringToBool(GetExpandedValue(state, loggingContext), out result);
         }
 
         internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result)
@@ -68,7 +69,7 @@ namespace Microsoft.Build.Evaluation
         /// to empty than to fully evaluate it.
         /// Implementations should cache the result so that calls after the first are free.
         /// </summary>
-        internal override bool EvaluatesToEmpty(ConditionEvaluator.IConditionEvaluationState state)
+        internal override bool EvaluatesToEmpty(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
         {
             if (_cachedExpandedValue == null)
             {
@@ -93,7 +94,7 @@ namespace Microsoft.Build.Evaluation
                             break;
                     }
 
-                    string expandBreakEarly = state.ExpandIntoStringBreakEarly(_value);
+                    string expandBreakEarly = state.ExpandIntoStringBreakEarly(_value, loggingContext);
 
                     if (expandBreakEarly == null)
                     {
@@ -129,13 +130,13 @@ namespace Microsoft.Build.Evaluation
         /// Value after any item and property expressions are expanded
         /// </summary>
         /// <returns></returns>
-        internal override string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state)
+        internal override string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
         {
             if (_cachedExpandedValue == null)
             {
                 if (_expandable)
                 {
-                    _cachedExpandedValue = state.ExpandIntoString(_value);
+                    _cachedExpandedValue = state.ExpandIntoString(_value, loggingContext);
                 }
                 else
                 {
