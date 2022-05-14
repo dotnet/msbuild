@@ -36,29 +36,29 @@ namespace Microsoft.Build.Evaluation
             return ConversionUtilities.TryConvertStringToBool(GetExpandedValue(state, loggingContext), out result);
         }
 
-        internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result)
+        internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result, LoggingContext loggingContext = null)
         {
-            if (ShouldBeTreatedAsVisualStudioVersion(state))
+            if (ShouldBeTreatedAsVisualStudioVersion(state, loggingContext))
             {
                 result = ConversionUtilities.ConvertDecimalOrHexToDouble(MSBuildConstants.CurrentVisualStudioVersion);
                 return true;
             }
             else
             {
-                return ConversionUtilities.TryConvertDecimalOrHexToDouble(GetExpandedValue(state), out result);
+                return ConversionUtilities.TryConvertDecimalOrHexToDouble(GetExpandedValue(state, loggingContext), out result);
             }
         }
 
-        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result)
+        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result, LoggingContext loggingContext = null)
         {
-            if (ShouldBeTreatedAsVisualStudioVersion(state))
+            if (ShouldBeTreatedAsVisualStudioVersion(state, loggingContext))
             {
                 result = Version.Parse(MSBuildConstants.CurrentVisualStudioVersion);
                 return true;
             }
             else
             {
-                return Version.TryParse(GetExpandedValue(state), out result);
+                return Version.TryParse(GetExpandedValue(state, loggingContext), out result);
             }
         }
 
@@ -169,7 +169,7 @@ namespace Microsoft.Build.Evaluation
         /// but now cause the project to throw InvalidProjectException when
         /// ToolsVersion is "Current". https://github.com/dotnet/msbuild/issues/4150
         /// </remarks>
-        private bool ShouldBeTreatedAsVisualStudioVersion(ConditionEvaluator.IConditionEvaluationState state)
+        private bool ShouldBeTreatedAsVisualStudioVersion(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
         {
             if (!_shouldBeTreatedAsVisualStudioVersion.HasValue)
             {
@@ -177,7 +177,7 @@ namespace Microsoft.Build.Evaluation
 
                 // Do this check first, because if it's not (common) we can early-out and the next
                 // expansion will be cheap because this will populate the cached expanded value.
-                if (string.Equals(GetExpandedValue(state), MSBuildConstants.CurrentToolsVersion, StringComparison.Ordinal))
+                if (string.Equals(GetExpandedValue(state, loggingContext), MSBuildConstants.CurrentToolsVersion, StringComparison.Ordinal))
                 {
                     // and it is just an expansion of MSBuildToolsVersion
                     _shouldBeTreatedAsVisualStudioVersion = string.Equals(_value, "$(MSBuildToolsVersion)", StringComparison.OrdinalIgnoreCase);

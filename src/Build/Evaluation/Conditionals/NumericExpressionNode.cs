@@ -29,12 +29,12 @@ namespace Microsoft.Build.Evaluation
             return false;
         }
 
-        internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result)
+        internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result, LoggingContext loggingContext = null)
         {
             return ConversionUtilities.TryConvertDecimalOrHexToDouble(_value, out result);
         }
 
-        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result)
+        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result, LoggingContext loggingContext = null)
         {
             return Version.TryParse(_value, out result);
         }

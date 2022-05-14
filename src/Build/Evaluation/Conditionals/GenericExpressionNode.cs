@@ -15,8 +15,8 @@ namespace Microsoft.Build.Evaluation
     internal abstract class GenericExpressionNode
     {
         internal abstract bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result, LoggingContext loggingContext = null);
-        internal abstract bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result);
-        internal abstract bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result);
+        internal abstract bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result, LoggingContext loggingContext = null);
+        internal abstract bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result, LoggingContext loggingContext = null);
 
         /// <summary>
         /// Returns true if this node evaluates to an empty string,
@@ -62,7 +62,7 @@ namespace Microsoft.Build.Evaluation
                     state.ElementLocation,
                     "ConditionNotBooleanDetail",
                     state.Condition,
-                    GetExpandedValue(state));
+                    GetExpandedValue(state, loggingContext));
             }
 
             return boolValue;

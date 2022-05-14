@@ -21,13 +21,13 @@ namespace Microsoft.Build.Evaluation
 
         internal abstract bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null);
 
-        internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result)
+        internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result, LoggingContext loggingContext = null)
         {
             result = default;
             return false;
         }
 
-        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result)
+        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result, LoggingContext loggingContext = null)
         {
             result = default;
             return false;
