@@ -3,23 +3,23 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.NET.Sdk.WorkloadManifestReader;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.Cli.NuGetPackageDownloader;
-using Microsoft.DotNet.ToolPackage;
+using System.Net.Http;
+using System.Runtime.InteropServices;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.NuGetPackageDownloader;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Configurer;
+using Microsoft.DotNet.MSBuildSdkResolver;
+using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using NuGet.Versioning;
-using Microsoft.DotNet.Configurer;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 using NuGet.Common;
-using System.Text.Json;
-using System.Runtime.InteropServices;
-using Microsoft.DotNet.Cli;
-using System.Net;
-using System.Net.Http;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -471,6 +471,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     ManifestVersion manifestVersion;
                     SdkFeatureBand manifestFeatureBand;
                     var parts = manifest.Value.Split('/');
+                    
+                    string manifestVersionString = (parts[0]);
+                    if (!FXVersion.TryParse(manifestVersionString, out FXVersion version))
+                    {
+                        throw new FormatException(String.Format(LocalizableStrings.InvalidVersionForWorkload, manifest.Key, manifestVersionString));
+                    } 
+
                     manifestVersion = new ManifestVersion(parts[0]);
                     if (parts.Length == 1)
                     {

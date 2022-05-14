@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.IO.Compression;
@@ -42,8 +43,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tool
 
             rootCommand.Add(brotli);
 
-            brotli.SetHandler((ParseResult parseResults) =>
+            brotli.SetHandler((InvocationContext context) =>
             {
+                var parseResults = context.ParseResult;
                 var c = parseResults.GetValueForOption(compressionLevelOption);
                 var s = parseResults.GetValueForOption(sourcesOption);
                 var o = parseResults.GetValueForOption(outputsOption);

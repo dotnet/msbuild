@@ -7,6 +7,7 @@ using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Tools.Tool.Common;
+using Microsoft.NET.TestFramework;
 using Xunit;
 using Xunit.Abstractions;
 using Parser = Microsoft.DotNet.Cli.Parser;
@@ -39,10 +40,10 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result =
                 Parser.Instance.Parse(
-                    @"dotnet tool install -g console.test.app --version 1.0.1 --framework netcoreapp2.0 --configfile C:\TestAssetLocalNugetFeed");
+                    $@"dotnet tool install -g console.test.app --version 1.0.1 --framework {ToolsetInfo.CurrentTargetFramework} --configfile C:\TestAssetLocalNugetFeed");
 
             result.GetValueForOption<string>(ToolInstallCommandParser.ConfigOption).Should().Be(@"C:\TestAssetLocalNugetFeed");
-            result.GetValueForOption<string>(ToolInstallCommandParser.FrameworkOption).Should().Be("netcoreapp2.0");
+            result.GetValueForOption<string>(ToolInstallCommandParser.FrameworkOption).Should().Be(ToolsetInfo.CurrentTargetFramework);
         }
 
         [Fact]
