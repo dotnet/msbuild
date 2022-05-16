@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             if (PackageIdsToNotFind.Contains(packageId.ToString()))
             {
-                return Task.FromException<string>(new NuGetPackageNotFoundException("Package not found: " + packageId.ToString()));     // THIS is the exception that's being thrown
+                return Task.FromException<string>(new NuGetPackageNotFoundException("Package not found: " + packageId.ToString()));
             }
 
             var path = Path.Combine(_downloadPath, "mock.nupkg");
@@ -92,8 +92,5 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         {
             return Task.FromResult("mock-url-" + packageId.ToString());
         }
-
-        // when it's called from the new test 
-            // if the feature band is a part of a certain list that should have exceptions thrown then it should do that and then fallback
     }
 }

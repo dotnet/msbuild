@@ -184,7 +184,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 }
 
                 if (advertisingManifestVersionAndWorkloads != null &&
-                    (advertisingManifestVersionAndWorkloads.Value.ManifestVersion.CompareTo(currentManifestVersion.manifestVersion) > 0 ||
+                    ((advertisingManifestVersionAndWorkloads.Value.ManifestVersion.CompareTo(currentManifestVersion.manifestVersion) > 0 
+                        && advertisingManifestVersionAndWorkloads.Value.ManifestFeatureBand.Equals(currentManifestVersion.sdkFeatureBand)) ||
                     advertisingManifestVersionAndWorkloads.Value.ManifestFeatureBand.CompareTo(currentManifestVersion.sdkFeatureBand) > 0)) 
                 {
                     manifestUpdates.Add((new ManifestVersionUpdate(manifestId, currentManifestVersion.manifestVersion, currentManifestVersion.sdkFeatureBand.ToString(),
@@ -331,6 +332,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 Directory.CreateDirectory(Path.GetDirectoryName(adManifestPath));
                 FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(Path.Combine(extractionPath, "data"), adManifestPath));
 
+                // add file that contains the advertisted manifest feature band so GetAdvertisingManifestVersionAndWorkloads will use correct feature band, regardless of if rollback occurred or not
                 File.WriteAllText(Path.Combine(adManifestPath, "AdvertisedManifestFeatureBand.txt"), currentFeatureBand);
 
                 if (_displayManifestUpdates)
@@ -354,7 +356,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 {
                     File.Delete(packagePath);
                 }
-                if (!string.IsNullOrEmpty(packagePath))
+                if (!string.IsNullOrEmpty(packagePath) || offlineCache.HasValue)
                 {
                     var versionDir = Path.GetDirectoryName(packagePath);
 
