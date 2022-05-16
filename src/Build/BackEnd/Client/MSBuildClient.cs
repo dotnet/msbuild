@@ -11,6 +11,7 @@ using System.IO.Pipes;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Client;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -75,6 +76,12 @@ namespace Microsoft.Build.Execution
         private readonly BinaryWriter _binaryWriter;
 
         /// <summary>
+        /// Used to estimate the size of the build with an ETW trace.
+        /// </summary>
+        private int _numConsoleWritePackets;
+        private long _sizeOfConsoleWritePackets;
+
+        /// <summary>
         /// Public constructor with parameters.
         /// </summary>
         /// <param name="exeLocation">Location of executable file to launch the server process.
@@ -115,14 +122,19 @@ namespace Microsoft.Build.Execution
         /// or the manner in which it failed.</returns>
         public MSBuildClientExitResult Execute(string commandLine, CancellationToken cancellationToken)
         {
+            CommunicationsUtilities.Trace("Executing build with command line '{0}'", commandLine);
             string serverRunningMutexName = OutOfProcServerNode.GetRunningServerMutexName(_handshake);
             string serverBusyMutexName = OutOfProcServerNode.GetBusyServerMutexName(_handshake);
 
             // Start server it if is not running.
             bool serverIsAlreadyRunning = ServerNamedMutex.WasOpen(serverRunningMutexName);
-            if (!serverIsAlreadyRunning && !TryLaunchServer())
+            if (!serverIsAlreadyRunning)
             {
-                return _exitResult;
+                CommunicationsUtilities.Trace("Server was not running. Starting server now.");
+                if (!TryLaunchServer())
+                {
+                    return _exitResult;
+                }
             }
 
             // Check that server is not busy.
@@ -144,12 +156,16 @@ namespace Microsoft.Build.Execution
 
             // Send build command.
             // Let's send it outside the packet pump so that we easier and quicker deal with possible issues with connection to server.
+            MSBuildEventSource.Log.MSBuildServerBuildStart(commandLine);
             if (!TrySendBuildCommand(commandLine))
             {
                 CommunicationsUtilities.Trace("Failure to connect to a server.");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.ConnectionError;
                 return _exitResult;
             }
+
+            _numConsoleWritePackets = 0;
+            _sizeOfConsoleWritePackets = 0;
 
             try
             {
@@ -201,6 +217,7 @@ namespace Microsoft.Build.Execution
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.Unexpected;
             }
 
+            MSBuildEventSource.Log.MSBuildServerBuildStop(commandLine, _numConsoleWritePackets, _sizeOfConsoleWritePackets, _exitResult.MSBuildClientExitType.ToString(), _exitResult.MSBuildAppExitTypeString);
             CommunicationsUtilities.Trace("Build finished.");
             return _exitResult;
         }
@@ -245,7 +262,8 @@ namespace Microsoft.Build.Execution
         }
 
         private Process LaunchNode(string exeLocation, string msBuildServerArguments, Dictionary<string, string> serverEnvironmentVariables)
-        { 
+        {
+            CommunicationsUtilities.Trace("Launching server node from {0} with arguments {1}", exeLocation, msBuildServerArguments);
             ProcessStartInfo processStartInfo = new() 
             {
                 FileName = exeLocation,
@@ -273,7 +291,7 @@ namespace Microsoft.Build.Execution
             {
                 ServerNodeBuildCommand buildCommand = GetServerNodeBuildCommand(commandLine);
                 WritePacket(_nodeStream, buildCommand);
-                CommunicationsUtilities.Trace("Build command send...");
+                CommunicationsUtilities.Trace("Build command sent...");
             }
             catch (Exception ex)
             {
@@ -347,7 +365,10 @@ namespace Microsoft.Build.Execution
             switch (packet.Type)
             {
                 case NodePacketType.ServerNodeConsoleWrite:
-                    HandleServerNodeConsoleWrite((ServerNodeConsoleWrite)packet);
+                    ServerNodeConsoleWrite writePacket = (packet as ServerNodeConsoleWrite)!;
+                    HandleServerNodeConsoleWrite(writePacket);
+                    _numConsoleWritePackets++;
+                    _sizeOfConsoleWritePackets += writePacket.Text.Length;
                     break;
                 case NodePacketType.ServerNodeBuildResult:
                     HandleServerNodeBuildResult((ServerNodeBuildResult)packet);

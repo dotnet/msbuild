@@ -85,13 +85,14 @@ namespace Microsoft.Build.Execution
         /// <returns>The reason for shutting down.</returns>
         public NodeEngineShutdownReason Run(out Exception? shutdownException)
         {
-            var handshake = new ServerNodeHandshake(
+            ServerNodeHandshake handshake = new(
                 CommunicationsUtilities.GetHandshakeOptions(taskHost: false, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
 
             _serverBusyMutexName = GetBusyServerMutexName(handshake);
 
             // Handled race condition. If two processes spawn to start build Server one will die while
             // one Server client connects to the other one and run build on it.
+            CommunicationsUtilities.Trace("Starting new server node with handshake {0}", handshake);
             using var serverRunningMutex = ServerNamedMutex.OpenOrCreateMutex(GetRunningServerMutexName(handshake), out bool mutexCreatedNew);
             if (!mutexCreatedNew)
             {
@@ -275,6 +276,7 @@ namespace Microsoft.Build.Execution
 
         private void HandleServerNodeBuildCommand(ServerNodeBuildCommand command)
         {
+            CommunicationsUtilities.Trace("Building with MSBuild server with command line {0}", command.CommandLine);
             using var serverBusyMutex = ServerNamedMutex.OpenOrCreateMutex(name: _serverBusyMutexName, createdNew: out var holdsMutex);
             if (!holdsMutex)
             {
