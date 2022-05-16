@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
@@ -251,9 +252,9 @@ namespace Microsoft.Build.Engine.UnitTests
 
         private int ParseNumber(string searchString, string toFind)
         {
-            int indexOfId = searchString.IndexOf(toFind) + toFind.Length;
-            int endOfId = searchString.IndexOfAny(new char[] { '\r', '\n' }, indexOfId);
-            return int.Parse(searchString.Substring(indexOfId, endOfId - indexOfId));
+            Regex regex = new(@$"{toFind}(\d+)");
+            var x = regex.Match(searchString);
+            return int.Parse(x.Groups[1].Value);
         }
     }
 }
