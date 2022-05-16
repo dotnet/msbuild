@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Client;
@@ -183,6 +184,11 @@ namespace Microsoft.Build.Execution
                     packetPump.PacketReceivedEvent
                 };
 
+                if (NativeMethodsShared.IsWindows)
+                {
+                    SupportVT100();
+                }
+
                 while (!_buildFinished)
                 {
                     int index = WaitHandle.WaitAny(waitHandles);
@@ -221,6 +227,29 @@ namespace Microsoft.Build.Execution
             CommunicationsUtilities.Trace("Build finished.");
             return _exitResult;
         }
+
+        private void SupportVT100()
+        {
+            const int STD_OUTPUT_HANDLE = -11;
+            const uint DISABLE_NEWLINE_AUTO_RETURN = 0x0008;
+            const uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
+
+            var stdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+            if (GetConsoleMode(stdOut, out uint consoleMode))
+            {
+                consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING | DISABLE_NEWLINE_AUTO_RETURN;
+                SetConsoleMode(stdOut, consoleMode);
+            }
+        }
+
+        [DllImport("kernel32.dll")]
+        private static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
+
+        [DllImport("kernel32.dll")]
+        private static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr GetStdHandle(int nStdHandle);
 
         private void SendCancelCommand(NamedPipeClientStream nodeStream) => throw new NotImplementedException();
 
