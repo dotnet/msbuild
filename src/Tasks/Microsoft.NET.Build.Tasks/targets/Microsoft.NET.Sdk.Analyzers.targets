@@ -47,7 +47,7 @@ Copyright (c) .NET Foundation. All rights reserved.
          and an implied numerical option (such as '4')-->
     <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'none' or '$(AnalysisLevelPrefix)' == 'none'">$(_NoneAnalysisLevel)</EffectiveAnalysisLevel>
     <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'latest' or '$(AnalysisLevelPrefix)' == 'latest'">$(_LatestAnalysisLevel)</EffectiveAnalysisLevel>
-    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'preview' or '$(AnalysisLevelPrefix)' == 'preview'">$(PreviewAnalysisLevel)</EffectiveAnalysisLevel>
+    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'preview' or '$(AnalysisLevelPrefix)' == 'preview'">$(_PreviewAnalysisLevel)</EffectiveAnalysisLevel>
 
     <!-- Set EffectiveAnalysisLevel to the value of AnalysisLevel if it is a version number -->
     <EffectiveAnalysisLevel Condition="'$(EffectiveAnalysisLevel)' == '' And
