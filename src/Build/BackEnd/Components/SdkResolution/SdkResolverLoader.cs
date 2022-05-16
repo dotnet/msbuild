@@ -70,7 +70,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             ElementLocation location)
         {
             return FindPotentialSdkResolversManifests(
-                Path.Combine(BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, "SdkResolvers"), location);
+                Path.Combine(BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot, "SdkResolvers"), location);
         }
 
         /// <summary>
