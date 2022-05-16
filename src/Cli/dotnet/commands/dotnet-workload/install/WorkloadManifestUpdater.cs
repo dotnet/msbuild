@@ -70,7 +70,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                           filePermissionSetter: null,
                                           new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, new NullLogger()),
                                           new NullLogger(),
-                                          reporter);
+                                          reporter,
+                                          verifySignatures: SignCheck.IsDotNetSigned());
             var workloadRecordRepo = WorkloadInstallerFactory.GetWorkloadInstaller(reporter, new SdkFeatureBand(sdkVersion),
                 workloadResolver, Cli.VerbosityOptions.normal, userProfileDir, verifySignatures: false)
                 .GetWorkloadInstallationRecordRepository();

@@ -69,8 +69,6 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<string> TempDirOption = new Option<string>("--temp-dir", LocalizableStrings.TempDirOptionDescription);
 
-        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.VerbosityOption;
-
         public static readonly Option<string> FromRollbackFileOption = new Option<string>("--from-rollback-file", Microsoft.DotNet.Workloads.Workload.Update.LocalizableStrings.FromRollbackDefinitionOptionDescription)
         {
             IsHidden = true
@@ -107,7 +105,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(IncludePreviewOption);
             command.AddOption(TempDirOption);
             command.AddWorkloadCommandNuGetRestoreActionConfigOptions();
-            command.AddOption(VerbosityOption);
+            command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(FromRollbackFileOption);
             command.AddOption(SkipSignCheckOption);
         }
