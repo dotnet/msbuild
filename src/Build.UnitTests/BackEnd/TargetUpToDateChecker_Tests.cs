@@ -1031,4 +1031,3 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
     }
 }
-

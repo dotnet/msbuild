@@ -7,7 +7,6 @@ using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
 
-
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -52,13 +51,17 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
+            
             AssignedProjectsWithPlatform = new ITaskItem[AnnotatedProjects.Length];
             for (int i = 0; i < AnnotatedProjects.Length; i++)
             {
                 AssignedProjectsWithPlatform[i] = new TaskItem(AnnotatedProjects[i]);
-                // Pull platformlookuptable metadata from the referenced project. This allows custom
-                // mappings on a per-ProjectReference basis.
-                 string? buildProjectReferenceAs = PlatformNegotiation.GetNearestPlatform(AssignedProjectsWithPlatform[i].GetMetadata("Platforms"), AssignedProjectsWithPlatform[i].GetMetadata("PlatformLookupTable"), CurrentProjectPlatform, PlatformLookupTable, AssignedProjectsWithPlatform[i].ItemSpec, Log);
+
+                string referencedProjectPlatform = AssignedProjectsWithPlatform[i].GetMetadata("Platform");
+                string projectReferencePlatformsMetadata = AssignedProjectsWithPlatform[i].GetMetadata("Platforms");
+                string projectReferenceLookupTableMetadata = AssignedProjectsWithPlatform[i].GetMetadata("PlatformLookupTable");
+
+                string? buildProjectReferenceAs = PlatformNegotiation.GetNearestPlatform(referencedProjectPlatform, projectReferencePlatformsMetadata, projectReferenceLookupTableMetadata, PlatformLookupTable, AssignedProjectsWithPlatform[i].ItemSpec, CurrentProjectPlatform, Log);
 
                 AssignedProjectsWithPlatform[i].SetMetadata("NearestPlatform", buildProjectReferenceAs);
                 Log.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.DisplayChosenPlatform", AssignedProjectsWithPlatform[i].ItemSpec, buildProjectReferenceAs);
