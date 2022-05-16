@@ -436,7 +436,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             Directory.GetFiles(installRecordPath).Count().Should().Be(2);
         }
 
-        [Fact]
+        [Fact(Skip="Disable tests that might be updating workload manifest")]
         public void HideManifestUpdateCheckWhenVerbosityIsQuiet()
         {
             var command = new DotnetCommand(Log);
@@ -451,7 +451,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
 
-        [Theory]
+        [Theory(Skip="Disable tests that might be updating workload manifest")]
         [InlineData("--verbosity:minimal")]
         [InlineData("--verbosity:normal")]
         public void HideManifestUpdatesWhenVerbosityIsMinimalOrNormal(string verbosityFlag)
@@ -467,7 +467,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 .NotHaveStdOutContaining(Workloads.Workload.Install.LocalizableStrings.AdManifestUpdated);
         }
 
-        [Theory]
+        [Theory(Skip="Disable tests that might be updating workload manifest")]
         [InlineData("--verbosity:detailed")]
         [InlineData("--verbosity:diagnostic")]
         public void ShowManifestUpdatesWhenVerbosityIsDetailedOrDiagnostic(string verbosityFlag)
