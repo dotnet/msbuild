@@ -80,7 +80,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory("net452", "Debug", "win7-x86");
+            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory("net452", "Debug", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86");
 
             publishDirectory.Should().HaveFiles(new[]
             {
@@ -265,7 +265,7 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "TestApp",
                 IsExe = true,
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 References = { publishedLibPath }
             };
 
@@ -277,7 +277,7 @@ namespace Microsoft.NET.Publish.Tests
             var appPublishResult = appPublishCommand.Execute("/p:" + property);
             appPublishResult.Should().Pass();
 
-            var appPublishDirectory = appPublishCommand.GetOutputDirectory("netcoreapp2.0");
+            var appPublishDirectory = appPublishCommand.GetOutputDirectory(appProject.TargetFrameworks);
 
             if (expectAssemblyDocumentationFilePublished)
             {
