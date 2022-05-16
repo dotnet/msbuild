@@ -2446,7 +2446,8 @@ namespace Microsoft.Build.Evaluation
                     element.ConditionLocation,
                     _evaluationLoggingContext.LoggingService,
                     _evaluationLoggingContext.BuildEventContext,
-                    _evaluationContext.FileSystem
+                    _evaluationContext.FileSystem,
+                    loggingContext: _evaluationLoggingContext
                     );
 
                 return result;
