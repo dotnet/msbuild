@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="RowHeader_AllowMultiValue">
         <source>Allow multiple values: {0}</source>
-        <target state="new">Allow multiple values: {0}</target>
+        <target state="translated">Consenti più valori: {0}</target>
         <note>{0} is a boolean flag</note>
       </trans-unit>
       <trans-unit id="RowHeader_DefaultIfOptionWithoutValue">
