@@ -356,7 +356,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 {
                     File.Delete(packagePath);
                 }
-                if (!string.IsNullOrEmpty(packagePath) || offlineCache.HasValue)
+                if (offlineCache == null || !offlineCache.HasValue)
                 {
                     var versionDir = Path.GetDirectoryName(packagePath);
 
