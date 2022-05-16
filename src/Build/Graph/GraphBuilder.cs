@@ -1,6 +1,3 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -505,50 +502,39 @@ namespace Microsoft.Build.Graph
             var globalProperties = configurationMetadata.GlobalProperties.ToDictionary();
             ProjectGraphNode graphNode;
             ProjectInstance projectInstance;
-
-            if (enableDynamicPlatformResolution){
-
+           
                 projectInstance = _projectInstanceFactory(
-                    configurationMetadata.ProjectFullPath,
-                    null,
-                    _projectCollection);
+                                    configurationMetadata.ProjectFullPath,
+                                    enableDynamicPlatformResolution ? null : globalProperties, // Platform negotiation requires an evaluation with no global properties first
+                                    _projectCollection);
 
-                if (projectInstance == null)
-                {
-                    throw new InvalidOperationException(ResourceUtilities.GetResourceString("NullReferenceFromProjectInstanceFactory"));
-                }
-
-                var SelectedPlatform = PlatformNegotiation.GetNearestPlatform(projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), globalProperties[PlatformMetadataName], "", projectInstance.FullPath);
-
-                if (!string.IsNullOrEmpty(SelectedPlatform))
-                {
-                    globalProperties["platform"] = SelectedPlatform;
-                }
-
-                projectInstance = _projectInstanceFactory(
-                    configurationMetadata.ProjectFullPath,
-                    globalProperties,
-                    _projectCollection);
-
-                graphNode = new ProjectGraphNode(projectInstance);
-            }
-            else
+            if (projectInstance == null)
             {
-                projectInstance = _projectInstanceFactory(
-                    configurationMetadata.ProjectFullPath,
-                    globalProperties,
-                    _projectCollection);
+                throw new InvalidOperationException(ResourceUtilities.GetResourceString("NullReferenceFromProjectInstanceFactory"));
+            }
 
-                if (projectInstance == null)
+            if (enableDynamicPlatformResolution)
+            {
+                var SelectedPlatform = PlatformNegotiation.GetNearestPlatform(projectInstance.GetPropertyValue(PlatformMetadataName), projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), configurationMetadata.PreviousPlatformLookupTable, projectInstance.FullPath, configurationMetadata.PreviousPlatform);
+
+                if (SelectedPlatform != null)
                 {
-                    throw new InvalidOperationException(ResourceUtilities.GetResourceString("NullReferenceFromProjectInstanceFactory"));
+                    globalProperties[PlatformMetadataName] = SelectedPlatform;
+                    if (SelectedPlatform.Equals(String.Empty))
+                    {
+                        globalProperties.Remove(PlatformMetadataName);
+                    }
                 }
 
-               graphNode = new ProjectGraphNode(projectInstance);
+                projectInstance = _projectInstanceFactory(
+                                    configurationMetadata.ProjectFullPath,
+                                    globalProperties,
+                                    _projectCollection);
             }
-            
-            var referenceInfos = ParseReferences(graphNode, ConversionUtilities.ValidBooleanTrue(projectInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)));
 
+            graphNode = new ProjectGraphNode(projectInstance);
+
+            var referenceInfos = ParseReferences(graphNode, ConversionUtilities.ValidBooleanTrue(projectInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)));
 
             return new ParsedProject(configurationMetadata, graphNode, referenceInfos);
         }
@@ -593,8 +579,15 @@ namespace Microsoft.Build.Graph
                         referenceInfo.ReferenceConfiguration.ProjectFullPath
                         ));
                 }
-                
-                SubmitProjectForParsing(referenceInfo.ReferenceConfiguration, enableDynamicPlatformResolution);
+
+                if (!referenceInfo.ProjectReferenceItem.HasMetadata("SetPlatform"))
+                {
+                    SubmitProjectForParsing(referenceInfo.ReferenceConfiguration, enableDynamicPlatformResolution);
+                }
+                else
+                {
+                    SubmitProjectForParsing(referenceInfo.ReferenceConfiguration, false);
+                }
 
                 referenceInfos.Add(referenceInfo);
             }
