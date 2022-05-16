@@ -169,7 +169,7 @@ namespace Microsoft.Build.Engine.UnitTests
             try
             {
                 // Start a server node and find its PID.
-                string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success, false, _output);
+                string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out bool success, false, _output);
                 pidOfServerProcess = ParseNumber(output, "Server ID is ");
 
                 foreach (Process p in Process.GetProcesses())
@@ -180,7 +180,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 t = Task.Run(() =>
                 {
-                    RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, sleepProject.Path, out _, false, _output);
+                    RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, sleepProject.Path + " -v:diag", out _, false, _output);
                 });
 
                 // The server will soon be in use; make sure we don't try to use it before that happens.
@@ -194,12 +194,12 @@ namespace Microsoft.Build.Engine.UnitTests
                 }
 
                 Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
-                output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
+                output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out success, false, _output);
                 success.ShouldBeTrue();
                 ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
 
                 Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
-                output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
+                output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out success, false, _output);
                 success.ShouldBeTrue();
                 pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Server ID is "), "The server should be otherwise occupied.");
                 pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
