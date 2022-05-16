@@ -174,7 +174,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 foreach (Process p in Process.GetProcesses())
                 {
-                    _output.WriteLine($"Process number {p.Id} is {p.ProcessName}");
+                    _output.WriteLine($"Process number {p.Id} is {p.ProcessName}" + $" tid: {System.Threading.Thread.CurrentThread.ManagedThreadId} timestamp: {DateTime.Now.Ticks}");
                     p.OutputDataReceived += (object sender, DataReceivedEventArgs args) => _output.WriteLine(args is null ? "empty" : args.Data);
                 }
 
@@ -189,7 +189,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 _output.WriteLine("next batch");
                 foreach (Process p in Process.GetProcesses())
                 {
-                    _output.WriteLine($"Process number {p.Id} is {p.ProcessName}");
+                    _output.WriteLine($"Process number {p.Id} is {p.ProcessName}" + $" tid: {System.Threading.Thread.CurrentThread.ManagedThreadId} timestamp: {DateTime.Now.Ticks}");
                     p.OutputDataReceived += (object sender, DataReceivedEventArgs args) => _output.WriteLine(args is null ? "empty" : args.Data);
                 }
 
@@ -208,10 +208,10 @@ namespace Microsoft.Build.Engine.UnitTests
             {
                 foreach (string? file in Directory.GetFiles(Path.Combine(Path.GetDirectoryName(project.Path)!, "myFolder")))
                 {
-                    _output.WriteLine($"New file: {file}");
+                    _output.WriteLine($"New file: {file}" + $" tid: {System.Threading.Thread.CurrentThread.ManagedThreadId} timestamp: {DateTime.Now.Ticks}");
                     foreach (string line in File.ReadLines(file!))
                     {
-                        _output.WriteLine(line);
+                        _output.WriteLine(line + $" tid: {System.Threading.Thread.CurrentThread.ManagedThreadId} timestamp: {DateTime.Now.Ticks}");
                     }
                 }
 

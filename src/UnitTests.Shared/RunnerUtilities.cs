@@ -107,7 +107,7 @@ namespace Microsoft.Build.UnitTests.Shared
                     }
                 };
 
-                outputHelper?.WriteLine("Executing [{0} {1}]", process, parameters);
+                outputHelper?.WriteLine("Executing [{0} {1}]; TID: {2}, timestamp:{3}", process, parameters, System.Threading.Thread.CurrentThread.ManagedThreadId, System.DateTime.Now.Ticks);
                 Console.WriteLine("Executing [{0} {1}]", process, parameters);
 
                 p.Start();
@@ -121,8 +121,8 @@ namespace Microsoft.Build.UnitTests.Shared
             }
 
             outputHelper?.WriteLine("==== OUTPUT ====");
-            outputHelper?.WriteLine(output);
-            outputHelper?.WriteLine("Process ID is " + pid + "\r\n");
+            outputHelper?.WriteLine(output + $" tid: {System.Threading.Thread.CurrentThread.ManagedThreadId} timestamp: {DateTime.Now.Ticks}");
+            outputHelper?.WriteLine("Process ID is " + pid + $" tid: {System.Threading.Thread.CurrentThread.ManagedThreadId} timestamp: {DateTime.Now.Ticks}" + "\r\n");
             outputHelper?.WriteLine("==============");
 
             Console.WriteLine("==== OUTPUT ====");
