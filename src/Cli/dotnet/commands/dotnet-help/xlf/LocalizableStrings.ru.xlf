@@ -302,6 +302,11 @@
         <target state="translated">Запуск F# Interactive / выполнение скриптов F#.</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadDefinition">
+        <source>Manage optional workloads.</source>
+        <target state="translated">Управление необязательными рабочими нагрузками.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

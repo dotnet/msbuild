@@ -52,6 +52,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 {
                     options.SuppressPrimaryMethodBody = true;
                     options.SuppressChecksum = true;
+                    options.SupportLocalizedComponentNames = razorSourceGeneratorOptions.SupportLocalizedComponentNames;
                 }));
 
                 b.SetRootNamespace(razorSourceGeneratorOptions.RootNamespace);
@@ -103,6 +104,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 b.Features.Add(new ConfigureRazorCodeGenerationOptions(options =>
                 {
                     options.SuppressMetadataSourceChecksumAttributes = !razorSourceGeneratorOptions.GenerateMetadataSourceChecksumAttributes;
+                    options.SupportLocalizedComponentNames = razorSourceGeneratorOptions.SupportLocalizedComponentNames;
                 }));
 
                 b.Features.Add(new StaticTagHelperFeature { TagHelpers = tagHelpers });

@@ -223,9 +223,9 @@
         <note>{StrBegin="NETSDK1167: "}</note>
       </trans-unit>
       <trans-unit id="CompressionInSingleFileRequiresSelfContained">
-        <source>NETSDK1174: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
-        <target state="translated">NETSDK1174: 자체 포함 애플리케이션이 게시된 경우 단일 파일 번들의 압축만 지원됩니다.</target>
-        <note>{StrBegin="NETSDK1174: "}</note>
+        <source>NETSDK1176: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
+        <target state="translated">NETSDK1176: 자체 포함 애플리케이션이 게시된 경우 단일 파일 번들의 압축만 지원됩니다.</target>
+        <note>{StrBegin="NETSDK1176: "}</note>
       </trans-unit>
       <trans-unit id="ConflictingRuntimePackInformation">
         <source>NETSDK1133: There was conflicting information about runtime packs available for {0}:
@@ -560,6 +560,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1115: 현재 .NET SDK는 .NET SDK 기본값을 사용하지 않는 .NET Framework를 지원하지 않습니다. C++/CLI 프로젝트 CLRSupport 속성과 TargetFramework 사이의 불일치 때문일 수 있습니다.</target>
         <note>{StrBegin="NETSDK1115: "}</note>
       </trans-unit>
+      <trans-unit id="Net6NotCompatibleWithDev16">
+        <source>NETSDK1182: Targeting .NET 6.0 in Visual Studio 2019 is not supported.</source>
+        <target state="translated">NETSDK1182: Visual Studio 2019에서 .NET 6.0을 대상으로 지정하는 것은 지원되지 않습니다.</target>
+        <note>{StrBegin="NETSDK1182: "}</note>
+      </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
         <target state="translated">NETSDK1084: 지정된 RuntimeIdentifier '{0}'에 사용할 수 있는 애플리케이션 호스트가 없습니다.</target>
@@ -651,9 +656,9 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1071: "}</note>
       </trans-unit>
       <trans-unit id="PlaceholderRunCommandProjectAbbreviationDeprecated">
-        <source>NETSDK1176: Placeholder</source>
-        <target state="translated">NETSDK1176: 자리 표시자</target>
-        <note>{StrBegin="NETSDK1176: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</note>
+        <source>NETSDK1174: Placeholder</source>
+        <target state="translated">NETSDK1174: 자리 표시자</target>
+        <note>{StrBegin="NETSDK1174: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</note>
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>NETSDK1011: Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>

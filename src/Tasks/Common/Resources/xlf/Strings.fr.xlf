@@ -223,9 +223,9 @@
         <note>{StrBegin="NETSDK1167: "}</note>
       </trans-unit>
       <trans-unit id="CompressionInSingleFileRequiresSelfContained">
-        <source>NETSDK1174: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
-        <target state="translated">NETSDK1174: la compression dans un groupe de fichiers unique n’est prise en charge que lors de la publication d’une application autonome.</target>
-        <note>{StrBegin="NETSDK1174: "}</note>
+        <source>NETSDK1176: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
+        <target state="translated">NETSDK1176: la compression dans un groupe de fichiers unique n’est prise en charge que lors de la publication d’une application autonome.</target>
+        <note>{StrBegin="NETSDK1176: "}</note>
       </trans-unit>
       <trans-unit id="ConflictingRuntimePackInformation">
         <source>NETSDK1133: There was conflicting information about runtime packs available for {0}:
@@ -560,6 +560,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1115: Le SDK .NET actuel ne prend pas en charge le .NET Framework avec des valeurs du SDK .NET autres que celles par défaut. Cela est probablement dû à une incompatibilité entre la propriété CLRSupport du projet C++/CLI et TargetFramework.</target>
         <note>{StrBegin="NETSDK1115: "}</note>
       </trans-unit>
+      <trans-unit id="Net6NotCompatibleWithDev16">
+        <source>NETSDK1182: Targeting .NET 6.0 in Visual Studio 2019 is not supported.</source>
+        <target state="translated">NETSDK1182: le ciblage de .NET 6.0 dans Visual Studio 2019 n’est pas pris en charge.</target>
+        <note>{StrBegin="NETSDK1182: "}</note>
+      </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
         <target state="translated">NETSDK1084: il n'existe aucun d'hôte d'application disponible pour le RuntimeIdentifier spécifié '{0}'.</target>
@@ -651,9 +656,9 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1071: "}</note>
       </trans-unit>
       <trans-unit id="PlaceholderRunCommandProjectAbbreviationDeprecated">
-        <source>NETSDK1176: Placeholder</source>
-        <target state="translated">NETSDK1176: espace réservé</target>
-        <note>{StrBegin="NETSDK1176: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</note>
+        <source>NETSDK1174: Placeholder</source>
+        <target state="translated">NETSDK1174: espace réservé</target>
+        <note>{StrBegin="NETSDK1174: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</note>
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>NETSDK1011: Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>

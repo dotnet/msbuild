@@ -14,20 +14,30 @@ namespace ManifestReaderTests
 {
     internal class FakeManifestProvider : IWorkloadManifestProvider
     {
-        readonly string[] _filePaths;
+        readonly (string manifest, string? localizationCatalog)[] _filePaths;
 
         public FakeManifestProvider(params string[] filePaths)
+        {
+            _filePaths = filePaths.Select(p => (p, (string?)null)).ToArray();
+        }
+
+        public FakeManifestProvider(params (string manifest, string? localizationCatalog)[] filePaths)
         {
             _filePaths = filePaths;
         }
 
         public IEnumerable<string> GetManifestDirectories() => throw new NotImplementedException();
 
-        public IEnumerable<(string manifestId, string? informationalPath, Func<Stream> openManifestStream)> GetManifests()
+        public IEnumerable<(string manifestId, string? informationalPath, Func<Stream> openManifestStream, Func<Stream?> openLocalizationStream)> GetManifests()
         {
             foreach (var filePath in _filePaths)
             {
-                yield return (Path.GetFileNameWithoutExtension(filePath), filePath,() => new FileStream(filePath, FileMode.Open, FileAccess.Read));
+                yield return (
+                    Path.GetFileNameWithoutExtension(filePath.manifest),
+                    filePath.manifest,
+                    () => new FileStream(filePath.manifest, FileMode.Open, FileAccess.Read),
+                    () => filePath.localizationCatalog != null ? new FileStream(filePath.localizationCatalog, FileMode.Open, FileAccess.Read) : null
+                );
             }
         }
 
@@ -41,8 +51,13 @@ namespace ManifestReaderTests
         public void Add(string id, string content) => _manifests.Add((id, Encoding.UTF8.GetBytes(content)));
         public IEnumerable<string> GetManifestDirectories() => throw new NotImplementedException();
 
-        public IEnumerable<(string manifestId, string? informationalPath, Func<Stream> openManifestStream)> GetManifests()
-            => _manifests.Select(m => (m.id, (string?)null, (Func<Stream>)(() => new MemoryStream(m.content))));
+        public IEnumerable<(string manifestId, string? informationalPath, Func<Stream> openManifestStream, Func<Stream?> openLocalizationStream)> GetManifests()
+            => _manifests.Select(m => (
+                m.id,
+                (string?)null,
+                (Func<Stream>)(() => new MemoryStream(m.content)),
+                (Func<Stream?>)(() => null)
+            ));
 
         // these are just so the collection initializer works
         public IEnumerator<(string id, string content)> GetEnumerator() => throw new NotImplementedException();

@@ -302,6 +302,11 @@
         <target state="translated">Spustí F# Interactive / spustí skripty F#.</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadDefinition">
+        <source>Manage optional workloads.</source>
+        <target state="translated">Spravujte volitelné úlohy.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

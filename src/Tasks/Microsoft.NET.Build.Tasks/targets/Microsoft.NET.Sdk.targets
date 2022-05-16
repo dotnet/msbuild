@@ -1081,6 +1081,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <UsingTask TaskName="ValidateExecutableReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
+  <PropertyGroup>
+    <_UseAttributeForTargetFrameworkInfoPropertyNames Condition="$([MSBuild]::VersionGreaterThanOrEquals($(MSBuildVersion), '17.0'))">true</_UseAttributeForTargetFrameworkInfoPropertyNames>
+  </PropertyGroup>
+
   <Target Name="ValidateExecutableReferences"
           AfterTargets="_GetProjectReferenceTargetFrameworkProperties"
           Condition="'$(ValidateExecutableReferencesMatchSelfContained)' != 'false'">
@@ -1089,6 +1093,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       SelfContained="$(SelfContained)"
       IsExecutable="$(_IsExecutable)"
       ReferencedProjects="@(_MSBuildProjectReferenceExistent)"
+      UseAttributeForTargetFrameworkInfoPropertyNames="$(_UseAttributeForTargetFrameworkInfoPropertyNames)"
       />
 
   </Target>

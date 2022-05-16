@@ -78,6 +78,13 @@ namespace Microsoft.DotNet.Tests
             unitUnderTest.GetTelemetryCommonProperties()["Kernel Version"].Should().Be(RuntimeInformation.OSDescription);
         }
 
+        [Fact]
+        public void TelemetryCommonPropertiesShouldContainArchitectureInformation()
+        {
+            var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => null, userLevelCacheWriter: new NothingCache());
+            unitUnderTest.GetTelemetryCommonProperties()["OS Architecture"].Should().Be(RuntimeInformation.OSArchitecture.ToString());
+        }
+
         [WindowsOnlyFact]
         public void TelemetryCommonPropertiesShouldContainWindowsInstallType()
         {

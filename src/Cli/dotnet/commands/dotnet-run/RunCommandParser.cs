@@ -33,6 +33,10 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<bool> InteractiveOption = CommonOptions.InteractiveMsBuildForwardOption();
 
+        public static readonly Option SelfContainedOption = CommonOptions.SelfContainedOption();
+
+        public static readonly Option NoSelfContainedOption = CommonOptions.NoSelfContainedOption();
+
         public static Command GetCommand()
         {
             var command = new Command("run", LocalizableStrings.AppFullName);
@@ -47,6 +51,8 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(NoBuildOption);
             command.AddOption(InteractiveOption);
             command.AddOption(NoRestoreOption);
+            command.AddOption(SelfContainedOption);
+            command.AddOption(NoSelfContainedOption);
             command.AddOption(CommonOptions.VerbosityOption());
             command.AddOption(CommonOptions.ArchitectureOption());
             command.AddOption(CommonOptions.OperatingSystemOption());

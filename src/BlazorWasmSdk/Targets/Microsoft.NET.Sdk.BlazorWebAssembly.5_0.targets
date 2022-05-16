@@ -84,16 +84,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!--
       We want the dotnet.js file output to have a version to better work with caching. We'll append the runtime version to the file name as soon as file has been discovered.
     -->
-    <PropertyGroup>
-      <_DotNetJsVersion>$(BundledNETCoreAppPackageVersion)</_DotNetJsVersion>
-      <_DotNetJsVersion Condition="'$(RuntimeFrameworkVersion)' != ''">$(RuntimeFrameworkVersion)</_DotNetJsVersion>
-      <_BlazorDotnetJsFileName>dotnet.$(_DotNetJsVersion).js</_BlazorDotnetJsFileName>
-      <_BlazorDotNetJsFilePath>$(IntermediateOutputPath)$(_BlazorDotnetJsFileName)</_BlazorDotNetJsFilePath>
-    </PropertyGroup>
-
     <ItemGroup>
       <_DotNetJsItem Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.DestinationSubPath)' == 'dotnet.js' AND '%(ReferenceCopyLocalPaths.AssetType)' == 'native'" />
     </ItemGroup>
+
+    <PropertyGroup>
+      <_DotNetJsVersion>%(_DotNetJsItem.NuGetPackageVersion)</_DotNetJsVersion>
+      <_BlazorDotnetJsFileName>dotnet.$(_DotNetJsVersion).js</_BlazorDotnetJsFileName>
+      <_BlazorDotNetJsFilePath>$(IntermediateOutputPath)$(_BlazorDotnetJsFileName)</_BlazorDotNetJsFilePath>
+    </PropertyGroup>
 
     <Copy
       SourceFiles="@(_DotNetJsItem)"
@@ -285,7 +284,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <_CurrentWasmProjectStaticWebAssets Include="@(_ThisProjectStaticWebAssets)" Condition="'%(SourceId)' == '$(PackageId)'" />
       <_CurrentWasmProjectStaticWebAssets>
-        <!-- We set the asset kind explicitly to build becasue blazor before 6.0 did its own publishing and was
+        <!-- We set the asset kind explicitly to build because blazor before 6.0 did its own publishing and was
              not fully integrated with static web assets, so we let it be even when called from 6.0 targets
         -->
         <AssetKind>Build</AssetKind>

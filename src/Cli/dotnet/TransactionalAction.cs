@@ -2,12 +2,19 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Reflection;
 using System.Transactions;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Cli
 {
     public sealed class TransactionalAction
     {
+        static TransactionalAction()
+        {
+            DisableTransactionTimeoutUpperLimit();
+        }
+
         private class EnlistmentNotification : IEnlistmentNotification
         {
             private Action _commit;
@@ -65,19 +72,44 @@ namespace Microsoft.DotNet.Cli
             // This automatically inherits any ambient transaction
             // If a transaction is inherited, completing this scope will be a no-op
             T result = default(T);
-            using (var scope = new TransactionScope(
-                TransactionScopeOption.Required,
-                TimeSpan.Zero))
+            try
             {
-                Transaction.Current.EnlistVolatile(
-                    new EnlistmentNotification(commit, rollback),
-                    EnlistmentOptions.None);
+                using (var scope = new TransactionScope(
+                    TransactionScopeOption.Required,
+                    TimeSpan.Zero))
+                {
+                    Transaction.Current.EnlistVolatile(
+                        new EnlistmentNotification(commit, rollback),
+                        EnlistmentOptions.None);
 
-                result = action();
+                    result = action();
 
-                scope.Complete();
+                    scope.Complete();
+                }
+
+                return result;
             }
-            return result;
+            catch (TransactionAbortedException ex)
+            {
+                Reporter.Verbose.WriteLine(string.Format("TransactionAbortedException Message: {0}", ex.Message));
+                Reporter.Verbose.WriteLine(
+                    $"Inner Exception Message: {ex?.InnerException?.Message + "---" + ex?.InnerException}");
+                throw;
+            }
+        }
+
+        private static void SetTransactionManagerField(string fieldName, object value)
+        {
+            typeof(TransactionManager).GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Static)
+                .SetValue(null, value);
+        }
+
+        // https://github.com/dotnet/sdk/issues/21101
+        // we should use the proper API once it is available
+        public static void DisableTransactionTimeoutUpperLimit()
+        {
+            SetTransactionManagerField("s_cachedMaxTimeout", true);
+            SetTransactionManagerField("s_maximumTimeout", TimeSpan.Zero);
         }
 
         public static void Run(
@@ -86,7 +118,11 @@ namespace Microsoft.DotNet.Cli
             Action rollback = null)
         {
             Run<object>(
-                action: () => { action(); return null; },
+                action: () =>
+                {
+                    action();
+                    return null;
+                },
                 commit: commit,
                 rollback: rollback);
         }

@@ -12,9 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Instead of using the version of M.C.C defined in Version.props we pin to a minimum required
-    version to avoid issues with loading newer versions of the assembly in VS/VS Code. -->
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisPackageVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharpPackageVersion)" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Internal.SourceGenerator.Transport" Version="$(MicrosoftAspNetCoreRazorInternalSourceGeneratorTransportPackageVersion)" GeneratePathProperty="true" />
   </ItemGroup>
 

@@ -61,7 +61,8 @@ namespace Microsoft.DotNet.ShellShim
                                          appHostDestinationFilePath: appHostDestinationFilePath,
                                          appBinaryFilePath: appBinaryFilePath,
                                          windowsGraphicalUserInterface: false,
-                                         assemblyToCopyResorcesFrom: null);
+                                         assemblyToCopyResorcesFrom: null,
+                                         enableMacOSCodeSign: OperatingSystem.IsMacOS());
             }
 
             _filePermissionSetter.SetUserExecutionPermission(appHostDestinationFilePath);

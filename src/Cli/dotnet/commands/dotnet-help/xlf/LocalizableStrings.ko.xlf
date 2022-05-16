@@ -302,6 +302,11 @@
         <target state="translated">F# Interactive를 시작하고 F# 스크립트를 실행합니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadDefinition">
+        <source>Manage optional workloads.</source>
+        <target state="translated">선택적 워크로드를 관리합니다.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli.Workload.Install.Tests;
 using Microsoft.DotNet.Cli.Workload.Search.Tests;
 using Microsoft.DotNet.PackageInstall.Tests;
@@ -65,7 +66,7 @@ namespace dotnet.Tests
 
             TempDirectoryWorkloadManifestProvider tempDirectoryWorkloadManifestProvider =
                 new TempDirectoryWorkloadManifestProvider(_manifestDirectory, mockWorkloadResolver.GetSdkFeatureBand());
-            IEnumerable<(string manifestId, string informationalPath, Func<Stream> openManifestStream)> manifest =
+            IEnumerable<(string manifestId, string informationalPath, Func<Stream> openManifestStream, Func<Stream> openLocalizationStream)> manifest =
                 tempDirectoryWorkloadManifestProvider.GetManifests();
             manifest.First().manifestId.Should()
                 .NotBe("microsoft.net.workload.emscripten.manifest-6.0.100.6.0.0-preview.7.21377.2");

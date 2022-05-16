@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Linq;
 using System.Runtime.Versioning;
 using Microsoft.Win32.Msi;
 
@@ -21,6 +22,12 @@ namespace Microsoft.DotNet.Installer.Windows
         /// Hides MSI entries from Add/Remove Programs by setting ARPSYSTEMCOMPONENT.
         /// </summary>
         public static readonly string SystemComponent = $"ARPSYSTEMCOMPONENT=1";
+
+        /// <summary>
+        /// Sets IGNOREDEPENDENCIES=ALL, allowing the MSI to be removed when it
+        /// still contains dependents.
+        /// </summary>
+        public static readonly string IgnoreDependencies = $"IGNOREDEPENDENCIES=ALL";
 
         /// <summary>
         /// Reduce the number of actions taken during the InstallValidate action.
@@ -47,7 +54,9 @@ namespace Microsoft.DotNet.Installer.Windows
         /// <returns>A string containing all the properties or <see langword="null" /> if <paramref name="properties"/> contain no values.</returns>
         internal static string Create(params string[] properties)
         {
-            return properties.Length > 0 ? string.Join(' ', properties) : null;
+            string[] props = properties.Where(p => !string.IsNullOrWhiteSpace(p)).ToArray();
+
+            return props.Length > 0 ? string.Join(' ', props) : null;
         }
     }
 }

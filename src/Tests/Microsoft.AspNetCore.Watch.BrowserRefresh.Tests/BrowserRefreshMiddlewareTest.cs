@@ -16,7 +16,7 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
         [InlineData("DELETE")]
         [InlineData("head")]
         [InlineData("Put")]
-        public void IsBrowserRequest_ReturnsFalse_ForNonGetOrPostRequests(string method)
+        public void IsBrowserDocumentRequest_ReturnsFalse_ForNonGetOrPostRequests(string method)
         {
             // Arrange
             var context = new DefaultHttpContext
@@ -32,14 +32,14 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
             };
 
             // Act
-            var result = BrowserRefreshMiddleware.IsBrowserRequest(context);
+            var result = BrowserRefreshMiddleware.IsBrowserDocumentRequest(context);
 
             // Assert
             Assert.False(result);
         }
 
         [Fact]
-        public void IsBrowserRequest_ReturnsFalse_IsRequestDoesNotAcceptHtml()
+        public void IsBrowserDocumentRequest_ReturnsFalse_IsRequestDoesNotAcceptHtml()
         {
             // Arrange
             var context = new DefaultHttpContext
@@ -55,14 +55,14 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
             };
 
             // Act
-            var result = BrowserRefreshMiddleware.IsBrowserRequest(context);
+            var result = BrowserRefreshMiddleware.IsBrowserDocumentRequest(context);
 
             // Assert
             Assert.False(result);
         }
 
         [Fact]
-        public void IsBrowserRequest_ReturnsTrue_ForGetRequestsThatAcceptHtml()
+        public void IsBrowserDocumentRequest_ReturnsTrue_ForGetRequestsThatAcceptHtml()
         {
             // Arrange
             var context = new DefaultHttpContext
@@ -78,14 +78,14 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
             };
 
             // Act
-            var result = BrowserRefreshMiddleware.IsBrowserRequest(context);
+            var result = BrowserRefreshMiddleware.IsBrowserDocumentRequest(context);
 
             // Assert
             Assert.True(result);
         }
 
         [Fact]
-        public void IsBrowserRequest_ReturnsTrue_ForRequestsThatAcceptAnyHtml()
+        public void IsBrowserDocumentRequest_ReturnsTrue_ForRequestsThatAcceptAnyHtml()
         {
             // Arrange
             var context = new DefaultHttpContext
@@ -101,10 +101,110 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
             };
 
             // Act
-            var result = BrowserRefreshMiddleware.IsBrowserRequest(context);
+            var result = BrowserRefreshMiddleware.IsBrowserDocumentRequest(context);
 
             // Assert
             Assert.True(result);
+        }
+
+        [Fact]
+        public void IsBrowserDocumentRequest_ReturnsTrue_IfRequestDoesNotHaveFetchMetadataRequestHeader()
+        {
+            // Arrange
+            var context = new DefaultHttpContext
+            {
+                Request =
+                {
+                    Method = "GET",
+                    Headers =
+                    {
+                        ["Accept"] = "text/html",
+                    },
+                },
+            };
+
+            // Act
+            var result = BrowserRefreshMiddleware.IsBrowserDocumentRequest(context);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void IsBrowserDocumentRequest_ReturnsTrue_IfRequestFetchMetadataRequestHeaderIsEmpty()
+        {
+            // Arrange
+            var context = new DefaultHttpContext
+            {
+                Request =
+                {
+                    Method = "Post",
+                    Headers =
+                    {
+                        ["Accept"] = "text/html",
+                        ["Sec-Fetch-Dest"] = string.Empty,
+                    },
+                },
+            };
+
+            // Act
+            var result = BrowserRefreshMiddleware.IsBrowserDocumentRequest(context);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Theory]
+        [InlineData("document")]
+        [InlineData("Document")]
+        public void IsBrowserDocumentRequest_ReturnsTrue_IfRequestFetchMetadataRequestHeaderIsDocument(string headerValue)
+        {
+            // Arrange
+            var context = new DefaultHttpContext
+            {
+                Request =
+                {
+                    Method = "Post",
+                    Headers =
+                    {
+                        ["Accept"] = "text/html",
+                        ["Sec-Fetch-Dest"] = headerValue,
+                    },
+                },
+            };
+
+            // Act
+            var result = BrowserRefreshMiddleware.IsBrowserDocumentRequest(context);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Theory]
+        [InlineData("frame")]
+        [InlineData("iframe")]
+        [InlineData("serviceworker")]
+        public void IsBrowserDocumentRequest_ReturnsFalse_IfRequestFetchMetadataRequestHeaderIsNotDocument(string headerValue)
+        {
+            // Arrange
+            var context = new DefaultHttpContext
+            {
+                Request =
+                {
+                    Method = "Post",
+                    Headers =
+                    {
+                        ["Accept"] = "text/html",
+                        ["Sec-Fetch-Dest"] = headerValue,
+                    },
+                },
+            };
+
+            // Act
+            var result = BrowserRefreshMiddleware.IsBrowserDocumentRequest(context);
+
+            // Assert
+            Assert.False(result);
         }
 
         [Fact]

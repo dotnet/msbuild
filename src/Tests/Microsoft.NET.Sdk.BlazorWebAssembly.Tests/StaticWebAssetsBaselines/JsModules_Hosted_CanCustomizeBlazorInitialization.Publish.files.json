@@ -238,5 +238,5 @@
   "${OutputPath}\\wwwroot\\custom-service-worker-assets.js",
   "${OutputPath}\\wwwroot\\index.html",
   "${OutputPath}\\wwwroot\\serviceworkers\\my-service-worker.js",
-  "${ProjectPath}\\blazorhosted\\obj\\Debug\\net6.0\\jsmodules\\jsmodules.publish.manifest.json"
+  "${ProjectPath}\\blazorhosted\\obj\\Debug\\${Tfm}\\jsmodules\\jsmodules.publish.manifest.json"
 ]

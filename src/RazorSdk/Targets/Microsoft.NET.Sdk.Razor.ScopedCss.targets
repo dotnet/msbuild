@@ -353,7 +353,7 @@ Integration with static web assets:
   <ConcatenateCssFiles
     Condition="'@(_ScopedCss)' != ''"
     ScopedCssFiles="@(_CurrentProjectDiscoveredScopedCssFiles)"
-    ProjectBundles="@()"
+    ProjectBundles=""
     ScopedCssBundleBasePath="$(_ScopedCssBundleBasePath)"
     OutputFile="$(_ScopedCssProjectOutputPath)" />
 

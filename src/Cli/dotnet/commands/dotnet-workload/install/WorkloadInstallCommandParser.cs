@@ -61,6 +61,11 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.VerbosityOption();
 
+        public static readonly Option<string> FromRollbackFileOption = new Option<string>("--from-rollback-file", Microsoft.DotNet.Workloads.Workload.Update.LocalizableStrings.FromRollbackDefinitionOptionDescription)
+        {
+            IsHidden = true
+        };
+
         public static Command GetCommand()
         {
             var command = new Command("install", LocalizableStrings.CommandDescription);
@@ -84,6 +89,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(TempDirOption);
             command.AddWorkloadCommandNuGetRestoreActionConfigOptions();
             command.AddOption(VerbosityOption);
+            command.AddOption(FromRollbackFileOption);
         }
     }
 }

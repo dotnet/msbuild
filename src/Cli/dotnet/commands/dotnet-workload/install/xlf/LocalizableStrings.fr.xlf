@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="FailedAdManifestUpdate">
         <source>Failed to update the advertising manifest {0}: {1}.</source>
-        <target state="new">Failed to update the advertising manifest {0}: {1}.</target>
+        <target state="translated">Échec de la mise à jour du manifeste de publicité {0} : {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToDownloadPackageManifest">
@@ -183,8 +183,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
-        <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs.</source>
-        <target state="translated">Définition de restauration non valide. Les ID de manifeste dans la définition de restauration {0} ne correspondent pas aux ID de manifeste installés.</target>
+        <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</source>
+        <target state="translated">Définition de restauration non valide. Les ID de manifeste dans la définition de restauration {0} ne correspondent pas aux ID de manifeste installés {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionFileDoesNotExist">

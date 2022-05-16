@@ -370,44 +370,13 @@ namespace Microsoft.NET.Build.Tests
             AssemblyInfo.Get(assemblyPath)["InternalsVisibleToAttribute"].Should().Be("Tests");
         }
 
-        private static string _cachedLatestTargetFramework = null;
-
-        private static string LatestTargetFramework
-        {
-            get
-            {
-                if (_cachedLatestTargetFramework == null)
-                {
-                    var logger = new StringTestLogger();
-                    var testAssetsManager = new TestAssetsManager(logger);
-                    TestDirectory testDirectory = testAssetsManager.CreateTestDirectory();
-                    string path = testDirectory.Path;
-                    var cmd = new DotnetCommand(logger)
-                        .WithWorkingDirectory(path)
-                        .Execute("new", "console");
-
-                    string projectFile = Path.Combine(path, $"{Path.GetFileName(path)}.csproj");
-                    XDocument projectXml = XDocument.Load(projectFile);
-                    XNamespace ns = projectXml.Root.Name.Namespace;
-                    _cachedLatestTargetFramework = projectXml.Root.Element(ns + "PropertyGroup").Element(ns + "TargetFramework").Value;
-                }
-
-                return _cachedLatestTargetFramework;
-            }
-        }
-
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData(true, true, "net5.0")]
-        [InlineData(true, true, "")]
-        [InlineData(true, false, "")]
-        [InlineData(false, false, "")]
+        [InlineData(true, true, ToolsetInfo.CurrentTargetFramework)]
+        [InlineData(true, false, ToolsetInfo.CurrentTargetFramework)]
+        [InlineData(false, false, ToolsetInfo.CurrentTargetFramework)]
         public void TestPreviewFeatures(bool enablePreviewFeatures, bool generateRequiresPreviewFeaturesAttribute, string targetFramework)
         {
-            if (targetFramework == "")
-            {
-                targetFramework = LatestTargetFramework;
-            }
-
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: $"{enablePreviewFeatures}${generateRequiresPreviewFeaturesAttribute}${targetFramework}")
                 .WithSource()
@@ -452,7 +421,7 @@ namespace Microsoft.NET.Build.Tests
 
             if (enablePreviewFeatures && generateRequiresPreviewFeaturesAttribute)
             {
-                if (targetFramework == LatestTargetFramework)
+                if (targetFramework == ToolsetInfo.CurrentTargetFramework)
                 {
                     Assert.Equal("Preview", langVersion);
                     Assert.True(contains);

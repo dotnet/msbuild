@@ -4,6 +4,7 @@
 #if !USE_SYSTEM_TEXT_JSON
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 using Newtonsoft.Json;
@@ -14,15 +15,31 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     public partial class WorkloadManifestReader
     {
-        public static WorkloadManifest ReadWorkloadManifest(string manifestId, Stream manifestStream, string? informationalPath = null)
+        public static WorkloadManifest ReadWorkloadManifest(string manifestId, Stream manifestStream, Stream? localizationStream, string? informationalPath = null)
         {
             using var textReader = new StreamReader(manifestStream, System.Text.Encoding.UTF8, true);
             using var jsonReader = new JsonTextReader(textReader);
 
-            var reader = new Utf8JsonStreamReader(jsonReader);
+            var manifestReader = new Utf8JsonStreamReader(jsonReader);
 
-            return ReadWorkloadManifest(manifestId, informationalPath, ref reader);
+            return ReadWorkloadManifest(manifestId, informationalPath, ReadLocalizationCatalog(localizationStream), ref manifestReader); ;
         }
+
+        private static LocalizationCatalog? ReadLocalizationCatalog(Stream? localizationStream)
+        {
+            if (localizationStream == null)
+            {
+                return null;
+            }
+
+            using var textReader = new StreamReader(localizationStream, System.Text.Encoding.UTF8, true);
+            using var jsonReader = new JsonTextReader(textReader);
+
+            var localizationReader = new Utf8JsonStreamReader(jsonReader);
+
+            return ReadLocalizationCatalog(ref localizationReader);
+        }
+
         // this is a compat wrapper so the source matches the system.text.json impl
         private ref struct Utf8JsonStreamReader
         {

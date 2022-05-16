@@ -45,6 +45,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly string _userProfileDir;
         private readonly string _tempDirPath;
         private readonly string _dotnetPath;
+        private readonly string _fromRollbackDefinition;
 
         public WorkloadInstallCommand(
             ParseResult parseResult,
@@ -75,6 +76,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadInstallCommandParser.TempDirOption)) ?
                 Path.GetTempPath() :
                 parseResult.ValueForOption<string>(WorkloadInstallCommandParser.TempDirOption));
+            _fromRollbackDefinition = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.FromRollbackFileOption);
 
             var configOption = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.ConfigOption);
             var sourceOption = parseResult.ValueForOption<string[]>(WorkloadInstallCommandParser.SourceOption);
@@ -176,7 +178,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 workloadIds = workloadIds.Concat(installedWorkloads).Distinct();
 
                 _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews, offlineCache).Wait();
-                manifestsToUpdate = _workloadManifestUpdater.CalculateManifestUpdates().Select(m => (m.manifestId, m.existingVersion, m.newVersion));
+                manifestsToUpdate = string.IsNullOrWhiteSpace(_fromRollbackDefinition) ?
+                    _workloadManifestUpdater.CalculateManifestUpdates().Select(m => (m.manifestId, m.existingVersion, m.newVersion)) :
+                    _workloadManifestUpdater.CalculateManifestRollbacks(_fromRollbackDefinition);
             }
 
             InstallWorkloadsWithInstallRecord(workloadIds, _sdkFeatureBand, manifestsToUpdate, offlineCache);
@@ -220,9 +224,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 TransactionalAction.Run(
                     action: () =>
                     {
+                        bool rollback = !string.IsNullOrWhiteSpace(_fromRollbackDefinition);
+
                         foreach (var manifest in manifestsToUpdate)
                         {
-                            _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.newVersion, sdkFeatureBand, offlineCache);
+                            _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.newVersion, sdkFeatureBand, offlineCache, rollback);
                         }
 
                         _workloadResolver.RefreshWorkloadManifests();

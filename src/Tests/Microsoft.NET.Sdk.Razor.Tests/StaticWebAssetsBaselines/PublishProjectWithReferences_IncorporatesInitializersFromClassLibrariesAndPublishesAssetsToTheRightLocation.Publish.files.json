@@ -12,6 +12,6 @@
   "${OutputPath}\\wwwroot\\_content\\PackageLibraryDirectDependency\\css\\site.css",
   "${OutputPath}\\wwwroot\\_content\\PackageLibraryDirectDependency\\js\\pkg-direct-dep.js",
   "${OutputPath}\\wwwroot\\_content\\PackageLibraryTransitiveDependency\\js\\pkg-transitive-dep.js",
-  "${ProjectPath}\\AppWithPackageAndP2PReference\\obj\\Debug\\net6.0\\jsmodules\\jsmodules.publish.manifest.json",
-  "${ProjectPath}\\AppWithPackageAndP2PReference\\obj\\Debug\\net6.0\\scopedcss\\bundle\\AppWithPackageAndP2PReference.styles.css"
+  "${ProjectPath}\\AppWithPackageAndP2PReference\\obj\\Debug\\${Tfm}\\jsmodules\\jsmodules.publish.manifest.json",
+  "${ProjectPath}\\AppWithPackageAndP2PReference\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\AppWithPackageAndP2PReference.styles.css"
 ]

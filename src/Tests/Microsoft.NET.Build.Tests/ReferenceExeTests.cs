@@ -277,7 +277,7 @@ namespace Microsoft.NET.Build.Tests
             var testProjectDirectory = Path.Combine(testAsset.TestRoot, "TestProject");
             Directory.CreateDirectory(testProjectDirectory);
 
-            new DotnetCommand(Log, "new", testTemplateName)
+            new DotnetCommand(Log, "new", testTemplateName, "--debug:ephemeral-hive")
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
                 .Should()
@@ -304,7 +304,7 @@ namespace Microsoft.NET.Build.Tests
             var testConsoleProject = new TestProject("ConsoleApp")
             {
                 IsExe = true,
-                TargetFrameworks = "net6.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
             };
 
@@ -313,7 +313,7 @@ namespace Microsoft.NET.Build.Tests
             var testProjectDirectory = Path.Combine(testAsset.TestRoot, "TestProject");
             Directory.CreateDirectory(testProjectDirectory);
 
-            new DotnetCommand(Log, "new", testTemplateName)
+            new DotnetCommand(Log, "new", testTemplateName, "--debug:ephemeral-hive")
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
                 .Should()

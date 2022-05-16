@@ -550,6 +550,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <FileWrites Include="$(_GeneratedBuildPropsFile)" />
       <FileWrites Include="$(_GeneratedBuildMultitargetingPropsFile)" />
       <FileWrites Include="$(_GeneratedBuildTransitivePropsFile)" />
+      <FileWrites Include="$(BaseIntermediateOutputPath)staticwebassets.pack.sentinel" />
     </ItemGroup>
 
     <!-- All files that go into the nuget package -->

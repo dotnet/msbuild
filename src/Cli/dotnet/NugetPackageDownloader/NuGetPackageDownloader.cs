@@ -33,6 +33,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         private readonly ILogger _verboseLogger;
         private readonly DirectoryPath _packageInstallDir;
         private readonly RestoreActionConfig _restoreActionConfig;
+        private readonly Func<IEnumerable<Task>> _retryTimer;
 
         /// <summary>
         /// Reporter would output to the console regardless
@@ -44,7 +45,10 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         public NuGetPackageDownloader(DirectoryPath packageInstallDir,
             IFilePermissionSetter filePermissionSetter = null,
             IFirstPartyNuGetPackageSigningVerifier firstPartyNuGetPackageSigningVerifier = null,
-            ILogger verboseLogger = null, IReporter reporter = null, RestoreActionConfig restoreActionConfig = null)
+            ILogger verboseLogger = null,
+            IReporter reporter = null,
+            RestoreActionConfig restoreActionConfig = null,
+            Func<IEnumerable<Task>> timer = null)
         {
             _packageInstallDir = packageInstallDir;
             _reporter = reporter ?? Reporter.Output;
@@ -54,6 +58,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                                                          tempDirectory: packageInstallDir, logger: _verboseLogger);
             _filePermissionSetter = filePermissionSetter ?? new FilePermissionSetter();
             _restoreActionConfig = restoreActionConfig ?? new RestoreActionConfig();
+            _retryTimer = timer;
 
             _cacheSettings = new SourceCacheContext
             {
@@ -101,13 +106,13 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             Directory.CreateDirectory(Path.GetDirectoryName(nupkgPath));
             using FileStream destinationStream = File.Create(nupkgPath);
-            bool success = await resource.CopyNupkgToStreamAsync(
+            bool success = await ExponentialRetry.ExecuteWithRetryOnFailure(async () => await resource.CopyNupkgToStreamAsync(
                 packageId.ToString(),
                 resolvedPackageVersion,
                 destinationStream,
                 _cacheSettings,
                 _verboseLogger,
-                cancellationToken);
+                cancellationToken));
             destinationStream.Close();
 
             if (!success)

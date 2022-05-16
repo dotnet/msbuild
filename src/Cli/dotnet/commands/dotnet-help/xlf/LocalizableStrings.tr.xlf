@@ -302,6 +302,11 @@
         <target state="translated">F# Etkileşimli'yi başlatın / F# betiklerini yürütün.</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadDefinition">
+        <source>Manage optional workloads.</source>
+        <target state="translated">İsteğe bağlı iş yüklerini yönetin.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

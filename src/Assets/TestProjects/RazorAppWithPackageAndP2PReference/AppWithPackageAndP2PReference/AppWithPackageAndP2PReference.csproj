@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>$(AspNetTestTfm)</TargetFramework>
+    <RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources);./TestPackages</RestoreAdditionalProjectSources>
   </PropertyGroup>
 
   <PropertyGroup>

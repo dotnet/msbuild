@@ -286,7 +286,7 @@
     <value>Provided rollback definition file {0} doesn't exist.</value>
   </data>
   <data name="RollbackDefinitionContainsExtraneousManifestIds" xml:space="preserve">
-    <value>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs.</value>
+    <value>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</value>
   </data>
   <data name="InsufficientPrivilegeToStartServer" xml:space="preserve">
     <value>Insufficient privilege to start the server.</value>

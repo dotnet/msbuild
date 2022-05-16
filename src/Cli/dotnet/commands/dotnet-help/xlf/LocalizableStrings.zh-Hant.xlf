@@ -302,6 +302,11 @@
         <target state="translated">啟動 F# Interactive/執行 F# 指令碼。</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadDefinition">
+        <source>Manage optional workloads.</source>
+        <target state="translated">管理選擇性工作負載。</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

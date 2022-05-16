@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright (c) .NET Foundation and contributors. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
@@ -7,10 +7,9 @@
 import copy
 from pandocfilters import toJSONFilters, Para, Str, Header, Space
 
-def remove_includes(key, value, format, meta):
+def fail_on_includes(key, value, format, meta):
     if key == 'Para' and value[0]['c'] == '[!INCLUDE':
-        return Para([Str("")])
-    return None
+        assert False, 'Found an unexpected [!INCLUDE'
 
 def promote_and_capitalize_sections(key, value, format, meta):
     if key == 'Header':
@@ -34,18 +33,11 @@ def demote_net_core_1_2(key, value, format, meta):
             return value
     return None
 
-def remove_references(key, value, format, meta):
-    if key == 'Link':
-        pass
-        return value[1]
-    return None
-
 def main():
     toJSONFilters([
-        remove_includes,
+        fail_on_includes,
         promote_and_capitalize_sections,
         demote_net_core_1_2,
-        remove_references,
     ])
 
 if __name__ == '__main__':

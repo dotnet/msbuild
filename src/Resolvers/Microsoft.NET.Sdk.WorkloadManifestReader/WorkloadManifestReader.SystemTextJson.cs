@@ -5,6 +5,7 @@
 
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 
@@ -12,7 +13,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     public partial class WorkloadManifestReader
     {
-        public static WorkloadManifest ReadWorkloadManifest(string manifestId, Stream manifestStream, string? informationalPath = null)
+        public static WorkloadManifest ReadWorkloadManifest(string manifestId, Stream manifestStream, Stream? localizationStream, string? informationalPath = null)
         {
             var readerOptions = new JsonReaderOptions
             {
@@ -20,9 +21,21 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 CommentHandling = JsonCommentHandling.Skip
             };
 
-            var reader = new Utf8JsonStreamReader(manifestStream, readerOptions);
+            var localizationCatalog = ReadLocalizationCatalog(localizationStream, readerOptions);
+            var manifestReader = new Utf8JsonStreamReader(manifestStream, readerOptions);
 
-            return ReadWorkloadManifest(manifestId, informationalPath, ref reader);
+            return ReadWorkloadManifest(manifestId, informationalPath, localizationCatalog, ref manifestReader);
+        }
+
+        private static LocalizationCatalog? ReadLocalizationCatalog(Stream? localizationStream, JsonReaderOptions readerOptions)
+        {
+            if (localizationStream == null)
+            {
+                return null;
+            }
+
+            var localizationReader = new Utf8JsonStreamReader(localizationStream, readerOptions);
+            return ReadLocalizationCatalog(ref localizationReader);
         }
 
         private ref struct Utf8JsonStreamReader

@@ -8,9 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- We pin the versions of the assets that ship with the SDK in order to be able to run on older SDKs. 
-    Currently we support .NET 6 Preview5 or later. -->
-    <PackageReference Include="Microsoft.CodeAnalysis" Version="4.0.0-1.21304.5" />
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="$(MicrosoftCodeAnalysisPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>

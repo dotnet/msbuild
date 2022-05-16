@@ -22,6 +22,7 @@ using Xunit.Abstractions;
 using System.Security.Cryptography.X509Certificates;
 using System.Linq;
 using System.Threading;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.PackageInstall.Tests
 {
@@ -42,8 +43,8 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             _tempDirectory = GetUniqueTempProjectPathEachTest();
             _logger = new NuGetTestLogger();
             _installer =
-                new NuGetPackageDownloader(_tempDirectory, null, new MockFirstPartyNuGetPackageSigningVerifier(),
-                    _logger, restoreActionConfig: new RestoreActionConfig(NoCache: true));
+                new NuGetPackageDownloader(_tempDirectory, null, new MockFirstPartyNuGetPackageSigningVerifier(), _logger,
+                    restoreActionConfig: new RestoreActionConfig(NoCache: true), timer: () => ExponentialRetry.Timer(ExponentialRetry.TestingIntervals));
         }
 
         [Fact]

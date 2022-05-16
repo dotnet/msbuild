@@ -52,13 +52,15 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void GivenWorkloadInstallItCanInstallPacks(bool userLocal)
+        [InlineData(true, "6.0.100")]
+        [InlineData(true, "6.0.101")]
+        [InlineData(true, "6.0.102-preview1")]
+        [InlineData(false, "6.0.100")]
+        public void GivenWorkloadInstallItCanInstallPacks(bool userLocal, string sdkVersion)
         {
             var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android") };
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android", "--skip-manifest-update" });
-            (_, var installManager, var installer, _, _, _) = GetTestInstallers(parseResult, userLocal);
+            (_, var installManager, var installer, _, _, _) = GetTestInstallers(parseResult, userLocal, sdkVersion);
 
             installManager.InstallWorkloads(mockWorkloadIds, true);
 
@@ -70,13 +72,15 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void GivenWorkloadInstallItCanRollBackPackInstallation(bool userLocal)
+        [InlineData(true, "6.0.100")]
+        [InlineData(true, "6.0.101")]
+        [InlineData(true, "6.0.102-preview1")]
+        [InlineData(false, "6.0.100")]
+        public void GivenWorkloadInstallItCanRollBackPackInstallation(bool userLocal, string sdkVersion)
         {
             var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android"), new WorkloadId("xamarin-android-build") };
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android", "xamarin-android-build", "--skip-manifest-update" });
-            (_, var installManager, var installer, var workloadResolver, _, _) = GetTestInstallers(parseResult, userLocal, failingWorkload: "xamarin-android-build");
+            (_, var installManager, var installer, var workloadResolver, _, _) = GetTestInstallers(parseResult, userLocal, sdkVersion, failingWorkload: "xamarin-android-build");
 
             var exceptionThrown = Assert.Throws<Exception>(() => installManager.InstallWorkloads(mockWorkloadIds, true));
             exceptionThrown.Message.Should().Be("Failing workload: xamarin-android-build");
@@ -106,12 +110,14 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void GivenWorkloadInstallItCanUpdateAdvertisingManifests(bool userLocal)
+        [InlineData(true, "6.0.100")]
+        [InlineData(true, "6.0.101")]
+        [InlineData(true, "6.0.102-preview1")]
+        [InlineData(false, "6.0.100")]
+        public void GivenWorkloadInstallItCanUpdateAdvertisingManifests(bool userLocal, string sdkVersion)
         {
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android" });
-            (_, var installManager, var installer, _, var manifestUpdater, _) = GetTestInstallers(parseResult, userLocal);
+            (_, var installManager, var installer, _, var manifestUpdater, _) = GetTestInstallers(parseResult, userLocal, sdkVersion);
 
             installManager.InstallWorkloads(new List<WorkloadId>(), false); // Don't actually do any installs, just update manifests
 
@@ -137,9 +143,11 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void GivenWorkloadInstallItCanUpdateInstalledManifests(bool userLocal)
+        [InlineData(true, "6.0.100")]
+        [InlineData(true, "6.0.101")]
+        [InlineData(true, "6.0.102-preview1")]
+        [InlineData(false, "6.0.100")]
+        public void GivenWorkloadInstallItCanUpdateInstalledManifests(bool userLocal, string sdkVersion)
         {
             var parseResult =
                 Parser.Instance.Parse(new string[] {"dotnet", "workload", "install", "xamarin-android"});
@@ -151,7 +159,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                             null),
                     };
             (_, var installManager, var installer, _, _, _) =
-                GetTestInstallers(parseResult, userLocal, manifestUpdates: manifestsToUpdate);
+                GetTestInstallers(parseResult, userLocal, sdkVersion, manifestUpdates: manifestsToUpdate);
 
             installManager.InstallWorkloads(new List<WorkloadId>(), false); // Don't actually do any installs, just update manifests
 
@@ -162,9 +170,11 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void GivenWorkloadInstallFromCacheItInstallsCachedManifest(bool userLocal)
+        [InlineData(true, "6.0.100")]
+        [InlineData(true, "6.0.101")]
+        [InlineData(true, "6.0.102-preview1")]
+        [InlineData(false, "6.0.100")]
+        public void GivenWorkloadInstallFromCacheItInstallsCachedManifest(bool userLocal, string sdkVersion)
         {
             var manifestsToUpdate =
                 new (ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition>
@@ -173,13 +183,13 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                         (new ManifestId("mock-manifest"), new ManifestVersion("1.0.0"), new ManifestVersion("2.0.0"),
                             null)
                     };
-            var cachePath = Path.Combine(_testAssetsManager.CreateTestDirectory(identifier: AppendForUserLocal("mockCache_", userLocal)).Path,
+            var cachePath = Path.Combine(_testAssetsManager.CreateTestDirectory(identifier: AppendForUserLocal("mockCache_", userLocal) + sdkVersion).Path,
                 "mockCachePath");
             var parseResult = Parser.Instance.Parse(new string[]
             {
                 "dotnet", "workload", "install", "xamarin-android", "--from-cache", cachePath
             });
-            (_, var installManager, var installer, _, _, _) = GetTestInstallers(parseResult, userLocal,
+            (_, var installManager, var installer, _, _, _) = GetTestInstallers(parseResult, userLocal, sdkVersion,
                 tempDirManifestPath: _manifestPath, manifestUpdates: manifestsToUpdate);
 
             installManager.Execute();
@@ -191,13 +201,15 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void GivenWorkloadInstallItCanDownloadToOfflineCache(bool userLocal)
+        [InlineData(true, "6.0.100")]
+        [InlineData(true, "6.0.101")]
+        [InlineData(true, "6.0.102-preview1")]
+        [InlineData(false, "6.0.100")]
+        public void GivenWorkloadInstallItCanDownloadToOfflineCache(bool userLocal, string sdkVersion)
         {
-            var cachePath = Path.Combine(_testAssetsManager.CreateTestDirectory(identifier: AppendForUserLocal("mockCache_", userLocal)).Path, "mockCachePath");
+            var cachePath = Path.Combine(_testAssetsManager.CreateTestDirectory(identifier: AppendForUserLocal("mockCache_", userLocal) + sdkVersion).Path, "mockCachePath");
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android", "--download-to-cache", cachePath });
-            (_, var installManager, var installer, _, var manifestUpdater, _) = GetTestInstallers(parseResult, userLocal, tempDirManifestPath: _manifestPath);
+            (_, var installManager, var installer, _, var manifestUpdater, _) = GetTestInstallers(parseResult, userLocal, sdkVersion, tempDirManifestPath: _manifestPath);
 
             installManager.Execute();
 
@@ -210,14 +222,16 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void GivenWorkloadInstallItCanInstallFromOfflineCache(bool userLocal)
+        [InlineData(true, "6.0.100")]
+        [InlineData(true, "6.0.101")]
+        [InlineData(true, "6.0.102-preview1")]
+        [InlineData(false, "6.0.100")]
+        public void GivenWorkloadInstallItCanInstallFromOfflineCache(bool userLocal, string sdkVersion)
         {
             var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android") };
             var cachePath = "mockCachePath";
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android", "--from-cache", cachePath });
-            (_, var installManager, var installer, _, _, var nugetDownloader) = GetTestInstallers(parseResult, userLocal);
+            (_, var installManager, var installer, _, _, var nugetDownloader) = GetTestInstallers(parseResult, userLocal, sdkVersion);
 
             installManager.Execute();
 
@@ -230,12 +244,14 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-		public void GivenWorkloadInstallItPrintsDownloadUrls(bool userLocal)
+        [InlineData(true, "6.0.100")]
+        [InlineData(true, "6.0.101")]
+        [InlineData(true, "6.0.102-preview1")]
+        [InlineData(false, "6.0.100")]
+		public void GivenWorkloadInstallItPrintsDownloadUrls(bool userLocal, string sdkVersion)
         {
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android", "--print-download-link-only" });
-            (_, var installManager, _, _, _, _) = GetTestInstallers(parseResult, userLocal, tempDirManifestPath: _manifestPath);
+            (_, var installManager, _, _, _, _) = GetTestInstallers(parseResult, userLocal, sdkVersion, tempDirManifestPath: _manifestPath);
 
             installManager.Execute();
 
@@ -312,20 +328,20 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         private (string, WorkloadInstallCommand, MockPackWorkloadInstaller, IWorkloadResolver, MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
                 ParseResult parseResult,
                 bool userLocal,
+                string sdkVersion,
                 [CallerMemberName] string testName = "",
                 string failingWorkload = null,
                 IEnumerable<(ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition> Workloads)> manifestUpdates = null,
                 string tempDirManifestPath = null)
         {
             _reporter.Clear();
-            var testDirectory = _testAssetsManager.CreateTestDirectory(testName: testName, identifier: userLocal ? "userlocal" : "default").Path;
+            var testDirectory = _testAssetsManager.CreateTestDirectory(testName: testName, identifier: (userLocal ? "userlocal" : "default") + sdkVersion).Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
             var userProfileDir = Path.Combine(testDirectory, "user-profile");
             var installer = new MockPackWorkloadInstaller(failingWorkload);
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var manifestUpdater = new MockWorkloadManifestUpdater(manifestUpdates, tempDirManifestPath);
-            string sdkVersion = "6.0.100";
             if (userLocal)
             {
                 WorkloadFileBasedInstall.SetUserLocal(dotnetRoot, sdkVersion);
@@ -339,9 +355,33 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 workloadManifestUpdater: manifestUpdater,
                 userProfileDir: userProfileDir,
                 dotnetDir: dotnetRoot,
-                version: "6.0.100");
+                version: sdkVersion);
 
             return (testDirectory, installManager, installer, workloadResolver, manifestUpdater, nugetDownloader);
+        }
+
+        [Fact]
+        public void GivenWorkloadInstallItErrorsOnInvalidWorkloadRollbackFile()
+        {
+            _reporter.Clear();
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            var userProfileDir = Path.Combine(testDirectory, "user-profile");
+            var tmpDir = Path.Combine(testDirectory, "tmp");
+            var manifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "MockWorkloadsSample.json");
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { manifestPath }), dotnetRoot);
+            var sdkFeatureVersion = "6.0.100";
+            var workload = "mock-1";
+            var mockRollbackFileContent = @"{""fake.manifest.name"":""1.0.0""}";
+            var rollbackFilePath = Path.Combine(testDirectory, "rollback.json");
+            File.WriteAllText(rollbackFilePath, mockRollbackFileContent);
+
+            var installParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", workload, "--from-rollback-file", rollbackFilePath });
+            var installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: new MockNuGetPackageDownloader(tmpDir),
+                userProfileDir: userProfileDir, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
+            
+            Assert.Throws<GracefulException>(() => installCommand.Execute());
+            string.Join(" ", _reporter.Lines).Should().Contain("Invalid rollback definition");
         }
 
         private string AppendForUserLocal(string identifier, bool userLocal)

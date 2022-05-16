@@ -183,8 +183,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
-        <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs.</source>
-        <target state="translated">Geri alma tanımı geçersiz. {0} geri alma tanımındaki bildirim kimlikleri yüklü bildirim kimlikleriyle eşleşmiyor.</target>
+        <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</source>
+        <target state="translated">Geri alma tanımı geçersiz. {0} geri alma tanımındaki bildirim kimlikleri yüklü bildirim kimlikleriyle ({1}) eşleşmiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionFileDoesNotExist">

@@ -29,6 +29,11 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData("netcoreapp3.0")]
         public void It_publishes_portable_apps_to_the_publish_folder_and_the_app_should_run(string targetFramework)
         {
+            if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
+            {
+                return;
+            }
+
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: targetFramework)
                 .WithSource()
@@ -696,7 +701,7 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "PublishMultitarget",
-                TargetFrameworks = "net472;net5.0"
+                TargetFrameworks = $"net472;{ToolsetInfo.CurrentTargetFramework}"
             };
             testProject.AdditionalProperties.Add("IsPublishable", "false");
             var testAsset = _testAssetsManager.CreateTestProject(testProject);

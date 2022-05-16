@@ -665,7 +665,7 @@ class Program
                     WorkingDirectory = testAsset.TestRoot
                 };
 
-                dotnetCommand.Execute("new", "sln")
+                dotnetCommand.Execute("new", "sln", "--debug:ephemeral-hive")
                     .Should()
                     .Pass();
 
@@ -846,12 +846,12 @@ class Program
         [InlineData("net5.0", true, false, false, null)]    // Pre .NET 6.0 predefinedCulturesOnly is not supported.
         [InlineData("net5.0", false, true, true, "True")]   // Pre .NET 6.0 predefinedCulturesOnly can end up in the runtime config file but with no effect at runtime.
         [InlineData("net5.0", true, true, true, "True")]    // Pre .NET 6.0 predefinedCulturesOnly can end up in the runtime config file but with no effect at runtime.
-        [InlineData("net6.0", false, false, false, null)]   // predefinedCulturesOnly will not be included in the runtime config file if invariant is not defined.
-        [InlineData("net6.0", false, false, true, "False")] // predefinedCulturesOnly explicitly defined as false.
-        [InlineData("net6.0", false, true, true, "True")]   // predefinedCulturesOnly explicitly defined as true.
-        [InlineData("net6.0", true, false, false, "True")]  // predefinedCulturesOnly default value is true when Invariant is true.
-        [InlineData("net6.0", true, false, true, "False")]  // predefinedCulturesOnly explicitly defined as false.
-        [InlineData("net6.0", true, true, true, "True")]    // predefinedCulturesOnly explicitly defined as true.
+        [InlineData(ToolsetInfo.CurrentTargetFramework, false, false, false, null)]   // predefinedCulturesOnly will not be included in the runtime config file if invariant is not defined.
+        [InlineData(ToolsetInfo.CurrentTargetFramework, false, false, true, "False")] // predefinedCulturesOnly explicitly defined as false.
+        [InlineData(ToolsetInfo.CurrentTargetFramework, false, true, true, "True")]   // predefinedCulturesOnly explicitly defined as true.
+        [InlineData(ToolsetInfo.CurrentTargetFramework, true, false, false, "True")]  // predefinedCulturesOnly default value is true when Invariant is true.
+        [InlineData(ToolsetInfo.CurrentTargetFramework, true, false, true, "False")]  // predefinedCulturesOnly explicitly defined as false.
+        [InlineData(ToolsetInfo.CurrentTargetFramework, true, true, true, "True")]    // predefinedCulturesOnly explicitly defined as true.
         public void It_can_implicitly_define_predefined_Cultures_only(string targetFramework, bool invariantValue, bool predefinedCulturesOnlyValue, bool definePredefinedCulturesOnly, string expectedPredefinedValue)
         {
             var testProj = new TestProject()

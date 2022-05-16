@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
 using System.Runtime.Versioning;
@@ -24,7 +25,7 @@ namespace Microsoft.DotNet.Installer.Windows
         /// <summary>
         /// Thread safe queue use to store incoming log request messages.
         /// </summary>
-        private ConcurrentQueue<string> _messageQueue = new ConcurrentQueue<string>();
+        private readonly BlockingCollection<string> _messageQueue = new BlockingCollection<string>();
 
         private bool _disposed;
         private readonly StreamWriter _stream;
@@ -42,8 +43,6 @@ namespace Microsoft.DotNet.Installer.Windows
         {
             get;
         }
-
-        private bool Done = false;
 
         private Thread LogWriter;
 
@@ -64,20 +63,15 @@ namespace Microsoft.DotNet.Installer.Windows
         /// <summary>
         /// Creates a new <see cref="TimestampedFileLogger"/> instance.
         /// </summary>
-        /// <param name="path"></param>
-        /// <param name="flushThreshold"></param>
-        /// <param name="logPipeNames"></param>
+        /// <param name="path">The path of the log file.</param>
+        /// <param name="flushThreshold">The number of writes to allow before flushing the underlying stream.</param>
+        /// <param name="logPipeNames">Additional named pipes that can be used to send log requests from other processes.</param>
         public TimestampedFileLogger(string path, int flushThreshold, params string[] logPipeNames)
         {
             Directory.CreateDirectory(Path.GetDirectoryName(path));
             _stream = File.CreateText(path);
             LogPath = Path.GetFullPath(path);
             FlushThreshold = flushThreshold;
-
-            // Capture control events. While console applications do support the CancelKeyPres event, users can
-            // terminate a CLI command by simply closing the command window, rebooting or logging off.
-            //NativeMethods.Windows.SetConsoleCtrlHandler(CtrlHandler, true);
-            AppDomain.CurrentDomain.ProcessExit += OnExit;
 
             // Spin up additional threads to listen for log requests coming in from external processes.
             foreach (string logPipeName in logPipeNames)
@@ -95,7 +89,7 @@ namespace Microsoft.DotNet.Installer.Windows
         }
 
         /// <summary>
-        /// Starts a new thread to list for log requests messages from external processes.
+        /// Starts a new thread to listen for log requests messages from external processes.
         /// </summary>
         /// <param name="pipeName">The name of the pipe.</param>
         public void AddNamedPipe(string pipeName)
@@ -114,28 +108,18 @@ namespace Microsoft.DotNet.Installer.Windows
         {
             if (!_disposed)
             {
-                Done = true;
+                _messageQueue.CompleteAdding();
                 LogWriter?.Join();
                 _stream.WriteLine($"{TimeStamp} {FormatMessage("=== Logging ended ===")}");
 
                 if (disposing)
                 {
                     _stream?.Dispose();
+                    _messageQueue.Dispose();
                 }
 
                 _disposed = true;
             }
-        }
-
-        /// <summary>
-        /// Event handler for when the current process terminates.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnExit(object sender, EventArgs e)
-        {
-            LogMessage($"Process is exiting");
-            Dispose();
         }
 
         /// <summary>
@@ -147,7 +131,7 @@ namespace Microsoft.DotNet.Installer.Windows
             NamedPipeClientStream logPipe = new NamedPipeClientStream(".", (string)logPipeName, PipeDirection.InOut);
             PipeStreamMessageDispatcherBase dispatcher = new(logPipe);
             dispatcher.Connect();
-            LogMessage($"Log connected.");
+            LogMessage($"Log connected: {logPipeName}.");
 
             while (dispatcher.IsConnected)
             {
@@ -155,7 +139,12 @@ namespace Microsoft.DotNet.Installer.Windows
                 {
                     // We'll block waiting for messages to arrive before sending them to the queue. We don't call LogMessage
                     // directly since the external logger should have stamped the message with the process ID.
-                    WriteMessage(UTF8Encoding.UTF8.GetString(dispatcher.ReadMessage()));
+                    string msg = UTF8Encoding.UTF8.GetString(dispatcher.ReadMessage());
+
+                    if (!string.IsNullOrWhiteSpace(msg))
+                    {
+                        WriteMessage(msg);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -174,35 +163,29 @@ namespace Microsoft.DotNet.Installer.Windows
             int writeCount = 0;
             int threshold = (int)flushThreshold;
 
-            while (!Done)
+            foreach (string message in _messageQueue.GetConsumingEnumerable())
             {
-                if (_messageQueue.TryDequeue(out string message))
-                {
-                    _stream.WriteLine($"{TimeStamp} {message}");
-                    writeCount = (writeCount + 1) % threshold;
+                _stream.WriteLine($"{TimeStamp} {message}");
+                writeCount = (writeCount + 1) % threshold;
 
-                    if (writeCount == 0)
-                    {
-                        _stream.Flush();
-                    }
+                if (writeCount == 0)
+                {
+                    _stream.Flush();
                 }
             }
-
-            // Clean out any remaining messages.
-            while (!_messageQueue.IsEmpty)
-            {
-                if (_messageQueue.TryDequeue(out string message))
-                {
-                    _stream.WriteLine($"{TimeStamp} {message}");
-                }
-            }
-
-            _stream.Flush();
         }
 
+        /// <summary>
+        /// Writes the specified message to the log file. The message will first be added to an internal queue to be timestamped
+        /// before it's dequeued and written to the log.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
         protected override void WriteMessage(string message)
         {
-            _messageQueue.Enqueue(message);
+            if (!_messageQueue.IsCompleted)
+            {
+                _messageQueue.Add(message);
+            }
         }
     }
 }

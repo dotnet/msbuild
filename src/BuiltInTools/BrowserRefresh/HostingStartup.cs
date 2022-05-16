@@ -23,7 +23,6 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
         {
             return app =>
             {
-
                 app.MapWhen(
                     static (context) =>
                     {

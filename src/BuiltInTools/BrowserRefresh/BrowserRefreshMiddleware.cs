@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.AspNetCore.Watch.BrowserRefresh
@@ -23,7 +24,7 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
         public async Task InvokeAsync(HttpContext context)
         {
             // We only need to support this for requests that could be initiated by a browser.
-            if (IsBrowserRequest(context))
+            if (IsBrowserDocumentRequest(context))
             {
                 // Use a custom StreamWrapper to rewrite output on Write/WriteAsync
                 using var responseStreamWrapper = new ResponseStreamWrapper(context, _logger);
@@ -57,7 +58,7 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
             }
         }
 
-        internal static bool IsBrowserRequest(HttpContext context)
+        internal static bool IsBrowserDocumentRequest(HttpContext context)
         {
             var request = context.Request;
             if (!HttpMethods.IsGet(request.Method) && !HttpMethods.IsPost(request.Method))
@@ -65,8 +66,17 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
                 return false;
             }
 
+            if (request.Headers.TryGetValue("Sec-Fetch-Dest", out var values) &&
+                !StringValues.IsNullOrEmpty(values) &&
+                !string.Equals(values[0], "document", StringComparison.OrdinalIgnoreCase))
+            {
+                // See https://github.com/dotnet/aspnetcore/issues/37326.
+                // Only inject scripts that are destined for a browser page.
+                return false;
+            }
+
             var typedHeaders = request.GetTypedHeaders();
-            if (!(typedHeaders.Accept is IList<MediaTypeHeaderValue> acceptHeaders))
+            if (typedHeaders.Accept is not IList<MediaTypeHeaderValue> acceptHeaders)
             {
                 return false;
             }

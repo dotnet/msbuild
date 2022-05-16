@@ -43,13 +43,19 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         /// </summary>
         public LanguageVersion CSharpLanguageVersion { get; set; } = LanguageVersion.CSharp10;
 
+        /// <summary>
+        /// Gets a flag that determines if localized component names should be supported.</c>.
+        /// </summary>
+        public bool SupportLocalizedComponentNames { get; set; } = false;
+
         public bool Equals(RazorSourceGenerationOptions other)
         {
             return RootNamespace == other.RootNamespace &&
                 Configuration == other.Configuration &&
                 GenerateMetadataSourceChecksumAttributes == other.GenerateMetadataSourceChecksumAttributes &&
                 SuppressRazorSourceGenerator == other.SuppressRazorSourceGenerator &&
-                CSharpLanguageVersion == other.CSharpLanguageVersion;
+                CSharpLanguageVersion == other.CSharpLanguageVersion &&
+                SupportLocalizedComponentNames == other.SupportLocalizedComponentNames;
         }
 
         public override bool Equals(object obj) => obj is RazorSourceGenerationOptions other && Equals(other);

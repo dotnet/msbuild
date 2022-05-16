@@ -4,6 +4,8 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
+set -euo pipefail
+
 MANPAGE_TOOL_DIR=$(cd "$(dirname "$0")" || exit; pwd)
 
 cd "$MANPAGE_TOOL_DIR"/../sdk || exit
@@ -24,7 +26,8 @@ fi
 ls docs-main/docs/core/tools/dotnet*.md | while read -r line;
   do
     echo "Working on $line"
-    pandoc -s -t man -V section=1 -V header=".NET Core" --column=500 --filter "$MANPAGE_TOOL_DIR"/man-pandoc-filter.py "$line" -o "$(basename "${line%.md}".1)"
+    "$MANPAGE_TOOL_DIR"/remove-metadata-and-embed-includes.py "$line"
+    pandoc -s -t man -V section=1 -V header=".NET" --column=500 --filter "$MANPAGE_TOOL_DIR"/man-pandoc-filter.py "$line" -o "$(basename "${line%.md}".1)"
 done
 
 rm -rf docs-main

@@ -43,10 +43,10 @@
       "OriginalItemSpec": "Pages\\Index.cshtml.js"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\scopedcss\\bundle\\ComponentApp.styles.css",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\ComponentApp.styles.css",
       "SourceId": "ComponentApp",
       "SourceType": "Computed",
-      "ContentRoot": "${ProjectRoot}\\obj\\Debug\\net6.0\\scopedcss\\bundle\\",
+      "ContentRoot": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\",
       "BasePath": "_content/ComponentApp",
       "RelativePath": "ComponentApp.styles.css",
       "AssetKind": "All",
@@ -57,13 +57,13 @@
       "AssetTraitValue": "ApplicationBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\net6.0\\scopedcss\\bundle\\ComponentApp.styles.css"
+      "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\ComponentApp.styles.css"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\scopedcss\\projectbundle\\ComponentApp.bundle.scp.css",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\scopedcss\\projectbundle\\ComponentApp.bundle.scp.css",
       "SourceId": "ComponentApp",
       "SourceType": "Computed",
-      "ContentRoot": "${ProjectRoot}\\obj\\Debug\\net6.0\\scopedcss\\projectbundle\\",
+      "ContentRoot": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\scopedcss\\projectbundle\\",
       "BasePath": "_content/ComponentApp",
       "RelativePath": "ComponentApp.bundle.scp.css",
       "AssetKind": "All",
@@ -74,7 +74,7 @@
       "AssetTraitValue": "ProjectBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\net6.0\\scopedcss\\projectbundle\\ComponentApp.bundle.scp.css"
+      "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\scopedcss\\projectbundle\\ComponentApp.bundle.scp.css"
     }
   ]
 }

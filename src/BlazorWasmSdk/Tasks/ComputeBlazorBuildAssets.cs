@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -42,9 +41,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
 
         [Required]
         public bool CopySymbols { get; set; }
-
-        [Required]
-        public string BundledNETCoreAppPackageVersion { get; set; }
 
         [Output]
         public ITaskItem[] AssetCandidates { get; set; }
@@ -103,7 +99,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     if (candidate.GetMetadata("FileName") == "dotnet" && candidate.GetMetadata("Extension") == ".js")
                     {
                         var itemHash = FileHasher.GetFileHash(candidate.ItemSpec);
-                        var cacheBustedDotNetJSFileName = $"dotnet.{BundledNETCoreAppPackageVersion}.{itemHash}.js";
+                        var cacheBustedDotNetJSFileName = $"dotnet.{candidate.GetMetadata("NuGetPackageVersion")}.{itemHash}.js";
 
                         var originalFileFullPath = Path.GetFullPath(candidate.ItemSpec);
                         var originalFileDirectory = Path.GetDirectoryName(originalFileFullPath);
@@ -130,6 +126,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     else
                     {
                         candidate.SetMetadata("RelativePath", $"_framework/{destinationSubPath}");
+                    }
+
+                    // Workaround for https://github.com/dotnet/aspnetcore/issues/37574.
+                    // For items added as "Reference" in project references, the OriginalItemSpec is incorrect.
+                    // Ignore it, and use the FullPath instead.
+                    if (candidate.GetMetadata("ReferenceSourceTarget") == "ProjectReference")
+                    {
+                        candidate.SetMetadata("OriginalItemSpec", candidate.ItemSpec);
                     }
 
                     var culture = candidate.GetMetadata("Culture");
@@ -183,7 +187,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         "_framework",
                         ProjectAssembly[0].GetMetadata("FileName") + ProjectAssembly[0].GetMetadata("Extension")));
 
-                    var normalizedPath = assetCandidate.GetMetadata("TargetPath").Replace('\\',  '/');
+                    var normalizedPath = assetCandidate.GetMetadata("TargetPath").Replace('\\', '/');
 
                     assetCandidate.SetMetadata("AssetKind", "Build");
                     assetCandidate.SetMetadata("AssetRole", "Related");

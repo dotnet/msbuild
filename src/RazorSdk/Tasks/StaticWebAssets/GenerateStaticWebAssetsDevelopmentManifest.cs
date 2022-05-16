@@ -92,7 +92,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
 
                 if (asset.HasSourceId(Source) && !StaticWebAssetsManifest.ManifestModes.ShouldIncludeAssetInCurrentProject(asset, StaticWebAssetsManifest.ManifestModes.Root))
                 {
-                    Log.LogMessage("Skipping candidate asset '{0}' because asset mode is '{2}'",
+                    Log.LogMessage("Skipping candidate asset '{0}' because asset mode is '{1}'",
                         asset.Identity,
                         asset.AssetMode);
 
@@ -114,17 +114,22 @@ namespace Microsoft.AspNetCore.Razor.Tasks
 
             if (!fileExists)
             {
-                Log.LogMessage($"Creating manifest because manifest file '{ManifestPath}' does not exist.");
+                Log.LogMessage("Creating manifest because manifest file '{0}' does not exist.", ManifestPath);
                 File.WriteAllBytes(ManifestPath, data);
             }
             else if (!currentHash.SequenceEqual(existingManifestHash))
             {
-                Log.LogMessage($"Updating manifest because manifest version '{Convert.ToBase64String(currentHash)}' is different from existing manifest hash '{Convert.ToBase64String(existingManifestHash)}'.");
+                Log.LogMessage(
+                    "Updating manifest because manifest version '{0}' is different from existing manifest hash '{1}'.",
+                    Convert.ToBase64String(currentHash),
+                    Convert.ToBase64String(existingManifestHash));
                 File.WriteAllBytes(ManifestPath, data);
             }
             else
             {
-                Log.LogMessage($"Skipping manifest updated because manifest version '{Convert.ToBase64String(currentHash)}' has not changed.");
+                Log.LogMessage(
+                    "Skipping manifest update because manifest version '{0}' has not changed.",
+                    Convert.ToBase64String(currentHash));
             }
         }
 

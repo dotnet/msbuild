@@ -97,7 +97,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                     if (filter != null && !filter.Match(relativePathCandidate).HasMatches)
                     {
                         Log.LogMessage(
-                            "Skipping '{0}' becasue the relative path '{1}' did not match the filter '{2}'.",
+                            "Skipping '{0}' because the relative path '{1}' did not match the filter '{2}'.",
                             candidate.ItemSpec,
                             relativePathCandidate,
                             RelativePathFilter);

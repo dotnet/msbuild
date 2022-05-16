@@ -18,6 +18,8 @@ using NuGet.Common;
 using System.Text.Json;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli;
+using System.Net;
+using System.Net.Http;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -206,9 +208,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             var currentManifestIds = GetInstalledManifestIds();
             var manifestRollbacks = ParseRollbackDefinitionFile(rollbackDefinitionFilePath);
 
-            if (!new HashSet<ManifestId>(currentManifestIds).SetEquals(manifestRollbacks.Select(manifest => manifest.Item1)))
+            var unrecognizedManifestIds = manifestRollbacks.Where(rollbackManifest => !currentManifestIds.Contains(rollbackManifest.Item1));
+            if (unrecognizedManifestIds.Any())
             {
-                throw new Exception(string.Format(LocalizableStrings.RollbackDefinitionContainsExtraneousManifestIds, rollbackDefinitionFilePath));
+                _reporter.WriteLine(string.Format(LocalizableStrings.RollbackDefinitionContainsExtraneousManifestIds, rollbackDefinitionFilePath, string.Join(" ", unrecognizedManifestIds)).Yellow());
+                manifestRollbacks = manifestRollbacks.Where(rollbackManifest => currentManifestIds.Contains(rollbackManifest.Item1));
             }
 
             var manifestUpdates = manifestRollbacks
@@ -428,11 +432,23 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         private IEnumerable<(ManifestId, ManifestVersion)> ParseRollbackDefinitionFile(string rollbackDefinitionFilePath)
         {
-            if (!File.Exists(rollbackDefinitionFilePath))
+            string fileContent;
+
+            if (Uri.TryCreate(rollbackDefinitionFilePath, UriKind.Absolute, out var rollbackUri) && !rollbackUri.IsFile)
             {
-                throw new ArgumentException(string.Format(LocalizableStrings.RollbackDefinitionFileDoesNotExist, rollbackDefinitionFilePath));
+                fileContent = (new HttpClient()).GetStringAsync(rollbackDefinitionFilePath).Result;
             }
-            var fileContent = File.ReadAllText(rollbackDefinitionFilePath);
+            else
+            {
+                if (File.Exists(rollbackDefinitionFilePath))
+                {
+                    fileContent = File.ReadAllText(rollbackDefinitionFilePath);
+                }
+                else
+                {
+                    throw new ArgumentException(string.Format(LocalizableStrings.RollbackDefinitionFileDoesNotExist, rollbackDefinitionFilePath));
+                }           
+            }
             return JsonSerializer.Deserialize<IDictionary<string, string>>(fileContent)
                 .Select(manifest => (new ManifestId(manifest.Key), new ManifestVersion(manifest.Value)));
         }

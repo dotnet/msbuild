@@ -297,4 +297,7 @@
   <data name="FormatDefinition" xml:space="preserve">
     <value>Apply style preferences to a project or solution.</value>
   </data>
+  <data name="WorkloadDefinition" xml:space="preserve">
+    <value>Manage optional workloads.</value>
+  </data>
 </root>
