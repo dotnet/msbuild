@@ -6153,6 +6153,13 @@ elementFormDefault="qualified">
               </xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="Key" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="InternalsVisibleTo_PublicKey" _locComment="" -->Optional public key associated with the strong name signature of the friend assembly.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
         </xs:extension>
       </xs:complexContent>
     </xs:complexType>
