@@ -244,7 +244,7 @@ namespace Microsoft.NET.Publish.Tests
             get
             {
                 yield return new object[] {
-                    "netcoreapp1.0",
+                    ToolsetInfo.CurrentTargetFramework,
                     new string[]
                     {
                         "TestApp.dll",
@@ -312,7 +312,7 @@ namespace Microsoft.NET.Publish.Tests
                         "hy/Humanizer.resources.dll",
                         "ms-MY/Humanizer.resources.dll",
                         "mt/Humanizer.resources.dll",
-                        "TestApp.exe",
+                        $"TestApp{EnvironmentInfo.ExecutableExtension}",
                     }
                 };
 
