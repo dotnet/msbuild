@@ -199,7 +199,7 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "PrivateAssetsTransitive",
                 IsExe = true,
-                TargetFrameworks = "net5.0"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
 
             //  Both these packages depend on NewtonSoft.Json.  Since only one of the package references specifies PrivateAssets=All,

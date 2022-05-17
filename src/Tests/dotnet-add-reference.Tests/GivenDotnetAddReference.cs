@@ -218,9 +218,9 @@ Commands:
             var invalidProjDirectory = Path.Combine(_testAssetsManager.CreateTestDirectory().Path, "InvalidProj");
             var invalidProjPath = Path.Combine(invalidProjDirectory, "InvalidProj.csproj");
             Directory.CreateDirectory(invalidProjDirectory);
-            File.WriteAllText(invalidProjPath, @"<Project Sdk=""Microsoft.NET.Sdk"">
+            File.WriteAllText(invalidProjPath, $@"<Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>{ToolsetInfo.CurrentTargetFramework}</TargetFramework>
   </PropertyGroup>
   <Import Project=""fake.props"" />
 </Project>");
@@ -746,7 +746,7 @@ Commands:
                     .Execute(reference);
 
             result.Should().Fail();
-            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot, "net451|net6.0|netcoreapp1.0"));
+            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot, $"net451|{ToolsetInfo.CurrentTargetFramework}|netcoreapp1.0"));
             result.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, reference));
         }
 
@@ -762,7 +762,7 @@ Commands:
                     .Execute(reference);
 
             result.Should().Fail();
-            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot, "net451|net6.0|netcoreapp1.0"));
+            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot, $"net451|{ToolsetInfo.CurrentTargetFramework}|netcoreapp1.0"));
             result.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneProjectInDirectory, reference));
         }
     }

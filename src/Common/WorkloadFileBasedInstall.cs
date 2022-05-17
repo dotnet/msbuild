@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Workloads.Workload
 
         private static string GetUserInstallFilePath(string dotnetDir, string sdkFeatureBand)
         {
-            if (sdkFeatureBand.Contains("-"))
+            if (sdkFeatureBand.Contains("-") || !sdkFeatureBand.EndsWith("00", StringComparison.Ordinal))
             {
                 // The user passed in the sdk version. Derive the feature band version.
                 if (!Version.TryParse(sdkFeatureBand.Split('-')[0], out var sdkVersionParsed))

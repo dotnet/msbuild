@@ -45,7 +45,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Pass();
 
             var publishDirectory =
-                command.GetOutputDirectory(targetFramework: "net5.0", configuration: "Release");
+                command.GetOutputDirectory(targetFramework: ToolsetInfo.CurrentTargetFramework, configuration: "Release");
 
             publishDirectory.Should().NotHaveSubDirectories();
             publishDirectory.Should().HaveFiles(new[] {
