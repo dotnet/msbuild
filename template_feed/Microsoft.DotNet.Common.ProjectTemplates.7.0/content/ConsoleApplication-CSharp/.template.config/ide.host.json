@@ -10,7 +10,9 @@
   "symbolInfo": [
     {
       "id": "UseProgramMain",
-      "isVisible": "true"
+      "isVisible": true,
+      "PersistenceScope": "Shared",
+      "PersistenceScopeName": "Microsoft"
     }
   ]
 }
