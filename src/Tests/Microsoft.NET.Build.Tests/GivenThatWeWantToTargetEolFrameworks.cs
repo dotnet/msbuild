@@ -75,7 +75,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = $"EolNoWarning",
-                TargetFrameworks = "netcoreapp1.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
 
                 IsExe = true
             };

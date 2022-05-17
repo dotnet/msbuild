@@ -57,7 +57,7 @@ namespace Microsoft.NET.Restore.Tests
 
         [Theory]
         [InlineData("netstandard1.3", "1.3")]
-        [InlineData("netcoreapp1.0", "1.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, ToolsetInfo.CurrentTargetFrameworkVersion)]
         // base line of the following tests
         public void I_can_restore_with_implicit_msbuild_nuget_config(string frameworks, string projectPrefix)
         {
@@ -70,7 +70,7 @@ namespace Microsoft.NET.Restore.Tests
 
         [Theory]
         [InlineData("netstandard1.3", "1.3")]
-        [InlineData("netcoreapp1.0", "1.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, ToolsetInfo.CurrentTargetFrameworkVersion)]
         [InlineData("netcoreapp1.1", "1.1")]
         [InlineData("netstandard2.0", "2.0")]
         [InlineData("netcoreapp2.0", "2.0app")]
@@ -88,7 +88,7 @@ namespace Microsoft.NET.Restore.Tests
         [InlineData("netcoreapp1.0", "1.0", false)]
         [InlineData("netcoreapp1.1", "1.1", false)]
         [InlineData("netstandard2.0", "2.0", true)]
-        [InlineData("netcoreapp2.0", "2.0app", true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, $"{ToolsetInfo.CurrentTargetFrameworkVersion}app", true)]
         public void I_can_disable_1_x_implicit_msbuild_nuget_config(string frameworks, string projectPrefix, bool shouldExecutePass)
         {
             string testProjectName = $"{projectPrefix}1xDisabledFallback";
