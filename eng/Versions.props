@@ -44,12 +44,12 @@
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/runtime -->
     <MicrosoftNETCoreAppRefPackageVersion>6.0.6</MicrosoftNETCoreAppRefPackageVersion>
-    <VSRedistCommonNetCoreSharedFrameworkx6460PackageVersion>6.0.6-servicing.22255.10</VSRedistCommonNetCoreSharedFrameworkx6460PackageVersion>
+    <VSRedistCommonNetCoreSharedFrameworkx6460PackageVersion>6.0.6-servicing.22266.9</VSRedistCommonNetCoreSharedFrameworkx6460PackageVersion>
     <MicrosoftNETCoreAppRuntimewinx64PackageVersion>6.0.6</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
     <MicrosoftNETCoreAppRuntimePackageVersion>$(MicrosoftNETCoreAppRuntimewinx64PackageVersion)</MicrosoftNETCoreAppRuntimePackageVersion>
     <MicrosoftExtensionsDependencyModelPackageVersion>6.0.0</MicrosoftExtensionsDependencyModelPackageVersion>
     <MicrosoftNETCoreDotNetHostResolverPackageVersion>6.0.6</MicrosoftNETCoreDotNetHostResolverPackageVersion>
-    <MicrosoftNETHostModelVersion>6.0.6-servicing.22255.10</MicrosoftNETHostModelVersion>
+    <MicrosoftNETHostModelVersion>6.0.6-servicing.22266.9</MicrosoftNETHostModelVersion>
     <MicrosoftExtensionsFileSystemGlobbingPackageVersion>6.0.0-preview.7.21363.9</MicrosoftExtensionsFileSystemGlobbingPackageVersion>
     <SystemServiceProcessServiceControllerVersion>6.0.0</SystemServiceProcessServiceControllerVersion>
   </PropertyGroup>
@@ -133,11 +133,11 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore -->
-    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>6.0.6-servicing.22260.10</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
+    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>6.0.6-servicing.22266.11</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
     <MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>6.0.6</MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>6.0.6-servicing.22260.10</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>6.0.6-servicing.22260.10</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreAnalyzersPackageVersion>6.0.6-servicing.22260.10</MicrosoftAspNetCoreAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>6.0.6-servicing.22266.11</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>6.0.6-servicing.22266.11</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreAnalyzersPackageVersion>6.0.6-servicing.22266.11</MicrosoftAspNetCoreAnalyzersPackageVersion>
     <MicrosoftAspNetCoreTestHostPackageVersion>6.0.6</MicrosoftAspNetCoreTestHostPackageVersion>
     <MicrosoftAspNetCoreMvcRazorExtensionsToolingInternalPackageVersion>6.0.3-1.22213.1</MicrosoftAspNetCoreMvcRazorExtensionsToolingInternalPackageVersion>
     <MicrosoftCodeAnalysisRazorToolingInternalVersion>6.0.3-1.22213.1</MicrosoftCodeAnalysisRazorToolingInternalVersion>
@@ -145,11 +145,11 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/wpf -->
-    <MicrosoftNETSdkWindowsDesktopPackageVersion>6.0.6-servicing.22255.5</MicrosoftNETSdkWindowsDesktopPackageVersion>
+    <MicrosoftNETSdkWindowsDesktopPackageVersion>6.0.6-servicing.22266.6</MicrosoftNETSdkWindowsDesktopPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/windowsdesktop -->
-    <VSRedistCommonWindowsDesktopSharedFrameworkx6460PackageVersion>6.0.6-servicing.22260.6</VSRedistCommonWindowsDesktopSharedFrameworkx6460PackageVersion>
+    <VSRedistCommonWindowsDesktopSharedFrameworkx6460PackageVersion>6.0.6-servicing.22266.7</VSRedistCommonWindowsDesktopSharedFrameworkx6460PackageVersion>
   </PropertyGroup>
   <PropertyGroup Label="Manually updated">
     <!-- Dependencies from https://github.com/microsoft/MSBuildLocator -->
