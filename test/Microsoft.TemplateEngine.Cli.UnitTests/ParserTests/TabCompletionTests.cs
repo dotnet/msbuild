@@ -6,6 +6,7 @@ using System.CommandLine.Completions;
 using System.CommandLine.Parsing;
 using FakeItEasy;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.Constraints;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
@@ -439,6 +440,168 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Equal(new[] { "project", "solution" }, result);
+        }
+
+        [Fact]
+        public void CanIgnoreTemplateGroupsWithConstraints()
+        {
+            var template1 = new MockTemplateInfo("foo1", identity: "foo.1")
+                .WithConstraints(new TemplateConstraintInfo("test", "yes"));
+
+            var template2 = new MockTemplateInfo("foo2", identity: "foo.2")
+                .WithConstraints(new TemplateConstraintInfo("test", "no"));
+
+            var template3 = new MockTemplateInfo("foo3", identity: "foo.3")
+             .WithConstraints(new TemplateConstraintInfo("test", "bad-params"));
+
+            var templateGroups = TemplateGroup.FromTemplateList(
+                CliTemplateInfo.FromTemplateInfo(new[] { template1, template2, template3 }, A.Fake<IHostSpecificDataLoader>()));
+
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: new[] { (typeof(ITemplateConstraintFactory), (IIdentifiedComponent)new TestConstraintFactory("test")) });
+            IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
+            TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
+
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var parseResult = myCommand.Parse($" new fo");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
+            Assert.NotNull(completionContext);
+
+            var result = InstantiateCommand.GetTemplateNameCompletions(args.ShortName, templateGroups, settings).Select(l => l.Label);
+
+            Assert.Equal(new[] { "foo1" }, result);
+        }
+
+        [Fact]
+        public void CanIgnoreTemplateGroupsWithConstraints_IgnoresLongEvaluationTemplateGroups()
+        {
+            var template1 = new MockTemplateInfo("foo1", identity: "foo.1")
+                .WithConstraints(new TemplateConstraintInfo("test", "yes"));
+
+            var template2 = new MockTemplateInfo("foo2", identity: "foo.2")
+                .WithConstraints(new TemplateConstraintInfo("test", "no"));
+
+            var template3 = new MockTemplateInfo("foo3", identity: "foo.3")
+             .WithConstraints(new TemplateConstraintInfo("test", "bad-params"));
+
+            var templateGroups = TemplateGroup.FromTemplateList(
+                CliTemplateInfo.FromTemplateInfo(new[] { template1, template2, template3 }, A.Fake<IHostSpecificDataLoader>()));
+
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: new[] { (typeof(ITemplateConstraintFactory), (IIdentifiedComponent)new LongRunningConstraintFactory("test", 1500)) });
+            IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
+            TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
+
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var parseResult = myCommand.Parse($" new fo");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
+            Assert.NotNull(completionContext);
+
+            var result = InstantiateCommand.GetTemplateNameCompletions(args.ShortName, templateGroups, settings).Select(l => l.Label);
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void CanIgnoreTemplatesInGroupWithConstraints()
+        {
+            var template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "group")
+                .WithConstraints(new TemplateConstraintInfo("test", "yes"))
+                .WithParameter("a");
+
+            var template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "group")
+                .WithConstraints(new TemplateConstraintInfo("test", "no"))
+                .WithParameter("b"); 
+
+            var template3 = new MockTemplateInfo("foo", identity: "foo.3", groupIdentity: "group")
+             .WithConstraints(new TemplateConstraintInfo("test", "bad-params"))
+             .WithParameter("c");
+
+            var templateGroups = TemplateGroup.FromTemplateList(
+                CliTemplateInfo.FromTemplateInfo(new[] { template1, template2, template3 }, A.Fake<IHostSpecificDataLoader>()));
+
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: new[] { (typeof(ITemplateConstraintFactory), (IIdentifiedComponent)new TestConstraintFactory("test")) });
+            IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
+            TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
+
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var parseResult = myCommand.Parse($" new foo ");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
+            Assert.NotNull(completionContext);
+
+            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+
+            Assert.Contains("--a", result);
+            Assert.DoesNotContain("--b", result);
+            Assert.DoesNotContain("--c", result);
+        }
+
+        [Fact]
+        public void IncludesTemplatesInGroupWithLongEvaluatedConstraints()
+        {
+            var template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "group")
+                .WithConstraints(new TemplateConstraintInfo("test", "yes"))
+                .WithParameter("a");
+
+            var template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "group")
+                .WithConstraints(new TemplateConstraintInfo("test", "no"))
+                .WithParameter("b");
+
+            var template3 = new MockTemplateInfo("foo", identity: "foo.3", groupIdentity: "group")
+             .WithConstraints(new TemplateConstraintInfo("test", "bad-params"))
+             .WithParameter("c");
+
+            var templateGroups = TemplateGroup.FromTemplateList(
+                CliTemplateInfo.FromTemplateInfo(new[] { template1, template2, template3 }, A.Fake<IHostSpecificDataLoader>()));
+
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: new[] { (typeof(ITemplateConstraintFactory), (IIdentifiedComponent)new LongRunningConstraintFactory("test", 1500)) });
+            IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
+            TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
+
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var parseResult = myCommand.Parse($" new foo ");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
+            Assert.NotNull(completionContext);
+
+            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+
+            Assert.Contains("--a", result);
+            Assert.Contains("--b", result);
+            Assert.Contains("--c", result);
+        }
+
+        [Fact]
+        public void WillNotEvaluateConstraints_WhenAtLeastOneTemplateInGroupDoesNotHaveConstraints()
+        {
+            var template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "group")
+                .WithParameter("a");
+
+            var template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "group")
+                .WithConstraints(new TemplateConstraintInfo("test", "no"))
+                .WithParameter("b");
+
+            var template3 = new MockTemplateInfo("foo", identity: "foo.3", groupIdentity: "group")
+             .WithConstraints(new TemplateConstraintInfo("test", "bad-params"))
+             .WithParameter("c");
+
+            var templateGroups = TemplateGroup.FromTemplateList(
+                CliTemplateInfo.FromTemplateInfo(new[] { template1, template2, template3 }, A.Fake<IHostSpecificDataLoader>()));
+
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: new[] { (typeof(ITemplateConstraintFactory), (IIdentifiedComponent)new LongRunningConstraintFactory("test", 3000)) });
+            IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
+            TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
+
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            var parseResult = myCommand.Parse($" new fo");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
+            Assert.NotNull(completionContext);
+
+            var result = InstantiateCommand.GetTemplateNameCompletions(args.ShortName, templateGroups, settings).Select(l => l.Label);
+
+            Assert.Equal(new[] { "foo" }, result);
         }
     }
 }
