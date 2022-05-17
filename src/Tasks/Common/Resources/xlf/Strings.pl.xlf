@@ -741,8 +741,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1112: "}</note>
       </trans-unit>
       <trans-unit id="RuntimePackNotRestored_TransitiveDisabled">
-        <source>NETSDK1184: The Runtime Pack for FrameworkReference '{0}' was not available.  This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
-        <target state="new">NETSDK1184: The Runtime Pack for FrameworkReference '{0}' was not available.  This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</target>
+        <source>NETSDK1184: The Runtime Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
+        <target state="new">NETSDK1184: The Runtime Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</target>
         <note>{StrBegin="NETSDK1184: "}</note>
       </trans-unit>
       <trans-unit id="SelfContainedExeCannotReferenceNonSelfContained">
@@ -781,8 +781,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1127: "}</note>
       </trans-unit>
       <trans-unit id="TargetingPackNotRestored_TransitiveDisabled">
-        <source>NETSDK1183: The Targeting Pack for FrameworkReference '{0}' was not available.  This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
-        <target state="new">NETSDK1183: The Targeting Pack for FrameworkReference '{0}' was not available.  This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</target>
+        <source>NETSDK1183: The Targeting Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
+        <target state="new">NETSDK1183: The Targeting Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</target>
         <note>{StrBegin="NETSDK1183: "}</note>
       </trans-unit>
       <trans-unit id="TrimmingWindowsFormsIsNotSupported">
@@ -821,8 +821,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1073: "}</note>
       </trans-unit>
       <trans-unit id="UnknownFrameworkReference_MauiEssentials">
-        <source>NETSDK1185: This project depends on Maui Essentials through a project or NuGet package reference.  To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</source>
-        <target state="new">NETSDK1185: This project depends on Maui Essentials through a project or NuGet package reference.  To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</target>
+        <source>NETSDK1185: This project depends on Maui Essentials through a project or NuGet package reference. To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</source>
+        <target state="new">NETSDK1185: This project depends on Maui Essentials through a project or NuGet package reference. To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</target>
         <note>{StrBegin="NETSDK1185: "}</note>
       </trans-unit>
       <trans-unit id="UnnecessaryWindowsDesktopSDK">
