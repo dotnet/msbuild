@@ -841,7 +841,7 @@ You may need to build the project on another operating system or architecture, o
     <comment>{StrBegin="NETSDK1184: "}</comment>
   </data>
   <data name="UnknownFrameworkReference_MauiEssentials" xml:space="preserve">
-    <value>NETSDK1185: This project depends on Maui Essentials through a project or NuGet package reference. To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</value>
+    <value>NETSDK1185: This project depends on Maui Essentials through a project or NuGet package reference, but doesn't declare that dependency explicitly. To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</value>
     <comment>{StrBegin="NETSDK1185: "}</comment>
   </data>
 </root>
