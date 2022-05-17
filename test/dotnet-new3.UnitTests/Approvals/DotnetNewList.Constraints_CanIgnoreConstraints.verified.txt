@@ -1,5 +1,5 @@
 ﻿These templates matched your input: 'RestrictedTemplate'
 
-Template Name                   Short Name                      Language  Tags      
-------------------------------  ------------------------------  --------  ----------
-Constraints.RestrictedTemplate  Constraints.RestrictedTemplate            Test Asset
+Template Name                      Short Name                      Language  Tags      
+---------------------------------  ------------------------------  --------  ----------
+Constraints - Restricted Template  Constraints.RestrictedTemplate            Test Asset

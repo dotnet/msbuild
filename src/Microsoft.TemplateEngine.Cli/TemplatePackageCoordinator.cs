@@ -4,12 +4,15 @@
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.CompilerServices;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.Constraints;
 using Microsoft.TemplateEngine.Abstractions.Installer;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Cli.NuGet;
 using Microsoft.TemplateEngine.Cli.TabularOutput;
+using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
 using NuGet.Credentials;
@@ -25,6 +28,8 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly ITelemetryLogger _telemetryLogger;
         private readonly IEngineEnvironmentSettings _engineEnvironmentSettings;
         private readonly TemplatePackageManager _templatePackageManager;
+        private readonly TemplateConstraintManager _constraintsManager;
+        private readonly HostSpecificDataLoader _hostSpecificDataLoader;
 
         internal TemplatePackageCoordinator(
             ITelemetryLogger telemetryLogger,
@@ -34,6 +39,8 @@ namespace Microsoft.TemplateEngine.Cli
             _telemetryLogger = telemetryLogger ?? throw new ArgumentNullException(nameof(telemetryLogger));
             _engineEnvironmentSettings = environmentSettings ?? throw new ArgumentNullException(nameof(environmentSettings));
             _templatePackageManager = templatePackageManager ?? throw new ArgumentNullException(nameof(templatePackageManager));
+            _constraintsManager = new TemplateConstraintManager(_engineEnvironmentSettings);
+            _hostSpecificDataLoader = new HostSpecificDataLoader(_engineEnvironmentSettings);
         }
 
         /// <summary>
@@ -685,16 +692,7 @@ namespace Microsoft.TemplateEngine.Cli
                     Reporter.Output.WriteLine($"{LocalizableStrings.Templates}:".Indent(level: 2));
                     foreach (ITemplateInfo info in templates)
                     {
-                        string? templateLanguage = info.GetLanguage();
-                        string shortNames = string.Join(",", info.ShortNameList);
-                        if (!string.IsNullOrWhiteSpace(templateLanguage))
-                        {
-                            Reporter.Output.WriteLine($"{info.Name} ({shortNames}) {templateLanguage}".Indent(level: 3));
-                        }
-                        else
-                        {
-                            Reporter.Output.WriteLine($"{info.Name} ({shortNames})".Indent(level: 3));
-                        }
+                        Reporter.Output.WriteLine(info.GetDisplayName().Indent(level: 3));
                     }
                 }
 
@@ -734,6 +732,7 @@ namespace Microsoft.TemplateEngine.Cli
                         templates,
                         new TabularOutputSettings(_engineEnvironmentSettings.Environment),
                         reporter: Reporter.Output);
+                    await EvaluateAndDisplayConstraintsAsync(templates, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
@@ -799,6 +798,29 @@ namespace Microsoft.TemplateEngine.Cli
                                 LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_GenericError,
                                 packageToInstall).Bold().Red());
                         break;
+                }
+            }
+        }
+
+        private async Task EvaluateAndDisplayConstraintsAsync(IEnumerable<ITemplateInfo> templates, CancellationToken cancellationToken)
+        {
+            var evaluationResult = await _constraintsManager.EvaluateConstraintsAsync(templates, cancellationToken).ConfigureAwait(false);
+
+            var restrictedTemplates = evaluationResult.Where(r => r.Result.Any(cr => cr.EvaluationStatus != TemplateConstraintResult.Status.Allowed));
+            if (!restrictedTemplates.Any())
+            {
+                return;
+            }
+
+            Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Install_ConstraintsNotice);
+
+            foreach (var template in restrictedTemplates)
+            {
+                bool showIdentity = !string.IsNullOrWhiteSpace(template.Template.GroupIdentity) && templates.Count(t => t.GroupIdentity == template.Template.GroupIdentity) > 1;
+                Reporter.Output.WriteLine(template.Template.GetDisplayName(showIdentity: showIdentity));
+                foreach (var constraintResult in template.Result.Where(r => r.EvaluationStatus != TemplateConstraintResult.Status.Allowed))
+                {
+                    Reporter.Output.WriteLine(constraintResult.ToDisplayString().Indent(1));
                 }
             }
         }

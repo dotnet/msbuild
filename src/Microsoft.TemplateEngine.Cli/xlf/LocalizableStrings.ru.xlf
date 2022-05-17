@@ -872,6 +872,11 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">Шаблон \"{0}\" включен в пакеты:</target>
         <note />
       </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_ConstraintsNotice">
+        <source>The following templates might not work because their constraints are not met:</source>
+        <target state="new">The following templates might not work because their constraints are not met:</target>
+        <note>The sentence is followed by the list of templates with information on their constraints. Each template and each restriction is given from new line.</note>
+      </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Error_FoundNoPackagesToInstall">
         <source>Found no template packages to install.</source>
         <target state="translated">Пакеты шаблонов для установки не найдены.</target>

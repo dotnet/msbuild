@@ -1564,6 +1564,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The following templates might not work because their constraints are not met:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Install_ConstraintsNotice {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Install_ConstraintsNotice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Found no template packages to install..
         /// </summary>
         internal static string TemplatePackageCoordinator_Install_Error_FoundNoPackagesToInstall {

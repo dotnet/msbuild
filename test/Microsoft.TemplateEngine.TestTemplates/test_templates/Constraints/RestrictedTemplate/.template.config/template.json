@@ -1,7 +1,7 @@
 {
   "author": "Test Asset",
   "classifications": [ "Test Asset" ],
-  "name": "Constraints.RestrictedTemplate",
+  "name": "Constraints - Restricted Template",
   "generatorVersions": "[1.0.0.0-*)",
   "groupIdentity": "Constraints.RestrictedTemplate",
   "precedence": "100",
@@ -13,7 +13,7 @@
       "type": "host",
       "args": [
         {
-          "host": "do-not-exist",
+          "hostname": "do-not-exist",
           "version": "(1.0, )"
         }
       ]

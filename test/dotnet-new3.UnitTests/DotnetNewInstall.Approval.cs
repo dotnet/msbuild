@@ -103,6 +103,23 @@ namespace Dotnet_new3.IntegrationTests
         }
 
         [Fact]
+        public Task CanShowWarning_WhenConstraintTemplateIsInstalled()
+        {
+            var testTemplateLocation = TestUtils.GetTestTemplateLocation("Constraints/RestrictedTemplate");
+            var commandResult = new DotnetNewCommand(_log, "install", testTemplateLocation)
+                .WithCustomHive()
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute();
+
+            commandResult
+                .Should()
+                .Pass();
+
+            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+                .AddScrubber(output => output.ScrubAndReplace(testTemplateLocation, "%TEMPLATE FOLDER%"));
+        }
+        
+        [Fact]
         public Task CanInstallSameSourceTwice_Folder_WhenSourceIsSpecified()
         {
             var home = TestUtils.CreateTemporaryFolder("Home");

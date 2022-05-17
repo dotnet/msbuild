@@ -805,6 +805,10 @@ The header is followed by the list of parameters and their errors (might be seve
     <value>For more information, run: </value>
     <comment>followed by command example (at new line, without quotes)</comment>
   </data>
+  <data name="TemplatePackageCoordinator_Install_ConstraintsNotice" xml:space="preserve">
+    <value>The following templates might not work because their constraints are not met:</value>
+    <comment>The sentence is followed by the list of templates with information on their constraints. Each template and each restriction is given from new line.</comment>
+  </data>
   <data name="TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled_Hint" xml:space="preserve">
     <value>To reinstall the same version of the template package, use '{0}' option:</value>
     <comment>{0} - option name (--force). Followed by command example on new line.</comment>
