@@ -27,7 +27,7 @@ namespace Microsoft.Build.Evaluation
                     state.ElementLocation,
                     "ExpressionDoesNotEvaluateToBoolean",
                     LeftChild.GetUnexpandedValue(state),
-                    LeftChild.GetExpandedValue(state),
+                    LeftChild.GetExpandedValue(state, loggingContext),
                     state.Condition);
             }
 
