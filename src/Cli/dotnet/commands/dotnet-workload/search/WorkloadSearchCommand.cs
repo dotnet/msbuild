@@ -17,8 +17,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Search
 {
     internal class WorkloadSearchCommand : WorkloadCommandBase
     {
-        private readonly IReporter _reporter;
-        private readonly VerbosityOptions _verbosity;
         private readonly IWorkloadResolver _workloadResolver;
         private readonly ReleaseVersion _sdkVersion;
         private readonly string _workloadIdStub;
@@ -28,10 +26,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Search
             IReporter reporter = null,
             IWorkloadResolver workloadResolver = null,
             string version = null,
-            string userProfileDir = null) : base(result)
+            string userProfileDir = null) : base(result, CommonOptions.HiddenVerbosityOption, reporter)
         {
-            _reporter = reporter ?? Reporter.Output;
-            _verbosity = result.GetValueForOption(WorkloadSearchCommandParser.VerbosityOption);
             _workloadIdStub = result.GetValueForArgument(WorkloadSearchCommandParser.WorkloadIdStubArgument);
             var dotnetPath = Path.GetDirectoryName(Environment.ProcessPath);
             userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
@@ -55,9 +51,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Search
             table.AddColumn(LocalizableStrings.WorkloadIdColumnName, workload => workload.Id.ToString());
             table.AddColumn(LocalizableStrings.DescriptionColumnName, workload => workload.Description);
 
-            _reporter.WriteLine();
-            table.PrintRows(availableWorkloads, l => _reporter.WriteLine(l));
-            _reporter.WriteLine();
+            Reporter.WriteLine();
+            table.PrintRows(availableWorkloads, l => Reporter.WriteLine(l));
+            Reporter.WriteLine();
 
             return 0;
         }

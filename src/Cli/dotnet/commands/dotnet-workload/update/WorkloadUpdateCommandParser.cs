@@ -17,8 +17,6 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<string> VersionOption = WorkloadInstallCommandParser.VersionOption;
 
-        public static readonly Option<VerbosityOptions> VerbosityOption = WorkloadInstallCommandParser.VerbosityOption;
-
         public static readonly Option<bool> IncludePreviewsOption = WorkloadInstallCommandParser.IncludePreviewOption;
 
         public static readonly Option<string> DownloadToCacheOption = WorkloadInstallCommandParser.DownloadToCacheOption;
@@ -64,7 +62,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(FromPreviousSdkOption);
             command.AddOption(AdManifestOnlyOption);
             command.AddWorkloadCommandNuGetRestoreActionConfigOptions();
-            command.AddOption(VerbosityOption);
+            command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(PrintRollbackOption);
             command.AddOption(FromRollbackFileOption);
 
