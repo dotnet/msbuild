@@ -55,6 +55,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.7.1" DisplayName=".NET Framework 4.7.1" Alias="net471" />
         <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.7.2" DisplayName=".NET Framework 4.7.2" Alias="net472" />
         <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.8"   DisplayName=".NET Framework 4.8" Alias="net48" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.8.1"   DisplayName=".NET Framework 4.8.1" Alias="net481" />
     </ItemGroup>
 
     <!-- All supported target frameworks -->
