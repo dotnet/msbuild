@@ -350,6 +350,8 @@ namespace Microsoft.TemplateEngine.Cli
                     }
                 }
             }
+            //rebuild cache after uninstall to remove deleted templates.
+            await _templatePackageManager.RebuildTemplateCacheAsync(cancellationToken).ConfigureAwait(false);
             return result;
         }
 
