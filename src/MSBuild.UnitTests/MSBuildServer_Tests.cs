@@ -182,8 +182,8 @@ namespace Microsoft.Build.Engine.UnitTests
 #if FEATURE_RUN_EXE_IN_TESTS
                 var pathToExecutable = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 #else
-            var pathToExecutable = ResolveRuntimeExecutableName();
-            msbuildParameters = FileUtilities.EnsureDoubleQuotes(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath) + " " + msbuildParameters;
+            var pathToExecutable = ResolveRuntimeExecutableName()!;
+            msbuildParameters = FileUtilities.EnsureDoubleQuotes(pathToExecutable) + " " + msbuildParameters;
 #endif
                 var psi = new ProcessStartInfo(pathToExecutable)
                 {
@@ -273,32 +273,6 @@ namespace Microsoft.Build.Engine.UnitTests
                     ProcessExtensions.KillTree(Process.GetProcessById(pidOfServerProcess), 1000);
                 }
                 pr.WaitForExit(30000);
-
-                //t = Task.Run(() =>
-                //{
-                //    RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, sleepProject.Path + " -v:diag", out _, false, _output);
-                //});
-
-                //// The server will soon be in use; make sure we don't try to use it before that happens.
-                //Thread.Sleep(1000);
-
-                //_output.WriteLine("next batch");
-                //foreach (Process p in Process.GetProcesses())
-                //{
-                //    _output.WriteLine($"Process number {p.Id} is {p.ProcessName}" + $" tid: {System.Threading.Thread.CurrentThread.ManagedThreadId} timestamp: {DateTime.Now.Ticks}");
-                //    p.OutputDataReceived += (object sender, DataReceivedEventArgs args) => _output.WriteLine(args is null ? "empty" : args.Data);
-                //}
-
-                //Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
-                //output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out success, false, _output);
-                //success.ShouldBeTrue();
-                //ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
-
-                //Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
-                //output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out success, false, _output);
-                //success.ShouldBeTrue();
-                //pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Server ID is "), "The server should be otherwise occupied.");
-                //pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
             }
             finally
             {
@@ -317,12 +291,8 @@ namespace Microsoft.Build.Engine.UnitTests
                     {
                         ProcessExtensions.KillTree(Process.GetProcessById(pidOfServerProcess), 1000);
                     }
-                } catch (Exception) { }
-
-                //if (t is not null)
-                //{
-                //    t.Wait();
-                //}
+                }
+                catch (Exception) { }
             }
         }
 
@@ -348,12 +318,12 @@ namespace Microsoft.Build.Engine.UnitTests
             workerPid.ShouldBe(ParseNumber(output, "Server ID is "));
         }
 
-        private static string ResolveRuntimeExecutableName()
+        private static string? ResolveRuntimeExecutableName()
         {
             // Run the child process with the same host as the currently-running process.
             using (Process currentProcess = Process.GetCurrentProcess())
             {
-                return currentProcess.MainModule.FileName;
+                return currentProcess?.MainModule?.FileName;
             }
         }
 
