@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Tests
                      .And.Pass();
         }
 
-        [RequiresSpecificFrameworkTheory(ToolsetInfo.CurrentTargetFramework)]
+        [RequiresSpecificFrameworkTheory("netcoreapp1.1")]
         [InlineData(true)]
         [InlineData(false)]
         public void IfPreviousVersionOfSharedFrameworkIsInstalled_ToolsTargetingItRun(bool toolPrefersCLIRuntime)
