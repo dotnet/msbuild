@@ -88,6 +88,38 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
+        [Fact]
+        public void SdkResolverLoaderPrefersManifestFile()
+        {
+            var root = FileUtilities.GetTemporaryDirectory();
+            try
+            {
+                var testFolder = Directory.CreateDirectory(Path.Combine(root, "MyTestResolver"));
+
+                var wrongResolverDll = Path.Combine(testFolder.FullName, "MyTestResolver.dll");
+                var resolverManifest = Path.Combine(testFolder.FullName, "MyTestResolver.xml");
+                var assemblyToLoad = Path.Combine(root, "SomeOtherResolver.dll");
+
+                File.WriteAllText(wrongResolverDll, string.Empty);
+                File.WriteAllText(assemblyToLoad, string.Empty);
+
+                File.WriteAllText(resolverManifest, $@"
+                    <SdkResolver>
+                      <Path>{assemblyToLoad}</Path>
+                    </SdkResolver>");
+
+                SdkResolverLoader loader = new SdkResolverLoader();
+                var resolversFound = loader.FindPotentialSdkResolvers(root, new MockElementLocation("file"));
+
+                resolversFound.Count.ShouldBe(1);
+                resolversFound.First().ShouldBe(assemblyToLoad);
+            }
+            finally
+            {
+                FileUtilities.DeleteDirectoryNoThrow(root, true);
+            }
+        }
+
         /// <summary>
         /// Verifies that if an SDK resolver throws while creating an instance that a warning is logged.
         /// </summary>

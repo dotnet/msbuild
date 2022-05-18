@@ -100,13 +100,26 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             foreach (var subfolder in subfolders)
             {
-                var assembly = Path.Combine(subfolder.FullName, $"{subfolder.Name}.dll");
                 var manifest = Path.Combine(subfolder.FullName, $"{subfolder.Name}.xml");
+                var assembly = Path.Combine(subfolder.FullName, $"{subfolder.Name}.dll");
+                bool assemblyAdded = false;
 
-                var assemblyAdded = TryAddAssemblyManifestFromDll(assembly, manifestsList);
-                if (!assemblyAdded)
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
                 {
+                    // Prefer manifest over the assembly. Try to read the xml first, and if not found then look for an assembly.
                     assemblyAdded = TryAddAssemblyManifestFromXml(manifest, subfolder.FullName, manifestsList, location);
+                    if (!assemblyAdded)
+                    {
+                        assemblyAdded = TryAddAssemblyManifestFromDll(assembly, manifestsList);
+                    }
+                }
+                else
+                {
+                    assemblyAdded = TryAddAssemblyManifestFromDll(assembly, manifestsList);
+                    if (!assemblyAdded)
+                    {
+                        assemblyAdded = TryAddAssemblyManifestFromXml(manifest, subfolder.FullName, manifestsList, location);
+                    }
                 }
 
                 if (!assemblyAdded)
