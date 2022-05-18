@@ -47,6 +47,8 @@ namespace Microsoft.Build.Shared
 
         private static MetadataLoadContext _context;
 
+        private static string[] runtimeAssemblies = Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll");
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -174,25 +176,8 @@ namespace Microsoft.Build.Shared
         private static Assembly LoadAssemblyUsingMetadataLoadContext(AssemblyLoadInfo assemblyLoadInfo)
         {
             string path = assemblyLoadInfo.AssemblyFile;
-
-            if (path is null)
-            {
-#if NETFRAMEWORK
-                AppDomainSetup setup = AppDomain.CurrentDomain.SetupInformation;
-                setup.LoaderOptimization = LoaderOptimization.SingleDomain;
-                AppDomain appDomain = AppDomain.CreateDomain("appDomainToFindPath", null, setup);
-                path = appDomain.Load(new AssemblyName(assemblyLoadInfo.AssemblyName)).Location;
-                AppDomain.Unload(appDomain);
-#else
-                AssemblyLoadContext alc = new("loadContextToFindPath", true);
-                path = alc.LoadFromAssemblyName(new AssemblyName(assemblyLoadInfo.AssemblyName)).Location;
-                alc.Unload();
-#endif
-            }
-
-            string[] runtimePaths = Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll");
             List<string> localPaths = new(Directory.GetFiles(Path.GetDirectoryName(path), "*.dll"));
-            localPaths.AddRange(runtimePaths);
+            localPaths.AddRange(runtimeAssemblies);
 
             _context = new(new PathAssemblyResolver(localPaths));
             return _context.LoadFromAssemblyPath(path);
@@ -318,7 +303,7 @@ namespace Microsoft.Build.Shared
             {
                 ErrorUtilities.VerifyThrowArgumentNull(typeName, nameof(typeName));
 
-                if (useTaskHost)
+                if (useTaskHost && _assemblyLoadInfo.AssemblyFile is not null)
                 {
                     return GetLoadedTypeFromTypeNameUsingMetadataLoadContext(typeName);
                 }
@@ -376,9 +361,12 @@ namespace Microsoft.Build.Shared
             {
                 return _publicTypeNameToLoadedType.GetOrAdd(typeName, typeName =>
                 {
+                    MSBuildEventSource.Log.LoadAssemblyAndFindTypeStart();
                     Assembly loadedAssembly = LoadAssemblyUsingMetadataLoadContext(_assemblyLoadInfo);
+                    int numberOfTypesSearched = 0;
                     foreach (Type publicType in loadedAssembly.GetExportedTypes())
                     {
+                        numberOfTypesSearched++;
                         if (_isDesiredType(publicType, null) && (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(publicType.FullName, typeName)))
                         {
                             MSBuildEventSource.Log.CreateLoadedTypeStart(loadedAssembly.FullName);
@@ -389,6 +377,8 @@ namespace Microsoft.Build.Shared
                             return loadedType;
                         }
                     }
+
+                    MSBuildEventSource.Log.LoadAssemblyAndFindTypeStop(_assemblyLoadInfo.AssemblyFile, numberOfTypesSearched);
 
                     return null;
                 });
