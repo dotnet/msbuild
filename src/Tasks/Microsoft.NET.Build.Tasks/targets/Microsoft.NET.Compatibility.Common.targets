@@ -3,7 +3,7 @@
   <UsingTask TaskName="Microsoft.DotNet.Compatibility.ValidatePackage" AssemblyFile="$(DotNetCompatibilityAssembly)" />
 
   <PropertyGroup>
-    <!--Add any custom targets that need to run before package validation to the following property-->
+    <!-- Add any custom targets that need to run before package validation to the following property. -->
     <RunPackageValidationDependsOn>_GetReferencePathFromInnerProjects;$(RunPackageValidationDependsOn)</RunPackageValidationDependsOn>
   </PropertyGroup>
 
@@ -45,32 +45,23 @@
       ReferencePaths="@(PackageValidationReferencePath)" />
   </Target>
 
-  <PropertyGroup>
-    <_GetReferencePathFromInnerProjectsDependsOn Condition="'$(IsCrossTargetingBuild)' != 'true'">_GetReferencePathForPackageValidation</_GetReferencePathFromInnerProjectsDependsOn>
-    <_GetReferencePathFromInnerProjectsDependsOn Condition="'$(IsCrossTargetingBuild)' == 'true'">_ComputeTargetFrameworkItems</_GetReferencePathFromInnerProjectsDependsOn>
-  </PropertyGroup>
-
   <Target Name="_GetReferencePathForPackageValidation"
           DependsOnTargets="ResolveReferences"
           Returns="@(_ReferencePathWithTargetFramework)">
     <ItemGroup>
-      <_ReferencePathWithTargetFramework Include="@(ReferencePath)"  TargetFramework="$(TargetFramework)" />
+      <_ReferencePathWithTargetFramework Include="@(ReferencePath)" TargetFramework="$(TargetFramework)" />
     </ItemGroup>
   </Target>
 
+  <!-- Depends on NuGet's _GetTargetFrameworksOutput target to calculate inner target frameworks. -->
   <Target Name="_GetReferencePathFromInnerProjects"
-          DependsOnTargets="$(_GetReferencePathFromInnerProjectsDependsOn)"
+          DependsOnTargets="_GetTargetFrameworksOutput"
           Condition="'$(RunPackageValidationWithoutReferences)' != 'true'">
-
-    <MSBuild Projects="@(_InnerBuildProjects)"
-             Condition="'$(IsCrossTargetingBuild)' == 'true'"
+    <MSBuild Projects="$(MSBuildProjectFullPath)"
              Targets="_GetReferencePathForPackageValidation"
-             Properties="BuildProjectReferences=false">
+             Properties="TargetFramework=%(_TargetFrameworks.Identity);
+                         BuildProjectReferences=false">
       <Output ItemName="PackageValidationReferencePath" TaskParameter="TargetOutputs" />
     </MSBuild>
-
-    <ItemGroup Condition="'$(IsCrossTargetingBuild)' != 'true'">
-      <PackageValidationReferencePath Include="@(_ReferencePathWithTargetFramework)" />
-    </ItemGroup>
   </Target>
 </Project>
