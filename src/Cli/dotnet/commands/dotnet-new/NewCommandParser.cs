@@ -15,6 +15,7 @@ using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Edge;
 using System.Linq;
+using Microsoft.DotNet.Workloads.Workload.List;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -84,6 +85,8 @@ namespace Microsoft.DotNet.Cli
                 builtIns.Add((typeof(ITemplatePackageProviderFactory), new BuiltInTemplatePackageProviderFactory()));
                 builtIns.Add((typeof(ITemplatePackageProviderFactory), new OptionalWorkloadProviderFactory()));
             }
+            builtIns.Add((typeof(IWorkloadsInfoProvider), new WorkloadsInfoProvider(new WorkloadListHelper())));
+            builtIns.Add((typeof(ISdkInfoProvider), new SdkInfoProvider()));
 
             string preferredLangEnvVar = Environment.GetEnvironmentVariable("DOTNET_NEW_PREFERRED_LANG");
             string preferredLang = string.IsNullOrWhiteSpace(preferredLangEnvVar)? "C#" : preferredLangEnvVar;
