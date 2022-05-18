@@ -32,11 +32,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Arity = new ArgumentArity(1, 99)
         };
 
+        internal static Option<bool> ForceOption { get; } = SharedOptionsFactory.CreateForceOption().WithDescription(SymbolStrings.Option_Install_Force);
+
         internal virtual Option<bool> InteractiveOption { get; } = SharedOptionsFactory.CreateInteractiveOption();
 
         internal virtual Option<string[]> AddSourceOption { get; } = SharedOptionsFactory.CreateAddSourceOption();
-
-        internal virtual Option<bool> ForceOption { get; } = SharedOptionsFactory.CreateForceOption().WithDescription(SymbolStrings.Option_Install_Force);
 
         protected NewCommand ParentCommand { get; }
 

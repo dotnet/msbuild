@@ -35,5 +35,15 @@ namespace Dotnet_new3.IntegrationTests
             output.Clear();
             output.Append(finalOutput);
         }
+
+        /// <summary>
+        /// Replaces content matching <paramref name="textToReplace"/> with <paramref name="replacement"/>.
+        /// </summary>
+        internal static void ScrubAndReplace(this StringBuilder output, string textToReplace, string replacement)
+        {
+            string finalOutput = output.ToString().Replace(textToReplace, replacement);
+            output.Clear();
+            output.Append(finalOutput);
+        }
     }
 }

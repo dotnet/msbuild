@@ -1,0 +1,3 @@
+﻿%TEMPLATE FOLDER% is already installed.
+To reinstall the same version of the template package, use '--force' option:
+   dotnet-new3 new3 install %TEMPLATE FOLDER% --force

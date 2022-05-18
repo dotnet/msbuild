@@ -370,53 +370,6 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("basic");
         }
 
-        [Fact]
-        public void CannotInstallSameSourceTwice_NuGet()
-        {
-            var home = TestUtils.CreateTemporaryFolder("Home");
-
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
-                .WithCustomHive(home)
-                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .Execute()
-                .Should()
-                .ExitWith(0)
-                .And
-                .NotHaveStdErr()
-                .And.HaveStdOutContaining("console")
-                .And.HaveStdOutContaining("classlib");
-
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
-                 .WithCustomHive(home)
-                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                 .Execute()
-                 .Should().Fail()
-                 .And.HaveStdErrContaining("Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0 is already installed");
-        }
-
-        [Fact]
-        public void CannotInstallSameSourceTwice_Folder()
-        {
-            var home = TestUtils.CreateTemporaryFolder("Home");
-            string basicFSharp = TestUtils.GetTestTemplateLocation("TemplateResolution/DifferentLanguagesGroup/BasicFSharp");
-            new DotnetNewCommand(_log, "-i", basicFSharp)
-                .WithCustomHive(home)
-                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .Execute()
-                .Should()
-                .ExitWith(0)
-                .And
-                .NotHaveStdErr()
-                .And.HaveStdOutContaining("basic");
-
-            new DotnetNewCommand(_log, "-i", basicFSharp)
-                 .WithCustomHive(home)
-                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                 .Execute()
-                 .Should().Fail()
-                 .And.HaveStdErrContaining($"{basicFSharp} is already installed");
-        }
-
         [Theory]
         [InlineData("-i", "-u")]
         [InlineData("install", "uninstall")]
@@ -455,7 +408,7 @@ namespace Dotnet_new3.IntegrationTests
                  .And.NotHaveStdErr()
                  .And.HaveStdOutContaining("The following template packages will be installed:")
                  .And.HaveStdOutContaining("Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.1")
-                 .And.HaveStdOutContaining("Microsoft.DotNet.Common.ProjectTemplates.5.0 is already installed, version: 5.0.0, it will be replaced with version 5.0.1")
+                 .And.HaveStdOutContaining("Microsoft.DotNet.Common.ProjectTemplates.5.0 (version 5.0.0) is already installed, it will be replaced with version 5.0.1")
                  .And.HaveStdOutContaining("Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0 was successfully uninstalled")
                  .And.HaveStdOutContaining($"Success: Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.1 installed the following templates:")
                  .And.HaveStdOutContaining("console")
@@ -520,7 +473,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("The following template packages will be installed:")
                 .And.HaveStdOutContaining("Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
-                .And.HaveStdOutMatching("Microsoft\\.DotNet\\.Common\\.ProjectTemplates\\.5\\.0 is already installed, version: ([\\d\\.a-z-])+, it will be replaced with version 5\\.0\\.0")
+                .And.HaveStdOutMatching("Microsoft\\.DotNet\\.Common\\.ProjectTemplates\\.5\\.0 \\(version ([\\d\\.a-z-])+\\) is already installed, it will be replaced with version 5\\.0\\.0")
                 .And.HaveStdOutMatching("Microsoft\\.DotNet\\.Common\\.ProjectTemplates\\.5\\.0::([\\d\\.a-z-])+ was successfully uninstalled")
                 .And.HaveStdOutContaining($"Success: Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0 installed the following templates:")
                 .And.HaveStdOutContaining("console")

@@ -992,6 +992,11 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">{0} zaten yüklendi.</target>
         <note />
       </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled_Hint">
+        <source>To reinstall the same version of the template package, use '{0}' option:</source>
+        <target state="new">To reinstall the same version of the template package, use '{0}' option:</target>
+        <note>{0} - option name (--force). Followed by command example on new line.</note>
+      </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_DownloadFailed">
         <source>{0} could not be installed, download failed.</source>
         <target state="translated">{0} yüklenemedi, indirme başarısız oldu.</target>

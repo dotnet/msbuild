@@ -1618,6 +1618,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to To reinstall the same version of the template package, use &apos;{0}&apos; option:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled_Hint {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled_Hint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} could not be installed, download failed..
         /// </summary>
         internal static string TemplatePackageCoordinator_lnstall_Error_DownloadFailed {

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Parsing;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Installer;
@@ -205,7 +206,7 @@ namespace Microsoft.TemplateEngine.Cli
                 string? version = splitByColons.Length > 1 ? splitByColons[1] : null;
                 foreach (string expandedIdentifier in InstallRequestPathResolution.ExpandMaskedPath(identifier, _engineEnvironmentSettings))
                 {
-                    installRequests.Add(new InstallRequest(expandedIdentifier, version, details: details));
+                    installRequests.Add(new InstallRequest(expandedIdentifier, version, details: details, force: args.Force));
                 }
             }
 
@@ -243,7 +244,7 @@ namespace Microsoft.TemplateEngine.Cli
             IReadOnlyList<InstallResult> installResults = await managedSourceProvider.InstallAsync(installRequests, cancellationToken).ConfigureAwait(false);
             foreach (InstallResult result in installResults)
             {
-                await DisplayInstallResultAsync(result.InstallRequest.DisplayName, result, cancellationToken).ConfigureAwait(false);
+                await DisplayInstallResultAsync(result.InstallRequest.DisplayName, result, args.ParseResult, cancellationToken).ConfigureAwait(false);
                 if (!result.Success)
                 {
                     resultStatus = NewCommandStatus.CreateFailed;
@@ -299,7 +300,7 @@ namespace Microsoft.TemplateEngine.Cli
                         {
                             success = NewCommandStatus.CreateFailed;
                         }
-                        await DisplayInstallResultAsync(updateResult.UpdateRequest.TemplatePackage.DisplayName, updateResult, cancellationToken).ConfigureAwait(false);
+                        await DisplayInstallResultAsync(updateResult.UpdateRequest.TemplatePackage.DisplayName, updateResult, commandArgs.ParseResult, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }
@@ -710,7 +711,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private async Task DisplayInstallResultAsync(string packageToInstall, InstallerOperationResult result, CancellationToken cancellationToken)
+        private async Task DisplayInstallResultAsync(string packageToInstall, InstallerOperationResult result, ParseResult parseResult, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(packageToInstall))
             {
@@ -775,6 +776,9 @@ namespace Microsoft.TemplateEngine.Cli
                               string.Format(
                                   LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled,
                                   packageToInstall).Bold().Red());
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled_Hint, InstallCommand.ForceOption.Aliases.First()));
+                        Reporter.Error.WriteCommand(Example.For<InstallCommand>(parseResult).WithArgument(BaseInstallCommand.NameArgument, packageToInstall).WithOption(BaseInstallCommand.ForceOption));
+
                         break;
                     case InstallerErrorCode.UpdateUninstallFailed:
                         Reporter.Error.WriteLine(
