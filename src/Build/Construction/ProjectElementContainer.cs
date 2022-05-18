@@ -407,44 +407,11 @@ namespace Microsoft.Build.Construction
                 }
                 else
                 {
-                    ProjectElement childClone = child.Clone(clone.ContainingProject);
-                    clone.AppendChild(childClone);
-                    if (childClone.XmlElement is not null)
-                    {
-                        AppendAttributesAndChildren(childClone.XmlElement, child.XmlElement);
-                    }
+                    clone.AppendChild(child.Clone(clone.ContainingProject));
                 }
             }
 
             return clone;
-        }
-
-        private void AppendAttributesAndChildren(XmlNode appendTo, XmlNode appendFrom)
-        {
-            appendTo.RemoveAll();
-            // Copy over the attributes from the template element.
-            if (appendFrom.Attributes is not null)
-            {
-                foreach (XmlAttribute attribute in appendFrom.Attributes)
-                {
-                    XmlAttribute attr = appendTo.OwnerDocument.CreateAttribute(attribute.LocalName, attribute.NamespaceURI);
-                    attr.Value = attribute.Value;
-                    appendTo.Attributes.Append(attr);
-                }
-            }
-
-            // If this element has pure text content, copy that over.
-            if (appendFrom.ChildNodes.Count == 1 && appendFrom.FirstChild.NodeType == XmlNodeType.Text)
-            {
-                appendTo.AppendChild(appendTo.OwnerDocument.CreateTextNode(appendFrom.FirstChild.Value));
-            }
-
-            foreach (XmlNode child in appendFrom.ChildNodes)
-            {
-                XmlNode childClone = appendTo.OwnerDocument.CreateNode(child.NodeType, child.Prefix, child.Name, child.NamespaceURI);
-                appendTo.AppendChild(childClone);
-                AppendAttributesAndChildren(childClone, child);
-            }
         }
 
         internal static ProjectElementContainer DeepClone(ProjectElementContainer xml, ProjectRootElement factory, ProjectElementContainer parent)

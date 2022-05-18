@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -147,6 +147,26 @@ namespace Microsoft.Build.BackEnd
             public void Translate(ref int value)
             {
                 value = _reader.ReadInt32();
+            }
+
+            /// <summary>
+            /// Translates an <see langword="int"/> array.
+            /// </summary>
+            /// <param name="array">The array to be translated.</param>
+            public void Translate(ref int[] array)
+            {
+                if (!TranslateNullable(array))
+                {
+                    return;
+                }
+
+                int count = _reader.ReadInt32();
+                array = new int[count];
+
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = _reader.ReadInt32();
+                }
             }
 
             /// <summary>
@@ -809,6 +829,26 @@ namespace Microsoft.Build.BackEnd
             public void Translate(ref int value)
             {
                 _writer.Write(value);
+            }
+
+            /// <summary>
+            /// Translates an <see langword="int"/> array.
+            /// </summary>
+            /// <param name="array">The array to be translated.</param>
+            public void Translate(ref int[] array)
+            {
+                if (!TranslateNullable(array))
+                {
+                    return;
+                }
+
+                int count = array.Length;
+                _writer.Write(count);
+
+                for (int i = 0; i < count; i++)
+                {
+                    _writer.Write(array[i]);
+                }
             }
 
             /// <summary>

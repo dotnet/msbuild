@@ -68,6 +68,11 @@ namespace Microsoft.Build.Internal
         /// Using the .NET Core/.NET 5.0+ runtime
         /// </summary>
         NET = 64,
+
+        /// <summary>
+        /// ARM64 process
+        /// </summary>
+        Arm64 = 128,
     }
 
     internal readonly struct Handshake
@@ -90,9 +95,9 @@ namespace Microsoft.Build.Internal
             CommunicationsUtilities.Trace("Building handshake for node type {0}, (version {1}): options {2}.", nodeType, handshakeVersion, options);
 
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
-            CommunicationsUtilities.Trace("Handshake salt is \"{0}\"", handshakeSalt);
-            string toolsDirectory = (nodeType & HandshakeOptions.X64) == HandshakeOptions.X64 ? BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64 : BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
-            CommunicationsUtilities.Trace("Tools directory is \"{0}\"", toolsDirectory);
+            CommunicationsUtilities.Trace("Handshake salt is " + handshakeSalt);
+            string toolsDirectory = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
+            CommunicationsUtilities.Trace("Tools directory root is " + toolsDirectory);
             salt = CommunicationsUtilities.GetHashCode(handshakeSalt + toolsDirectory);
             Version fileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
             fileVersionMajor = fileVersion.Major;
@@ -147,6 +152,11 @@ namespace Microsoft.Build.Internal
         /// Whether to trace communications
         /// </summary>
         private static bool s_trace = Traits.Instance.DebugNodeCommunication;
+
+        /// <summary>
+        /// Lock trace to ensure we are logging in serial fashion.
+        /// </summary>
+        private static readonly object s_traceLock = new();
 
         /// <summary>
         /// Place to dump trace
@@ -483,22 +493,22 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Given the appropriate information, return the equivalent HandshakeOptions.
         /// </summary>
-        internal static HandshakeOptions GetHandshakeOptions(bool taskHost, bool is64Bit = false, bool nodeReuse = false, bool lowPriority = false, IDictionary<string, string> taskHostParameters = null)
+        internal static HandshakeOptions GetHandshakeOptions(bool taskHost, string architectureFlagToSet = null, bool nodeReuse = false, bool lowPriority = false, IDictionary<string, string> taskHostParameters = null)
         {
             HandshakeOptions context = taskHost ? HandshakeOptions.TaskHost : HandshakeOptions.None;
 
             int clrVersion = 0;
 
-            // We don't know about the TaskHost. Figure it out.
+            // We don't know about the TaskHost.
             if (taskHost)
             {
-                // Take the current TaskHost context
+                // No parameters given, default to current
                 if (taskHostParameters == null)
                 {
                     clrVersion = typeof(bool).GetTypeInfo().Assembly.GetName().Version.Major;
-                    is64Bit = XMakeAttributes.GetCurrentMSBuildArchitecture().Equals(XMakeAttributes.MSBuildArchitectureValues.x64);
+                    architectureFlagToSet = XMakeAttributes.GetCurrentMSBuildArchitecture();
                 }
-                else
+                else // Figure out flags based on parameters given
                 {
                     ErrorUtilities.VerifyThrow(taskHostParameters.TryGetValue(XMakeAttributes.runtime, out string runtimeVersion), "Should always have an explicit runtime when we call this method.");
                     ErrorUtilities.VerifyThrow(taskHostParameters.TryGetValue(XMakeAttributes.architecture, out string architecture), "Should always have an explicit architecture when we call this method.");
@@ -520,13 +530,20 @@ namespace Microsoft.Build.Internal
                         ErrorUtilities.ThrowInternalErrorUnreachable();
                     }
 
-                    is64Bit = architecture.Equals(XMakeAttributes.MSBuildArchitectureValues.x64);
+                    architectureFlagToSet = architecture;
                 }
             }
 
-            if (is64Bit)
+            if (!string.IsNullOrEmpty(architectureFlagToSet))
             {
-                context |= HandshakeOptions.X64;
+                if (architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase))
+                {
+                    context |= HandshakeOptions.X64;
+                }
+                else if (architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.arm64, StringComparison.OrdinalIgnoreCase))
+                {
+                    context |= HandshakeOptions.Arm64;
+                }
             }
 
             switch (clrVersion)
@@ -604,9 +621,11 @@ namespace Microsoft.Build.Internal
         {
             if (s_trace)
             {
-                if (s_debugDumpPath == null)
+                lock (s_traceLock)
                 {
-                    s_debugDumpPath =
+                    if (s_debugDumpPath == null)
+                    {
+                        s_debugDumpPath =
 #if CLR2COMPATIBILITY
                         Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
 #else
@@ -615,38 +634,42 @@ namespace Microsoft.Build.Internal
                             : Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
 #endif
 
-                    if (String.IsNullOrEmpty(s_debugDumpPath))
-                    {
-                        s_debugDumpPath = Path.GetTempPath();
-                    }
-                    else
-                    {
-                        Directory.CreateDirectory(s_debugDumpPath);
-                    }
-                }
-
-                try
-                {
-                    string fileName = @"MSBuild_CommTrace_PID_{0}";
-                    if (nodeId != -1)
-                    {
-                        fileName += "_node_" + nodeId;
+                        if (String.IsNullOrEmpty(s_debugDumpPath))
+                        {
+                            s_debugDumpPath = Path.GetTempPath();
+                        }
+                        else
+                        {
+                            Directory.CreateDirectory(s_debugDumpPath);
+                        }
                     }
 
-                    fileName += ".txt";
-
-                    using (StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), Process.GetCurrentProcess().Id, nodeId), append: true))
+                    try
                     {
-                        string message = String.Format(CultureInfo.CurrentCulture, format, args);
-                        long now = DateTime.UtcNow.Ticks;
-                        float millisecondsSinceLastLog = (float)(now - s_lastLoggedTicks) / 10000L;
-                        s_lastLoggedTicks = now;
-                        file.WriteLine("{0} (TID {1}) {2,15} +{3,10}ms: {4}", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, now, millisecondsSinceLastLog, message);
+                        string fileName = @"MSBuild_CommTrace_PID_{0}";
+                        if (nodeId != -1)
+                        {
+                            fileName += "_node_" + nodeId;
+                        }
+
+                        fileName += ".txt";
+
+                        using (StreamWriter file =
+                               FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), Process.GetCurrentProcess().Id, nodeId),
+                                   append: true))
+                        {
+                            string message = String.Format(CultureInfo.CurrentCulture, format, args);
+                            long now = DateTime.UtcNow.Ticks;
+                            float millisecondsSinceLastLog = (float)(now - s_lastLoggedTicks) / 10000L;
+                            s_lastLoggedTicks = now;
+                            file.WriteLine("{0} (TID {1}) {2,15} +{3,10}ms: {4}", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, now, millisecondsSinceLastLog,
+                                message);
+                        }
                     }
-                }
-                catch (IOException)
-                {
-                    // Ignore
+                    catch (IOException)
+                    {
+                        // Ignore
+                    }
                 }
             }
         }

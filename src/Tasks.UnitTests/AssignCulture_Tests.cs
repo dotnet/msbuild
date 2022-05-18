@@ -220,6 +220,3 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
-
-
-
