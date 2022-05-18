@@ -88,6 +88,7 @@ jobs:
         env:
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
             HelixAccessToken: $(_HelixApiToken)
+            RunAoTTests: 'false'
 
     - ${{ if eq(parameters.agentOs, 'Windows_NT_FullFramework') }}:
       - script: eng\CIBuild.cmd
