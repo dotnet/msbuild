@@ -157,6 +157,146 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        public void BuildsWhileBuildIsRunningOnServer()
+        {
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+            TransientTestFile sleepProject = _env.CreateFile("napProject.proj", sleepingTaskContents);
+            _env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
+            _env.SetEnvironmentVariable("MSBUILDDEBUGPATH", Path.Combine(Path.GetDirectoryName(project.Path)!, "myFolder"));
+
+            int pidOfServerProcess = -1;
+            try
+            {
+                // Start a server node and find its PID.
+                string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out bool success, false, _output);
+                pidOfServerProcess = ParseNumber(output, "Server ID is ");
+
+                foreach (Process p in Process.GetProcesses())
+                {
+                    _output.WriteLine($"Process number {p.Id} is {p.ProcessName}" + $" tid: {System.Threading.Thread.CurrentThread.ManagedThreadId} timestamp: {DateTime.Now.Ticks}");
+                    p.OutputDataReceived += (object sender, DataReceivedEventArgs args) => _output.WriteLine(args is null ? "empty" : args.Data);
+                }
+
+                var msbuildParameters = sleepProject.Path;
+#if FEATURE_RUN_EXE_IN_TESTS
+                var pathToExecutable = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
+#else
+            var pathToExecutable = ResolveRuntimeExecutableName()!;
+            msbuildParameters = FileUtilities.EnsureDoubleQuotes(pathToExecutable) + " " + msbuildParameters;
+#endif
+                var psi = new ProcessStartInfo(pathToExecutable)
+                {
+                    CreateNoWindow = true,
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    Arguments = msbuildParameters
+                };
+
+                Process pr = new Process { EnableRaisingEvents = true, StartInfo = psi };
+                    pr.Start();
+                    pr.BeginOutputReadLine();
+                    pr.BeginErrorReadLine();
+                    pr.StandardInput.Dispose();
+
+                psi = new(pathToExecutable)
+                {
+                    CreateNoWindow = true,
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    Arguments = project.Path
+                };
+
+                Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
+                output = String.Empty;
+                Process q = new Process { EnableRaisingEvents = true, StartInfo = psi };
+                    q.OutputDataReceived += delegate (object sender, DataReceivedEventArgs args)
+                    {
+                        if (args != null)
+                        {
+                            output += args.Data + "\r\n";
+                        }
+                    };
+
+                    q.ErrorDataReceived += delegate (object sender, DataReceivedEventArgs args)
+                    {
+                        if (args != null)
+                        {
+                            output += args.Data + "\r\n";
+                        }
+                    };
+
+                    q.Start();
+                    q.BeginOutputReadLine();
+                    q.BeginErrorReadLine();
+                    q.StandardInput.Dispose();
+
+                q.WaitForExit(30000);
+                q.ExitCode.ShouldBe(0);
+                ParseNumber(output, "Server ID is ").ShouldBe(q.Id, "There should not be a server node for this build.");
+
+                Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+                output = String.Empty;
+                q = new Process { EnableRaisingEvents = true, StartInfo = psi };
+                    q.OutputDataReceived += delegate (object sender, DataReceivedEventArgs args)
+                    {
+                        if (args != null)
+                        {
+                            output += args.Data + "\r\n";
+                        }
+                    };
+
+                    q.ErrorDataReceived += delegate (object sender, DataReceivedEventArgs args)
+                    {
+                        if (args != null)
+                        {
+                            output += args.Data + "\r\n";
+                        }
+                    };
+
+                    q.Start();
+                    q.BeginOutputReadLine();
+                    q.BeginErrorReadLine();
+                    q.StandardInput.Dispose();
+
+                q.WaitForExit(30000);
+                q.ExitCode.ShouldBe(0);
+                pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Server ID is "), "The server should be otherwise occupied.");
+                pidOfServerProcess.ShouldNotBe(q.Id, "There should not be a server node for this build.");
+
+                if (pidOfServerProcess > -1)
+                {
+                    ProcessExtensions.KillTree(Process.GetProcessById(pidOfServerProcess), 1000);
+                }
+                pr.WaitForExit(30000);
+            }
+            finally
+            {
+                foreach (string? file in Directory.GetFiles(Path.Combine(Path.GetDirectoryName(project.Path)!, "myFolder")))
+                {
+                    _output.WriteLine($"New file: {file}" + $" tid: {System.Threading.Thread.CurrentThread.ManagedThreadId} timestamp: {DateTime.Now.Ticks}");
+                    foreach (string line in File.ReadLines(file!))
+                    {
+                        _output.WriteLine(line + $" tid: {System.Threading.Thread.CurrentThread.ManagedThreadId} timestamp: {DateTime.Now.Ticks}");
+                    }
+                }
+
+                try
+                {
+                    if (pidOfServerProcess > -1)
+                    {
+                        ProcessExtensions.KillTree(Process.GetProcessById(pidOfServerProcess), 1000);
+                    }
+                }
+                catch (Exception) { }
+            }
+        }
+
+        [Fact]
         public void MultiProcBuildOnServer()
         {
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
