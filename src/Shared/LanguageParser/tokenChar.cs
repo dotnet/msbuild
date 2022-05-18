@@ -173,4 +173,3 @@ namespace Microsoft.Build.Shared.LanguageParser
         }
     }
 }
-
