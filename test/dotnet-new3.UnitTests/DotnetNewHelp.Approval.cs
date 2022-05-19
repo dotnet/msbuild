@@ -208,7 +208,7 @@ namespace Dotnet_new3.IntegrationTests
         }
 
         [Fact]
-        public Task CannotShowHelpForTemplate_MultipleValueChoice()
+        public Task CanShowHelpForTemplate_MultipleValueChoice()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
             Helpers.InstallTestTemplate("TemplateWithMultiValueChoice", _log, _fixture.HomeDirectory, workingDirectory);

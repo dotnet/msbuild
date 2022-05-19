@@ -137,7 +137,7 @@
     <value>This template contains technologies from parties other than Microsoft, see {0} for details.</value>
   </data>
   <data name="RowHeader_AllowMultiValue" xml:space="preserve">
-    <value>Allow multiple values: {0}</value>
+    <value>Multiple values are allowed: {0}</value>
     <comment>{0} is a boolean flag</comment>
   </data>
   <data name="RowHeader_DefaultIfOptionWithoutValue" xml:space="preserve">

@@ -20,5 +20,5 @@ Template options:
                                                                  iOS           iOS mobile
                                                                  android       android mobile
                                                                  nix           Linux distributions
-                                                               Allow multiple values: True
+                                                               Multiple values are allowed: True
                                                                Default: MacOS|iOS

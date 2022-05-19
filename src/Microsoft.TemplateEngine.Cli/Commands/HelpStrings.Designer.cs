@@ -106,7 +106,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Allow multiple values: {0}.
+        ///   Looks up a localized string similar to Multiple values are allowed: {0}.
         /// </summary>
         internal static string RowHeader_AllowMultiValue {
             get {
