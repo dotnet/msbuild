@@ -77,7 +77,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 var ns = project.Root.Name.Namespace;
                 project.Root.Element(ns + "PropertyGroup")
-                    .Add(new XElement(ns + "RuntimeIdentifier", "win-x64"));
+                    .Add(new XElement(ns + "RuntimeIdentifier", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64"));
             });
         }
 

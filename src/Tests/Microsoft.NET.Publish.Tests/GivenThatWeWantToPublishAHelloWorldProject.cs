@@ -167,8 +167,8 @@ public static class Program
         [InlineData("win-arm")]
         [InlineData("win8-arm")]
         [InlineData("win81-arm")]
-        [InlineData("win10-arm")]
-        [InlineData("win10-arm64")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-arm")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-arm64")]
         public void Publish_standalone_post_netcoreapp2_arm_app(string runtimeIdentifier)
         {
             // Tests for existence of expected files when publishing an ARM project
