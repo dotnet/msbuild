@@ -207,6 +207,12 @@ namespace Microsoft.Build.BackEnd
         /// Keep this enum value constant intact as this is part of contract with dotnet CLI
         /// </summary>
         ServerNodeConsoleWrite = 0xF2,
+
+        /// <summary>
+        /// Command to cancel ongoing build. 
+        /// Keep this enum value constant intact as this is part of contract with dotnet CLI
+        /// </summary>
+        ServerNodeBuildCancel = 0xF3,
     }
     #endregion
 
