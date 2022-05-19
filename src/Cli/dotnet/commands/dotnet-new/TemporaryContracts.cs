@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 
@@ -23,12 +24,14 @@ namespace Microsoft.DotNet.Tools.New
     /// <summary>
     /// Provider of descriptors of SDK workloads available to particular host (that is usually providing this component).
     /// </summary>
-    internal interface IWorkloadsInfoProvider : IIdentifiedComponent
+    public interface IWorkloadsInfoProvider : IIdentifiedComponent
     {
         /// <summary>
-        /// Set of installed workloads.
+        /// Fetches set of installed workloads.
         /// </summary>
-        public IEnumerable<WorkloadInfo> InstalledWorkloads { get; }
+        /// <param name="token"></param>
+        /// <returns>Set of installed workloads.</returns>
+        public Task<IEnumerable<WorkloadInfo>> GetInstalledWorkloadsAsync(CancellationToken token);
     }
 
     /// <summary>
@@ -39,7 +42,9 @@ namespace Microsoft.DotNet.Tools.New
         /// <summary>
         /// Current SDK installation semver version string.
         /// </summary>
-        public string VersionString { get; }
+        /// <param name="cancellationToken"></param>
+        /// <returns>SDK version.</returns>
+        public Task<string> GetVersionAsync(CancellationToken cancellationToken);
     }
 
     /// <summary>

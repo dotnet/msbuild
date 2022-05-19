@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.New.Tests
             IWorkloadsInfoProvider wp = new WorkloadsInfoProvider(workloadsEnumerator);
 
             // Act
-            var workloads = wp.InstalledWorkloads;
+            var workloads = wp.GetInstalledWorkloadsAsync(default).Result;
 
             // Assert
             List<WorkloadInfo> expected = new List<WorkloadInfo>()

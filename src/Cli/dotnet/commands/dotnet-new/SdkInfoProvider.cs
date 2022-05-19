@@ -3,6 +3,8 @@
 //
 
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.New
@@ -10,6 +12,10 @@ namespace Microsoft.DotNet.Tools.New
     internal class SdkInfoProvider : ISdkInfoProvider
     {
         public Guid Id { get; } = Guid.Parse("{A846C4E2-1E85-4BF5-954D-17655D916928}");
-        public string VersionString => Product.Version;
+
+        public Task<string> GetVersionAsync(CancellationToken cancellationToken)
+        {
+            return Task.FromResult(Product.Version);
+        } 
     }
 }

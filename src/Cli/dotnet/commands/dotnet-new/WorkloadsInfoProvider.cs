@@ -23,12 +23,11 @@ namespace Microsoft.DotNet.Tools.New
             _workloadsRepositoryEnumerator = workloadsRepositoryEnumerator;
         }
 
-        public IEnumerable<WorkloadInfo> InstalledWorkloads
+        public Task<IEnumerable<WorkloadInfo>> GetInstalledWorkloadsAsync(CancellationToken cancellationToken)
         {
-            get
-            {
-                return _workloadsRepositoryEnumerator.InstalledAndExtendedWorkloads.Select(w => new WorkloadInfo(w.Id, w.Description));
-            }
+            return Task.FromResult(
+                _workloadsRepositoryEnumerator.InstalledAndExtendedWorkloads.Select(w => new WorkloadInfo(w.Id, w.Description))
+                );
         }
     }
 }
