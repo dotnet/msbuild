@@ -13,13 +13,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     /// </summary>
     internal class SdkResolverManifest
     {
-        public SdkResolverManifest()
-        {
-        }
-
-        public SdkResolverManifest(string name, string path, Regex resolvableSdkPattern)
+        public SdkResolverManifest(string name)
         {
             Name = name;
+        }
+
+        public SdkResolverManifest(string name, string path, Regex resolvableSdkPattern) : this(name)
+        {
             Path = path;
             ResolvableSdkRegex = resolvableSdkPattern;
         }
@@ -85,8 +85,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         // This parsing code is very specific and not forward compatible, but since resolvers generally ship in the same release vehicle as MSBuild itself, only backward compatibility is required.
         private static SdkResolverManifest ParseSdkResolverElement(XmlReader reader, string filePath)
         {
-            SdkResolverManifest manifest = new SdkResolverManifest();
-            manifest.Name = filePath;
+            SdkResolverManifest manifest = new SdkResolverManifest(filePath);
 
             reader.Read();
             while (!reader.EOF)

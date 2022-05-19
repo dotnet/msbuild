@@ -618,9 +618,9 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(84, Keywords = Keywords.All)]
-        public void SdkResolverServiceLoadResolversStop(int resolverCount)
+        public void SdkResolverServiceLoadResolversStop(string manifestName, int resolverCount)
         {
-            WriteEvent(84, resolverCount);
+            WriteEvent(84, manifestName, resolverCount);
         }
 
         #endregion

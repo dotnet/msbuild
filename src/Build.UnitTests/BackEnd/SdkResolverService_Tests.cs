@@ -681,7 +681,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 return resolvers.OrderBy(t => t.Priority).ToList();
             }
 
-            internal override IList<SdkResolver> LoadDefaultResolvers(LoggingContext loggingContext, ElementLocation location)
+            internal override IList<SdkResolver> GetDefaultResolvers(LoggingContext loggingContext, ElementLocation location)
             {
                 return new List<SdkResolver>();
             }

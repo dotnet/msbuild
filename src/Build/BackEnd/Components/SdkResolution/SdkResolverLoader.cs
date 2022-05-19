@@ -34,7 +34,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 #endif
             ) ?? Environment.GetEnvironmentVariable("MSBUILDADDITIONALSDKRESOLVERSFOLDER");
 
-        internal virtual IList<SdkResolver> LoadDefaultResolvers(LoggingContext loggingContext, ElementLocation location)
+        internal virtual IList<SdkResolver> GetDefaultResolvers(LoggingContext loggingContext, ElementLocation location)
         {
             var resolvers = !String.Equals(IncludeDefaultResolver, "false", StringComparison.OrdinalIgnoreCase) ?
                 new List<SdkResolver> {new DefaultSdkResolver()}
