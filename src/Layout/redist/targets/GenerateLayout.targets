@@ -12,6 +12,15 @@
     <WriteLinesToFile File="$(OutputPath)/.version"
                       Lines="$(GitCommitHash);$(Version);$(Rid)"
                       Overwrite="true" />
+
+	<!-- Development env and CI loads DotnetFiles type from the following location
+	      The resolution of the product version (https://github.com/dotnet/sdk/blob/main/src/Cli/Microsoft.DotNet.Cli.Utils/DotnetFiles.cs#L21)
+		  then need the version file there as well. -->
+    <WriteLinesToFile File="$(BaseOutputPath)$(Configuration)/.version"
+                      Lines="$(GitCommitHash);$(Version);$(Rid)"
+                      Overwrite="true" />
+
+    
   </Target>
 
   <Target Name="PublishRoslyn"
