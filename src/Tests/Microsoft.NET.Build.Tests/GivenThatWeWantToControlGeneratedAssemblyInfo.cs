@@ -95,7 +95,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ProjectWithSourceRevisionId",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -112,7 +112,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ProjectWithSourceRevisionId",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -143,7 +143,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ProjectWithSourceRevisionId",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -175,7 +175,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ProjectWithSourceRevisionId",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -211,7 +211,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ProjectWithSourceRevisionId",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)

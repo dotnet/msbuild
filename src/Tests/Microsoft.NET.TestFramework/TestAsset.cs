@@ -90,23 +90,26 @@ namespace Microsoft.NET.TestFramework
                 File.Copy(srcFile, destFile, true);
             }
 
-            this.UpdateCurrentTargetFramework();
+            string[][] Properties = { new string[] { "TargetFramework", "$(CurrentTargetFramework)", ToolsetInfo.CurrentTargetFramework }, new string[] { "RuntimeIdentifier", "$(LatestWinRuntimeIdentifier)", ToolsetInfo.LatestWinRuntimeIdentifier } };
+
+            foreach (string[] property in Properties)
+            {
+                this.UpdateProjProperty(property[0], property[1], property[2]);
+            }
 
             return this;
         }
 
-        public TestAsset UpdateCurrentTargetFramework()
+        public TestAsset UpdateProjProperty(string propertyName, string variableName, string targetValue)
         {
             return WithTargetFramework(
             p =>
             {
                 var ns = p.Root.Name.Namespace;
-                var currentTargetFramework = p.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").FirstOrDefault();
-                currentTargetFramework ??= p.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFrameworks").FirstOrDefault();
-                currentTargetFramework?.SetValue(currentTargetFramework?.Value.Replace("$(CurrentTargetFramework)", 
-                                                                                        ToolsetInfo.CurrentTargetFramework));
-            },
-            ToolsetInfo.CurrentTargetFramework);
+                var getNode = p.Root.Elements(ns + "PropertyGroup").Elements(ns + propertyName).FirstOrDefault();
+                getNode ??= p.Root.Elements(ns + "PropertyGroup").Elements(ns + $"{propertyName}s").FirstOrDefault();
+                getNode?.SetValue(getNode?.Value.Replace(variableName, targetValue));
+            }, targetValue);
         }
 
         public TestAsset WithTargetFramework(string targetFramework, string projectName = null)

@@ -372,7 +372,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "DontIncludeSourceFilesInNone",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
             };
             testProject.AdditionalProperties["EnableDefaultCompileItems"] = "false";
