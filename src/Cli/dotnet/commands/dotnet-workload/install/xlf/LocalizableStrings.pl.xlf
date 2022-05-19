@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="pl" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AdManifestPackageDoesNotExist">
-        <source>Failed to update advertising manifest. Manifest package {0} doesn't exist.</source>
-        <target state="translated">Nie można zaktualizować manifestu treści reklamowych. Pakiet manifestu {0} nie istnieje.</target>
+        <source>Advertising manifest not updated. Manifest package for {0} doesn't exist.</source>
+        <target state="needs-review-translation">Nie można zaktualizować manifestu treści reklamowych. Pakiet manifestu {0} nie istnieje.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdManifestUpdated">

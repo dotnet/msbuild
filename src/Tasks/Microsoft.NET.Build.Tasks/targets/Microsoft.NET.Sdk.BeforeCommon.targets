@@ -171,7 +171,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(DisableImplicitAssetTargetFallback)' != 'true' and '$(_IsNETCoreOrNETStandard)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' >= '2.0'">
-    <AssetTargetFallback>$(AssetTargetFallback);net461;net462;net47;net471;net472;net48</AssetTargetFallback>
+    <AssetTargetFallback>$(AssetTargetFallback);net461;net462;net47;net471;net472;net48;net481</AssetTargetFallback>
   </PropertyGroup>
 
   <!-- Add conditional compilation symbols for the target framework (for example NET461, NETSTANDARD2_0, NETCOREAPP1_0) -->

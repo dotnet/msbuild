@@ -16,12 +16,18 @@ namespace Microsoft.DotNet.Workloads.Workload
         /// Determines whether dotnet is signed.
         /// </summary>
         /// <returns><see langword="true"/> if dotnet is signed; <see langword="false"/> otherwise.</returns>
-        public static bool IsDotNetSigned()
+        public static bool IsDotNetSigned() => IsSigned(s_dotnet);
+
+        /// <summary>
+        /// Determines whether the specified file is signed by a trusted organization.
+        /// </summary>
+        /// <returns><see langword="true"/> if file is signed; <see langword="false"/> otherwise.</returns>
+        internal static bool IsSigned(string path)
         {
             if (OperatingSystem.IsWindows())
             {
-                return AuthentiCode.IsSigned(s_dotnet) && 
-                    AuthentiCode.IsSignedByTrustedOrganization(s_dotnet, AuthentiCode.TrustedOrganizations);
+                return AuthentiCode.IsSigned(path) &&
+                    AuthentiCode.IsSignedByTrustedOrganization(path, AuthentiCode.TrustedOrganizations);
             }
 
             return false;
