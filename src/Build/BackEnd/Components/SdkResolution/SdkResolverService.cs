@@ -206,22 +206,22 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             List<SdkResolver> resolvers = new List<SdkResolver>();
             foreach (var resolverManifest in resolversManifests)
             {
-                if (!_resolversDict.ContainsKey(resolverManifest))
+                if (!_resolversDict.TryGetValue(resolverManifest, out IList<SdkResolver> newResolvers))
                 {
                     lock (_lockObject)
                     {
-                        if (!_resolversDict.ContainsKey(resolverManifest))
+                        if (!_resolversDict.TryGetValue(resolverManifest, out newResolvers))
                         {
                             // Loading of the needed resolvers.
                             MSBuildEventSource.Log.SdkResolverServiceLoadResolversStart();
-                            IList<SdkResolver> newResolvers = _sdkResolverLoader.LoadResolversFromManifest(resolverManifest, loggingContext, sdkReferenceLocation);
+                            newResolvers = _sdkResolverLoader.LoadResolversFromManifest(resolverManifest, loggingContext, sdkReferenceLocation);
                             _resolversDict[resolverManifest] = newResolvers;
                             MSBuildEventSource.Log.SdkResolverServiceLoadResolversStop(newResolvers.Count);
                         }
                     }
                 }
 
-                resolvers.AddRange(_resolversDict[resolverManifest]);
+                resolvers.AddRange(newResolvers);
             }
             return resolvers.OrderBy(t => t.Priority).ToList();
         }

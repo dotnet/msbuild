@@ -40,7 +40,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 new List<SdkResolver> {new DefaultSdkResolver()}
                 : new List<SdkResolver>();
 
-            return resolvers.OrderBy(t => t.Priority).ToList();
+            return resolvers;
         }
 
         internal virtual IList<SdkResolver> LoadAllResolvers(LoggingContext loggingContext,
