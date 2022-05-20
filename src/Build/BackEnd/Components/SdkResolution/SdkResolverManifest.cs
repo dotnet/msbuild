@@ -107,7 +107,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                                     }
                                     catch (ArgumentException ex)
                                     {
-                                        ErrorUtilities.ThrowInternalError("A regular expression parsing error occurred while parsing {0}. Error message: {1}", filePath, ex.Message);
+                                        ErrorUtilities.ThrowInternalError("A regular expression parsing error occurred while parsing {0}.", ex, filePath);
                                     }
                                     break;
                                 default:

@@ -148,7 +148,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 }
                 catch (RegexMatchTimeoutException ex)
                 {
-                    ErrorUtilities.ThrowInternalError("Regular expression parsing exceeds timeout for manifest {0}. Error message: {1}", manifest.Name, ex.Message);
+                    ErrorUtilities.ThrowInternalError("Timeout exceeded matching sdk \"{0}\" to <ResolvableSdkPattern> from sdk resolver manifest {1}.", ex, sdk.Name, manifest.Name);
                 }
             }
 
