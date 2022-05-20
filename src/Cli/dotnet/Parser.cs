@@ -178,9 +178,6 @@ namespace Microsoft.DotNet.Cli
                 }
 
                 DotnetHelpBuilder dotnetHelpBuilder = new DotnetHelpBuilder(windowWidth);
-                dotnetHelpBuilder.CustomizeSymbol(FormatCommandCommon.DiagnosticsOption, defaultValue: Tools.Format.LocalizableStrings.whichever_ids_are_listed_in_the_editorconfig_file);
-                dotnetHelpBuilder.CustomizeSymbol(FormatCommandCommon.IncludeOption, defaultValue: Tools.Format.LocalizableStrings.all_files_in_the_solution_or_project);
-                dotnetHelpBuilder.CustomizeSymbol(FormatCommandCommon.ExcludeOption, defaultValue: Tools.Format.LocalizableStrings.none);
 
                 SetHelpCustomizations(dotnetHelpBuilder);
 
@@ -229,6 +226,10 @@ namespace Microsoft.DotNet.Cli
                 else if (command.Name.Equals(VSTestCommandParser.GetCommand().Name))
                 {
                     new VSTestForwardingApp(helpArgs).Execute();
+                }
+                else if (command.Name.Equals(FormatCommandParser.GetCommand().Name))
+                {
+                    new DotnetFormatForwardingApp(helpArgs).Execute();
                 }
                 else
                 {
