@@ -902,7 +902,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresWindows">
         <source>NETSDK1100: To build a project targeting Windows on this operating system, set the EnableWindowsTargeting property to true.</source>
-        <target state="needs-review-translation">NETSDK1100: per compilare applicazioni desktop di Windows è richiesto Windows.</target>
+        <target state="new">NETSDK1100: To build a project targeting Windows on this operating system, set the EnableWindowsTargeting property to true.</target>
         <note>{StrBegin="NETSDK1100: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopTargetPlatformMustBeWindows">

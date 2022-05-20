@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="InvalidManifestVersion">
         <source>Invalid version: {0}</source>
-        <target state="new">Invalid version: {0}</target>
+        <target state="translated">版本 {0} 无效</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
