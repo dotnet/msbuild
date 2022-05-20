@@ -227,6 +227,10 @@ namespace Microsoft.DotNet.Cli
                 {
                     new VSTestForwardingApp(helpArgs).Execute();
                 }
+                else if (command.Name.Equals(FormatCommandParser.GetCommand().Name))
+                {
+                    new DotnetFormatForwardingApp(helpArgs).Execute();
+                }
                 else
                 {
                     if (command.Name.Equals(ListProjectToProjectReferencesCommandParser.GetCommand().Name))

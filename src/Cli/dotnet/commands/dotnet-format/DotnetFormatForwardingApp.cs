@@ -1,6 +1,5 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
 
 using System;
 using System.CommandLine.Parsing;
@@ -22,10 +21,15 @@ namespace Microsoft.DotNet.Tools.Format
             => Path.Combine(AppContext.BaseDirectory, "DotnetTools/dotnet-format/dotnet-format.runtimeconfig.json");
 
         public DotnetFormatForwardingApp(ParseResult parseResult)
+            : this(parseResult.GetArguments())
+        {
+        }
+
+        public DotnetFormatForwardingApp(string[] argsToForward)
             : base(forwardApplicationPath: GetForwardApplicationPath(),
-                  argsToForward: parseResult.GetArguments(),
-                  depsFile: GetDepsFilePath(),
-                  runtimeConfig: GetRuntimeConfigPath())
+                argsToForward: argsToForward,
+                depsFile: GetDepsFilePath(),
+                runtimeConfig: GetRuntimeConfigPath())
         {
         }
     }
