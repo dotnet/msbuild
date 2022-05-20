@@ -61,7 +61,7 @@ namespace Microsoft.NET.Build.Tests
                 Name = "RuntimeConfigPartialBuild",
                 TargetFrameworks = "netcoreapp3.0",
                 IsExe = true,
-                RuntimeIdentifier = "win-x86"
+                RuntimeIdentifier = $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86"
             };
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
@@ -106,7 +106,7 @@ namespace Microsoft.NET.Build.Tests
                 Name = "UpdateRuntimeConfigPartialBuild",
                 TargetFrameworks = "netcoreapp3.0",
                 IsExe = true,
-                RuntimeIdentifier = "win-x86"
+                RuntimeIdentifier = $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86"
             };
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
