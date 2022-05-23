@@ -676,7 +676,7 @@ Commands:
         [Theory]
         [InlineData("net45")]
         [InlineData("net40")]
-        [InlineData("netcoreapp1.1")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         [InlineData("nonexistingframeworkname")]
         public void WhenFrameworkSwitchIsNotMatchingAnyOfTargetedFrameworksItPrintsError(string framework)
         {
