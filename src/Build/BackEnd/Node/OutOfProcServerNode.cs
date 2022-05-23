@@ -20,6 +20,8 @@ namespace Microsoft.Build.Execution
     {
         private readonly Func<string, (int exitCode, string exitType)> _buildFunction;
 
+        private readonly Action _onCancel;
+
         /// <summary>
         /// The endpoint used to talk to the host.
         /// </summary>
@@ -64,9 +66,10 @@ namespace Microsoft.Build.Execution
 
         private string _serverBusyMutexName = default!;
 
-        public OutOfProcServerNode(Func<string, (int exitCode, string exitType)> buildFunction)
+        public OutOfProcServerNode(Func<string, (int exitCode, string exitType)> buildFunction, Action onCancel)
         {
             _buildFunction = buildFunction;
+            _onCancel = onCancel;
             new Dictionary<string, string>();
             _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
 
@@ -276,14 +279,9 @@ namespace Microsoft.Build.Execution
                     HandleServerNodeBuildCommandAsync((ServerNodeBuildCommand)packet);
                     break;
                 case NodePacketType.ServerNodeBuildCancel:
-                    HandleServerNodeBuildCancel((ServerNodeBuildCancel)packet);
+                    _onCancel();
                     break;
             }
-        }
-
-        private void HandleServerNodeBuildCancel(ServerNodeBuildCancel command)
-        {
-            BuildManager.DefaultBuildManager.CancelAllSubmissions();
         }
 
         private void HandleServerNodeBuildCommandAsync(ServerNodeBuildCommand command)
