@@ -233,7 +233,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
             string [] args = new string[] { "--packages", dir };
 
             string [] newArgs = new string[] { "console", "-o", rootPath, "--no-restore" };
-            new DotnetCommand(Log, "new")
+            new DotnetCommand(Log, "new","--debug:ephemeral-hive")
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)
                 .Should()

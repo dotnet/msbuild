@@ -141,7 +141,7 @@ namespace Microsoft.DotNet.Restore.Test
             string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));
 
             string[] newArgs = new[] { "console", "-o", rootPath, "--no-restore" };
-            new DotnetCommand(Log, "new")
+            new DotnetCommand(Log, "new","--debug:ephemeral-hive")
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)
                 .Should()

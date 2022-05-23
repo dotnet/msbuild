@@ -239,6 +239,7 @@ namespace Microsoft.NET.TestFramework
             configuration = commandLine.SDKRepoConfiguration ?? configuration;
 
             string dotnetInstallDirFromEnvironment = Environment.GetEnvironmentVariable("DOTNET_INSTALL_DIR");
+            string dotnetCLIHomeFromEnvironment = Environment.GetEnvironmentVariable("DOTNET_CLI_HOME");
 
             string dotnetRoot;
 
@@ -253,6 +254,10 @@ namespace Microsoft.NET.TestFramework
             else if (!string.IsNullOrEmpty(dotnetInstallDirFromEnvironment))
             {
                 dotnetRoot = dotnetInstallDirFromEnvironment;
+            }
+            else if  (!string.IsNullOrEmpty(dotnetCLIHomeFromEnvironment))
+            {
+                dotnetRoot = dotnetCLIHomeFromEnvironment;
             }
             else
             {

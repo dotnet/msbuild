@@ -37,7 +37,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             _manifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "Sample.json");
         }
 
-        [Fact]
+        // These two tests hit an IOException when run in helix on non-windows
+        [WindowsOnlyFact]
         public void GivenWorkloadInstallItErrorsOnFakeWorkloadName()
         {
             var command = new DotnetCommand(Log);
@@ -51,7 +52,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 .HaveStdErrContaining(String.Format(Workloads.Workload.Install.LocalizableStrings.WorkloadNotRecognized, "fake"));
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void ItErrorUsingSkipManifestAndRollback()
         {
             var command = new DotnetCommand(Log);
