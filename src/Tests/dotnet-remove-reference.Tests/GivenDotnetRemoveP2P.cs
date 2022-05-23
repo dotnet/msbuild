@@ -80,7 +80,7 @@ Options:
             try
             {
                 string [] newArgs = new[] { "classlib", "-o", projDir.Path, "--no-restore" };
-                new DotnetCommand(Log, "new")
+                new DotnetCommand(Log, "new","--debug:ephemeral-hive")
                     .WithWorkingDirectory(projDir.Path)
                     .Execute(newArgs)
                 .Should().Pass();

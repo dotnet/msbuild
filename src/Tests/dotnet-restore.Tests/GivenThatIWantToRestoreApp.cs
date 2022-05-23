@@ -164,7 +164,7 @@ namespace Microsoft.DotNet.Restore.Test
             var rootPath = _testAssetsManager.CreateTestDirectory().Path;
 
             string[] newArgs = new[] { "console", "-o", rootPath, "--no-restore" };
-            new DotnetCommand(Log, "new")
+            new DotnetCommand(Log, "new", "--debug:ephemeral-hive")
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)
                 .Should()
