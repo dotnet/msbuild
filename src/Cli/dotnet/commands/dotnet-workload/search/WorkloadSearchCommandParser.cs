@@ -18,8 +18,6 @@ namespace Microsoft.DotNet.Cli
                 Description = LocalizableStrings.WorkloadIdStubArgumentDescription
             };
 
-        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.HiddenVerbosityOption;
-
         public static readonly Option<string> VersionOption = WorkloadInstallCommandParser.VersionOption;
 
         private static readonly Command Command = ConstructCommand();
@@ -33,7 +31,7 @@ namespace Microsoft.DotNet.Cli
         {
             var command = new Command("search", LocalizableStrings.CommandDescription);
             command.AddArgument(WorkloadIdStubArgument);
-            command.AddOption(VerbosityOption);
+            command.AddOption(CommonOptions.HiddenVerbosityOption);
             command.AddOption(VersionOption);
 
             command.SetHandler((parseResult) => new WorkloadSearchCommand(parseResult).Execute());
