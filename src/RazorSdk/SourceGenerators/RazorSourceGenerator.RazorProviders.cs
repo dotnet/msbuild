@@ -14,6 +14,20 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 {
     public partial class RazorSourceGenerator
     {
+        /// <summary>
+        /// Gets a flag that determines if the source generator should no-op.
+        /// <para>
+        /// This flag exists to support scenarios in VS where design-time and EnC builds need
+        /// to run without invoking the source generator to avoid duplicate types being produced.
+        /// The property is set by the SDK via an editor config.
+        /// </para>
+        /// </summary>
+        private static bool GetSuppressionStatus(AnalyzerConfigOptionsProvider optionsProvider, CancellationToken _)
+        {
+            return optionsProvider.GlobalOptions.TryGetValue("build_property.SuppressRazorSourceGenerator", out var suppressRazorSourceGenerator)
+                && suppressRazorSourceGenerator == "true";
+        }
+
         private static (RazorSourceGenerationOptions?, Diagnostic?) ComputeRazorSourceGeneratorOptions((AnalyzerConfigOptionsProvider, ParseOptions) pair, CancellationToken ct)
         {
             Log.ComputeRazorSourceGeneratorOptions();
@@ -24,8 +38,6 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             globalOptions.TryGetValue("build_property.RazorConfiguration", out var configurationName);
             globalOptions.TryGetValue("build_property.RootNamespace", out var rootNamespace);
             globalOptions.TryGetValue("build_property.SupportLocalizedComponentNames", out var supportLocalizedComponentNames);
-            globalOptions.TryGetValue("build_property._RazorSourceGeneratorDebug", out var waitForDebugger);
-            globalOptions.TryGetValue("build_property.SuppressRazorSourceGenerator", out var suppressRazorSourceGenerator);
             globalOptions.TryGetValue("build_property.GenerateRazorMetadataSourceChecksumAttributes", out var generateMetadataSourceChecksumAttributes);
 
             var razorLanguageVersion = RazorLanguageVersion.Latest;
@@ -44,8 +56,6 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             var razorSourceGenerationOptions = new RazorSourceGenerationOptions()
             {
                 Configuration = razorConfiguration,
-                WaitForDebugger = waitForDebugger == "true",
-                SuppressRazorSourceGenerator = suppressRazorSourceGenerator == "true",
                 GenerateMetadataSourceChecksumAttributes = generateMetadataSourceChecksumAttributes == "true",
                 RootNamespace = rootNamespace ?? "ASP",
                 SupportLocalizedComponentNames = supportLocalizedComponentNames == "true",
