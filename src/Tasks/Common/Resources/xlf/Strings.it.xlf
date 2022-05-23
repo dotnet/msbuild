@@ -742,7 +742,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="RuntimePackNotRestored_TransitiveDisabled">
         <source>NETSDK1184: The Runtime Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
-        <target state="new">NETSDK1184: The Runtime Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</target>
+        <target state="translated">NETSDK1184: il Runtime Pack per FrameworkReference '{0}' non è disponibile. È possibile che DisableTransitiveFrameworkReferenceDownloads sia stato impostato su true.</target>
         <note>{StrBegin="NETSDK1184: "}</note>
       </trans-unit>
       <trans-unit id="SelfContainedExeCannotReferenceNonSelfContained">
@@ -782,7 +782,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="TargetingPackNotRestored_TransitiveDisabled">
         <source>NETSDK1183: The Targeting Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
-        <target state="new">NETSDK1183: The Targeting Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</target>
+        <target state="translated">NETSDK1183: il Targeting Pack per FrameworkReference '{0}' non è disponibile. È possibile che DisableTransitiveFrameworkReferenceDownloads sia stato impostato su true.</target>
         <note>{StrBegin="NETSDK1183: "}</note>
       </trans-unit>
       <trans-unit id="TrimmingWindowsFormsIsNotSupported">
@@ -822,7 +822,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnknownFrameworkReference_MauiEssentials">
         <source>NETSDK1185: This project depends on Maui Essentials through a project or NuGet package reference, but doesn't declare that dependency explicitly. To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</source>
-        <target state="new">NETSDK1185: This project depends on Maui Essentials through a project or NuGet package reference, but doesn't declare that dependency explicitly. To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</target>
+        <target state="translated">NETSDK1185: questo progetto dipende da Maui Essentials tramite un progetto o NuGet riferimento al pacchetto, ma non dichiara questa dipendenza in modo esplicito. Per compilare questo progetto, è necessario impostare la proprietà UseMauiEssentials su true e, se necessario, installare il carico di lavoro Maui.</target>
         <note>{StrBegin="NETSDK1185: "}</note>
       </trans-unit>
       <trans-unit id="UnnecessaryWindowsDesktopSDK">
@@ -902,7 +902,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresWindows">
         <source>NETSDK1100: To build a project targeting Windows on this operating system, set the EnableWindowsTargeting property to true.</source>
-        <target state="new">NETSDK1100: To build a project targeting Windows on this operating system, set the EnableWindowsTargeting property to true.</target>
+        <target state="translated">NETSDK1100: per compilare un progetto destinato a Windows in questo sistema operativo, impostare la proprietà EnableWindowsTargeting su true.</target>
         <note>{StrBegin="NETSDK1100: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopTargetPlatformMustBeWindows">
