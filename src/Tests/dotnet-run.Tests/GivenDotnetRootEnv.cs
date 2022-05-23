@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         {
         }
 
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData("net5.0")]
         [InlineData("net6.0")]
         public void ItShouldSetDotnetRootToDirectoryOfMuxer(string targetFramework)
