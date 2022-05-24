@@ -90,21 +90,21 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         "Microsoft.NETCore.App",
                         new Dictionary<string, string>
                         {
-                            {"FrameworkName", "Microsoft.NETCore.App"}, {"Version", "3.1.0"}
+                            {"FrameworkName", "Microsoft.NETCore.App"}, {"Version", "6.0.5"}
                         }
                     ),
                     new MockTaskItem(
                         "Microsoft.WindowsDesktop.App",
                         new Dictionary<string, string>
                         {
-                            {"FrameworkName", "Microsoft.WindowsDesktop.App"}, {"Version", "3.1.0"}
+                            {"FrameworkName", "Microsoft.WindowsDesktop.App"}, {"Version", "6.0.5"}
                         }
                     ),
                     new MockTaskItem(
                         "Microsoft.AspNetCore.App",
                         new Dictionary<string, string>
                         {
-                            {"FrameworkName", "Microsoft.AspNetCore.App"}, {"Version", "3.1.0"}
+                            {"FrameworkName", "Microsoft.AspNetCore.App"}, {"Version", "6.0.5"}
                         }
                     )
                 },
@@ -123,11 +123,11 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
     ""frameworks"": [
       {{
         ""name"": ""Microsoft.WindowsDesktop.App"",
-        ""version"": ""3.1.0""
+        ""version"": ""6.0.5""
       }},
       {{
         ""name"": ""Microsoft.AspNetCore.App"",
-        ""version"": ""3.1.0""
+        ""version"": ""6.0.5""
       }}
     ]
   }}
@@ -150,14 +150,14 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         "Microsoft.NETCore.App",
                         new Dictionary<string, string>
                         {
-                            {"FrameworkName", "Microsoft.NETCore.App"}, {"Version", "3.1.0"}
+                            {"FrameworkName", "Microsoft.NETCore.App"}, {"Version", "6.0.5"}
                         }
                     ),
                     new MockTaskItem(
                         "Microsoft.WindowsDesktop.App",
                         new Dictionary<string, string>
                         {
-                            {"FrameworkName", "Microsoft.WindowsDesktop.App"}, {"Version", "3.1.0"}
+                            {"FrameworkName", "Microsoft.WindowsDesktop.App"}, {"Version", "6.0.5"}
                         }
                     )
                 },
@@ -175,7 +175,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
     ""rollForward"": ""LatestMinor"",
     ""framework"": {{
       ""name"": ""Microsoft.WindowsDesktop.App"",
-      ""version"": ""3.1.0""
+      ""version"": ""6.0.5""
     }}
   }}
 }}",

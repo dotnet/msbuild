@@ -336,10 +336,10 @@ namespace FrameworkReferenceTest
         }
 
         [Theory]
-        [InlineData("Major", ToolsetInfo.CurrentTargetFramework, true)]
+        [InlineData("Major", "netcoreapp3.0", true)]
         [InlineData("Major", "netcoreapp2.0", true)]
-        [InlineData("latestMinor", ToolsetInfo.CurrentTargetFramework, true)]
-        [InlineData("Invalid", ToolsetInfo.CurrentTargetFramework, false)]
+        [InlineData("latestMinor", "netcoreapp3.0", true)]
+        [InlineData("Invalid", "netcoreapp3.0", false)]
         public void RollForwardCanBeSpecifiedViaProperty(string rollForwardValue, string tfm, bool valid)
         {
             var testProject = new TestProject()
