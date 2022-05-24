@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
@@ -91,21 +92,55 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             var settings = new XmlWriterSettings
             {
                 Encoding = Encoding.UTF8,
-                CloseOutput = true,
+                CloseOutput = false,
                 OmitXmlDeclaration = true,
                 Indent = true,
                 NewLineOnAttributes = false,
                 Async = true
             };
 
-            using (var xmlWriter = GetXmlWriter(settings))
+            using var memoryStream = new MemoryStream();
+            using (var xmlWriter = XmlWriter.Create(memoryStream, settings))
             {
                 document.WriteTo(xmlWriter);
             }
 
+            var data = memoryStream.ToArray();
+            WriteFile(data);
+
             return !Log.HasLoggedErrors;
 
             static string Normalize(string relativePath) => relativePath.Replace("/", "\\").TrimStart('\\');
+        }
+
+        private void WriteFile(byte[] data)
+        {
+            var dataHash = ComputeHash(data);
+            var fileExists = File.Exists(TargetPropsFilePath);
+            var existingFileHash = fileExists ? ComputeHash(File.ReadAllBytes(TargetPropsFilePath)) : "";
+
+            if (!fileExists)
+            {
+                Log.LogMessage(MessageImportance.Low, $"Creating file '{TargetPropsFilePath}' does not exist.");
+                File.WriteAllBytes(TargetPropsFilePath, data);
+            }
+            else if (!string.Equals(dataHash, existingFileHash, StringComparison.Ordinal))
+            {
+                Log.LogMessage(MessageImportance.Low, $"Updating '{TargetPropsFilePath}' file because the hash '{dataHash}' is different from existing file hash '{existingFileHash}'.");
+                File.WriteAllBytes(TargetPropsFilePath, data);
+            }
+            else
+            {
+                Log.LogMessage(MessageImportance.Low, $"Skipping file update because the hash '{dataHash}' has not changed.");
+            }
+        }
+
+        private static string ComputeHash(byte[] data)
+        {
+            using var sha256 = SHA256.Create();
+
+            var result = sha256.ComputeHash(data);
+            return Convert.ToBase64String(result);
         }
 
         private XmlWriter GetXmlWriter(XmlWriterSettings settings)

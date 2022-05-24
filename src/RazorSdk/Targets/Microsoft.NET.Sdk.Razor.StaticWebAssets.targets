@@ -37,7 +37,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     AssemblyFile="$(RazorSdkBuildTasksAssembly)"
     Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
 
-    <UsingTask
+  <UsingTask
     TaskName="Microsoft.AspNetCore.Razor.Tasks.ReadStaticWebAssetsManifestFile"
     AssemblyFile="$(RazorSdkBuildTasksAssembly)"
     Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
@@ -54,16 +54,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <UsingTask
     TaskName="Microsoft.AspNetCore.Razor.Tasks.ValidateStaticWebAssetsUniquePaths"
-    AssemblyFile="$(RazorSdkBuildTasksAssembly)"
-    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
-
-  <UsingTask
-    TaskName="Microsoft.AspNetCore.Razor.Tasks.GenerateStaticWebAsssetsPropsFile"
-    AssemblyFile="$(RazorSdkBuildTasksAssembly)"
-    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
-
-  <UsingTask
-    TaskName="Microsoft.AspNetCore.Razor.Tasks.StaticWebAssetsGeneratePackagePropsFile"
     AssemblyFile="$(RazorSdkBuildTasksAssembly)"
     Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
 
@@ -279,19 +269,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <CopyStaticWebAssetsToPublishDirectoryDependsOn>StaticWebAssetsPrepareForPublish;LoadStaticWebAssetsPublishManifest;$(CopyStaticWebAssetsToPublishDirectoryDependsOn)</CopyStaticWebAssetsToPublishDirectoryDependsOn>
 
-    <!-- TMP: Pack -->
-    <GenerateStaticWebAssetsPackTargetsDependsOn>
-      ResolveStaticWebAssetsConfiguration;
-      LoadStaticWebAssetsBuildManifest;
-      $(GenerateStaticWebAssetsPackTargetsDependsOn);
-    </GenerateStaticWebAssetsPackTargetsDependsOn>
-
-    <TargetsForTfmSpecificContentInPackage>
-      GenerateStaticWebAssetsPackTargets;
-      IncludeStaticWebAssetsPackItems;
-      $(TargetsForTfmSpecificContentInPackage)
-    </TargetsForTfmSpecificContentInPackage>
-
   </PropertyGroup>
 
   <Target Name="ResolveStaticWebAssetsConfiguration">
@@ -301,6 +278,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <StaticWebAssetBasePath Condition="'$(StaticWebAssetBasePath)' == ''">_content/$(PackageId)</StaticWebAssetBasePath>
       <StaticWebAssetProjectMode Condition="'$(StaticWebAssetProjectMode)' == ''">Default</StaticWebAssetProjectMode>
       <StaticWebAssetBuildManifestPath>$(_StaticWebAssetsManifestBase)staticwebassets.build.json</StaticWebAssetBuildManifestPath>
+      <StaticWebAssetPackManifestPath>$(_StaticWebAssetsManifestBase)staticwebassets.pack.json</StaticWebAssetPackManifestPath>
       <StaticWebAssetDevelopmentManifestPath>$(_StaticWebAssetsManifestBase)staticwebassets.development.json</StaticWebAssetDevelopmentManifestPath>
       <StaticWebAssetPublishManifestPath>$(_StaticWebAssetsManifestBase)staticwebassets.publish.json</StaticWebAssetPublishManifestPath>
 
@@ -429,12 +407,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       ManifestPath="$(StaticWebAssetDevelopmentManifestPath)">
     </GenerateStaticWebAssetsDevelopmentManifest>
 
-    <WriteLinesToFile File="$(BaseIntermediateOutputPath)staticwebassets.pack.sentinel" Lines="2.0" WriteOnlyWhenDifferent="true" />
-
     <ItemGroup>
       <FileWrites Include="$(StaticWebAssetBuildManifestPath)" />
       <FileWrites Include="$(StaticWebAssetDevelopmentManifestPath)" />
-      <FileWrites Include="$(BaseIntermediateOutputPath)staticwebassets.pack.sentinel" />
     </ItemGroup>
 
   </Target>
@@ -532,8 +507,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <Content Remove="@(_CachedBuildStaticWebAssets->'%(OriginalItemSpec)')" />
       <None Remove="@(_CachedBuildStaticWebAssets->'%(OriginalItemSpec)')" />
-      <ResolvedFileToBuild Remove="@(_CachedBuildStaticWebAssets->'%(OriginalItemSpec)')" />
-      <ResolvedFileToBuild Remove="@(_CachedBuildStaticWebAssets)" />
+      <ResolvedFileToPublish Remove="@(_CachedBuildStaticWebAssets->'%(OriginalItemSpec)')" />
+      <ResolvedFileToPublish Remove="@(_CachedBuildStaticWebAssets)" />
     </ItemGroup>
 
     <ItemGroup Condition="$(_ShouldLoadBuildManifestAndUpdateAssets)">
@@ -857,148 +832,5 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     </Target>
 
-  <!-- Pack -->
-
-  <Target Name="_RemoveWebRootContentFromPackaging" DependsOnTargets="ResolveStaticWebAssetsInputs">
-    <ItemGroup>
-      <Content
-        Condition="'%(StaticWebAsset.SourceType)' == ''"
-        Remove="@(StaticWebAsset->'wwwroot\%(RelativePath)')"  />
-    </ItemGroup>
-  </Target>
-
-  <Target Name="_DeleteSentinelFile" BeforeTargets="_GetTargetFrameworksOutput">
-    <!-- We use this to detect when we are packing in a multitarget scenario, the first pack task to run creates the sentinel and
-    the other ones no-op when they see it. -->
-    <Delete Files="$(BaseIntermediateOutputPath)staticwebassets.pack.sentinel" Condition="Exists('$(BaseIntermediateOutputPath)staticwebassets.pack.sentinel')" />
-  </Target>
-
-  <!-- This target makes sure that all static web assets for the current project get included
-       in the package under the folder staticwebassets and generates MSBuild props files to
-       ensure that consuming packages can discover and use the static web assets.
-       This target generates and includes a Microsoft.AspNetCore.StaticWebAssets.props file that
-       goes inside the build directory and describes the static web assets in the package as an
-       item group.
-       This target also generates and includes a $(PackageId).props file under the build, buildMultiTargeting
-       and buildTransitive folders that are setup so that:
-       * buildTransitive\$(PackageId).props simply imports buildMultitargeting\$(PackageId).props
-       * buildMultitargeting\$(PackageId).props simply imports build\$(PackageId).props
-       * build\$(PackageId).props simply imports Microsoft.AspNetCore.StaticWebAssets.props
-
-       We do it this way to preserve the ability of package authors to customize the package in any way
-       they see fit and to make sure the package works in all scenarios. Authors including custom MSBuild
-       targets into their packages are expected to disable the generation of $(PackageId).props files and
-       to manually import build\Microsoft.AspNetCore.StaticWebAssets.props in their custom props files.
-   -->
-  <Target
-    Name="GenerateStaticWebAssetsPackTargets"
-    Inputs="$(StaticWebAssetBuildManifestPath)"
-    Outputs="$(_GeneratedStaticWebAssetsPropsFile)"
-    DependsOnTargets="$(GenerateStaticWebAssetsPackTargetsDependsOn)">
-
-    <ItemGroup>
-      <_CurrentProjectStaticWebAsset Include="@(StaticWebAsset)" Condition="'%(SourceId)' == '$(PackageId)' and '%(AssetMode)' != 'CurrentProject'" />
-      <Content Remove="@(StaticWebAsset->'%(OriginalItemSpec)')"/>
-      <None Remove="@(StaticWebAsset->'%(OriginalItemSpec)')"/>
-    </ItemGroup>
-
-    <PropertyGroup>
-      <_CurrentProjectHasStaticWebAssets Condition="'@(_CurrentProjectStaticWebAsset->Count())' != '0'">true</_CurrentProjectHasStaticWebAssets>
-    </PropertyGroup>
-
-    <!-- Validate that there are no path conflicts between the assets we are about to pack. -->
-    <ValidateStaticWebAssetsUniquePaths Condition="'$(_CurrentProjectHasStaticWebAssets)' == 'true'"
-      StaticWebAssets="@(_CurrentProjectStaticWebAsset)"
-      WebRootFiles="" />
-
-    <!-- Generates a props file that goes in build\Microsoft.AspNetCore.StaticWebAssets.props
-         and that describes the static web assets for the package.
-     -->
-    <GenerateStaticWebAsssetsPropsFile
-      Condition="'$(_CurrentProjectHasStaticWebAssets)' == 'true'"
-      StaticWebAssets="@(_CurrentProjectStaticWebAsset)"
-      TargetPropsFilePath="$(_GeneratedStaticWebAssetsPropsFile)" />
-
-    <!-- Generates a props file the goes in build\$(PackageId).props and that simply imports
-         build\Microsoft.AspNetCore.StaticWebAssets.props
-     -->
-    <StaticWebAssetsGeneratePackagePropsFile
-      Condition="'$(_CurrentProjectHasStaticWebAssets)' == 'true'"
-      PropsFileImport="$(_StaticWebAssetsPropsFileImportPath)"
-      BuildTargetPath="$(_GeneratedBuildPropsFile)" />
-
-    <!-- Generates a props file the goes in buildMultiTargeting\$(PackageId).props and that simply imports
-         build\$(PackageId).props
-     -->
-    <StaticWebAssetsGeneratePackagePropsFile
-      Condition="'$(_CurrentProjectHasStaticWebAssets)' == 'true'"
-      PropsFileImport="$(_StaticWebAssetsGeneratedBuildPropsFileImportPath)"
-      BuildTargetPath="$(_GeneratedBuildMultitargetingPropsFile)" />
-
-    <!-- Generates a props file the goes in buildTransitive\$(PackageId).props and that simply imports
-         buildMultiTargeting\$(PackageId)
-     -->
-    <StaticWebAssetsGeneratePackagePropsFile
-      Condition="'$(_CurrentProjectHasStaticWebAssets)' == 'true'"
-      PropsFileImport="$(_StaticWebAssetsGeneratedBuildMultiTargetingPropsFileImportPath)"
-      BuildTargetPath="$(_GeneratedBuildTransitivePropsFile)" />
-
-    <!-- All files potentially created within this target -->
-    <ItemGroup>
-      <FileWrites Include="$(_GeneratedStaticWebAssetsPropsFile)" />
-      <FileWrites Include="$(_GeneratedBuildPropsFile)" />
-      <FileWrites Include="$(_GeneratedBuildMultitargetingPropsFile)" />
-      <FileWrites Include="$(_GeneratedBuildTransitivePropsFile)" />
-    </ItemGroup>
-
-  </Target>
-
-  <!-- We need to use a separate target because MSBuild doesn't capture the output item groups from tasks
-       and as a result, the output of ComputeStaticWebAssetsTargetPaths is not defined on incremental builds
-  -->
-  <Target Name="IncludeStaticWebAssetsPackItems">
-    <!-- We need to adjust the path for files without extension (LICENSE) for example. Otherwise, when they get packed, nuget creates an
-         additional folder for the file. -->
-    <ComputeStaticWebAssetsTargetPaths Assets="@(_CurrentProjectStaticWebAsset)" PathPrefix="staticwebassets" AdjustPathsForPack="true">
-      <Output TaskParameter="AssetsWithTargetPath" ItemName="_PackStaticWebAssetWithTargetPath" />
-    </ComputeStaticWebAssetsTargetPaths>
-
-    <!-- All files that go into the nuget package -->
-    <ItemGroup Condition="'$(_CurrentProjectHasStaticWebAssets)' == 'true'">
-
-      <!-- MSBuild prop files -->
-
-      <TfmSpecificPackageFile Include="$(_GeneratedStaticWebAssetsPropsFile)"
-        Condition="'$(DisableStaticWebAssetsBuildPropsFileGeneration)' == ''">
-
-        <PackagePath>build\Microsoft.AspNetCore.StaticWebAssets.props</PackagePath>
-      </TfmSpecificPackageFile>
-
-      <TfmSpecificPackageFile Include="$(_GeneratedBuildPropsFile)"
-        Condition="'$(StaticWebAssetsDisableProjectBuildPropsFileGeneration)' == ''">
-
-        <PackagePath>build\$(PackageId).props</PackagePath>
-      </TfmSpecificPackageFile>
-
-      <TfmSpecificPackageFile Include="$(_GeneratedBuildMultitargetingPropsFile)"
-        Condition="'$(StaticWebAssetsDisableProjectBuildMultiTargetingPropsFileGeneration)' == ''">
-
-        <PackagePath>buildMultiTargeting\$(PackageId).props</PackagePath>
-      </TfmSpecificPackageFile>
-
-      <TfmSpecificPackageFile Include="$(_GeneratedBuildTransitivePropsFile)"
-        Condition="'$(StaticWebAssetsDisableProjectBuildTransitivePropsFileGeneration)' == ''">
-
-        <PackagePath>buildTransitive\$(PackageId).props</PackagePath>
-      </TfmSpecificPackageFile>
-
-      <!-- Project file contents -->
-
-      <TfmSpecificPackageFile Include="%(_PackStaticWebAssetWithTargetPath.Identity)">
-        <PackagePath>%(_PackStaticWebAssetWithTargetPath.TargetPath)</PackagePath>
-      </TfmSpecificPackageFile>
-    </ItemGroup>
-
-  </Target>
-
+    <Import Project="Microsoft.NET.Sdk.Razor.StaticWebAssets.Pack.targets" />
 </Project>
