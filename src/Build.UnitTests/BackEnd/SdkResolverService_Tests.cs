@@ -666,14 +666,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 var resolvers = new List<SdkResolver>();
                 foreach (var resolver in _resolvers)
                 {
-                    if (resolver.Name == manifest.Name)
+                    if (resolver.Name == manifest.DisplayName)
                     {
                         resolvers.Add(resolver);
                     }
                 }
                 foreach (var pair in _resolversWithPatterns)
                 {
-                    if (pair.Resolver.Name == manifest.Name)
+                    if (pair.Resolver.Name == manifest.DisplayName)
                     {
                         resolvers.Add(pair.Resolver);
                     }

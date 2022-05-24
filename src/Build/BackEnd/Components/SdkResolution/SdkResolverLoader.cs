@@ -215,7 +215,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
             if (string.IsNullOrEmpty(assemblyPath) || !FileUtilities.FileExistsNoThrow(assemblyPath)) return false;
 
-            manifestsList.Add(new SdkResolverManifest(assemblyPath, assemblyPath, null));
+            manifestsList.Add(new SdkResolverManifest(DisplayName: assemblyPath, Path: assemblyPath, ResolvableSdkRegex: null));
             return true;
         }
 
