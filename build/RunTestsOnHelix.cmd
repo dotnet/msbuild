@@ -32,4 +32,7 @@ dotnet nuget list source
 
 mkdir %DOTNET_ROOT%\.nuget
 dotnet nuget add source %DOTNET_ROOT%\.nuget
+dir %DOTNET_ROOT%\.nuget
+dir \.nuget\*
+dir /s /b %DOTNET_ROOT%\*.zip
 PowerShell -ExecutionPolicy ByPass -File "%HELIX_CORRELATION_PAYLOAD%\t\eng\ExpandSDKTestPackages.ps1"
