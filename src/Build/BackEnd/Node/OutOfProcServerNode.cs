@@ -9,6 +9,7 @@ using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
+using System.Threading.Tasks;
 
 namespace Microsoft.Build.Execution
 {
@@ -18,6 +19,8 @@ namespace Microsoft.Build.Execution
     public sealed class OutOfProcServerNode : INode, INodePacketFactory, INodePacketHandler
     {
         private readonly Func<string, (int exitCode, string exitType)> _buildFunction;
+
+        private readonly Action _onCancel;
 
         /// <summary>
         /// The endpoint used to talk to the host.
@@ -59,11 +62,14 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private readonly bool _debugCommunications;
 
+        private Task? _buildTask;
+
         private string _serverBusyMutexName = default!;
 
-        public OutOfProcServerNode(Func<string, (int exitCode, string exitType)> buildFunction)
+        public OutOfProcServerNode(Func<string, (int exitCode, string exitType)> buildFunction, Action onCancel)
         {
             _buildFunction = buildFunction;
+            _onCancel = onCancel;
             new Dictionary<string, string>();
             _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
 
@@ -74,6 +80,7 @@ namespace Microsoft.Build.Execution
 
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.ServerNodeBuildCommand, ServerNodeBuildCommand.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.ServerNodeBuildCancel, ServerNodeBuildCancel.FactoryForDeserialization, this);
         }
 
         #region INode Members
@@ -105,7 +112,7 @@ namespace Microsoft.Build.Execution
             _nodeEndpoint.Listen(this);
 
             var waitHandles = new WaitHandle[] { _shutdownEvent, _packetReceivedEvent };
-
+            
             // Get the current directory before doing any work. We need this so we can restore the directory when the node shutsdown.
             while (true)
             {
@@ -269,9 +276,33 @@ namespace Microsoft.Build.Execution
             switch (packet.Type)
             {
                 case NodePacketType.ServerNodeBuildCommand:
-                    HandleServerNodeBuildCommand((ServerNodeBuildCommand)packet);
+                    HandleServerNodeBuildCommandAsync((ServerNodeBuildCommand)packet);
+                    break;
+                case NodePacketType.ServerNodeBuildCancel:
+                    _onCancel();
                     break;
             }
+        }
+
+        private void HandleServerNodeBuildCommandAsync(ServerNodeBuildCommand command)
+        {
+            _buildTask = Task.Run(() =>
+            {
+                try
+                {
+                    HandleServerNodeBuildCommand(command);
+                }
+                catch(Exception e)
+                {
+                    _shutdownException = e;
+                    _shutdownReason = NodeEngineShutdownReason.Error;
+                    _shutdownEvent.Set();
+                }
+                finally
+                {
+                    _buildTask = null;
+                }
+            });
         }
 
         private void HandleServerNodeBuildCommand(ServerNodeBuildCommand command)
@@ -285,6 +316,8 @@ namespace Microsoft.Build.Execution
                 _shutdownException = new InvalidOperationException("Client requested build while server is busy processing previous client build request.");
                 _shutdownReason = NodeEngineShutdownReason.Error;
                 _shutdownEvent.Set();
+
+                return;
             }
 
             // set build process context
