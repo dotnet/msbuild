@@ -149,7 +149,7 @@ namespace Microsoft.NET.Build.Tests
                 .Execute()
                 .Should()
                 .Fail()
-                .And.HaveStdOutContaining("NETSDK1183:");
+                .And.HaveStdOutContaining("NETSDK1184:");
         }
 
         [Fact]
@@ -187,7 +187,7 @@ namespace Microsoft.NET.Build.Tests
                 .Execute()
                 .Should()
                 .Fail()
-                .And.HaveStdOutContaining("NETSDK1184:");
+                .And.HaveStdOutContaining("NETSDK1185:");
         }
 
     }
