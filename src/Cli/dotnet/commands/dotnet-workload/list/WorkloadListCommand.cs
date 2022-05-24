@@ -13,8 +13,6 @@ using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
-using NuGet.Common;
-using Product = Microsoft.DotNet.Cli.Utils.Product;
 
 namespace Microsoft.DotNet.Workloads.Workload.List
 {
@@ -39,7 +37,8 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         ) : base(result, CommonOptions.HiddenVerbosityOption, reporter, tempDirPath, nugetPackageDownloader)
         {
             _workloadListHelper = new WorkloadListHelper(
-                result,
+                Verbosity,
+                result?.GetValueForOption(WorkloadListCommandParser.VersionOption) ?? null,
                 VerifySignatures,
                 Reporter,
                 workloadRecordRepo,
@@ -52,20 +51,8 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             _machineReadableOption = result.GetValueForOption(WorkloadListCommandParser.MachineReadableOption);
 
             _includePreviews = result.GetValueForOption(WorkloadListCommandParser.IncludePreviewsOption);
-            tempDirPath ??=
-                (string.IsNullOrWhiteSpace(
-                    result.GetValueForOption(WorkloadListCommandParser.TempDirOption))
-                    ? Path.GetTempPath()
-                    : result.GetValueForOption(WorkloadListCommandParser.TempDirOption));
             string userProfileDir1 = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            DirectoryPath tempPackagesDir =
-                new(Path.Combine(userProfileDir1, "sdk-advertising-temp"));
-            NullLogger nullLogger = new NullLogger();
-            nugetPackageDownloader ??= new NuGetPackageDownloader(tempPackagesDir, null,
-                new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, nullLogger),
-                verboseLogger: nullLogger,
-                restoreActionConfig: _parseResult.ToRestoreActionConfig());
-				
+
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(Reporter,
                 _workloadListHelper.WorkloadResolver, PackageDownloader, userProfileDir1, TempDirectoryPath, _workloadListHelper.WorkloadRecordRepo);
         }

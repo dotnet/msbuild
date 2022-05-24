@@ -20,7 +20,8 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         private readonly string _targetSdkVersion;
 
         public WorkloadListHelper(
-            ParseResult result = null,
+            VerbosityOptions verbosity = VerbosityOptions.normal,
+            string targetSdkVersion = null,
             bool? verifySignatures = null,
             IReporter reporter = null,
             IWorkloadInstallationRecordRepository workloadRecordRepo = null,
@@ -30,14 +31,11 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             IWorkloadResolver workloadResolver = null
         )
         {
-            VerbosityOptions verbosity = result?.GetValueForOption(WorkloadListCommandParser.VerbosityOption) ??
-                                         VerbosityOptions.normal;
-
             string dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             ReleaseVersion currentSdkReleaseVersion = new(currentSdkVersion ?? Product.Version);
             _currentSdkFeatureBand = new SdkFeatureBand(currentSdkReleaseVersion);
 
-            _targetSdkVersion = result?.GetValueForOption(WorkloadListCommandParser.VersionOption) ?? null;
+            _targetSdkVersion = targetSdkVersion;
             userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
             var workloadManifestProvider =
                 new SdkDirectoryWorkloadManifestProvider(dotnetPath,
