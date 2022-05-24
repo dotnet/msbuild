@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         {
             var project = _testAssets.CreateTestProject(new TestProject("Project1")
             {
-                TargetFrameworks = "netcoreapp2.1",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             });
 
             project.WithProjectChanges(d => d.Root.Add(XElement.Parse(
@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         {
             var project = _testAssets.CreateTestProject(new TestProject("Project1")
             {
-                TargetFrameworks = "netcoreapp2.1",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 AdditionalProperties =
                 {
                     ["BaseIntermediateOutputPath"] = "obj",
@@ -132,7 +132,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         {
             var project = _testAssets.CreateTestProject(new TestProject("Project1")
             {
-                TargetFrameworks = "netcoreapp2.1;net462",
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework};net462",
                 AdditionalProperties =
                 {
                     ["EnableDefaultCompileItems"] = "false",
@@ -140,8 +140,8 @@ namespace Microsoft.DotNet.Watcher.Tools
             });
 
             project.WithProjectChanges(d => d.Root.Add(XElement.Parse(
-@"<ItemGroup>
-    <Compile Include=""Class1.netcore.cs"" Condition=""'$(TargetFramework)'=='netcoreapp2.1'"" />
+$@"<ItemGroup>
+    <Compile Include=""Class1.netcore.cs"" Condition=""'$(TargetFramework)'=='{ToolsetInfo.CurrentTargetFramework}'"" />
     <Compile Include=""Class1.desktop.cs"" Condition=""'$(TargetFramework)'=='net462'"" />
 </ItemGroup>")));
 
@@ -250,7 +250,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var project1 = _testAssets.CreateTestProject(new TestProject("Project1")
             {
-                TargetFrameworks = "netcoreapp2.1;net462",
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework};net462",
                 ReferencedProjects = { project2.TestProject, },
             });
 
@@ -285,7 +285,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var project1 = _testAssets.CreateTestProject(new TestProject("Project1")
             {
-                TargetFrameworks = "netcoreapp2.1;net462",
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework};net462",
                 ReferencedProjects = { project2.TestProject, },
             });
 

@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AdManifestPackageDoesNotExist">
         <source>Advertising manifest not updated. Manifest package for {0} doesn't exist.</source>
-        <target state="needs-review-translation">광고 매니페스트를 업데이트하지 못했습니다. 매니페스트 패키지 {0}이(가) 없습니다.</target>
+        <target state="translated">광고 매니페스트가 업데이트되지 않았습니다. {0}에 대한 매니페스트 패키지가 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdManifestUpdated">
@@ -124,7 +124,7 @@
       </trans-unit>
       <trans-unit id="InvalidVersionForWorkload">
         <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
-        <target state="new">Error parsing version '{1}' for workload manifest ID '{0}'</target>
+        <target state="translated">작업 매니페스트 ID '{1}'의 버전 '{0}'을(를) 구문 분석하는 동안 오류가 발생했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
