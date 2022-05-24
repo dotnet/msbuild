@@ -311,7 +311,7 @@ namespace Microsoft.DotNet.Tests
         public void DotnetPublishCommandRuntimeOpinionsShouldBeSentToTelemetry()
         {
             const string optionKey = "runtime";
-            const string optionValueToSend = "win10-x64";
+            const string optionValueToSend = $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64";
             string[] args = { "publish", "--" + optionKey, optionValueToSend };
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry

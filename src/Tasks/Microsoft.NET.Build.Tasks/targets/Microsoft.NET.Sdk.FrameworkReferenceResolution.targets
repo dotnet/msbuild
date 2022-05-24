@@ -107,6 +107,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 TargetLatestRuntimePatchIsDefault="$(_TargetLatestRuntimePatchIsDefault)"
                                 EnableTargetingPackDownload="$(EnableTargetingPackDownload)"
                                 EnableRuntimePackDownload="$(EnableRuntimePackDownload)"
+                                EnableWindowsTargeting="$(EnableWindowsTargeting)"
+                                DisableTransitiveFrameworkReferenceDownloads="$(DisableTransitiveFrameworkReferenceDownloads)"
                                 KnownCrossgen2Packs="@(KnownCrossgen2Pack)"
                                 KnownILCompilerPacks="@(KnownILCompilerPack)"
                                 NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"
@@ -369,6 +371,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 RuntimeFrameworks="@(RuntimeFramework)"
                                 GenerateErrorForMissingTargetingPacks="$(GenerateErrorForMissingTargetingPacks)"
                                 NuGetRestoreSupported="$(_NuGetRestoreSupported)"
+                                DisableTransitiveFrameworkReferenceDownloads="$(DisableTransitiveFrameworkReferenceDownloads)"
                                 NetCoreTargetingPackRoot="$(NetCoreTargetingPackRoot)">
       <Output TaskParameter="ReferencesToAdd" ItemName="Reference" />
       <Output TaskParameter="AnalyzersToAdd" ItemName="Analyzer" />
@@ -438,7 +441,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                               ResolvedRuntimePacks="@(ResolvedRuntimePack)"
                               UnavailableRuntimePacks="@(UnavailableRuntimePack)"
                               SatelliteResourceLanguages="$(SatelliteResourceLanguages)"
-                              DesignTimeBuild="$(DesignTimeBuild)">
+                              DesignTimeBuild="$(DesignTimeBuild)"
+                              DisableTransitiveFrameworkReferenceDownloads="$(DisableTransitiveFrameworkReferenceDownloads)">
       <Output TaskParameter="RuntimePackAssets" ItemName="RuntimePackAsset" />
     </ResolveRuntimePackAssets>
 

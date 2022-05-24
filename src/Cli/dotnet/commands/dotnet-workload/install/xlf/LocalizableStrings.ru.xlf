@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AdManifestPackageDoesNotExist">
         <source>Advertising manifest not updated. Manifest package for {0} doesn't exist.</source>
-        <target state="needs-review-translation">Не удалось обновить манифест рекламы. Пакет манифеста {0} не существует.</target>
+        <target state="translated">Манифест рекламы не обновлен. Не существует пакета манифеста для следующего: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdManifestUpdated">
@@ -124,7 +124,7 @@
       </trans-unit>
       <trans-unit id="InvalidVersionForWorkload">
         <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
-        <target state="new">Error parsing version '{1}' for workload manifest ID '{0}'</target>
+        <target state="translated">Ошибка при анализе версии \"{1}\" идентификатора манифеста рабочей нагрузки \"{0}\"</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">

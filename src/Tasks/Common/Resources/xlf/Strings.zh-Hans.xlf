@@ -750,6 +750,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1112: 未下载 {0} 的运行时包。请尝试使用 RuntimeIdentifier“{1}”运行 NuGet 还原。</target>
         <note>{StrBegin="NETSDK1112: "}</note>
       </trans-unit>
+      <trans-unit id="RuntimePackNotRestored_TransitiveDisabled">
+        <source>NETSDK1184: The Runtime Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
+        <target state="translated">NETSDK1184: FrameworkReference“{0}”的运行时包不可用。这可能是因为 DisableTransitiveFrameworkReferenceDownloads 设置为 true。</target>
+        <note>{StrBegin="NETSDK1184: "}</note>
+      </trans-unit>
       <trans-unit id="SelfContainedExeCannotReferenceNonSelfContained">
         <source>NETSDK1150: The referenced project '{0}' is a non self-contained executable.  A non self-contained executable cannot be referenced by a self-contained executable.  For more information, see https://aka.ms/netsdk1150</source>
         <target state="translated">NETSDK1150: 引用的项目“{0}”是非自包含的可执行文件。非自包含可执行文件不能由自包含可执行文件引用。如需获取更多信息，请访问 https://aka.ms/netsdk1150</target>
@@ -785,6 +790,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1127: 未安装目标包 {0}。请还原并重试。</target>
         <note>{StrBegin="NETSDK1127: "}</note>
       </trans-unit>
+      <trans-unit id="TargetingPackNotRestored_TransitiveDisabled">
+        <source>NETSDK1183: The Targeting Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
+        <target state="translated">NETSDK1183: FrameworkReference“{0}”的目标包不可用。这可能是因为 DisableTransitiveFrameworkReferenceDownloads 设置为 true。</target>
+        <note>{StrBegin="NETSDK1183: "}</note>
+      </trans-unit>
       <trans-unit id="TrimmingWindowsFormsIsNotSupported">
         <source>NETSDK1175: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</source>
         <target state="translated">NETSDK1175: 启用剪裁时，不支持或不推荐使用 Windows 窗体。请转到 https://aka.ms/dotnet-illink/windows-forms 以了解详细信息。</target>
@@ -819,6 +829,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1073: The FrameworkReference '{0}' was not recognized</source>
         <target state="translated">NETSDK1073: 未识别 FrameworkReference“{0}”</target>
         <note>{StrBegin="NETSDK1073: "}</note>
+      </trans-unit>
+      <trans-unit id="UnknownFrameworkReference_MauiEssentials">
+        <source>NETSDK1185: This project depends on Maui Essentials through a project or NuGet package reference, but doesn't declare that dependency explicitly. To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</source>
+        <target state="translated">NETSDK1185: 此项目通过项目或 NuGet 包引用依赖于 Maui Essentials，但不显式声明该依赖项。若要生成此项目，必须将 UseMauiEssentials 属性设置为 true (如有必要，请安装 Maui 工作负载)。</target>
+        <note>{StrBegin="NETSDK1185: "}</note>
       </trans-unit>
       <trans-unit id="UnnecessaryWindowsDesktopSDK">
         <source>NETSDK1137: It is no longer necessary to use the Microsoft.NET.Sdk.WindowsDesktop SDK. Consider changing the Sdk attribute of the root Project element to 'Microsoft.NET.Sdk'.</source>
@@ -896,8 +911,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1105: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresWindows">
-        <source>NETSDK1100: Windows is required to build Windows desktop applications.</source>
-        <target state="translated">NETSDK1100: 需使用 Windows 才能构建 Windows 桌面应用程序。</target>
+        <source>NETSDK1100: To build a project targeting Windows on this operating system, set the EnableWindowsTargeting property to true.</source>
+        <target state="translated">NETSDK1100: 若要在此操作系统上生成面向 Windows 的项目，请将 EnableWindowsTargeting 属性设置为 true。</target>
         <note>{StrBegin="NETSDK1100: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopTargetPlatformMustBeWindows">
