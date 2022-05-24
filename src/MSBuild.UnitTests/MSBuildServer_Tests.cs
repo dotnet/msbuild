@@ -160,6 +160,7 @@ namespace Microsoft.Build.Engine.UnitTests
         public void BuildsWhileBuildIsRunningOnServer()
         {
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            _output.WriteLine("Set MSBUILDUSESERVER to 1");
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
             TransientTestFile sleepProject = _env.CreateFile("napProject.proj", sleepingTaskContents);
             _env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
@@ -195,11 +196,13 @@ namespace Microsoft.Build.Engine.UnitTests
                 }
 
                 Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
+                _output.WriteLine("Set MSBUILDUSESERVER to 0");
                 output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out success, false, _output);
                 success.ShouldBeTrue();
                 ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
 
                 Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+                _output.WriteLine("Set MSBUILDUSESERVER back to 1");
                 output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out success, false, _output);
                 success.ShouldBeTrue();
                 pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Server ID is "), "The server should be otherwise occupied.");
@@ -249,9 +252,14 @@ namespace Microsoft.Build.Engine.UnitTests
             success.ShouldBeTrue();
             workerPid.ShouldBe(ParseNumber(output, "Server ID is "));
         }
+        
 
         private int ParseNumber(string searchString, string toFind)
         {
+            _output.WriteLine("ParseNumber func.");
+            _output.WriteLine("---");
+            _output.WriteLine(searchString);
+            _output.WriteLine("---");
             Regex regex = new(@$"{toFind}(\d+)");
             var x = regex.Match(searchString);
             return int.Parse(x.Groups[1].Value);
