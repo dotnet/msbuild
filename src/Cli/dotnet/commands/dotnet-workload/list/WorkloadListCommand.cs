@@ -12,9 +12,9 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
-using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using NuGet.Common;
+using Product = Microsoft.DotNet.Cli.Utils.Product;
 
 namespace Microsoft.DotNet.Workloads.Workload.List
 {
@@ -22,7 +22,6 @@ namespace Microsoft.DotNet.Workloads.Workload.List
     {
         private readonly bool _includePreviews;
         private readonly bool _machineReadableOption;
-        private readonly IReporter _reporter;
         private readonly IWorkloadManifestUpdater _workloadManifestUpdater;
         private readonly IWorkloadListHelper _workloadListHelper;
 
@@ -37,14 +36,12 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             INuGetPackageDownloader nugetPackageDownloader = null,
             IWorkloadManifestUpdater workloadManifestUpdater = null,
             IWorkloadResolver workloadResolver = null
-        ) : base(result)
+        ) : base(result, CommonOptions.HiddenVerbosityOption, reporter, tempDirPath, nugetPackageDownloader)
         {
-            _reporter = reporter ?? Reporter.Output;
-
             _workloadListHelper = new WorkloadListHelper(
                 result,
                 VerifySignatures,
-                _reporter,
+                Reporter,
                 workloadRecordRepo,
                 currentSdkVersion,
                 dotnetDir,
@@ -68,9 +65,9 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                 new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, nullLogger),
                 verboseLogger: nullLogger,
                 restoreActionConfig: _parseResult.ToRestoreActionConfig());
-
-            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter,
-                _workloadListHelper.WorkloadResolver, nugetPackageDownloader, userProfileDir1, tempDirPath, _workloadListHelper.WorkloadRecordRepo);
+				
+            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(Reporter,
+                _workloadListHelper.WorkloadResolver, PackageDownloader, userProfileDir1, TempDirectoryPath, _workloadListHelper.WorkloadRecordRepo);
         }
 
         public override int Execute()
@@ -85,34 +82,32 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                 ListOutput listOutput = new(installedList.Select(id => id.ToString()).ToArray(),
                     updateAvailable);
 
-                _reporter.WriteLine("==workloadListJsonOutputStart==");
-                _reporter.WriteLine(
+                Reporter.WriteLine("==workloadListJsonOutputStart==");
+                Reporter.WriteLine(
                     JsonSerializer.Serialize(listOutput,
-                        new JsonSerializerOptions {PropertyNamingPolicy = JsonNamingPolicy.CamelCase}));
-                _reporter.WriteLine("==workloadListJsonOutputEnd==");
+                        new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
+                Reporter.WriteLine("==workloadListJsonOutputEnd==");
             }
             else
             {
                 InstalledWorkloadsCollection installedWorkloads = _workloadListHelper.AddInstalledVsWorkloads(installedList);
-
-
-                _reporter.WriteLine();
+                Reporter.WriteLine();
 
                 PrintableTable<KeyValuePair<string, string>> table = new();
                 table.AddColumn(LocalizableStrings.WorkloadIdColumn, workload => workload.Key);
                 table.AddColumn(LocalizableStrings.WorkloadSourceColumn, workload => workload.Value);
 
-                table.PrintRows(installedWorkloads.AsEnumerable(), l => _reporter.WriteLine(l));
+                table.PrintRows(installedWorkloads.AsEnumerable(), l => Reporter.WriteLine(l));
 
-                _reporter.WriteLine();
-                _reporter.WriteLine(LocalizableStrings.WorkloadListFooter);
-                _reporter.WriteLine();
+                Reporter.WriteLine();
+                Reporter.WriteLine(LocalizableStrings.WorkloadListFooter);
+                Reporter.WriteLine();
 
                 var updatableWorkloads = _workloadManifestUpdater.GetUpdatableWorkloadsToAdvertise(installedList).Select(workloadId => workloadId.ToString());
                 if (updatableWorkloads.Any())
                 {
-                    _reporter.WriteLine(string.Format(LocalizableStrings.WorkloadUpdatesAvailable, string.Join(" ", updatableWorkloads)));
-                    _reporter.WriteLine();
+                    Reporter.WriteLine(string.Format(LocalizableStrings.WorkloadUpdatesAvailable, string.Join(" ", updatableWorkloads)));
+                    Reporter.WriteLine();
                 }
             }
 
@@ -134,7 +129,6 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                 {
                     if (installedWorkloads.Contains(new WorkloadId(WorkloadId.ToString())))
                     {
-                        //  TODO: Potentially show existing and new feature bands
                         updateList.Add(new UpdateAvailableEntry(manifestUpdate.ExistingVersion.ToString(),
                             manifestUpdate.NewVersion.ToString(),
                             workloadDefinition.Description, WorkloadId.ToString()));

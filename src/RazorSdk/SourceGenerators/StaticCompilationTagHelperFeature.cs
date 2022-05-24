@@ -45,14 +45,5 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         {
             _providers = Engine.Features.OfType<ITagHelperDescriptorProvider>().OrderBy(f => f.Order).ToArray();
         }
-
-        internal static bool IsValidCompilation(Compilation compilation)
-        {
-            var @string = compilation.GetSpecialType(SpecialType.System_String);
-
-            // Do some minimal tests to verify the compilation is valid. If symbols for System.String
-            // is missing or errored, the compilation may be missing references.
-            return @string != null && @string.TypeKind != TypeKind.Error;
-        }
     }
 }

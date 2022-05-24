@@ -68,7 +68,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "PublishSatelliteAssemblies",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
             };
 
@@ -97,7 +97,8 @@ namespace Microsoft.NET.Publish.Tests
                 $"{testProject.Name}.dll",
                 $"{testProject.Name}.pdb",
                 $"{testProject.Name}.deps.json",
-                $"{testProject.Name}.runtimeconfig.json"
+                $"{testProject.Name}.runtimeconfig.json",
+                $"{testProject.Name}{EnvironmentInfo.ExecutableExtension}"
             });
         }
     }
