@@ -27,7 +27,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
                 || string.IsNullOrEmpty(deploymentResponse.LogUrl)
                 || string.IsNullOrEmpty(deploymentResponse.Id))
             {
-                return deploymentResponse.LogUrl;
+                return deploymentResponse?.LogUrl;
             }
 
             try

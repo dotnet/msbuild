@@ -99,7 +99,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
             {
                 if (logMessages)
                 {
-                    Log.LogError(String.Format(Resources.ZIPDEPLOY_FailedDeploy, zipDeployPublishUrl, response.StatusCode));
+                    Log.LogError(string.Format(Resources.ZIPDEPLOY_FailedDeploy, zipDeployPublishUrl, response.StatusCode));
                 }
 
                 return false;
@@ -122,9 +122,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
                         Log.LogMessage(MessageImportance.High, Resources.ZIPDEPLOY_Succeeded);
                         return true;
                     }
-                    else if (deploymentResponse?.Status == DeployStatus.Failed || deploymentResponse?.Status == DeployStatus.Unknown)
+                    else if (deploymentResponse is null || deploymentResponse?.Status == DeployStatus.Failed || deploymentResponse?.Status == DeployStatus.Unknown)
                     {
-                        Log.LogError(string.Format(Resources.ZIPDEPLOY_Failed, zipDeployPublishUrl, deploymentResponse?.Status, deploymentResponse?.GetLogUrlWithId()));
+                        Log.LogError(string.Format(Resources.ZIPDEPLOY_Failed,
+                            zipDeployPublishUrl,
+                            deploymentResponse?.Status ?? DeployStatus.Unknown,
+                            deploymentResponse?.GetLogUrlWithId()));
+
                         return false;
                     }
                 }
