@@ -311,7 +311,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ResolveRuntimePackAssets Condition="'$(_TargetFrameworkVersionWithoutV)' >= '3.0'"
                               FrameworkReferences="@(FrameworkReference)"
-                              ResolvedRuntimePacks="@(_CrossgenRuntimePack)">
+                              ResolvedRuntimePacks="@(_CrossgenRuntimePack)"
+                              DisableTransitiveFrameworkReferenceDownloads="$(DisableTransitiveFrameworkReferenceDownloads)">
       <Output TaskParameter="RuntimePackAssets" ItemName="CrossgenResolvedAssembliesToPublish" />
     </ResolveRuntimePackAssets>
 

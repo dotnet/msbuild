@@ -70,8 +70,8 @@ namespace Microsoft.NET.Build.Tests
                         ("microsoft.codequality.analyzers", "2.6.0", "analyzers/dotnet/cs/Microsoft.CodeQuality.Analyzers.dll"),
                         ("microsoft.codequality.analyzers", "2.6.0", "analyzers/dotnet/cs/Microsoft.CodeQuality.CSharp.Analyzers.dll"),
                         ("microsoft.dependencyvalidation.analyzers", "0.9.0", "analyzers/dotnet/Microsoft.DependencyValidation.Analyzers.dll"),
-                        ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/Microsoft.Interop.LibraryImportGenerator.dll"),
-                        ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/Microsoft.Interop.SourceGeneration.dll")
+                        ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/cs/Microsoft.Interop.LibraryImportGenerator.dll"),
+                        ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/cs/Microsoft.Interop.SourceGeneration.dll")
                         );
                     break;
 
@@ -81,17 +81,12 @@ namespace Microsoft.NET.Build.Tests
                         ("Microsoft.NET.Sdk", (string)null, "analyzers/Microsoft.CodeAnalysis.NetAnalyzers.dll"),
                         ("microsoft.codequality.analyzers", "2.6.0", "analyzers/dotnet/vb/Microsoft.CodeQuality.Analyzers.dll"),
                         ("microsoft.codequality.analyzers", "2.6.0", "analyzers/dotnet/vb/Microsoft.CodeQuality.VisualBasic.Analyzers.dll"),
-                        ("microsoft.dependencyvalidation.analyzers", "0.9.0", "analyzers/dotnet/Microsoft.DependencyValidation.Analyzers.dll"),
-                        ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/Microsoft.Interop.LibraryImportGenerator.dll"),
-                        ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/Microsoft.Interop.SourceGeneration.dll")
+                        ("microsoft.dependencyvalidation.analyzers", "0.9.0", "analyzers/dotnet/Microsoft.DependencyValidation.Analyzers.dll")
                         );
                     break;
 
                 case "F#":
-                    analyzers.Select(x => GetPackageAndPath(x)).Should().BeEquivalentTo(
-                        ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/Microsoft.Interop.LibraryImportGenerator.dll"),
-                        ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/Microsoft.Interop.SourceGeneration.dll")
-                        );
+                    analyzers.Should().BeEmpty();
                     break;
 
                 default:
