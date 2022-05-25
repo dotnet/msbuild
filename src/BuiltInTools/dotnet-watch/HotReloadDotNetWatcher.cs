@@ -141,7 +141,12 @@ namespace Microsoft.DotNet.Watcher
 
                         if (finishedTask != fileSetTask || fileSetTask.Result is not FileItem[] fileItems)
                         {
-                            // The app exited.
+                            if (processTask.IsFaulted && finishedTask == processTask && !cancellationToken.IsCancellationRequested)
+                            {
+                                // Only show this error message if the process exited non-zero due to a normal process exit.
+                                // Don't show this if dotnet-watch killed the inner process due to file change or CTRL+C by the user
+                                _reporter.Error($"Application failed to start: {processTask.Exception.InnerException.Message}");
+                            }
                             break;
                         }
                         else
@@ -199,7 +204,7 @@ namespace Microsoft.DotNet.Watcher
 
                     await Task.WhenAll(processTask, fileSetTask);
 
-                    if (processTask.Result != 0 && finishedTask == processTask && !cancellationToken.IsCancellationRequested)
+                    if (!processTask.IsFaulted && processTask.Result != 0 && finishedTask == processTask && !cancellationToken.IsCancellationRequested)
                     {
                         // Only show this error message if the process exited non-zero due to a normal process exit.
                         // Don't show this if dotnet-watch killed the inner process due to file change or CTRL+C by the user
