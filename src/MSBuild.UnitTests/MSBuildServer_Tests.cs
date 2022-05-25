@@ -197,7 +197,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
                 _output.WriteLine("Set MSBUILDUSESERVER to 0");
-                output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out success, false, _output);
+                output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out success, false, _output, true);
                 success.ShouldBeTrue();
                 ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
 
@@ -257,9 +257,10 @@ namespace Microsoft.Build.Engine.UnitTests
         private int ParseNumber(string searchString, string toFind)
         {
             _output.WriteLine("ParseNumber func.");
-            _output.WriteLine("---");
+            _output.WriteLine($"Finding {0}", toFind);
+            _output.WriteLine("-searchString-in-ParseNumber-func-");
             _output.WriteLine(searchString);
-            _output.WriteLine("---");
+            _output.WriteLine("--end-of-searchString-in-ParseNumber-func-");
             Regex regex = new(@$"{toFind}(\d+)");
             var x = regex.Match(searchString);
             return int.Parse(x.Groups[1].Value);
