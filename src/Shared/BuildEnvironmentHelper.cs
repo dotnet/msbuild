@@ -526,6 +526,7 @@ namespace Microsoft.Build.Shared
                 CurrentMSBuildConfigurationFile = string.Concat(currentMSBuildExePath, ".config");
                 MSBuildToolsDirectory32 = CurrentMSBuildToolsDirectory;
                 MSBuildToolsDirectory64 = CurrentMSBuildToolsDirectory;
+                MSBuildToolsDirectoryRoot = CurrentMSBuildToolsDirectory;
             }
 
             // We can't detect an environment, don't try to set other paths.
