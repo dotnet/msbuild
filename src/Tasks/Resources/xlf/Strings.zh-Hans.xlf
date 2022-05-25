@@ -1363,12 +1363,12 @@
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.NoPlatformsListed">
         <source>MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</source>
-        <target state="needs-review-translation">MSB3982: EnableDynamicPlatformResolution 为 true，但引用的项目 "{0}" 没有设置 "Platforms" 元数据。它将在没有指定平台的情况下生成。</target>
+        <target state="translated">MSB3982: EnableDynamicPlatformResolution 为 true，但引用的项目 \"{0}\" 没有设置 \"Platforms\" 或 \"Platform\" 元数据。它将在没有指定平台的情况下生成。</target>
         <note>{StrBegin="MSB3982: "}</note>
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform">
         <source>Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</source>
-        <target state="new">Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</target>
+        <target state="translated">引用项目 \"{0}\" 的平台属性与当前项目的平台 \"{1}\" 匹配。将在不使用全局平台属性的情况下生成引用的项目。</target>
         <note />
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.SamePlatform">
@@ -1554,7 +1554,7 @@
       </trans-unit>
       <trans-unit id="RemoveDir.EmptyPath">
         <source>MSB3232: An empty directory was passed to RemoveDir and was ignored.</source>
-        <target state="new">MSB3232: An empty directory was passed to RemoveDir and was ignored.</target>
+        <target state="translated">MSB3232: 已向 RemoveDir 传递一个空目录，并且已被忽略。</target>
         <note>{StrBegin="MSB3232: "}</note>
       </trans-unit>
       <trans-unit id="RemoveDir.Error">
