@@ -97,6 +97,11 @@ namespace Microsoft.TemplateEngine.Cli
             _baseHost.VirtualizeDirectory(path);
         }
 
+        public void Dispose()
+        {
+            _loggerFactory?.Dispose();
+        }
+
         #region Obsolete
         [Obsolete]
 #pragma warning disable SA1202 // Elements should be ordered by access

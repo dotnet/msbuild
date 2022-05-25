@@ -93,7 +93,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         public async Task<int> InvokeAsync(InvocationContext context)
         {
             TArgs args = ParseContext(context.ParseResult);
-            IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args, context.ParseResult);
+            using IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args, context.ParseResult);
             ITelemetryLogger telemetryLogger = CreateTelemetryLogger(context.ParseResult);
 
             CancellationToken cancellationToken = context.GetCancellationToken();
@@ -149,8 +149,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 return base.GetCompletions(context);
             }
             GlobalArgs args = new GlobalArgs(this, context.ParseResult);
-            IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args, context.ParseResult);
-            return GetCompletions(context, environmentSettings);
+            using IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args, context.ParseResult);
+            return GetCompletions(context, environmentSettings).ToList();
         }
 
         protected abstract Task<NewCommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, ITelemetryLogger telemetryLogger, InvocationContext context);

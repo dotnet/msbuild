@@ -121,6 +121,11 @@ namespace Microsoft.TemplateEngine.TestHelper
             _fileSystem = new InMemoryFileSystem(path, _fileSystem);
         }
 
+        public void Dispose()
+        {
+            _loggerFactory?.Dispose();
+        }
+
         [Obsolete]
         void ITemplateEngineHost.OnSymbolUsed(string symbol, object value)
         {
