@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>net6.0;net472</TargetFrameworks>
-    <IsPackable>true</IsPackable>
+    <!-- Re-enable and update the VersionPrefix in case of a servicing change. -->
+    <IsPackable>false</IsPackable>
     <IsShippingPackage>true</IsShippingPackage>
     <StrongNameKeyId>Open</StrongNameKeyId>
     <VersionPrefix>1.1.0</VersionPrefix>
