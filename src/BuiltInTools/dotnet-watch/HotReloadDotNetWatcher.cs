@@ -145,7 +145,7 @@ namespace Microsoft.DotNet.Watcher
                             {
                                 // Only show this error message if the process exited non-zero due to a normal process exit.
                                 // Don't show this if dotnet-watch killed the inner process due to file change or CTRL+C by the user
-                                _reporter.Error($"Application failed to start: {processTask.Exception.InnerException.Message}");
+                                _reporter.Error($"Application failed to start: {processTask.Exception?.InnerException?.Message}");
                             }
                             break;
                         }
