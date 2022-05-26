@@ -400,7 +400,19 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             File.GetLastAccessTime(sentinelPath2).Should().BeCloseTo(updateTime2);
         }
 
-       
+        [Fact]
+        public void GivenUpdateAvailablePrintDownloadLinkWorksWithPriorSdkVersions()
+        {
+            // user has 6.0.100 installed
+            // updater offers 6.0.201 update
+            // 6.0.201 is not currently installed
+            // user executes "dotnet workload update --print-download-link-only --sdk-version 6.0.201"
+            // link to download 6.0.201 is given
+
+
+        }
+
+
 
         private List<(PackageId, NuGetVersion, DirectoryPath?, PackageSourceLocation)> GetExpectedDownloadedPackages(string sdkFeatureBand = "6.0.100")
         {

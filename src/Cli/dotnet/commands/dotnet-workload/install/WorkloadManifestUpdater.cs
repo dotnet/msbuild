@@ -271,7 +271,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             var packageIds = GetInstalledManifestIds()
                 .Select(manifestId => GetManifestPackageId(_sdkFeatureBand, manifestId));       // this returns nothing (third/last)
-                        // what if we make a similar call to above but with whatever feature band update is offered?? (6.0.201 in the filed issue, 6.0.500 in my local testing)
 
             var packageUrls = new List<string>();
             foreach (var packageId in packageIds)
