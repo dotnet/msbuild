@@ -233,10 +233,11 @@ namespace Microsoft.DotNet.Cli
         public static string GetCurrentRuntimeId()
         {
             var dotnetRootPath = Path.GetDirectoryName(Environment.ProcessPath);
-            // When running under test the path does not always contain "dotnet" and Product.Version is empty.
+            // When running under test the path does not always contain "dotnet".
             dotnetRootPath = Path.GetFileName(dotnetRootPath).Contains("dotnet") || Path.GetFileName(dotnetRootPath).Contains("x64") ? dotnetRootPath : Path.Combine(dotnetRootPath, "dotnet");
             var ridFileName = "NETCoreSdkRuntimeIdentifierChain.txt";
-            string runtimeIdentifierChainPath = string.IsNullOrEmpty(Product.Version) ?
+            // When running under test the Product.Version might be empty or point to version not installed in dotnetRootPath.
+            string runtimeIdentifierChainPath = string.IsNullOrEmpty(Product.Version) || !Directory.Exists(Path.Combine(dotnetRootPath, "sdk", Product.Version)) ?
                 Path.Combine(Directory.GetDirectories(Path.Combine(dotnetRootPath, "sdk"))[0], ridFileName) :
                 Path.Combine(dotnetRootPath, "sdk", Product.Version, ridFileName);
             string[] currentRuntimeIdentifiers = File.Exists(runtimeIdentifierChainPath) ?
