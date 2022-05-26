@@ -76,7 +76,8 @@ namespace Microsoft.TemplateEngine.Cli
                 aliases.ToArray(),
                 parseArgument: result => GetParseChoiceArgument(this)(result))
             {
-                Arity = new ArgumentArity(DefaultIfOptionWithoutValue == null ? 1 : 0, AllowMultipleValues ? _choices.Count : 1)
+                Arity = new ArgumentArity(DefaultIfOptionWithoutValue == null ? 1 : 0, AllowMultipleValues ? _choices.Count : 1),
+                AllowMultipleArgumentsPerToken = AllowMultipleValues
             };
 
             option.FromAmongCaseInsensitive(Choices.Keys.ToArray());
