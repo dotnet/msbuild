@@ -63,8 +63,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _downloadToCacheOption = parseResult.GetValueForOption(WorkloadUpdateCommandParser.DownloadToCacheOption);
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(WorkloadUpdateCommandParser.VersionOption), version, _dotnetPath, _userProfileDir);
-
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(WorkloadUpdateCommandParser.VersionOption), version, _dotnetPath, _userProfileDir, false);
+            _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.GetValueForOption(WorkloadUpdateCommandParser.TempDirOption)) ?
+                Path.GetTempPath() :
+                parseResult.GetValueForOption(WorkloadUpdateCommandParser.TempDirOption));
             _printRollbackDefinitionOnly = parseResult.GetValueForOption(WorkloadUpdateCommandParser.PrintRollbackOption);
             _fromRollbackDefinition = parseResult.GetValueForOption(WorkloadUpdateCommandParser.FromRollbackFileOption);
 
@@ -100,7 +102,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             }
             else if (_printDownloadLinkOnly)
             {
-                var packageUrls = GetUpdatablePackageUrlsAsync(_includePreviews).GetAwaiter().GetResult();
+                var packageUrls = GetUpdatablePackageUrlsAsync(_includePreviews).GetAwaiter().GetResult();      // this is where it checks what packages can be updated (first)
 
                 Reporter.WriteLine("==allPackageLinksJsonOutputStart==");
                 Reporter.WriteLine(JsonSerializer.Serialize(packageUrls));
@@ -254,7 +256,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
 
             try
             {
-                var manifestPackageUrls = _workloadManifestUpdater.GetManifestPackageUrls(includePreview);
+                var manifestPackageUrls = _workloadManifestUpdater.GetManifestPackageUrls(includePreview);      // where it calls for the URLs to display... returns count=0 (second)
                 packageUrls = packageUrls.Concat(manifestPackageUrls);
 
                 tempPath = new DirectoryPath(Path.Combine(TempDirectoryPath, "dotnet-manifest-extraction"));

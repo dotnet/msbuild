@@ -270,10 +270,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public IEnumerable<string> GetManifestPackageUrls(bool includePreviews)
+        public IEnumerable<string> GetManifestPackageUrls(bool includePreviews)     // where it gets the package URLs
         {
             var packageIds = GetInstalledManifestIds()
-                .Select(manifestId => GetManifestPackageId(_sdkFeatureBand, manifestId));
+                .Select(manifestId => GetManifestPackageId(_sdkFeatureBand, manifestId));       // this returns nothing (third/last)
+                        // what if we make a similar call to above but with whatever feature band update is offered?? (6.0.201 in the filed issue, 6.0.500 in my local testing)
 
             var packageUrls = new List<string>();
             foreach (var packageId in packageIds)
