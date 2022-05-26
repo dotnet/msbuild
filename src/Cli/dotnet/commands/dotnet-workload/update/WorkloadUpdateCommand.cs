@@ -64,9 +64,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
             _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(WorkloadUpdateCommandParser.VersionOption), version, _dotnetPath, _userProfileDir, false);
-            _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.GetValueForOption(WorkloadUpdateCommandParser.TempDirOption)) ?
-                Path.GetTempPath() :
-                parseResult.GetValueForOption(WorkloadUpdateCommandParser.TempDirOption));
             _printRollbackDefinitionOnly = parseResult.GetValueForOption(WorkloadUpdateCommandParser.PrintRollbackOption);
             _fromRollbackDefinition = parseResult.GetValueForOption(WorkloadUpdateCommandParser.FromRollbackFileOption);
 
