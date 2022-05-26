@@ -4,6 +4,7 @@
 using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Utils;
 using CreationResultStatus = Microsoft.TemplateEngine.Edge.Template.CreationResultStatus;
@@ -107,37 +108,17 @@ namespace Microsoft.TemplateEngine.Cli
             };
         }
 
-        private static string AdjustReportedPath(string targetPath, string? requestedOutputPath)
+        private static string AdjustReportedPath(string targetPath, string? requestedOutputPath, IPhysicalFileSystem fileSystem)
         {
             if (string.IsNullOrEmpty(requestedOutputPath))
             {
                 return targetPath;
             }
 
-            return TryGetRelativePath(Path.Combine(requestedOutputPath, targetPath), Directory.GetCurrentDirectory());
-        }
-
-        /// <summary>
-        /// Attempts to reconstruct the path relative to `basePath`. If `path` is not subfolder of `basePath` or if error occurs, original path is returned.
-        /// </summary>
-        /// <param name="path">Path to attempt to make relative.</param>
-        /// <param name="basePath">base folder to relativize the path.</param>
-        /// <returns></returns>
-        private static string TryGetRelativePath(string path, string basePath)
-        {
-            try
-            {
-                string sourceFullPath = Path.GetFullPath(path);
-                if (sourceFullPath.StartsWith(basePath, StringComparison.CurrentCulture))
-                {
-                    return sourceFullPath.Substring(basePath.Length + 1);
-                }
-            }
-            catch (Exception)
-            {
-            }
-
-            return path;
+            return fileSystem
+                .PathRelativeTo(
+                    Path.Combine(requestedOutputPath, targetPath),
+                    Directory.GetCurrentDirectory());
         }
 
         private async Task<NewCommandStatus> CreateTemplateAsync(TemplateCommandArgs templateArgs, CancellationToken cancellationToken)
@@ -223,7 +204,7 @@ namespace Microsoft.TemplateEngine.Cli
                         {
                             foreach (IFileChange change in instantiateResult.CreationEffects.FileChanges)
                             {
-                                string targetPathToReport = AdjustReportedPath(change.TargetRelativePath, templateArgs.OutputPath);
+                                string targetPathToReport = AdjustReportedPath(change.TargetRelativePath, templateArgs.OutputPath, _environmentSettings.Host.FileSystem);
                                 Reporter.Output.WriteLine($"  {GetChangeString(change.ChangeKind)}: {targetPathToReport}");
                             }
                         }
@@ -275,7 +256,7 @@ namespace Microsoft.TemplateEngine.Cli
                         foreach (IFileChange change in destructiveChanges)
                         {
                             string changeKind = GetChangeString(change.ChangeKind);
-                            string targetPathToReport = AdjustReportedPath(change.TargetRelativePath, templateArgs.OutputPath);
+                            string targetPathToReport = AdjustReportedPath(change.TargetRelativePath, templateArgs.OutputPath, _environmentSettings.Host.FileSystem);
                             Reporter.Error.WriteLine(($"  {changeKind}".PadRight(padLen) + targetPathToReport).Bold().Red());
                         }
                         Reporter.Error.WriteLine();

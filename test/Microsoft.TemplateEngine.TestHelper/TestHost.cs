@@ -51,26 +51,8 @@ namespace Microsoft.TemplateEngine.TestHelper
             HostParamDefaults = new Dictionary<string, string>();
             _fileSystem = fileSystem ?? new PhysicalFileSystem();
 
-            _loggerFactory =
-                Microsoft.Extensions.Logging.LoggerFactory.Create(builder =>
-                {
-                    builder
-                      .SetMinimumLevel(LogLevel.Trace);
-
-                    if (addLoggerProviders?.Any() ?? false)
-                    {
-                        foreach (ILoggerProvider loggerProvider in addLoggerProviders)
-                        {
-                            builder.AddProvider(loggerProvider);
-                        }
-                    }
-                    builder.AddSimpleConsole(options =>
-                        {
-                            options.SingleLine = true;
-                            options.TimestampFormat = "[yyyy-MM-dd HH:mm:ss.fff] ";
-                            options.IncludeScopes = true;
-                        });
-                });
+            _loggerFactory = new TestLoggerFactory();
+            addLoggerProviders?.ToList().ForEach(_loggerFactory.AddProvider);
             _logger = _loggerFactory.CreateLogger("Test Host");
             _fallbackNames = fallbackNames ?? new[] { "dotnetcli" };
         }
