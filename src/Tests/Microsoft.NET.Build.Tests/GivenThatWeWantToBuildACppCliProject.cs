@@ -148,7 +148,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource();
 
             new BuildCommand(testAsset, "NETCoreCppCliTest")
-                .Execute("-p:Platform=x64", "-p:selfcontained=true", "-p:RuntimeIdentifier=win-x64")
+                .Execute("-p:Platform=x64", "-p:selfcontained=true", $"-p:RuntimeIdentifier={ToolsetInfo.LatestWinRuntimeIdentifier}-x64")
                 .Should()
                 .Fail()
                 .And

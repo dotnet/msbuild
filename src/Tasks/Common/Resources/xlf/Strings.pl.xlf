@@ -750,6 +750,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1112: Nie pobrano pakietu wykonawczego dla: {0}. Spróbuj uruchomić przywracanie NuGet z użyciem wartości RuntimeIdentifier „{1}”.</target>
         <note>{StrBegin="NETSDK1112: "}</note>
       </trans-unit>
+      <trans-unit id="RuntimePackNotRestored_TransitiveDisabled">
+        <source>NETSDK1185: The Runtime Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
+        <target state="translated">NETSDK1185: Pakiet środowiska uruchomieniowego dla elementu FrameworkReference „{0}” był niedostępny. Może to być spowodowane tym, że parametr DisableTransitiveFrameworkReferenceDownloads został ustawiony na wartość True.</target>
+        <note>{StrBegin="NETSDK1185: "}</note>
+      </trans-unit>
       <trans-unit id="SelfContainedExeCannotReferenceNonSelfContained">
         <source>NETSDK1150: The referenced project '{0}' is a non self-contained executable.  A non self-contained executable cannot be referenced by a self-contained executable.  For more information, see https://aka.ms/netsdk1150</source>
         <target state="translated">NETSDK1150: Projekt „{0}”, do którego istnieje odwołanie, jest niesamodzielnym plikiem wykonywalnym.  Niesamodzielny plik wykonywalny nie może być przywoływany przez samodzielny plik wykonywalny. Aby uzyskać więcej informacji, zobacz: https://aka.ms/netsdk1150</target>
@@ -785,6 +790,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1127: Pakiet docelowy {0} nie jest zainstalowany. Wykonaj przywrócenie i spróbuj ponownie.</target>
         <note>{StrBegin="NETSDK1127: "}</note>
       </trans-unit>
+      <trans-unit id="TargetingPackNotRestored_TransitiveDisabled">
+        <source>NETSDK1184: The Targeting Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
+        <target state="translated">NETSDK1184: Pakiet określania wartości docelowej dla elementu FrameworkReference „{0}” był niedostępny. Może to być spowodowane tym, że parametr DisableTransitiveFrameworkReferenceDownloads został ustawiony na wartość True.</target>
+        <note>{StrBegin="NETSDK1184: "}</note>
+      </trans-unit>
       <trans-unit id="TrimmingWindowsFormsIsNotSupported">
         <source>NETSDK1175: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</source>
         <target state="translated">NETSDK1175: Aplikacja Windows Forms nie jest obsługiwana lub proponowana z funkcją włączonego przycinania. Aby uzyskać więcej szczegółów, przejdź do: https://aka.ms/dotnet-illink/windows-forms.</target>
@@ -819,6 +829,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1073: The FrameworkReference '{0}' was not recognized</source>
         <target state="translated">NETSDK1073: Nie rozpoznano elementu FrameworkReference „{0}”</target>
         <note>{StrBegin="NETSDK1073: "}</note>
+      </trans-unit>
+      <trans-unit id="UnknownFrameworkReference_MauiEssentials">
+        <source>NETSDK1186: This project depends on Maui Essentials through a project or NuGet package reference, but doesn't declare that dependency explicitly. To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</source>
+        <target state="translated">NETSDK1186: Ten projekt zależy od programu Maui Essentials za pośrednictwem projektu lub odwołania do pakietu NuGet, ale nie deklaruje jawnie tej zależności. Aby skompilować ten projekt, należy ustawić właściwość UseMauiEssentials na wartość True (i zainstalować obciążenie Maui w razie potrzeby).</target>
+        <note>{StrBegin="NETSDK1186: "}</note>
       </trans-unit>
       <trans-unit id="UnnecessaryWindowsDesktopSDK">
         <source>NETSDK1137: It is no longer necessary to use the Microsoft.NET.Sdk.WindowsDesktop SDK. Consider changing the Sdk attribute of the root Project element to 'Microsoft.NET.Sdk'.</source>
@@ -896,8 +911,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1105: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresWindows">
-        <source>NETSDK1100: Windows is required to build Windows desktop applications.</source>
-        <target state="translated">NETSDK1100: Do tworzenia aplikacji klasycznych systemu Windows wymagany jest system Windows.</target>
+        <source>NETSDK1100: To build a project targeting Windows on this operating system, set the EnableWindowsTargeting property to true.</source>
+        <target state="translated">NETSDK1100: Aby skompilować projekt przeznaczony dla systemu Windows w tym systemie operacyjnym, ustaw właściwość EnableWindowsTargeting na wartość True.</target>
         <note>{StrBegin="NETSDK1100: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopTargetPlatformMustBeWindows">

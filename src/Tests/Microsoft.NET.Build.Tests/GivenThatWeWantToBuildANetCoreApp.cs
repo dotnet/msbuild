@@ -575,7 +575,7 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "AppUsingPackageWithSatellites",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -622,7 +622,7 @@ public static class Program
                 IsExe = true
             };
 
-            string[] extraArgs = new[] { "/p:TargetFramework=NETCOREAPP1.1" };
+            string[] extraArgs = new[] { $"/p:TargetFramework={ToolsetInfo.CurrentTargetFramework.ToUpper()}" };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
@@ -638,14 +638,14 @@ public static class Program
             Directory.GetDirectories(outputFolderWithConfiguration)
                 .Select(Path.GetFileName)
                 .Should()
-                .BeEquivalentTo("netcoreapp1.1");
+                .BeEquivalentTo(ToolsetInfo.CurrentTargetFramework);
 
             string intermediateFolderWithConfiguration = Path.Combine(buildCommand.GetBaseIntermediateDirectory().FullName, "Debug");
 
             Directory.GetDirectories(intermediateFolderWithConfiguration)
                 .Select(Path.GetFileName)
                 .Should()
-                .BeEquivalentTo("netcoreapp1.1");
+                .BeEquivalentTo(ToolsetInfo.CurrentTargetFramework);
         }
 
         [Fact]

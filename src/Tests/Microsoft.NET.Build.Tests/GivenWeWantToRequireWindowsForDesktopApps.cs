@@ -97,6 +97,37 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining(Strings.WindowsDesktopFrameworkRequiresWindows);
         }
 
+        [PlatformSpecificFact(TestPlatforms.Linux | TestPlatforms.OSX | TestPlatforms.FreeBSD)]
+        public void AppTargetingWindows10CanBuildOnNonWindows()
+        {
+            var testProject = new TestProject()
+            {
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework + "-windows10.0.19041.0",
+                IsWinExe = true
+            };
+            testProject.AdditionalProperties["EnableWindowsTargeting"] = "true";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            new BuildCommand(testAsset)
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
+        [PlatformSpecificFact(TestPlatforms.Linux | TestPlatforms.OSX | TestPlatforms.FreeBSD)]
+        public void WindowsFormsAppCanBuildOnNonWindows()
+        {
+            var testInstance = _testAssetsManager.CopyTestAsset("WindowsFormsTestApp")
+                .WithSource();
+
+            new BuildCommand(Log, testInstance.Path)
+                .WithEnvironmentVariable("EnableWindowsTargeting", "true")
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
         [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_builds_on_windows_with_the_windows_desktop_sdk_5_0_with_ProjectSdk_set()
         {
@@ -191,7 +222,7 @@ namespace Microsoft.NET.Build.Tests
             Assert(buildCommand.GetOutputDirectory(tfm));
 
             var publishCommand = new PublishCommand(asset);
-            var runtimeIdentifier = "win-x64";
+            var runtimeIdentifier = $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64";
             publishCommand.Execute("-p:SelfContained=true", $"-p:RuntimeIdentifier={runtimeIdentifier}")
                 .Should()
                 .Pass();

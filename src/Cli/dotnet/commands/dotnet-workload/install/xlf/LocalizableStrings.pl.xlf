@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="pl" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AdManifestPackageDoesNotExist">
-        <source>Failed to update advertising manifest. Manifest package {0} doesn't exist.</source>
-        <target state="translated">Nie można zaktualizować manifestu treści reklamowych. Pakiet manifestu {0} nie istnieje.</target>
+        <source>Advertising manifest not updated. Manifest package for {0} doesn't exist.</source>
+        <target state="translated">Manifest treści reklamowych nie został zaktualizowany. Pakiet manifestu dla {0} nie istnieje.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdManifestUpdated">
@@ -124,7 +124,7 @@
       </trans-unit>
       <trans-unit id="InvalidVersionForWorkload">
         <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
-        <target state="new">Error parsing version '{1}' for workload manifest ID '{0}'</target>
+        <target state="translated">Wystąpił błąd podczas analizowania wersji „{1}” dla identyfikatora manifestu obciążenia „{0}”</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">

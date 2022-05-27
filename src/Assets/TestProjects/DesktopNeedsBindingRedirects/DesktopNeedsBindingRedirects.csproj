@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net452</TargetFramework>
-    <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
+    <RuntimeIdentifier>$(LatestWinRuntimeIdentifier)-x86</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
