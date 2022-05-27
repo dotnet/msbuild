@@ -344,7 +344,7 @@ namespace Microsoft.Build.Evaluation
                 // we do not need to auto reload.
                 bool autoReloadFromDisk = reuseProjectRootElementCache;
                 ProjectRootElementCache = new ProjectRootElementCache(autoReloadFromDisk, loadProjectsReadOnly);
-                if (reuseProjectRootElementCache && s_projectRootElementCache == null)
+                if (reuseProjectRootElementCache)
                 {
                     s_projectRootElementCache = ProjectRootElementCache;
                 }
