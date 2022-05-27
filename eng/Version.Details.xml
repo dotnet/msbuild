@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="5.0.0-beta.22159.5">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="5.0.0-beta.22276.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>ee744068a4fcccc5b8b56e0025f9c95aa19ff318</Sha>
+      <Sha>9c6a04ea1e79e9fcd4e60abd5d2c577075787f93</Sha>
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="5.9.1-rc.8">
       <Uri>https://github.com/nuget/nuget.client</Uri>
