@@ -117,12 +117,12 @@ namespace Microsoft.Build.UnitTests.Shared
                 p.BeginErrorReadLine();
                 p.StandardInput.Dispose();
 
+                p.WaitForExit();
+
                 if (sleepABit)
                 {
                     Thread.Sleep(1000);
                 }
-
-                p.WaitForExit();
 
                 pid = p.Id;
                 successfulExit = p.ExitCode == 0;
