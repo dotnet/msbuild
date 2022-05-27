@@ -235,9 +235,7 @@ namespace Microsoft.Build.UnitTests
                     foreach (var pair in pairs)
                     {
                         var expectedText = pair.expected.textGetter();
-                        expectedText = expectedText.Substring(expectedText.IndexOf("Project"));
                         var actualText = pair.actual.textGetter();
-                        actualText = actualText.Substring(actualText.IndexOf("Project"));
                         actualText.ShouldContainWithoutWhitespace(expectedText);
                     }
                 }

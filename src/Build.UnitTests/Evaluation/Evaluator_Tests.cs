@@ -4518,7 +4518,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void VerifyPropertyTrackingLoggingDefault()
         {
-            // Having nothing defined should default to nothing being logged.
+            // Having just environment variables defined should default to nothing being logged except one environment variable read.
             this.VerifyPropertyTrackingLoggingScenario(
                 null,
                 logger =>
