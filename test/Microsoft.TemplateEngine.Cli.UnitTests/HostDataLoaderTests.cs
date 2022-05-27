@@ -29,7 +29,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             HostSpecificDataLoader hostSpecificDataLoader = new HostSpecificDataLoader(engineEnvironmentSettings);
             Assert.True(engineEnvironmentSettings.TryGetMountPoint(Directory.GetCurrentDirectory(), out IMountPoint? mountPoint));
             Assert.NotNull(mountPoint);
-            IFile dataFile = mountPoint!.FileInfo("/Resources/dotnetcli.host.json");
+            IFile? dataFile = mountPoint!.FileInfo("/Resources/dotnetcli.host.json");
 
             ITemplateInfo template = A.Fake<ITemplateInfo>();
             A.CallTo(() => template.MountPointUri).Returns(Directory.GetCurrentDirectory());
@@ -71,8 +71,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             HostSpecificDataLoader hostSpecificDataLoader = new HostSpecificDataLoader(engineEnvironmentSettings);
             Assert.True(engineEnvironmentSettings.TryGetMountPoint(Directory.GetCurrentDirectory(), out IMountPoint? mountPoint));
             Assert.NotNull(mountPoint);
-            IFile dataFile = mountPoint!.FileInfo("/Resources/dotnetcli.host.json");
-            JObject json = ReadJObjectFromIFile(dataFile);
+            IFile? dataFile = mountPoint!.FileInfo("/Resources/dotnetcli.host.json");
+            Assert.NotNull(dataFile);
+            JObject json = ReadJObjectFromIFile(dataFile!);
 
             ITemplateInfo template = A.Fake<ITemplateInfo>(builder => builder.Implements<ITemplateInfoHostJsonCache>().Implements<ITemplateInfo>());
             A.CallTo(() => ((ITemplateInfoHostJsonCache)template).HostData).Returns(json);

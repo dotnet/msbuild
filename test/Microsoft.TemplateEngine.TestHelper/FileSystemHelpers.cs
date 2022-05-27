@@ -24,6 +24,10 @@ namespace Microsoft.TemplateEngine.TestHelper
             {
                 if (factory.TryMount(environmentSettings, null, path, out IMountPoint? mountPoint))
                 {
+                    if (mountPoint is null)
+                    {
+                        throw new InvalidOperationException($"{nameof(mountPoint)} cannot be null when {nameof(factory.TryMount)} is 'true'");
+                    }
                     return mountPoint;
                 }
             }
