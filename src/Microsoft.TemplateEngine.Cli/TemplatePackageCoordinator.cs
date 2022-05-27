@@ -141,7 +141,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 if (!versionCheckResult.IsLatestVersion)
                 {
-                    string displayString = $"{versionCheckResult.TemplatePackage.Identifier}::{versionCheckResult.TemplatePackage.Version}";         // the package::version currently installed
+                    string displayString = $"{versionCheckResult.TemplatePackage?.Identifier}::{versionCheckResult.TemplatePackage?.Version}";         // the package::version currently installed
                     Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateAvailable, displayString));
 
                     Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateSingleCommandHeader);
@@ -149,7 +149,7 @@ namespace Microsoft.TemplateEngine.Cli
                         Example
                             .For<NewCommand>(args.ParseResult)
                             .WithSubcommand<InstallCommand>()
-                            .WithArgument(InstallCommand.NameArgument, $"{versionCheckResult.TemplatePackage.Identifier}::{versionCheckResult.LatestVersion}"));
+                            .WithArgument(InstallCommand.NameArgument, $"{versionCheckResult.TemplatePackage?.Identifier}::{versionCheckResult.LatestVersion}"));
                     Reporter.Output.WriteLine();
                 }
             }
@@ -287,20 +287,24 @@ namespace Microsoft.TemplateEngine.Cli
 
                 if (applyUpdates)
                 {
-                    IEnumerable<CheckUpdateResult> updatesToApply = checkUpdateResults.Where(update => update.Success && !update.IsLatestVersion && !string.IsNullOrWhiteSpace(update.LatestVersion));
+                    IEnumerable<CheckUpdateResult> updatesToApply = checkUpdateResults.Where(update => update.Success && !update.IsLatestVersion);
                     if (!updatesToApply.Any())
                     {
                         continue;
+                    }
+                    if (updatesToApply.Any(update => update.TemplatePackage is null || update.LatestVersion is null))
+                    {
+                        throw new InvalidOperationException($"Unexpected result received from {nameof(provider.GetLatestVersionsAsync)} method: returned result where {nameof(CheckUpdateResult.TemplatePackage)} is null, or {nameof(CheckUpdateResult.LatestVersion)} is null.");
                     }
 
                     Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_PackagesToBeUpdated);
                     foreach (CheckUpdateResult update in updatesToApply)
                     {
-                        Reporter.Output.WriteLine($"{update.TemplatePackage.Identifier}::{update.LatestVersion}".Indent());
+                        Reporter.Output.WriteLine($"{update.TemplatePackage!.Identifier}::{update.LatestVersion}".Indent());
                     }
                     Reporter.Output.WriteLine();
 
-                    IReadOnlyList<UpdateResult> updateResults = await provider.UpdateAsync(updatesToApply.Select(update => new UpdateRequest(update.TemplatePackage, update.LatestVersion)), cancellationToken).ConfigureAwait(false);
+                    IReadOnlyList<UpdateResult> updateResults = await provider.UpdateAsync(updatesToApply.Select(update => new UpdateRequest(update.TemplatePackage!, update.LatestVersion!)), cancellationToken).ConfigureAwait(false);
                     foreach (var updateResult in updateResults)
                     {
                         if (!updateResult.Success)
@@ -604,8 +608,8 @@ namespace Microsoft.TemplateEngine.Cli
             if (versionCheckResults.Any(result => result.Success && !result.IsLatestVersion) && showUpdates)
             {
                 Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateAvailablePackages);
-                IEnumerable<(string Identifier, string CurrentVersion, string LatestVersion)> displayableResults = versionCheckResults
-                    .Where(result => result.Success && !result.IsLatestVersion)
+                IEnumerable<(string Identifier, string? CurrentVersion, string? LatestVersion)> displayableResults = versionCheckResults
+                    .Where(result => result.Success && !result.IsLatestVersion && !string.IsNullOrWhiteSpace(result.LatestVersion))
                     .Select(result => (result.TemplatePackage.Identifier, result.TemplatePackage.Version, result.LatestVersion));
 
                 var formatter =
@@ -614,8 +618,8 @@ namespace Microsoft.TemplateEngine.Cli
                            new TabularOutputSettings(_engineEnvironmentSettings.Environment),
                            displayableResults)
                        .DefineColumn(r => r.Identifier, out object? packageColumn, LocalizableStrings.ColumnNamePackage, showAlways: true)
-                       .DefineColumn(r => r.CurrentVersion, LocalizableStrings.ColumnNameCurrentVersion, showAlways: true)
-                       .DefineColumn(r => r.LatestVersion, LocalizableStrings.ColumnNameLatestVersion, showAlways: true)
+                       .DefineColumn(r => r.CurrentVersion ?? string.Empty, LocalizableStrings.ColumnNameCurrentVersion, showAlways: true)
+                       .DefineColumn(r => r.LatestVersion ?? string.Empty, LocalizableStrings.ColumnNameLatestVersion, showAlways: true)
                        .OrderBy(packageColumn, StringComparer.CurrentCultureIgnoreCase);
                 Reporter.Output.WriteLine(formatter.Layout());
                 Reporter.Output.WriteLine();
@@ -720,6 +724,10 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (result.Success)
             {
+                if (result.TemplatePackage is null)
+                {
+                    throw new ArgumentException($"{nameof(result.TemplatePackage)} cannot be null when {nameof(result.Success)} is 'true'", nameof(result));
+                }
                 IEnumerable<ITemplateInfo> templates = await _templatePackageManager.GetTemplatesAsync(result.TemplatePackage, cancellationToken).ConfigureAwait(false);
                 if (templates.Any())
                 {
@@ -825,7 +833,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private void HandleUpdateCheckErrors(InstallerOperationResult result, bool ignoreLocalPackageNotFound)
+        private void HandleUpdateCheckErrors(CheckUpdateResult result, bool ignoreLocalPackageNotFound)
         {
             switch (result.Error)
             {

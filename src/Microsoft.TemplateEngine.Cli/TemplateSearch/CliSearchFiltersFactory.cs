@@ -12,11 +12,11 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 {
     internal class CliSearchFiltersFactory
     {
-        private IReadOnlyDictionary<string, string> _existingTemplatePackageFilterData;
+        private IReadOnlyDictionary<string, string?> _existingTemplatePackageFilterData;
 
         internal CliSearchFiltersFactory(IReadOnlyList<IManagedTemplatePackage> installedPackages)
         {
-            Dictionary<string, string> filterData = new Dictionary<string, string>();
+            Dictionary<string, string?> filterData = new Dictionary<string, string?>();
             foreach (IManagedTemplatePackage descriptor in installedPackages)
             {
                 filterData[descriptor.Identifier] = descriptor.Version;
