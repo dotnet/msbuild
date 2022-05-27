@@ -145,6 +145,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static string s_assemblyDisplayVersion;
 
+        private static ProjectRootElementCacheBase s_projectRootElementCache = null;
+
         /// <summary>
         /// The projects loaded into this collection.
         /// </summary>
@@ -302,6 +304,26 @@ namespace Microsoft.Build.Evaluation
         /// <param name="onlyLogCriticalEvents">If set to true, only critical events will be logged.</param>
         /// <param name="loadProjectsReadOnly">If set to true, load all projects as read-only.</param>
         public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly)
+            : this(globalProperties, loggers, remoteLoggers, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly, reuseProjectRootElementCache: false)
+        {
+        }
+
+        /// <summary>
+        /// Instantiates a project collection with specified global properties and loggers and using the
+        /// specified toolset locations, node count, and setting of onlyLogCriticalEvents.
+        /// Global properties and loggers may be null.
+        /// Throws InvalidProjectFileException if any of the global properties are reserved.
+        /// May throw InvalidToolsetDefinitionException.
+        /// </summary>
+        /// <param name="globalProperties">The default global properties to use. May be null.</param>
+        /// <param name="loggers">The loggers to register. May be null and specified to any build instead.</param>
+        /// <param name="remoteLoggers">Any remote loggers to register. May be null and specified to any build instead.</param>
+        /// <param name="toolsetDefinitionLocations">The locations from which to load toolsets.</param>
+        /// <param name="maxNodeCount">The maximum number of nodes to use for building.</param>
+        /// <param name="onlyLogCriticalEvents">If set to true, only critical events will be logged.</param>
+        /// <param name="loadProjectsReadOnly">If set to true, load all projects as read-only.</param>
+        /// <param name="reuseProjectRootElementCache">If set to true, it will try to reuse <see cref="ProjectRootElementCacheBase"/> singleton.</param>
+        public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool reuseProjectRootElementCache)
         {
             _loadedProjects = new LoadedProjectCollection();
             ToolsetLocations = toolsetDefinitionLocations;
@@ -311,10 +333,23 @@ namespace Microsoft.Build.Evaluation
             {
                 ProjectRootElementCache = new SimpleProjectRootElementCache();
             }
+            else if (reuseProjectRootElementCache && s_projectRootElementCache != null)
+            {
+                ProjectRootElementCache = s_projectRootElementCache;
+            }
             else
             {
-                ProjectRootElementCache = new ProjectRootElementCache(autoReloadFromDisk: false, loadProjectsReadOnly);
+                // When we are reusing ProjectRootElementCache we need to reload XMLs if it has changed between MSBuild Server sessions/builds.
+                // If we are not reusing, cache will be released at end of build and as we do not support project files will changes during build
+                // we do not need to auto reload.
+                bool autoReloadFromDisk = reuseProjectRootElementCache;
+                ProjectRootElementCache = new ProjectRootElementCache(autoReloadFromDisk, loadProjectsReadOnly);
+                if (reuseProjectRootElementCache && s_projectRootElementCache == null)
+                {
+                    s_projectRootElementCache = ProjectRootElementCache;
+                }
             }
+
             OnlyLogCriticalEvents = onlyLogCriticalEvents;
 
             try
@@ -1603,6 +1638,12 @@ namespace Microsoft.Build.Evaluation
             if (disposing)
             {
                 ShutDownLoggingService();
+                if (ProjectRootElementCache != null)
+                {
+                    ProjectRootElementCache.ProjectRootElementAddedHandler -= ProjectRootElementCache_ProjectRootElementAddedHandler;
+                    ProjectRootElementCache.ProjectRootElementDirtied -= ProjectRootElementCache_ProjectRootElementDirtiedHandler;
+                    ProjectRootElementCache.ProjectDirtied -= ProjectRootElementCache_ProjectDirtiedHandler;
+                }
                 Tracing.Dump();
             }
         }
