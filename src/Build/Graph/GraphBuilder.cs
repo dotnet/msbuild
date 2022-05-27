@@ -504,7 +504,7 @@ namespace Microsoft.Build.Graph
             var globalProperties = configurationMetadata.GlobalProperties.ToDictionary();
             ProjectGraphNode graphNode;
             ProjectInstance projectInstance;
-            var DynamiclySetPlatform = IsDynamicPlatformNegotiationEnabaled && configurationMetadata.IsSetPlatformHardCoded;
+            var DynamiclySetPlatform = IsDynamicPlatformNegotiationEnabaled && !configurationMetadata.IsSetPlatformHardCoded;
 
             projectInstance = _projectInstanceFactory(
                                 configurationMetadata.ProjectFullPath,
