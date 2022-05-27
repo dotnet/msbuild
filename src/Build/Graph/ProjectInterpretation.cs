@@ -107,7 +107,7 @@ namespace Microsoft.Build.Graph
                     requesterPlatformLookupTable = requesterInstance.GetPropertyValue("PlatformLookupTable");
                 }
 
-                var referenceConfig = new ConfigurationMetadata(projectReferenceFullPath, referenceGlobalProperties, requesterPlatform, requesterPlatformLookupTable);
+                var referenceConfig = new ConfigurationMetadata(projectReferenceFullPath, referenceGlobalProperties, requesterPlatform, requesterPlatformLookupTable, projectReferenceItem.HasMetadata("SetPlatform"));
 
                 yield return new ReferenceInfo(referenceConfig, projectReferenceItem);
             }

@@ -58,7 +58,7 @@ namespace Microsoft.Build.BackEnd
             _toolsVersion = MSBuildConstants.CurrentToolsVersion;
             _globalProperties = globalProperties;
         }
-        public ConfigurationMetadata(string projectFullPath, PropertyDictionary<ProjectPropertyInstance> globalProperties, string previousPlatform, string previousPlatformLookupTable)
+        public ConfigurationMetadata(string projectFullPath, PropertyDictionary<ProjectPropertyInstance> globalProperties, string previousPlatform, string previousPlatformLookupTable, bool isSetPlatformHardCoded)
         {
             ErrorUtilities.VerifyThrowArgumentLength(projectFullPath, nameof(projectFullPath));
             ErrorUtilities.VerifyThrowArgumentNull(globalProperties, nameof(globalProperties));
@@ -68,6 +68,7 @@ namespace Microsoft.Build.BackEnd
             _globalProperties = globalProperties;
             PreviousPlatform = previousPlatform;
             PreviousPlatformLookupTable = previousPlatformLookupTable;
+            IsSetPlatformHardCoded = isSetPlatformHardCoded;
         }
 
         public ConfigurationMetadata(ITranslator translator)
@@ -95,6 +96,7 @@ namespace Microsoft.Build.BackEnd
         public string PreviousPlatform { get; } = "";
 
         public string PreviousPlatformLookupTable { get; } = "";
+        public bool IsSetPlatformHardCoded { get; } = false;
 
         private PropertyDictionary<ProjectPropertyInstance> _globalProperties;
 

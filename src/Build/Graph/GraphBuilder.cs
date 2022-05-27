@@ -49,6 +49,8 @@ namespace Microsoft.Build.Graph
         private readonly ProjectGraph.ProjectInstanceFactoryFunc _projectInstanceFactory;
         private IReadOnlyDictionary<string, IReadOnlyCollection<string>> _solutionDependencies;
 
+        public bool IsDynamicPlatformNegotiationEnabaled = false;
+
         public GraphBuilder(
             IEnumerable<ProjectGraphEntryPoint> entryPoints,
             ProjectCollection projectCollection,
@@ -496,24 +498,30 @@ namespace Microsoft.Build.Graph
             }
         }
 
-        private ParsedProject ParseProject(ConfigurationMetadata configurationMetadata, bool enableDynamicPlatformResolution)
+        private ParsedProject ParseProject(ConfigurationMetadata configurationMetadata)
         {
             // TODO: ProjectInstance just converts the dictionary back to a PropertyDictionary, so find a way to directly provide it.
             var globalProperties = configurationMetadata.GlobalProperties.ToDictionary();
             ProjectGraphNode graphNode;
             ProjectInstance projectInstance;
-           
+            var DynamiclySetPlatform = IsDynamicPlatformNegotiationEnabaled && configurationMetadata.IsSetPlatformHardCoded;
+
             projectInstance = _projectInstanceFactory(
                                 configurationMetadata.ProjectFullPath,
-                                enableDynamicPlatformResolution ? null : globalProperties, // Platform negotiation requires an evaluation with no global properties first
+                                DynamiclySetPlatform ? null : globalProperties, // Platform negotiation requires an evaluation with no global properties first
                                 _projectCollection);
+
+            if (ConversionUtilities.ValidBooleanTrue(projectInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)))
+            {
+                IsDynamicPlatformNegotiationEnabaled = true;
+            }
 
             if (projectInstance == null)
             {
                 throw new InvalidOperationException(ResourceUtilities.GetResourceString("NullReferenceFromProjectInstanceFactory"));
             }
 
-            if (enableDynamicPlatformResolution)
+            if (DynamiclySetPlatform)
             {
                 var selectedPlatform = PlatformNegotiation.GetNearestPlatform(projectInstance.GetPropertyValue(PlatformMetadataName), projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), configurationMetadata.PreviousPlatformLookupTable, projectInstance.FullPath, configurationMetadata.PreviousPlatform);
 
@@ -533,7 +541,7 @@ namespace Microsoft.Build.Graph
 
             graphNode = new ProjectGraphNode(projectInstance);
 
-            var referenceInfos = ParseReferences(graphNode, ConversionUtilities.ValidBooleanTrue(projectInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)));
+            var referenceInfos = ParseReferences(graphNode);
 
             return new ParsedProject(configurationMetadata, graphNode, referenceInfos);
         }
@@ -547,7 +555,7 @@ namespace Microsoft.Build.Graph
         {
             foreach (ConfigurationMetadata projectToEvaluate in _entryPointConfigurationMetadata)
             {
-                SubmitProjectForParsing(projectToEvaluate, false);
+                SubmitProjectForParsing(projectToEvaluate);
                                 /*todo: fix the following double check-then-act concurrency bug: one thread can pass the two checks, loose context,
                              meanwhile another thread passes the same checks with the same data and inserts its reference. The initial thread regains context
                              and duplicates the information, leading to wasted work
@@ -559,12 +567,12 @@ namespace Microsoft.Build.Graph
             return _graphWorkSet.CompletedWork;
         }
 
-        private void SubmitProjectForParsing(ConfigurationMetadata projectToEvaluate, bool enableDynamicPlatformResolution)
+        private void SubmitProjectForParsing(ConfigurationMetadata projectToEvaluate)
         {
-            _graphWorkSet.AddWork(projectToEvaluate, () => ParseProject(projectToEvaluate, enableDynamicPlatformResolution));
+            _graphWorkSet.AddWork(projectToEvaluate, () => ParseProject(projectToEvaluate));
         }
 
-        private List<ProjectInterpretation.ReferenceInfo> ParseReferences(ProjectGraphNode parsedProject, bool enableDynamicPlatformResolution)
+        private List<ProjectInterpretation.ReferenceInfo> ParseReferences(ProjectGraphNode parsedProject)
         {
             var referenceInfos = new List<ProjectInterpretation.ReferenceInfo>();
 
@@ -579,14 +587,7 @@ namespace Microsoft.Build.Graph
                         ));
                 }
 
-                if (!referenceInfo.ProjectReferenceItem.HasMetadata("SetPlatform"))
-                {
-                    SubmitProjectForParsing(referenceInfo.ReferenceConfiguration, enableDynamicPlatformResolution);
-                }
-                else
-                {
-                    SubmitProjectForParsing(referenceInfo.ReferenceConfiguration, false);
-                }
+                SubmitProjectForParsing(referenceInfo.ReferenceConfiguration);
 
                 referenceInfos.Add(referenceInfo);
             }
