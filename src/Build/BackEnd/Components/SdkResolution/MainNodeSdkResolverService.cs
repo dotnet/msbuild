@@ -67,7 +67,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             SdkResult response = null;
 
-            // Create an SdkReference from the request, bellow SdkReference constructor shall never throw.
+            // Create an SdkReference from the request; the SdkReference constructor below never throws.
             SdkReference sdkReference = new SdkReference(request.Name, request.Version, request.MinimumVersion);
             try
             {
