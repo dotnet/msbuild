@@ -98,16 +98,16 @@ namespace Microsoft.Build.Graph
 
                 var referenceGlobalProperties = GetGlobalPropertiesForItem(projectReferenceItem, requesterInstance.GlobalPropertiesDictionary, globalPropertiesModifiers);
 
-                var RequesterPlatform = "";
-                var RequesterPlatformLookupTable = "";
+                var requesterPlatform = "";
+                var requesterPlatformLookupTable = "";
 
                 if (ConversionUtilities.ValidBooleanTrue(requesterInstance.GetPropertyValue("EnableDynamicPlatformResolution")))
                 {
-                    RequesterPlatform = requesterInstance.GetPropertyValue("Platform");
-                    RequesterPlatformLookupTable = requesterInstance.GetPropertyValue("PlatformLookupTable");
+                    requesterPlatform = requesterInstance.GetPropertyValue("Platform");
+                    requesterPlatformLookupTable = requesterInstance.GetPropertyValue("PlatformLookupTable");
                 }
 
-                var referenceConfig = new ConfigurationMetadata(projectReferenceFullPath, referenceGlobalProperties, RequesterPlatform, RequesterPlatformLookupTable);
+                var referenceConfig = new ConfigurationMetadata(projectReferenceFullPath, referenceGlobalProperties, requesterPlatform, requesterPlatformLookupTable);
 
                 yield return new ReferenceInfo(referenceConfig, projectReferenceItem);
             }

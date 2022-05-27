@@ -503,10 +503,10 @@ namespace Microsoft.Build.Graph
             ProjectGraphNode graphNode;
             ProjectInstance projectInstance;
            
-                projectInstance = _projectInstanceFactory(
-                                    configurationMetadata.ProjectFullPath,
-                                    enableDynamicPlatformResolution ? null : globalProperties, // Platform negotiation requires an evaluation with no global properties first
-                                    _projectCollection);
+            projectInstance = _projectInstanceFactory(
+                                configurationMetadata.ProjectFullPath,
+                                enableDynamicPlatformResolution ? null : globalProperties, // Platform negotiation requires an evaluation with no global properties first
+                                _projectCollection);
 
             if (projectInstance == null)
             {
@@ -515,12 +515,12 @@ namespace Microsoft.Build.Graph
 
             if (enableDynamicPlatformResolution)
             {
-                var SelectedPlatform = PlatformNegotiation.GetNearestPlatform(projectInstance.GetPropertyValue(PlatformMetadataName), projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), configurationMetadata.PreviousPlatformLookupTable, projectInstance.FullPath, configurationMetadata.PreviousPlatform);
+                var selectedPlatform = PlatformNegotiation.GetNearestPlatform(projectInstance.GetPropertyValue(PlatformMetadataName), projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), configurationMetadata.PreviousPlatformLookupTable, projectInstance.FullPath, configurationMetadata.PreviousPlatform);
 
-                if (SelectedPlatform != null)
+                if (selectedPlatform != null)
                 {
-                    globalProperties[PlatformMetadataName] = SelectedPlatform;
-                    if (SelectedPlatform.Equals(String.Empty))
+                    globalProperties[PlatformMetadataName] = selectedPlatform;
+                    if (selectedPlatform.Equals(String.Empty))
                     {
                         globalProperties.Remove(PlatformMetadataName);
                     }

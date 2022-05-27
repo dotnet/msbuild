@@ -92,9 +92,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public string ToolsVersion => _toolsVersion;
 
-        public string PreviousPlatform { get; private set; } = "";
+        public string PreviousPlatform { get; } = "";
 
-        public string PreviousPlatformLookupTable { get; private set; } = "";
+        public string PreviousPlatformLookupTable { get; } = "";
 
         private PropertyDictionary<ProjectPropertyInstance> _globalProperties;
 
