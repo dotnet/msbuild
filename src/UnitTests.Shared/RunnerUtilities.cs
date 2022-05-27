@@ -1,9 +1,7 @@
 ﻿using Microsoft.Build.Shared;
 using System;
 using System.Diagnostics;
-using System.Threading;
 using Xunit.Abstractions;
-
 
 #nullable disable
 
@@ -26,7 +24,7 @@ namespace Microsoft.Build.UnitTests.Shared
         /// Invoke msbuild.exe with the given parameters and return the stdout, stderr, and process exit status.
         /// This method may invoke msbuild via other runtimes.
         /// </summary>
-        public static string ExecMSBuild(string pathToMsBuildExe, string msbuildParameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null, bool sleepABit = false)
+        public static string ExecMSBuild(string pathToMsBuildExe, string msbuildParameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
         {
 #if FEATURE_RUN_EXE_IN_TESTS
             var pathToExecutable = pathToMsBuildExe;
@@ -35,7 +33,7 @@ namespace Microsoft.Build.UnitTests.Shared
             msbuildParameters = FileUtilities.EnsureDoubleQuotes(pathToMsBuildExe) + " " + msbuildParameters;
 #endif
 
-            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper, sleepABit);
+            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper);
         }
 
         private static void AdjustForShellExecution(ref string pathToExecutable, ref string arguments)
@@ -71,7 +69,7 @@ namespace Microsoft.Build.UnitTests.Shared
         /// <summary>
         /// Run the process and get stdout and stderr
         /// </summary>
-        public static string RunProcessAndGetOutput(string process, string parameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null, bool sleepABit = false)
+        public static string RunProcessAndGetOutput(string process, string parameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
         {
             if (shellExecute)
             {
@@ -116,13 +114,7 @@ namespace Microsoft.Build.UnitTests.Shared
                 p.BeginOutputReadLine();
                 p.BeginErrorReadLine();
                 p.StandardInput.Dispose();
-
-                p.WaitForExit();
-
-                if (sleepABit)
-                {
-                    Thread.Sleep(1000);
-                }
+                p.WaitForExit(30000);
 
                 pid = p.Id;
                 successfulExit = p.ExitCode == 0;
