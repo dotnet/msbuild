@@ -524,12 +524,11 @@ namespace Microsoft.Build.Graph
                     {
                         globalProperties.Remove(PlatformMetadataName);
                     }
-                }
-
-                projectInstance = _projectInstanceFactory(
+                    projectInstance = _projectInstanceFactory(
                                     configurationMetadata.ProjectFullPath,
                                     globalProperties,
                                     _projectCollection);
+                }
             }
 
             graphNode = new ProjectGraphNode(projectInstance);
