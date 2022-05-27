@@ -21,7 +21,7 @@ namespace Microsoft.Build.Shared
             if (string.IsNullOrEmpty(projectReferencePlatformsMetadata) && string.IsNullOrEmpty(referencedProjectPlatform))
                 {
                     log?.LogWarningWithCodeFromResources("GetCompatiblePlatform.NoPlatformsListed", projectPath);
-                    return "";
+                    return string.Empty;
                 }
 
                 // Pull platformLookupTable metadata from the referenced project. This allows custom
