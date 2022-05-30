@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Client;
@@ -183,6 +184,11 @@ namespace Microsoft.Build.Execution
                     packetPump.PacketReceivedEvent
                 };
 
+                if (NativeMethodsShared.IsWindows)
+                {
+                    SupportVT100();
+                }
+
                 while (!_buildFinished)
                 {
                     int index = WaitHandle.WaitAny(waitHandles);
@@ -220,6 +226,16 @@ namespace Microsoft.Build.Execution
             MSBuildEventSource.Log.MSBuildServerBuildStop(commandLine, _numConsoleWritePackets, _sizeOfConsoleWritePackets, _exitResult.MSBuildClientExitType.ToString(), _exitResult.MSBuildAppExitTypeString);
             CommunicationsUtilities.Trace("Build finished.");
             return _exitResult;
+        }
+
+        private void SupportVT100()
+        {
+            IntPtr stdOut = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
+            if (NativeMethodsShared.GetConsoleMode(stdOut, out uint consoleMode))
+            {
+                consoleMode |= NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING | NativeMethodsShared.DISABLE_NEWLINE_AUTO_RETURN;
+                NativeMethodsShared.SetConsoleMode(stdOut, consoleMode);
+            }
         }
 
         private void SendCancelCommand(NamedPipeClientStream nodeStream) => throw new NotImplementedException();
