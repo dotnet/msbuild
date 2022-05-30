@@ -29,5 +29,7 @@ namespace Microsoft.DotNet.Tools.New
                 _workloadsRepositoryEnumerator.InstalledAndExtendedWorkloads.Select(w => new WorkloadInfo(w.Id, w.Description))
                 );
         }
+
+        public string ProvideConstraintRemedySuggestion(IReadOnlyList<string> supportedWorkloads) => LocalizableStrings.WorkloadInfoProvider_Message_AddWorkloads;
     }
 }

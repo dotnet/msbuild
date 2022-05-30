@@ -32,6 +32,16 @@ namespace Microsoft.DotNet.Tools.New
         /// <param name="token"></param>
         /// <returns>Set of installed workloads.</returns>
         public Task<IEnumerable<WorkloadInfo>> GetInstalledWorkloadsAsync(CancellationToken token);
+
+        /// <summary>
+        /// Provides localized suggestion on action to be taken so that constraints requiring specified workloads can be met.
+        /// This should be specific for current host (e.g. action to be taken for VS will differ from CLI host action.)
+        /// This method should not perform any heavy processing (external services or file system queries) - as it's being
+        ///   synchronously executed as part of constraint evaluation.
+        /// </summary>
+        /// <param name="supportedWorkloads">Workloads required by a constraint (in an 'OR' relationship).</param>
+        /// <returns>Localized string with remedy suggestion specific to current host.</returns>
+        public string ProvideConstraintRemedySuggestion(IReadOnlyList<string> supportedWorkloads);
     }
 
     /// <summary>
@@ -44,7 +54,25 @@ namespace Microsoft.DotNet.Tools.New
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns>SDK version.</returns>
-        public Task<string> GetVersionAsync(CancellationToken cancellationToken);
+        public Task<string> GetCurrentVersionAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        /// All installed SDK installations semver version strings.
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns>SDK version strings.</returns>
+        public Task<IEnumerable<string>> GetInstalledVersionsAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Provides localized suggestion on action to be taken so that constraints requiring specified workloads can be met.
+        /// This should be specific for current host (e.g. action to be taken for VS will differ from CLI host action.)
+        /// This method should not perform any heavy processing (external services or file system queries) - as it's being
+        ///   synchronously executed as part of constraint evaluation.
+        /// </summary>
+        /// <param name="supportedVersions">SDK versions required by a constraint (in an 'OR' relationship).</param>
+        /// <param name="viableInstalledVersions">SDK versions installed, that can meet the constraint - instructions should be provided to switch to any of those.</param>
+        /// <returns>Localized string with remedy suggestion specific to current host.</returns>
+        public string ProvideConstraintRemedySuggestion(IReadOnlyList<string> supportedVersions, IReadOnlyList<string> viableInstalledVersions);
     }
 
     /// <summary>
@@ -73,5 +101,20 @@ namespace Microsoft.DotNet.Tools.New
         /// Workload description string - expected to be localized.
         /// </summary>
         public string Description { get; }
+    }
+
+    public static class EnumerableExtensions
+    {
+        /// <summary>
+        /// Concatenates items of input sequence into csv string.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source">Sequence to be turned into csv string.</param>
+        /// <param name="useSpace">Indicates whether space should be inserted between comas and following items.</param>
+        /// <returns>Csv string.</returns>
+        public static string ToCsvString<T>(this IEnumerable<T> source, bool useSpace = true)
+        {
+            return source == null ? "<NULL>" : string.Join("," + (useSpace ? " " : string.Empty), source);
+        }
     }
 }
