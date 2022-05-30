@@ -207,6 +207,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 success.ShouldBeTrue();
                 pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Server ID is "), "The server should be otherwise occupied.");
                 pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
+                ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "Process ID and Server ID should coincide.");
             }
             finally
             {
@@ -223,6 +224,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 {
                     ProcessExtensions.KillTree(Process.GetProcessById(pidOfServerProcess), 1000);
                 }
+
 
                 if (t is not null)
                 {
@@ -256,10 +258,6 @@ namespace Microsoft.Build.Engine.UnitTests
 
         private int ParseNumber(string searchString, string toFind)
         {
-            _output.WriteLine("ParseNumber func.");
-            _output.WriteLine("---");
-            _output.WriteLine(searchString);
-            _output.WriteLine("---");
             Regex regex = new(@$"{toFind}(\d+)");
             var x = regex.Match(searchString);
             return int.Parse(x.Groups[1].Value);

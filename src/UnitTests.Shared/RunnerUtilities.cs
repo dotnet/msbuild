@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests.Shared
                 p.StandardInput.Dispose();
 
                 p.WaitForExit(30000);
-                p.WaitForExit(); // The timeout overload does not wait for output to be recieved.
+                p.WaitForExit(); // The timeout overload does not wait for output to be received.
 
                 pid = p.Id;
                 successfulExit = p.ExitCode == 0;
