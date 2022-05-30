@@ -22,7 +22,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 //If the author didn't opt in to the new behavior by specifying "projectFiles", use the old behavior - primary outputs
                 if (templateCreationResult.PrimaryOutputs.Count == 0)
                 {
-                    Reporter.Output.WriteLine(LocalizableStrings.NoPrimaryOutputsToRestore);
+                    Reporter.Output.WriteLine(LocalizableStrings.PostAction_Restore_Error_NoProjectsToRestore);
                     return true;
                 }
                 targetFiles = templateCreationResult.PrimaryOutputs.Select(output => Path.GetFullPath(output.Path, outputBasePath));
@@ -30,14 +30,14 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
             if (targetFiles is null || !targetFiles.Any())
             {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.CouldntDetermineFilesToRestore));
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.PostAction_Restore_Error_FailedToDetermineProjectToRestore));
                 return false;
             }
 
             foreach (string pathToRestore in targetFiles)
             {
                 //do not check for file existance. The restore will fail in case file doesn't exist.
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.RunningDotnetRestoreOn, pathToRestore));
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostAction_Restore_Running, pathToRestore));
 
                 // Prefer to restore the project in-proc vs. creating a new process.
                 bool succeeded = false;
@@ -45,21 +45,19 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 {
                     succeeded = Callbacks.RestoreProject(pathToRestore);
                 }
-                else
-                {
-                    Dotnet restoreCommand = Dotnet.Restore(pathToRestore).ForwardStdErr().ForwardStdOut();
-                    Dotnet.Result commandResult = restoreCommand.Execute();
-                    succeeded = commandResult.ExitCode == 0;
-                }
 
                 if (!succeeded)
                 {
-                    Reporter.Error.WriteLine(LocalizableStrings.RestoreFailed);
+                    Reporter.Error.WriteLine(LocalizableStrings.PostAction_Restore_Failed);
+                    if (Callbacks?.RestoreProject == null)
+                    {
+                        Reporter.Error.WriteLine(LocalizableStrings.Generic_NoCallbackError);
+                    }
                     allSucceeded = false;
                 }
                 else
                 {
-                    Reporter.Output.WriteLine(LocalizableStrings.RestoreSucceeded);
+                    Reporter.Output.WriteLine(LocalizableStrings.PostAction_Restore_Succeeded);
                 }
             }
             return allSucceeded;

@@ -70,146 +70,6 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to add project(s) {0} to solution file {1}, solution folder {2}..
-        /// </summary>
-        internal static string AddProjToSlnPostActionFailed {
-            get {
-                return ResourceManager.GetString("AddProjToSlnPostActionFailed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add..
-        /// </summary>
-        internal static string AddProjToSlnPostActionNoProjFiles {
-            get {
-                return ResourceManager.GetString("AddProjToSlnPostActionNoProjFiles", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Adding project reference(s) to solution file. Running {0}.
-        /// </summary>
-        internal static string AddProjToSlnPostActionRunning {
-            get {
-                return ResourceManager.GetString("AddProjToSlnPostActionRunning", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Successfully added
-        ///    project(s): {0}
-        ///    to solution file: {1}
-        ///    solution folder: {2}.
-        /// </summary>
-        internal static string AddProjToSlnPostActionSucceeded {
-            get {
-                return ResourceManager.GetString("AddProjToSlnPostActionSucceeded", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unable to determine which solution file to add the reference to..
-        /// </summary>
-        internal static string AddProjToSlnPostActionUnresolvedSlnFile {
-            get {
-                return ResourceManager.GetString("AddProjToSlnPostActionUnresolvedSlnFile", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Adding a package reference. Running dotnet add {0} package {1}.
-        /// </summary>
-        internal static string AddRefPostActionAddPackageRef {
-            get {
-                return ResourceManager.GetString("AddRefPostActionAddPackageRef", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Adding a package reference. Running dotnet add {0} package {1} --version {2}.
-        /// </summary>
-        internal static string AddRefPostActionAddPackageRefWithVersion {
-            get {
-                return ResourceManager.GetString("AddRefPostActionAddPackageRefWithVersion", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Adding a project reference. Running dotnet add {0} reference {1}.
-        /// </summary>
-        internal static string AddRefPostActionAddProjectRef {
-            get {
-                return ResourceManager.GetString("AddRefPostActionAddProjectRef", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Failed to add reference {0} to project file {1}.
-        /// </summary>
-        internal static string AddRefPostActionFailed {
-            get {
-                return ResourceManager.GetString("AddRefPostActionFailed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it..
-        /// </summary>
-        internal static string AddRefPostActionFrameworkNotSupported {
-            get {
-                return ResourceManager.GetString("AddRefPostActionFrameworkNotSupported", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Add reference action is not configured correctly in the template..
-        /// </summary>
-        internal static string AddRefPostActionMisconfigured {
-            get {
-                return ResourceManager.GetString("AddRefPostActionMisconfigured", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Project files found:.
-        /// </summary>
-        internal static string AddRefPostActionProjFileListHeader {
-            get {
-                return ResourceManager.GetString("AddRefPostActionProjFileListHeader", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Successfully added
-        ///    reference: {0}
-        ///    to project file: {1}.
-        /// </summary>
-        internal static string AddRefPostActionSucceeded {
-            get {
-                return ResourceManager.GetString("AddRefPostActionSucceeded", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unable to determine which project file to add the reference to..
-        /// </summary>
-        internal static string AddRefPostActionUnresolvedProjFile {
-            get {
-                return ResourceManager.GetString("AddRefPostActionUnresolvedProjFile", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Adding reference type {0} is not supported..
-        /// </summary>
-        internal static string AddRefPostActionUnsupportedRefType {
-            get {
-                return ResourceManager.GetString("AddRefPostActionUnsupportedRefType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Failed to assign long option alias for parameter &apos;{0}&apos;, tried: &apos;{1}&apos;; &apos;{2}&apos;..
         /// </summary>
         internal static string AliasAssignmentCoordinator_Error_LongAlias {
@@ -788,15 +648,6 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Couldn&apos;t determine files to restore..
-        /// </summary>
-        internal static string CouldntDetermineFilesToRestore {
-            get {
-                return ResourceManager.GetString("CouldntDetermineFilesToRestore", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Create.
         /// </summary>
         internal static string Create {
@@ -930,6 +781,15 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string Generic_ExamplesHeader {
             get {
                 return ResourceManager.GetString("Generic_ExamplesHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No callback is configured. Running post action is not possible..
+        /// </summary>
+        internal static string Generic_NoCallbackError {
+            get {
+                return ResourceManager.GetString("Generic_NoCallbackError", resourceCulture);
             }
         }
         
@@ -1083,15 +943,6 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string NoParameters {
             get {
                 return ResourceManager.GetString("NoParameters", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No Primary Outputs to restore..
-        /// </summary>
-        internal static string NoPrimaryOutputsToRestore {
-            get {
-                return ResourceManager.GetString("NoPrimaryOutputsToRestore", resourceCulture);
             }
         }
         
@@ -1258,11 +1109,194 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add..
+        /// </summary>
+        internal static string PostAction_AddProjToSln_Error_NoProjectsToAdd {
+            get {
+                return ResourceManager.GetString("PostAction_AddProjToSln_Error_NoProjectsToAdd", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to determine which solution file to add the reference to..
+        /// </summary>
+        internal static string PostAction_AddProjToSln_Error_NoSolutionFile {
+            get {
+                return ResourceManager.GetString("PostAction_AddProjToSln_Error_NoSolutionFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to add project(s) to a solution file..
+        /// </summary>
+        internal static string PostAction_AddProjToSln_Failed {
+            get {
+                return ResourceManager.GetString("PostAction_AddProjToSln_Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adding
+        ///    project(s): {0}
+        ///    to solution file: {1}
+        ///    solution folder: {2}.
+        /// </summary>
+        internal static string PostAction_AddProjToSln_Running {
+            get {
+                return ResourceManager.GetString("PostAction_AddProjToSln_Running", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successfully added project(s) to a solution file..
+        /// </summary>
+        internal static string PostAction_AddProjToSln_Succeeded {
+            get {
+                return ResourceManager.GetString("PostAction_AddProjToSln_Succeeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adding a package reference {0} to project file {1}:.
+        /// </summary>
+        internal static string PostAction_AddReference_AddPackageReference {
+            get {
+                return ResourceManager.GetString("PostAction_AddReference_AddPackageReference", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adding a package reference {0} (version: {1}) to project file {2}:.
+        /// </summary>
+        internal static string PostAction_AddReference_AddPackageReference_WithVersion {
+            get {
+                return ResourceManager.GetString("PostAction_AddReference_AddPackageReference_WithVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adding a project reference {0} to project file {1}:.
+        /// </summary>
+        internal static string PostAction_AddReference_AddProjectReference {
+            get {
+                return ResourceManager.GetString("PostAction_AddReference_AddProjectReference", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add reference action is not configured correctly in the template..
+        /// </summary>
+        internal static string PostAction_AddReference_Error_ActionMisconfigured {
+            get {
+                return ResourceManager.GetString("PostAction_AddReference_Error_ActionMisconfigured", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it..
+        /// </summary>
+        internal static string PostAction_AddReference_Error_FrameworkNotSupported {
+            get {
+                return ResourceManager.GetString("PostAction_AddReference_Error_FrameworkNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Project files found:.
+        /// </summary>
+        internal static string PostAction_AddReference_Error_ProjFileListHeader {
+            get {
+                return ResourceManager.GetString("PostAction_AddReference_Error_ProjFileListHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to determine which project file to add the reference to..
+        /// </summary>
+        internal static string PostAction_AddReference_Error_UnresolvedProjFile {
+            get {
+                return ResourceManager.GetString("PostAction_AddReference_Error_UnresolvedProjFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adding reference type {0} is not supported..
+        /// </summary>
+        internal static string PostAction_AddReference_Error_UnsupportedRefType {
+            get {
+                return ResourceManager.GetString("PostAction_AddReference_Error_UnsupportedRefType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to add a reference to the project file..
+        /// </summary>
+        internal static string PostAction_AddReference_Failed {
+            get {
+                return ResourceManager.GetString("PostAction_AddReference_Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successfully added a reference to the project file..
+        /// </summary>
+        internal static string PostAction_AddReference_Succeeded {
+            get {
+                return ResourceManager.GetString("PostAction_AddReference_Succeeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to run the command: argument &apos;executable&apos; is missing in post action configuration..
         /// </summary>
         internal static string PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable {
             get {
                 return ResourceManager.GetString("PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Couldn&apos;t determine files to restore..
+        /// </summary>
+        internal static string PostAction_Restore_Error_FailedToDetermineProjectToRestore {
+            get {
+                return ResourceManager.GetString("PostAction_Restore_Error_FailedToDetermineProjectToRestore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No projects are configured to restore. Check primary outputs configuration in template.json..
+        /// </summary>
+        internal static string PostAction_Restore_Error_NoProjectsToRestore {
+            get {
+                return ResourceManager.GetString("PostAction_Restore_Error_NoProjectsToRestore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Restore failed..
+        /// </summary>
+        internal static string PostAction_Restore_Failed {
+            get {
+                return ResourceManager.GetString("PostAction_Restore_Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Restoring {0}:.
+        /// </summary>
+        internal static string PostAction_Restore_Running {
+            get {
+                return ResourceManager.GetString("PostAction_Restore_Running", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Restore succeeded..
+        /// </summary>
+        internal static string PostAction_Restore_Succeeded {
+            get {
+                return ResourceManager.GetString("PostAction_Restore_Succeeded", resourceCulture);
             }
         }
         
@@ -1366,24 +1400,6 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Restore failed..
-        /// </summary>
-        internal static string RestoreFailed {
-            get {
-                return ResourceManager.GetString("RestoreFailed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Restore succeeded..
-        /// </summary>
-        internal static string RestoreSucceeded {
-            get {
-                return ResourceManager.GetString("RestoreSucceeded", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to For usage information, run: .
         /// </summary>
         internal static string RunHelpForInformationAboutAcceptedParameters {
@@ -1398,15 +1414,6 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string RunningCommand {
             get {
                 return ResourceManager.GetString("RunningCommand", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Running &apos;dotnet restore&apos; on {0}....
-        /// </summary>
-        internal static string RunningDotnetRestoreOn {
-            get {
-                return ResourceManager.GetString("RunningDotnetRestoreOn", resourceCulture);
             }
         }
         

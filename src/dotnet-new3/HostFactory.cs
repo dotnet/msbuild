@@ -111,24 +111,18 @@ namespace Dotnet_new3
             Environment.SetEnvironmentVariable(CompilerLanguageEnvironmentVar, language.Name);
         }
 
-        private static string GetCLIVersion()
+        private static string? GetCLIVersion()
         {
-            ProcessStartInfo processInfo = new ProcessStartInfo("dotnet", "--version")
+            Dotnet versionCommand = Dotnet.Version();
+            versionCommand.CaptureStdOut();
+
+            var result = versionCommand.Execute();
+            if (result.ExitCode != 0)
             {
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                RedirectStandardError = true,
-                RedirectStandardOutput = true
-            };
-            StringBuilder version = new StringBuilder();
-            Process? p = Process.Start(processInfo);
-            if (p != null)
-            {
-                p.BeginOutputReadLine();
-                p.OutputDataReceived += (sender, e) => version.AppendLine(e.Data);
-                p.WaitForExit();
+                return null;
             }
-            return version.ToString();
+
+            return result.StdOut?.ToString();
         }
     }
 }

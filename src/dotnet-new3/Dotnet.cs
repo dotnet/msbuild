@@ -4,7 +4,7 @@
 using System.Diagnostics;
 using System.Text;
 
-namespace Microsoft.TemplateEngine.Cli
+namespace Dotnet_new3
 {
     internal class Dotnet
     {
@@ -69,7 +69,7 @@ namespace Microsoft.TemplateEngine.Cli
             };
         }
 
-        internal static Dotnet AddProjectsToSolution(string solutionFile, IReadOnlyList<string> projects, string solutionFolder = "")
+        internal static Dotnet AddProjectsToSolution(string solutionFile, IReadOnlyList<string> projects, string? solutionFolder = null)
         {
             List<string> allArgs = new List<string>()
             {

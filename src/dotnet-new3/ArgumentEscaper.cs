@@ -3,7 +3,7 @@
 
 using System.Text;
 
-namespace Microsoft.TemplateEngine.Cli
+namespace Dotnet_new3
 {
     internal static class ArgumentEscaper
     {

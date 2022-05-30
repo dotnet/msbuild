@@ -220,8 +220,8 @@
   <data name="TemplatePackageCoordinator_Update_Info_UpdateAvailable" xml:space="preserve">
     <value>An update for template package '{0}' is available.</value>
   </data>
-  <data name="NoPrimaryOutputsToRestore" xml:space="preserve">
-    <value>No Primary Outputs to restore.</value>
+  <data name="PostAction_Restore_Error_NoProjectsToRestore" xml:space="preserve">
+    <value>No projects are configured to restore. Check primary outputs configuration in template.json.</value>
   </data>
   <data name="CommandFailed" xml:space="preserve">
     <value>Command failed.</value>
@@ -232,14 +232,15 @@
   <data name="CommandSucceeded" xml:space="preserve">
     <value>Command succeeded.</value>
   </data>
-  <data name="RestoreFailed" xml:space="preserve">
+  <data name="PostAction_Restore_Failed" xml:space="preserve">
     <value>Restore failed.</value>
   </data>
-  <data name="RestoreSucceeded" xml:space="preserve">
+  <data name="PostAction_Restore_Succeeded" xml:space="preserve">
     <value>Restore succeeded.</value>
   </data>
-  <data name="RunningDotnetRestoreOn" xml:space="preserve">
-    <value>Running 'dotnet restore' on {0}...</value>
+  <data name="PostAction_Restore_Running" xml:space="preserve">
+    <value>Restoring {0}:</value>
+    <comment>{0} - path to a project to restore</comment>
   </data>
   <data name="RunningCommand" xml:space="preserve">
     <value>Running command '{0}'...</value>
@@ -283,36 +284,31 @@
   <data name="InvalidParameterDefault" xml:space="preserve">
     <value>The default value '{1}' is not a valid value for {0}.</value>
   </data>
-  <data name="AddRefPostActionFailed" xml:space="preserve">
-    <value>Failed to add reference {0} to project file {1}</value>
+  <data name="PostAction_AddReference_Failed" xml:space="preserve">
+    <value>Failed to add a reference to the project file.</value>
   </data>
-  <data name="AddRefPostActionAddProjectRef" xml:space="preserve">
-    <value>Adding a project reference. Running dotnet add {0} reference {1}</value>
+  <data name="PostAction_AddReference_AddProjectReference" xml:space="preserve">
+    <value>Adding a project reference {0} to project file {1}:</value>
   </data>
-  <data name="AddRefPostActionSucceeded" xml:space="preserve">
-    <value>Successfully added
-    reference: {0}
-    to project file: {1}</value>
+  <data name="PostAction_AddReference_Succeeded" xml:space="preserve">
+    <value>Successfully added a reference to the project file.</value>
   </data>
   <data name="PostActionFailedInstructionHeader" xml:space="preserve">
     <value>Post action failed.</value>
   </data>
-  <data name="AddRefPostActionAddPackageRef" xml:space="preserve">
-    <value>Adding a package reference. Running dotnet add {0} package {1}</value>
+  <data name="PostAction_AddReference_AddPackageReference" xml:space="preserve">
+    <value>Adding a package reference {0} to project file {1}:</value>
   </data>
-  <data name="AddRefPostActionMisconfigured" xml:space="preserve">
+  <data name="PostAction_AddReference_Error_ActionMisconfigured" xml:space="preserve">
     <value>Add reference action is not configured correctly in the template.</value>
   </data>
-  <data name="AddRefPostActionUnsupportedRefType" xml:space="preserve">
+  <data name="PostAction_AddReference_Error_UnsupportedRefType" xml:space="preserve">
     <value>Adding reference type {0} is not supported.</value>
   </data>
-  <data name="AddRefPostActionAddPackageRefWithVersion" xml:space="preserve">
-    <value>Adding a package reference. Running dotnet add {0} package {1} --version {2}</value>
-  </data>
-  <data name="AddRefPostActionUnresolvedProjFile" xml:space="preserve">
+  <data name="PostAction_AddReference_Error_UnresolvedProjFile" xml:space="preserve">
     <value>Unable to determine which project file to add the reference to.</value>
   </data>
-  <data name="AddRefPostActionProjFileListHeader" xml:space="preserve">
+  <data name="PostAction_AddReference_Error_ProjFileListHeader" xml:space="preserve">
     <value>Project files found:</value>
   </data>
   <data name="AliasName" xml:space="preserve">
@@ -366,25 +362,25 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="AliasRemoveNonExistentFailed" xml:space="preserve">
     <value>Unable to remove alias '{0}'. It did not exist.</value>
   </data>
-  <data name="AddRefPostActionFrameworkNotSupported" xml:space="preserve">
+  <data name="PostAction_AddReference_Error_FrameworkNotSupported" xml:space="preserve">
     <value>Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</value>
   </data>
-  <data name="AddProjToSlnPostActionFailed" xml:space="preserve">
-    <value>Failed to add project(s) {0} to solution file {1}, solution folder {2}.</value>
+  <data name="PostAction_AddProjToSln_Failed" xml:space="preserve">
+    <value>Failed to add project(s) to a solution file.</value>
   </data>
-  <data name="AddProjToSlnPostActionNoProjFiles" xml:space="preserve">
+  <data name="PostAction_AddProjToSln_Error_NoProjectsToAdd" xml:space="preserve">
     <value>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</value>
   </data>
-  <data name="AddProjToSlnPostActionRunning" xml:space="preserve">
-    <value>Adding project reference(s) to solution file. Running {0}</value>
-  </data>
-  <data name="AddProjToSlnPostActionSucceeded" xml:space="preserve">
-    <value>Successfully added
+  <data name="PostAction_AddProjToSln_Running" xml:space="preserve">
+    <value>Adding
     project(s): {0}
     to solution file: {1}
     solution folder: {2}</value>
   </data>
-  <data name="AddProjToSlnPostActionUnresolvedSlnFile" xml:space="preserve">
+  <data name="PostAction_AddProjToSln_Succeeded" xml:space="preserve">
+    <value>Successfully added project(s) to a solution file.</value>
+  </data>
+  <data name="PostAction_AddProjToSln_Error_NoSolutionFile" xml:space="preserve">
     <value>Unable to determine which solution file to add the reference to.</value>
   </data>
   <data name="UnableToSetPermissions" xml:space="preserve">
@@ -423,7 +419,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="InvalidNameParameter" xml:space="preserve">
     <value>Name cannot contain any of the following characters {0} or character codes {1}</value>
   </data>
-  <data name="CouldntDetermineFilesToRestore" xml:space="preserve">
+  <data name="PostAction_Restore_Error_FailedToDetermineProjectToRestore" xml:space="preserve">
     <value>Couldn't determine files to restore.</value>
   </data>
   <data name="TemplatePackageCoordinator_Uninstall_Info_DetailsHeader" xml:space="preserve">
@@ -831,5 +827,11 @@ The header is followed by the list of parameters and their errors (might be seve
   <data name="TemplateCommand_DisplayConstraintResults_Warning" xml:space="preserve">
     <value>Warning: the following constraints for the template '{0}' are not met:</value>
     <comment>{0} - template name (user friendly)</comment>
+  </data>
+  <data name="Generic_NoCallbackError" xml:space="preserve">
+    <value>No callback is configured. Running post action is not possible.</value>
+  </data>
+  <data name="PostAction_AddReference_AddPackageReference_WithVersion" xml:space="preserve">
+    <value>Adding a package reference {0} (version: {1}) to project file {2}:</value>
   </data>
 </root>

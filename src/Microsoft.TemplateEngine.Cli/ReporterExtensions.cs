@@ -26,22 +26,6 @@ namespace Microsoft.TemplateEngine.Cli
         /// <summary>
         /// Writes formatted command output from <paramref name="process"/>.
         /// </summary>
-        internal static void WriteCommandOutput(this Reporter reporter, Dotnet.Result process)
-        {
-            reporter.WriteLine(LocalizableStrings.CommandOutput);
-            if (!string.IsNullOrWhiteSpace(process.StdOut))
-            {
-                reporter.WriteStdOut(process.StdOut);
-            }
-            if (!string.IsNullOrWhiteSpace(process.StdErr))
-            {
-                reporter.WriteStdErr(process.StdErr);
-            }
-        }
-
-        /// <summary>
-        /// Writes formatted command output from <paramref name="process"/>.
-        /// </summary>
         internal static void WriteCommandOutput(this Reporter reporter, Process process)
         {
             if (process.StartInfo.RedirectStandardOutput || process.StartInfo.RedirectStandardError)

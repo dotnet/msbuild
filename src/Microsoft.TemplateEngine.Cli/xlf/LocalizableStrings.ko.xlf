@@ -7,91 +7,6 @@
         <target state="translated">조치가 자동으로 수행되었습니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="AddProjToSlnPostActionFailed">
-        <source>Failed to add project(s) {0} to solution file {1}, solution folder {2}.</source>
-        <target state="translated">솔루션 파일 {1}, 솔루션 폴더 {2}에{0} 프로젝트를 추가하는 데 실패했습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddProjToSlnPostActionNoProjFiles">
-        <source>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</source>
-        <target state="translated">솔루션 작업에 프로젝트 참조 추가가 템플릿에서 올바르게 구성되지 않았습니다. 추가할 프로젝트 파일을 확인할 수 없습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddProjToSlnPostActionRunning">
-        <source>Adding project reference(s) to solution file. Running {0}</source>
-        <target state="translated">솔루션 파일에 프로젝트 참조를 추가합니다. {0} 실행</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddProjToSlnPostActionSucceeded">
-        <source>Successfully added
-    project(s): {0}
-    to solution file: {1}
-    solution folder: {2}</source>
-        <target state="translated">
- 프로젝트를 성공적으로 추가 :{0}
- 솔루션 파일 :{1}
- 솔루션 폴더 :{2}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddProjToSlnPostActionUnresolvedSlnFile">
-        <source>Unable to determine which solution file to add the reference to.</source>
-        <target state="translated">참조를 추가할 솔루션 파일을 확인할 수 없습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddRefPostActionAddPackageRef">
-        <source>Adding a package reference. Running dotnet add {0} package {1}</source>
-        <target state="translated">패키지 참조 추가. dotnet 추가 {0} 패키지{1} 실행</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddRefPostActionAddPackageRefWithVersion">
-        <source>Adding a package reference. Running dotnet add {0} package {1} --version {2}</source>
-        <target state="translated">패키지 참조 추가. dotnet 추가 {0} 패키지 {1} --version{2} 실행</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddRefPostActionAddProjectRef">
-        <source>Adding a project reference. Running dotnet add {0} reference {1}</source>
-        <target state="translated">프로젝트 참조를 추가합니다. 도트넷 추가 {0} 참조 {1} 실행</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddRefPostActionFailed">
-        <source>Failed to add reference {0} to project file {1}</source>
-        <target state="translated">{1} 프로젝트 파일에{0} 참조를 추가하지 못했습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddRefPostActionFrameworkNotSupported">
-        <source>Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</source>
-        <target state="translated">프레임워크 참조 {0}을(를) 프로젝트에 자동으로 추가할 수 없습니다. 프로젝트 파일을 수동으로 편집하여 추가하세요.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddRefPostActionMisconfigured">
-        <source>Add reference action is not configured correctly in the template.</source>
-        <target state="translated">템플릿에서 참조 추가 작업이 올바르게 구성되지 않았습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddRefPostActionProjFileListHeader">
-        <source>Project files found:</source>
-        <target state="translated">찾은 프로젝트 파일 :</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddRefPostActionSucceeded">
-        <source>Successfully added
-    reference: {0}
-    to project file: {1}</source>
-        <target state="translated">프로젝트 파일에 
- 참조:{0}
- 추가 완료:{1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddRefPostActionUnresolvedProjFile">
-        <source>Unable to determine which project file to add the reference to.</source>
-        <target state="translated">참조를 추가할 프로젝트 파일을 확인할 수 없습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddRefPostActionUnsupportedRefType">
-        <source>Adding reference type {0} is not supported.</source>
-        <target state="translated">참조 형식 {0} 추가는 지원되지 않습니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="AliasAssignmentCoordinator_Error_LongAlias">
         <source>Failed to assign long option alias for parameter '{0}', tried: '{1}'; '{2}'.</source>
         <target state="translated">'{0}' 매개 변수에 긴 옵션 별칭을 할당하지 못했습니다. 시도됨: '{1}'; '{2}'.</target>
@@ -418,11 +333,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">구성된 값:{0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="CouldntDetermineFilesToRestore">
-        <source>Couldn't determine files to restore.</source>
-        <target state="translated">복원할 파일을 확인할 수 없습니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Create">
         <source>Create</source>
         <target state="translated">만들기</target>
@@ -513,6 +423,11 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">예:</target>
         <note />
       </trans-unit>
+      <trans-unit id="Generic_NoCallbackError">
+        <source>No callback is configured. Running post action is not possible.</source>
+        <target state="new">No callback is configured. Running post action is not possible.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="HostSpecificDataLoader_Warning_FailedToRead">
         <source>Failed to load dotnet CLI host data for template {0} from cache.</source>
         <target state="translated">캐시에서 템플릿 {0}에 대한 dotnet CLI 호스트 데이터를 로드하지 못했습니다.</target>
@@ -586,11 +501,6 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="NoParameters">
         <source>    (No Parameters)</source>
         <target state="translated">    (매개 변수 없음)</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NoPrimaryOutputsToRestore">
-        <source>No Primary Outputs to restore.</source>
-        <target state="translated">복원할 기본 출력이 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoTemplatesFound">
@@ -746,9 +656,115 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">이 작업을 실행하시겠어요 [{0} (예) |{1} (아니요)]?</target>
         <note />
       </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Error_NoProjectsToAdd">
+        <source>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</source>
+        <target state="new">Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Error_NoSolutionFile">
+        <source>Unable to determine which solution file to add the reference to.</source>
+        <target state="new">Unable to determine which solution file to add the reference to.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Failed">
+        <source>Failed to add project(s) to a solution file.</source>
+        <target state="new">Failed to add project(s) to a solution file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Running">
+        <source>Adding
+    project(s): {0}
+    to solution file: {1}
+    solution folder: {2}</source>
+        <target state="new">Adding
+    project(s): {0}
+    to solution file: {1}
+    solution folder: {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Succeeded">
+        <source>Successfully added project(s) to a solution file.</source>
+        <target state="new">Successfully added project(s) to a solution file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_AddPackageReference">
+        <source>Adding a package reference {0} to project file {1}:</source>
+        <target state="new">Adding a package reference {0} to project file {1}:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_AddPackageReference_WithVersion">
+        <source>Adding a package reference {0} (version: {1}) to project file {2}:</source>
+        <target state="new">Adding a package reference {0} (version: {1}) to project file {2}:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_AddProjectReference">
+        <source>Adding a project reference {0} to project file {1}:</source>
+        <target state="new">Adding a project reference {0} to project file {1}:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_ActionMisconfigured">
+        <source>Add reference action is not configured correctly in the template.</source>
+        <target state="new">Add reference action is not configured correctly in the template.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_FrameworkNotSupported">
+        <source>Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</source>
+        <target state="new">Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_ProjFileListHeader">
+        <source>Project files found:</source>
+        <target state="new">Project files found:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_UnresolvedProjFile">
+        <source>Unable to determine which project file to add the reference to.</source>
+        <target state="new">Unable to determine which project file to add the reference to.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_UnsupportedRefType">
+        <source>Adding reference type {0} is not supported.</source>
+        <target state="new">Adding reference type {0} is not supported.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Failed">
+        <source>Failed to add a reference to the project file.</source>
+        <target state="new">Failed to add a reference to the project file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Succeeded">
+        <source>Successfully added a reference to the project file.</source>
+        <target state="new">Successfully added a reference to the project file.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
         <source>Failed to run the command: argument 'executable' is missing in post action configuration.</source>
         <target state="translated">명령을 실행하지 못했습니다. 게시 작업 구성에 'executable' 인수가 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Error_FailedToDetermineProjectToRestore">
+        <source>Couldn't determine files to restore.</source>
+        <target state="new">Couldn't determine files to restore.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Error_NoProjectsToRestore">
+        <source>No projects are configured to restore. Check primary outputs configuration in template.json.</source>
+        <target state="new">No projects are configured to restore. Check primary outputs configuration in template.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Failed">
+        <source>Restore failed.</source>
+        <target state="new">Restore failed.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Running">
+        <source>Restoring {0}:</source>
+        <target state="new">Restoring {0}:</target>
+        <note>{0} - path to a project to restore</note>
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Succeeded">
+        <source>Restore succeeded.</source>
+        <target state="new">Restore succeeded.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessingPostActions">
@@ -761,16 +777,6 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">명령을 다시 실행하고 --force를 전달하여 수락하고 만듭니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="RestoreFailed">
-        <source>Restore failed.</source>
-        <target state="translated">복원하지 못했습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RestoreSucceeded">
-        <source>Restore succeeded.</source>
-        <target state="translated">복원에 성공했습니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="RunHelpForInformationAboutAcceptedParameters">
         <source>For usage information, run: </source>
         <target state="translated">사용법 정보를 보려면 다음을 실행하세요. </target>
@@ -779,11 +785,6 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="RunningCommand">
         <source>Running command '{0}'...</source>
         <target state="translated">'{0}' 명령 실행 중 ...</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RunningDotnetRestoreOn">
-        <source>Running 'dotnet restore' on {0}...</source>
-        <target state="translated">{0}에서 'dotnet restore' 실행 중 ...</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">

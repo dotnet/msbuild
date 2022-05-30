@@ -7,91 +7,6 @@
         <target state="translated">L'azione verrebbe eseguita automaticamente:</target>
         <note />
       </trans-unit>
-      <trans-unit id="AddProjToSlnPostActionFailed">
-        <source>Failed to add project(s) {0} to solution file {1}, solution folder {2}.</source>
-        <target state="translated">Impossibile aggiungere i progetti {0} al file di soluzione {1}, cartella di soluzione {2}.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddProjToSlnPostActionNoProjFiles">
-        <source>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</source>
-        <target state="translated">L'aggiunta del riferimento al progetto all'azione della soluzione non è configurata correttamente nel modello. Non è possibile determinare i file di progetto da aggiungere.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddProjToSlnPostActionRunning">
-        <source>Adding project reference(s) to solution file. Running {0}</source>
-        <target state="translated">Aggiunta di riferimenti al progetto al file di soluzione. Esecuzione {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddProjToSlnPostActionSucceeded">
-        <source>Successfully added
-    project(s): {0}
-    to solution file: {1}
-    solution folder: {2}</source>
-        <target state="translated">
-    progetti aggiunti {0}
-    al file di soluzione: {1}
-    cartella di soluzione: {2}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddProjToSlnPostActionUnresolvedSlnFile">
-        <source>Unable to determine which solution file to add the reference to.</source>
-        <target state="translated">Non è possibile determinare il file di soluzione a cui aggiungere il riferimento.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddRefPostActionAddPackageRef">
-        <source>Adding a package reference. Running dotnet add {0} package {1}</source>
-        <target state="translated">Aggiunta di un riferimento al pacchetto. Esecuzione di dotnet add {0} package {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddRefPostActionAddPackageRefWithVersion">
-        <source>Adding a package reference. Running dotnet add {0} package {1} --version {2}</source>
-        <target state="translated">Aggiunta di un riferimento al pacchetto. Esecuzione di dotnet add {0} package {1}--version {2}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddRefPostActionAddProjectRef">
-        <source>Adding a project reference. Running dotnet add {0} reference {1}</source>
-        <target state="translated">Aggiunta di un riferimento a un progetto. Riferimento {0} a dotnet add{1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddRefPostActionFailed">
-        <source>Failed to add reference {0} to project file {1}</source>
-        <target state="translated">Non è possibile aggiungere il riferimento{0} al file di progetto {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddRefPostActionFrameworkNotSupported">
-        <source>Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</source>
-        <target state="translated">Non è possibile aggiungere automaticamente il riferimento framework {0} al progetto. Modificare manualmente il file di progetto per aggiungerlo.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddRefPostActionMisconfigured">
-        <source>Add reference action is not configured correctly in the template.</source>
-        <target state="translated">L'azione di aggiunta del riferimento non è configurata correttamente nel modello.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddRefPostActionProjFileListHeader">
-        <source>Project files found:</source>
-        <target state="translated">File di progetto trovati:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddRefPostActionSucceeded">
-        <source>Successfully added
-    reference: {0}
-    to project file: {1}</source>
-        <target state="translated">Riferimento
-aggiunto    : {0}
-    al file di progetto: {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddRefPostActionUnresolvedProjFile">
-        <source>Unable to determine which project file to add the reference to.</source>
-        <target state="translated">Non è possibile determinare il file di progetto a cui aggiungere il riferimento.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddRefPostActionUnsupportedRefType">
-        <source>Adding reference type {0} is not supported.</source>
-        <target state="translated">L'aggiunta del tipo riferimento {0} non è supportata.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="AliasAssignmentCoordinator_Error_LongAlias">
         <source>Failed to assign long option alias for parameter '{0}', tried: '{1}'; '{2}'.</source>
         <target state="translated">Impossibile assegnare l'alias di opzione long per il parametro '{0}'. Tentativo: '{1}'; '{2}'.</target>
@@ -418,11 +333,6 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
         <target state="translated">Valore configurato: {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="CouldntDetermineFilesToRestore">
-        <source>Couldn't determine files to restore.</source>
-        <target state="translated">Non è stato possibile determinare i file da ripristinare.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Create">
         <source>Create</source>
         <target state="translated">Crea</target>
@@ -513,6 +423,11 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">Esempi:</target>
         <note />
       </trans-unit>
+      <trans-unit id="Generic_NoCallbackError">
+        <source>No callback is configured. Running post action is not possible.</source>
+        <target state="new">No callback is configured. Running post action is not possible.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="HostSpecificDataLoader_Warning_FailedToRead">
         <source>Failed to load dotnet CLI host data for template {0} from cache.</source>
         <target state="translated">Non è stato possibile caricare i dati dell'host dell'interfaccia della riga di comando di .NET per il modello {0} dalla cache.</target>
@@ -586,11 +501,6 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="NoParameters">
         <source>    (No Parameters)</source>
         <target state="translated">    (Nessun parametro)</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NoPrimaryOutputsToRestore">
-        <source>No Primary Outputs to restore.</source>
-        <target state="translated">Nessun output primario da ripristinare.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoTemplatesFound">
@@ -746,9 +656,115 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">Eseguire questa azione [{0} (sì) |{1} (no)]?</target>
         <note />
       </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Error_NoProjectsToAdd">
+        <source>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</source>
+        <target state="new">Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Error_NoSolutionFile">
+        <source>Unable to determine which solution file to add the reference to.</source>
+        <target state="new">Unable to determine which solution file to add the reference to.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Failed">
+        <source>Failed to add project(s) to a solution file.</source>
+        <target state="new">Failed to add project(s) to a solution file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Running">
+        <source>Adding
+    project(s): {0}
+    to solution file: {1}
+    solution folder: {2}</source>
+        <target state="new">Adding
+    project(s): {0}
+    to solution file: {1}
+    solution folder: {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Succeeded">
+        <source>Successfully added project(s) to a solution file.</source>
+        <target state="new">Successfully added project(s) to a solution file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_AddPackageReference">
+        <source>Adding a package reference {0} to project file {1}:</source>
+        <target state="new">Adding a package reference {0} to project file {1}:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_AddPackageReference_WithVersion">
+        <source>Adding a package reference {0} (version: {1}) to project file {2}:</source>
+        <target state="new">Adding a package reference {0} (version: {1}) to project file {2}:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_AddProjectReference">
+        <source>Adding a project reference {0} to project file {1}:</source>
+        <target state="new">Adding a project reference {0} to project file {1}:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_ActionMisconfigured">
+        <source>Add reference action is not configured correctly in the template.</source>
+        <target state="new">Add reference action is not configured correctly in the template.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_FrameworkNotSupported">
+        <source>Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</source>
+        <target state="new">Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_ProjFileListHeader">
+        <source>Project files found:</source>
+        <target state="new">Project files found:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_UnresolvedProjFile">
+        <source>Unable to determine which project file to add the reference to.</source>
+        <target state="new">Unable to determine which project file to add the reference to.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_UnsupportedRefType">
+        <source>Adding reference type {0} is not supported.</source>
+        <target state="new">Adding reference type {0} is not supported.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Failed">
+        <source>Failed to add a reference to the project file.</source>
+        <target state="new">Failed to add a reference to the project file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Succeeded">
+        <source>Successfully added a reference to the project file.</source>
+        <target state="new">Successfully added a reference to the project file.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
         <source>Failed to run the command: argument 'executable' is missing in post action configuration.</source>
         <target state="translated">Non è stato possibile eseguire il comando: argomento \"eseguibile\" mancante nella configurazione dell'azione post.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Error_FailedToDetermineProjectToRestore">
+        <source>Couldn't determine files to restore.</source>
+        <target state="new">Couldn't determine files to restore.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Error_NoProjectsToRestore">
+        <source>No projects are configured to restore. Check primary outputs configuration in template.json.</source>
+        <target state="new">No projects are configured to restore. Check primary outputs configuration in template.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Failed">
+        <source>Restore failed.</source>
+        <target state="new">Restore failed.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Running">
+        <source>Restoring {0}:</source>
+        <target state="new">Restoring {0}:</target>
+        <note>{0} - path to a project to restore</note>
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Succeeded">
+        <source>Restore succeeded.</source>
+        <target state="new">Restore succeeded.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessingPostActions">
@@ -761,16 +777,6 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">Eseguire di nuovo il comando e passare--Force per accettare e creare.</target>
         <note />
       </trans-unit>
-      <trans-unit id="RestoreFailed">
-        <source>Restore failed.</source>
-        <target state="translated">Il ripristino non è riuscito.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RestoreSucceeded">
-        <source>Restore succeeded.</source>
-        <target state="translated">Il ripristino è riuscito.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="RunHelpForInformationAboutAcceptedParameters">
         <source>For usage information, run: </source>
         <target state="translated">Per informazioni sull'utilizzo, eseguire: </target>
@@ -779,11 +785,6 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="RunningCommand">
         <source>Running command '{0}'...</source>
         <target state="translated">Esecuzione del comando: ‘{0}’...</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RunningDotnetRestoreOn">
-        <source>Running 'dotnet restore' on {0}...</source>
-        <target state="translated">Esecuzione di 'dotnet restore ' in {0}...</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">

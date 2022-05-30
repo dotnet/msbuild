@@ -67,7 +67,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             IReadOnlyList<string> nearestSlnFilesFound = FindSolutionFilesAtOrAbovePath(environment.Host.FileSystem, outputBasePath);
             if (nearestSlnFilesFound.Count != 1)
             {
-                Reporter.Error.WriteLine(LocalizableStrings.AddProjToSlnPostActionUnresolvedSlnFile);
+                Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddProjToSln_Error_NoSolutionFile);
                 return false;
             }
 
@@ -77,33 +77,37 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 //If the author didn't opt in to the new behavior by specifying "projectFiles", use the old behavior
                 if (!TryGetProjectFilesToAdd( action, templateCreationResult, outputBasePath, out projectFiles))
                 {
-                    Reporter.Error.WriteLine(LocalizableStrings.AddProjToSlnPostActionNoProjFiles);
+                    Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddProjToSln_Error_NoProjectsToAdd);
                     return false;
                 }
             }
             if (projectFiles.Count == 0)
             {
-                Reporter.Error.WriteLine(LocalizableStrings.AddProjToSlnPostActionNoProjFiles);
+                Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddProjToSln_Error_NoProjectsToAdd);
                 return false;
             }
 
             string solutionFolder = GetSolutionFolder(action);
-            Dotnet addProjToSlnCommand = Dotnet.AddProjectsToSolution(nearestSlnFilesFound[0], projectFiles, solutionFolder);
-            addProjToSlnCommand.CaptureStdOut();
-            addProjToSlnCommand.CaptureStdErr();
-            Reporter.Output.WriteLine(string.Format(LocalizableStrings.AddProjToSlnPostActionRunning, addProjToSlnCommand.Command));
-            Dotnet.Result commandResult = addProjToSlnCommand.Execute();
 
-            if (commandResult.ExitCode != 0)
+            bool succeeded = false;
+            if (Callbacks?.AddProjectsToSolution != null)
             {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.AddProjToSlnPostActionFailed, string.Join(" ", projectFiles), nearestSlnFilesFound[0], solutionFolder));
-                Reporter.Error.WriteCommandOutput(commandResult);
-                Reporter.Error.WriteLine(string.Empty);
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostAction_AddProjToSln_Running, string.Join(" ", projectFiles), nearestSlnFilesFound[0], solutionFolder));
+                succeeded = Callbacks.AddProjectsToSolution(nearestSlnFilesFound[0], projectFiles, solutionFolder);
+            }
+
+            if (!succeeded)
+            {
+                Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddProjToSln_Failed);
+                if (Callbacks?.AddProjectsToSolution == null)
+                {
+                    Reporter.Error.WriteLine(LocalizableStrings.Generic_NoCallbackError);
+                }
                 return false;
             }
             else
             {
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.AddProjToSlnPostActionSucceeded, string.Join(" ", projectFiles), nearestSlnFilesFound[0], solutionFolder));
+                Reporter.Output.WriteLine(LocalizableStrings.PostAction_AddProjToSln_Succeeded);
                 return true;
             }
         }

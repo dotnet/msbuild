@@ -29,9 +29,9 @@ namespace Dotnet_new3.IntegrationTests
         /// <summary>
         /// Replaces content matching <paramref name="pattern"/> with <paramref name="replacement"/>.
         /// </summary>
-        internal static void ScrubByRegex(this StringBuilder output, string pattern, string replacement)
+        internal static void ScrubByRegex(this StringBuilder output, string pattern, string replacement, RegexOptions regexOptions = RegexOptions.None)
         {
-            string finalOutput = Regex.Replace(output.ToString(), pattern, replacement);
+            string finalOutput = Regex.Replace(output.ToString(), pattern, replacement, regexOptions);
             output.Clear();
             output.Append(finalOutput);
         }

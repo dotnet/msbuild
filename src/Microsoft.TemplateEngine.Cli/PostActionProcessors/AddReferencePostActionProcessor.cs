@@ -39,7 +39,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                     if (projectFileExtensions.Contains("/") || projectFileExtensions.Contains("\\") || projectFileExtensions.Contains("*"))
                     {
                         // these must be literals
-                        Reporter.Error.WriteLine(LocalizableStrings.AddRefPostActionMisconfigured);
+                        Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddReference_Error_ActionMisconfigured);
                         return false;
                     }
 
@@ -49,8 +49,8 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 if (projectsToProcess.Count > 1)
                 {
                     // multiple projects at the same level. Error.
-                    Reporter.Error.WriteLine(LocalizableStrings.AddRefPostActionUnresolvedProjFile);
-                    Reporter.Error.WriteLine(LocalizableStrings.AddRefPostActionProjFileListHeader);
+                    Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddReference_Error_UnresolvedProjFile);
+                    Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddReference_Error_ProjFileListHeader);
                     foreach (string projectFile in projectsToProcess)
                     {
                         Reporter.Error.WriteLine(string.Format("\t{0}", projectFile));
@@ -61,7 +61,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             if (projectsToProcess is null || !projectsToProcess.Any())
             {
                 // no projects found. Error.
-                Reporter.Error.WriteLine(LocalizableStrings.AddRefPostActionUnresolvedProjFile);
+                Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddReference_Error_UnresolvedProjFile);
                 return false;
             }
 
@@ -82,68 +82,77 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
         {
             if (actionConfig.Args == null || !actionConfig.Args.TryGetValue("reference", out string? referenceToAdd))
             {
-                Reporter.Error.WriteLine(LocalizableStrings.AddRefPostActionMisconfigured);
+                Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddReference_Error_ActionMisconfigured);
                 return false;
             }
 
             if (!actionConfig.Args.TryGetValue("referenceType", out string? referenceType))
             {
-                Reporter.Error.WriteLine(LocalizableStrings.AddRefPostActionMisconfigured);
+                Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddReference_Error_ActionMisconfigured);
                 return false;
             }
-            Dotnet.Result commandResult;
+
+            bool succeeded = false;
 
             if (string.Equals(referenceType, "project", StringComparison.OrdinalIgnoreCase))
             {
-                // actually do the add ref
+                if ((Callbacks?.AddProjectReference) == null)
+                {
+                    Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddReference_Failed);
+                    Reporter.Error.WriteLine(LocalizableStrings.Generic_NoCallbackError);
+                    return false;
+                }
                 referenceToAdd = Path.GetFullPath(referenceToAdd, outputBasePath);
-                Dotnet addReferenceCommand = Dotnet.AddProjectToProjectReference(projectFile, referenceToAdd);
-                addReferenceCommand.CaptureStdOut();
-                addReferenceCommand.CaptureStdErr();
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.AddRefPostActionAddProjectRef, projectFile, referenceToAdd));
-                commandResult = addReferenceCommand.Execute();
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostAction_AddReference_AddProjectReference, referenceToAdd, projectFile));
+                succeeded = Callbacks.AddProjectReference(projectFile, new[] { referenceToAdd });
+                if (succeeded)
+                {
+                    Reporter.Output.WriteLine(LocalizableStrings.PostAction_AddReference_Succeeded);
+                }
+                else
+                {
+                    Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddReference_Failed);
+                }
+                return succeeded;
             }
             else if (string.Equals(referenceType, "package", StringComparison.OrdinalIgnoreCase))
             {
                 actionConfig.Args.TryGetValue("version", out string? version);
-
-                Dotnet addReferenceCommand = Dotnet.AddPackageReference(projectFile, referenceToAdd, version);
-                addReferenceCommand.CaptureStdOut();
-                addReferenceCommand.CaptureStdErr();
-                if (string.IsNullOrEmpty(version))
+                if ((Callbacks?.AddPackageReference) == null)
                 {
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.AddRefPostActionAddPackageRef, projectFile, referenceToAdd));
+                    Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddReference_Failed);
+                    Reporter.Error.WriteLine(LocalizableStrings.Generic_NoCallbackError);
+                    return false;
+                }
+                if (string.IsNullOrWhiteSpace(version))
+                {
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostAction_AddReference_AddPackageReference, referenceToAdd, projectFile));
                 }
                 else
                 {
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.AddRefPostActionAddPackageRefWithVersion, projectFile, referenceToAdd, version));
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostAction_AddReference_AddPackageReference_WithVersion, referenceToAdd, version, projectFile));
                 }
-                commandResult = addReferenceCommand.Execute();
+                succeeded = Callbacks.AddPackageReference(projectFile, referenceToAdd, version);
+                if (succeeded)
+                {
+                    Reporter.Output.WriteLine(LocalizableStrings.PostAction_AddReference_Succeeded);
+                }
+                else
+                {
+                    Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddReference_Failed);
+                }
+                return succeeded;
             }
             else if (string.Equals(referenceType, "framework", StringComparison.OrdinalIgnoreCase))
             {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.AddRefPostActionFrameworkNotSupported, referenceToAdd));
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.PostAction_AddReference_Error_FrameworkNotSupported, referenceToAdd));
                 return false;
             }
             else
             {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.AddRefPostActionUnsupportedRefType, referenceType));
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.PostAction_AddReference_Error_UnsupportedRefType, referenceType));
                 return false;
             }
-
-            if (commandResult.ExitCode != 0)
-            {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.AddRefPostActionFailed, referenceToAdd, projectFile));
-                Reporter.Error.WriteCommandOutput(commandResult);
-                Reporter.Error.WriteLine(string.Empty);
-                return false;
-            }
-            else
-            {
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.AddRefPostActionSucceeded, referenceToAdd, projectFile));
-                return true;
-            }
-
         }
     }
 }

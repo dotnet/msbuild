@@ -15,7 +15,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
         protected override bool ProcessInternal(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationEffects creationEffects, ICreationResult templateCreationResult, string outputBasePath)
         {
-            if (!actionConfig.Args.TryGetValue("executable", out string? executable))
+            if (!actionConfig.Args.TryGetValue("executable", out string? executable) || string.IsNullOrWhiteSpace(executable))
             {
                 Reporter.Error.WriteLine(LocalizableStrings.PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable);
                 return false;
@@ -41,7 +41,12 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
             try
             {
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.RunningCommand, executable + " " + args));
+                string command = executable;
+                if (!string.IsNullOrWhiteSpace(args))
+                {
+                    command = command + " " + args;
+                }
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.RunningCommand, command));
                 string resolvedExecutablePath = ResolveExecutableFilePath(environment.Host.FileSystem, executable, outputBasePath);
 
                 Process? commandResult = System.Diagnostics.Process.Start(new ProcessStartInfo
