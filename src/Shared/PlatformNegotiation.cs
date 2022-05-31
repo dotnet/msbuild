@@ -12,7 +12,7 @@ namespace Microsoft.Build.Shared
     /// tasks and graph projects in order for two projects to negotiate which platform a projectreference
     /// should be built as.
     /// </summary>
-    static internal class PlatformNegotiation
+    internal static class PlatformNegotiation
     {
         internal static string GetNearestPlatform(string referencedProjectPlatform, string projectReferencePlatformsMetadata, string projectReferenceLookupTableMetadata, string platformLookupTable, string projectPath, string currentProjectPlatform, TaskLoggingHelper? log = null)
         {
