@@ -39,7 +39,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                // PlatformLookupTable always takes priority. It is typically user-defined.
+
                 TransientTestFile entryProject = CreateProjectFile(env, 1, extraContent: @"<PropertyGroup>
                                                                                                 <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
                                                                                                 <Platform>x64</Platform>
@@ -80,7 +80,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                // PlatformLookupTable always takes priority. It is typically user-defined.
+
                 TransientTestFile entryProject = CreateProjectFile(env, 1, extraContent: @"<PropertyGroup>
                                                                                                 <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
                                                                                                 <Platform>win32</Platform>
@@ -107,7 +107,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                // PlatformLookupTable always takes priority. It is typically user-defined.
+
                 TransientTestFile entryProject = CreateProjectFile(env, 1, extraContent: @"<PropertyGroup>
                                                                                                 <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
                                                                                                 <Platform>win32</Platform>
@@ -135,7 +135,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                // PlatformLookupTable always takes priority. It is typically user-defined.
+
                 TransientTestFile entryProject = CreateProjectFile(env, 1, extraContent: @"<PropertyGroup>
                                                                                                 <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
                                                                                                 <Platform>x86</Platform>
@@ -162,7 +162,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                // PlatformLookupTable always takes priority. It is typically user-defined.
+
                 TransientTestFile entryProject = CreateProjectFile(env, 1, extraContent: @"<PropertyGroup>
                                                                                                 <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
                                                                                                 <Platform>x86</Platform>
@@ -190,7 +190,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                // PlatformLookupTable always takes priority. It is typically user-defined.
+
                 TransientTestFile entryProject = CreateProjectFile(env, 1, extraContent: @"<PropertyGroup>
                                                                                                 <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
                                                                                                 <Platform>x86</Platform>
@@ -208,6 +208,9 @@ namespace Microsoft.Build.Graph.UnitTests
                                                     </Project>");
               
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
+                // Here we are checking if platform is defined. in this case it should not be since Platorm would be set to the value this project defaults as
+                // in order to avoid dual build errors we remove platform in order to avoid the edge case where a project has global platform set and does not have global platform set
+                // yet still default to the same platform.
                 GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GlobalProperties.ContainsKey("Platform").ShouldBeFalse();
             }
         }
@@ -217,7 +220,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                // PlatformLookupTable always takes priority. It is typically user-defined.
+
                 TransientTestFile entryProject = CreateProjectFile(env, 1, extraContent: @"<PropertyGroup>
                                                                                                 <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
                                                                                                 <Platform>x64</Platform>

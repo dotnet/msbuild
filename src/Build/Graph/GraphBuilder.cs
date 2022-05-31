@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -504,11 +507,11 @@ namespace Microsoft.Build.Graph
             var globalProperties = configurationMetadata.GlobalProperties.ToDictionary();
             ProjectGraphNode graphNode;
             ProjectInstance projectInstance;
-            var DynamiclySetPlatform = PlatformNegotiationEnabled && !configurationMetadata.IsSetPlatformHardCoded;
+            var dynamiclySetPlatform = PlatformNegotiationEnabled && !configurationMetadata.IsSetPlatformHardCoded;
 
             projectInstance = _projectInstanceFactory(
                                 configurationMetadata.ProjectFullPath,
-                                DynamiclySetPlatform ? null : globalProperties, // Platform negotiation requires an evaluation with no global properties first
+                                dynamiclySetPlatform ? null : globalProperties, // Platform negotiation requires an evaluation with no global properties first
                                 _projectCollection);
 
             if (ConversionUtilities.ValidBooleanTrue(projectInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)))
@@ -521,7 +524,7 @@ namespace Microsoft.Build.Graph
                 throw new InvalidOperationException(ResourceUtilities.GetResourceString("NullReferenceFromProjectInstanceFactory"));
             }
 
-            if (DynamiclySetPlatform)
+            if (dynamiclySetPlatform)
             {
                 var selectedPlatform = PlatformNegotiation.GetNearestPlatform(projectInstance.GetPropertyValue(PlatformMetadataName), projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), configurationMetadata.PreviousPlatformLookupTable, projectInstance.FullPath, configurationMetadata.PreviousPlatform);
 
