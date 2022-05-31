@@ -281,6 +281,9 @@ namespace Microsoft.Build.Execution
 
             processStartInfo.CreateNoWindow = true;
             processStartInfo.UseShellExecute = false;
+            processStartInfo.RedirectStandardInput = true;
+            processStartInfo.RedirectStandardOutput = true;
+            processStartInfo.RedirectStandardError = true;
 
             return Process.Start(processStartInfo) ?? throw new InvalidOperationException("MSBuild server node failed to launch.");
         }
