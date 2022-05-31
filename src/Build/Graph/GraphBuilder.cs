@@ -49,7 +49,7 @@ namespace Microsoft.Build.Graph
         private readonly ProjectGraph.ProjectInstanceFactoryFunc _projectInstanceFactory;
         private IReadOnlyDictionary<string, IReadOnlyCollection<string>> _solutionDependencies;
 
-        public bool IsDynamicPlatformNegotiationEnabaled = false;
+        private bool PlatformNegotiationEnabled = false;
 
         public GraphBuilder(
             IEnumerable<ProjectGraphEntryPoint> entryPoints,
@@ -504,7 +504,7 @@ namespace Microsoft.Build.Graph
             var globalProperties = configurationMetadata.GlobalProperties.ToDictionary();
             ProjectGraphNode graphNode;
             ProjectInstance projectInstance;
-            var DynamiclySetPlatform = IsDynamicPlatformNegotiationEnabaled && !configurationMetadata.IsSetPlatformHardCoded;
+            var DynamiclySetPlatform = PlatformNegotiationEnabled && !configurationMetadata.IsSetPlatformHardCoded;
 
             projectInstance = _projectInstanceFactory(
                                 configurationMetadata.ProjectFullPath,
@@ -513,7 +513,7 @@ namespace Microsoft.Build.Graph
 
             if (ConversionUtilities.ValidBooleanTrue(projectInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)))
             {
-                IsDynamicPlatformNegotiationEnabaled = true;
+                PlatformNegotiationEnabled = true;
             }
 
             if (projectInstance == null)
@@ -525,18 +525,18 @@ namespace Microsoft.Build.Graph
             {
                 var selectedPlatform = PlatformNegotiation.GetNearestPlatform(projectInstance.GetPropertyValue(PlatformMetadataName), projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), configurationMetadata.PreviousPlatformLookupTable, projectInstance.FullPath, configurationMetadata.PreviousPlatform);
 
-                if (selectedPlatform != null)
+                if (selectedPlatform.Equals(String.Empty))
+                {
+                    globalProperties.Remove(PlatformMetadataName);
+                }
+                else
                 {
                     globalProperties[PlatformMetadataName] = selectedPlatform;
-                    if (selectedPlatform.Equals(String.Empty))
-                    {
-                        globalProperties.Remove(PlatformMetadataName);
-                    }
-                    projectInstance = _projectInstanceFactory(
-                                    configurationMetadata.ProjectFullPath,
-                                    globalProperties,
-                                    _projectCollection);
                 }
+                projectInstance = _projectInstanceFactory(
+                                configurationMetadata.ProjectFullPath,
+                                globalProperties,
+                                _projectCollection);           
             }
 
             graphNode = new ProjectGraphNode(projectInstance);
@@ -586,7 +586,7 @@ namespace Microsoft.Build.Graph
                         referenceInfo.ReferenceConfiguration.ProjectFullPath
                         ));
                 }
-
+                
                 SubmitProjectForParsing(referenceInfo.ReferenceConfiguration);
 
                 referenceInfos.Add(referenceInfo);
