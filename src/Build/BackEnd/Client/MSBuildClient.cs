@@ -233,24 +233,6 @@ namespace Microsoft.Build.Execution
             return _exitResult;
         }
 
-        private bool TrySendPacket(Func<INodePacket> packetResolver)
-        {
-            INodePacket? packet = null;
-            try
-            {
-                packet = packetResolver();
-                WritePacket(_nodeStream, packet);
-                CommunicationsUtilities.Trace($"Command packet of type '{packet.Type}' sent...");
-            }
-            catch (Exception ex)
-            {
-                CommunicationsUtilities.Trace($"Failed to send command packet of type '{packet?.Type.ToString() ?? "Unknown"}' to server: {0}", ex);
-                _exitResult.MSBuildClientExitType = MSBuildClientExitType.ConnectionError;
-                return false;
-            }
-
-            return true;
-        }
         private void SupportVT100()
         {
             IntPtr stdOut = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
