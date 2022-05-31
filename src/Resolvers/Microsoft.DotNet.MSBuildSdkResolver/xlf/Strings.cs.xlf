@@ -7,6 +7,11 @@
         <target state="translated">Nepovedlo se najít sadu .NET SDK uvedenou v souboru global.json. Zkontrolujte prosím, že je nainstalovaná zadaná verze.</target>
         <note />
       </trans-unit>
+      <trans-unit id="GlobalJsonResolutionFailedSpecificVersion">
+        <source>Unable to locate the .NET SDK version '{0}' as specified by global.json, please check that the specified version is installed.</source>
+        <target state="new">Unable to locate the .NET SDK version '{0}' as specified by global.json, please check that the specified version is installed.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MSBuildSDKDirectoryNotFound">
         <source>{0} not found. Check that a recent enough .NET SDK is installed and/or increase the version specified in global.json.</source>
         <target state="translated">{0} nejde najít. Zajistěte, aby byla nainstalovaná dostatečně vysoká verze sady .NET SDK, nebo zvyšte verzi zadanou v souboru global.json.</target>

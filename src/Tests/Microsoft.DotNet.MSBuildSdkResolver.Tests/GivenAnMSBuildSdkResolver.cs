@@ -289,7 +289,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             result.PropertiesToAdd.ContainsKey("SdkResolverGlobalJsonPath");
             result.PropertiesToAdd["SdkResolverHonoredGlobalJson"].Should().Be("false");
             result.Version.Should().Be(disallowPreviews ? "98.98.98" : "99.99.99-preview");
-            result.Warnings.Should().BeEquivalentTo(new[] { "Unable to locate the .NET SDK as specified by global.json, please check that the specified version is installed." });
+            result.Warnings.Should().BeEquivalentTo(new[] { "Unable to locate the .NET SDK version '1.2.3' as specified by global.json, please check that the specified version is installed." });
             result.Errors.Should().BeNullOrEmpty();
         }
 

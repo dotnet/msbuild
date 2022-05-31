@@ -7,6 +7,11 @@
         <target state="translated">Não é possível localizar o .NET SDK como especificado pelo global.json. Verifique se a versão especificada está instalada.</target>
         <note />
       </trans-unit>
+      <trans-unit id="GlobalJsonResolutionFailedSpecificVersion">
+        <source>Unable to locate the .NET SDK version '{0}' as specified by global.json, please check that the specified version is installed.</source>
+        <target state="new">Unable to locate the .NET SDK version '{0}' as specified by global.json, please check that the specified version is installed.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MSBuildSDKDirectoryNotFound">
         <source>{0} not found. Check that a recent enough .NET SDK is installed and/or increase the version specified in global.json.</source>
         <target state="translated">{0} não encontrado. Verifique se um SDK do .NET suficientemente recente está instalado e/ou aumente a versão especificada em global.json.</target>
