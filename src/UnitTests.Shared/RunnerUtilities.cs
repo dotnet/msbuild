@@ -97,7 +97,21 @@ namespace Microsoft.Build.UnitTests.Shared
             {
 
                 outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:4");
-                
+                p.OutputDataReceived += delegate (object sender, DataReceivedEventArgs args)
+                {
+                    if (args != null)
+                    {
+                        output += args.Data + "\r\n";
+                    }
+                };
+
+                p.ErrorDataReceived += delegate (object sender, DataReceivedEventArgs args)
+                {
+                    if (args != null)
+                    {
+                        output += args.Data + "\r\n";
+                    }
+                };
 
                 outputHelper?.WriteLine("Executing [{0} {1}]; TID: {2}, timestamp:{3}", process, parameters, System.Threading.Thread.CurrentThread.ManagedThreadId, System.DateTime.Now.Ticks);
                 Console.WriteLine("Executing [{0} {1}]", process, parameters);
@@ -107,10 +121,10 @@ namespace Microsoft.Build.UnitTests.Shared
                 p.Start();
 
                 outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:6");
-                output += p.StandardOutput.ReadToEnd();
+                p.BeginOutputReadLine();
 
                 outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:7");
-                output += p.StandardError.ReadToEnd();
+                p.BeginErrorReadLine();
 
                 outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:8");
                 p.StandardInput.Dispose();
@@ -119,6 +133,7 @@ namespace Microsoft.Build.UnitTests.Shared
                 p.WaitForExit(30000);
 
                 outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:10");
+                p.WaitForExit(); // The timeout overload does not wait for output to be received.
 
                 outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:11");
 
