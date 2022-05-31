@@ -507,11 +507,11 @@ namespace Microsoft.Build.Graph
             var globalProperties = configurationMetadata.GlobalProperties.ToDictionary();
             ProjectGraphNode graphNode;
             ProjectInstance projectInstance;
-            var dynamiclySetPlatform = PlatformNegotiationEnabled && !configurationMetadata.IsSetPlatformHardCoded;
+            var negotiatePlatform = PlatformNegotiationEnabled && !configurationMetadata.IsSetPlatformHardCoded;
 
             projectInstance = _projectInstanceFactory(
                                 configurationMetadata.ProjectFullPath,
-                                dynamiclySetPlatform ? null : globalProperties, // Platform negotiation requires an evaluation with no global properties first
+                                negotiatePlatform ? null : globalProperties, // Platform negotiation requires an evaluation with no global properties first
                                 _projectCollection);
 
             if (ConversionUtilities.ValidBooleanTrue(projectInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)))
@@ -524,7 +524,7 @@ namespace Microsoft.Build.Graph
                 throw new InvalidOperationException(ResourceUtilities.GetResourceString("NullReferenceFromProjectInstanceFactory"));
             }
 
-            if (dynamiclySetPlatform)
+            if (negotiatePlatform)
             {
                 var selectedPlatform = PlatformNegotiation.GetNearestPlatform(projectInstance.GetPropertyValue(PlatformMetadataName), projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), configurationMetadata.PreviousPlatformLookupTable, projectInstance.FullPath, configurationMetadata.PreviousPlatform);
 
