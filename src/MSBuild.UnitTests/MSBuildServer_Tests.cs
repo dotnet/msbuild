@@ -171,7 +171,10 @@ namespace Microsoft.Build.Engine.UnitTests
             try
             {
                 // Start a server node and find its PID.
+
+                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Start first execution");
                 string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out bool success, false, _output);
+                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:End first execution");
                 pidOfServerProcess = ParseNumber(output, "Server ID is ");
 
                 foreach (Process p in Process.GetProcesses())
@@ -180,6 +183,8 @@ namespace Microsoft.Build.Engine.UnitTests
                     p.OutputDataReceived += (object sender, DataReceivedEventArgs args) => _output.WriteLine(args is null ? "empty" : args.Data);
                 }
 
+
+                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Start second execution");
                 t = Task.Run(() =>
                 {
                     RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, sleepProject.Path + " -v:diag", out _, false, _output);
@@ -197,13 +202,19 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
                 _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Set MSBUILDUSESERVER to 0");
+
+                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Start 3rd execution");
                 output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out success, false, _output);
+                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:End 3rd execution");
                 success.ShouldBeTrue();
                 ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
 
                 Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
                 _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Set MSBUILDUSESERVER back to 1");
+
+                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Start 4th execution");
                 output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out success, false, _output);
+                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:End 4th execution");
                 success.ShouldBeTrue();
                 pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Server ID is "), "The server should be otherwise occupied.");
                 pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
