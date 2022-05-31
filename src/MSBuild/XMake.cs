@@ -224,6 +224,8 @@ namespace Microsoft.Build.CommandLine
             int exitCode;
             if (Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName) == "1")
             {
+                Console.CancelKeyPress += Console_CancelKeyPress;
+
                 // Use the client app to execute build in msbuild server. Opt-in feature.
                 exitCode = ((s_initialized && MSBuildClientApp.Execute(
 #if FEATURE_GET_COMMANDLINE
@@ -866,8 +868,7 @@ namespace Microsoft.Build.CommandLine
         {
             if (e.SpecialKey == ConsoleSpecialKey.ControlBreak)
             {
-                e.Cancel = false; // required; the process will now be terminated rudely
-                return;
+                Environment.Exit(1); // the process will now be terminated rudely
             }
 
             e.Cancel = true; // do not terminate rudely
@@ -2684,14 +2685,7 @@ namespace Microsoft.Build.CommandLine
                         return (exitCode, exitType.ToString());
                     };
 
-                    Action onCancel = () =>
-                    {
-                        Console.WriteLine(ResourceUtilities.GetResourceString("AbortingBuild"));
-
-                        BuildManager.DefaultBuildManager.CancelAllSubmissions();
-                    };
-
-                    OutOfProcServerNode node = new(buildFunction, onCancel);
+                    OutOfProcServerNode node = new(buildFunction);
 
                     s_isServerNode = true;
                     shutdownReason = node.Run(out nodeException);
