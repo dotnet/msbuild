@@ -273,6 +273,33 @@ namespace Dotnet_new3.IntegrationTests
         }
 
         [Fact]
+        public Task CanInstantiateTemplate_ConditionalProcessing()
+        {
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            Helpers.InstallTestTemplate($"TemplateConditionalProcessing", _log, home, workingDirectory);
+
+            new DotnetNewCommand(_log, "TestAssets.TemplateConditionalProcessing")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("The template \"TemplateConditionalProcessing\" was created successfully.");
+
+            string[] actualFiles = Directory.GetFiles(workingDirectory);
+
+            return Task.WhenAll(
+                actualFiles.Select(
+                    async (file) =>
+                    await Verifier.VerifyFile(file, _verifySettings)
+                    .UseMethodName($"CanInstantiateTemplate_ConditionalProcessing_{Path.GetFileName(file)}")
+                    .UseExtension("txt")
+                    ));
+        }
+
+        [Fact]
         public Task DryRunRespectsTargetPathAndOutputDir()
         {
             const string _OUT_FOLDER = "folderF";

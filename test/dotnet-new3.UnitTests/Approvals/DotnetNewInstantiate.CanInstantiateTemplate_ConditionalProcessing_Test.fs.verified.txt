@@ -1,0 +1,16 @@
+﻿open System
+
+type DefaultTrueIncluded() = do printfn ""
+
+#if defaultTrue
+type InsideUnknownDirectiveNoEmit() = do printfn ""
+#endif
+
+type DefaultFalseIncluded() = do printfn ""
+
+// Without noEmit the following line will be emitted
+//-:cnd
+#if defaultFalse
+type InsideUnknownDirectiveEmit() = do printfn ""
+#endif
+//+:cnd
