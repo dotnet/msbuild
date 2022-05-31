@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 var manifests = new SdkDirectoryWorkloadManifestProvider(dotnetPath, versionOption, userProfileDir).GetManifests();
                 if (!manifests.Any() && checkIfFeatureBandManifestsExist)
                 {
-                    throw new GracefulException(string.Format(LocalizableStrings.NoManifestsExistForFeatureBand, versionOption), isUserError: false);       // issue #24335 is throwing this exception but we don't want it to... for some reason it doesn't hit this line while debugging though???
+                    throw new GracefulException(string.Format(LocalizableStrings.NoManifestsExistForFeatureBand, versionOption), isUserError: false);     
                 }
                 try
                 {

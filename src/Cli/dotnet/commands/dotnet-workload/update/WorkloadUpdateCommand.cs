@@ -293,7 +293,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
         {
             var currentFeatureBand = new SdkFeatureBand(_sdkVersion);
             if (_fromPreviousSdk)
-            {
+             {
                 var priorFeatureBands = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetFeatureBandsWithInstallationRecords()
                     .Where(featureBand => featureBand.CompareTo(currentFeatureBand) < 0);
                 if (priorFeatureBands.Any())
@@ -305,10 +305,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             }
             else
             {
+                // check if there are any workloads available to install????
                 var workloads = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(currentFeatureBand);
                 if (workloads == null || !workloads.Any())
                 {
-                    Reporter.WriteLine(LocalizableStrings.NoWorkloadsToUpdate);
+                    Reporter.WriteLine(LocalizableStrings.NoWorkloadsToUpdate);     // throwing this message
                 }
 
                 return workloads;
