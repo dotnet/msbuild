@@ -147,7 +147,7 @@ jobs:
 - job: CoreBootstrappedOnLinux
   displayName: "Linux Core"
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-latest'
   steps:
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh'
     displayName: CI Build
@@ -179,7 +179,7 @@ jobs:
 - job: CoreOnMac
   displayName: "macOS Core"
   pool:
-    vmImage: 'macOS-10.14'
+    vmImage: 'macOS-latest'
   steps:
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh'
     displayName: CI Build
@@ -211,7 +211,7 @@ jobs:
 - job: MonoOnMac
   displayName: "macOS Mono"
   pool:
-    vmImage: 'macOS-10.14'
+    vmImage: 'macOS-latest'
   steps:
   # https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops&tabs=yaml#mono
   - bash: |
