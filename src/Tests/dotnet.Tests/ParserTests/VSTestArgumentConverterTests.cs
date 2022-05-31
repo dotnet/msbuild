@@ -3,6 +3,7 @@
 
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
+using Microsoft.NET.TestFramework;
 using System;
 using System.Collections.Generic;
 using Xunit;
@@ -119,7 +120,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             {
                 new object[] { "sometest.dll -c Debug", "sometest.dll", "-c Debug" },
                 new object[] { "sometest.dll --configuration Debug", "sometest.dll", "--configuration Debug" },
-                new object[] { "sometest.dll --runtime win10-x64", "sometest.dll", "--runtime win10-x64" },
+                new object[] { $"sometest.dll --runtime {ToolsetInfo.LatestWinRuntimeIdentifier}-x64", "sometest.dll", $"--runtime {ToolsetInfo.LatestWinRuntimeIdentifier}-x64" },
                 new object[] { "sometest.dll -o c:\temp2", "sometest.dll", "-o c:\temp2" },
                 new object[] { "sometest.dll --output c:\temp2", "sometest.dll", "--output c:\temp2" },
                 new object[] { "sometest.dll --interactive", "sometest.dll", "--interactive" },
@@ -127,14 +128,14 @@ namespace Microsoft.DotNet.Tests.ParserTests
                 new object[] { "sometest.dll --no-restore", "sometest.dll", "--no-restore" },
 
                 new object[] {
-                    @"sometest.dll -s testsettings -t -a c:\path -f net451 -d log.txt --configuration Debug --output C:\foo --runtime win10-x64 --results-directory c:\temp\ --no-build --no-restore --interactive",
+                    $@"sometest.dll -s testsettings -t -a c:\path -f net451 -d log.txt --configuration Debug --output C:\foo --runtime {ToolsetInfo.LatestWinRuntimeIdentifier}-x64 --results-directory c:\temp\ --no-build --no-restore --interactive",
                     @"sometest.dll --settings:testsettings --listtests --testadapterpath:c:\path --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\",
-                    @"--configuration Debug --output C:\foo --runtime win10-x64 --no-build --no-restore --interactive"
+                    $@"--configuration Debug --output C:\foo --runtime {ToolsetInfo.LatestWinRuntimeIdentifier}-x64 --no-build --no-restore --interactive"
                 },
                 new object[] {
-                    @"sometest.dll --settings testsettings --list-tests -a c:\path -f net451 --diag log.txt --collect coverage --blame --configuration Debug --output C:\foo --runtime win10-x64 --results-directory c:\temp\ --no-build --no-restore --interactive",
+                    $@"sometest.dll --settings testsettings --list-tests -a c:\path -f net451 --diag log.txt --collect coverage --blame --configuration Debug --output C:\foo --runtime {ToolsetInfo.LatestWinRuntimeIdentifier}-x64 --results-directory c:\temp\ --no-build --no-restore --interactive",
                     @"sometest.dll --settings:testsettings --listtests --testadapterpath:c:\path --framework:net451 --diag:log.txt --collect:coverage --blame --resultsdirectory:c:\temp\",
-                    @"--configuration Debug --output C:\foo --runtime win10-x64 --no-build --no-restore --interactive"
+                    $@"--configuration Debug --output C:\foo --runtime {ToolsetInfo.LatestWinRuntimeIdentifier}-x64 --no-build --no-restore --interactive"
                 }
             };
         }

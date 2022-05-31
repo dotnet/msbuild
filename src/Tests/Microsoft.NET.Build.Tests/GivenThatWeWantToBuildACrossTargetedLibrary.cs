@@ -79,8 +79,8 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData("1", "win7-x86", "win7-x86;win7-x64", "win10-arm", "win7-x86;linux;WIN7-X86;unix", "osx-10.12", "win8-arm;win8-arm-aot",
-            "win7-x86;win7-x64;win10-arm;linux;unix;osx-10.12;win8-arm;win8-arm-aot")]
+        [InlineData("1", "win7-x86", "win7-x86;win7-x64", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-arm", "win7-x86;linux;WIN7-X86;unix", "osx-10.12", "win8-arm;win8-arm-aot",
+            $"win7-x86;win7-x64;{ToolsetInfo.LatestWinRuntimeIdentifier}-arm;linux;unix;osx-10.12;win8-arm;win8-arm-aot")]
         public void It_combines_inner_rids_for_restore(
             string identifier,
             string outerRid,
