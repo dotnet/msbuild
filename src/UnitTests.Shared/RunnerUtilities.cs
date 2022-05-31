@@ -71,12 +71,15 @@ namespace Microsoft.Build.UnitTests.Shared
         /// </summary>
         public static string RunProcessAndGetOutput(string process, string parameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
         {
+            outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:1");
+
             if (shellExecute)
             {
                 // we adjust the psi data manually because on net core using ProcessStartInfo.UseShellExecute throws NotImplementedException
                 AdjustForShellExecution(ref process, ref parameters);
             }
 
+            outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:2");
             var psi = new ProcessStartInfo(process)
             {
                 CreateNoWindow = true,
@@ -89,8 +92,11 @@ namespace Microsoft.Build.UnitTests.Shared
             string output = string.Empty;
             int pid = -1;
 
+            outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:3");
             using (var p = new Process { EnableRaisingEvents = true, StartInfo = psi })
             {
+
+                outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:4");
                 p.OutputDataReceived += delegate (object sender, DataReceivedEventArgs args)
                 {
                     if (args != null)
@@ -110,23 +116,38 @@ namespace Microsoft.Build.UnitTests.Shared
                 outputHelper?.WriteLine("Executing [{0} {1}]; TID: {2}, timestamp:{3}", process, parameters, System.Threading.Thread.CurrentThread.ManagedThreadId, System.DateTime.Now.Ticks);
                 Console.WriteLine("Executing [{0} {1}]", process, parameters);
 
+
+                outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:5");
                 p.Start();
+
+                outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:6");
                 p.BeginOutputReadLine();
+
+                outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:7");
                 p.BeginErrorReadLine();
+
+                outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:8");
                 p.StandardInput.Dispose();
 
+                outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:9");
                 p.WaitForExit(30000);
+
+                outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:10");
                 p.WaitForExit(); // The timeout overload does not wait for output to be received.
+
+                outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:11");
 
                 pid = p.Id;
                 successfulExit = p.ExitCode == 0;
             }
 
+            outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:12");
             outputHelper?.WriteLine("==== OUTPUT ====");
             outputHelper?.WriteLine(output + $" tid: {System.Threading.Thread.CurrentThread.ManagedThreadId} timestamp: {DateTime.Now.Ticks}");
             outputHelper?.WriteLine("Process ID is " + pid + $" tid: {System.Threading.Thread.CurrentThread.ManagedThreadId} timestamp: {DateTime.Now.Ticks}" + "\r\n");
             outputHelper?.WriteLine("==============");
 
+            outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:13");
             Console.WriteLine("==== OUTPUT ====");
             Console.WriteLine(output);
             Console.WriteLine("Process ID is " + pid + "\r\n");
