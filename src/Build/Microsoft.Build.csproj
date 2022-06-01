@@ -155,6 +155,7 @@
     <Compile Include="FileSystem\*.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\ServerNamedMutex.cs" />
+    <Compile Include="BackEnd\Node\ServerNodeBuildCancel.cs" />
     <Compile Include="BackEnd\Node\ServerNodeBuildCommand.cs" />
     <Compile Include="BackEnd\Node\ServerNodeConsoleWrite.cs" />
     <Compile Include="BackEnd\Node\ServerNodeBuildResult.cs" />
