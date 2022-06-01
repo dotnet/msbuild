@@ -120,16 +120,17 @@ namespace Microsoft.Build.UnitTests.Shared
                 successfulExit = p.ExitCode == 0;
             }
 
-            output += "Process ID is " + pid + "\r\n";
-
             outputHelper?.WriteLine("==== OUTPUT ====");
             outputHelper?.WriteLine(output + $" tid: {System.Threading.Thread.CurrentThread.ManagedThreadId} timestamp: {DateTime.Now.Ticks}");
+            outputHelper?.WriteLine("Process ID is " + pid + $" tid: {System.Threading.Thread.CurrentThread.ManagedThreadId} timestamp: {DateTime.Now.Ticks}" + "\r\n");
             outputHelper?.WriteLine("==============");
 
             Console.WriteLine("==== OUTPUT ====");
             Console.WriteLine(output);
+            Console.WriteLine("Process ID is " + pid + "\r\n");
             Console.WriteLine("==============");
 
+            output += "Process ID is " + pid + "\r\n";
             return output;
         }
     }
