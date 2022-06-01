@@ -234,7 +234,8 @@ namespace Microsoft.DotNet.Cli
         {
             var dotnetRootPath = Path.GetDirectoryName(Environment.ProcessPath);
             // When running under test the path does not always contain "dotnet" and Product.Version is empty.
-            dotnetRootPath = Path.GetFileName(dotnetRootPath).Contains("dotnet") || Path.GetFileName(dotnetRootPath).Contains("x64") ? dotnetRootPath : Path.Combine(dotnetRootPath, "dotnet");
+            // The sdk folder is /d/ when run on helix because of space issues
+            dotnetRootPath = Path.GetFileName(dotnetRootPath).Contains("dotnet") || Path.GetFileName(dotnetRootPath).Contains("x64") || Path.GetFileName(dotnetRootPath).Equals("d") ? dotnetRootPath : Path.Combine(dotnetRootPath, "dotnet");
             var ridFileName = "NETCoreSdkRuntimeIdentifierChain.txt";
             string runtimeIdentifierChainPath = string.IsNullOrEmpty(Product.Version) ?
                 Path.Combine(Directory.GetDirectories(Path.Combine(dotnetRootPath, "sdk"))[0], ridFileName) :

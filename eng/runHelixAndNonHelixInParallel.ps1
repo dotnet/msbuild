@@ -33,8 +33,6 @@
         "/p:_CustomHelixTargetQueue=$customHelixTargetQueue") + $additionalParameters
 
         parallel {
-            Write-Output "&'$engfolderPath\runTestsCannotRunOnHelix.ps1' $runTestsCannotRunOnHelixArgs"
-            Invoke-Expression "&'$engfolderPath\runTestsCannotRunOnHelix.ps1' $runTestsCannotRunOnHelixArgs"
             Write-Output "&'$engfolderPath\common\build.ps1' $runTestsOnHelixArgs"
             Invoke-Expression "&'$engfolderPath\common\build.ps1' $runTestsOnHelixArgs"
         }
