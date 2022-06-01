@@ -91,7 +91,7 @@ namespace Microsoft.Build.UnitTests.Shared
 
             using (var p = new Process { EnableRaisingEvents = true, StartInfo = psi })
             {
-                p.OutputDataReceived += delegate (object sender, DataReceivedEventArgs args)
+                DataReceivedEventHandler handler = delegate (object sender, DataReceivedEventArgs args)
                 {
                     if (args != null)
                     {
@@ -99,13 +99,8 @@ namespace Microsoft.Build.UnitTests.Shared
                     }
                 };
 
-                p.ErrorDataReceived += delegate (object sender, DataReceivedEventArgs args)
-                {
-                    if (args != null)
-                    {
-                        output += args.Data + "\r\n";
-                    }
-                };
+                p.OutputDataReceived += handler;
+                p.ErrorDataReceived += handler;
 
                 outputHelper?.WriteLine("Executing [{0} {1}]; TID: {2}, timestamp:{3}", process, parameters, System.Threading.Thread.CurrentThread.ManagedThreadId, System.DateTime.Now.Ticks);
                 Console.WriteLine("Executing [{0} {1}]", process, parameters);
