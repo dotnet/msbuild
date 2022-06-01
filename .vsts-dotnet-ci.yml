@@ -147,7 +147,7 @@ jobs:
 - job: CoreBootstrappedOnLinux
   displayName: "Linux Core"
   pool:
-    vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-18.04'
   steps:
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh'
     displayName: CI Build
