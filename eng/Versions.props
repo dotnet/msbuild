@@ -2,8 +2,7 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
   <PropertyGroup>
-    <VersionPrefix>16.11.2</VersionPrefix>
-    <DotNetFinalVersionKind>release</DotNetFinalVersionKind>
+    <VersionPrefix>16.11.3</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
@@ -28,9 +27,9 @@
   <PropertyGroup>
     <!-- DotNetCliVersion MUST match the dotnet version in global.json.
          Otherwise, this version of dotnet will not be installed and the build will error out. -->
-    <DotNetCliVersion>5.0.401</DotNetCliVersion>
+    <DotNetCliVersion>5.0.408</DotNetCliVersion>
     <MicrosoftNetCompilersToolsetVersion>3.9.0-2.20574.26</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>5.11.0-rc.10</NuGetBuildTasksVersion>
+    <NuGetBuildTasksVersion>5.11.1-rc.5</NuGetBuildTasksVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386

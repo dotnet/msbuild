@@ -184,6 +184,7 @@ stages:
             arguments: -task SigningValidation -restore -msbuildEngine vs
               /p:PackageBasePath='$(Build.ArtifactStagingDirectory)/PackageArtifacts'
               /p:SignCheckExclusionsFile='$(Build.SourcesDirectory)/eng/SignCheckExclusionsFile.txt'
+              /p:CheckEolTargetFramework=false
               ${{ parameters.signingValidationAdditionalParameters }}
 
         - template: ../steps/publish-logs.yml

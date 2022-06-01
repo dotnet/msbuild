@@ -1,6 +1,6 @@
 {
   "tools": {
-    "dotnet": "5.0.401",
+    "dotnet": "5.0.408",
     "runtimes": {
       "dotnet/x64": [
         "2.1.7"
@@ -12,6 +12,6 @@
   },
   "msbuild-sdks": {
     "Microsoft.Build.CentralPackageVersions": "2.0.1",
-    "Microsoft.DotNet.Arcade.Sdk": "5.0.0-beta.22123.4"
+    "Microsoft.DotNet.Arcade.Sdk": "5.0.0-beta.22276.2"
   }
 }
