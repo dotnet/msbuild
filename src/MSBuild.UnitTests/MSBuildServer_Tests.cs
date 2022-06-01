@@ -167,7 +167,7 @@ namespace Microsoft.Build.Engine.UnitTests
             try
             {
                 // Start a server node and find its PID.
-                string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out bool success, false, _output);
+                string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success, false, _output);
                 pidOfServerProcess = ParseNumber(output, "Server ID is ");
 
                 var msbuildParameters = sleepProject.Path;
