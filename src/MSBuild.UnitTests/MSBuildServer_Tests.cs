@@ -88,31 +88,18 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success, false, _output);
+            success.ShouldBeTrue();
+            int pidOfInitialProcess = ParseNumber(output, "Process ID is ");
+            int pidOfServerProcess = ParseNumber(output, "Server ID is ");
+            pidOfInitialProcess.ShouldNotBe(pidOfServerProcess, "We started a server node to execute the target rather than running it in-proc, so its pid should be different.");
 
-            int pidOfInitialProcess = 0;
-            int pidOfServerProcess = 0;
-            int newPidOfInitialProcess = 0;
-            int newPidOfServerProcess = 0;
-            Task u = Task.Run(() =>
-            {
-                string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success, false, _output, waitForExit: false);
-                success.ShouldBeTrue();
-                pidOfInitialProcess = ParseNumber(output, "Process ID is ");
-                pidOfServerProcess = ParseNumber(output, "Server ID is ");
-                pidOfInitialProcess.ShouldNotBe(pidOfServerProcess, "We started a server node to execute the target rather than running it in-proc, so its pid should be different.");
-            });
-
-            Thread.Sleep(1000);
-
-            Task v = Task.Run(() =>
-            {
-                string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success, false, _output, waitForExit: false);
-                success.ShouldBeTrue();
-                newPidOfInitialProcess = ParseNumber(output, "Process ID is ");
-                newPidOfServerProcess = ParseNumber(output, "Server ID is ");
-            });
-
-            Thread.Sleep(1000);
+            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
+            success.ShouldBeTrue();
+            int newPidOfInitialProcess = ParseNumber(output, "Process ID is ");
+            newPidOfInitialProcess.ShouldNotBe(pidOfServerProcess, "We started a server node to execute the target rather than running it in-proc, so its pid should be different.");
+            newPidOfInitialProcess.ShouldNotBe(pidOfInitialProcess, "Process started by two MSBuild executions should be different.");
+            pidOfServerProcess.ShouldBe(ParseNumber(output, "Server ID is "), "Node used by both the first and second build should be the same.");
 
             // Prep to kill the long-lived task we're about to start.
             Task t = Task.Run(() =>
@@ -131,23 +118,11 @@ namespace Microsoft.Build.Engine.UnitTests
 
             t.Wait();
 
-            int newServerProcessId = 0;
-            int newServerServerId = 0;
-            t = Task.Run(() =>
-            {
-                // Ensure that a new build can still succeed and that its server node is different.
-                string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success, false, _output);
-                success.ShouldBeTrue();
-                newServerServerId = ParseNumber(output, "Process ID is ");
-                newServerProcessId = ParseNumber(output, "Server ID is ");
-            });
-
-            Thread.Sleep(1000);
-
-            newPidOfInitialProcess.ShouldNotBe(pidOfServerProcess, "We started a server node to execute the target rather than running it in-proc, so its pid should be different.");
-            newPidOfInitialProcess.ShouldNotBe(pidOfInitialProcess, "Process started by two MSBuild executions should be different.");
-            pidOfServerProcess.ShouldBe(newPidOfServerProcess, "Node used by both the first and second build should be the same.");
-
+            // Ensure that a new build can still succeed and that its server node is different.
+            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
+            success.ShouldBeTrue();
+            newPidOfInitialProcess = ParseNumber(output, "Process ID is ");
+            int newServerProcessId = ParseNumber(output, "Server ID is ");
             newPidOfInitialProcess.ShouldNotBe(pidOfInitialProcess, "Process started by two MSBuild executions should be different.");
             newPidOfInitialProcess.ShouldNotBe(newServerProcessId, "We started a server node to execute the target rather than running it in-proc, so its pid should be different.");
             pidOfServerProcess.ShouldNotBe(newServerProcessId, "Node used by both the first and second build should not be the same.");
@@ -193,21 +168,14 @@ namespace Microsoft.Build.Engine.UnitTests
 
             int pidOfServerProcess = -1;
             Task? t = null;
-            Task? u = null;
-            Task? v = null;
-            Task? w = null;
             try
             {
                 // Start a server node and find its PID.
-                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Start first execution");
-                t = Task.Run(() =>
-                {
-                    string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out bool success, false, _output);
-                    _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:End first execution");
-                    pidOfServerProcess = ParseNumber(output, "Server ID is ");
-                });
 
-                Thread.Sleep(1000);
+                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Start first execution");
+                string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out bool success, false, _output);
+                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:End first execution");
+                pidOfServerProcess = ParseNumber(output, "Server ID is ");
 
                 foreach (Process p in Process.GetProcesses())
                 {
@@ -215,8 +183,9 @@ namespace Microsoft.Build.Engine.UnitTests
                     p.OutputDataReceived += (object sender, DataReceivedEventArgs args) => _output.WriteLine(args is null ? "empty" : args.Data);
                 }
 
+
                 _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Start second execution");
-                u = Task.Run(() =>
+                t = Task.Run(() =>
                 {
                     RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, sleepProject.Path + " -v:diag", out _, false, _output);
                 });
@@ -235,29 +204,21 @@ namespace Microsoft.Build.Engine.UnitTests
                 _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Set MSBUILDUSESERVER to 0");
 
                 _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Start 3rd execution");
-                v = Task.Run(() =>
-                {
-                    string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out bool success, false, _output);
-                    _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:End 3rd execution");
-                    success.ShouldBeTrue();
-                    ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
-                });
-
-                Thread.Sleep(1000);
+                output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out success, false, _output);
+                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:End 3rd execution");
+                success.ShouldBeTrue();
+                ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
 
                 Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
                 _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Set MSBUILDUSESERVER back to 1");
 
                 _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Start 4th execution");
-                w = Task.Run(() =>
-                {
-                    string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out bool success, false, _output);
-                    _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:End 4th execution");
-                    success.ShouldBeTrue();
-                    pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Server ID is "), "The server should be otherwise occupied.");
-                    pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
-                    ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "Process ID and Server ID should coincide.");
-                });
+                output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out success, false, _output);
+                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:End 4th execution");
+                success.ShouldBeTrue();
+                pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Server ID is "), "The server should be otherwise occupied.");
+                pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
+                ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "Process ID and Server ID should coincide.");
 
                 _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}: End of test.");
             }
@@ -274,17 +235,14 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 if (pidOfServerProcess > -1)
                 {
-                    try
-                    {
-                        ProcessExtensions.KillTree(Process.GetProcessById(pidOfServerProcess), 1000);
-                    }
-                    catch (Exception) { }
+                    ProcessExtensions.KillTree(Process.GetProcessById(pidOfServerProcess), 1000);
                 }
 
-                t?.Wait();
-                u?.Wait();
-                v?.Wait();
-                w?.Wait();
+
+                if (t is not null)
+                {
+                    t.Wait();
+                }
             }
         }
 

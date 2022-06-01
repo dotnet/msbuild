@@ -24,7 +24,7 @@ namespace Microsoft.Build.UnitTests.Shared
         /// Invoke msbuild.exe with the given parameters and return the stdout, stderr, and process exit status.
         /// This method may invoke msbuild via other runtimes.
         /// </summary>
-        public static string ExecMSBuild(string pathToMsBuildExe, string msbuildParameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null, bool waitForExit = true)
+        public static string ExecMSBuild(string pathToMsBuildExe, string msbuildParameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
         {
 #if FEATURE_RUN_EXE_IN_TESTS
             var pathToExecutable = pathToMsBuildExe;
@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests.Shared
             msbuildParameters = FileUtilities.EnsureDoubleQuotes(pathToMsBuildExe) + " " + msbuildParameters;
 #endif
 
-            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper, waitForExit);
+            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper);
         }
 
         private static void AdjustForShellExecution(ref string pathToExecutable, ref string arguments)
@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests.Shared
         /// <summary>
         /// Run the process and get stdout and stderr
         /// </summary>
-        public static string RunProcessAndGetOutput(string process, string parameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null, bool waitForExit = true)
+        public static string RunProcessAndGetOutput(string process, string parameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
         {
             outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:1");
 
@@ -133,10 +133,7 @@ namespace Microsoft.Build.UnitTests.Shared
                 p.WaitForExit(30000);
 
                 outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:10");
-                if (waitForExit)
-                {
-                    p.WaitForExit(); // The timeout overload does not wait for output to be received.
-                }
+                p.WaitForExit(); // The timeout overload does not wait for output to be received.
 
                 outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:11");
 
