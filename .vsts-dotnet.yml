@@ -28,7 +28,7 @@ stages:
   jobs:
   - job: Windows_NT
     pool:
-      name: VSEng-MicroBuildVS2019
+      name: VSEngSS-MicroBuild2019-1ES
       demands:
       - agent.os -equals Windows_NT
 
@@ -99,46 +99,46 @@ stages:
       condition: succeeded()
 
     # Publish OptProf configuration files
-    - task: ms-vscs-artifact.build-tasks.artifactDropTask-1.artifactDropTask@0
-      inputs:
-        dropServiceURI: 'https://devdiv.artifacts.visualstudio.com'
-        buildNumber: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
-        sourcePath: '$(Build.SourcesDirectory)\artifacts\OptProf\$(BuildConfiguration)\Data'
-        toLowerCase: false
-        usePat: false
-      displayName: 'OptProf - Publish to Artifact Services - ProfilingInputs'
-      condition: succeeded()
+    # - task: ms-vscs-artifact.build-tasks.artifactDropTask-1.artifactDropTask@0
+    #   inputs:
+    #     dropServiceURI: 'https://devdiv.artifacts.visualstudio.com'
+    #     buildNumber: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
+    #     sourcePath: '$(Build.SourcesDirectory)\artifacts\OptProf\$(BuildConfiguration)\Data'
+    #     toLowerCase: false
+    #     usePat: false
+    #   displayName: 'OptProf - Publish to Artifact Services - ProfilingInputs'
+    #   condition: succeeded()
 
     # Build VS bootstrapper
     # Generates $(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
-    - task: ms-vseng.MicroBuildTasks.0e9d0d4d-71ec-4e4e-ae40-db9896f1ae74.MicroBuildBuildVSBootstrapper@2
-      inputs:
-        vsMajorVersion: $(VisualStudio.MajorVersion)
-        channelName: $(VisualStudio.ChannelName)
-        manifests: $(VisualStudio.SetupManifestList)
-        outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
-      displayName: 'OptProf - Build VS bootstrapper'
-      condition: succeeded()
+    # - task: ms-vseng.MicroBuildTasks.0e9d0d4d-71ec-4e4e-ae40-db9896f1ae74.MicroBuildBuildVSBootstrapper@2
+    #   inputs:
+    #     vsMajorVersion: $(VisualStudio.MajorVersion)
+    #     channelName: $(VisualStudio.ChannelName)
+    #     manifests: $(VisualStudio.SetupManifestList)
+    #     outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+    #   displayName: 'OptProf - Build VS bootstrapper'
+    #   condition: succeeded()
 
     # Publish run settings
-    - task: PowerShell@2
-      inputs:
-        filePath: eng\common\sdk-task.ps1
-        arguments: -configuration $(BuildConfiguration)
-                  -task VisualStudio.BuildIbcTrainingSettings
-                  /p:VisualStudioDropName=$(VisualStudio.DropName)
-                  /p:BootstrapperInfoPath=$(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
-      displayName: 'OptProf - Build IBC training settings'
-      condition: succeeded()
+    # - task: PowerShell@2
+    #   inputs:
+    #     filePath: eng\common\sdk-task.ps1
+    #     arguments: -configuration $(BuildConfiguration)
+    #               -task VisualStudio.BuildIbcTrainingSettings
+    #               /p:VisualStudioDropName=$(VisualStudio.DropName)
+    #               /p:BootstrapperInfoPath=$(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
+    #   displayName: 'OptProf - Build IBC training settings'
+    #   condition: succeeded()
 
     # Publish bootstrapper info
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: $(Build.StagingDirectory)\MicroBuild\Output
-        ArtifactName: MicroBuildOutputs
-        ArtifactType: Container
-      displayName: 'OptProf - Publish Artifact: MicroBuildOutputs'
-      condition: succeeded()
+    # - task: PublishBuildArtifacts@1
+    #   inputs:
+    #     PathtoPublish: $(Build.StagingDirectory)\MicroBuild\Output
+    #     ArtifactName: MicroBuildOutputs
+    #     ArtifactType: Container
+    #   displayName: 'OptProf - Publish Artifact: MicroBuildOutputs'
+    #   condition: succeeded()
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: logs'
@@ -156,12 +156,12 @@ stages:
 
     # Publishes setup VSIXes to a drop.
     # Note: The insertion tool looks for the display name of this task in the logs.
-    - task: ms-vseng.MicroBuildTasks.4305a8de-ba66-4d8b-b2d1-0dc4ecbbf5e8.MicroBuildUploadVstsDropFolder@1
-      displayName: Upload VSTS Drop
-      inputs:
-        DropName: $(VisualStudio.DropName)
-        DropFolder: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
-      condition: succeeded()
+    # - task: ms-vseng.MicroBuildTasks.4305a8de-ba66-4d8b-b2d1-0dc4ecbbf5e8.MicroBuildUploadVstsDropFolder@1
+    #   displayName: Upload VSTS Drop
+    #   inputs:
+    #     DropName: $(VisualStudio.DropName)
+    #     DropFolder: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+    #   condition: succeeded()
 
     # Publish an artifact that the RoslynInsertionTool is able to find by its name.
     - task: PublishBuildArtifacts@1
@@ -199,11 +199,11 @@ stages:
       condition: succeeded()
 
     # Tag the build at the very end when we know it's been successful.
-    - task: colinsalmcorner.colinsalmcorner-buildtasks.tag-build-task.tagBuildOrRelease@0
-      displayName: Tag build as ready for optimization training
-      inputs:
-        tags: 'ready-for-training'
-      condition: succeeded()
+    # - task: colinsalmcorner.colinsalmcorner-buildtasks.tag-build-task.tagBuildOrRelease@0
+    #   displayName: Tag build as ready for optimization training
+    #   inputs:
+    #     tags: 'ready-for-training'
+    #   condition: succeeded()
 
     - task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
       displayName: Execute cleanup tasks

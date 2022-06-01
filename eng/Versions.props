@@ -2,7 +2,7 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
   <PropertyGroup>
-    <VersionPrefix>16.9.2</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind>
+    <VersionPrefix>16.9.3</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
@@ -23,7 +23,7 @@
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
-    <DotNetCliVersion>3.1.100</DotNetCliVersion>
+    <DotNetCliVersion>3.1.120</DotNetCliVersion>
     <MicrosoftNetCompilersToolsetVersion>3.3.1-beta3-final</MicrosoftNetCompilersToolsetVersion>
     <NuGetBuildTasksVersion>5.9.0-preview.3.7016</NuGetBuildTasksVersion>
   </PropertyGroup>
