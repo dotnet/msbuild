@@ -28,7 +28,7 @@ stages:
   jobs:
   - job: Windows_NT
     pool:
-      name: VSEng-MicroBuildVS2019
+      name: VSEngSS-MicroBuild2019-1ES
       demands:
       - agent.os -equals Windows_NT
 
