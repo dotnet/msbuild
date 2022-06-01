@@ -160,79 +160,41 @@ namespace Microsoft.Build.Engine.UnitTests
         public void BuildsWhileBuildIsRunningOnServer()
         {
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
-            _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Set MSBUILDUSESERVER to 1");
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
             TransientTestFile sleepProject = _env.CreateFile("napProject.proj", sleepingTaskContents);
-            _env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
-            _env.SetEnvironmentVariable("MSBUILDDEBUGPATH", Path.Combine(Path.GetDirectoryName(project.Path)!, "myFolder"));
 
             int pidOfServerProcess = -1;
             Task? t = null;
             try
             {
                 // Start a server node and find its PID.
-
-                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Start first execution");
-                string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out bool success, false, _output);
-                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:End first execution");
+                string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success, false, _output);
                 pidOfServerProcess = ParseNumber(output, "Server ID is ");
 
-                foreach (Process p in Process.GetProcesses())
-                {
-                    _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Process number {p.Id} is {p.ProcessName}" + $" tid: {System.Threading.Thread.CurrentThread.ManagedThreadId} timestamp: {DateTime.Now.Ticks}");
-                    p.OutputDataReceived += (object sender, DataReceivedEventArgs args) => _output.WriteLine(args is null ? "empty" : args.Data);
-                }
-
-
-                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Start second execution");
                 t = Task.Run(() =>
                 {
-                    RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, sleepProject.Path + " -v:diag", out _, false, _output);
+                    RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, sleepProject.Path, out _, false, _output);
                 });
 
                 // The server will soon be in use; make sure we don't try to use it before that happens.
                 Thread.Sleep(1000);
 
-                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:next batch");
-                foreach (Process p in Process.GetProcesses())
-                {
-                    _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Process number {p.Id} is {p.ProcessName}" + $" tid: {System.Threading.Thread.CurrentThread.ManagedThreadId} timestamp: {DateTime.Now.Ticks}");
-                    p.OutputDataReceived += (object sender, DataReceivedEventArgs args) => _output.WriteLine(args is null ? "empty" : args.Data);
-                }
-
                 Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
-                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Set MSBUILDUSESERVER to 0");
 
-                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Start 3rd execution");
-                output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out success, false, _output);
-                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:End 3rd execution");
+                output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
                 success.ShouldBeTrue();
                 ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
 
                 Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
-                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Set MSBUILDUSESERVER back to 1");
 
-                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:Start 4th execution");
-                output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -v:diag", out success, false, _output);
-                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:End 4th execution");
+                output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
                 success.ShouldBeTrue();
                 pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Server ID is "), "The server should be otherwise occupied.");
                 pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
                 ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "Process ID and Server ID should coincide.");
-
-                _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}: End of test.");
             }
             finally
             {
-                foreach (string? file in Directory.GetFiles(Path.Combine(Path.GetDirectoryName(project.Path)!, "myFolder")))
-                {
-                    _output.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:New file: {file}" + $" tid: {System.Threading.Thread.CurrentThread.ManagedThreadId} timestamp: {DateTime.Now.Ticks}");
-                    foreach (string line in File.ReadLines(file!))
-                    {
-                        _output.WriteLine(line + $"{DateTime.Now.ToString("hh:mm:ss tt")}: tid: {System.Threading.Thread.CurrentThread.ManagedThreadId} timestamp: {DateTime.Now.Ticks}");
-                    }
-                }
-
                 if (pidOfServerProcess > -1)
                 {
                     ProcessExtensions.KillTree(Process.GetProcessById(pidOfServerProcess), 1000);
@@ -270,8 +232,8 @@ namespace Microsoft.Build.Engine.UnitTests
         private int ParseNumber(string searchString, string toFind)
         {
             Regex regex = new(@$"{toFind}(\d+)");
-            var x = regex.Match(searchString);
-            return int.Parse(x.Groups[1].Value);
+            Match match = regex.Match(searchString);
+            return int.Parse(match.Groups[1].Value);
         }
     }
 }

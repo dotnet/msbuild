@@ -106,7 +106,7 @@ namespace Microsoft.Build.UnitTests.Shared
                 p.OutputDataReceived += handler;
                 p.ErrorDataReceived += handler;
 
-                outputHelper?.WriteLine("Executing [{0} {1}]; TID: {2}, timestamp:{3}", process, parameters, System.Threading.Thread.CurrentThread.ManagedThreadId, System.DateTime.Now.Ticks);
+                outputHelper?.WriteLine("Executing [{0} {1}]", process, parameters);
                 Console.WriteLine("Executing [{0} {1}]", process, parameters);
 
                 p.Start();
@@ -119,13 +119,11 @@ namespace Microsoft.Build.UnitTests.Shared
                 successfulExit = p.ExitCode == 0;
             }
 
-            outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:12");
             outputHelper?.WriteLine("==== OUTPUT ====");
-            outputHelper?.WriteLine(output + $" tid: {System.Threading.Thread.CurrentThread.ManagedThreadId} timestamp: {DateTime.Now.Ticks}");
-            outputHelper?.WriteLine("Process ID is " + pid + $" tid: {System.Threading.Thread.CurrentThread.ManagedThreadId} timestamp: {DateTime.Now.Ticks}" + "\r\n");
+            outputHelper?.WriteLine(output);
+            outputHelper?.WriteLine("Process ID is " + pid + "\r\n");
             outputHelper?.WriteLine("==============");
 
-            outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:13");
             Console.WriteLine("==== OUTPUT ====");
             Console.WriteLine(output);
             Console.WriteLine("Process ID is " + pid + "\r\n");
