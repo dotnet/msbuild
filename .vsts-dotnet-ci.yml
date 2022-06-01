@@ -223,7 +223,7 @@ jobs:
   condition: eq(1,2)
   displayName: "macOS Mono"
   pool:
-    vmImage: 'macOS-10.14'
+    vmImage: 'macOS-latest'
   steps:
   # https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops&tabs=yaml#mono
   - bash: |
