@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Client;
@@ -453,15 +454,8 @@ namespace Microsoft.Build.Execution
             uint creationFlags = 0;
             if (Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
             {
-                FileName = exeLocation,
-                Arguments = msBuildServerArguments,
-                UseShellExecute = false
+                creationFlags = BackendNativeMethods.NORMALPRIORITYCLASS;
             };
-
-            foreach (var entry in serverEnvironmentVariables)
-            {
-                processStartInfo.Environment[entry.Key] = entry.Value;
-            }
 
             if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDNODEWINDOW")))
             {
