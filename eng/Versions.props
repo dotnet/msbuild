@@ -28,7 +28,7 @@
   <PropertyGroup>
     <!-- DotNetCliVersion MUST match the dotnet version in global.json.
          Otherwise, this version of dotnet will not be installed and the build will error out. -->
-    <DotNetCliVersion>5.0.401</DotNetCliVersion>
+    <DotNetCliVersion>5.0.408</DotNetCliVersion>
     <MicrosoftNetCompilersToolsetVersion>3.9.0-2.20574.26</MicrosoftNetCompilersToolsetVersion>
     <NuGetBuildTasksVersion>5.11.0-rc.10</NuGetBuildTasksVersion>
   </PropertyGroup>
