@@ -18,4 +18,3 @@ cp -a $HELIX_CORRELATION_PAYLOAD/t/TestExecutionDirectoryFiles/. $TestExecutionD
 dotnet new
 # avoid potetial concurrency issues when nuget is creating nuget.config
 dotnet nuget list source
-dotnet nuget add source $DOTNET_ROOT/.nuget
