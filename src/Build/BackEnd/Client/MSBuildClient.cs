@@ -486,7 +486,7 @@ namespace Microsoft.Build.Execution
             if (Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
             {
                 creationFlags = BackendNativeMethods.NORMALPRIORITYCLASS;
-            };
+            }
 
             if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDNODEWINDOW")))
             {
@@ -538,8 +538,10 @@ namespace Microsoft.Build.Execution
                 processStartInfo.UseShellExecute = false;
 
 
-            processStartInfo.CreateNoWindow = true;
-            processStartInfo.UseShellExecute = false;
+                foreach (var entry in serverEnvironmentVariables)
+                {
+                    processStartInfo.Environment[entry.Key] = entry.Value;
+                }
 
                 // We remove env to enable MSBuild Server that might be equal to 1, so we do not get an infinite recursion here.
                 processStartInfo.Environment[Traits.UseMSBuildServerEnvVarName] = "0";
