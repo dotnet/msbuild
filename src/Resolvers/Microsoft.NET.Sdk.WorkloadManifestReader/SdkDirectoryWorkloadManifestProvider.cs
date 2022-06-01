@@ -51,7 +51,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             var sdkVersionBand =
                 $"{sdkVersionParsed.Major}.{sdkVersionParsed.Minor}.{Last2DigitsTo0(sdkVersionParsed.Build)}";
-
+           
             _sdkRootPath = sdkRootPath;
             _sdkVersionBand = sdkVersionBand;
 
