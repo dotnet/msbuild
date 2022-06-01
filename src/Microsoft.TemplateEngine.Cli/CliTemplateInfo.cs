@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.Constraints;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
