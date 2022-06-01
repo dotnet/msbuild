@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Text;
 
 using Microsoft.Build.BackEnd.Logging;
@@ -179,6 +180,31 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void BinaryLoggerShouldEmbedFilesViaTaskOutput()
+        {
+            using var buildManager = new BuildManager();
+            var binaryLogger = new BinaryLogger()
+            {
+                Parameters = $"LogFile={_logFile}",
+                CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
+            };
+            var testProject = @"
+<Project>
+    <Target Name=""Build"">
+        <WriteLinesToFile File=""testtaskoutputfile.txt"" Lines=""abc;def;ghi""/>
+        <CreateItem Include=""testtaskoutputfile.txt"">
+            <Output TaskParameter=""Include"" ItemName=""EmbedInBinlog"" />
+        </CreateItem>
+    </Target>
+</Project>";
+            ObjectModelHelpers.BuildProjectExpectSuccess(testProject, binaryLogger);
+            var projectImportsZipPath = Path.ChangeExtension(_logFile, ".ProjectImports.zip");
+            using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
+            using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
+            zipArchive.Entries.ShouldContain(zE => zE.Name == "testtaskoutputfile.txt");
+        }
+
+        [Fact]
         public void BinaryLoggerShouldNotThrowWhenMetadataCannotBeExpanded()
         {
             var binaryLogger = new BinaryLogger
@@ -244,7 +270,6 @@ namespace Microsoft.Build.UnitTests
                 new BuildRequestData(entryProject.ProjectFile, new Dictionary<string, string>(), null, new string[] { "BuildSelf" }, null))
                 .OverallResult.ShouldBe(BuildResultCode.Success);
         }
-
 
         public void Dispose()
         {

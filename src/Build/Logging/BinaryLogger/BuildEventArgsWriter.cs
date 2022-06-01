@@ -521,7 +521,8 @@ Build
             Write((int)e.Kind);
             WriteDeduplicatedString(e.ItemType);
             WriteTaskItemList(e.Items, e.LogItemMetadata);
-            if (e.Kind == TaskParameterMessageKind.AddItem)
+            if (e.Kind == TaskParameterMessageKind.AddItem
+                | e.Kind == TaskParameterMessageKind.TaskOutput)
             {
                 CheckForFilesToEmbed(e.ItemType, e.Items);
             }
