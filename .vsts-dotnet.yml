@@ -156,12 +156,12 @@ stages:
 
     # Publishes setup VSIXes to a drop.
     # Note: The insertion tool looks for the display name of this task in the logs.
-    - task: ms-vseng.MicroBuildTasks.4305a8de-ba66-4d8b-b2d1-0dc4ecbbf5e8.MicroBuildUploadVstsDropFolder@1
-      displayName: Upload VSTS Drop
-      inputs:
-        DropName: $(VisualStudio.DropName)
-        DropFolder: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
-      condition: succeeded()
+    # - task: ms-vseng.MicroBuildTasks.4305a8de-ba66-4d8b-b2d1-0dc4ecbbf5e8.MicroBuildUploadVstsDropFolder@1
+    #   displayName: Upload VSTS Drop
+    #   inputs:
+    #     DropName: $(VisualStudio.DropName)
+    #     DropFolder: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+    #   condition: succeeded()
 
     # Publish an artifact that the RoslynInsertionTool is able to find by its name.
     - task: PublishBuildArtifacts@1
