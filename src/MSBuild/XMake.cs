@@ -2684,7 +2684,14 @@ namespace Microsoft.Build.CommandLine
                         return (exitCode, exitType.ToString());
                     };
 
-                    OutOfProcServerNode node = new(buildFunction);
+                    Action onCancel = () =>
+                    {
+                        Console.WriteLine(ResourceUtilities.GetResourceString("AbortingBuild"));
+
+                        BuildManager.DefaultBuildManager.CancelAllSubmissions();
+                    };
+
+                    OutOfProcServerNode node = new(buildFunction, onCancel);
 
                     s_isServerNode = true;
                     shutdownReason = node.Run(out nodeException);

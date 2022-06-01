@@ -214,7 +214,7 @@ namespace Microsoft.Build.BackEnd.Client
 
                         case 1:
                             {
-                                // Client recieved a packet header. Read the rest of a package.
+                                // Client recieved a packet header. Read the rest of it.
                                 int headerBytesRead = 0;
 #if FEATURE_APM
                                 headerBytesRead = localStream.EndRead(result);
