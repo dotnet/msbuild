@@ -30,7 +30,7 @@
          Otherwise, this version of dotnet will not be installed and the build will error out. -->
     <DotNetCliVersion>5.0.408</DotNetCliVersion>
     <MicrosoftNetCompilersToolsetVersion>3.9.0-2.20574.26</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>5.11.0-rc.10</NuGetBuildTasksVersion>
+    <NuGetBuildTasksVersion>5.11.1-rc.5</NuGetBuildTasksVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386
