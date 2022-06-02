@@ -4,9 +4,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.NativeWrapper;
 
@@ -23,9 +25,11 @@ namespace Microsoft.DotNet.Tools.New
 
         public Task<IEnumerable<string>> GetInstalledVersionsAsync(CancellationToken cancellationToken)
         {
-            string dotnetDir = Microsoft.DotNet.NativeWrapper.EnvironmentProvider.GetDotnetExeDirectory();
-            string[] sdks = NETCoreSdkResolverNativeWrapper.GetAvailableSdks(dotnetDir);
-            return Task.FromResult((IEnumerable<string>)sdks);
+            var dotnetDir = CommonOptions.GetDotnetExeDirectory();
+            // sdks contain the full path, version is the last part
+            //  details: https://github.com/dotnet/runtime/blob/5098d45cc1bf9649fab5df21f227da4b80daa084/src/native/corehost/fxr/sdk_info.cpp#L76
+            IEnumerable<string> sdks = NETCoreSdkResolverNativeWrapper.GetAvailableSdks(dotnetDir).Select(Path.GetFileName);
+            return Task.FromResult(sdks);
         }
 
         public string ProvideConstraintRemedySuggestion(IReadOnlyList<string> supportedVersions,
