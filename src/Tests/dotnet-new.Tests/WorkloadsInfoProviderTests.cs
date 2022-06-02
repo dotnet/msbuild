@@ -16,6 +16,7 @@ using Xunit;
 using Xunit.Abstractions;
 using Moq;
 using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.TemplateEngine.Abstractions.Components;
 
 namespace Microsoft.DotNet.New.Tests
 {

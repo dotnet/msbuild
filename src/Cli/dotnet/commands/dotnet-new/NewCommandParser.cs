@@ -16,6 +16,7 @@ using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Edge;
 using System.Linq;
 using Microsoft.DotNet.Workloads.Workload.List;
+using Microsoft.TemplateEngine.Abstractions.Components;
 
 namespace Microsoft.DotNet.Cli
 {

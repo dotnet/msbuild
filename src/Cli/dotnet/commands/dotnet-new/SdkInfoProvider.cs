@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.NativeWrapper;
+using Microsoft.TemplateEngine.Abstractions.Components;
+using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.DotNet.Tools.New
 {
