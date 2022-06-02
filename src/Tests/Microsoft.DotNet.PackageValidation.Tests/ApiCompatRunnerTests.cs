@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
         [Fact]
         public void NoDuplicateRightsForSpecificLeft()
         {
-            ApiCompatRunner acp = new(false, null, null);
+            ApiCompatRunner acp = new(false, null, null, "A");
             MetadataInformation left = new(@"A.dll", "netstandard2.0", @"lib\netstandard2.0\A.dll");
             MetadataInformation right = new(@"A.dll", "net462", @"lib\net462\A.dll");
 

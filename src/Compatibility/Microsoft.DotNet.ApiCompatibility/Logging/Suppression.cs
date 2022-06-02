@@ -4,9 +4,8 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using System.Xml.Serialization;
 
-namespace Microsoft.DotNet.Compatibility.ErrorSuppression
+namespace Microsoft.DotNet.ApiCompatibility.Logging
 {
     /// <summary>
     /// Represents a Suppression for a validation error.
@@ -16,7 +15,7 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
         /// <summary>
         /// The DiagnosticId representing the error to be suppressed.
         /// </summary>
-        public string? DiagnosticId { get; set; }
+        public string DiagnosticId { get; set; }
 
         /// <summary>
         /// The target of where to suppress the <see cref="DiagnosticId"/>
@@ -32,6 +31,17 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
         /// Right operand of an APICompat comparison.
         /// </summary>
         public string? Right { get; set; }
+
+        // Neccessary for XmlSerializer to instantiate an object of this class.
+        private Suppression()
+        {
+            DiagnosticId = string.Empty;
+        }
+
+        public Suppression(string diagnosticId)
+        {
+            DiagnosticId = diagnosticId;
+        }
 
         /// <summary>
         /// <see langword="true"/> if the suppression is to be applied to a baseline validation. <see langword="false"/> otherwise.

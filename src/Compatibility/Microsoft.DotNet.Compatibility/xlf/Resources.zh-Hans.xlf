@@ -7,11 +7,6 @@
         <target state="translated">Roslyn 所需的最低版本为“{1}”，并且你使用的是“{0}”版本的 Roslyn。可以更新 SDK，获取最新版本。</target>
         <note />
       </trans-unit>
-      <trans-unit id="WroteSuppressions">
-        <source>Successfully wrote compatibility suppressions to '{0}'.</source>
-        <target state="translated">已成功将兼容性抑制写入“{0}”。</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

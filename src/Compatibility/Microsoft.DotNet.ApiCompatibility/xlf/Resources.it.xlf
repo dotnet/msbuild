@@ -162,6 +162,11 @@
         <target state="translated">Il conteggio di destra specificato durante la creazione del visitatore deve corrispondere alle dimensioni del set di destra specificato per i mapper.</target>
         <note />
       </trans-unit>
+      <trans-unit id="WroteSuppressions">
+        <source>Successfully wrote compatibility suppressions to '{0}'.</source>
+        <target state="new">Successfully wrote compatibility suppressions to '{0}'.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

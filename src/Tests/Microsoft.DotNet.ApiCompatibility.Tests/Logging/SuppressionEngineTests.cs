@@ -6,14 +6,14 @@ using System.IO;
 using System.Xml.Serialization;
 using Xunit;
 
-namespace Microsoft.DotNet.Compatibility.ErrorSuppression.Tests
+namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
 {
     public class SuppressionEngineTests
     {
         [Fact]
         public void AddingASuppressionTwiceDoesntThrow()
         {
-            var testEngine = SuppressionEngine.Create();
+            var testEngine = new SuppressionEngine();
             AddSuppression(testEngine);
             AddSuppression(testEngine);
 
@@ -40,9 +40,8 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression.Tests
             Assert.False(testEngine.IsErrorSuppressed("CP123", "T:myValidation.Class1", isBaselineSuppression: false));
 
             // Test IsErrorSuppressed Suppression overload.
-            Assert.True(testEngine.IsErrorSuppressed(new Suppression
+            Assert.True(testEngine.IsErrorSuppressed(new Suppression("CP0001")
             {
-                DiagnosticId = "CP0001",
                 Target = "T:A.B",
                 Left = "ref/netstandard2.0/tempValidation.dll",
                 Right = "lib/net6.0/tempValidation.dll"
@@ -52,22 +51,21 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression.Tests
         [Fact]
         public void SuppressionEngineThrowsIfFileDoesNotExist()
         {
-            Assert.Throws<FileNotFoundException>(() => SuppressionEngine.CreateFromFile("AFileThatDoesNotExist.xml"));
+            Assert.Throws<FileNotFoundException>(() => new SuppressionEngine(suppressionFile: "AFileThatDoesNotExist.xml"));
         }
 
         [Fact]
         public void SuppressionEngineDoesNotThrowOnEmptyFile()
         {
-            SuppressionEngine _ = SuppressionEngine.CreateFromFile(string.Empty);
-            _ = SuppressionEngine.CreateFromFile("      ");
+            SuppressionEngine _ = new(suppressionFile: string.Empty);
+            _ = new SuppressionEngine(suppressionFile: "      ");
         }
 
         [Fact]
         public void SuppressionEngineSuppressionsRoundTrip()
         {
             string output = string.Empty;
-            TestSuppressionEngine engine = TestSuppressionEngine.CreateTestSuppressionEngine(
-            (stream) =>
+            TestSuppressionEngine engine = TestSuppressionEngine.CreateTestSuppressionEngine((stream) =>
             {
                 stream.Position = 0;
                 using StreamReader reader = new(stream);
@@ -93,7 +91,7 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression.Tests
         [Fact]
         public void SuppressionEngineSupportsGlobalCompare()
         {
-            SuppressionEngine engine = SuppressionEngine.Create();
+            SuppressionEngine engine = new();
             // Engine has a suppression with no left and no right. This should be treated global for any left and any right.
             engine.AddSuppression("CP0001", "T:A.B", isBaselineSuppression: true);
             engine.AddSuppression("CP0001", "T:A.C");
@@ -126,9 +124,8 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression.Tests
 
             Assert.Equal(9, engine.GetSuppressionCount());
 
-            Suppression newSuppression = new()
+            Suppression newSuppression = new("CP0002")
             {
-                DiagnosticId = "CP0002",
                 Target = "F:MyNs.Class1.Field"
             };
 
@@ -140,9 +137,8 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression.Tests
             Suppression[] deserializedSuppressions = xmlSerializer.Deserialize(stream) as Suppression[];
             Assert.Equal(10, deserializedSuppressions.Length);
 
-            Assert.Equal(new Suppression()
+            Assert.Equal(new Suppression("CP0001")
             {
-                DiagnosticId = "CP0001",
                 Target = "T:A.B",
                 Left = "ref/netstandard2.0/tempValidation.dll",
                 Right = "lib/net6.0/tempValidation.dll"
@@ -154,7 +150,7 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression.Tests
         [Fact]
         public void NoWarnIsHonored()
         {
-            SuppressionEngine engine = SuppressionEngine.Create(noWarn: "CP0001;CP0003;CP1111");
+            SuppressionEngine engine = new(noWarn: "CP0001;CP0003;CP1111");
 
             Assert.True(engine.IsErrorSuppressed("CP0001", "T:A.B", "ref/net6.0/myLib.dll", "lib/net6.0/myLib.dll", isBaselineSuppression: true));
             Assert.False(engine.IsErrorSuppressed("CP1110", "T:A.B", "ref/net6.0/myLib.dll", "lib/net6.0/myLib.dll", isBaselineSuppression: false));
@@ -314,11 +310,11 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression.Tests
   </Suppression>
 </Suppressions>";
 
-        private MemoryStream _outputStream = new();
+        private readonly MemoryStream _outputStream = new();
         private readonly Action<Stream> _callback;
 
-        public TestSuppressionEngine(string baselineFile, string noWarn, Action<Stream> callback)
-            : base(baselineFile, noWarn)
+        public TestSuppressionEngine(string noWarn, string suppressionFile, Action<Stream> callback)
+            : base(noWarn: noWarn, suppressionFile: suppressionFile)
         {
             if (callback == null)
             {
@@ -328,7 +324,7 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression.Tests
         }
 
         public static TestSuppressionEngine CreateTestSuppressionEngine(Action<Stream> callback = null, string noWarn = "")
-            => new("NonExistentFile.xml", noWarn, callback);
+            => new(noWarn: noWarn, suppressionFile: "NonExistentFile.xml", callback);
 
         public int GetSuppressionCount() => _validationSuppressions.Count;
 

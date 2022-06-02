@@ -213,4 +213,7 @@
   <data name="EnumTypesMustMatch" xml:space="preserve">
     <value>Underlying type of enum '{0}' changed from '{1}' to '{2}'.</value>
   </data>
+  <data name="WroteSuppressions" xml:space="preserve">
+    <value>Successfully wrote compatibility suppressions to '{0}'.</value>
+  </data>
 </root>

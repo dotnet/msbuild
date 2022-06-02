@@ -162,6 +162,11 @@
         <target state="translated">ビジターの作成時に指定された適切なカウントは、マッパーに指定された適切なセット サイズと一致する必要があります。</target>
         <note />
       </trans-unit>
+      <trans-unit id="WroteSuppressions">
+        <source>Successfully wrote compatibility suppressions to '{0}'.</source>
+        <target state="new">Successfully wrote compatibility suppressions to '{0}'.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

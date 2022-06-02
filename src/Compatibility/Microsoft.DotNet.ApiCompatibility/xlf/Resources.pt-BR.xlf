@@ -162,6 +162,11 @@
         <target state="translated">A contagem correta fornecida ao criar o visitante deve corresponder ao tamanho de conjunto correto especificado para os mapeadores.</target>
         <note />
       </trans-unit>
+      <trans-unit id="WroteSuppressions">
+        <source>Successfully wrote compatibility suppressions to '{0}'.</source>
+        <target state="new">Successfully wrote compatibility suppressions to '{0}'.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

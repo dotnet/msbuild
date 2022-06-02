@@ -162,6 +162,11 @@
         <target state="translated">Указанное правильное количество при создании посетителя должно соответствовать правильному заданному размеру, указанному для сопоставителей.</target>
         <note />
       </trans-unit>
+      <trans-unit id="WroteSuppressions">
+        <source>Successfully wrote compatibility suppressions to '{0}'.</source>
+        <target state="new">Successfully wrote compatibility suppressions to '{0}'.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
