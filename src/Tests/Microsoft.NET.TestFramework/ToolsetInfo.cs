@@ -19,6 +19,8 @@ namespace Microsoft.NET.TestFramework
     {
         public const string CurrentTargetFramework = "net7.0";
         public const string CurrentTargetFrameworkVersion = "7.0";
+        public const string NextTargetFramework = "net8.0";
+        public const string NextTargetFrameworkVersion = "8.0";
 
         public const string LatestWinRuntimeIdentifier = "win10";
 
