@@ -12,7 +12,7 @@ using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
-    internal class MockPackWorkloadInstaller : IWorkloadPackInstaller
+    internal class MockPackWorkloadInstaller : IInstaller
     {
         public IList<PackInfo> InstalledPacks;
         public List<PackInfo> RolledBackPacks = new List<PackInfo>();
@@ -77,16 +77,6 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             GarbageCollectionCalled = true;
         }
 
-        public InstallationUnit GetInstallationUnit()
-        {
-            return InstallationUnit.Packs;
-        }
-
-        public IWorkloadPackInstaller GetPackInstaller()
-        {
-            return this;
-        }
-
         public IWorkloadInstallationRecordRepository GetWorkloadInstallationRecordRepository()
         {
             return InstallationRecordRepository;
@@ -107,8 +97,6 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         {
             return InstalledPacks.Select(pack => (pack.Id, pack.Version));
         }
-
-        public IWorkloadInstaller GetWorkloadInstaller() => throw new NotImplementedException();
 
         public void Shutdown()
         {

@@ -20,7 +20,7 @@ using System.Text.Json;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
-    internal class FileBasedInstaller : IWorkloadPackInstaller
+    internal class FileBasedInstaller : IInstaller
     {
         private readonly IReporter _reporter;
         private readonly string _workloadMetadataDir;
@@ -64,21 +64,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _workloadResolver = workloadResolver;
             _installationRecordRepository = new FileBasedInstallationRecordRepository(_workloadMetadataDir);
             _packageSourceLocation = packageSourceLocation;
-        }
-
-        public InstallationUnit GetInstallationUnit()
-        {
-            return InstallationUnit.Packs;
-        }
-
-        public IWorkloadPackInstaller GetPackInstaller()
-        {
-            return this;
-        }
-
-        public IWorkloadInstaller GetWorkloadInstaller()
-        {
-            throw new Exception($"{nameof(FileBasedInstaller)} is not a workload installer.");
         }
 
         public IWorkloadInstallationRecordRepository GetWorkloadInstallationRecordRepository()

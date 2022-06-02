@@ -35,13 +35,6 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         [Fact]
-        public void GivenManagedInstallItsInsallationUnitIsPacks()
-        {
-            var (_, installer, _) = GetTestInstaller();
-            installer.GetInstallationUnit().Should().Be(InstallationUnit.Packs);
-        }
-
-        [Fact]
         public void GivenManagedInstallItCanGetFeatureBandsWhenFilesArePresent()
         {
             var versions = new string[] { "6.0.100", "6.0.300", "7.0.100" };

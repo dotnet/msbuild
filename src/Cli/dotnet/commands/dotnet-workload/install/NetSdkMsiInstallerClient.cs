@@ -24,7 +24,7 @@ using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
     [SupportedOSPlatform("windows")]
-    internal partial class NetSdkMsiInstallerClient : MsiInstallerBase, IWorkloadPackInstaller
+    internal partial class NetSdkMsiInstallerClient : MsiInstallerBase, IInstaller
     {
         private INuGetPackageDownloader _nugetPackageDownloader;
 
@@ -235,8 +235,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public InstallationUnit GetInstallationUnit() => InstallationUnit.Packs;
-
         public IEnumerable<(WorkloadPackId Id, string Version)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
         {
             string dependent = $"{DependentPrefix},{sdkFeatureBand},{HostArchitecture}";
@@ -247,11 +245,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 .Select(p => (p.id, p.version.ToString()));
         }
 
-        public IWorkloadPackInstaller GetPackInstaller() => this;
-
         public IWorkloadInstallationRecordRepository GetWorkloadInstallationRecordRepository() => RecordRepository;
-
-        public IWorkloadInstaller GetWorkloadInstaller() => throw new InvalidOperationException($"{GetType()} is not a workload installer.");
 
         public void InstallWorkloadManifest(ManifestVersionUpdate manifestUpdate, ITransactionContext transactionContext, DirectoryPath? offlineCache = null, bool isRollback = false)
         {

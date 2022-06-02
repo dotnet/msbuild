@@ -203,10 +203,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             try
             {
-                if (workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
-                {
-                    workloadInstaller.GetPackInstaller().GarbageCollectInstalledWorkloadPacks(offlineCache);
-                }
+                workloadInstaller.GarbageCollectInstalledWorkloadPacks(offlineCache);
             }
             catch (Exception e)
             {
@@ -222,67 +219,56 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             IEnumerable<ManifestVersionUpdate> manifestsToUpdate,
             DirectoryPath? offlineCache)
         {
-            if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
+            IEnumerable<PackInfo> workloadPackToInstall = new List<PackInfo>();
+            IEnumerable<WorkloadId> newWorkloadInstallRecords = new List<WorkloadId>();
+
+            var transaction = new CliTransaction();
+
+            transaction.RollbackStarted = () =>
             {
-                var installer = _workloadInstaller.GetPackInstaller();
-                IEnumerable<PackInfo> workloadPackToInstall = new List<PackInfo>();
-                IEnumerable<WorkloadId> newWorkloadInstallRecords = new List<WorkloadId>();
-
-                var transaction = new CliTransaction();
-
-                transaction.RollbackStarted = () =>
-                {
-                    Reporter.WriteLine(LocalizableStrings.RollingBackInstall);
-                };
-                // Don't hide the original error if roll back fails, but do log the rollback failure
-                transaction.RollbackFailed = ex =>
-                {
-                    Reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, ex.Message));
-                };
-
-                transaction.Run(
-                    action: context =>
-                    {
-                        bool rollback = !string.IsNullOrWhiteSpace(_fromRollbackDefinition);
-
-                        foreach (var manifestUpdate in manifestsToUpdate)
-                        {
-                            _workloadInstaller.InstallWorkloadManifest(manifestUpdate, context, offlineCache, rollback);
-                        }
-
-                        _workloadResolver.RefreshWorkloadManifests();
-
-                        workloadPackToInstall = GetPacksToInstall(workloadIds);
-
-                        installer.InstallWorkloadPacks(workloadPackToInstall, sdkFeatureBand, context, offlineCache);
-
-                        var recordRepo = _workloadInstaller.GetWorkloadInstallationRecordRepository();
-                        newWorkloadInstallRecords = workloadIds.Except(recordRepo.GetInstalledWorkloads(sdkFeatureBand));
-                        foreach (var workloadId in newWorkloadInstallRecords)
-                        {
-                            recordRepo.WriteWorkloadInstallationRecord(workloadId, sdkFeatureBand);
-                        }
-                    },
-                    rollback: () =>
-                    {
-                        //  InstallWorkloadManifest and InstallWorkloadPacks already handle rolling back their actions, so here we only
-                        //  need to delete the installation records
-
-                        foreach (var workloadId in newWorkloadInstallRecords)
-                        {
-                            _workloadInstaller.GetWorkloadInstallationRecordRepository()
-                                .DeleteWorkloadInstallationRecord(workloadId, sdkFeatureBand);
-                        }
-                    });
-            }
-            else
+                Reporter.WriteLine(LocalizableStrings.RollingBackInstall);
+            };
+            // Don't hide the original error if roll back fails, but do log the rollback failure
+            transaction.RollbackFailed = ex =>
             {
-                var installer = _workloadInstaller.GetWorkloadInstaller();
-                foreach (var workloadId in workloadIds)
+                Reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, ex.Message));
+            };
+
+            transaction.Run(
+                action: context =>
                 {
-                    installer.InstallWorkload(workloadId);
-                }
-            }
+                    bool rollback = !string.IsNullOrWhiteSpace(_fromRollbackDefinition);
+
+                    foreach (var manifestUpdate in manifestsToUpdate)
+                    {
+                        _workloadInstaller.InstallWorkloadManifest(manifestUpdate, context, offlineCache, rollback);
+                    }
+
+                    _workloadResolver.RefreshWorkloadManifests();
+
+                    workloadPackToInstall = GetPacksToInstall(workloadIds);
+
+                    _workloadInstaller.InstallWorkloadPacks(workloadPackToInstall, sdkFeatureBand, context, offlineCache);
+
+                    var recordRepo = _workloadInstaller.GetWorkloadInstallationRecordRepository();
+                    newWorkloadInstallRecords = workloadIds.Except(recordRepo.GetInstalledWorkloads(sdkFeatureBand));
+                    foreach (var workloadId in newWorkloadInstallRecords)
+                    {
+                        recordRepo.WriteWorkloadInstallationRecord(workloadId, sdkFeatureBand);
+                    }
+                },
+                rollback: () =>
+                {
+                    //  InstallWorkloadManifest and InstallWorkloadPacks already handle rolling back their actions, so here we only
+                    //  need to delete the installation records
+
+                    foreach (var workloadId in newWorkloadInstallRecords)
+                    {
+                        _workloadInstaller.GetWorkloadInstallationRecordRepository()
+                            .DeleteWorkloadInstallationRecord(workloadId, sdkFeatureBand);
+                    }
+                });
+
         }
 
         private async Task<IEnumerable<string>> GetPackageDownloadUrlsAsync(IEnumerable<WorkloadId> workloadIds, bool skipManifestUpdate, bool includePreview)
@@ -304,19 +290,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     workloadIds = workloadIds.Concat(installedWorkloads).Distinct();
                 }
 
-                if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
-                {
-                    var installer = _workloadInstaller.GetPackInstaller();
+                var packUrls = GetPacksToInstall(workloadIds)
+                    .Select(pack => PackageDownloader.GetPackageUrl(new PackageId(pack.ResolvedPackageId), new NuGetVersion(pack.Version),
+                        packageSourceLocation: _packageSourceLocation, includePreview: includePreview).GetAwaiter().GetResult());
+                packageUrls.AddRange(packUrls);
 
-                    var packUrls = GetPacksToInstall(workloadIds)
-                        .Select(pack => PackageDownloader.GetPackageUrl(new PackageId(pack.ResolvedPackageId), new NuGetVersion(pack.Version),
-                            packageSourceLocation: _packageSourceLocation, includePreview: includePreview).GetAwaiter().GetResult());
-                    packageUrls.AddRange(packUrls);
-                }
-                else
-                {
-                    throw new NotImplementedException();
-                }
 
                 return packageUrls;
             }
@@ -364,25 +342,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 workloadIds = workloadIds.Concat(installedWorkloads).Distinct();
             }
 
-            if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
-            {
-                var installer = _workloadInstaller.GetPackInstaller();
+            var workloadPacks = GetPacksToInstall(workloadIds);
 
-                var workloadPacks = GetPacksToInstall(workloadIds);
-
-                foreach (var pack in workloadPacks)
-                {
-                    installer.DownloadToOfflineCache(pack, offlineCache, includePreviews);
-                }
-            }
-            else
+            foreach (var pack in workloadPacks)
             {
-                var installer = _workloadInstaller.GetWorkloadInstaller();
-                foreach (var workloadId in workloadIds)
-                {
-                    installer.DownloadToOfflineCache(workloadId, offlineCache, includePreviews);
-                }
+                _workloadInstaller.DownloadToOfflineCache(pack, offlineCache, includePreviews);
             }
+
 
             if (!string.IsNullOrWhiteSpace(tempManifestDir) && Directory.Exists(tempManifestDir))
             {
@@ -392,7 +358,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         private IEnumerable<PackInfo> GetPacksToInstall(IEnumerable<WorkloadId> workloadIds)
         {
-            var installedPacks = _workloadInstaller.GetPackInstaller().GetInstalledPacks(_sdkFeatureBand);
+            var installedPacks = _workloadInstaller.GetInstalledPacks(_sdkFeatureBand);
             return workloadIds
                 .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId))
                 .Distinct()

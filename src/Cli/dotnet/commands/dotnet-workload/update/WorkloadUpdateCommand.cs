@@ -166,52 +166,40 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             IEnumerable<ManifestVersionUpdate> manifestsToUpdate,
             DirectoryPath? offlineCache = null)
         {
-            if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
+
+            var transaction = new CliTransaction();
+
+            transaction.RollbackStarted = () =>
             {
-                var installer = _workloadInstaller.GetPackInstaller();
-                IEnumerable<PackInfo> workloadPackToUpdate = new List<PackInfo>();
-
-                var transaction = new CliTransaction();
-
-                transaction.RollbackStarted = () =>
-                {
-                    Reporter.WriteLine(LocalizableStrings.RollingBackInstall);
-                };
-                // Don't hide the original error if roll back fails, but do log the rollback failure
-                transaction.RollbackFailed = ex =>
-                {
-                    Reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, ex.Message));
-                };
-
-                transaction.Run(
-                    action: context =>
-                    {
-                        bool rollback = !string.IsNullOrWhiteSpace(_fromRollbackDefinition);
-
-                        foreach (var manifestUpdate in manifestsToUpdate)
-                        {
-                            _workloadInstaller.InstallWorkloadManifest(manifestUpdate, context, offlineCache, rollback);
-                        }
-
-                        _workloadResolver.RefreshWorkloadManifests();
-
-                        workloadPackToUpdate = GetUpdatablePacks(installer);
-
-                        installer.InstallWorkloadPacks(workloadPackToUpdate, sdkFeatureBand, context, offlineCache);
-                    },
-                    rollback: () =>
-                    {
-                        //  Nothing to roll back at this level, InstallWorkloadManifest and InstallWorkloadPacks handle the transaction rollback
-                    });
-            }
-            else
+                Reporter.WriteLine(LocalizableStrings.RollingBackInstall);
+            };
+            // Don't hide the original error if roll back fails, but do log the rollback failure
+            transaction.RollbackFailed = ex =>
             {
-                var installer = _workloadInstaller.GetWorkloadInstaller();
-                foreach (var workloadId in workloadIds)
+                Reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, ex.Message));
+            };
+
+            transaction.Run(
+                action: context =>
                 {
-                    installer.InstallWorkload(workloadId);
-                }
-            }
+                    bool rollback = !string.IsNullOrWhiteSpace(_fromRollbackDefinition);
+
+                    foreach (var manifestUpdate in manifestsToUpdate)
+                    {
+                        _workloadInstaller.InstallWorkloadManifest(manifestUpdate, context, offlineCache, rollback);
+                    }
+
+                    _workloadResolver.RefreshWorkloadManifests();
+
+                    var workloadPacksToUpdate = GetUpdatablePacks(_workloadInstaller);
+
+                    _workloadInstaller.InstallWorkloadPacks(workloadPacksToUpdate, sdkFeatureBand, context, offlineCache);
+                },
+                rollback: () =>
+                {
+                    //  Nothing to roll back at this level, InstallWorkloadManifest and InstallWorkloadPacks handle the transaction rollback
+                });
+
         }
 
         private async Task DownloadToOfflineCacheAsync(DirectoryPath offlineCache, bool includePreviews)
@@ -224,19 +212,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 var overlayManifestProvider = new TempDirectoryWorkloadManifestProvider(tempManifestDir, _sdkVersion.ToString());
                 _workloadResolver = WorkloadResolver.Create(overlayManifestProvider, _dotnetPath, _sdkVersion.ToString(), _userProfileDir);
 
-                if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
+                var packsToUpdate = GetUpdatablePacks(_workloadInstaller);
+                foreach (var pack in packsToUpdate)
                 {
-                    var installer = _workloadInstaller.GetPackInstaller();
-                    var packsToUpdate = GetUpdatablePacks(installer);
-                    foreach (var pack in packsToUpdate)
-                    {
-                        installer.DownloadToOfflineCache(pack, new DirectoryPath(_downloadToCacheOption), _includePreviews);
-                    }
+                    _workloadInstaller.DownloadToOfflineCache(pack, new DirectoryPath(_downloadToCacheOption), _includePreviews);
                 }
-                else
-                {
-                    throw new NotImplementedException();
-                }
+ 
             }
             finally
             {
@@ -260,18 +241,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 tempPath = new DirectoryPath(Path.Combine(TempDirectoryPath, "dotnet-manifest-extraction"));
                 await UseTempManifestsToResolvePacksAsync(tempPath.Value, includePreview);
 
-                if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
-                {
-                    var installer = _workloadInstaller.GetPackInstaller();
-                    var packsToUpdate = GetUpdatablePacks(installer)
-                        .Select(packInfo => PackageDownloader.GetPackageUrl(new PackageId(packInfo.ResolvedPackageId), new NuGetVersion(packInfo.Version), _packageSourceLocation).GetAwaiter().GetResult());
-                    packageUrls = packageUrls.Concat(packsToUpdate);
-                    return packageUrls;
-                }
-                else
-                {
-                    throw new NotImplementedException();
-                }
+                var packsToUpdate = GetUpdatablePacks(_workloadInstaller)
+                    .Select(packInfo => PackageDownloader.GetPackageUrl(new PackageId(packInfo.ResolvedPackageId), new NuGetVersion(packInfo.Version), _packageSourceLocation).GetAwaiter().GetResult());
+                packageUrls = packageUrls.Concat(packsToUpdate);
+                return packageUrls;
             }
             finally
             {
@@ -316,7 +289,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             }
         }
 
-        private IEnumerable<PackInfo> GetUpdatablePacks(IWorkloadPackInstaller installer)
+        private IEnumerable<PackInfo> GetUpdatablePacks(IInstaller installer)
         {
             var currentFeatureBand = new SdkFeatureBand(_sdkVersion);
             var workloads = GetUpdatableWorkloads();
