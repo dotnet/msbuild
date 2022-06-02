@@ -26,6 +26,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public bool FailingGarbageCollection;
         private readonly string FailingPack;
 
+        public IWorkloadResolver WorkloadResolver { get; set; }
+
         public int ExitCode => 0;
 
         public MockPackWorkloadInstaller(string failingWorkload = null, string failingPack = null, bool failingRollback = false, IList<WorkloadId> installedWorkloads = null, 
@@ -38,17 +40,30 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             FailingGarbageCollection = failingGarbageCollection;
         }
 
-        public void InstallWorkloadPacks(IEnumerable<PackInfo> packInfos, SdkFeatureBand sdkFeatureBand, ITransactionContext transactionContext, DirectoryPath? offlineCache = null)
+        public void InstallWorkloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, ITransactionContext transactionContext, DirectoryPath? offlineCache = null)
         {
+            List<PackInfo> packs = new List<PackInfo>();
+
             transactionContext.Run(action: () =>
             {
-                foreach (var packInfo in packInfos)
+                CachePath = offlineCache?.Value;
+
+                if (WorkloadResolver != null)
                 {
-                    InstalledPacks = InstalledPacks.Append(packInfo).ToList();
-                    CachePath = offlineCache?.Value;
-                    if (packInfo.Id.ToString().Equals(FailingPack))
+                    packs = workloadIds
+                        .SelectMany(workloadId => WorkloadResolver.GetPacksInWorkload(workloadId))
+                        .Distinct()
+                        .Select(packId => WorkloadResolver.TryGetPackInfo(packId))
+                        .Where(pack => pack != null).ToList();
+
+
+                    foreach (var packInfo in packs)
                     {
-                        throw new Exception($"Failing pack: {packInfo.Id}");
+                        InstalledPacks = InstalledPacks.Append(packInfo).ToList();
+                        if (packInfo.Id.ToString().Equals(FailingPack))
+                        {
+                            throw new Exception($"Failing pack: {packInfo.Id}");
+                        }
                     }
                 }
             },
@@ -59,14 +74,11 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                     throw new Exception("Rollback failure");
                 }
 
-                RolledBackPacks.AddRange(packInfos);
+                RolledBackPacks.AddRange(packs);
             });
         }
 
-        public void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, ITransactionContext context, DirectoryPath? offlineCache = null)
-        {
-            InstallWorkloadPacks(new[] { packInfo }, sdkFeatureBand, context, offlineCache);
-        }
+        public void RepairWorkloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null) => throw new NotImplementedException();
 
         public void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null)
         {

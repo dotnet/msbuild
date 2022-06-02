@@ -246,9 +246,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                     _workloadResolver.RefreshWorkloadManifests();
 
-                    workloadPackToInstall = GetPacksToInstall(workloadIds);
-
-                    _workloadInstaller.InstallWorkloadPacks(workloadPackToInstall, sdkFeatureBand, context, offlineCache);
+                    _workloadInstaller.InstallWorkloads(workloadIds, sdkFeatureBand, context, offlineCache);
 
                     var recordRepo = _workloadInstaller.GetWorkloadInstallationRecordRepository();
                     newWorkloadInstallRecords = workloadIds.Except(recordRepo.GetInstalledWorkloads(sdkFeatureBand));

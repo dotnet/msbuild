@@ -71,19 +71,35 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return _installationRecordRepository;
         }
 
-        public void InstallWorkloadPacks(IEnumerable<PackInfo> packInfos, SdkFeatureBand sdkFeatureBand, ITransactionContext transactionContext, DirectoryPath? offlineCache = null)
+        IEnumerable<PackInfo> GetPacksInWorkloads(IEnumerable<WorkloadId> workloadIds)
         {
+            var packs = workloadIds
+                .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId))
+                .Distinct()
+                .Select(packId => _workloadResolver.TryGetPackInfo(packId))
+                .Where(pack => pack != null);
+
+            return packs;
+        }
+
+
+        public void InstallWorkloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, ITransactionContext transactionContext, DirectoryPath? offlineCache = null)
+        {
+            var packInfos = GetPacksInWorkloads(workloadIds);
+
             foreach (var packInfo in packInfos)
             {
-                _reporter.WriteLine(string.Format(LocalizableStrings.InstallingPackVersionMessage, packInfo.Id, packInfo.Version));
+                _reporter.WriteLine(string.Format(LocalizableStrings.InstallingPackVersionMessage, packInfo.ResolvedPackageId, packInfo.Version));
                 var tempDirsToDelete = new List<string>();
                 var tempFilesToDelete = new List<string>();
+                bool shouldRollBackPack = false;
 
                 transactionContext.Run(
                     action: () =>
                     {
                         if (!PackIsInstalled(packInfo))
                         {
+                            shouldRollBackPack = true;
                             string packagePath;
                             if (offlineCache == null || !offlineCache.HasValue)
                             {
@@ -95,7 +111,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             }
                             else
                             {
-                                _reporter.WriteLine(string.Format(LocalizableStrings.UsingCacheForPackInstall, packInfo.Id, packInfo.Version, offlineCache));
+                                _reporter.WriteLine(string.Format(LocalizableStrings.UsingCacheForPackInstall, packInfo.ResolvedPackageId, packInfo.Version, offlineCache));
                                 packagePath = Path.Combine(offlineCache.Value.Value, $"{packInfo.ResolvedPackageId}.{packInfo.Version}.nupkg");
                                 if (!File.Exists(packagePath))
                                 {
@@ -114,7 +130,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             }
                             else
                             {
-                                var tempExtractionDir = Path.Combine(_tempPackagesDir.Value, $"{packInfo.Id}-{packInfo.Version}-extracted");
+                                var tempExtractionDir = Path.Combine(_tempPackagesDir.Value, $"{packInfo.ResolvedPackageId}-{packInfo.Version}-extracted");
                                 tempDirsToDelete.Add(tempExtractionDir);
                                 Directory.CreateDirectory(tempExtractionDir);
                                 var packFiles = _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(tempExtractionDir)).GetAwaiter().GetResult();
@@ -124,7 +140,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         }
                         else
                         {
-                            _reporter.WriteLine(string.Format(LocalizableStrings.WorkloadPackAlreadyInstalledMessage, packInfo.Id, packInfo.Version));
+                            _reporter.WriteLine(string.Format(LocalizableStrings.WorkloadPackAlreadyInstalledMessage, packInfo.ResolvedPackageId, packInfo.Version));
                         }
 
                         WritePackInstallationRecord(packInfo, sdkFeatureBand);
@@ -133,11 +149,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     {
                         try
                         {
-                            _reporter.WriteLine(string.Format(LocalizableStrings.RollingBackPackInstall, packInfo.Id));
-                            DeletePackInstallationRecord(packInfo, sdkFeatureBand);
-                            if (!PackHasInstallRecords(packInfo))
+                            if (shouldRollBackPack)
                             {
-                                DeletePack(packInfo);
+                                _reporter.WriteLine(string.Format(LocalizableStrings.RollingBackPackInstall, packInfo.ResolvedPackageId));
+                                DeletePackInstallationRecord(packInfo, sdkFeatureBand);
+                                if (!PackHasInstallRecords(packInfo))
+                                {
+                                    DeletePack(packInfo);
+                                }
                             }
                         }
                         catch (Exception e)
@@ -167,9 +186,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, ITransactionContext transactionContext, DirectoryPath? offlineCache = null)
+        public void RepairWorkloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
         {
-            InstallWorkloadPacks(new[] { packInfo }, sdkFeatureBand, transactionContext, offlineCache);
+            //  TODO: Actually re-extract the packs to fix any corrupted files. 
+            CliTransaction.RunNew(context => InstallWorkloads(workloadIds, sdkFeatureBand, context, offlineCache));
         }
 
         public void InstallWorkloadManifest(ManifestVersionUpdate manifestUpdate, ITransactionContext transactionContext, DirectoryPath? offlineCache = null, bool isRollback = false)

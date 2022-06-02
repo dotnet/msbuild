@@ -97,17 +97,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
 
         private void ReinstallWorkloadsBasedOnCurrentManifests(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand)
         {
-
-            var packsToInstall = workloadIds
-                .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId))
-                .Distinct()
-                .Select(packId => _workloadResolver.TryGetPackInfo(packId))
-                .Where(pack => pack != null);
-
-            foreach (var packId in packsToInstall)
-            {
-                CliTransaction.RunNew(context => _workloadInstaller.RepairWorkloadPack(packId, sdkFeatureBand, context));
-            }
+            _workloadInstaller.RepairWorkloads(workloadIds, sdkFeatureBand);
         }
     }
 }

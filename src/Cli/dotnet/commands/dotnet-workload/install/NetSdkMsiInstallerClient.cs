@@ -345,24 +345,24 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             UpdateDependent(InstallRequestType.AddDependent, msi.Manifest.ProviderKeyName, _dependent);
         }
 
-        public void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, ITransactionContext transactionContext, DirectoryPath? offlineCache = null)
+        public void RepairWorkloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
         {
             try
             {
                 ReportPendingReboot();
 
-                // Determine the MSI payload package ID based on the host architecture, pack ID and pack version.
-                string msiPackageId = GetMsiPackageId(packInfo);
+                foreach (var aquirableMsi in GetMsisForWorkloads(workloadIds))
+                {
+                    // Retrieve the payload from the MSI package cache.
+                    MsiPayload msi = GetCachedMsiPayload(aquirableMsi.NuGetPackageId, aquirableMsi.NuGetPackageVersion, offlineCache);
+                    VerifyPackage(msi);
+                    DetectState state = DetectPackage(msi, out Version installedVersion);
+                    InstallAction plannedAction = PlanPackage(msi, state, InstallAction.Repair, installedVersion, out _);
+                    ExecutePackage(msi, plannedAction);
 
-                // Retrieve the payload from the MSI package cache.
-                MsiPayload msi = GetCachedMsiPayload(msiPackageId, packInfo.Version, offlineCache);
-                VerifyPackage(msi);
-                DetectState state = DetectPackage(msi, out Version installedVersion);
-                InstallAction plannedAction = PlanPackage(msi, state, InstallAction.Repair, installedVersion, out _);
-                ExecutePackage(msi, plannedAction);
-
-                // Update the reference count against the MSI.
-                UpdateDependent(InstallRequestType.AddDependent, msi.Manifest.ProviderKeyName, _dependent);
+                    // Update the reference count against the MSI.
+                    UpdateDependent(InstallRequestType.AddDependent, msi.Manifest.ProviderKeyName, _dependent);
+                }
             }
             catch (Exception e)
             {
@@ -371,14 +371,16 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public void InstallWorkloadPacks(IEnumerable<PackInfo> packInfos, SdkFeatureBand sdkFeatureBand, ITransactionContext transactionContext, DirectoryPath? offlineCache = null)
+        public void InstallWorkloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, ITransactionContext transactionContext, DirectoryPath? offlineCache = null)
         {
             ReportPendingReboot();
 
-            var msisToInstall = GetMsisToInstall(packInfos);
+            var msisToInstall = GetMsisForWorkloads(workloadIds);
 
             foreach (var msiToInstall in msisToInstall)
             {
+                bool shouldRollBackPack = false;
+
                 transactionContext.Run(action: () =>
                 {
                     try
@@ -388,6 +390,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         VerifyPackage(msi);
                         DetectState state = DetectPackage(msi, out Version installedVersion);
                         InstallAction plannedAction = PlanPackage(msi, state, InstallAction.Install, installedVersion, out _);
+                        if (plannedAction == InstallAction.Install)
+                        {
+                            shouldRollBackPack = true;
+                        }
                         ExecutePackage(msi, plannedAction);
 
                         // Update the reference count against the MSI.
@@ -401,7 +407,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 },
                 rollback: () =>
                 {
-                    RollBackMsiInstall(msiToInstall);
+                    if (shouldRollBackPack)
+                    {
+                        RollBackMsiInstall(msiToInstall);
+                    }
                 });
                 
             }

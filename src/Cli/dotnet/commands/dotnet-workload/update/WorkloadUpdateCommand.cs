@@ -191,9 +191,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
 
                     _workloadResolver.RefreshWorkloadManifests();
 
-                    var workloadPacksToUpdate = GetUpdatablePacks(_workloadInstaller);
+                    var workloads = GetUpdatableWorkloads();
 
-                    _workloadInstaller.InstallWorkloadPacks(workloadPacksToUpdate, sdkFeatureBand, context, offlineCache);
+                    _workloadInstaller.InstallWorkloads(workloads, sdkFeatureBand, context, offlineCache);
                 },
                 rollback: () =>
                 {

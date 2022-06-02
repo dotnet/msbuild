@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
@@ -66,8 +67,19 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             return ret;
         }
+        List<AcquirableMsi> GetMsisForWorkloads(IEnumerable<WorkloadId> workloads)
+        {
+            var packs = workloads
+                .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId))
+                .Distinct()
+                .Select(packId => _workloadResolver.TryGetPackInfo(packId))
+                .Where(pack => pack != null);
 
-        List<AcquirableMsi> GetMsisToInstall(IEnumerable<PackInfo> packInfos)
+            return GetMsisForPacks(packs);
+        }
+
+
+        List<AcquirableMsi> GetMsisForPacks(IEnumerable<PackInfo> packInfos)
         {
             List<AcquirableMsi> msisToInstall = new();
             HashSet<(string packId, string packVersion)> packsProcessed = new();
