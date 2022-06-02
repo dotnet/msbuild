@@ -1082,7 +1082,8 @@ namespace Microsoft.Build.CommandLine
                     toolsetDefinitionLocations,
                     cpuCount,
                     onlyLogCriticalEvents,
-                    loadProjectsReadOnly: !preprocessOnly
+                    loadProjectsReadOnly: !preprocessOnly,
+                    reuseProjectRootElementCache: s_isServerNode
                 );
 
                 if (toolsVersion != null && !projectCollection.ContainsToolset(toolsVersion))
@@ -1315,7 +1316,14 @@ namespace Microsoft.Build.CommandLine
                 FileUtilities.ClearCacheDirectory();
                 projectCollection?.Dispose();
 
-                BuildManager.DefaultBuildManager.Dispose();
+                // Build manager shall be reused for all build sessions.
+                // If, for one reason or another, this behavior needs to change in future
+                // please be aware that current code creates and keep running  InProcNode even
+                // when its owning default build manager is disposed resulting in leek of memory and threads.
+                if (!s_isServerNode)
+                {
+                    BuildManager.DefaultBuildManager.Dispose();
+                }
             }
 
             return success;
