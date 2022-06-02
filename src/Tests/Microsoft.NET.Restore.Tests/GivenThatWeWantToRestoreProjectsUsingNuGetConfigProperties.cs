@@ -88,7 +88,7 @@ namespace Microsoft.NET.Restore.Tests
         [InlineData("netcoreapp1.0", "1.0", false)]
         [InlineData("netcoreapp1.1", "1.1", false)]
         [InlineData("netstandard2.0", "2.0", true)]
-        [InlineData(ToolsetInfo.CurrentTargetFramework, $"{ToolsetInfo.CurrentTargetFrameworkVersion}app", true)]
+        [InlineData("netcoreapp2.0", "2.0app", true)]
         public void I_can_disable_1_x_implicit_msbuild_nuget_config(string frameworks, string projectPrefix, bool shouldExecutePass)
         {
             string testProjectName = $"{projectPrefix}1xDisabledFallback";
