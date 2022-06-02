@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.MSBuildSdkResolver;
 using Microsoft.DotNet.NativeWrapper;
 using Microsoft.TemplateEngine.Abstractions.Components;
 using Microsoft.TemplateEngine.Utils;
@@ -27,10 +28,24 @@ namespace Microsoft.DotNet.Tools.New
 
         public Task<IEnumerable<string>> GetInstalledVersionsAsync(CancellationToken cancellationToken)
         {
-            var dotnetDir = CommonOptions.GetDotnetExeDirectory();
-            // sdks contain the full path, version is the last part
-            //  details: https://github.com/dotnet/runtime/blob/5098d45cc1bf9649fab5df21f227da4b80daa084/src/native/corehost/fxr/sdk_info.cpp#L76
-            IEnumerable<string> sdks = NETCoreSdkResolverNativeWrapper.GetAvailableSdks(dotnetDir).Select(Path.GetFileName);
+            string dotnetDir = CommonOptions.GetDotnetExeDirectory();
+            IEnumerable<string> sdks;
+            try
+            {
+                // sdks contain the full path, version is the last part
+                //  details: https://github.com/dotnet/runtime/blob/5098d45cc1bf9649fab5df21f227da4b80daa084/src/native/corehost/fxr/sdk_info.cpp#L76
+                sdks = NETCoreSdkResolverNativeWrapper.GetAvailableSdks(dotnetDir).Select(Path.GetFileName);
+            }
+            // The NETCoreSdkResolverNativeWrapper is not properly initialized (case of OSx in test env) - let's manually perform what
+            //  sdk_info::get_all_sdk_infos does
+            catch (Exception e) when(e is HostFxrRuntimePropertyNotSetException or HostFxrNotFoundException)
+            {
+                string sdkDir = Path.Combine(dotnetDir, "sdk");
+                sdks =
+                    Directory.Exists(sdkDir)
+                        ? Directory.GetDirectories(sdkDir).Select(Path.GetFileName).Where(IsValidFxVersion)
+                        : Enumerable.Empty<string>();
+            }
             return Task.FromResult(sdks);
         }
 
@@ -45,6 +60,11 @@ namespace Microsoft.DotNet.Tools.New
             {
                 return string.Format(LocalizableStrings.SdkInfoProvider_Message_InstallSdk, supportedVersions.ToCsvString());
             }
+        }
+
+        private static bool IsValidFxVersion(string versionString)
+        {
+            return FXVersion.TryParse(versionString, out _);
         }
     }
 }
