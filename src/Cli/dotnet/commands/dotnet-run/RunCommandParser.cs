@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli
             new ForwardedOption<IEnumerable<string>>(new string[] { "--property", "-p" }, LocalizableStrings.PropertyOptionDescription)
                 .SetForwardingFunction((values, parseResult) => parseResult.GetRunCommandPropertyValues().Select(value => $"-p:{value}"));
 
-        public static readonly Option<string> LaunchProfileOption = new Option<string>("--launch-profile", LocalizableStrings.CommandOptionLaunchProfileDescription);
+        public static readonly Option<string> LaunchProfileOption = new Option<string>(new string[] { "--launch-profile", "-lp" }, LocalizableStrings.CommandOptionLaunchProfileDescription);
 
         public static readonly Option<bool> NoLaunchProfileOption = new Option<bool>("--no-launch-profile", LocalizableStrings.CommandOptionNoLaunchProfileDescription);
 
