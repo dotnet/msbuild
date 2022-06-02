@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Xml;
 
@@ -1712,8 +1713,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
            );
         }
-#if FEATURE_WIN32_REGISTRY
+
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void RegistryPropertyString()
         {
             try
@@ -1735,6 +1738,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void RegistryPropertyBinary()
         {
             try
@@ -1759,6 +1764,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void RegistryPropertyDWord()
         {
             try
@@ -1780,6 +1787,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void RegistryPropertyExpandString()
         {
             try
@@ -1802,6 +1811,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void RegistryPropertyQWord()
         {
             try
@@ -1823,6 +1834,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void RegistryPropertyMultiString()
         {
             try
@@ -1842,7 +1855,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Registry.CurrentUser.DeleteSubKey(@"Software\Microsoft\MSBuild_test");
             }
         }
-#endif
 
         [Fact]
         public void TestItemSpecModiferEscaping()
@@ -3471,8 +3483,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(String.Empty, result);
         }
 
-#if FEATURE_WIN32_REGISTRY
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void PropertyFunctionGetRegitryValue()
         {
             try
@@ -3496,6 +3509,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void PropertyFunctionGetRegitryValueDefault()
         {
             try
@@ -3519,6 +3534,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void PropertyFunctionGetRegistryValueFromView1()
         {
             try
@@ -3542,6 +3559,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void PropertyFunctionGetRegistryValueFromView2()
         {
             try
@@ -3563,7 +3582,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Registry.CurrentUser.DeleteSubKey(@"Software\Microsoft\MSBuild_test");
             }
         }
-#endif
 
         /// <summary>
         /// Expand a property function that references item metadata
@@ -3644,6 +3662,44 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     }
                 }
             }
+        }
+
+        [Theory]
+        [InlineData("easycase")]
+        [InlineData("")]
+        [InlineData("\"\n()\tsdfIR$%#*;==")]
+        public void TestBase64Conversion(string testCase)
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new();
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new(pg, FileSystems.Default);
+            string intermediate = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertToBase64('{testCase}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
+            intermediate.Trim('=').All(c => char.IsLetterOrDigit(c) || c == '+' || c == '/').ShouldBeTrue();
+            string original = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertFromBase64('{intermediate}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
+            original.ShouldBe(testCase);
+        }
+
+        [Theory]
+        [InlineData("easycase", "ZWFzeWNhc2U=")]
+        [InlineData("", "")]
+        [InlineData("\"\n()\tsdfIR$%#*;==", "IgooKQlzZGZJUiQlIyo7PT0=")]
+        public void TestExplicitToBase64Conversion(string plaintext, string base64)
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new();
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new(pg, FileSystems.Default);
+            string intermediate = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertToBase64('{plaintext}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
+            intermediate.ShouldBe(base64);
+        }
+
+        [Theory]
+        [InlineData("easycase", "ZWFzeWNhc2U=")]
+        [InlineData("", "")]
+        [InlineData("\"\n()\tsdfIR$%#*;==", "IgooKQlzZGZJUiQlIyo7PT0=")]
+        public void TestExplicitFromBase64Conversion(string plaintext, string base64)
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new();
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new(pg, FileSystems.Default);
+            string original = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertFromBase64('{base64}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
+            original.ShouldBe(plaintext);
         }
 
         /// <summary>
@@ -3863,12 +3919,10 @@ $(
             }
 #endif
 
-#if FEATURE_WIN32_REGISTRY
             if (NativeMethodsShared.IsWindows)
             {
                 errorTests.Add("$(Registry:X)");
             }
-#endif
 
             if (!NativeMethodsShared.IsWindows)
             {

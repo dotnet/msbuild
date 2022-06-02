@@ -19,9 +19,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-#if FEATURE_WIN32_REGISTRY
 using Microsoft.Win32;
-#endif
 using AvailableStaticMethods = Microsoft.Build.Internal.AvailableStaticMethods;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -1190,12 +1188,11 @@ namespace Microsoft.Build.Evaluation
                         }
                         else if ((expression.Length - (propertyStartIndex + 2)) > 9 && tryExtractRegistryFunction && s_invariantCompareInfo.IndexOf(expression, "Registry:", propertyStartIndex + 2, 9, CompareOptions.OrdinalIgnoreCase) == propertyStartIndex + 2)
                         {
-                            // if FEATURE_WIN32_REGISTRY is off, treat the property value as if there's no Registry value at that location, rather than fail
                             propertyBody = expression.Substring(propertyStartIndex + 2, propertyEndIndex - propertyStartIndex - 2);
 
                             // If the property body starts with any of our special objects, then deal with them
                             // This is a registry reference, like $(Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation)
-                            propertyValue = ExpandRegistryValue(propertyBody, elementLocation); // This func returns an empty string if not FEATURE_WIN32_REGISTRY
+                            propertyValue = ExpandRegistryValue(propertyBody, elementLocation); // This func returns an empty string if not on Windows
                         }
 
                         // Compat hack: as a special case, $(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\9.0\VSTSDB@VSTSDBDirectory) should return String.Empty
@@ -1571,7 +1568,6 @@ namespace Microsoft.Build.Evaluation
                 return value;
             }
 
-#if FEATURE_WIN32_REGISTRY
             /// <summary>
             /// Given a string like "Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation", return the value at that location
             /// in the registry. If the value isn't found, returns String.Empty.
@@ -1582,6 +1578,16 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private static string ExpandRegistryValue(string registryExpression, IElementLocation elementLocation)
             {
+#if RUNTIME_TYPE_NETCORE
+                // .NET Core MSBuild used to always return empty, so match that behavior
+                // on non-Windows (no registry), and with a changewave (in case someone
+                // had a registry property and it breaks when it lights up).
+                if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+                {
+                    return string.Empty;
+                }
+#endif
+
                 // Remove "Registry:" prefix
                 string registryLocation = registryExpression.Substring(9);
 
@@ -1655,15 +1661,6 @@ namespace Microsoft.Build.Evaluation
 
                 return result;
             }
-#else
-            /// <summary>
-            /// Given a string like "Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation", returns String.Empty, as FEATURE_WIN32_REGISTRY is off.
-            /// </summary>
-            private static string ExpandRegistryValue(string registryExpression, IElementLocation elementLocation)
-            {
-                return String.Empty;
-            }
-#endif
         }
 
         /// <summary>
@@ -3509,8 +3506,11 @@ namespace Microsoft.Build.Evaluation
 
                     // If the result of the function call is a string, then we need to escape the result
                     // so that we maintain the "engine contains escaped data" state.
-                    // The exception is that the user is explicitly calling MSBuild::Unescape or MSBuild::Escape
-                    if (functionResult is string functionResultString && !String.Equals("Unescape", _methodMethodName, StringComparison.OrdinalIgnoreCase) && !String.Equals("Escape", _methodMethodName, StringComparison.OrdinalIgnoreCase))
+                    // The exception is that the user is explicitly calling MSBuild::Unescape, MSBuild::Escape, or ConvertFromBase64
+                    if (functionResult is string functionResultString &&
+                        !String.Equals("Unescape", _methodMethodName, StringComparison.OrdinalIgnoreCase) &&
+                        !String.Equals("Escape", _methodMethodName, StringComparison.OrdinalIgnoreCase) &&
+                        !String.Equals("ConvertFromBase64", _methodMethodName, StringComparison.OrdinalIgnoreCase))
                     {
                         functionResult = EscapingUtilities.Escape(functionResultString);
                     }
@@ -4071,6 +4071,22 @@ namespace Microsoft.Build.Evaluation
                             if (TryGetArgs(args, out string arg1, out int arg2))
                             {
                                 returnVal = IntrinsicFunctions.GetTargetPlatformVersion(arg1, arg2);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.ConvertToBase64), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.ConvertToBase64(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.ConvertFromBase64), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.ConvertFromBase64(arg0);
                                 return true;
                             }
                         }

@@ -133,24 +133,6 @@ namespace Microsoft.Build.UnitTests
             lexer._errorState.ShouldBeFalse();
         }
 
-        [Fact]
-        public void SpacePropertyOptOutWave16_10()
-        {
-            using TestEnvironment env = TestEnvironment.Create();
-            ChangeWaves.ResetStateForTests();
-            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave16_10.ToString());
-            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-
-            Scanner lexer = new Scanner("$(x )", ParserOptions.AllowProperties);
-            AdvanceToScannerError(lexer);
-            Assert.Null(lexer.UnexpectedlyFound);
-
-            lexer = new Scanner("$( x)", ParserOptions.AllowProperties);
-            AdvanceToScannerError(lexer);
-            Assert.Null(lexer.UnexpectedlyFound);
-            ChangeWaves.ResetStateForTests();
-        }
-
         /// <summary>
         /// Tests the special errors for "@(" and "@x" and similar cases.
         /// </summary>

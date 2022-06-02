@@ -58,6 +58,12 @@ namespace Microsoft.Build.BackEnd
             _toolsVersion = MSBuildConstants.CurrentToolsVersion;
             _globalProperties = globalProperties;
         }
+        public ConfigurationMetadata(string projectFullPath, PropertyDictionary<ProjectPropertyInstance> globalProperties, string previousPlatform, string previousPlatformLookupTable, bool isSetPlatformHardCoded) : this(projectFullPath, globalProperties)
+        {
+            PreviousPlatform = previousPlatform;
+            PreviousPlatformLookupTable = previousPlatformLookupTable;
+            IsSetPlatformHardCoded = isSetPlatformHardCoded;
+        }
 
         public ConfigurationMetadata(ITranslator translator)
         {
@@ -80,6 +86,11 @@ namespace Microsoft.Build.BackEnd
         /// or a Project tag, or the default.
         /// </summary>
         public string ToolsVersion => _toolsVersion;
+
+        public string PreviousPlatform { get; } = "";
+
+        public string PreviousPlatformLookupTable { get; } = "";
+        public bool IsSetPlatformHardCoded { get; } = false;
 
         private PropertyDictionary<ProjectPropertyInstance> _globalProperties;
 
@@ -167,7 +178,9 @@ namespace Microsoft.Build.BackEnd
 
             return ProjectFullPath.Equals(other.ProjectFullPath, StringComparison.OrdinalIgnoreCase) &&
                    ToolsVersion.Equals(other.ToolsVersion, StringComparison.OrdinalIgnoreCase) &&
-                   GlobalProperties.Equals(other.GlobalProperties);
+                   GlobalProperties.Equals(other.GlobalProperties) &&
+                   PreviousPlatform.Equals(other.PreviousPlatform, StringComparison.OrdinalIgnoreCase) &&
+                   PreviousPlatformLookupTable.Equals(other.PreviousPlatformLookupTable, StringComparison.OrdinalIgnoreCase);
         }
 
         private string DebugString()

@@ -7,6 +7,7 @@ package name=Microsoft.Build
 
 vs.dependencies
   vs.dependency id=Microsoft.Build.UnGAC
+  vs.dependency id=Microsoft.Build.Arm64
   vs.dependency id=Microsoft.VisualStudio.PackageGroup.NuGet
 
 vs.relatedProcessFiles
@@ -18,7 +19,6 @@ vs.relatedProcessFiles
   vs.relatedProcessFile Path="[InstallDir]\MSBuild\Current\Bin\amd64\Microsoft.Build.Framework.dll"
   vs.relatedProcessFile Path="[InstallDir]\MSBuild\Current\Bin\amd64\Microsoft.Build.Tasks.Core.dll"
   vs.relatedProcessFile Path="[InstallDir]\MSBuild\Current\Bin\amd64\Microsoft.Build.Utilities.Core.dll"
-  vs.relatedProcessFile Path="[InstallDir]\MSBuild\Current\Bin\arm64\Microsoft.Build.Tasks.Core.dll"
 
 folder InstallDir:\MSBuild\Current
   file source=$(X86BinPath)Microsoft.Common.props
@@ -308,70 +308,6 @@ folder InstallDir:\MSBuild\Current\Bin\amd64\zh-Hant
   file source=$(X64BinPath)zh-Hant\Microsoft.Build.Utilities.Core.resources.dll vs.file.ngenArchitecture=all
   file source=$(X64BinPath)zh-Hant\MSBuild.resources.dll vs.file.ngenArchitecture=all
   file source=$(TaskHostX64BinPath)zh-Hant\MSBuildTaskHost.resources.dll vs.file.ngenArchitecture=all
-
-folder InstallDir:\MSBuild\Current\Bin\arm64
-  file source=$(Arm64BinPath)MSBuild.exe vs.file.ngenArchitecture=x64
-  file source=$(Arm64BinPath)MSBuild.exe.config
-
-  file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
-  file source=$(X86BinPath)Microsoft.Common.CrossTargeting.targets
-  file source=$(X86BinPath)Microsoft.Common.overridetasks
-  file source=$(X86BinPath)Microsoft.Common.targets
-  file source=$(X86BinPath)Microsoft.Common.tasks
-  file source=$(X86BinPath)Microsoft.Managed.targets
-  file source=$(X86BinPath)Microsoft.Managed.Before.targets
-  file source=$(X86BinPath)Microsoft.Managed.After.targets
-  file source=$(X86BinPath)Microsoft.CSharp.CurrentVersion.targets
-  file source=$(X86BinPath)Microsoft.CSharp.CrossTargeting.targets
-  file source=$(X86BinPath)Microsoft.CSharp.targets
-  file source=$(X86BinPath)Microsoft.Net.props
-  file source=$(X86BinPath)Microsoft.NetFramework.CurrentVersion.props
-  file source=$(X86BinPath)Microsoft.NetFramework.CurrentVersion.targets
-  file source=$(X86BinPath)Microsoft.NetFramework.props
-  file source=$(X86BinPath)Microsoft.NetFramework.targets
-  file source=$(X86BinPath)Microsoft.VisualBasic.CurrentVersion.targets
-  file source=$(X86BinPath)Microsoft.VisualBasic.CrossTargeting.targets
-  file source=$(X86BinPath)Microsoft.VisualBasic.targets
-  file source=$(X86BinPath)MSBuild.rsp
-  file source=$(X86BinPath)Workflow.targets
-  file source=$(X86BinPath)Workflow.VisualBasic.targets
-  file source=$(X86BinPath)Microsoft.Xaml.targets
-  file source=$(X86BinPath)Microsoft.Data.Entity.targets
-  file source=$(X86BinPath)Microsoft.ServiceModel.targets
-  file source=$(X86BinPath)Microsoft.WinFx.targets
-  file source=$(X86BinPath)Microsoft.WorkflowBuildExtensions.targets
-
-folder InstallDir:\MSBuild\Current\Bin\arm64\MSBuild
-  file source=$(X86BinPath)\MSBuild\Microsoft.Build.Core.xsd
-  file source=$(X86BinPath)\MSBuild\Microsoft.Build.CommonTypes.xsd
-
-folder InstallDir:\MSBuild\Current\Bin\arm64\cs
-  file source=$(Arm64BinPath)cs\MSBuild.resources.dll vs.file.ngenArchitecture=all
-folder InstallDir:\MSBuild\Current\Bin\arm64\de
-  file source=$(Arm64BinPath)de\MSBuild.resources.dll vs.file.ngenArchitecture=all
-folder InstallDir:\MSBuild\Current\Bin\arm64\es
-  file source=$(Arm64BinPath)es\MSBuild.resources.dll vs.file.ngenArchitecture=all
-folder InstallDir:\MSBuild\Current\Bin\arm64\fr
-  file source=$(Arm64BinPath)fr\MSBuild.resources.dll vs.file.ngenArchitecture=all
-folder InstallDir:\MSBuild\Current\Bin\arm64\it
-  file source=$(Arm64BinPath)it\MSBuild.resources.dll vs.file.ngenArchitecture=all
-folder InstallDir:\MSBuild\Current\Bin\arm64\ja
-  file source=$(Arm64BinPath)ja\MSBuild.resources.dll vs.file.ngenArchitecture=all
-folder InstallDir:\MSBuild\Current\Bin\arm64\ko
-  file source=$(Arm64BinPath)ko\MSBuild.resources.dll vs.file.ngenArchitecture=all
-folder InstallDir:\MSBuild\Current\Bin\arm64\pl
-  file source=$(Arm64BinPath)pl\MSBuild.resources.dll vs.file.ngenArchitecture=all
-folder InstallDir:\MSBuild\Current\Bin\arm64\pt-BR
-  file source=$(Arm64BinPath)pt-BR\MSBuild.resources.dll vs.file.ngenArchitecture=all
-folder InstallDir:\MSBuild\Current\Bin\arm64\ru
-  file source=$(Arm64BinPath)ru\MSBuild.resources.dll vs.file.ngenArchitecture=all
-folder InstallDir:\MSBuild\Current\Bin\arm64\tr
-  file source=$(Arm64BinPath)tr\MSBuild.resources.dll vs.file.ngenArchitecture=all
-folder InstallDir:\MSBuild\Current\Bin\arm64\zh-Hans
-  file source=$(Arm64BinPath)zh-Hans\MSBuild.resources.dll vs.file.ngenArchitecture=all
-folder InstallDir:\MSBuild\Current\Bin\arm64\zh-Hant
-  file source=$(Arm64BinPath)zh-Hant\MSBuild.resources.dll vs.file.ngenArchitecture=all
 
 folder InstallDir:\Common7\IDE\CommonExtensions\MSBuild
   file source=$(SourceDir)Package\MSBuild.VSSetup\MSBuild.clientenabledpkg

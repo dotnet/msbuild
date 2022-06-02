@@ -1,7 +1,1 @@
-Microsoft.Build.Construction.ProjectUsingTaskElement.Override.get -> string
-Microsoft.Build.Construction.ProjectUsingTaskElement.Override.set -> void
-Microsoft.Build.Construction.ProjectUsingTaskElement.OverrideLocation.get -> Microsoft.Build.Construction.ElementLocation
-Microsoft.Build.Execution.BuildParameters.BuildThreadPriority.get -> System.Threading.ThreadPriority
-Microsoft.Build.Execution.BuildParameters.BuildThreadPriority.set -> void
-Microsoft.Build.Execution.BuildParameters.WarningsNotAsErrors.get -> System.Collections.Generic.ISet<string>
-Microsoft.Build.Execution.BuildParameters.WarningsNotAsErrors.set -> void
+Microsoft.Build.Execution.HostServices.RegisterHostObject(string projectFile, string targetName, string taskName, string monikerName) -> void

@@ -2983,4 +2983,3 @@ namespace Microsoft.Build.UnitTests.Definition
     }
 #endif
 }
-

@@ -34,6 +34,7 @@ using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
 using Microsoft.NET.StringTools;
+using System.ComponentModel;
 
 #nullable disable
 
@@ -175,6 +176,11 @@ namespace Microsoft.Build.Execution
         /// The next build submission id.
         /// </summary>
         private int _nextBuildSubmissionId;
+
+        /// <summary>
+        /// The last BuildParameters used for building.
+        /// </summary>
+        private bool? _previousLowPriority = null;
 
         /// <summary>
         /// Mapping of unnamed project instances to the file names assigned to them.
@@ -404,6 +410,15 @@ namespace Microsoft.Build.Execution
             _deferredBuildMessages = null;
         }
 
+        private void UpdatePriority(Process p, ProcessPriorityClass priority)
+        {
+            try
+            {
+                p.PriorityClass = priority;
+            }
+            catch (Win32Exception) { }
+        }
+
         /// <summary>
         /// Prepares the BuildManager to receive build requests.
         /// </summary>
@@ -411,6 +426,41 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public void BeginBuild(BuildParameters parameters)
         {
+            if (_previousLowPriority != null)
+            {
+                if (parameters.LowPriority != _previousLowPriority)
+                {
+                    if (NativeMethodsShared.IsWindows || parameters.LowPriority)
+                    {
+                        ProcessPriorityClass priority = parameters.LowPriority ? ProcessPriorityClass.BelowNormal : ProcessPriorityClass.Normal;
+                        IEnumerable<Process> processes = _nodeManager?.GetProcesses();
+                        if (processes is not null)
+                        {
+                            foreach (Process p in processes)
+                            {
+                                UpdatePriority(p, priority);
+                            }
+                        }
+
+                        processes = _taskHostNodeManager?.GetProcesses();
+                        if (processes is not null)
+                        {
+                            foreach (Process p in processes)
+                            {
+                                UpdatePriority(p, priority);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        _nodeManager?.ShutdownAllNodes();
+                        _taskHostNodeManager?.ShutdownAllNodes();
+                    }
+               }
+            }
+
+            _previousLowPriority = parameters.LowPriority;
+
             lock (_syncLock)
             {
                 AttachDebugger();
@@ -1612,7 +1662,7 @@ namespace Microsoft.Build.Execution
             // this has to be called out of the lock (_syncLock)
             // because processing events can callback to 'this' instance and cause deadlock
             Debug.Assert(!Monitor.IsEntered(_syncLock));
-            ((LoggingService) ((IBuildComponentHost) this).LoggingService).WaitForThreadToProcessEvents();
+            ((LoggingService) ((IBuildComponentHost) this).LoggingService).WaitForLoggingToProcessEvents();
         }
 
         /// <summary>
@@ -2602,26 +2652,20 @@ namespace Microsoft.Build.Execution
                         break;
 
                     case ScheduleActionType.CreateNode:
-                        var newNodes = new List<NodeInfo>();
+                        IList<NodeInfo> newNodes = _nodeManager.CreateNodes(GetNodeConfiguration(), response.RequiredNodeType, response.NumberOfNodesToCreate);
 
-                        for (int i = 0; i < response.NumberOfNodesToCreate; i++)
+                        if (newNodes?.Count != response.NumberOfNodesToCreate || newNodes.Any(n => n == null))
                         {
-                            NodeInfo createdNode = _nodeManager.CreateNode(GetNodeConfiguration(), response.RequiredNodeType);
+                            BuildEventContext buildEventContext = new BuildEventContext(0, Scheduler.VirtualNode, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                            ((IBuildComponentHost)this).LoggingService.LogError(buildEventContext, new BuildEventFileInfo(String.Empty), "UnableToCreateNode", response.RequiredNodeType.ToString("G"));
 
-                            if (createdNode != null)
-                            {
-                                _noNodesActiveEvent.Reset();
-                                _activeNodes.Add(createdNode.NodeId);
-                                newNodes.Add(createdNode);
-                                ErrorUtilities.VerifyThrow(_activeNodes.Count != 0, "Still 0 nodes after asking for a new node.  Build cannot proceed.");
-                            }
-                            else
-                            {
-                                BuildEventContext buildEventContext = new BuildEventContext(0, Scheduler.VirtualNode, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-                                ((IBuildComponentHost)this).LoggingService.LogError(buildEventContext, new BuildEventFileInfo(String.Empty), "UnableToCreateNode", response.RequiredNodeType.ToString("G"));
+                            throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnableToCreateNode", response.RequiredNodeType.ToString("G")));
+                        }
 
-                                throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnableToCreateNode", response.RequiredNodeType.ToString("G")));
-                            }
+                        foreach (var node in newNodes)
+                        {
+                            _noNodesActiveEvent.Reset();
+                            _activeNodes.Add(node.NodeId);
                         }
 
                         IEnumerable<ScheduleResponse> newResponses = _scheduler.ReportNodesCreated(newNodes);

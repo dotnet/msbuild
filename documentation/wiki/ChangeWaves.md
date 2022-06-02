@@ -22,12 +22,11 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 # Change Waves & Associated Features
 
 ## Current Rotation of Change Waves
-### 16.10
-- [Error when a property expansion in a condition has whitespace](https://github.com/dotnet/msbuild/pull/5672)
-- [Allow Custom CopyToOutputDirectory Location With TargetPath](https://github.com/dotnet/msbuild/pull/6237)
-- [Allow users that have certain special characters in their username to build successfully when using exec](https://github.com/dotnet/msbuild/pull/6223)
-- [Fail restore operations when an SDK is unresolveable](https://github.com/dotnet/msbuild/pull/6430)
-- [Optimize glob evaluation](https://github.com/dotnet/msbuild/pull/6151)
+
+### 17.4
+- [Respect deps.json when loading assemblies](https://github.com/dotnet/msbuild/pull/7520)
+- [Consider `Platform` as default during Platform Negotiation](https://github.com/dotnet/msbuild/pull/7511)
+- [Adding accepted SDK name match pattern to SDK manifests](https://github.com/dotnet/msbuild/pull/7597)
 
 ### 17.0
 - [Scheduler should honor BuildParameters.DisableInprocNode](https://github.com/dotnet/msbuild/pull/6400)
@@ -47,3 +46,10 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Enable NoWarn](https://github.com/dotnet/msbuild/pull/5671)
 - [Truncate Target/Task skipped log messages to 1024 chars](https://github.com/dotnet/msbuild/pull/5553)
 - [Don't expand full drive globs with false condition](https://github.com/dotnet/msbuild/pull/5669)
+
+### 16.10
+- [Error when a property expansion in a condition has whitespace](https://github.com/dotnet/msbuild/pull/5672)
+- [Allow Custom CopyToOutputDirectory Location With TargetPath](https://github.com/dotnet/msbuild/pull/6237)
+- [Allow users that have certain special characters in their username to build successfully when using exec](https://github.com/dotnet/msbuild/pull/6223)
+- [Fail restore operations when an SDK is unresolveable](https://github.com/dotnet/msbuild/pull/6430)
+- [Optimize glob evaluation](https://github.com/dotnet/msbuild/pull/6151)

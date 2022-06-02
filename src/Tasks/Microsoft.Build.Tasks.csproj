@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -191,6 +191,10 @@
     <Compile Include="..\Shared\LanguageParser\VisualBasictokenizer.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\PlatformNegotiation.cs">
+      <Link>PlatformNegotiation.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="..\Shared\XMakeAttributes.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -375,6 +379,7 @@
     <Compile Include="GetReferenceAssemblyPaths.cs" />
     <Compile Include="Hash.cs" />
     <Compile Include="InstalledSDKResolver.cs" />
+    <Compile Include="Interop.cs" />
     <Compile Include="ErrorFromResources.cs" />
     <Compile Include="ExtractedClassName.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -602,9 +607,6 @@
     <Compile Include="GetInstalledSDKLocations.cs" />
     <Compile Include="GetSDKReferenceFiles.cs" />
     <Compile Include="IComReferenceResolver.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Interop.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="ManifestUtil\CngLightup.cs">
@@ -976,7 +978,7 @@
   </ItemGroup>
 
   <!-- Mimics AddRefAssemblies from MSBuild.csproj -->
-  <Target Name="AddRefAssemblies" 
+  <Target Name="AddRefAssemblies"
           DependsOnTargets="ResolveAssemblyReferences"
           BeforeTargets="AssignTargetPaths">
     <ItemGroup>
@@ -999,6 +1001,10 @@
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers.toolset\$(MicrosoftNetCompilersToolsetVersion)\tasks\net472\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
+    <PackageReference Include="Microsoft.Win32.Registry" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <PackageReference Include="System.CodeDom" />
     <PackageReference Include="System.Reflection.Metadata" />
@@ -1006,9 +1012,6 @@
     <PackageReference Include="System.Security.Cryptography.Xml" />
     <PackageReference Include="System.Security.Permissions" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
-
-    <!-- Need Win32 API on .NET Core to ping registry to determine long path support -->
-    <PackageReference Include="Microsoft.Win32.Registry" />
 
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers.toolset\$(MicrosoftNetCompilersToolsetVersion)\tasks\net6.0\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
