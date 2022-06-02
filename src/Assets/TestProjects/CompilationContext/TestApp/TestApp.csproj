@@ -3,7 +3,7 @@
     <PreserveCompilationContext>true</PreserveCompilationContext>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net46;$(CurrentTargetFramework)</TargetFrameworks>
-    <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
+    <RuntimeIdentifier>$(LatestWinRuntimeIdentifier)-x86</RuntimeIdentifier>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../TestLibrary/TestLibrary.csproj" />

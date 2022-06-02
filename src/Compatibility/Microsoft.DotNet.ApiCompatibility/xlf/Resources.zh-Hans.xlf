@@ -67,6 +67,16 @@
         <target state="translated">元素不应为 null。在索引 {0} 找到 null。</target>
         <note />
       </trans-unit>
+      <trans-unit id="EnumTypesMustMatch">
+        <source>Underlying type of enum '{0}' changed from '{1}' to '{2}'.</source>
+        <target state="new">Underlying type of enum '{0}' changed from '{1}' to '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnumValuesMustMatch">
+        <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
+        <target state="new">Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="FileDoesNotExist">
         <source>File '{0}' does not exist.</source>
         <target state="translated">文件“{0}”不存在。</target>

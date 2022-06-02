@@ -169,7 +169,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            new DotnetCommand(Log, "new", "sln")
+            new DotnetCommand(Log, "new", "sln", "--debug:ephemeral-hive")
                 .WithWorkingDirectory(testAsset.TestRoot)
                 .Execute()
                 .Should()

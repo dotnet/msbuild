@@ -238,7 +238,8 @@ namespace Microsoft.DotNet.Cli
 
             var dotnetRootPath = Path.GetDirectoryName(Environment.ProcessPath);
             // When running under test the path does not always contain "dotnet".
-            dotnetRootPath = Path.GetFileName(dotnetRootPath).Contains("dotnet") || Path.GetFileName(dotnetRootPath).Contains("x64") ? dotnetRootPath : Path.Combine(dotnetRootPath, "dotnet");
+			// The sdk folder is /d/ when run on helix because of space issues
+            dotnetRootPath = Path.GetFileName(dotnetRootPath).Contains("dotnet") || Path.GetFileName(dotnetRootPath).Contains("x64") || Path.GetFileName(dotnetRootPath).Equals("d") ? dotnetRootPath : Path.Combine(dotnetRootPath, "dotnet");
             return dotnetRootPath;
         }
 
