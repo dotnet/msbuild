@@ -350,6 +350,7 @@
     <Compile Include="BackEnd\Components\Communications\INodeProvider.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeEndpointInProc.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeInfo.cs" />
+    <Compile Include="BackEnd\Components\Communications\NodeLauncher.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeProviderInProc.cs" />
     <Compile Include="BackEnd\Components\IBuildComponent.cs" />
     <Compile Include="BackEnd\Components\IBuildComponentHost.cs" />

@@ -38,14 +38,10 @@ namespace Microsoft.Build.Execution
         private readonly Dictionary<string, string> _serverEnvironmentVariables;
 
         /// <summary>
-        /// Location of executable file to launch the server process. That should be either dotnet.exe or MSBuild.exe location.
+        /// Full path to current MSBuild.exe if executable is MSBuild.exe,
+        /// or to version of MSBuild.dll found to be associated with the current process.
         /// </summary>
-        private readonly string _exeLocation;
-
-        /// <summary>
-        /// Location of dll file to launch the server process if needed. Empty if executable is msbuild.exe and not empty if dotnet.exe.
-        /// </summary>
-        private readonly string _dllLocation;
+        private readonly string _msbuildLocation;
 
         /// <summary>
         /// The MSBuild client execution result.
@@ -91,18 +87,15 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Public constructor with parameters.
         /// </summary>
-        /// <param name="exeLocation">Location of executable file to launch the server process.
-        /// That should be either dotnet.exe or MSBuild.exe location.</param>
-        /// <param name="dllLocation">Location of dll file to launch the server process if needed.
-        /// Empty if executable is msbuild.exe and not empty if dotnet.exe.</param>
-        public MSBuildClient(string exeLocation, string dllLocation)
+        /// <param name="msbuildLocation"> Full path to current MSBuild.exe if executable is MSBuild.exe,
+        /// or to version of MSBuild.dll found to be associated with the current process.</param>
+        public MSBuildClient(string msbuildLocation)
         {
             _serverEnvironmentVariables = new();
             _exitResult = new();
 
             // dll & exe locations
-            _exeLocation = exeLocation;
-            _dllLocation = dllLocation;
+            _msbuildLocation = msbuildLocation;
 
             // Client <-> Server communication stream
             _handshake = GetHandshake();
@@ -249,24 +242,17 @@ namespace Microsoft.Build.Execution
 
             // Temporary hack
             string[] msBuildServerOptions = new string[] {
-                // _dllLocation,
                 "/nologo",
                 "/nodemode:8"
             };
 
-            string msbuildLocation;
-            if (string.IsNullOrEmpty(_dllLocation))
-            {
-                msbuildLocation = _exeLocation;
-            }
-            else
-            {
-                msbuildLocation = _dllLocation;
-            }
-
+            string useMSBuildServerEnvVar = Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName);
             try
             {
-                Process msbuildProcess = LaunchNode(msbuildLocation, string.Join(" ", msBuildServerOptions), _serverEnvironmentVariables);
+                // Disable msbuild server in a child process, preventing an infinite recurson.
+                Environment.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, "");
+
+                Process msbuildProcess = NodeLauncher.LaunchNode(_msbuildLocation, string.Join(" ", msBuildServerOptions));
                 CommunicationsUtilities.Trace("Server is launched with PID: {0}", msbuildProcess?.Id);
             }
             catch (Exception ex)
@@ -275,355 +261,12 @@ namespace Microsoft.Build.Execution
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.LaunchError;
                 return false;
             }
+            finally
+            {
+                Environment.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, useMSBuildServerEnvVar);
+            }
 
             return true;
-        }
-
-        /* 
-
-                private Process? LaunchNode(string exeLocation, string msBuildServerArguments, Dictionary<string, string> serverEnvironmentVariables)
-                {
-                    CommunicationsUtilities.Trace("Launching server node from {0} with arguments {1}", exeLocation, msBuildServerArguments);
-
-                    BackendNativeMethods.STARTUP_INFO startInfo = new();
-                    startInfo.cb = Marshal.SizeOf<BackendNativeMethods.STARTUP_INFO>();
-
-                    // Null out the process handles so that the parent process does not wait for the child process
-                    // to exit before it can exit.
-                    uint creationFlags = 0;
-                    if (Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
-                    {
-                        creationFlags = BackendNativeMethods.NORMALPRIORITYCLASS;
-                    }
-
-                    if (!NativeMethodsShared.IsWindows)
-                    {
-                        ProcessStartInfo processStartInfo = new()
-                        {
-                            FileName = exeLocation,
-                            Arguments = msBuildServerArguments,
-                            UseShellExecute = false
-                        };
-
-                        foreach (var entry in serverEnvironmentVariables)
-                        {
-                            processStartInfo.Environment[entry.Key] = entry.Value;
-                        }
-
-                        // We remove env to enable MSBuild Server that might be equal to 1, so we do not get an infinite recursion here.
-                        processStartInfo.Environment[Traits.UseMSBuildServerEnvVarName] = "0";
-
-                        processStartInfo.CreateNoWindow = true;
-                        processStartInfo.UseShellExecute = false;
-
-                        // Redirect the streams of worker nodes so that this MSBuild.exe's
-                        // parent doesn't wait on idle worker nodes to close streams
-                        // after the build is complete.
-                        processStartInfo.RedirectStandardInput = true;
-                        processStartInfo.RedirectStandardOutput = true;
-                        processStartInfo.RedirectStandardError = true;
-
-                        Process? process = null;
-                        try
-                        {
-                            process = Process.Start(processStartInfo);
-                        }
-                        catch (Exception ex)
-                        {
-                            CommunicationsUtilities.Trace
-                               (
-                                   "Failed to launch server node from {0}. CommandLine: {1}" + Environment.NewLine + "{2}",
-                                   exeLocation,
-                                   msBuildServerArguments,
-                                   ex.ToString()
-                               );
-
-                            throw new NodeFailedToLaunchException(ex);
-                        }
-
-                        CommunicationsUtilities.Trace("Successfully launched server node with PID {0}", process?.Id);
-                        return process;
-                    }
-                    else
-                    {
-                        // TODO: IT DOES NOT USE EXTRA ENV VARIABLES!!!
-
-                        BackendNativeMethods.PROCESS_INFORMATION processInfo = new();
-                        BackendNativeMethods.SECURITY_ATTRIBUTES processSecurityAttributes = new();
-                        BackendNativeMethods.SECURITY_ATTRIBUTES threadSecurityAttributes = new();
-                        processSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
-                        threadSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
-
-                        bool result = false;
-                        try
-                        {
-                            Environment.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, "0");
-                            result = BackendNativeMethods.CreateProcess
-                           (
-                               exeLocation,
-                               msBuildServerArguments,
-                               ref processSecurityAttributes,
-                               ref threadSecurityAttributes,
-                               false,
-                               creationFlags,
-                               BackendNativeMethods.NullPtr,
-                               null,
-                               ref startInfo,
-                               out processInfo
-                           );
-                        }
-                        finally
-                        {
-                            Environment.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, "1");
-                        }
-
-
-                        if (!result)
-                        {
-                            // Creating an instance of this exception calls GetLastWin32Error and also converts it to a user-friendly string.
-                            System.ComponentModel.Win32Exception e = new System.ComponentModel.Win32Exception();
-
-                            CommunicationsUtilities.Trace
-                                (
-                                    "Failed to launch node from {0}. System32 Error code {1}. Description {2}. CommandLine: {2}",
-                                    exeLocation,
-                                    e.NativeErrorCode.ToString(CultureInfo.InvariantCulture),
-                                    e.Message,
-                                    msBuildServerArguments
-                                );
-
-                            throw new NodeFailedToLaunchException(e.NativeErrorCode.ToString(CultureInfo.InvariantCulture), e.Message);
-                        }
-
-                        int childProcessId = processInfo.dwProcessId;
-
-                        if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != NativeMethods.InvalidHandle)
-                        {
-                            NativeMethodsShared.CloseHandle(processInfo.hProcess);
-                        }
-
-                        if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != NativeMethods.InvalidHandle)
-                        {
-                            NativeMethodsShared.CloseHandle(processInfo.hThread);
-                        }
-
-                        CommunicationsUtilities.Trace("Successfully launched server node with PID {0}", childProcessId);
-                        return Process.GetProcessById(childProcessId);
-                    } 
-                }
-        */
-
-
-#if RUNTIME_TYPE_NETCORE || MONO
-        private static string CurrentHost;
-#endif
-
-        /// <summary>
-        /// Identify the .NET host of the current process.
-        /// </summary>
-        /// <returns>The full path to the executable hosting the current process, or null if running on Full Framework on Windows.</returns>
-        private static string GetCurrentHost()
-        {
-#if RUNTIME_TYPE_NETCORE || MONO
-            if (CurrentHost == null)
-            {
-                string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, 2),
-                    NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet");
-                if (File.Exists(dotnetExe))
-                {
-                    CurrentHost = dotnetExe;
-                }
-                else
-                {
-                    using (Process currentProcess = Process.GetCurrentProcess())
-                    {
-                        CurrentHost = currentProcess.MainModule.FileName;
-                    }
-                }
-            }
-
-            return CurrentHost;
-#else
-            return null;
-#endif
-        }
-
-        private Process LaunchNode(string msbuildLocation, string commandLineArgs, Dictionary<string, string> serverEnvironmentVariables)
-        {
-            // Should always have been set already.
-            ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, nameof(msbuildLocation));
-
-            if (!FileSystems.Default.FileExists(msbuildLocation))
-            {
-                throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotFindMSBuildExe", msbuildLocation));
-            }
-
-            // Repeat the executable name as the first token of the command line because the command line
-            // parser logic expects it and will otherwise skip the first argument
-            commandLineArgs = $"\"{msbuildLocation}\" {commandLineArgs}";
-
-            BackendNativeMethods.STARTUP_INFO startInfo = new();
-            startInfo.cb = Marshal.SizeOf<BackendNativeMethods.STARTUP_INFO>();
-
-            // Null out the process handles so that the parent process does not wait for the child process
-            // to exit before it can exit.
-            uint creationFlags = 0;
-            if (Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
-            {
-                creationFlags = BackendNativeMethods.NORMALPRIORITYCLASS;
-            }
-
-            if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDNODEWINDOW")))
-            {
-                if (!Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
-                {
-                    // Redirect the streams of worker nodes so that this MSBuild.exe's
-                    // parent doesn't wait on idle worker nodes to close streams
-                    // after the build is complete.
-                    startInfo.hStdError = BackendNativeMethods.InvalidHandle;
-                    startInfo.hStdInput = BackendNativeMethods.InvalidHandle;
-                    startInfo.hStdOutput = BackendNativeMethods.InvalidHandle;
-                    startInfo.dwFlags = BackendNativeMethods.STARTFUSESTDHANDLES;
-                    creationFlags |= BackendNativeMethods.CREATENOWINDOW;
-                }
-            }
-            else
-            {
-                creationFlags |= BackendNativeMethods.CREATE_NEW_CONSOLE;
-            }
-
-            CommunicationsUtilities.Trace("Launching node from {0}", msbuildLocation);
-
-            string exeName = msbuildLocation;
-
-#if RUNTIME_TYPE_NETCORE || MONO
-            // Mono automagically uses the current mono, to execute a managed assembly
-            if (!NativeMethodsShared.IsMono)
-            {
-                // Run the child process with the same host as the currently-running process.
-                exeName = GetCurrentHost();
-            }
-#endif
-
-            if (!NativeMethodsShared.IsWindows)
-            {
-                ProcessStartInfo processStartInfo = new ProcessStartInfo();
-                processStartInfo.FileName = exeName;
-                processStartInfo.Arguments = commandLineArgs;
-                if (!Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
-                {
-                    // Redirect the streams of worker nodes so that this MSBuild.exe's
-                    // parent doesn't wait on idle worker nodes to close streams
-                    // after the build is complete.
-                    processStartInfo.RedirectStandardInput = true;
-                    processStartInfo.RedirectStandardOutput = true;
-                    processStartInfo.RedirectStandardError = true;
-                    processStartInfo.CreateNoWindow = (creationFlags | BackendNativeMethods.CREATENOWINDOW) == BackendNativeMethods.CREATENOWINDOW;
-                }
-                processStartInfo.UseShellExecute = false;
-
-
-                foreach (var entry in serverEnvironmentVariables)
-                {
-                    processStartInfo.Environment[entry.Key] = entry.Value;
-                }
-
-                // We remove env to enable MSBuild Server that might be equal to 1, so we do not get an infinite recursion here.
-                processStartInfo.Environment[Traits.UseMSBuildServerEnvVarName] = "0";
-
-                Process process;
-                try
-                {
-                    process = Process.Start(processStartInfo);
-                }
-                catch (Exception ex)
-                {
-                    CommunicationsUtilities.Trace
-                       (
-                           "Failed to launch node from {0}. CommandLine: {1}" + Environment.NewLine + "{2}",
-                           msbuildLocation,
-                           commandLineArgs,
-                           ex.ToString()
-                       );
-
-                    throw new NodeFailedToLaunchException(ex);
-                }
-
-                CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", process.Id, exeName);
-                return process;
-            }
-            else
-            {
-                // TODO: IT DOES NOT USE EXTRA ENV VARIABLES!!!
-
-#if RUNTIME_TYPE_NETCORE
-                // Repeat the executable name in the args to suit CreateProcess
-                commandLineArgs = $"\"{exeName}\" {commandLineArgs}";
-#endif
-
-                BackendNativeMethods.PROCESS_INFORMATION processInfo = new();
-                BackendNativeMethods.SECURITY_ATTRIBUTES processSecurityAttributes = new();
-                BackendNativeMethods.SECURITY_ATTRIBUTES threadSecurityAttributes = new();
-                processSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
-                threadSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
-
-
-                bool result = false;
-                try
-                {
-                    Environment.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, "0");
-                    result = BackendNativeMethods.CreateProcess
-                    (
-                        exeName,
-                        commandLineArgs,
-                        ref processSecurityAttributes,
-                        ref threadSecurityAttributes,
-                        false,
-                        creationFlags,
-                        BackendNativeMethods.NullPtr,
-                        null,
-                        ref startInfo,
-                        out processInfo
-                    );
-                }
-                finally
-                {
-                    Environment.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, "1");
-                }
-
-
-                if (!result)
-                {
-                    // Creating an instance of this exception calls GetLastWin32Error and also converts it to a user-friendly string.
-                    System.ComponentModel.Win32Exception e = new System.ComponentModel.Win32Exception();
-
-                    CommunicationsUtilities.Trace
-                        (
-                            "Failed to launch node from {0}. System32 Error code {1}. Description {2}. CommandLine: {2}",
-                            msbuildLocation,
-                            e.NativeErrorCode.ToString(CultureInfo.InvariantCulture),
-                            e.Message,
-                            commandLineArgs
-                        );
-
-                    throw new NodeFailedToLaunchException(e.NativeErrorCode.ToString(CultureInfo.InvariantCulture), e.Message);
-                }
-
-                int childProcessId = processInfo.dwProcessId;
-
-                if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != NativeMethods.InvalidHandle)
-                {
-                    NativeMethodsShared.CloseHandle(processInfo.hProcess);
-                }
-
-                if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != NativeMethods.InvalidHandle)
-                {
-                    NativeMethodsShared.CloseHandle(processInfo.hThread);
-                }
-
-                CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", childProcessId, exeName);
-                return Process.GetProcessById(childProcessId);
-            }
         }
 
         private bool TrySendBuildCommand(string commandLine)
