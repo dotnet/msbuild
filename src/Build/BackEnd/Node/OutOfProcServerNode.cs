@@ -10,6 +10,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd.Logging;
 
 namespace Microsoft.Build.Execution
 {
@@ -320,13 +321,34 @@ namespace Microsoft.Build.Execution
                 return;
             }
 
-            // set build process context
+            // Set build process context
             Directory.SetCurrentDirectory(command.StartupDirectory);
             CommunicationsUtilities.SetEnvironment(command.BuildProcessEnvironment);
             Thread.CurrentThread.CurrentCulture = command.Culture;
             Thread.CurrentThread.CurrentUICulture = command.UICulture;
 
-            // configure console output redirection
+            // Configure console configuration so Loggers can change their behavior based on Target (client) Console properties.
+            ConsoleConfiguration.Provider = new TargetConsoleConfiguration(command.ConsoleBufferWidth, command.AcceptAnsiColorCodes, command.ConsoleIsScreen, command.ConsoleBackgroundColor);
+
+            // Also try our best to increase chance custom Loggers which use Console static members will work as expected.
+            try
+            {
+                if (NativeMethodsShared.IsWindows && command.ConsoleBufferWidth > 0)
+                {
+                    Console.BufferWidth = command.ConsoleBufferWidth;
+                }
+
+                if ((int)command.ConsoleBackgroundColor != -1)
+                {
+                    Console.BackgroundColor = command.ConsoleBackgroundColor;
+                }
+            }
+            catch (Exception)
+            {
+                // Ignore exception, it is best effort only
+            }
+
+            // Configure console output redirection
             var oldOut = Console.Out;
             var oldErr = Console.Error;
             (int exitCode, string exitType) buildResult;

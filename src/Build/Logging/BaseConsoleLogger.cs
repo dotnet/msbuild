@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -28,37 +29,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
     internal abstract class BaseConsoleLogger : INodeLogger
     {
-        /// <summary>
-        /// When set, we'll try reading background color.
-        /// </summary>
-        private static bool _supportReadingBackgroundColor = true;
-
         #region Properties
-
-        /// <summary>
-        /// Some platforms do not allow getting current background color. There
-        /// is not way to check, but not-supported exception is thrown. Assume
-        /// black, but don't crash.
-        /// </summary>
-        internal static ConsoleColor BackgroundColor
-        {
-            get
-            {
-                if (_supportReadingBackgroundColor)
-                {
-                    try
-                    {
-                        return Console.BackgroundColor;
-                    }
-                    catch (PlatformNotSupportedException)
-                    {
-                        _supportReadingBackgroundColor = false;
-                    }
-                }
-
-                return ConsoleColor.Black;
-            }
-        }
 
         /// <summary>
         /// Gets or sets the level of detail to show in the event log.
@@ -314,16 +285,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (NativeMethodsShared.IsWindows)
             {
-                // Get the std out handle
-                IntPtr stdHandle = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
-
-                if (stdHandle != NativeMethods.InvalidHandle)
-                {
-                    uint fileType = NativeMethodsShared.GetFileType(stdHandle);
-
-                    // The std out is a char type(LPT or Console)
-                    runningWithCharacterFileType = (fileType == NativeMethodsShared.FILE_TYPE_CHAR);
-                }
+                runningWithCharacterFileType = ConsoleConfiguration.OutputIsScreen;
             }
         }
 
@@ -367,7 +329,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             try
             {
-                Console.ForegroundColor = TransformColor(c, BackgroundColor);
+                Console.ForegroundColor = TransformColor(c, ConsoleConfiguration.BackgroundColor);
             }
             catch (IOException)
             {
@@ -480,7 +442,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             try
             {
-                ConsoleColor c = BackgroundColor;
+                ConsoleColor c = ConsoleConfiguration.BackgroundColor;
             }
             catch (IOException)
             {
@@ -1277,5 +1239,205 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         #endregion
+    }
+
+    /// <summary>
+    /// Console configuration needed for proper Console logging.
+    /// </summary>
+    internal interface IConsoleConfiguration
+    {
+        /// <summary>
+        /// Buffer width of destination Console.
+        /// Console loggers are supposed, on Windows OS, to be wrapping to avoid output trimming.
+        /// -1 console buffer width can't be obtained.
+        /// </summary>
+        int BufferWidth { get; }
+
+        /// <summary>
+        /// True if console output accept ANSI colors codes.
+        /// False if output is redirected to non screen type such as file or nul.
+        /// </summary>
+        bool AcceptAnsiColorCodes { get; }
+
+        /// <summary>
+        /// True if console output is screen. It is expected that non screen output is post-processed and often does not need wrapping and coloring.
+        /// False if output is redirected to non screen type such as file or nul.
+        /// </summary>
+        bool OutputIsScreen { get; }
+
+        /// <summary>
+        /// Background color of client console, -1 if not detectable
+        /// Some platforms do not allow getting current background color. There
+        /// is not way to check, but not-supported exception is thrown. Assume
+        /// black, but don't crash.
+        /// </summary>
+        ConsoleColor BackgroundColor { get; }
+    }
+
+    /// <summary>
+    /// Console configuration of target Console at which we will render output.
+    /// It is supposed to be Console fromm other process to which output from this process will be redirected.
+    /// </summary>
+    internal class TargetConsoleConfiguration : IConsoleConfiguration
+    {
+        public TargetConsoleConfiguration(int bufferWidth, bool acceptAnsiColorCodes, bool outputIsScreen, ConsoleColor backgroundColor)
+        {
+            BufferWidth = bufferWidth;
+            AcceptAnsiColorCodes = acceptAnsiColorCodes;
+            OutputIsScreen = outputIsScreen;
+            BackgroundColor = backgroundColor;
+        }
+
+        public int BufferWidth { get; }
+        public bool AcceptAnsiColorCodes { get; }
+        public bool OutputIsScreen { get; }
+        public ConsoleColor BackgroundColor { get; }
+    }
+
+    /// <summary>
+    /// Console configuration of current process Console.
+    /// </summary>
+    internal class InProcessConsoleConfiguration : IConsoleConfiguration
+    {
+        /// <summary>
+        /// When set, we'll try reading background color.
+        /// </summary>
+        private static bool s_supportReadingBackgroundColor = true;
+
+        public int BufferWidth => Console.BufferWidth;
+
+        public bool AcceptAnsiColorCodes
+        {
+            get
+            {
+                bool acceptAnsiColorCodes = false;
+                if (NativeMethodsShared.IsWindows && !Console.IsOutputRedirected)
+                {
+                    try
+                    {
+                        IntPtr stdOut = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
+                        if (NativeMethodsShared.GetConsoleMode(stdOut, out uint consoleMode))
+                        {
+                            acceptAnsiColorCodes = (consoleMode & NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING) != 0;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.Assert(false, $"MSBuild client warning: problem during enabling support for VT100: {ex}.");
+                    }
+                }
+                else
+                {
+                    // On posix OSes we expect console always supports VT100 coloring unless it is redirected
+                    acceptAnsiColorCodes = !Console.IsOutputRedirected;
+                }
+
+                return acceptAnsiColorCodes;
+            }
+        }
+
+        public ConsoleColor BackgroundColor
+        {
+            get
+            {
+                if (s_supportReadingBackgroundColor)
+                {
+                    try
+                    {
+                        return Console.BackgroundColor;
+                    }
+                    catch (PlatformNotSupportedException)
+                    {
+                        s_supportReadingBackgroundColor = false;
+                    }
+                }
+
+                return ConsoleColor.Black;
+            }
+        }
+
+        public bool OutputIsScreen
+        {
+            get
+            {
+                bool isScreen = false;
+
+                if (NativeMethodsShared.IsWindows)
+                {
+                    // Get the std out handle
+                    IntPtr stdHandle = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
+
+                    if (stdHandle != NativeMethods.InvalidHandle)
+                    {
+                        uint fileType = NativeMethodsShared.GetFileType(stdHandle);
+
+                        // The std out is a char type(LPT or Console)
+                        isScreen = fileType == NativeMethodsShared.FILE_TYPE_CHAR;
+                    }
+                }
+                else
+                {
+                    isScreen = !Console.IsOutputRedirected;
+                }
+
+                return isScreen;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Target console configuration.
+    /// If console output is redirected to other process console, like for example MSBuild Server does,
+    ///    we need to know property of target/final console at which our output will be rendered.
+    /// If console is rendered at current process Console, we grab properties from Console and/or by WinAPI.
+    /// </summary>
+    internal static class ConsoleConfiguration
+    {
+        /// <summary>
+        /// Get or set current target console configuration provider.
+        /// </summary>
+        public static IConsoleConfiguration Provider
+        {
+            get { return Instance.s_instance; }
+            set { Instance.s_instance = value; }
+        }
+
+        private static class Instance
+        {
+            // Explicit static constructor to tell C# compiler
+            // not to mark type as beforefieldinit
+            static Instance()
+            {
+            }
+
+            internal static IConsoleConfiguration s_instance = new InProcessConsoleConfiguration();
+        }
+
+        /// <summary>
+        /// Buffer width of destination Console.
+        /// Console loggers are supposed, on Windows OS, to be wrapping to avoid output trimming.
+        /// -1 console buffer width can't be obtained.
+        /// </summary>
+        public static int BufferWidth => Provider.BufferWidth;
+
+        /// <summary>
+        /// True if console output accept ANSI colors codes.
+        /// False if output is redirected to non screen type such as file or nul.
+        /// </summary>
+        public static bool AcceptAnsiColorCodes => Provider.AcceptAnsiColorCodes;
+
+        /// <summary>
+        /// Background color of client console, -1 if not detectable
+        /// Some platforms do not allow getting current background color. There
+        /// is not way to check, but not-supported exception is thrown. Assume
+        /// black, but don't crash.
+        /// </summary>
+        public static ConsoleColor BackgroundColor => Provider.BackgroundColor;
+
+        /// <summary>
+        /// True if console output is screen. It is expected that non screen output is post-processed and often does not need wrapping and coloring.
+        /// False if output is redirected to non screen type such as file or nul.
+        /// </summary>
+        public static bool OutputIsScreen => Provider.OutputIsScreen;
     }
 }

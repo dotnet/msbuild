@@ -83,6 +83,28 @@ namespace Microsoft.Build.Execution
         private long _sizeOfConsoleWritePackets;
 
         /// <summary>
+        /// Width of the Console output device or -1 if unknown.
+        /// </summary>
+        private int _consoleBufferWidth;
+
+        /// <summary>
+        /// True if console output accept ANSI colors codes.
+        /// False if console does not support ANSI codes or output is redirected to non screen type such as file or nul.
+        /// </summary>
+        private bool _acceptAnsiColorCodes;
+
+        /// <summary>
+        /// True if console output is screen. It is expected that non screen output is post-processed and often does not need wrapping and coloring.
+        /// False if output is redirected to non screen type such as file or nul.
+        /// </summary>
+        private bool _consoleIsScreen;
+
+        /// <summary>
+        /// Background color of client console, -1 if not detectable.
+        /// </summary>
+        private ConsoleColor _consoleBackgroundColor;
+
+        /// <summary>
         /// Public constructor with parameters.
         /// </summary>
         /// <param name="exeLocation">Location of executable file to launch the server process.
@@ -155,6 +177,8 @@ namespace Microsoft.Build.Execution
                 return _exitResult;
             }
 
+            ConfigureAndQueryConsoleProperties();
+
             // Send build command.
             // Let's send it outside the packet pump so that we easier and quicker deal with possible issues with connection to server.
             MSBuildEventSource.Log.MSBuildServerBuildStart(commandLine);
@@ -183,11 +207,6 @@ namespace Microsoft.Build.Execution
                     packetPump.PacketPumpErrorEvent,
                     packetPump.PacketReceivedEvent
                 };
-
-                if (NativeMethodsShared.IsWindows)
-                {
-                    SupportVT100();
-                }
 
                 while (!_buildFinished)
                 {
@@ -228,13 +247,89 @@ namespace Microsoft.Build.Execution
             return _exitResult;
         }
 
-        private void SupportVT100()
+        private void ConfigureAndQueryConsoleProperties()
         {
-            IntPtr stdOut = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
-            if (NativeMethodsShared.GetConsoleMode(stdOut, out uint consoleMode))
+            QueryIsScreenAndTryEnableAnsiColorCodes();
+            QueryConsoleBufferWidth();
+            QueryConsoleBackgroundColor();
+        }
+
+        private void QueryIsScreenAndTryEnableAnsiColorCodes()
+        {
+            if (NativeMethodsShared.IsWindows)
             {
-                consoleMode |= NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING | NativeMethodsShared.DISABLE_NEWLINE_AUTO_RETURN;
-                NativeMethodsShared.SetConsoleMode(stdOut, consoleMode);
+                _acceptAnsiColorCodes = false;
+                _consoleIsScreen = false;
+                try
+                {
+                    IntPtr stdOut = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
+                    if (NativeMethodsShared.GetConsoleMode(stdOut, out uint consoleMode))
+                    {
+                        bool success;
+                        if ((consoleMode & NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING) == NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING &&
+                            (consoleMode & NativeMethodsShared.DISABLE_NEWLINE_AUTO_RETURN) == NativeMethodsShared.DISABLE_NEWLINE_AUTO_RETURN)
+                        {
+                            // Console is already in required state
+                            success = true;
+                        }
+                        else
+                        {
+                            consoleMode |= NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING | NativeMethodsShared.DISABLE_NEWLINE_AUTO_RETURN;
+                            success = NativeMethodsShared.SetConsoleMode(stdOut, consoleMode);
+                        }
+
+                        if (success)
+                        {
+                            _acceptAnsiColorCodes = true;
+                        }
+
+                        uint fileType = NativeMethodsShared.GetFileType(stdOut);
+                        // The std out is a char type(LPT or Console)
+                        _consoleIsScreen = fileType == NativeMethodsShared.FILE_TYPE_CHAR;
+                        _acceptAnsiColorCodes &= _consoleIsScreen;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    CommunicationsUtilities.Trace("MSBuild client warning: problem during enabling support for VT100: {0}.", ex);
+                }
+            }
+            else
+            {
+                // On posix OSes we expect console always supports VT100 coloring unless it is redirected
+                _acceptAnsiColorCodes = _consoleIsScreen = !Console.IsOutputRedirected;
+            }
+        }
+
+        private void QueryConsoleBufferWidth()
+        {
+            _consoleBufferWidth = -1;
+            try
+            {
+                _consoleBufferWidth = Console.BufferWidth;
+            }
+            catch (Exception ex)
+            {
+                // on Win8 machines while in IDE Console.BufferWidth will throw (while it talks to native console it gets "operation aborted" native error)
+                // this is probably temporary workaround till we understand what is the reason for that exception
+                CommunicationsUtilities.Trace("MSBuild client warning: problem during querying console buffer width.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Some platforms do not allow getting current background color. There
+        /// is not way to check, but not-supported exception is thrown. Assume
+        /// black, but don't crash.
+        /// </summary>
+        private void QueryConsoleBackgroundColor()
+        {
+            try
+            {
+                _consoleBackgroundColor = Console.BackgroundColor;
+            }
+            catch (PlatformNotSupportedException)
+            {
+                _consoleBackgroundColor = ConsoleColor.Black;
             }
         }
 
@@ -341,7 +436,11 @@ namespace Microsoft.Build.Execution
                         startupDirectory: Directory.GetCurrentDirectory(),
                         buildProcessEnvironment: envVars,
                         CultureInfo.CurrentCulture,
-                        CultureInfo.CurrentUICulture);
+                        CultureInfo.CurrentUICulture,
+                        _consoleBufferWidth,
+                        _acceptAnsiColorCodes,
+                        _consoleIsScreen,
+                        _consoleBackgroundColor);
         }
 
         private ServerNodeHandshake GetHandshake()
