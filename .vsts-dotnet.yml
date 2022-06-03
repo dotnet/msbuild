@@ -42,7 +42,7 @@ stages:
   displayName: Build
 
   jobs:
-  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}: # should track next-release's active dev branch
+  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/vs17.2') }}: # should track next-release's active dev branch
     - template: /eng/common/templates/job/onelocbuild.yml
       parameters:
         LclSource: lclFilesfromPackage
