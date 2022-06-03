@@ -18,13 +18,15 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public string? CommandName { get; set; }
 
+        // TODO: Add support for commandLineArgs defined in the launch profile
+
         public bool LaunchBrowser { get; set; }
 
         public string? LaunchUrl { get; set; }
 
         public IDictionary<string, string>? EnvironmentVariables { get; set; }
 
-        internal static LaunchSettingsProfile? ReadDefaultProfile(string projectDirectory, IReporter reporter)
+        internal static LaunchSettingsProfile? ReadLaunchProfile(string projectDirectory, string? launchProfileName, IReporter reporter)
         {
             var launchSettingsPath = Path.Combine(projectDirectory, "Properties", "launchSettings.json");
             if (!File.Exists(launchSettingsPath))
@@ -45,11 +47,32 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return null;
             }
 
+            if (string.IsNullOrEmpty(launchProfileName))
+            {
+                // Load the default (first) launch profile
+                return ReadDefaultLaunchProfile(launchSettings, reporter);
+            }
+
+            // Load the specified launch profile
+            var namedProfile = launchSettings?.Profiles?.FirstOrDefault(f => string.Equals(f.Key , launchProfileName, StringComparison.OrdinalIgnoreCase)).Value;
+
+            if (namedProfile is null)
+            {
+                reporter.Warn($"Unable to find launch profile with name '{launchProfileName}'. Falling back to default profile.");
+
+                return ReadDefaultLaunchProfile(launchSettings, reporter);
+            }
+
+            return namedProfile;
+        }
+
+        private static LaunchSettingsProfile? ReadDefaultLaunchProfile(LaunchSettingsJson? launchSettings, IReporter reporter)
+        {
             var defaultProfile = launchSettings?.Profiles?.FirstOrDefault(f => f.Value.CommandName == "Project").Value;
+
             if (defaultProfile is null)
             {
-                reporter.Verbose("Unable to find default launchSettings profile.");
-                return null;
+                reporter.Verbose("Unable to find default launch profile.");
             }
 
             return defaultProfile;
