@@ -316,6 +316,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             }
             else
             {
+                // check if there are any workloads available to install????
                 var workloads = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(currentFeatureBand);
                 if (workloads == null || !workloads.Any())
                 {
