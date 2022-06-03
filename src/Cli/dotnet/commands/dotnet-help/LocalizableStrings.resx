@@ -285,6 +285,9 @@
   <data name="UserSecretsDefinition" xml:space="preserve">
     <value>Manage development user secrets.</value>
   </data>
+  <data name="UserJwtsDefinition" xml:space="preserve">
+    <value>Manage JSON Web Tokens in development.</value>
+  </data>
   <data name="WatchDefinition" xml:space="preserve">
     <value>Start a file watcher that runs a command when files change.</value>
   </data>

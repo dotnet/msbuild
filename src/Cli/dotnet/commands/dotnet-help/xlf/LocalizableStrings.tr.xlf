@@ -57,6 +57,11 @@
         <target state="translated">Konak seçenekleri (komuttan önce geçirilir)</target>
         <note />
       </trans-unit>
+      <trans-unit id="UserJwtsDefinition">
+        <source>Manage JSON Web Tokens in development.</source>
+        <target state="new">Manage JSON Web Tokens in development.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="VersionDescription">
         <source>Display the version of the .NET SDK, including the effects of any global.json</source>
         <target state="translated">Tüm global.json etkileri dahil olmak üzere .NET SDK sürümünü görüntüleyin</target>

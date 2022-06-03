@@ -68,6 +68,7 @@ SDK commands:
 Additional commands from bundled tools:
   dev-certs         Create and manage development certificates.
   fsi               Start F# Interactive / execute F# scripts.
+  user-jwts         Manage JSON Web Tokens in development.
   user-secrets      Manage development user secrets.
   watch             Start a file watcher that runs a command when files change.
 

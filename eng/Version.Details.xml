@@ -196,6 +196,10 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>02646222b7e6fb70a2fce0d3e2545ab3fae31138</Sha>
     </Dependency>
+    <Dependency Name="dotnet-user-jwts" Version="7.0.0-preview.6.22301.19">
+      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Sha>b32d561b976362e6273ca5766553d51ac4d12025</Sha>
+    </Dependency>
     <Dependency Name="dotnet-user-secrets" Version="7.0.0-preview.6.22301.19">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>02646222b7e6fb70a2fce0d3e2545ab3fae31138</Sha>

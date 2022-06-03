@@ -57,6 +57,11 @@
         <target state="translated">호스트 옵션(명령 전에 전달됨)</target>
         <note />
       </trans-unit>
+      <trans-unit id="UserJwtsDefinition">
+        <source>Manage JSON Web Tokens in development.</source>
+        <target state="new">Manage JSON Web Tokens in development.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="VersionDescription">
         <source>Display the version of the .NET SDK, including the effects of any global.json</source>
         <target state="translated">global.json의 효과를 포함하여 .NET SDK의 버전을 표시합니다.</target>

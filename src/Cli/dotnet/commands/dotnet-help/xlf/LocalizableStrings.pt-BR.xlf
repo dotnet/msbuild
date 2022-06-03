@@ -57,6 +57,11 @@
         <target state="translated">Opções de host (passadas antes do comando)</target>
         <note />
       </trans-unit>
+      <trans-unit id="UserJwtsDefinition">
+        <source>Manage JSON Web Tokens in development.</source>
+        <target state="new">Manage JSON Web Tokens in development.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="VersionDescription">
         <source>Display the version of the .NET SDK, including the effects of any global.json</source>
         <target state="translated">Exibir a versão do SDK do .NET, incluindo os efeitos de qualquer global.json</target>
