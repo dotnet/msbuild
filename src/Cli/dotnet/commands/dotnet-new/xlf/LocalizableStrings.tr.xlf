@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="SdkInfoProvider_Message_InstallSdk">
-        <source>Go to https://dotnet.microsoft.com/download/dotnet and install any of the supported SDK versions: '{0}'.</source>
-        <target state="new">Go to https://dotnet.microsoft.com/download/dotnet and install any of the supported SDK versions: '{0}'.</target>
+        <source>Go to aka.ms/get-dotnet and install any of the supported SDK versions: '{0}'.</source>
+        <target state="new">Go to aka.ms/get-dotnet and install any of the supported SDK versions: '{0}'.</target>
         <note>{0} is the list of supported versions.</note>
       </trans-unit>
       <trans-unit id="SdkInfoProvider_Message_SwitchSdk">
