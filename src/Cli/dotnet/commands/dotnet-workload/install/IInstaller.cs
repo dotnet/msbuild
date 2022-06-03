@@ -18,17 +18,27 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         void RepairWorkloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null);
 
-        void DownloadToOfflineCache(PackInfo packInfo, DirectoryPath offlineCache, bool includePreviews);
+        IEnumerable<WorkloadDownload> GetDownloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, bool includeInstalledItems);
 
         void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null);
-
-        IEnumerable<(WorkloadPackId Id, string Version)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand);
 
         void InstallWorkloadManifest(ManifestVersionUpdate manifestUpdate, ITransactionContext transactionContext, DirectoryPath? offlineCache = null, bool isRollback = false);
 
         IWorkloadInstallationRecordRepository GetWorkloadInstallationRecordRepository();
 
         void Shutdown();
+    }
 
+    public class WorkloadDownload
+    {
+        public string NuGetPackageId { get; }
+
+        public string NuGetPackageVersion { get; }
+
+        public WorkloadDownload(string nuGetPackageId, string nuGetPackageVersion)
+        {
+            NuGetPackageId = nuGetPackageId;
+            NuGetPackageVersion = nuGetPackageVersion;
+        }
     }
 }

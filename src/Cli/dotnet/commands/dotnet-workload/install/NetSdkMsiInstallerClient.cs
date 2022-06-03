@@ -76,20 +76,26 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public void DownloadToOfflineCache(PackInfo packInfo, DirectoryPath cachePath, bool includePreviews)
+        private IEnumerable<(WorkloadPackId Id, string Version)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
         {
-            // Determine the MSI payload package ID based on the host architecture, pack ID and pack version.
-            string msiPackageId = GetMsiPackageId(packInfo);
+            string dependent = $"{DependentPrefix},{sdkFeatureBand},{HostArchitecture}";
 
-            Reporter.WriteLine(string.Format(LocalizableStrings.DownloadingPackToCacheMessage, $"{packInfo.Id} ({msiPackageId})", packInfo.Version, cachePath.Value));
+            return GetWorkloadPackRecords()
+                .Where(packRecord => new DependencyProvider(packRecord.ProviderKeyName).Dependents.Contains(dependent))
+                .SelectMany(packRecord => packRecord.InstalledPacks)
+                .Select(p => (p.id, p.version.ToString()));
+        }
 
-            if (!Directory.Exists(cachePath.Value))
+        public IEnumerable<WorkloadDownload> GetDownloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, bool includeInstalledItems)
+        {
+            IEnumerable<AcquirableMsi> msis = GetMsisForWorkloads(workloadIds);
+            if (!includeInstalledItems)
             {
-                Directory.CreateDirectory(cachePath.Value);
+                HashSet<(string id, string version)> installedItems = new(GetInstalledPacks(sdkFeatureBand).Select(t => (t.Id.ToString(), t.Version)));
+                msis = msis.Where(m => !installedItems.Contains((m.NuGetPackageId, m.NuGetPackageVersion)));
             }
 
-            _nugetPackageDownloader.DownloadPackageAsync(new PackageId(msiPackageId), new NuGetVersion(packInfo.Version), downloadFolder: cachePath,
-                packageSourceLocation: _packageSourceLocation, includePreview: includePreviews).Wait();
+            return msis.Select(m => new WorkloadDownload(m.NuGetPackageId, m.NuGetPackageVersion));
         }
 
         /// <summary>
@@ -233,16 +239,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 LogException(e);
                 throw;
             }
-        }
-
-        public IEnumerable<(WorkloadPackId Id, string Version)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
-        {
-            string dependent = $"{DependentPrefix},{sdkFeatureBand},{HostArchitecture}";
-
-            return GetWorkloadPackRecords()
-                .Where(packRecord => new DependencyProvider(packRecord.ProviderKeyName).Dependents.Contains(dependent))
-                .SelectMany(packRecord => packRecord.InstalledPacks)
-                .Select(p => (p.id, p.version.ToString()));
         }
 
         public IWorkloadInstallationRecordRepository GetWorkloadInstallationRecordRepository() => RecordRepository;

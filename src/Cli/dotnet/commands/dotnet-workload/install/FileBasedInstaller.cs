@@ -281,19 +281,15 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public void DownloadToOfflineCache(PackInfo packInfo, DirectoryPath cachePath, bool includePreviews)
+        public IEnumerable<WorkloadDownload> GetDownloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, bool includeInstalledItems)
         {
-            _reporter.WriteLine(string.Format(LocalizableStrings.DownloadingPackToCacheMessage, packInfo.Id, packInfo.Version, cachePath.Value));
-            if (!Directory.Exists(cachePath.Value))
+            var packs = GetPacksInWorkloads(workloadIds);
+            if (!includeInstalledItems)
             {
-                Directory.CreateDirectory(cachePath.Value);
+                packs = packs.Where(p => !PackIsInstalled(p));
             }
 
-            _nugetPackageDownloader.DownloadPackageAsync(new PackageId(packInfo.ResolvedPackageId),
-                new NuGetVersion(packInfo.Version),
-                packageSourceLocation: _packageSourceLocation,
-                includePreview: includePreviews,
-                downloadFolder: cachePath).GetAwaiter().GetResult();
+            return packs.Select(p => new WorkloadDownload(p.ResolvedPackageId, p.Version));
         }
 
         public void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null)
@@ -353,19 +349,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     Directory.Delete(packIdDir);
                 }
             }
-        }
-
-        public IEnumerable<(WorkloadPackId, string)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
-        {
-            var installedPacksDir = Path.Combine(_workloadMetadataDir, InstalledPacksDir, "v1");
-            if (!Directory.Exists(installedPacksDir))
-            {
-                return Enumerable.Empty<(WorkloadPackId, string)>();
-            }
-            return Directory.GetDirectories(installedPacksDir)
-                .Where(packIdDir => HasFeatureBandMarkerFile(packIdDir, sdkFeatureBand))
-                .SelectMany(packIdPath => Directory.GetDirectories(packIdPath))
-                .Select(packVersionPath => (new WorkloadPackId(Path.GetFileName(Path.GetDirectoryName(packVersionPath))), Path.GetFileName(packVersionPath)));
         }
 
         public void Shutdown()

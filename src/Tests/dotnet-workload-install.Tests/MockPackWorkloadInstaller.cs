@@ -99,15 +99,15 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             InstalledManifests.Add((manifestUpdate, offlineCache));
         }
 
+        public IEnumerable<WorkloadDownload> GetDownloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, bool includeInstalledItems)
+        {
+            throw new NotImplementedException();
+        }
+
         public void DownloadToOfflineCache(PackInfo pack, DirectoryPath cachePath, bool includePreviews)
         {
             CachedPacks.Add(pack);
             CachePath = cachePath.Value;
-        }
-
-        public IEnumerable<(WorkloadPackId, string)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
-        {
-            return InstalledPacks.Select(pack => (pack.Id, pack.Version));
         }
 
         public void Shutdown()
