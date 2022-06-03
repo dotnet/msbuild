@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             }
 
             // Load the specified launch profile
-            var namedProfile = launchSettings?.Profiles?.FirstOrDefault(f => string.Equals(f.Key , launchProfileName, StringComparison.OrdinalIgnoreCase)).Value;
+            var namedProfile = launchSettings?.Profiles?.FirstOrDefault(f => string.Equals(f.Key , launchProfileName, StringComparison.Ordinal)).Value;
 
             if (namedProfile is null)
             {
