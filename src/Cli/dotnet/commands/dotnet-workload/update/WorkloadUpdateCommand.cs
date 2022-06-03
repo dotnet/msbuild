@@ -253,7 +253,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
 
             try
             {
-                var manifestPackageUrls = _workloadManifestUpdater.GetManifestPackageUrls(includePreview);      // where it calls for the URLs to display... returns count=0 (second)
+                // first update the advertising manifests and then get the package urls for the advertised manifests
+                // then use the advertising manifests for the workload installer / resolver (or both)
+                // get an updated resolver and then have the installer use that
+                // then use the installer to get the package urls 
+
+                _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(false).Wait();
+                var manifestPackageUrls = _workloadManifestUpdater.GetManifestPackageUrls(includePreview);      
+
                 packageUrls = packageUrls.Concat(manifestPackageUrls);
 
                 tempPath = new DirectoryPath(Path.Combine(TempDirectoryPath, "dotnet-manifest-extraction"));
@@ -283,8 +290,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
 
         private async Task UseTempManifestsToResolvePacksAsync(DirectoryPath tempPath, bool includePreview)
         {
+            // instead: figure out paths to advertsing manifests and use those paths for the overlay manifest provider
+
             var manifestPackagePaths = await _workloadManifestUpdater.DownloadManifestPackagesAsync(includePreview, tempPath);
             await _workloadManifestUpdater.ExtractManifestPackagesToTempDirAsync(manifestPackagePaths, tempPath);
+                
+            // update the advertising manifests and then pass to the temp directory workload manifest provider
             var overlayManifestProvider = new TempDirectoryWorkloadManifestProvider(tempPath.Value, _sdkVersion.ToString());
             _workloadResolver = WorkloadResolver.Create(overlayManifestProvider, _dotnetPath, _sdkVersion.ToString(), _userProfileDir);
         }
@@ -305,7 +316,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             }
             else
             {
-                // check if there are any workloads available to install????
                 var workloads = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(currentFeatureBand);
                 if (workloads == null || !workloads.Any())
                 {
