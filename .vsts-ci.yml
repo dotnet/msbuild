@@ -9,8 +9,6 @@ trigger:
     - internal/release/5.*
     - internal/release/6.*
   paths:
-    include:
-    - '*'
     exclude:
     - *.md
 
