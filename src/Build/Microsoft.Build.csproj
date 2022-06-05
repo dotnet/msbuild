@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -149,6 +149,7 @@
     <Compile Include="BackEnd\Components\Caching\ConfigCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\ProjectCache\*.cs" />
+    <Compile Include="BackEnd\Components\Communications\CurrentHost.cs" />
     <Compile Include="BackEnd\Components\Communications\ServerNodeEndpointOutOfProc.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverException.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\TranslationHelpers.cs" />

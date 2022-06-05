@@ -328,7 +328,7 @@ namespace Microsoft.Build.BackEnd
                 msbuildLocation = "MSBuild.exe";
             }
 
-            var expectedProcessName = Path.GetFileNameWithoutExtension(NodeLauncher.GetCurrentHost() ?? msbuildLocation);
+            var expectedProcessName = Path.GetFileNameWithoutExtension(CurrentHost.GetCurrentHost() ?? msbuildLocation);
 
             List<Process> nodeProcesses = new List<Process>(Process.GetProcessesByName(expectedProcessName));
 

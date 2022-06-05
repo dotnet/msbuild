@@ -19,41 +19,6 @@ namespace Microsoft.Build.BackEnd
 {
     internal class NodeLauncher
     {
-
-#if RUNTIME_TYPE_NETCORE || MONO
-        public static string CurrentHost;
-#endif
-
-        /// <summary>
-        /// Identify the .NET host of the current process.
-        /// </summary>
-        /// <returns>The full path to the executable hosting the current process, or null if running on Full Framework on Windows.</returns>
-        public static string GetCurrentHost()
-        {
-#if RUNTIME_TYPE_NETCORE || MONO
-            if (CurrentHost == null)
-            {
-                string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, 2),
-                    NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet");
-                if (File.Exists(dotnetExe))
-                {
-                    CurrentHost = dotnetExe;
-                }
-                else
-                {
-                    using (Process currentProcess = Process.GetCurrentProcess())
-                    {
-                        CurrentHost = currentProcess.MainModule.FileName;
-                    }
-                }
-            }
-
-            return CurrentHost;
-#else
-            return null;
-#endif
-        }
-
         /// <summary>
         /// Creates a new MSBuild process
         /// </summary>
@@ -110,7 +75,7 @@ namespace Microsoft.Build.BackEnd
             if (!NativeMethodsShared.IsMono)
             {
                 // Run the child process with the same host as the currently-running process.
-                exeName = GetCurrentHost();
+                exeName = CurrentHost.GetCurrentHost();
             }
 #endif
 
