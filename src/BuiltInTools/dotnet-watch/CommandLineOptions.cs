@@ -9,6 +9,7 @@ namespace Microsoft.DotNet.Watcher
     internal class CommandLineOptions
     {
         public string Project { get; set; }
+        public string LaunchProfile { get; set; }
         public bool Quiet { get; set; }
         public bool Verbose { get; set; }
         public bool List { get; set; }

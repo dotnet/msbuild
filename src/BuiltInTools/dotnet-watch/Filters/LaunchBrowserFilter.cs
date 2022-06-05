@@ -151,13 +151,13 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return false;
             }
 
-            if (context.DefaultLaunchSettingsProfile is not { LaunchBrowser: true })
+            if (context.LaunchSettingsProfile is not { LaunchBrowser: true })
             {
                 reporter.Verbose("launchSettings does not allow launching browsers.");
                 return false;
             }
 
-            launchUrl = context.DefaultLaunchSettingsProfile.LaunchUrl;
+            launchUrl = context.LaunchSettingsProfile.LaunchUrl;
             return true;
         }
 

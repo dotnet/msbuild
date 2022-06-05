@@ -300,9 +300,9 @@ namespace Microsoft.DotNet.Watcher
                 processSpec.WorkingDirectory = project.RunWorkingDirectory;
             }
 
-            if (!string.IsNullOrEmpty(context.DefaultLaunchSettingsProfile.ApplicationUrl))
+            if (!string.IsNullOrEmpty(context.LaunchSettingsProfile.ApplicationUrl))
             {
-                processSpec.EnvironmentVariables["ASPNETCORE_URLS"] = context.DefaultLaunchSettingsProfile.ApplicationUrl;
+                processSpec.EnvironmentVariables["ASPNETCORE_URLS"] = context.LaunchSettingsProfile.ApplicationUrl;
             }
 
             var rootVariableName = Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)";
@@ -311,7 +311,7 @@ namespace Microsoft.DotNet.Watcher
                 processSpec.EnvironmentVariables[rootVariableName] = Path.GetDirectoryName(DotnetMuxer.MuxerPath);
             }
 
-            if (context.DefaultLaunchSettingsProfile.EnvironmentVariables is IDictionary<string, string> envVariables)
+            if (context.LaunchSettingsProfile.EnvironmentVariables is IDictionary<string, string> envVariables)
             {
                 foreach (var entry in envVariables)
                 {
