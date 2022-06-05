@@ -42,6 +42,8 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option NoSelfContainedOption = CommonOptions.NoSelfContainedOption;
 
+        public static readonly Argument<IEnumerable<string>> ApplicationArguments = new Argument<IEnumerable<string>>("applicationArguments", () => Array.Empty<string>(), "Arguments passed to the application that is being run.");
+
         private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
@@ -68,7 +70,8 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(CommonOptions.ArchitectureOption);
             command.AddOption(CommonOptions.OperatingSystemOption);
-            command.TreatUnmatchedTokensAsErrors = false;
+
+            command.AddArgument(ApplicationArguments);
 
             command.SetHandler(RunCommand.Run);
 

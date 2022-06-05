@@ -13,6 +13,8 @@ namespace Microsoft.DotNet.Tools.MSBuild
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-msbuild";
 
+        public static readonly Argument<string[]> Arguments = new Argument<string[]>();
+
         private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
@@ -22,9 +24,12 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
         private static Command ConstructCommand()
         {
-            var command = new DocumentedCommand("msbuild", DocsLink, LocalizableStrings.AppFullName);
+            var command = new DocumentedCommand("msbuild", DocsLink, LocalizableStrings.AppFullName)
+            {
+                Arguments
+            };
 
-            command.SetHandler(MSBuildCommand.Run);
+            command.SetHandler((ParseResult parseResult) => MSBuildCommand.Run(parseResult.GetValueForArgument(Arguments)));
 
             return command;
         }
