@@ -18,8 +18,6 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public string? CommandName { get; set; }
 
-        // TODO: Add support for commandLineArgs defined in the launch profile
-
         public bool LaunchBrowser { get; set; }
 
         public string? LaunchUrl { get; set; }
@@ -54,15 +52,26 @@ namespace Microsoft.DotNet.Watcher.Tools
             }
 
             // Load the specified launch profile
-            var namedProfile = launchSettings?.Profiles?.FirstOrDefault(f => string.Equals(f.Key , launchProfileName, StringComparison.Ordinal)).Value;
+            var namedProfile = launchSettings?.Profiles?.FirstOrDefault(kvp =>
+                string.Equals(kvp.Key, launchProfileName, StringComparison.Ordinal)).Value;
 
             if (namedProfile is null)
             {
                 reporter.Warn($"Unable to find launch profile with name '{launchProfileName}'. Falling back to default profile.");
 
+                // Check if a case-insensitive match exists
+                var caseInsensitiveNamedProfile = launchSettings?.Profiles?.FirstOrDefault(kvp =>
+                    string.Equals(kvp.Key, launchProfileName, StringComparison.OrdinalIgnoreCase)).Key;
+
+                if (caseInsensitiveNamedProfile is not null)
+                {
+                    reporter.Warn($"Note: Launch profile names are case-sensitive. Did you mean '{caseInsensitiveNamedProfile}'?");
+                }
+
                 return ReadDefaultLaunchProfile(launchSettings, reporter);
             }
 
+            reporter.Verbose($"Found named launch profile '{launchProfileName}'.");
             return namedProfile;
         }
 

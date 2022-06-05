@@ -139,7 +139,7 @@ Examples:
             var listOption = new Option<bool>("--list", "Lists all discovered files without starting the watcher.");
             var shortProjectOption = new Option<string>("-p", "The project to watch.") { IsHidden = true };
             var longProjectOption = new Option<string>("--project","The project to watch");
-            var launchProfileOption = new Option<string>(new[] { "-lp", "--launch-profile" }, "The launch profile to start the project with. " +
+            var launchProfileOption = new Option<string>(new[] { "-lp", "--launch-profile" }, "The launch profile to start the project with (case-sensitive). " +
                 "This option is only supported when running 'dotnet watch' or 'dotnet watch run'.");
             var noHotReloadOption = new Option<bool>("--no-hot-reload", "Suppress hot reload for supported apps.");
             var nonInteractiveOption = new Option<bool>(
