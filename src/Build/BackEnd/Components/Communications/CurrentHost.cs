@@ -13,7 +13,7 @@ namespace Microsoft.Build.BackEnd
     {
 
 #if RUNTIME_TYPE_NETCORE || MONO
-        private static string _currentHost;
+        private static string s_currentHost;
 #endif
 
         /// <summary>
@@ -23,24 +23,24 @@ namespace Microsoft.Build.BackEnd
         public static string GetCurrentHost()
         {
 #if RUNTIME_TYPE_NETCORE || MONO
-            if (_currentHost == null)
+            if (s_currentHost == null)
             {
                 string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, 2),
                     NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet");
                 if (File.Exists(dotnetExe))
                 {
-                    _currentHost = dotnetExe;
+                    s_currentHost = dotnetExe;
                 }
                 else
                 {
                     using (Process currentProcess = Process.GetCurrentProcess())
                     {
-                        _currentHost = currentProcess.MainModule.FileName;
+                        s_currentHost = currentProcess.MainModule.FileName;
                     }
                 }
             }
 
-            return _currentHost;
+            return s_currentHost;
 #else
             return null;
 #endif
