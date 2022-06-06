@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
-using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Client;
@@ -32,14 +31,10 @@ namespace Microsoft.Build.Execution
         private readonly Dictionary<string, string> _serverEnvironmentVariables;
 
         /// <summary>
-        /// Location of executable file to launch the server process. That should be either dotnet.exe or MSBuild.exe location.
+        /// Full path to current MSBuild.exe if executable is MSBuild.exe,
+        /// or to version of MSBuild.dll found to be associated with the current process.
         /// </summary>
-        private readonly string _exeLocation;
-
-        /// <summary>
-        /// Location of dll file to launch the server process if needed. Empty if executable is msbuild.exe and not empty if dotnet.exe.
-        /// </summary>
-        private readonly string _dllLocation;
+        private readonly string _msbuildLocation;
 
         /// <summary>
         /// The MSBuild client execution result.
@@ -85,18 +80,15 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Public constructor with parameters.
         /// </summary>
-        /// <param name="exeLocation">Location of executable file to launch the server process.
-        /// That should be either dotnet.exe or MSBuild.exe location.</param>
-        /// <param name="dllLocation">Location of dll file to launch the server process if needed.
-        /// Empty if executable is msbuild.exe and not empty if dotnet.exe.</param>
-        public MSBuildClient(string exeLocation, string dllLocation)
+        /// <param name="msbuildLocation"> Full path to current MSBuild.exe if executable is MSBuild.exe,
+        /// or to version of MSBuild.dll found to be associated with the current process.</param>
+        public MSBuildClient(string msbuildLocation)
         {
             _serverEnvironmentVariables = new();
             _exitResult = new();
 
             // dll & exe locations
-            _exeLocation = exeLocation;
-            _dllLocation = dllLocation;
+            _msbuildLocation = msbuildLocation;
 
             // Client <-> Server communication stream
             _handshake = GetHandshake();
@@ -257,15 +249,20 @@ namespace Microsoft.Build.Execution
             }
 
             string[] msBuildServerOptions = new string[] {
-                _dllLocation,
                 "/nologo",
                 "/nodemode:8"
             };
 
+            string? useMSBuildServerEnvVarValue = Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName);
             try
             {
-                Process msbuildProcess = LaunchNode(_exeLocation, string.Join(" ", msBuildServerOptions), _serverEnvironmentVariables);
-                CommunicationsUtilities.Trace("Server is launched with PID: {0}", msbuildProcess.Id);
+                // Disable MSBuild server for a child process, preventing an infinite recurson.
+                Environment.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, "");
+
+                NodeLauncher nodeLauncher = new NodeLauncher();
+                CommunicationsUtilities.Trace("Starting Server...");
+                Process msbuildProcess = nodeLauncher.Start(_msbuildLocation, string.Join(" ", msBuildServerOptions));
+                CommunicationsUtilities.Trace("Server started with PID: {0}", msbuildProcess?.Id);
             }
             catch (Exception ex)
             {
@@ -273,32 +270,12 @@ namespace Microsoft.Build.Execution
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.LaunchError;
                 return false;
             }
-
-            return true;
-        }
-
-        private Process LaunchNode(string exeLocation, string msBuildServerArguments, Dictionary<string, string> serverEnvironmentVariables)
-        {
-            CommunicationsUtilities.Trace("Launching server node from {0} with arguments {1}", exeLocation, msBuildServerArguments);
-            ProcessStartInfo processStartInfo = new()
+            finally
             {
-                FileName = exeLocation,
-                Arguments = msBuildServerArguments,
-                UseShellExecute = false
-            };
-
-            foreach (var entry in serverEnvironmentVariables)
-            {
-                processStartInfo.Environment[entry.Key] = entry.Value;
+                Environment.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, useMSBuildServerEnvVarValue);
             }
 
-            // We remove env to enable MSBuild Server that might be equal to 1, so we do not get an infinite recursion here.
-            processStartInfo.Environment[Traits.UseMSBuildServerEnvVarName] = "0";
-
-            processStartInfo.CreateNoWindow = true;
-            processStartInfo.UseShellExecute = false;
-
-            return Process.Start(processStartInfo) ?? throw new InvalidOperationException("MSBuild server node failed to launch.");
+            return true;
         }
 
         private bool TrySendBuildCommand(string commandLine)

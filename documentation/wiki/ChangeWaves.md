@@ -26,6 +26,7 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 ### 17.4
 - [Respect deps.json when loading assemblies](https://github.com/dotnet/msbuild/pull/7520)
 - [Remove opt in for new schema for CombineTargetFrameworkInfoProperties](https://github.com/dotnet/msbuild/pull/6928)
+- [MSBuild server](https://github.com/dotnet/msbuild/pull/7634)
 
 ### 17.0
 - [Scheduler should honor BuildParameters.DisableInprocNode](https://github.com/dotnet/msbuild/pull/6400)
