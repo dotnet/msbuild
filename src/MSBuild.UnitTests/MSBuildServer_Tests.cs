@@ -207,28 +207,6 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
-        public void MultiProcBuildOnServer()
-        {
-            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
-            TransientTestFile project = _env.CreateFile("test.proj", printPidContents);
-
-            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success);
-            success.ShouldBeTrue();
-            int serverPid = ParseNumber(output, "Server ID is ");
-
-            _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
-
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -m:2", out success);
-            success.ShouldBeTrue();
-            int workerPid = ParseNumber(output, "Server ID is ");
-            workerPid.ShouldNotBe(serverPid);
-
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -m:2", out success);
-            success.ShouldBeTrue();
-            workerPid.ShouldBe(ParseNumber(output, "Server ID is "));
-        }
-
         private int ParseNumber(string searchString, string toFind)
         {
             Regex regex = new(@$"{toFind}(\d+)");
