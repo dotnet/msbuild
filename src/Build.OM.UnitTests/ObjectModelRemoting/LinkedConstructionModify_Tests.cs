@@ -9,6 +9,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using System.Linq;
     using Microsoft.Build.Construction;
     using Microsoft.Build.Evaluation;
+    using Shouldly;
     using Xunit;
 
     public class LinkedConstructionModify_Tests : IClassFixture<LinkedConstructionModify_Tests.MyTestCollectionGroup>
@@ -69,7 +70,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             var newItemWithMetadata = this.StdGroup.Disk.GetAbsolutePath("newfile2.cpp");
             List<KeyValuePair<string, string>> itemMetadata = new List<KeyValuePair<string, string>>()
             {
-                new KeyValuePair<string, string>("m1", "v1"),
+                new KeyValuePair<string, string>("m1", @"<Some>
+  <Xml With=""Nesting"" />
+</Some>"),
                 new KeyValuePair<string, string>("m2", "v2"),
                 new KeyValuePair<string, string>("m3", "v3"),
             };
@@ -90,7 +93,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             // Property
             xmlPair.Add2NewChildrenWithVerify<ProjectPropertyElement>("NewProp", (p, pn) => p.AddProperty(pn, $"Value{pn}"), (prop, pn) => prop.Name == pn, out var itemProp1, out var itemProp2);
-            xmlPair.Add2NewLabeledChildrenWithVerify<ProjectPropertyGroupElement>("NewPropGroup", (p, l) => p.AddPropertyGroup(), out var itemPropretyGroup1, out var itemPropretyGroup2);
+            xmlPair.Add2NewLabeledChildrenWithVerify<ProjectPropertyGroupElement>("NewPropGroup", (p, l) => p.AddPropertyGroup(), out var itemPropertyGroup1, out var itemPropertyGroup2);
 
             // Target & Tasks
             xmlPair.Add2NewChildrenWithVerify<ProjectTargetElement>("NewTarget", (p, n) => p.AddTarget(n), (t, n) => string.Equals(t.Name, n), out var newTarget1, out var newTarget2);
@@ -132,6 +135,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             var clone = xmlPair.View.DeepClone();
             ViewValidation.IsLinkedObject(clone);
             Assert.NotSame(clone, xmlPair.View);
+            clone.OuterElement.ShouldBe(xmlPair.View.OuterElement);
             Assert.True(string.IsNullOrEmpty(clone.FullPath));
         }
 
