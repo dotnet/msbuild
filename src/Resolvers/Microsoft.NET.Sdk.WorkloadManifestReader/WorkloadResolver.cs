@@ -393,22 +393,31 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 #nullable restore
         }
 
+        public IEnumerable<WorkloadInfo> GetExtendedWorkloads(IEnumerable<WorkloadId> workloadIds)
+        {
+            return EnumerateWorkloadWithExtends(new WorkloadId("root"), workloadIds, null)
+                .Select(t => new WorkloadInfo(t.workload.Id, t.workload.Description));
+        }
+
         private IEnumerable<(WorkloadDefinition workload, WorkloadManifest workloadManifest)> EnumerateWorkloadWithExtends(WorkloadDefinition workload, WorkloadManifest manifest)
+        {
+            IEnumerable<(WorkloadDefinition workload, WorkloadManifest workloadManifest)> result =
+                workload.Extends == null
+                    ? Enumerable.Empty<(WorkloadDefinition workload, WorkloadManifest workloadManifest)>()
+                    : EnumerateWorkloadWithExtends(workload.Id, workload.Extends, manifest);
+
+            return result.Prepend((workload, manifest));
+        }
+
+        private IEnumerable<(WorkloadDefinition workload, WorkloadManifest workloadManifest)> EnumerateWorkloadWithExtends(WorkloadId workloadId, IEnumerable<WorkloadId> extends, WorkloadManifest? manifest)
         {
             HashSet<WorkloadId>? dedup = null;
 
-            IEnumerable<(WorkloadDefinition workload, WorkloadManifest workloadManifest)> EnumerateWorkloadWithExtendsRec(WorkloadDefinition workload, WorkloadManifest manifest)
+            IEnumerable<(WorkloadDefinition workload, WorkloadManifest workloadManifest)> EnumerateWorkloadWithExtendsRec(WorkloadId workloadId, IEnumerable<WorkloadId> extends, WorkloadManifest? manifest)
             {
-                yield return (workload, manifest);
+                dedup ??= new HashSet<WorkloadId> { workloadId };
 
-                if (workload.Extends == null || workload.Extends.Count == 0)
-                {
-                    yield break;
-                }
-
-                dedup ??= new HashSet<WorkloadId> { workload.Id };
-
-                foreach (var baseWorkloadId in workload.Extends)
+                foreach (var baseWorkloadId in extends)
                 {
                     if (!dedup.Add(baseWorkloadId))
                     {
@@ -417,7 +426,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
                     if (_workloads.TryGetValue(baseWorkloadId) is not (WorkloadDefinition baseWorkload, WorkloadManifest baseWorkloadManifest))
                     {
-                        throw new WorkloadManifestCompositionException(Strings.MissingBaseWorkload, baseWorkloadId, workload.Id, manifest.Id, manifest.ManifestPath);
+                        throw new WorkloadManifestCompositionException(Strings.MissingBaseWorkload, baseWorkloadId, workloadId, manifest?.Id, manifest?.ManifestPath);
                     }
 
                     // the workload's ID may not match the value we looked up if it's a redirect
@@ -426,14 +435,21 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         continue;
                     }
 
-                    foreach (var enumeratedbaseWorkload in EnumerateWorkloadWithExtendsRec(baseWorkload, baseWorkloadManifest))
+                    yield return (baseWorkload, baseWorkloadManifest);
+
+                    if (baseWorkload.Extends == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var enumeratedbaseWorkload in EnumerateWorkloadWithExtendsRec(baseWorkload.Id, baseWorkload.Extends, baseWorkloadManifest))
                     {
                         yield return enumeratedbaseWorkload;
                     }
                 }
             }
 
-            return EnumerateWorkloadWithExtendsRec(workload, manifest);
+            return EnumerateWorkloadWithExtendsRec(workloadId, extends, manifest);
         }
 
         internal IEnumerable<(WorkloadPackId packId, WorkloadDefinition referencingWorkload, WorkloadManifest workloadDefinedIn)> GetPacksInWorkload(WorkloadDefinition workload, WorkloadManifest manifest)

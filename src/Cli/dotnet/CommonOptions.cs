@@ -230,14 +230,25 @@ namespace Microsoft.DotNet.Cli
             return $"{os}-{arch}";
         }
 
+        public static string GetDotnetExeDirectory()
+        {
+            // Alternatively we could use Microsoft.DotNet.NativeWrapper.EnvironmentProvider.GetDotnetExeDirectory here
+            //  (while injecting env resolver so that DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR is being returned as null)
+            // However - it first looks on PATH - which can be problematic in environment (e.g. dev) where we have installed and xcopy dotnet versions
+
+            var dotnetRootPath = Path.GetDirectoryName(Environment.ProcessPath);
+            // When running under test the path does not always contain "dotnet".
+			// The sdk folder is /d/ when run on helix because of space issues
+            dotnetRootPath = Path.GetFileName(dotnetRootPath).Contains("dotnet") || Path.GetFileName(dotnetRootPath).Contains("x64") || Path.GetFileName(dotnetRootPath).Equals("d") ? dotnetRootPath : Path.Combine(dotnetRootPath, "dotnet");
+            return dotnetRootPath;
+        }
+
         public static string GetCurrentRuntimeId()
         {
-            var dotnetRootPath = Path.GetDirectoryName(Environment.ProcessPath);
-            // When running under test the path does not always contain "dotnet" and Product.Version is empty.
-            // The sdk folder is /d/ when run on helix because of space issues
-            dotnetRootPath = Path.GetFileName(dotnetRootPath).Contains("dotnet") || Path.GetFileName(dotnetRootPath).Contains("x64") || Path.GetFileName(dotnetRootPath).Equals("d") ? dotnetRootPath : Path.Combine(dotnetRootPath, "dotnet");
+            var dotnetRootPath = GetDotnetExeDirectory();
             var ridFileName = "NETCoreSdkRuntimeIdentifierChain.txt";
-            string runtimeIdentifierChainPath = string.IsNullOrEmpty(Product.Version) ?
+            // When running under test the Product.Version might be empty or point to version not installed in dotnetRootPath.
+            string runtimeIdentifierChainPath = string.IsNullOrEmpty(Product.Version) || !Directory.Exists(Path.Combine(dotnetRootPath, "sdk", Product.Version)) ?
                 Path.Combine(Directory.GetDirectories(Path.Combine(dotnetRootPath, "sdk"))[0], ridFileName) :
                 Path.Combine(dotnetRootPath, "sdk", Product.Version, ridFileName);
             string[] currentRuntimeIdentifiers = File.Exists(runtimeIdentifierChainPath) ?
