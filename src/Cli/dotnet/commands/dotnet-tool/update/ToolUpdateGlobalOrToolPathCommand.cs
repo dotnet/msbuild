@@ -260,9 +260,13 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             }
             else
             {
+                
                 _reporter.WriteLine(
                     string.Format(
-                        LocalizableStrings.UpdateSucceededVersionNoChange,
+                        (
+                        newInstalledPackage.Version.IsPrerelease ? 
+                        LocalizableStrings.UpdateSucceededPreVersionNoChange : LocalizableStrings.UpdateSucceededStableVersionNoChange
+                        ),
                         newInstalledPackage.Id, newInstalledPackage.Version).Green());
             }
         }
