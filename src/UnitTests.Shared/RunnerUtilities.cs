@@ -113,7 +113,7 @@ namespace Microsoft.Build.UnitTests.Shared
                 p.BeginOutputReadLine();
                 p.BeginErrorReadLine();
                 p.StandardInput.Dispose();
-                p.WaitForExit(30000);
+                p.WaitForExit();
 
                 pid = p.Id;
                 successfulExit = p.ExitCode == 0;
