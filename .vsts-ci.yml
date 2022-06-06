@@ -10,7 +10,7 @@ trigger:
     - internal/release/6.*
   paths:
     exclude:
-    - *.md
+    - "*.md"
 
 variables:
   - name: teamName
