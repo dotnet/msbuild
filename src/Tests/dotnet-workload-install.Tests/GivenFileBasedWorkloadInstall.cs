@@ -156,23 +156,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         {
             var (dotnetRoot, installer, nugetInstaller) = GetTestInstaller();
             var mockNugetInstaller = nugetInstaller as MockNuGetPackageDownloader;
-            string packId;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                packId = "Xamarin.Android.BuildTools.WinHost";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                packId = "Xamarin.Android.BuildTools.LinuxHost";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                packId = "Xamarin.Android.BuildTools.MacHost";
-            }
-            else
-            {
-                throw new NotSupportedException(RuntimeInformation.OSDescription);
-            }
+            //  Test runs xplat, but in WorkloadResolver.CreateForTests we are using Windows RIDs for tests
+            var packId = "Xamarin.Android.BuildTools.WinHost";
             var packVersion = "8.4.7";
 
             var version = "6.0.100";
@@ -427,23 +412,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             downloads.Count.Should().Be(1);
 
-            string expectedPackId;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                expectedPackId = "Xamarin.Android.BuildTools.WinHost";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                expectedPackId = "Xamarin.Android.BuildTools.LinuxHost";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                expectedPackId = "Xamarin.Android.BuildTools.MacHost";
-            }
-            else
-            {
-                throw new NotSupportedException(RuntimeInformation.OSDescription);
-            }
+            string expectedPackId = "Xamarin.Android.BuildTools.WinHost";
             downloads[0].NuGetPackageId.Should().Be(expectedPackId);
             downloads[0].NuGetPackageVersion.Should().Be("8.4.7");
         }

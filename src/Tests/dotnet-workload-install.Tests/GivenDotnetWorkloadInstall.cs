@@ -225,7 +225,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         {
             var cachePath = Path.Combine(_testAssetsManager.CreateTestDirectory(identifier: AppendForUserLocal("mockCache_", userLocal) + sdkVersion).Path, "mockCachePath");
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android", "--download-to-cache", cachePath });
-            (_, var installManager, var installer, _, var manifestUpdater, _) = GetTestInstallers(parseResult, userLocal, sdkVersion, tempDirManifestPath: _manifestPath);
+            (_, var installManager, var installer, _, var manifestUpdater, var packageDownloader) = GetTestInstallers(parseResult, userLocal, sdkVersion, tempDirManifestPath: _manifestPath);
 
             installManager.Execute();
 
@@ -233,8 +233,11 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             manifestUpdater.DownloadManifestPackagesCallCount.Should().Be(1);
             manifestUpdater.ExtractManifestPackagesToTempDirCallCount.Should().Be(1);
             // 8 android pack packages
-            installer.CachedPacks.Count.Should().Be(8);
-            installer.CachePath.Should().Be(cachePath);
+            packageDownloader.DownloadCallParams.Count.Should().Be(8);
+            foreach (var downloadParams in packageDownloader.DownloadCallParams)
+            {
+                downloadParams.downloadFolder.Value.Value.Should().Be(cachePath);
+            }
         }
 
         [Theory]

@@ -18,7 +18,6 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public List<PackInfo> RolledBackPacks = new List<PackInfo>();
         public IList<(ManifestVersionUpdate manifestUpdate, DirectoryPath? offlineCache)> InstalledManifests = 
             new List<(ManifestVersionUpdate manifestUpdate, DirectoryPath?)>();
-        public IList<PackInfo> CachedPacks = new List<PackInfo>();
         public string CachePath;
         public bool GarbageCollectionCalled = false;
         public MockInstallationRecordRepository InstallationRecordRepository;
@@ -40,6 +39,22 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             FailingGarbageCollection = failingGarbageCollection;
         }
 
+        IEnumerable<PackInfo> GetPacksForWorkloads(IEnumerable<WorkloadId> workloadIds)
+        {
+            if (WorkloadResolver == null)
+            {
+                return Enumerable.Empty<PackInfo>();
+            }
+            else
+            {
+                return workloadIds
+                        .SelectMany(workloadId => WorkloadResolver.GetPacksInWorkload(workloadId))
+                        .Distinct()
+                        .Select(packId => WorkloadResolver.TryGetPackInfo(packId))
+                        .Where(pack => pack != null).ToList();
+            }
+        }
+
         public void InstallWorkloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, ITransactionContext transactionContext, DirectoryPath? offlineCache = null)
         {
             List<PackInfo> packs = new List<PackInfo>();
@@ -48,22 +63,14 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             {
                 CachePath = offlineCache?.Value;
 
-                if (WorkloadResolver != null)
+                packs = GetPacksForWorkloads(workloadIds).ToList();
+
+                foreach (var packInfo in packs)
                 {
-                    packs = workloadIds
-                        .SelectMany(workloadId => WorkloadResolver.GetPacksInWorkload(workloadId))
-                        .Distinct()
-                        .Select(packId => WorkloadResolver.TryGetPackInfo(packId))
-                        .Where(pack => pack != null).ToList();
-
-
-                    foreach (var packInfo in packs)
+                    InstalledPacks = InstalledPacks.Append(packInfo).ToList();
+                    if (packInfo.Id.ToString().Equals(FailingPack))
                     {
-                        InstalledPacks = InstalledPacks.Append(packInfo).ToList();
-                        if (packInfo.Id.ToString().Equals(FailingPack))
-                        {
-                            throw new Exception($"Failing pack: {packInfo.Id}");
-                        }
+                        throw new Exception($"Failing pack: {packInfo.Id}");
                     }
                 }
             },
@@ -101,13 +108,14 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
         public IEnumerable<WorkloadDownload> GetDownloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, bool includeInstalledItems)
         {
-            throw new NotImplementedException();
-        }
+            var packs = GetPacksForWorkloads(workloadIds);
 
-        public void DownloadToOfflineCache(PackInfo pack, DirectoryPath cachePath, bool includePreviews)
-        {
-            CachedPacks.Add(pack);
-            CachePath = cachePath.Value;
+            if (!includeInstalledItems)
+            {
+                packs = packs.Where(p => !InstalledPacks.Any(installed => installed.ResolvedPackageId == p.ResolvedPackageId && installed.Version == p.Version));
+            }
+
+            return packs.Select(p => new WorkloadDownload(p.ResolvedPackageId, p.Version));
         }
 
         public void Shutdown()

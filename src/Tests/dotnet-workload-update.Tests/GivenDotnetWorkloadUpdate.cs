@@ -219,17 +219,20 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android") };
             var cachePath = Path.Combine(_testAssetsManager.CreateTestDirectory(identifier: "cachePath").Path, "mockCachePath");
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--download-to-cache", cachePath });
-            (_, var command, var installer, _, var manifestUpdater, _) = GetTestInstallers(parseResult, installedWorkloads: mockWorkloadIds, includeInstalledPacks: true);
+            (_, var command, var installer, _, var manifestUpdater, var packageDownloader) = GetTestInstallers(parseResult, installedWorkloads: mockWorkloadIds, includeInstalledPacks: true);
 
             command.Execute();
 
             // Manifest packages should have been 'downloaded' and used for pack resolution
             manifestUpdater.DownloadManifestPackagesCallCount.Should().Be(1);
             manifestUpdater.ExtractManifestPackagesToTempDirCallCount.Should().Be(1);
-            // 6 android pack packages need to be updated
-            installer.CachedPacks.Count.Should().Be(6);
-            installer.CachedPacks.Select(pack => pack.Id).Should().NotContain("Xamarin.Android.Sdk"); // This pack is up to date, doesn't need to be cached
-            installer.CachePath.Should().Be(cachePath);
+            // 7 android pack packages need to be updated
+            packageDownloader.DownloadCallParams.Count.Should().Be(7);
+            foreach (var downloadParams in packageDownloader.DownloadCallParams)
+            {
+                downloadParams.downloadFolder.Value.Value.Should().Be(cachePath);
+                downloadParams.id.ToString().Should().NotBe("xamarin.android.sdk");  // This pack is up to date, doesn't need to be cached
+            }
         }
 
         [Fact]
