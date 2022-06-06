@@ -24,10 +24,6 @@ namespace Microsoft.Build.Execution
         /// The build stopped unexpectedly, for example,
         /// because a named pipe between the server and the client was unexpectedly closed.
         /// </summary>
-        Unexpected,
-        /// <summary>
-        /// The build was cancelled.
-        /// </summary>
-        Cancelled
+        Unexpected
     }
 }

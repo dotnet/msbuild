@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
-using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Client;
@@ -50,11 +49,6 @@ namespace Microsoft.Build.Execution
         /// Whether MSBuild server finished the build.
         /// </summary>
         private bool _buildFinished = false;
-
-        /// <summary>
-        /// Whether the build was canceled.
-        /// </summary>
-        private bool _buildCanceled = false;
 
         /// <summary>
         /// Handshake between server and client.
@@ -366,7 +360,6 @@ namespace Microsoft.Build.Execution
 
             Console.WriteLine("MSBuild client cancelled.");
             CommunicationsUtilities.Trace("MSBuild client cancelled.");
-            _buildCanceled = true;
         }
 
         /// <summary>
@@ -416,7 +409,7 @@ namespace Microsoft.Build.Execution
         private void HandleServerNodeBuildResult(ServerNodeBuildResult response)
         {
             CommunicationsUtilities.Trace("Build response received: exit code {0}, exit type '{1}'", response.ExitCode, response.ExitType);
-            _exitResult.MSBuildClientExitType = _buildCanceled ? MSBuildClientExitType.Cancelled : MSBuildClientExitType.Success;
+            _exitResult.MSBuildClientExitType = MSBuildClientExitType.Success;
             _exitResult.MSBuildAppExitTypeString = response.ExitType;
             _buildFinished = true;
         }
