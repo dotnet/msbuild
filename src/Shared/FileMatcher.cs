@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
+using System.Buffers;
 
 #nullable disable
 
@@ -836,6 +837,20 @@ namespace Microsoft.Build.Shared
             Dictionary<string, List<RecursionState>> searchesToExcludeInSubdirs,
             TaskOptions taskOptions)
         {
+#if NET6_0
+            // This is a pretty quick, simple check, but it misses some cases:
+            // symlink in folder A pointing to folder B and symlink in folder B pointing to folder A
+            // GetFiles in folder C that contains a symlink that points folder D, which contains C as well as other files
+            // and most obviously, frameworks other than net6.0
+            // The solution I'd propose for the first two, if necessary, would be maintaining a set of symlinks and verifying, before following it,
+            // that we had not followed it previously. The third would require a more involved P/invoke-style fix.
+            DirectoryInfo baseDirectoryInfo = new(recursionState.BaseDirectory);
+            if (baseDirectoryInfo.LinkTarget is not null && baseDirectoryInfo.FullName.Contains(baseDirectoryInfo.LinkTarget))
+            {
+                return;
+            }
+#endif
+
             ErrorUtilities.VerifyThrow((recursionState.SearchData.Filespec == null) || (recursionState.SearchData.RegexFileMatch == null),
                 "File-spec overrides the regular expression -- pass null for file-spec if you want to use the regular expression.");
 
