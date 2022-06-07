@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -416,7 +416,7 @@ namespace Microsoft.Build.Execution
                 CommunicationsUtilities.Trace("Reading handshake from pipe {0}", _pipeName);
 
 #if NETCOREAPP2_1_OR_GREATER || MONO
-                _nodeStream.ReadEndOfHandshakeSignal(false, 1000); 
+                _nodeStream.ReadEndOfHandshakeSignal(false, 1000);
 #else
                 _nodeStream.ReadEndOfHandshakeSignal(false);
 #endif
