@@ -260,7 +260,6 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             }
             else
             {
-                
                 _reporter.WriteLine(
                     string.Format(
                         (

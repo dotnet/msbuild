@@ -34,7 +34,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         private const string LowerPackageVersion = "1.0.4";
         private const string HigherPackageVersion = "1.0.5";
         private const string HigherPreviewPackageVersion = "1.0.5-preview3";
-        private const string HighestPreviewPackageVersion = "1.0.6-preview3";
         private readonly string _shimsDirectory;
         private readonly string _toolsDirectory;
 
@@ -72,12 +71,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                             Version = HigherPreviewPackageVersion,
                             ToolCommandName = "SimulatorCommand"
                         },
-                        new MockFeedPackage
-                        {
-                            PackageId = _packageId.ToString(),
-                            Version = HighestPreviewPackageVersion,
-                            ToolCommandName = "SimulatorCommand"
-                        }
                     }
                 }
             };
@@ -237,16 +230,16 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         [Fact]
         public void GivenAnExistedSameVersionInstallationWhenCallWithPrereleaseItUsesAPrereleaseSuccessMessage()
         {
-            CreateInstallCommand($"-g {_packageId} --version {HighestPreviewPackageVersion}").Execute();
+            CreateInstallCommand($"-g {_packageId} --version {HigherPreviewPackageVersion}").Execute();
             _reporter.Lines.Clear();
 
-            var command = CreateUpdateCommand($"-g {_packageId} --version {HighestPreviewPackageVersion}");
+            var command = CreateUpdateCommand($"-g {_packageId} --version {HigherPreviewPackageVersion}");
 
             command.Execute();
 
             _reporter.Lines.First().Should().Contain(string.Format(
                 LocalizableStrings.UpdateSucceededPreVersionNoChange,
-                _packageId, HighestPreviewPackageVersion));
+                _packageId, HigherPreviewPackageVersion));
         }
 
         [Fact]
