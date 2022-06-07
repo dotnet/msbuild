@@ -42,34 +42,12 @@ namespace Microsoft.Build.CommandLine
             CancellationToken cancellationToken
             )
         {
-            string? exeLocation;
-            string? dllLocation;
-
-#if RUNTIME_TYPE_NETCORE || MONO
-            // Run the child process with the same host as the currently-running process.
-            // Mono automatically uses the current mono, to execute a managed assembly.
-            if (!NativeMethodsShared.IsMono)
-            {
-                // _exeFileLocation consists the msbuild dll instead.
-                dllLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
-                exeLocation = GetCurrentHost();
-            }
-            else
-            {
-                // _exeFileLocation consists the msbuild dll instead.
-                exeLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
-                dllLocation = String.Empty;
-            }
-#else
-            exeLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
-            dllLocation = String.Empty;
-#endif
+            string msbuildLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 
             return Execute(
                 commandLine,
                 cancellationToken,
-                exeLocation,
-                dllLocation
+                msbuildLocation
             );
         }
 
@@ -80,10 +58,8 @@ namespace Microsoft.Build.CommandLine
         /// on the command line is assumed to be the name/path of the executable, and
         /// is ignored.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
-        /// <param name="exeLocation">Location of executable file to launch the server process.
-        /// That should be either dotnet.exe or MSBuild.exe location.</param>
-        /// <param name="dllLocation">Location of dll file to launch the server process if needed.
-        /// Empty if executable is msbuild.exe and not empty if dotnet.exe.</param>
+        /// <param name="msbuildLocation"> Full path to current MSBuild.exe if executable is MSBuild.exe,
+        /// or to version of MSBuild.dll found to be associated with the current process.</param>
         /// <returns>A value of type <see cref="MSBuildApp.ExitType"/> that indicates whether the build succeeded,
         /// or the manner in which it failed.</returns>
         public static MSBuildApp.ExitType Execute(
@@ -93,8 +69,7 @@ namespace Microsoft.Build.CommandLine
             string[] commandLine,
 #endif
             CancellationToken cancellationToken,
-            string exeLocation,
-            string dllLocation
+            string msbuildLocation
         )
         {
             // MSBuild client orchestration.
@@ -103,7 +78,7 @@ namespace Microsoft.Build.CommandLine
 #else
             string commandLineString = commandLine;
 #endif
-            MSBuildClient msbuildClient = new MSBuildClient(exeLocation, dllLocation); 
+            MSBuildClient msbuildClient = new MSBuildClient(msbuildLocation); 
             MSBuildClientExitResult exitResult = msbuildClient.Execute(commandLineString, cancellationToken);
 
             if (exitResult.MSBuildClientExitType == MSBuildClientExitType.ServerBusy ||
