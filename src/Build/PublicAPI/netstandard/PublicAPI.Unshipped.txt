@@ -8,7 +8,6 @@ Microsoft.Build.Execution.MSBuildClientExitResult.MSBuildClientExitResult() -> v
 Microsoft.Build.Execution.MSBuildClientExitResult.MSBuildClientExitType.get -> Microsoft.Build.Execution.MSBuildClientExitType
 Microsoft.Build.Execution.MSBuildClientExitResult.MSBuildClientExitType.set -> void
 Microsoft.Build.Execution.MSBuildClientExitType
-Microsoft.Build.Execution.MSBuildClientExitType.Cancelled = 5 -> Microsoft.Build.Execution.MSBuildClientExitType
 Microsoft.Build.Execution.MSBuildClientExitType.ConnectionError = 2 -> Microsoft.Build.Execution.MSBuildClientExitType
 Microsoft.Build.Execution.MSBuildClientExitType.LaunchError = 3 -> Microsoft.Build.Execution.MSBuildClientExitType
 Microsoft.Build.Execution.MSBuildClientExitType.ServerBusy = 1 -> Microsoft.Build.Execution.MSBuildClientExitType

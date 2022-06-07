@@ -195,6 +195,8 @@ namespace Microsoft.Build.Execution
                     {
                         case 0:
                             HandleCancellation();
+                            // After the cancelation, we want to wait to server gracefuly finish the build.
+                            // We have to replace the cancelation handle, because WaitAny would cause to repeatedly hit this branch of code.
                             waitHandles[0] = CancellationToken.None.WaitHandle;
                             break;
 
@@ -319,7 +321,7 @@ namespace Microsoft.Build.Execution
 
         private bool TrySendBuildCommand(string commandLine) => TrySendPacket(() => GetServerNodeBuildCommand(commandLine));
 
-        private bool TrySendCancelCommand() => TrySendPacket(() => ServerNodeBuildCancel.Instance);
+        private bool TrySendCancelCommand() => TrySendPacket(() => new ServerNodeBuildCancel());
 
         private ServerNodeBuildCommand GetServerNodeBuildCommand(string commandLine)
         {
@@ -358,8 +360,7 @@ namespace Microsoft.Build.Execution
         {
             TrySendCancelCommand();
 
-            Console.WriteLine("MSBuild client cancelled.");
-            CommunicationsUtilities.Trace("MSBuild client cancelled.");
+            CommunicationsUtilities.Trace("MSBuild client sent cancelation command.");
         }
 
         /// <summary>
