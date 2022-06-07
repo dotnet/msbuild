@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AdManifestPackageDoesNotExist">
-        <source>Failed to update advertising manifest. Manifest package {0} doesn't exist.</source>
-        <target state="translated">未能更新广告清单。清单程序包 {0} 不存在。</target>
+        <source>Advertising manifest not updated. Manifest package for {0} doesn't exist.</source>
+        <target state="translated">广告清单未更新。{0} 的清单包不存在。</target>
         <note />
       </trans-unit>
       <trans-unit id="AdManifestUpdated">
@@ -120,6 +120,11 @@
       <trans-unit id="InsufficientPrivilegeToStartServer">
         <source>Insufficient privilege to start the server.</source>
         <target state="translated">权限不足，无法启动服务器。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">分析工作负载清单 ID“{1}”的版本“{0}”时出错</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">

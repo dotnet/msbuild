@@ -46,13 +46,13 @@ namespace Microsoft.NET.Build.Tests
                 "StopwatchLib.dll",
                 "StopwatchLib.pdb");
 
-            VerifyBuild(testAsset, "EntityFrameworkApp", "net451", "win7-x86", buildArgs,
+            VerifyBuild(testAsset, "EntityFrameworkApp", "net451", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86", buildArgs,
                 "EntityFrameworkApp.exe",
                 "EntityFrameworkApp.pdb");
 
             // Try running EntityFrameworkApp.exe
             var buildCommand = new BuildCommand(testAsset, "EntityFrameworkApp");
-            var outputDirectory = buildCommand.GetOutputDirectory("net451", runtimeIdentifier: "win7-x86");
+            var outputDirectory = buildCommand.GetOutputDirectory("net451", runtimeIdentifier: $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86");
 
             new RunExeCommand(Log, Path.Combine(outputDirectory.FullName, "EntityFrameworkApp.exe"))
                 .Execute()
@@ -87,7 +87,7 @@ namespace Microsoft.NET.Build.Tests
                 "StopwatchLib.dll",
                 "StopwatchLib.pdb");
 
-            VerifyClean(testAsset, "EntityFrameworkApp", "net451", "win7-x86",
+            VerifyClean(testAsset, "EntityFrameworkApp", "net451", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86",
                 "EntityFrameworkApp.exe",
                 "EntityFrameworkApp.pdb");
         }

@@ -143,7 +143,6 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                 {
                     if (installedWorkloads.Contains(new WorkloadId(WorkloadId.ToString())))
                     {
-                        //  TODO: Potentially show existing and new feature bands
                         updateList.Add(new UpdateAvailableEntry(manifestUpdate.ExistingVersion.ToString(),
                             manifestUpdate.NewVersion.ToString(),
                             workloadDefinition.Description, WorkloadId.ToString()));

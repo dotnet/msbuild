@@ -57,6 +57,11 @@
         <target state="translated">ドキュメントが途中で終了しました</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidManifestVersion">
+        <source>Invalid version: {0}</source>
+        <target state="translated">無効なバージョン: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
         <target state="translated">マニフェスト '{1}' [{2}] で必要なワークロード マニフェストの依存関係 '{0}' が見つかりません</target>

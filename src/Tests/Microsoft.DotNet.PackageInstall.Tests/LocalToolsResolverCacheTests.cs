@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         {
             (DirectoryPath nuGetGlobalPackagesFolder, LocalToolsResolverCache localToolsResolverCache) = Setup();
 
-            NuGetFramework targetFramework = NuGetFramework.Parse("netcoreapp2.1");
+            NuGetFramework targetFramework = NuGetFramework.Parse(ToolsetInfo.CurrentTargetFramework);
             string runtimeIdentifier = Constants.AnyRid;
             PackageId packageId = new PackageId("my.toolBundle");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
@@ -88,7 +88,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         {
             (DirectoryPath nuGetGlobalPackagesFolder, LocalToolsResolverCache localToolsResolverCache) = Setup();
 
-            NuGetFramework targetFramework = NuGetFramework.Parse("netcoreapp2.1");
+            NuGetFramework targetFramework = NuGetFramework.Parse(ToolsetInfo.CurrentTargetFramework);
             string runtimeIdentifier = Constants.AnyRid;
             PackageId packageId = new PackageId("my.toolBundle");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
@@ -122,7 +122,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         {
             (DirectoryPath nuGetGlobalPackagesFolder, LocalToolsResolverCache localToolsResolverCache) = Setup();
 
-            NuGetFramework targetFramework = NuGetFramework.Parse("netcoreapp2.1");
+            NuGetFramework targetFramework = NuGetFramework.Parse(ToolsetInfo.CurrentTargetFramework);
             string runtimeIdentifier = Constants.AnyRid;
             PackageId packageId = new PackageId("my.toolBundle");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
@@ -162,7 +162,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         {
             (DirectoryPath nuGetGlobalPackagesFolder, LocalToolsResolverCache localToolsResolverCache) = Setup();
 
-            NuGetFramework targetFramework = NuGetFramework.Parse("netcoreapp2.1");
+            NuGetFramework targetFramework = NuGetFramework.Parse(ToolsetInfo.CurrentTargetFramework);
             string runtimeIdentifier = Constants.AnyRid;
             PackageId packageId = new PackageId("my.toolBundle");
 
@@ -222,7 +222,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                     new RestoredCommandIdentifierVersionRange(
                         new PackageId("my.toolBundle"),
                         VersionRange.Parse("(0.0.0, 2.0.0)"),
-                        NuGetFramework.Parse("netcoreapp2.1"), Constants.AnyRid, new ToolCommandName("tool1")),
+                        NuGetFramework.Parse(ToolsetInfo.CurrentTargetFramework), Constants.AnyRid, new ToolCommandName("tool1")),
                     out _);
 
             loadSuccess.Should().BeFalse();
@@ -233,7 +233,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         {
             (DirectoryPath nuGetGlobalPackagesFolder, LocalToolsResolverCache localToolsResolverCache) = Setup();
 
-            NuGetFramework targetFramework = NuGetFramework.Parse("netcoreapp2.1");
+            NuGetFramework targetFramework = NuGetFramework.Parse(ToolsetInfo.CurrentTargetFramework);
             string runtimeIdentifier = Constants.AnyRid;
             PackageId packageId = new PackageId("my.toolBundle");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
@@ -315,7 +315,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             LocalToolsResolverCache localToolsResolverCache =
                 new LocalToolsResolverCache(fileSystem, cacheDirectory, version);
 
-            NuGetFramework targetFramework = NuGetFramework.Parse("netcoreapp2.1");
+            NuGetFramework targetFramework = NuGetFramework.Parse(ToolsetInfo.CurrentTargetFramework);
             string runtimeIdentifier = Constants.AnyRid;
             PackageId packageId = new PackageId("my.toolBundle");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
@@ -372,7 +372,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             LocalToolsResolverCache localToolsResolverCache =
                 new LocalToolsResolverCache(fileSystem, cacheDirectory, version);
 
-            NuGetFramework targetFramework = NuGetFramework.Parse("netcoreapp2.1");
+            NuGetFramework targetFramework = NuGetFramework.Parse(ToolsetInfo.CurrentTargetFramework);
             string runtimeIdentifier = Constants.AnyRid;
             PackageId packageId = new PackageId("my.toolBundle");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");

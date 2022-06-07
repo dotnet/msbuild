@@ -202,7 +202,7 @@ namespace Microsoft.NET.Pack.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "PackMultiTargetedLibrary",
-                TargetFrameworks = "netstandard1.1;netstandard2.0;netcoreapp1.1;netcoreapp2.0",
+                TargetFrameworks = $"netstandard1.1;netstandard2.0;netcoreapp1.1;{ToolsetInfo.CurrentTargetFramework}",
                 IsExe = false
             };
 
@@ -234,7 +234,7 @@ namespace Microsoft.NET.Pack.Tests
             ExpectDependencyGroup(".NETStandard1.1", "NETStandard.Library");
             ExpectDependencyGroup(".NETStandard2.0", null);
             ExpectDependencyGroup(".NETCoreApp1.1", "Microsoft.NETCore.App");
-            ExpectDependencyGroup(".NETCoreApp2.0", null);
+            ExpectDependencyGroup(ToolsetInfo.CurrentTargetFramework, null);
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 ExpectDependencyGroup(".NETFramework4.6.1", null);

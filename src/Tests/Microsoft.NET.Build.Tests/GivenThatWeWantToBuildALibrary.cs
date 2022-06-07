@@ -320,6 +320,8 @@ namespace Microsoft.NET.Build.Tests
             "NET451_OR_GREATER", "NET452_OR_GREATER", "NET46_OR_GREATER", "NET461_OR_GREATER" })]
         [InlineData("net48", new[] { "NETFRAMEWORK", "NET48", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER",
             "NET451_OR_GREATER", "NET452_OR_GREATER", "NET46_OR_GREATER", "NET461_OR_GREATER", "NET462_OR_GREATER", "NET47_OR_GREATER", "NET471_OR_GREATER", "NET472_OR_GREATER", "NET48_OR_GREATER" })]
+        [InlineData("net481", new[] { "NETFRAMEWORK", "NET481", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER",
+            "NET451_OR_GREATER", "NET452_OR_GREATER", "NET46_OR_GREATER", "NET461_OR_GREATER", "NET462_OR_GREATER", "NET47_OR_GREATER", "NET471_OR_GREATER", "NET472_OR_GREATER", "NET48_OR_GREATER", "NET481_OR_GREATER" })]
         [InlineData("netcoreapp1.0", new[] { "NETCOREAPP", "NETCOREAPP1_0", "NETCOREAPP1_0_OR_GREATER" })]
         [InlineData("netcoreapp3.0", new[] { "NETCOREAPP", "NETCOREAPP3_0", "NETCOREAPP1_0_OR_GREATER", "NETCOREAPP1_1_OR_GREATER", "NETCOREAPP2_0_OR_GREATER",
             "NETCOREAPP2_1_OR_GREATER", "NETCOREAPP2_2_OR_GREATER", "NETCOREAPP3_0_OR_GREATER" })]
@@ -565,7 +567,7 @@ class Program
         [InlineData(true)]
         public void It_fails_gracefully_if_targetframework_should_be_targetframeworks(bool useSolution)
         {
-            string targetFramework = "netcoreapp2.0;net461";
+            string targetFramework = $"{ToolsetInfo.CurrentTargetFramework};net461";
             TestInvalidTargetFramework("InvalidTargetFramework", targetFramework, useSolution,
                 $"The TargetFramework value '{targetFramework}' is not valid. To multi-target, use the 'TargetFrameworks' property instead");
         }
@@ -735,12 +737,12 @@ class Program
         [Fact]
         public void It_passes_ridless_target_to_compiler()
         {
-            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid("netcoreapp2.0");
+            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(ToolsetInfo.CurrentTargetFramework);
 
             var testProject = new TestProject()
             {
                 Name = "CompileDoesntUseRid",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 RuntimeIdentifier = runtimeIdentifier,
             };
 

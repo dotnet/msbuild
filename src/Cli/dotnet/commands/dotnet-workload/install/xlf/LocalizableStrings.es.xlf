@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="es" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AdManifestPackageDoesNotExist">
-        <source>Failed to update advertising manifest. Manifest package {0} doesn't exist.</source>
-        <target state="translated">No se pudo actualizar el manifiesto publicitario. El paquete de manifiesto {0} no existe.</target>
+        <source>Advertising manifest not updated. Manifest package for {0} doesn't exist.</source>
+        <target state="translated">Manifiesto de publicidad no actualizado. El paquete de manifiesto para {0} no existe.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdManifestUpdated">
@@ -120,6 +120,11 @@
       <trans-unit id="InsufficientPrivilegeToStartServer">
         <source>Insufficient privilege to start the server.</source>
         <target state="translated">Insuficientes privilegios para iniciar el servidor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">Error al analizar la versión \"{1}\" para el id. de manifiesto de carga de trabajo \"{0}\"</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">

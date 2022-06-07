@@ -20,6 +20,8 @@ namespace Microsoft.NET.TestFramework
         public const string CurrentTargetFramework = "net6.0";
         public const string CurrentTargetFrameworkVersion = "6.0";
 
+        public const string LatestWinRuntimeIdentifier = "win10";
+
         public string DotNetRoot { get; }
         public string DotNetHostPath { get; }
 
