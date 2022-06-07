@@ -65,7 +65,14 @@ Run the following command from the root of the repository to run all the .NET Co
 
 The `dotnet` executable in the artifacts directory can be run directly.
 
-However, it's easier to configure a test environment to run the built `dotnet`.
+However, it's easier to configure a test environment to run the built `dotnet`. This test environment is managed by dogfood. 
+The dogfood script starts a new Powershell with the environment configured to redirect SDK resolution to your build.
+
+From that shell your SDK will be available in:
+
+- any Visual Studio instance launched (via `& devenv.exe`)
+- `dotnet build`
+- `msbuild`
 
 ### Windows
 
