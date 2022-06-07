@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                             PackageId = _packageId.ToString(),
                             Version = HigherPreviewPackageVersion,
                             ToolCommandName = "SimulatorCommand"
-                        },
+                        }
                     }
                 }
             };
