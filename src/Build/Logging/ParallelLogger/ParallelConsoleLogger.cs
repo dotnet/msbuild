@@ -1705,12 +1705,9 @@ namespace Microsoft.Build.BackEnd.Logging
                     entryPoint.MessageIndentLevel = 7;
                 }
 
-                if (_startedEvent == null)
-                {
-                    _startedEvent = comparer == null
-                        ? new Dictionary<BuildEventContext, object>()
-                        : new Dictionary<BuildEventContext, object>(comparer);
-                }
+                _startedEvent ??= comparer == null
+                    ? new Dictionary<BuildEventContext, object>()
+                    : new Dictionary<BuildEventContext, object>(comparer);
 
                 if (!_startedEvent.ContainsKey(buildEventContext))
                 {
