@@ -34,6 +34,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         private const string LowerPackageVersion = "1.0.4";
         private const string HigherPackageVersion = "1.0.5";
         private const string HigherPreviewPackageVersion = "1.0.5-preview3";
+        private const string HighestPreviewPackageVersion = "1.0.6-preview3";
         private readonly string _shimsDirectory;
         private readonly string _toolsDirectory;
 
@@ -69,6 +70,12 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         {
                             PackageId = _packageId.ToString(),
                             Version = HigherPreviewPackageVersion,
+                            ToolCommandName = "SimulatorCommand"
+                        },
+                        new MockFeedPackage
+                        {
+                            PackageId = _packageId.ToString(),
+                            Version = HighestPreviewPackageVersion,
                             ToolCommandName = "SimulatorCommand"
                         }
                     }
@@ -221,10 +228,25 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             var command = CreateUpdateCommand($"-g {_packageId}");
 
             command.Execute();
+            
+            _reporter.Lines.First().Should().Contain(string.Format(
+                LocalizableStrings.UpdateSucceededStableVersionNoChange,
+                _packageId, HigherPackageVersion));
+        }
+
+        [Fact]
+        public void GivenAnExistedSameVersionInstallationWhenCallWithPrereleaseItUsesAPrereleaseSuccessMessage()
+        {
+            CreateInstallCommand($"-g {_packageId} --version {HighestPreviewPackageVersion}").Execute();
+            _reporter.Lines.Clear();
+
+            var command = CreateUpdateCommand($"-g {_packageId} --version {HighestPreviewPackageVersion}");
+
+            command.Execute();
 
             _reporter.Lines.First().Should().Contain(string.Format(
-                LocalizableStrings.UpdateSucceededVersionNoChange,
-                _packageId, HigherPackageVersion));
+                LocalizableStrings.UpdateSucceededPreVersionNoChange,
+                _packageId, HighestPreviewPackageVersion));
         }
 
         [Fact]
