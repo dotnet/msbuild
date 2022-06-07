@@ -1552,6 +1552,11 @@
         <target state="translated">MSB3216: "{0}" 어셈블리를 등록할 수 없습니다. 액세스가 거부되었습니다. 관리자로 애플리케이션을 실행하고 있는지 확인하세요. {1}</target>
         <note>{StrBegin="MSB3216: "}</note>
       </trans-unit>
+      <trans-unit id="RemoveDir.EmptyPath">
+        <source>MSB3232: An empty directory was passed to RemoveDir and was ignored.</source>
+        <target state="new">MSB3232: An empty directory was passed to RemoveDir and was ignored.</target>
+        <note>{StrBegin="MSB3232: "}</note>
+      </trans-unit>
       <trans-unit id="RemoveDir.Error">
         <source>MSB3231: Unable to remove directory "{0}". {1}</source>
         <target state="translated">MSB3231: "{0}" 디렉터리를 제거할 수 없습니다. {1}</target>

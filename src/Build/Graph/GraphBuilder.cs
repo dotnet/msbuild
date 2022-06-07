@@ -22,6 +22,10 @@ namespace Microsoft.Build.Graph
 {
     internal class GraphBuilder
     {
+        private const string PlatformLookupTableMetadataName = "PlatformLookupTable";
+        private const string PlatformMetadataName = "Platform";
+        private const string PlatformsMetadataName = "Platforms";
+        private const string EnableDynamicPlatformResolutionMetadataName = "EnableDynamicPlatformResolution";
         internal const string SolutionItemReference = "_SolutionReference";
         
         /// <summary>
@@ -47,6 +51,8 @@ namespace Microsoft.Build.Graph
 
         private readonly ProjectGraph.ProjectInstanceFactoryFunc _projectInstanceFactory;
         private IReadOnlyDictionary<string, IReadOnlyCollection<string>> _solutionDependencies;
+
+        private bool PlatformNegotiationEnabled = false;
 
         public GraphBuilder(
             IEnumerable<ProjectGraphEntryPoint> entryPoints,
@@ -499,18 +505,44 @@ namespace Microsoft.Build.Graph
         {
             // TODO: ProjectInstance just converts the dictionary back to a PropertyDictionary, so find a way to directly provide it.
             var globalProperties = configurationMetadata.GlobalProperties.ToDictionary();
+            ProjectGraphNode graphNode;
+            ProjectInstance projectInstance;
+            var negotiatePlatform = PlatformNegotiationEnabled && !configurationMetadata.IsSetPlatformHardCoded;
 
-            var projectInstance = _projectInstanceFactory(
-                configurationMetadata.ProjectFullPath,
-                globalProperties,
-                _projectCollection);
+            projectInstance = _projectInstanceFactory(
+                                configurationMetadata.ProjectFullPath,
+                                negotiatePlatform ? null : globalProperties, // Platform negotiation requires an evaluation with no global properties first
+                                _projectCollection);
+
+            if (ConversionUtilities.ValidBooleanTrue(projectInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)))
+            {
+                PlatformNegotiationEnabled = true;
+            }
 
             if (projectInstance == null)
             {
                 throw new InvalidOperationException(ResourceUtilities.GetResourceString("NullReferenceFromProjectInstanceFactory"));
             }
 
-            var graphNode = new ProjectGraphNode(projectInstance);
+            if (negotiatePlatform)
+            {
+                var selectedPlatform = PlatformNegotiation.GetNearestPlatform(projectInstance.GetPropertyValue(PlatformMetadataName), projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), configurationMetadata.PreviousPlatformLookupTable, projectInstance.FullPath, configurationMetadata.PreviousPlatform);
+
+                if (selectedPlatform.Equals(String.Empty))
+                {
+                    globalProperties.Remove(PlatformMetadataName);
+                }
+                else
+                {
+                    globalProperties[PlatformMetadataName] = selectedPlatform;
+                }
+                projectInstance = _projectInstanceFactory(
+                                configurationMetadata.ProjectFullPath,
+                                globalProperties,
+                                _projectCollection);           
+            }
+
+            graphNode = new ProjectGraphNode(projectInstance);
 
             var referenceInfos = ParseReferences(graphNode);
 
