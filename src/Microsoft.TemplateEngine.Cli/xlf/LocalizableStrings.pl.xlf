@@ -258,6 +258,11 @@ Uruchom polecenie \"dotnet {1}--show-aliases\" bez argumentów, aby wyświetlić
         <target state="translated">Niejednoznaczna wartość parametru wyboru uniemożliwiła jednoznaczne wybranie szablonu do wywołania.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BaseCommand_ExitCodeHelp">
+        <source>For details on the exit code, refer to https://aka.ms/templating-exit-codes#{0}</source>
+        <target state="new">For details on the exit code, refer to https://aka.ms/templating-exit-codes#{0}</target>
+        <note>{0} is the exit code</note>
+      </trans-unit>
       <trans-unit id="Change">
         <source>Change</source>
         <target state="translated">Zmień</target>
@@ -559,8 +564,8 @@ The header is followed by the list of parameters and their errors (might be seve
         <note />
       </trans-unit>
       <trans-unit id="MissingRequiredParameter">
-        <source>Mandatory option {0} missing for template {1}.</source>
-        <target state="translated">Brak obowiązkowej parametru opcji {0} dla szablonu {1}.</target>
+        <source>Mandatory option '{0}' is missing for the template '{1}'.</source>
+        <target state="needs-review-translation">Brak obowiązkowej parametru opcji {0} dla szablonu {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingTemplateContentDetected">

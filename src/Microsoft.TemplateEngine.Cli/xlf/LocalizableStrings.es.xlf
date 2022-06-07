@@ -258,6 +258,11 @@ Ejecute \"dotnet {1} --show-aliases\" sin argumentos para mostrar todos los alia
         <target state="translated">Un valor de parámetro de opción ambiguo impidió la elección sin ambigüedad de una plantilla para invocarla.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BaseCommand_ExitCodeHelp">
+        <source>For details on the exit code, refer to https://aka.ms/templating-exit-codes#{0}</source>
+        <target state="new">For details on the exit code, refer to https://aka.ms/templating-exit-codes#{0}</target>
+        <note>{0} is the exit code</note>
+      </trans-unit>
       <trans-unit id="Change">
         <source>Change</source>
         <target state="translated">Cambiar</target>
@@ -559,8 +564,8 @@ The header is followed by the list of parameters and their errors (might be seve
         <note />
       </trans-unit>
       <trans-unit id="MissingRequiredParameter">
-        <source>Mandatory option {0} missing for template {1}.</source>
-        <target state="translated">Falta la opción obligatoria {0} para la plantilla {1}. </target>
+        <source>Mandatory option '{0}' is missing for the template '{1}'.</source>
+        <target state="needs-review-translation">Falta la opción obligatoria {0} para la plantilla {1}. </target>
         <note />
       </trans-unit>
       <trans-unit id="MissingTemplateContentDetected">

@@ -157,7 +157,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                         .WithHelpOption());
             }
 
-            return NewCommandStatus.InvalidParamValues;
+            return invalidOptionsList.Any() ? NewCommandStatus.InvalidOption : NewCommandStatus.NotFound;
         }
 
         private static void HandleNoMatchOnTemplateBaseOptions(IEnumerable<TemplateResult> matchInfos, InstantiateCommandArgs args, TemplateGroup templateGroup)

@@ -258,6 +258,11 @@ Execute 'dotnet {1} --mostrar- aliases' sem nenhum args para mostrar todos os al
         <target state="translated">Um valor de parâmetro de escolha ambíguo impediu a escolha não ambígua de um modelo para invocar.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BaseCommand_ExitCodeHelp">
+        <source>For details on the exit code, refer to https://aka.ms/templating-exit-codes#{0}</source>
+        <target state="new">For details on the exit code, refer to https://aka.ms/templating-exit-codes#{0}</target>
+        <note>{0} is the exit code</note>
+      </trans-unit>
       <trans-unit id="Change">
         <source>Change</source>
         <target state="translated">Alterar</target>
@@ -559,8 +564,8 @@ The header is followed by the list of parameters and their errors (might be seve
         <note />
       </trans-unit>
       <trans-unit id="MissingRequiredParameter">
-        <source>Mandatory option {0} missing for template {1}.</source>
-        <target state="translated">O parâmetro obrigatório {0} está ausente no modelo {1}. </target>
+        <source>Mandatory option '{0}' is missing for the template '{1}'.</source>
+        <target state="needs-review-translation">O parâmetro obrigatório {0} está ausente no modelo {1}. </target>
         <note />
       </trans-unit>
       <trans-unit id="MissingTemplateContentDetected">

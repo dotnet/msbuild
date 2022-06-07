@@ -4,3 +4,5 @@ The following template package(s) are already available:
 
 To install the template package(s) anyway, apply '--force' option:
    dotnet-new3 new3 install Microsoft.DotNet.Common.ItemTemplates::6.0.100 Microsoft.DotNet.Web.ItemTemplates::5.0.0 --force
+
+For details on the exit code, refer to https://aka.ms/templating-exit-codes#106

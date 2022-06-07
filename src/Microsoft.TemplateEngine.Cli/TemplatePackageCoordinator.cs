@@ -232,7 +232,7 @@ namespace Microsoft.TemplateEngine.Cli
                     continue;
                 }
                 Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Install_Error_SameInstallRequests, installRequest.PackageIdentifier));
-                return NewCommandStatus.Cancelled;
+                return NewCommandStatus.InstallFailed;
             }
 
             Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Install_Info_PackagesToBeInstalled);
@@ -245,7 +245,7 @@ namespace Microsoft.TemplateEngine.Cli
             bool validated = await ValidateInstallationRequestsAsync(args, installRequests, cancellationToken).ConfigureAwait(false);
             if (!validated)
             {
-                return NewCommandStatus.CreateFailed;
+                return NewCommandStatus.InstallFailed;
             }
 
             IReadOnlyList<InstallResult> installResults = await managedSourceProvider.InstallAsync(installRequests, cancellationToken).ConfigureAwait(false);
@@ -254,7 +254,7 @@ namespace Microsoft.TemplateEngine.Cli
                 await DisplayInstallResultAsync(result.InstallRequest.DisplayName, result, args.ParseResult, cancellationToken).ConfigureAwait(false);
                 if (!result.Success)
                 {
-                    resultStatus = NewCommandStatus.CreateFailed;
+                    resultStatus = result.Error == InstallerErrorCode.PackageNotFound ? NewCommandStatus.NotFound : NewCommandStatus.InstallFailed;
                 }
             }
             return resultStatus;
@@ -281,7 +281,7 @@ namespace Microsoft.TemplateEngine.Cli
                 DisplayUpdateCheckResults(checkUpdateResults, commandArgs, showUpdates: !applyUpdates);
                 if (checkUpdateResults.Any(result => !result.Success))
                 {
-                    success = NewCommandStatus.CreateFailed;
+                    success = NewCommandStatus.InstallFailed;
                 }
                 allTemplatesUpToDate = checkUpdateResults.All(result => result.Success && result.IsLatestVersion);
 
@@ -305,7 +305,7 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         if (!updateResult.Success)
                         {
-                            success = NewCommandStatus.CreateFailed;
+                            success = NewCommandStatus.InstallFailed;
                         }
                         await DisplayInstallResultAsync(updateResult.UpdateRequest.TemplatePackage.DisplayName, updateResult, commandArgs.ParseResult, cancellationToken).ConfigureAwait(false);
                     }
@@ -354,7 +354,7 @@ namespace Microsoft.TemplateEngine.Cli
                     else
                     {
                         Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Uninstall_Error_GenericError, uninstallResult.TemplatePackage.DisplayName, uninstallResult.ErrorMessage));
-                        result = NewCommandStatus.CreateFailed;
+                        result = NewCommandStatus.InstallFailed;
                     }
                 }
             }

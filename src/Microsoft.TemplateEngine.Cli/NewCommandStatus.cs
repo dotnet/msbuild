@@ -3,6 +3,16 @@
 
 namespace Microsoft.TemplateEngine.Cli
 {
+    /// <summary>
+    /// Exit codes based on
+    ///  * https://tldp.org/LDP/abs/html/exitcodes.html
+    ///  * https://github.com/openbsd/src/blob/master/include/sysexits.h.
+    /// Further documentation: https://aka.ms/templating-exit-codes.
+    /// Future exit codes should be allocated in a range of 107 - 113. If not sufficient, a range of 79 - 99 may be used as well.
+    ///
+    /// 127 is not explicitly used here - it is injected from sdk:
+    ///    https://github.com/dotnet/sdk/blob/main/src/Cli/dotnet/Parser.cs#L148.
+    /// </summary>
     internal enum NewCommandStatus
     {
         /// <summary>
@@ -11,58 +21,53 @@ namespace Microsoft.TemplateEngine.Cli
         Success = 0,
 
         /// <summary>
-        /// The template instantiation failed.
+        /// Unexpected internal software issue. The result received from template engine core is not expected.
         /// </summary>
-        CreateFailed = unchecked((int)0x80020009),
+        Unexpected = 70,
 
         /// <summary>
-        /// The mandatory parameters for template are missing.
+        /// Can't create output file. The operation was cancelled due to detection of an attempt to perform destructive changes to existing files.
         /// </summary>
-        MissingMandatoryParam = unchecked((int)0x8002000F),
+        CannotCreateOutputFile = 73,
 
         /// <summary>
-        /// The values passed for template parameters are invalid.
+        /// Instantiation Failed - Processing issues.
         /// </summary>
-        InvalidParamValues = unchecked((int)0x80020005),
+        CreateFailed = 100,
 
         /// <summary>
-        /// The subcommand to run is not specified.
+        /// Invalid template or template package.
         /// </summary>
-        OperationNotSpecified = unchecked((int)0x8002000E),
+        TemplateIssueDetected = 101,
 
         /// <summary>
-        /// The template is not found.
+        /// Missing required option(s) and/or argument(s) for the command.
         /// </summary>
-        NotFound = unchecked((int)0x800200006),
+        MissingRequiredOption = 102,
 
         /// <summary>
-        /// The operation is cancelled.
+        /// The template or the template package was not found.
         /// </summary>
-        Cancelled = unchecked((int)0x80004004),
+        NotFound = 103,
 
         /// <summary>
-        /// The result received from template engine core is not expected.
+        /// The operation was cancelled.
         /// </summary>
-        UnexpectedResult = unchecked((int)0x80010001),
+        Cancelled = 104,
 
         /// <summary>
-        /// The manipulation with alias has failed.
+        /// Instantiation Failed - Post action failed.
         /// </summary>
-        AliasFailed = unchecked((int)0x80010002),
+        PostActionFailed = 105,
 
         /// <summary>
-        /// The operation is cancelled due to destructive changes to existing files are detected.
+        /// Installation/Uninstallation Failed - Processing issues.
         /// </summary>
-        DestructiveChangesDetected = unchecked((int)0x8002000D),
+        InstallFailed = 106,
 
         /// <summary>
-        /// Post action failed.
+        /// Unrecognized option(s) and/or argument(s) for a command.
         /// </summary>
-        PostActionFailed = unchecked((int)0x80010003),
-
-        /// <summary>
-        /// Generic error when displaying help.
-        /// </summary>
-        DisplayHelpFailed = unchecked((int)0x80010004)
+        InvalidOption = 127,
     }
 }

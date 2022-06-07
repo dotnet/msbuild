@@ -131,7 +131,7 @@ namespace Microsoft.TemplateEngine.Cli
                 string printableChars = string.Join(", ", invalidChars.Where(x => !char.IsControl(x)).Select(x => $"'{x}'"));
                 string nonPrintableChars = string.Join(", ", invalidChars.Where(char.IsControl).Select(x => $"char({(int)x})"));
                 Reporter.Error.WriteLine(string.Format(LocalizableStrings.InvalidNameParameter, printableChars, nonPrintableChars).Bold().Red());
-                return NewCommandStatus.CreateFailed;
+                return NewCommandStatus.InvalidOption;
             }
 
             string? fallbackName = new DirectoryInfo(
@@ -185,7 +185,7 @@ namespace Microsoft.TemplateEngine.Cli
             catch (TemplateAuthoringException tae)
             {
                 Reporter.Error.WriteLine(tae.Message.Bold().Red());
-                return NewCommandStatus.CreateFailed;
+                return NewCommandStatus.TemplateIssueDetected;
             }
 
             string resultTemplateName = string.IsNullOrEmpty(instantiateResult.TemplateFullName) ? templateArgs.Template.Name : instantiateResult.TemplateFullName;
@@ -230,7 +230,7 @@ namespace Microsoft.TemplateEngine.Cli
                         string fixedMessage = string.Join(", ", missingParamNamesCanonical);
                         Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingRequiredParameter, fixedMessage, resultTemplateName).Bold().Red());
                     }
-                    return NewCommandStatus.MissingMandatoryParam;
+                    return NewCommandStatus.MissingRequiredOption;
                 case CreationResultStatus.NotFound:
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, templateArgs).Bold().Red());
                     return NewCommandStatus.NotFound;
@@ -244,7 +244,7 @@ namespace Microsoft.TemplateEngine.Cli
                             .For<NewCommand>(templateArgs.ParseResult)
                             .WithArgument(NewCommand.ShortNameArgument, templateArgs.Template.ShortNameList[0])
                             .WithHelpOption());
-                    return NewCommandStatus.InvalidParamValues;
+                    return NewCommandStatus.InvalidOption;
                 case CreationResultStatus.DestructiveChangesDetected:
                     Reporter.Error.WriteLine(LocalizableStrings.DestructiveChangesNotification.Bold().Red());
                     if (instantiateResult.CreationEffects != null)
@@ -262,9 +262,9 @@ namespace Microsoft.TemplateEngine.Cli
                         Reporter.Error.WriteLine();
                     }
                     Reporter.Error.WriteLine(LocalizableStrings.RerunCommandAndPassForceToCreateAnyway.Bold().Red());
-                    return NewCommandStatus.DestructiveChangesDetected;
+                    return NewCommandStatus.CannotCreateOutputFile;
                 default:
-                    return NewCommandStatus.UnexpectedResult;
+                    return NewCommandStatus.Unexpected;
             }
         }
 
@@ -278,7 +278,7 @@ namespace Microsoft.TemplateEngine.Cli
                 PostActionExecutionStatus.Failure => NewCommandStatus.PostActionFailed,
                 PostActionExecutionStatus.Cancelled => NewCommandStatus.Cancelled,
                 PostActionExecutionStatus.Failure | PostActionExecutionStatus.Cancelled => NewCommandStatus.PostActionFailed,
-                _ => NewCommandStatus.UnexpectedResult
+                _ => NewCommandStatus.Unexpected
             };
         }
     }

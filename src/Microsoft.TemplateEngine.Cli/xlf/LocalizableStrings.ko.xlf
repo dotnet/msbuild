@@ -258,6 +258,11 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">애매한 선택 매개 변수 값으로 인해 호출할 템플릿을 명확하게 선택할 수 없습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BaseCommand_ExitCodeHelp">
+        <source>For details on the exit code, refer to https://aka.ms/templating-exit-codes#{0}</source>
+        <target state="new">For details on the exit code, refer to https://aka.ms/templating-exit-codes#{0}</target>
+        <note>{0} is the exit code</note>
+      </trans-unit>
       <trans-unit id="Change">
         <source>Change</source>
         <target state="translated">변경</target>
@@ -559,8 +564,8 @@ The header is followed by the list of parameters and their errors (might be seve
         <note />
       </trans-unit>
       <trans-unit id="MissingRequiredParameter">
-        <source>Mandatory option {0} missing for template {1}.</source>
-        <target state="translated">{1} 템플릿에 대한 필수 옵션{0}이(가) 없습니다.</target>
+        <source>Mandatory option '{0}' is missing for the template '{1}'.</source>
+        <target state="needs-review-translation">{1} 템플릿에 대한 필수 옵션{0}이(가) 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingTemplateContentDetected">

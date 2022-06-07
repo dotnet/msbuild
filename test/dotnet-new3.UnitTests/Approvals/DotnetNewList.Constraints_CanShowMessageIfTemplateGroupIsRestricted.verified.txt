@@ -3,3 +3,6 @@
 
 To search for the templates on NuGet.org, run:
    dotnet-new3 new3 search RestrictedTemplate
+
+
+For details on the exit code, refer to https://aka.ms/templating-exit-codes#103

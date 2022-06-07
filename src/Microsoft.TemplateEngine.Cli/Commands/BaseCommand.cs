@@ -98,12 +98,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             CancellationToken cancellationToken = context.GetCancellationToken();
 
+            NewCommandStatus returnCode;
+
             try
             {
                 using (Timing.Over(environmentSettings.Host.Logger, "Execute"))
                 {
                     await HandleGlobalOptionsAsync(args, environmentSettings, cancellationToken).ConfigureAwait(false);
-                    return (int)await ExecuteAsync(args, environmentSettings, telemetryLogger, context).ConfigureAwait(false);
+                    returnCode = await ExecuteAsync(args, environmentSettings, telemetryLogger, context).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -136,8 +138,16 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 {
                     Reporter.Error.WriteLine(ex.StackTrace.Bold().Red());
                 }
-                return 1;
+                returnCode = NewCommandStatus.Unexpected;
             }
+
+            if (returnCode != NewCommandStatus.Success)
+            {
+                Reporter.Error.WriteLine();
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.BaseCommand_ExitCodeHelp, (int)returnCode));
+            }
+
+            return (int)returnCode;
         }
 
         public int Invoke(InvocationContext context) => InvokeAsync(context).GetAwaiter().GetResult();

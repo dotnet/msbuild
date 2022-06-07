@@ -258,6 +258,11 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">不明確的選擇參數值無法明確地選擇要叫用的範本。</target>
         <note />
       </trans-unit>
+      <trans-unit id="BaseCommand_ExitCodeHelp">
+        <source>For details on the exit code, refer to https://aka.ms/templating-exit-codes#{0}</source>
+        <target state="new">For details on the exit code, refer to https://aka.ms/templating-exit-codes#{0}</target>
+        <note>{0} is the exit code</note>
+      </trans-unit>
       <trans-unit id="Change">
         <source>Change</source>
         <target state="translated">變更</target>
@@ -559,8 +564,8 @@ The header is followed by the list of parameters and their errors (might be seve
         <note />
       </trans-unit>
       <trans-unit id="MissingRequiredParameter">
-        <source>Mandatory option {0} missing for template {1}.</source>
-        <target state="translated">範本 {1} 缺少強制選項 {0}。</target>
+        <source>Mandatory option '{0}' is missing for the template '{1}'.</source>
+        <target state="needs-review-translation">範本 {1} 缺少強制選項 {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingTemplateContentDetected">

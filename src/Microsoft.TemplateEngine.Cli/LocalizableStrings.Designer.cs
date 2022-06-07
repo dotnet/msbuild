@@ -500,6 +500,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For details on the exit code, refer to https://aka.ms/templating-exit-codes#{0}.
+        /// </summary>
+        internal static string BaseCommand_ExitCodeHelp {
+            get {
+                return ResourceManager.GetString("BaseCommand_ExitCodeHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Change.
         /// </summary>
         internal static string Change {
@@ -1033,7 +1042,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Mandatory option {0} missing for template {1}..
+        ///   Looks up a localized string similar to Mandatory option &apos;{0}&apos; is missing for the template &apos;{1}&apos;..
         /// </summary>
         internal static string MissingRequiredParameter {
             get {

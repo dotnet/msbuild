@@ -9,3 +9,5 @@
 
 For more information, run:
    dotnet-new3 new3 console -h
+
+For details on the exit code, refer to https://aka.ms/templating-exit-codes#127

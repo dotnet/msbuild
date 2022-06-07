@@ -167,7 +167,7 @@
     <value>Language</value>
   </data>
   <data name="MissingRequiredParameter" xml:space="preserve">
-    <value>Mandatory option {0} missing for template {1}.</value>
+    <value>Mandatory option '{0}' is missing for the template '{1}'.</value>
   </data>
   <data name="MountPointFactories" xml:space="preserve">
     <value>Mount Point Factories</value>
@@ -812,6 +812,10 @@ The header is followed by the list of parameters and their errors (might be seve
   <data name="TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled_Hint" xml:space="preserve">
     <value>To reinstall the same version of the template package, use '{0}' option:</value>
     <comment>{0} - option name (--force). Followed by command example on new line.</comment>
+  </data>
+  <data name="BaseCommand_ExitCodeHelp" xml:space="preserve">
+    <value>For details on the exit code, refer to https://aka.ms/templating-exit-codes#{0}</value>
+    <comment>{0} is the exit code</comment>
   </data>
   <data name="TemplateCommand_DisplayConstraintResults_Error" xml:space="preserve">
     <value>Failed to instatiate template '{0}', the following constraints are not met:</value>
