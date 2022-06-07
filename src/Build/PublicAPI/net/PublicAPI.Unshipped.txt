@@ -9,12 +9,11 @@ Microsoft.Build.Execution.MSBuildClientExitResult.MSBuildClientExitResult() -> v
 Microsoft.Build.Execution.MSBuildClientExitResult.MSBuildClientExitType.get -> Microsoft.Build.Execution.MSBuildClientExitType
 Microsoft.Build.Execution.MSBuildClientExitResult.MSBuildClientExitType.set -> void
 Microsoft.Build.Execution.MSBuildClientExitType
-Microsoft.Build.Execution.MSBuildClientExitType.Cancelled = 5 -> Microsoft.Build.Execution.MSBuildClientExitType
 Microsoft.Build.Execution.MSBuildClientExitType.ConnectionError = 2 -> Microsoft.Build.Execution.MSBuildClientExitType
 Microsoft.Build.Execution.MSBuildClientExitType.LaunchError = 3 -> Microsoft.Build.Execution.MSBuildClientExitType
 Microsoft.Build.Execution.MSBuildClientExitType.ServerBusy = 1 -> Microsoft.Build.Execution.MSBuildClientExitType
 Microsoft.Build.Execution.MSBuildClientExitType.Success = 0 -> Microsoft.Build.Execution.MSBuildClientExitType
 Microsoft.Build.Execution.MSBuildClientExitType.Unexpected = 4 -> Microsoft.Build.Execution.MSBuildClientExitType
 Microsoft.Build.Execution.OutOfProcServerNode
-Microsoft.Build.Execution.OutOfProcServerNode.OutOfProcServerNode(System.Func<string, (int exitCode, string exitType)> buildFunction, System.Action onCancel) -> void
+Microsoft.Build.Execution.OutOfProcServerNode.OutOfProcServerNode(System.Func<string, (int exitCode, string exitType)> buildFunction) -> void
 Microsoft.Build.Execution.OutOfProcServerNode.Run(out System.Exception shutdownException) -> Microsoft.Build.Execution.NodeEngineShutdownReason

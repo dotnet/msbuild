@@ -188,6 +188,9 @@ namespace Microsoft.Build.Execution
                     {
                         case 0:
                             HandleCancellation();
+                            // After the cancelation, we want to wait to server gracefuly finish the build.
+                            // We have to replace the cancelation handle, because WaitAny would cause to repeatedly hit this branch of code.
+                            waitHandles[0] = CancellationToken.None.WaitHandle;
                             break;
 
                         case 1:
@@ -196,8 +199,7 @@ namespace Microsoft.Build.Execution
 
                         case 2:
                             while (packetPump.ReceivedPacketsQueue.TryDequeue(out INodePacket? packet) &&
-                                   !_buildFinished &&
-                                   !cancellationToken.IsCancellationRequested)
+                                   !_buildFinished)
                             {
                                 if (packet != null)
                                 {
@@ -230,7 +232,24 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        private void SendCancelCommand(NamedPipeClientStream nodeStream) => throw new NotImplementedException();
+        private bool TrySendPacket(Func<INodePacket> packetResolver)
+        {
+            INodePacket? packet = null;
+            try
+            {
+                packet = packetResolver();
+                WritePacket(_nodeStream, packet);
+                CommunicationsUtilities.Trace($"Command packet of type '{packet.Type}' sent...");
+            }
+            catch (Exception ex)
+            {
+                CommunicationsUtilities.Trace($"Failed to send command packet of type '{packet?.Type.ToString() ?? "Unknown"}' to server: {0}", ex);
+                _exitResult.MSBuildClientExitType = MSBuildClientExitType.ConnectionError;
+                return false;
+            }
+
+            return true;
+        }
 
         /// <summary>
         /// Launches MSBuild server. 
@@ -278,23 +297,9 @@ namespace Microsoft.Build.Execution
             return true;
         }
 
-        private bool TrySendBuildCommand(string commandLine)
-        {
-            try
-            {
-                ServerNodeBuildCommand buildCommand = GetServerNodeBuildCommand(commandLine);
-                WritePacket(_nodeStream, buildCommand);
-                CommunicationsUtilities.Trace("Build command sent...");
-            }
-            catch (Exception ex)
-            {
-                CommunicationsUtilities.Trace("Failed to send build command to server: {0}", ex);
-                _exitResult.MSBuildClientExitType = MSBuildClientExitType.ConnectionError;
-                return false;
-            }
+        private bool TrySendBuildCommand(string commandLine) => TrySendPacket(() => GetServerNodeBuildCommand(commandLine));
 
-            return true;
-        }
+        private bool TrySendCancelCommand() => TrySendPacket(() => new ServerNodeBuildCancel());
 
         private ServerNodeBuildCommand GetServerNodeBuildCommand(string commandLine)
         {
@@ -331,14 +336,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void HandleCancellation()
         {
-            // TODO.
-            // Send cancellation command to server.
-            // SendCancelCommand(_nodeStream);
+            TrySendCancelCommand();
 
-            Console.WriteLine("MSBuild client cancelled.");
-            CommunicationsUtilities.Trace("MSBuild client cancelled.");
-            _exitResult.MSBuildClientExitType = MSBuildClientExitType.Cancelled;
-            _buildFinished = true;
+            CommunicationsUtilities.Trace("MSBuild client sent cancelation command.");
         }
 
         /// <summary>
