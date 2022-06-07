@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 var manifests = _workloadResolver.GetInstalledManifests().ToDictionary(m => m.Id, m => m.Version + "/" + m.ManifestFeatureBand, StringComparer.OrdinalIgnoreCase);
 
                 Reporter.WriteLine("==workloadRollbackDefinitionJsonOutputStart==");
-                Reporter.WriteLine(JsonSerializer.Serialize(manifests));
+                Reporter.WriteLine(JsonSerializer.Serialize(manifests, new JsonSerializerOptions() { WriteIndented = true }));
                 Reporter.WriteLine("==workloadRollbackDefinitionJsonOutputEnd==");
             }
             else
