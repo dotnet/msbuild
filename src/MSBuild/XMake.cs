@@ -222,8 +222,10 @@ namespace Microsoft.Build.CommandLine
             }
 
             int exitCode;
-            if (Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName) == "1")
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4) && Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName) == "1")
             {
+                DebuggerLaunchCheck();
+
                 // Use the client app to execute build in msbuild server. Opt-in feature.
                 exitCode = ((s_initialized && MSBuildClientApp.Execute(
 #if FEATURE_GET_COMMANDLINE
@@ -482,6 +484,26 @@ namespace Microsoft.Build.CommandLine
             }
         }
 #endif
+        /// <summary>
+        /// Launch debugger if it's requested by environment variable "MSBUILDDEBUGONSTART".
+        /// </summary>
+        private static void DebuggerLaunchCheck()
+        {
+            switch (Environment.GetEnvironmentVariable("MSBUILDDEBUGONSTART"))
+            {
+#if FEATURE_DEBUG_LAUNCH
+                case "1":
+                    Debugger.Launch();
+                    break;
+#endif
+                case "2":
+                    // Sometimes easier to attach rather than deal with JIT prompt
+                    Process currentProcess = Process.GetCurrentProcess();
+                    Console.WriteLine($"Waiting for debugger to attach ({currentProcess.MainModule.FileName} PID {currentProcess.Id}).  Press enter to continue...");
+                    Console.ReadLine();
+                    break;
+            }
+        }
 
         /// <summary>
         /// Orchestrates the execution of the application, and is also responsible
@@ -506,20 +528,8 @@ namespace Microsoft.Build.CommandLine
             // with our OM and modify and save them. They'll never do this for Microsoft.*.targets, though,
             // and those form the great majority of our unnecessary memory use.
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", "true");
-            switch (Environment.GetEnvironmentVariable("MSBUILDDEBUGONSTART"))
-            {
-#if FEATURE_DEBUG_LAUNCH
-                case "1":
-                    Debugger.Launch();
-                    break;
-#endif
-                case "2":
-                    // Sometimes easier to attach rather than deal with JIT prompt
-                    Process currentProcess = Process.GetCurrentProcess();
-                    Console.WriteLine($"Waiting for debugger to attach ({currentProcess.MainModule.FileName} PID {currentProcess.Id}).  Press enter to continue...");
-                    Console.ReadLine();
-                    break;
-            }
+
+            DebuggerLaunchCheck();
 
 #if FEATURE_GET_COMMANDLINE
             ErrorUtilities.VerifyThrowArgumentLength(commandLine, nameof(commandLine));
@@ -1082,7 +1092,8 @@ namespace Microsoft.Build.CommandLine
                     toolsetDefinitionLocations,
                     cpuCount,
                     onlyLogCriticalEvents,
-                    loadProjectsReadOnly: !preprocessOnly
+                    loadProjectsReadOnly: !preprocessOnly,
+                    reuseProjectRootElementCache: s_isServerNode
                 );
 
                 if (toolsVersion != null && !projectCollection.ContainsToolset(toolsVersion))
@@ -1315,7 +1326,14 @@ namespace Microsoft.Build.CommandLine
                 FileUtilities.ClearCacheDirectory();
                 projectCollection?.Dispose();
 
-                BuildManager.DefaultBuildManager.Dispose();
+                // Build manager shall be reused for all build sessions.
+                // If, for one reason or another, this behavior needs to change in future
+                // please be aware that current code creates and keep running  InProcNode even
+                // when its owning default build manager is disposed resulting in leek of memory and threads.
+                if (!s_isServerNode)
+                {
+                    BuildManager.DefaultBuildManager.Dispose();
+                }
             }
 
             return success;
