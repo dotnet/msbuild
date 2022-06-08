@@ -1,0 +1,2 @@
+Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.Version481 = 15 -> Microsoft.Build.Utilities.TargetDotNetFrameworkVersion
+Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.VersionLatest = 15 -> Microsoft.Build.Utilities.TargetDotNetFrameworkVersion

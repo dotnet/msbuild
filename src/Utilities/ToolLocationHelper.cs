@@ -106,12 +106,17 @@ namespace Microsoft.Build.Utilities
         Version48 = 14,
 
         /// <summary>
+        /// version 4.8.1
+        /// </summary>
+        Version481 = 15,
+
+        /// <summary>
         /// The latest version available at the time of major release. This
         /// value should not be updated in minor releases as it could be a
         /// breaking change. Use 'Latest' if possible, but note the
         /// compatibility implications.
         /// </summary>
-        VersionLatest = Version48,
+        VersionLatest = Version481,
 
         /// <summary>
         /// Sentinel value for the latest version that this version of MSBuild is aware of. Similar
