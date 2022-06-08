@@ -52,6 +52,16 @@
         <target state="translated">A ferramenta '{0}' foi atualizada com êxito da versão '{1}' para a versão '{2}' (arquivo de manifesto {3}).</target>
         <note />
       </trans-unit>
+      <trans-unit id="UpdateSucceededPreVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</source>
+        <target state="new">Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceededStableVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
+        <target state="new">Tool '{0}' was reinstalled with the latest stable version (version '{1}').</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UpdateToLowerVersion">
         <source>The requested version {0} is lower than existing version {1}.</source>
         <target state="translated">A versão solicitada {0} é inferior à versão existente {1}.</target>
@@ -130,11 +140,6 @@ As ferramentas são atualizadas usando a ID do pacote, o que pode ser diferente
 do nome da ferramenta que você usa ao chamar a ferramenta. Você pode encontrar os nomes das ferramentas 
 e as Ids de pacote correspondentes para as ferramentas instaladas usando o comando
 'lista de ferramentas do dotnet'.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateSucceededVersionNoChange">
-        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
-        <target state="translated">A ferramenta '{0}' foi reinstalada com a versão estável mais recente (versão '{1}').</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolFailed">

@@ -52,6 +52,16 @@
         <target state="translated">L'outil '{0}' a été correctement mis à jour de la version '{1}' à la version '{2}' (fichier manifeste {3}).</target>
         <note />
       </trans-unit>
+      <trans-unit id="UpdateSucceededPreVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</source>
+        <target state="new">Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceededStableVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
+        <target state="new">Tool '{0}' was reinstalled with the latest stable version (version '{1}').</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UpdateToLowerVersion">
         <source>The requested version {0} is lower than existing version {1}.</source>
         <target state="translated">La version demandée {0} est inférieure à la version existante {1}.</target>
@@ -130,11 +140,6 @@ Les outils sont mis à jour via leur ID de package, lequel peut être différent
 du nom d'outil que vous utilisez quand vous appelez ce dernier. Pour trouver les noms d'outils 
 et les ID de package correspondants aux outils installés, utilisez la commande
 'dotnet tool list'.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateSucceededVersionNoChange">
-        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
-        <target state="translated">L'outil '{0}' a été réinstallé avec la dernière version stable (version '{1}').</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolFailed">
