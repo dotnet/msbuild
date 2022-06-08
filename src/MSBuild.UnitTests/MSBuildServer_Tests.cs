@@ -133,6 +133,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            _env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
 
             string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success, false, _output);
             success.ShouldBeTrue();
