@@ -109,7 +109,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Restore
             foreach (string file in slnFiles)
             {
                 var solutionFile = SolutionFile.Parse(file);
-                var projects = solutionFile.ProjectsInOrder;
+                var projects = solutionFile.ProjectsInOrder.Where(p => p.ProjectType != SolutionProjectType.SolutionFolder);
                 foreach (var p in projects)
                 {
                     projectFiles.Add(p.AbsolutePath);
