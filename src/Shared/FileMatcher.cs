@@ -837,15 +837,17 @@ namespace Microsoft.Build.Shared
             Dictionary<string, List<RecursionState>> searchesToExcludeInSubdirs,
             TaskOptions taskOptions)
         {
-#if NET6_0
+#if NET6_0_OR_GREATER
             // This is a pretty quick, simple check, but it misses some cases:
             // symlink in folder A pointing to folder B and symlink in folder B pointing to folder A
-            // GetFiles in folder C that contains a symlink that points folder D, which contains C as well as other files
+            // If folder C contains file Foo.cs and folder D, and folder D contains a symlink pointing to folder C, calling GetFilesRecursive and
+            // passing in folder D would currently find Foo.cs, whereas this would make us miss it.
             // and most obviously, frameworks other than net6.0
             // The solution I'd propose for the first two, if necessary, would be maintaining a set of symlinks and verifying, before following it,
             // that we had not followed it previously. The third would require a more involved P/invoke-style fix.
-            DirectoryInfo baseDirectoryInfo = new(recursionState.BaseDirectory);
-            if (baseDirectoryInfo.LinkTarget is not null && baseDirectoryInfo.FullName.Contains(baseDirectoryInfo.LinkTarget))
+            // These issues should ideally be resolved as part of #703
+            FileSystemInfo linkTarget = Directory.ResolveLinkTarget(recursionState.BaseDirectory, returnFinalTarget: true);
+            if (linkTarget is not null && recursionState.BaseDirectory.Contains(linkTarget.FullName))
             {
                 return;
             }

@@ -67,6 +67,30 @@ namespace Microsoft.Build.UnitTests
             fileMatches.Length.ShouldBe(expectedMatchCount, $"Matches: '{String.Join("', '", fileMatches)}'");
         }
 
+#if NET6_0_OR_GREATER
+        [Fact]
+        // Please provide a better name for this test.
+        public void DoNotFollowRecursiveSymlinks()
+        {
+            TransientTestFolder testFolder = _env.CreateFolder();
+            TransientTestFile file = _env.CreateFile(testFolder, "Foo.cs");
+            string symlinkPath = Path.Combine(testFolder.Path, "mySymlink");
+            try
+            {
+                File.CreateSymbolicLink(symlinkPath, testFolder.Path);
+                string[] fileMatches = FileMatcher.Default.GetFiles(testFolder.Path, "**").FileList;
+                fileMatches.Length.ShouldBe(1);
+            }
+            finally
+            {
+                if (File.Exists(symlinkPath))
+                {
+                    File.Delete(symlinkPath);
+                }
+            }
+        }
+#endif
+
         [Theory]
         [MemberData(nameof(GetFilesComplexGlobbingMatchingInfo.GetTestData), MemberType = typeof(GetFilesComplexGlobbingMatchingInfo))]
         public void GetFilesComplexGlobbingMatching(GetFilesComplexGlobbingMatchingInfo info)
@@ -2077,7 +2101,7 @@ namespace Microsoft.Build.UnitTests
             isLegalFileSpec.ShouldBe(expectedIsLegalFileSpec);
         }
 
-        #region Support functions.
+#region Support functions.
 
         /// <summary>
         /// This support class simulates a file system.
@@ -2758,7 +2782,7 @@ namespace Microsoft.Build.UnitTests
             return match.isMatch;
         }
 
-        #endregion
+#endregion
 
         private class FileSystemAdapter : IFileSystem
         {
