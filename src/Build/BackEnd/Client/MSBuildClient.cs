@@ -12,11 +12,12 @@ using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Client;
 using Microsoft.Build.Eventing;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Execution
+namespace Microsoft.Build.Experimental
 {
     /// <summary>
     /// This class is the public entry point for executing builds in msbuild server.

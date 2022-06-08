@@ -35,6 +35,7 @@ using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 using Microsoft.Build.Shared.Debugging;
+using Microsoft.Build.Experimental;
 
 #nullable disable
 
