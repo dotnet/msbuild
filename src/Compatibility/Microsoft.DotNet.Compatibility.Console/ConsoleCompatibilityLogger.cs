@@ -5,7 +5,10 @@ using Microsoft.DotNet.ApiCompatibility.Logging;
 
 namespace Microsoft.DotNet.Compatibility.Console
 {
-    internal class ConsoleCompatibilityLogger : CompatibilityLoggerBase
+    /// <summary>
+    /// A console based compatibility logger
+    /// </summary>
+    internal sealed class ConsoleCompatibilityLogger : CompatibilityLoggerBase
     {
         public ConsoleCompatibilityLogger(string? suppressionsFile, bool baselineAllErrors, string? noWarn)
             : base(suppressionsFile, baselineAllErrors, noWarn)

@@ -20,35 +20,28 @@ namespace Microsoft.DotNet.Compatibility
             bool disablePackageBaselineValidation,
             string? baselinePackageTargetPath,
             string? runtimeGraph,
-            Dictionary<string, HashSet<string>> frameworkReferences)
+            Dictionary<string, HashSet<string>>? frameworkReferences)
         {
             Package package = Package.Create(packageTargetPath, runtimeGraph);
 
-            new CompatibleTfmValidator(log).Validate(new()
-            {
-                EnableStrictMode = enableStrictModeForCompatibleTfms,
-                RunApiCompat = runApiCompat,
-                FrameworkReferences = frameworkReferences,
-                Package = package
-            });
-            new CompatibleFrameworkInPackageValidator(log).Validate(new()
-            {
-                EnableStrictMode = enableStrictModeForCompatibleFrameworksInPackage,
-                RunApiCompat = runApiCompat,
-                FrameworkReferences = frameworkReferences,
-                Package = package
-            });
+            new CompatibleTfmValidator(log).Validate(new(package,
+                enableStrictModeForCompatibleTfms,
+                runApiCompat,
+                frameworkReferences));
+            new CompatibleFrameworkInPackageValidator(log).Validate(new(
+                package,
+                enableStrictModeForCompatibleFrameworksInPackage,
+                runApiCompat,
+                frameworkReferences));
 
             if (!disablePackageBaselineValidation && !string.IsNullOrEmpty(baselinePackageTargetPath))
             {
-                new BaselinePackageValidator(log).Validate(new()
-                {
-                    EnableStrictMode = false,
-                    RunApiCompat = runApiCompat,
-                    FrameworkReferences = frameworkReferences,
-                    BaselinePackage = Package.Create(baselinePackageTargetPath, runtimeGraph),
-                    Package = package
-                });
+                new BaselinePackageValidator(log).Validate(new(
+                    package,
+                    enableStrictMode: false,
+                    runApiCompat,
+                    frameworkReferences,
+                    baselinePackage: Package.Create(baselinePackageTargetPath, runtimeGraph)));
             }
 
             if (generateCompatibilitySuppressionFile)

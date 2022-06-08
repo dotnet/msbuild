@@ -31,8 +31,8 @@ namespace Microsoft.DotNet.PackageValidation.Validators
         /// <param name="package">Nuget Package that needs to be validated.</param>
         public void Validate(PackageValidatorOption option)
         {
-            ApiCompatRunner apiCompatRunner = new(option.EnableStrictMode,
-                _log,
+            ApiCompatRunner apiCompatRunner = new(_log,
+                option.EnableStrictMode,
                 option.FrameworkReferences,
                 option.Package.PackagePath);
 

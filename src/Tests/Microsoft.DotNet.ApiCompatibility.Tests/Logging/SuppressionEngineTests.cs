@@ -51,14 +51,14 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
         [Fact]
         public void SuppressionEngineThrowsIfFileDoesNotExist()
         {
-            Assert.Throws<FileNotFoundException>(() => new SuppressionEngine(suppressionFile: "AFileThatDoesNotExist.xml"));
+            Assert.Throws<FileNotFoundException>(() => new SuppressionEngine("AFileThatDoesNotExist.xml"));
         }
 
         [Fact]
         public void SuppressionEngineDoesNotThrowOnEmptyFile()
         {
-            SuppressionEngine _ = new(suppressionFile: string.Empty);
-            _ = new SuppressionEngine(suppressionFile: "      ");
+            SuppressionEngine _ = new(suppressionsFile: string.Empty);
+            _ = new SuppressionEngine(suppressionsFile: "      ");
         }
 
         [Fact]
@@ -313,8 +313,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
         private readonly MemoryStream _outputStream = new();
         private readonly Action<Stream> _callback;
 
-        public TestSuppressionEngine(string noWarn, string suppressionFile, Action<Stream> callback)
-            : base(noWarn: noWarn, suppressionFile: suppressionFile)
+        public TestSuppressionEngine(string suppressionsFile, string noWarn, Action<Stream> callback)
+            : base(suppressionsFile, noWarn)
         {
             if (callback == null)
             {
@@ -324,7 +324,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
         }
 
         public static TestSuppressionEngine CreateTestSuppressionEngine(Action<Stream> callback = null, string noWarn = "")
-            => new(noWarn: noWarn, suppressionFile: "NonExistentFile.xml", callback);
+            => new("NonExistentFile.xml", noWarn, callback);
 
         public int GetSuppressionCount() => _validationSuppressions.Count;
 

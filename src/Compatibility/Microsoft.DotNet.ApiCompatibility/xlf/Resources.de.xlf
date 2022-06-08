@@ -137,6 +137,11 @@
         <target state="translated">Die Datenstromposition ist größer als die Länge, daher sind keine Inhalte zum Lesen verfügbar.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SuppressionsFileNotSpecified">
+        <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
+        <target state="new">A file path must be passed in to successfully generate a compatibility suppression file.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TypeExistsOnLeft">
         <source>Type '{0}' exists on {1} but not on {2}</source>
         <target state="translated">Der Typ „{0}“ ist auf {1} vorhanden, aber nicht auf {2}</target>

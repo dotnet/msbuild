@@ -137,6 +137,11 @@
         <target state="translated">Pozice streamu je větší než jeho délka, proto není k dispozici žádný obsah pro čtení.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SuppressionsFileNotSpecified">
+        <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
+        <target state="new">A file path must be passed in to successfully generate a compatibility suppression file.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TypeExistsOnLeft">
         <source>Type '{0}' exists on {1} but not on {2}</source>
         <target state="translated">Typ {0} existuje v {1}, ale ne v {2}</target>

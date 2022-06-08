@@ -137,6 +137,11 @@
         <target state="translated">스트림 위치가 길이 보다 크므로 읽을 수 있는 콘텐츠가 없습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SuppressionsFileNotSpecified">
+        <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
+        <target state="new">A file path must be passed in to successfully generate a compatibility suppression file.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TypeExistsOnLeft">
         <source>Type '{0}' exists on {1} but not on {2}</source>
         <target state="translated">'{0}' 유형이 {1}에 있지만 {2}에 없음</target>

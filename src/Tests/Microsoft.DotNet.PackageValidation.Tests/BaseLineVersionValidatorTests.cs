@@ -34,12 +34,11 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             };
 
             Package package = new(string.Empty, "TestPackage", "2.0.0", currentFilePaths, null, null);
-            new BaselinePackageValidator(_log).Validate(new()
-            {
-                BaselinePackage = previousPackage,
-                Package = package,
-                RunApiCompat = false
-            });
+            new BaselinePackageValidator(_log).Validate(new PackageValidatorOption(
+                package,
+                enableStrictMode: false,
+                runApiCompat: false,
+                baselinePackage: previousPackage));
             Assert.NotEmpty(_log.errors);
             Assert.Contains(DiagnosticIds.TargetFrameworkDropped + " " + string.Format(Resources.MissingTargetFramework, ".NETStandard,Version=v2.0"), _log.errors);
         }

@@ -137,6 +137,11 @@
         <target state="translated">A posição do fluxo é maior do que seu comprimento, portanto, não há conteúdo disponível para leitura.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SuppressionsFileNotSpecified">
+        <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
+        <target state="new">A file path must be passed in to successfully generate a compatibility suppression file.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TypeExistsOnLeft">
         <source>Type '{0}' exists on {1} but not on {2}</source>
         <target state="translated">O tipo '{0}' existe em {1} mas não em {2}</target>

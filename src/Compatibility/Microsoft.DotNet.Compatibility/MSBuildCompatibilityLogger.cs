@@ -1,14 +1,15 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#nullable enable
-
 using Microsoft.DotNet.ApiCompatibility.Logging;
 using Microsoft.NET.Build.Tasks;
 
 namespace Microsoft.DotNet.Compatibility
 {
-    internal class MSBuildCompatibilityLogger : CompatibilityLoggerBase
+    /// <summary>
+    /// An MSBuild based compatibility logger
+    /// </summary>
+    internal sealed class MSBuildCompatibilityLogger : CompatibilityLoggerBase
     {
         private readonly Logger _log;
 

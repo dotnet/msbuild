@@ -216,4 +216,7 @@
   <data name="WroteSuppressions" xml:space="preserve">
     <value>Successfully wrote compatibility suppressions to '{0}'.</value>
   </data>
+  <data name="SuppressionsFileNotSpecified" xml:space="preserve">
+    <value>A file path must be passed in to successfully generate a compatibility suppression file.</value>
+  </data>
 </root>

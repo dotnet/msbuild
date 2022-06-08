@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using Microsoft.DotNet.ApiCompatibility.Logging;
 using NuGet.ContentModel;
 using NuGet.Frameworks;
@@ -26,8 +27,11 @@ namespace Microsoft.DotNet.PackageValidation.Validators
         /// <param name="package">Nuget Package that needs to be validated.</param>
         public void Validate(PackageValidatorOption option)
         {
-            ApiCompatRunner apiCompatRunner = new(option.EnableStrictMode,
-                _log,
+            if (option.BaselinePackage is null)
+                throw new ArgumentNullException(nameof(option.BaselinePackage));
+
+            ApiCompatRunner apiCompatRunner = new(_log,
+                option.EnableStrictMode,
                 option.FrameworkReferences,
                 option.BaselinePackage.PackagePath,
                 option.Package.PackagePath);

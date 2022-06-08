@@ -137,6 +137,11 @@
         <target state="translated">Позиция потока больше его длины, поэтому содержимое, доступное для чтения, отсутствует.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SuppressionsFileNotSpecified">
+        <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
+        <target state="new">A file path must be passed in to successfully generate a compatibility suppression file.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TypeExistsOnLeft">
         <source>Type '{0}' exists on {1} but not on {2}</source>
         <target state="translated">Тип "{0}" существует в {1}, но не в {2}</target>
