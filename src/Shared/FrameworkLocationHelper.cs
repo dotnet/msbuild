@@ -61,6 +61,7 @@ namespace Microsoft.Build.Shared
         internal static readonly Version dotNetFrameworkVersion471 = new Version(4, 7, 1);
         internal static readonly Version dotNetFrameworkVersion472 = new Version(4, 7, 2);
         internal static readonly Version dotNetFrameworkVersion48 = new Version(4, 8);
+        internal static readonly Version dotNetFrameworkVersion481 = new Version(4, 8, 1);
 
         // visual studio versions.
         internal static readonly Version visualStudioVersion100 = new Version(10, 0);
@@ -217,6 +218,9 @@ namespace Microsoft.Build.Shared
 
             // v4.8
             CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion48, visualStudioVersion150),
+
+            // v4.8.1
+            CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion481, visualStudioVersion150),
         };
 
         /// <summary>
@@ -289,6 +293,7 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion471,
                 dotNetFrameworkVersion472,
                 dotNetFrameworkVersion48,
+                dotNetFrameworkVersion481,
             }),
 
             // VS16
@@ -308,6 +313,7 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion471,
                 dotNetFrameworkVersion472,
                 dotNetFrameworkVersion48,
+                dotNetFrameworkVersion481,
             }),
 
             // VS17
@@ -327,6 +333,7 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion471,
                 dotNetFrameworkVersion472,
                 dotNetFrameworkVersion48,
+                dotNetFrameworkVersion481,
             }),
         });
 
@@ -1212,7 +1219,11 @@ namespace Microsoft.Build.Shared
             {
                 string sdkVersionFolder = "4.6"; // Default for back-compat
 
-                if (dotNetSdkVersion == dotNetFrameworkVersion48)
+                if (dotNetSdkVersion == dotNetFrameworkVersion481)
+                {
+                    sdkVersionFolder = "4.8.1";
+                }
+                else if (dotNetSdkVersion == dotNetFrameworkVersion48)
                 {
                     sdkVersionFolder = "4.8";
                 }
