@@ -84,9 +84,9 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (File.Exists(symlinkPath))
+                if (Directory.Exists(symlinkPath))
                 {
-                    File.Delete(symlinkPath);
+                    Directory.Delete(symlinkPath);
                 }
             }
         }
