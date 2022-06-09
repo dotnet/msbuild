@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 Microsoft.Common.props
 
@@ -9,7 +9,6 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
-
 <Project>
 
   <PropertyGroup>
@@ -21,9 +20,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <!--
-        Determine the path to the directory build props file if the user did not disable $(ImportDirectoryBuildProps) and
-        they did not already specify an absolute path to use via $(DirectoryBuildPropsPath)
-    -->
+      Determine the path to the directory build props file if the user did not disable $(ImportDirectoryBuildProps) and
+      they did not already specify an absolute path to use via $(DirectoryBuildPropsPath)
+  -->
   <PropertyGroup Condition="'$(ImportDirectoryBuildProps)' == 'true' and '$(DirectoryBuildPropsPath)' == ''">
     <_DirectoryBuildPropsFile Condition="'$(_DirectoryBuildPropsFile)' == ''">Directory.Build.props</_DirectoryBuildPropsFile>
     <_DirectoryBuildPropsBasePath Condition="'$(_DirectoryBuildPropsBasePath)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), '$(_DirectoryBuildPropsFile)'))</_DirectoryBuildPropsBasePath>
@@ -33,17 +32,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Import Project="$(DirectoryBuildPropsPath)" Condition="'$(ImportDirectoryBuildProps)' == 'true' and exists('$(DirectoryBuildPropsPath)')"/>
 
   <!--
-        Prepare to import project extensions which usually come from packages.  Package management systems will create a file at:
-          $(MSBuildProjectExtensionsPath)\$(MSBuildProjectFile).<SomethingUnique>.props
+      Prepare to import project extensions which usually come from packages.  Package management systems will create a file at:
+        $(MSBuildProjectExtensionsPath)\$(MSBuildProjectFile).<SomethingUnique>.props
 
-        Each package management system should use a unique moniker to avoid collisions.  It is a wild-card import so the package
-        management system can write out multiple files but the order of the import is alphabetic because MSBuild sorts the list.
-    -->
+      Each package management system should use a unique moniker to avoid collisions.  It is a wild-card import so the package
+      management system can write out multiple files but the order of the import is alphabetic because MSBuild sorts the list.
+  -->
   <PropertyGroup>
     <!--
-            The declaration of $(BaseIntermediateOutputPath) had to be moved up from Microsoft.Common.CurrentVersion.targets
-            in order for the $(MSBuildProjectExtensionsPath) to use it as a default.
-        -->
+        The declaration of $(BaseIntermediateOutputPath) had to be moved up from Microsoft.Common.CurrentVersion.targets
+        in order for the $(MSBuildProjectExtensionsPath) to use it as a default.
+    -->
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">obj\</BaseIntermediateOutputPath>
     <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
     <_InitialBaseIntermediateOutputPath>$(BaseIntermediateOutputPath)</_InitialBaseIntermediateOutputPath>
@@ -53,7 +52,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Import paths that are relative default to be relative to the importing file.  However, since MSBuildExtensionsPath
         defaults to BaseIntermediateOutputPath we expect it to be relative to the project directory.  So if the path is relative
         it needs to be made absolute based on the project directory.
-      -->
+    -->
     <MSBuildProjectExtensionsPath Condition="'$([System.IO.Path]::IsPathRooted($(MSBuildProjectExtensionsPath)))' == 'false'">$([System.IO.Path]::Combine('$(MSBuildProjectDirectory)', '$(MSBuildProjectExtensionsPath)'))</MSBuildProjectExtensionsPath>
     <MSBuildProjectExtensionsPath Condition="!HasTrailingSlash('$(MSBuildProjectExtensionsPath)')">$(MSBuildProjectExtensionsPath)\</MSBuildProjectExtensionsPath>
     <ImportProjectExtensionProps Condition="'$(ImportProjectExtensionProps)' == ''">true</ImportProjectExtensionProps>
@@ -63,12 +62,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Import Project="$(MSBuildProjectExtensionsPath)$(MSBuildProjectFile).*.props" Condition="'$(ImportProjectExtensionProps)' == 'true' and exists('$(MSBuildProjectExtensionsPath)')" />
 
   <!--
-          Wildcard imports come from $(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ directory.
-          This is very similar to the same extension point used in Microsoft.Common.targets, which is located in
-          the $(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ directory.
-          Unfortunately, there is already a file named "Microsoft.Common.props" in this directory,
-          so we have to have a slightly different directory name to hold extensions.
-    -->
+      Wildcard imports come from $(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ directory.
+      This is very similar to the same extension point used in Microsoft.Common.targets, which is located in
+      the $(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ directory.
+
+      Unfortunately, there is already a file named "Microsoft.Common.props" in this directory,
+      so we have to have a slightly different directory name to hold extensions.
+  -->
   <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportBefore\*" Condition="'$(ImportUserLocationsByWildcardBeforeMicrosoftCommonProps)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportBefore')"/>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportBefore\*" Condition="'$(ImportByWildcardBeforeMicrosoftCommonProps)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportBefore')"/>
 
@@ -80,8 +80,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Import Project="$(CustomBeforeMicrosoftCommonProps)" Condition="'$(CustomBeforeMicrosoftCommonProps)' != '' and Exists('$(CustomBeforeMicrosoftCommonProps)')" />
 
   <!-- This is used to determine whether Microsoft.Common.targets needs to import
-         Microsoft.Common.props itself, or whether it has been imported previously,
-         e.g. by the project itself. -->
+      Microsoft.Common.props itself, or whether it has been imported previously,
+      e.g. by the project itself. -->
   <PropertyGroup>
     <MicrosoftCommonPropsHasBeenImported>true</MicrosoftCommonPropsHasBeenImported>
   </PropertyGroup>
@@ -104,8 +104,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter\*" Condition="'$(ImportByWildcardAfterMicrosoftCommonProps)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter')"/>
 
   <!--
-        Import NuGet.props file.
-    -->
+      Import NuGet.props file.
+  -->
   <PropertyGroup>
     <MSBuildUseVisualStudioDirectoryLayout Condition="'$(MSBuildUseVisualStudioDirectoryLayout)'==''">$([MSBuild]::IsRunningFromVisualStudio())</MSBuildUseVisualStudioDirectoryLayout>
     <NuGetPropsFile Condition="'$(NuGetPropsFile)'=='' and '$(MSBuildUseVisualStudioDirectoryLayout)'=='true'">$([MSBuild]::GetToolsDirectory32())\..\..\..\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.props</NuGetPropsFile>

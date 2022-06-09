@@ -1,4 +1,3 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
 <!--Copyright, Microsoft Corporation, All rights reserved.-->
 <Rule
   Name="Folder"
@@ -13,8 +12,8 @@
   <StringProperty Name="Identity" Visible="false" ReadOnly="true" Category="Misc" />
   <StringProperty Name="FullPath" DisplayName="Full Path" ReadOnly="true" Category="Misc" />
   <StringProperty Name="FileNameAndExtension" DisplayName="Folder Name" ReadOnly="true" Category="Misc">
-      <StringProperty.DataSource>
-            <DataSource Persistence="ProjectInstance" ItemType="Folder" PersistedName="FileNameAndExtension" />
-      </StringProperty.DataSource>
+    <StringProperty.DataSource>
+        <DataSource Persistence="ProjectInstance" ItemType="Folder" PersistedName="FileNameAndExtension" />
+    </StringProperty.DataSource>
   </StringProperty>
 </Rule>
