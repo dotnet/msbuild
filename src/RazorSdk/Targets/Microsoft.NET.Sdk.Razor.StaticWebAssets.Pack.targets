@@ -195,14 +195,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
-  <Target Name="IncludeStaticWebAssetsPackItems" 
+  <Target Name="IncludeStaticWebAssetsPackItems"
     DependsOnTargets="$(IncludeStaticWebAssetsPackItemsDependsOn)">
     
     <!-- LoadStaticWebAssetsBuildManifest takes care of removing all the static web assets from existing item groups
          if they were present already. That ensures no static web asset is mistakenly included as content even if it is
          not an asset that needs to be included on the package. -->
     
-    <StaticWebAssetsReadPackManifest ManifestPath="$(StaticWebAssetPackManifestPath)">
+    <StaticWebAssetsReadPackManifest Condition="Exists('$(StaticWebAssetPackManifestPath)')" ManifestPath="$(StaticWebAssetPackManifestPath)">
       <Output TaskParameter="Files" ItemName="_StaticWebAssetsFilesToPack" />
     </StaticWebAssetsReadPackManifest>
 

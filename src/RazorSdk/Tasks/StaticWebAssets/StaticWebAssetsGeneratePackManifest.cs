@@ -41,6 +41,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             if (Assets.Length == 0)
             {
                 // Do nothing if there are no assets to pack.
+                Log.LogMessage(MessageImportance.Low, "Skipping manifest creation because there are no static web assets to pack.");
                 return true;
             }
 

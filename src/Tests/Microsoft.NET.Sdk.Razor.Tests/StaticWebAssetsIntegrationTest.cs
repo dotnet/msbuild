@@ -926,6 +926,34 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         }
 
         [Fact]
+        public void Pack_NoAssets_DoesNothing()
+        {
+            var testAsset = "PackageLibraryNoStaticAssets";
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset, subdirectory: "TestPackages");
+
+            var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path);
+            pack.WithWorkingDirectory(projectDirectory.Path);
+            var result = pack.Execute("/bl");
+
+            result.Should().Pass();
+
+            var outputPath = pack.GetOutputDirectory(DefaultTfm, "Debug").ToString();
+
+            new FileInfo(Path.Combine(outputPath, "PackageLibraryNoStaticAssets.dll")).Should().Exist();
+
+            result.Should().NuPkgDoesNotContain(
+                Path.Combine(projectDirectory.Path, "bin", "Debug", "PackageLibraryNoStaticAssets.1.0.0.nupkg"),
+                filePaths: new[]
+                {
+                    Path.Combine("staticwebassets"),
+                    Path.Combine("build", "Microsoft.AspNetCore.StaticWebAssets.props"),
+                    Path.Combine("build", "PackageLibraryNoStaticAssets.props"),
+                    Path.Combine("buildMultiTargeting", "PackageLibraryNoStaticAssets.props"),
+                    Path.Combine("buildTransitive", "PackageLibraryNoStaticAssets.props")
+                });
+        }
+
+        [Fact]
         public void Pack_Incremental_IncludesStaticWebAssets()
         {
             var testAsset = "PackageLibraryDirectDependency";
