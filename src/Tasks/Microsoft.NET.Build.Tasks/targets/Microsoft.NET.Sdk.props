@@ -21,8 +21,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Configurations Condition=" '$(Configurations)' == '' ">Debug;Release</Configurations>
     <Platforms Condition=" '$(Platforms)' == '' ">AnyCPU</Platforms>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Configuration Condition=" '$(PublishRelease)' == 'True' " and=" '$(Configuration)' == ''">Release</Configuration>
-    <Configuration Condition=" '$(PackRelease)' == 'True' " and=" '$(Configuration)' == ''">Release</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
   </PropertyGroup>
 

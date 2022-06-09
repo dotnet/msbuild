@@ -62,8 +62,6 @@ namespace Microsoft.DotNet.Cli
         {
             var command = new DocumentedCommand("publish", DocsLink, LocalizableStrings.AppDescription);
 
-            ConfigurationOption.SetDefaultValue("Release");
-
             command.AddArgument(SlnOrProjectArgument);
             RestoreCommandParser.AddImplicitRestoreOptions(command, includeRuntimeOption: false, includeNoDependenciesOption: true);
             command.AddOption(OuputOption);
