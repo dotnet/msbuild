@@ -52,6 +52,16 @@
         <target state="translated">ツール '{0}' がバージョン '{1}' からバージョン '{2}' (マニフェストファイル {3}) に正常に更新されました。</target>
         <note />
       </trans-unit>
+      <trans-unit id="UpdateSucceededPreVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</source>
+        <target state="new">Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceededStableVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
+        <target state="new">Tool '{0}' was reinstalled with the latest stable version (version '{1}').</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UpdateToLowerVersion">
         <source>The requested version {0} is lower than existing version {1}.</source>
         <target state="translated">要求されたバージョン {0} は、既存のバージョン {1} を下回っています。</target>
@@ -130,11 +140,6 @@ and the corresponding package Ids for installed tools using the command
 ツールを呼び出すときに使用するツール名。ツール名が見つかります
 と、コマンドを使用してインストールされたツールの対応するパッケージ Id
 ' dotnet tool list '。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateSucceededVersionNoChange">
-        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
-        <target state="translated">ツール '{0}' が安定した最新バージョン (バージョン '{1}') で再インストールされました。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolFailed">
