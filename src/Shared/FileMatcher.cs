@@ -979,7 +979,8 @@ namespace Microsoft.Build.Shared
                     if (searchesToExcludeInSubdirs.TryGetValue(subdir, out List<RecursionState> searchesForSubdir))
                     {
                         // We've found the base directory that these exclusions apply to.  So now add them as normal searches
-                        newSearchesToExclude ??= new(searchesForSubdir);
+                        newSearchesToExclude ??= new();
+                        newSearchesToExclude.AddRange(searchesForSubdir);
                     }
                 }
 
