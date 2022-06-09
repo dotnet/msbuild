@@ -9,6 +9,7 @@
     <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
     <RootNamespace>Microsoft.DotNet.Cli</RootNamespace>
     <DefineConstants Condition="'$(IncludeAspNetCoreRuntime)' == 'false'">$(DefineConstants);EXCLUDE_ASPNETCORE</DefineConstants>
+    <DefineConstants Condition="'$(DotNetBuildFromSource)' == 'true'">$(DefineConstants);NO_TELEMETRY_BY_DEFAULT</DefineConstants>
     <PackageId>Microsoft.DotNet.Cli</PackageId>
     <UseAppHost>false</UseAppHost>
     <IsPackable>true</IsPackable>
