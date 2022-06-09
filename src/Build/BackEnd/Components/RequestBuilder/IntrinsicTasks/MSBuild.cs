@@ -327,20 +327,20 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // Try to get the behavior from metadata if it is undefined.
-                var skipNonexistPropjects = _skipNonexistentProjects;
+                var skipNonexistProjects = _skipNonexistentProjects;
                 if (_skipNonexistentProjects == SkipNonexistentProjectsBehavior.Undefined)
                 {
                     if (TryParseSkipNonexistentProjects(project.GetMetadata("SkipNonexistentProjects"), out SkipNonexistentProjectsBehavior behavior))
                     {
-                        skipNonexistPropjects = behavior;
+                        skipNonexistProjects = behavior;
                     }
                     else
                     {
-                        skipNonexistPropjects = SkipNonexistentProjectsBehavior.Error;
+                        skipNonexistProjects = SkipNonexistentProjectsBehavior.Error;
                     }
                 }
 
-                if (FileSystems.Default.FileExists(projectPath) || (skipNonexistPropjects == SkipNonexistentProjectsBehavior.Build))
+                if (FileSystems.Default.FileExists(projectPath) || (skipNonexistProjects == SkipNonexistentProjectsBehavior.Build))
                 {
                     if (FileUtilities.IsVCProjFilename(projectPath))
                     {
@@ -381,13 +381,13 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    if (skipNonexistPropjects == SkipNonexistentProjectsBehavior.Skip)
+                    if (skipNonexistProjects == SkipNonexistentProjectsBehavior.Skip)
                     {
                         Log.LogMessageFromResources(MessageImportance.High, "MSBuild.ProjectFileNotFoundMessage", project.ItemSpec);
                     }
                     else
                     {
-                        ErrorUtilities.VerifyThrow(skipNonexistPropjects == SkipNonexistentProjectsBehavior.Error, "skipNonexistentProjects has unexpected value {0}", skipNonexistPropjects);
+                        ErrorUtilities.VerifyThrow(skipNonexistProjects == SkipNonexistentProjectsBehavior.Error, "skipNonexistentProjects has unexpected value {0}", skipNonexistProjects);
                         Log.LogErrorWithCodeFromResources("MSBuild.ProjectFileNotFound", project.ItemSpec);
                         success = false;
                     }
