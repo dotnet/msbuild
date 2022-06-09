@@ -846,12 +846,16 @@ namespace Microsoft.Build.Shared
             // The solution I'd propose for the first two, if necessary, would be maintaining a set of symlinks and verifying, before following it,
             // that we had not followed it previously. The third would require a more involved P/invoke-style fix.
             // These issues should ideally be resolved as part of #703
-            DirectoryInfo info = new(recursionState.BaseDirectory);
-            FileSystemInfo linkTarget = Directory.ResolveLinkTarget(recursionState.BaseDirectory, returnFinalTarget: true);
-            if (linkTarget is not null && recursionState.BaseDirectory.Contains(linkTarget.FullName))
+            try
             {
-                return;
+                FileSystemInfo linkTarget = Directory.ResolveLinkTarget(recursionState.BaseDirectory, returnFinalTarget: true);
+                if (linkTarget is not null && recursionState.BaseDirectory.Contains(linkTarget.FullName))
+                {
+                    return;
+                }
             }
+            // This fails in tests with the MockFileSystem when they don't have real paths.
+            catch (Exception) { }
 #endif
 
             ErrorUtilities.VerifyThrow((recursionState.SearchData.Filespec == null) || (recursionState.SearchData.RegexFileMatch == null),
