@@ -67,17 +67,18 @@ namespace Microsoft.Build.UnitTests
             fileMatches.Length.ShouldBe(expectedMatchCount, $"Matches: '{String.Join("', '", fileMatches)}'");
         }
 
-#if NET6_0_OR_GREATER
+#if FEATURE_SYMLINK_TARGET
         [Fact]
         // Please provide a better name for this test.
         public void DoNotFollowRecursiveSymlinks()
         {
             TransientTestFolder testFolder = _env.CreateFolder();
             TransientTestFile file = _env.CreateFile(testFolder, "Foo.cs");
-            string symlinkPath = Path.Combine(testFolder.Path, "mySymlink");
+            TransientTestFolder tf2 = _env.CreateFolder(Path.Combine(testFolder.Path, "subfolder"));
+            string symlinkPath = Path.Combine(tf2.Path, "mySymlink");
             try
             {
-                File.CreateSymbolicLink(symlinkPath, testFolder.Path);
+                Directory.CreateSymbolicLink(symlinkPath, testFolder.Path);
                 string[] fileMatches = FileMatcher.Default.GetFiles(testFolder.Path, "**").FileList;
                 fileMatches.Length.ShouldBe(1);
             }

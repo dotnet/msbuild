@@ -837,7 +837,7 @@ namespace Microsoft.Build.Shared
             Dictionary<string, List<RecursionState>> searchesToExcludeInSubdirs,
             TaskOptions taskOptions)
         {
-#if NET6_0_OR_GREATER
+#if FEATURE_SYMLINK_TARGET
             // This is a pretty quick, simple check, but it misses some cases:
             // symlink in folder A pointing to folder B and symlink in folder B pointing to folder A
             // If folder C contains file Foo.cs and folder D, and folder D contains a symlink pointing to folder C, calling GetFilesRecursive and
@@ -846,6 +846,7 @@ namespace Microsoft.Build.Shared
             // The solution I'd propose for the first two, if necessary, would be maintaining a set of symlinks and verifying, before following it,
             // that we had not followed it previously. The third would require a more involved P/invoke-style fix.
             // These issues should ideally be resolved as part of #703
+            DirectoryInfo info = new(recursionState.BaseDirectory);
             FileSystemInfo linkTarget = Directory.ResolveLinkTarget(recursionState.BaseDirectory, returnFinalTarget: true);
             if (linkTarget is not null && recursionState.BaseDirectory.Contains(linkTarget.FullName))
             {
@@ -971,16 +972,10 @@ namespace Microsoft.Build.Shared
 
                 if (searchesToExcludeInSubdirs != null)
                 {
-                    List<RecursionState> searchesForSubdir;
-
-                    if (searchesToExcludeInSubdirs.TryGetValue(subdir, out searchesForSubdir))
+                    if (searchesToExcludeInSubdirs.TryGetValue(subdir, out List<RecursionState> searchesForSubdir))
                     {
                         // We've found the base directory that these exclusions apply to.  So now add them as normal searches
-                        if (newSearchesToExclude == null)
-                        {
-                            newSearchesToExclude = new List<RecursionState>();
-                        }
-                        newSearchesToExclude.AddRange(searchesForSubdir);
+                        newSearchesToExclude ??= new(searchesForSubdir);
                     }
                 }
 
@@ -1018,10 +1013,10 @@ namespace Microsoft.Build.Shared
                     }
                 }
             }
-            // Use a foreach to reduce the overhead of Parallel.ForEach when we are not running in parallel
+            // Use a foreach to avoid the overhead of Parallel.ForEach when we are not running in parallel
             if (dop < 2)
             {
-                foreach (var subdir in _getFileSystemEntries(FileSystemEntity.Directories, recursionState.BaseDirectory, nextStep.DirectoryPattern, null, false))
+                foreach (string subdir in _getFileSystemEntries(FileSystemEntity.Directories, recursionState.BaseDirectory, nextStep.DirectoryPattern, null, false))
                 {
                     processSubdirectory(subdir);
                 }
