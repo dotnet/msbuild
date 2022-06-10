@@ -74,7 +74,7 @@
         Also download an old version and (later in the target ReferenceOlderSCIandSRM)
         pass them to the compiler. -->
     <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" IncludeAssets="none" />
-    <PackageReference Include="System.Collections.Immutable" Version="6.0.0" IncludeAssets="none" />
+    <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" IncludeAssets="none" />
     <PackageDownload Include="System.Collections.Immutable" Version="[5.0.0]" GeneratePathProperty="true" />
     <PackageDownload Include="System.Reflection.Metadata" Version="[5.0.0]" GeneratePathProperty="true" />
   </ItemGroup>
