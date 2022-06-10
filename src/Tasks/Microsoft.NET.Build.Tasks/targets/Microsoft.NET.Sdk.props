@@ -16,11 +16,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DisableHandlePackageFileConflicts>true</DisableHandlePackageFileConflicts>
   </PropertyGroup>
 
-  <!-- Default configuration and platform to Debug|AnyCPU-->
+  <!-- Default configuration and platform to Debug|AnyCPU, unless we are publishing or packing.-->
   <PropertyGroup>
     <Configurations Condition=" '$(Configurations)' == '' ">Debug;Release</Configurations>
     <Platforms Condition=" '$(Platforms)' == '' ">AnyCPU</Platforms>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Configuration Condition=" '$(PublishRelease)' == 'true' And '$(Configuration)' == '' ">Release</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
   </PropertyGroup>
 
