@@ -102,5 +102,94 @@
         ]
       },
       "disabled": false
+    },
+    {
+      "taskType": "scheduled",
+      "capabilityId": "ScheduledSearch",
+      "subCapability": "ScheduledSearch",
+      "version": "1.1",
+      "config": {
+        "frequency": [
+          {
+            "weekDay": 0,
+            "hours": [
+              16
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 1,
+            "hours": [
+              16
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 2,
+            "hours": [
+              16
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 3,
+            "hours": [
+              16
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 4,
+            "hours": [
+              16
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 5,
+            "hours": [
+              16
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 6,
+            "hours": [
+              16
+            ],
+            "timezoneOffset": -7
+          }
+        ],
+        "searchTerms": [
+          {
+            "name": "isIssue",
+            "parameters": {}
+          },
+          {
+            "name": "isOpen",
+            "parameters": {}
+          },
+          {
+            "name": "hasLabel",
+            "parameters": {
+              "label": "Area-Compatibility"
+            }
+          }
+        ],
+        "taskName": "Notify compatibility of new untriaged bugs",
+        "actions": [
+          {
+            "name": "addReply",
+            "parameters": {
+              "comment": "@dotnet/area-infrastructure-libraries a new issue has been filed in the Compatibility area, please triage"
+            }
+          },
+          {
+            "name": "closeIssue",
+            "parameters": {}
+          }
+        ]
+      },
+      "disabled": false
     }
   ]
