@@ -144,7 +144,6 @@ Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.Version47 = 11 -> Microso
 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.Version471 = 12 -> Microsoft.Build.Utilities.TargetDotNetFrameworkVersion
 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.Version472 = 13 -> Microsoft.Build.Utilities.TargetDotNetFrameworkVersion
 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.Version48 = 14 -> Microsoft.Build.Utilities.TargetDotNetFrameworkVersion
-Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.VersionLatest = 14 -> Microsoft.Build.Utilities.TargetDotNetFrameworkVersion
 Microsoft.Build.Utilities.TargetPlatformSDK
 Microsoft.Build.Utilities.TargetPlatformSDK.ContainsPlatform(string targetPlatformIdentifier, string targetPlatformVersion) -> bool
 Microsoft.Build.Utilities.TargetPlatformSDK.DisplayName.get -> string
