@@ -586,11 +586,18 @@ namespace Microsoft.Build.Tasks
 
             foreach (List<int> partition in partitionsByDestination.Values)
             {
-                bool partitionAccepted = partitionCopyActionBlock.Post(partition);
-                if (!partitionAccepted)
+                if (_cancellationTokenSource.IsCancellationRequested)
                 {
-                    // Retail assert...
-                    ErrorUtilities.ThrowInternalError("Failed posting a file copy to an ActionBlock. Should not happen with block at max int capacity.");
+                    break;
+                }
+                else
+                {
+                    bool partitionAccepted = partitionCopyActionBlock.Post(partition);
+                    if (!partitionAccepted)
+                    {
+                        // Retail assert...
+                        ErrorUtilities.ThrowInternalError("Failed posting a file copy to an ActionBlock. Should not happen with block at max int capacity.");
+                    }
                 }
             }
 
