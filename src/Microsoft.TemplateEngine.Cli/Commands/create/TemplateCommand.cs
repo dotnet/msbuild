@@ -63,7 +63,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 LanguageOption = SharedOptionsFactory.CreateLanguageOption();
                 LanguageOption.Description = SymbolStrings.TemplateCommand_Option_Language;
-                LanguageOption.FromAmongCaseInsensitive(templateLanguage);
+                LanguageOption.FromAmongCaseInsensitive(new[] { templateLanguage });
 
                 if (!string.IsNullOrWhiteSpace(defaultLanguage)
                      && buildDefaultLanguageValidation)
@@ -88,7 +88,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 TypeOption = SharedOptionsFactory.CreateTypeOption();
                 TypeOption.Description = SymbolStrings.TemplateCommand_Option_Type;
-                TypeOption.FromAmongCaseInsensitive(templateType);
+                TypeOption.FromAmongCaseInsensitive(new[] { templateType });
                 this.AddOption(TypeOption);
             }
 

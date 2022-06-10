@@ -80,7 +80,9 @@ namespace Microsoft.TemplateEngine.Cli
                 AllowMultipleArgumentsPerToken = AllowMultipleValues
             };
 
-            option.FromAmongCaseInsensitive(Choices.Keys.ToArray());
+            // empty string for the explicit unset option
+            option.FromAmongCaseInsensitive(Choices.Keys.ToArray(), allowedHiddenValue: string.Empty);
+
             return option;
         }
 
@@ -184,6 +186,13 @@ namespace Microsoft.TemplateEngine.Cli
                 parsedValues.Add(value);
             }
 
+            // An empty value is not allowed when multiple choice values are specified.
+            if (parsedValues.Count > 1 && parsedValues.Any(string.IsNullOrEmpty))
+            {
+                error = CreateParseError(string.Empty, parameter);
+                return false;
+            }
+
             parsedValue = string.Join(MultiValueParameter.MultiValueSeparator, parsedValues);
             return true;
         }
@@ -191,22 +200,32 @@ namespace Microsoft.TemplateEngine.Cli
         private static bool TryConvertSingleValueToChoice(string value, ChoiceTemplateParameter parameter, out string parsedValue, out string error)
         {
             parsedValue = string.Empty;
+            error = string.Empty;
+
+            if (value.Equals(string.Empty))
+            {
+                return true;
+            }
 
             foreach (string choiceValue in parameter.Choices.Keys)
             {
                 if (string.Equals(choiceValue, value, StringComparison.OrdinalIgnoreCase))
                 {
                     parsedValue = choiceValue;
-                    error = string.Empty;
                     return true;
                 }
             }
+            error = CreateParseError(value, parameter);
+            return false;
+        }
+
+        private static string CreateParseError(string value, ChoiceTemplateParameter parameter)
+        {
             //value '{0}' is not allowed, allowed values are: {1}
-            error = string.Format(
+            return string.Format(
                 LocalizableStrings.ParseChoiceTemplateOption_ErrorText_InvalidChoiceValue,
                 value,
                 string.Join(",", parameter.Choices.Keys.Select(key => $"'{key}'")));
-            return false;
         }
     }
 }

@@ -128,7 +128,7 @@ namespace Microsoft.TemplateEngine.Cli
         bool ITemplateEngineHost.OnParameterError(ITemplateParameter parameter, string receivedValue, string message, out string newValue)
         {
             //do nothing
-            newValue = "";
+            newValue = receivedValue;
             return false;
         }
 

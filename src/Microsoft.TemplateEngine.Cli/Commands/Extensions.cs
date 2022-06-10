@@ -48,9 +48,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         /// <summary>
         /// Case insensitive version for <see cref="System.CommandLine.OptionExtensions.FromAmong{TOption}(TOption, string[])"/>.
         /// </summary>
-        internal static void FromAmongCaseInsensitive(this Option<string> option, params string[] allowedValues)
+        internal static void FromAmongCaseInsensitive(this Option<string> option, string[]? allowedValues = null, string? allowedHiddenValue = null)
         {
-            option.AddValidator(optionResult => ValidateAllowedValues(optionResult, allowedValues));
+            allowedValues ??= Array.Empty<string>();
+            option.AddValidator(optionResult => ValidateAllowedValues(optionResult, allowedValues, allowedHiddenValue));
             option.AddCompletions(allowedValues);
         }
 
@@ -74,9 +75,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return constraintResult.All(s => s.EvaluationStatus == TemplateConstraintResult.Status.Allowed);
         }
 
-        private static void ValidateAllowedValues(OptionResult optionResult, string[] allowedValues)
+        private static void ValidateAllowedValues(OptionResult optionResult, string[] allowedValues, string? allowedHiddenValue = null)
         {
-            var invalidArguments = optionResult.Tokens.Where(token => !allowedValues.Contains(token.Value, StringComparer.OrdinalIgnoreCase));
+            var invalidArguments = optionResult.Tokens.Where(token => !allowedValues.Append(allowedHiddenValue).Contains(token.Value, StringComparer.OrdinalIgnoreCase)).ToList();
             if (invalidArguments.Any())
             {
                 optionResult.ErrorMessage = string.Format(
