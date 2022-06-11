@@ -32,7 +32,8 @@ namespace Microsoft.NET.Publish.Tests
         private const string ExcludeAlways = "/p:ExcludeAlways=true";
         private const string DontUseAppHost = "/p:UseAppHost=false";
         private const string ReadyToRun = "/p:PublishReadyToRun=true";
-        private const string ReadyToRunComposite = "/p:PublishReadyToRunComposite=true";
+        private const string ReadyToRunCompositeOn = "/p:PublishReadyToRunComposite=true";
+        private const string ReadyToRunCompositeOff = "/p:PublishReadyToRunComposite=false";
         private const string ReadyToRunWithSymbols = "/p:PublishReadyToRunEmitSymbols=true";
         private const string UseAppHost = "/p:UseAppHost=true";
         private const string IncludeDefault = "/p:IncludeSymbolsInSingleFile=false";
@@ -314,7 +315,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
             var publishCommand = new PublishCommand(testAsset);
-            var extraArgs = new List<string>() { PublishSingleFile, ReadyToRun, ReadyToRunComposite, RuntimeIdentifier };
+            var extraArgs = new List<string>() { PublishSingleFile, ReadyToRun, ReadyToRunCompositeOn, RuntimeIdentifier };
 
             if (extractAll)
             {
@@ -434,7 +435,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var publishCommand = GetPublishCommand();
             publishCommand
-                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeAllContent, ReadyToRun, ReadyToRunWithSymbols)
+                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeAllContent, ReadyToRun, ReadyToRunWithSymbols, ReadyToRunCompositeOff)
                 .Should()
                 .Pass();
 
@@ -505,7 +506,7 @@ namespace Microsoft.NET.Publish.Tests
         {
             var publishCommand = GetPublishCommand();
             publishCommand
-                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeAllContent, ReadyToRun)
+                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeAllContent, ReadyToRun, ReadyToRunCompositeOff)
                 .Should()
                 .Pass();
 
