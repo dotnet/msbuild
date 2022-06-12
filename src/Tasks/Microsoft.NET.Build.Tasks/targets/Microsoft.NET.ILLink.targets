@@ -27,7 +27,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     </AssemblyAttribute>
   </ItemGroup>
 
-
   <!-- We disable features for trimmed apps here so that the feature
       switches can flow to the runtimeconfig.json. Features are disabled
       by default since they may require assemblies, types or members that
