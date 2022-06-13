@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
             var msbuildArgs = new List<string>()
             {
-                "-target:pack",
+                "-target:Publish",
                 "-property:PublishRelease=true"
             };
 
