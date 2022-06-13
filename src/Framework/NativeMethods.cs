@@ -518,7 +518,7 @@ internal static class NativeMethods
             var result = GetLogicalCoreCountOnWindows();
             if (result != -1)
             {
-                return result;
+                numberOfCpus = result;
             }
         }
 #endif
