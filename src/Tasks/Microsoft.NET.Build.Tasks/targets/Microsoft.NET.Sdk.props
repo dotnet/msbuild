@@ -15,7 +15,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- This property disables the conflict resolution logic from the Microsoft.Packaging.Tools package, which is superceded by the logic here in the SDK -->
     <DisableHandlePackageFileConflicts>true</DisableHandlePackageFileConflicts>
   </PropertyGroup>
-
+  
   <!-- Default configuration and platform to Debug|AnyCPU, unless we are publishing or packing.-->
   <PropertyGroup>
     <Configurations Condition=" '$(Configurations)' == '' ">Debug;Release</Configurations>

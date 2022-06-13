@@ -58,8 +58,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>The configuration to use for building the package. The default for most projects is 'Debug'.</source>
-        <target state="translated">La configuración que se usará para compilar el paquete. El valor predeterminado para la mayoría de los proyectos es "Debug".</target>
+        <source>The configuration to use for building the package. The default for packing is 'Release.'</source>
+        <target state="needs-review-translation">La configuración que se usará para compilar el paquete. El valor predeterminado para la mayoría de los proyectos es "Debug".</target>
         <note />
       </trans-unit>
     </body>

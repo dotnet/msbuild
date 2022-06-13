@@ -33,7 +33,8 @@ namespace Microsoft.DotNet.Tools.Pack
 
             var msbuildArgs = new List<string>()
             {
-                "-target:pack"
+                "-target:pack",
+                "-property:_ShouldDefaultToRelease=true"
             };
 
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PackCommandParser.GetCommand()));
