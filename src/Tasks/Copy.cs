@@ -596,7 +596,6 @@ namespace Microsoft.Build.Tasks
                     // Retail assert...
                     ErrorUtilities.ThrowInternalError("Failed posting a file copy to an ActionBlock. Should not happen with block at max int capacity.");
                 }
-
             }
 
             partitionCopyActionBlock.Complete();
