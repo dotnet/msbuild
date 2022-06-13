@@ -9,7 +9,7 @@
      -->
   <ItemGroup>
     <PackageReference Update="BenchmarkDotNet" Version="0.13.1" />
-    <PackageReference Update="LargeAddressAware" Version="1.0.5" />
+    <PackageReference Update="LargeAddressAware" Version="1.0.6" />
     <PackageReference Update="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.3" />
     <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.36" />
     <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="3.2.2146" PrivateAssets="All" />
