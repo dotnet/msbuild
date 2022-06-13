@@ -144,6 +144,12 @@ namespace Microsoft.Build.Logging
                 _forwardingSetFromParameters = true;
                 _forwardingTable[parameterName] = 1;
             }
+            else if (String.Equals(parameterName, ProjectEvaluationStartedEventDescription, StringComparison.OrdinalIgnoreCase) ||
+                String.Equals(parameterName, ProjectEvaluationFinishedEventDescription, StringComparison.OrdinalIgnoreCase))
+            {
+                _forwardingSetFromParameters = true;
+                _forwardingTable[ProjectEvaluationEventDescription] = 1;
+            }
 
             // If any of the following parameters are set, we will make sure we forward the events
             // necessary for the central logger to emit the requested information
@@ -535,6 +541,8 @@ namespace Microsoft.Build.Logging
         private const string ProjectStartedEventDescription = "PROJECTSTARTEDEVENT";
         private const string ProjectFinishedEventDescription = "PROJECTFINISHEDEVENT";
         private const string ProjectEvaluationEventDescription = "PROJECTEVALUATIONEVENT";
+        private const string ProjectEvaluationStartedEventDescription = "PROJECTEVALUATIONSTARTEDEVENT";
+        private const string ProjectEvaluationFinishedEventDescription = "PROJECTEVALUATIONFINISHEDEVENT";
         private const string TargetStartedEventDescription = "TARGETSTARTEDEVENT";
         private const string TargetFinishedEventDescription = "TARGETFINISHEDEVENT";
         private const string TaskStartedEventDescription = "TASKSTARTEDEVENT";
