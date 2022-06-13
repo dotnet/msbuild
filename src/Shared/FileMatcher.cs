@@ -855,7 +855,8 @@ namespace Microsoft.Build.Shared
                 }
             }
             // This fails in tests with the MockFileSystem when they don't have real paths.
-            catch (Exception) { }
+            catch (IOException) { }
+            catch (ArgumentException) { }
 #endif
 
             ErrorUtilities.VerifyThrow((recursionState.SearchData.Filespec == null) || (recursionState.SearchData.RegexFileMatch == null),
