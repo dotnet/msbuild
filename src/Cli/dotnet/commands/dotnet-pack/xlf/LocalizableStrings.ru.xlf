@@ -58,7 +58,7 @@
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>The configuration to use for building the package. The default for packing is 'Release.'</source>
+        <source>The configuration to use for building the package. The default for packing is 'Release'.</source>
         <target state="needs-review-translation">Конфигурация, используемая для сборки пакета. По умолчанию для большинства проектов используется "Debug".</target>
         <note />
       </trans-unit>

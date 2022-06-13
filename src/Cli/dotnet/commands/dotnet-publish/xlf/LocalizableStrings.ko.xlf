@@ -55,7 +55,7 @@ The default is to publish a framework-dependent application.</source>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>The configuration to publish for. The default for publishing is 'Release.'</source>
+        <source>The configuration to publish for. The default for publishing is 'Release'.</source>
         <target state="needs-review-translation">게시할 구성입니다. 대부분의 프로젝트에서 기본값은 'Debug'입니다.</target>
         <note />
       </trans-unit>

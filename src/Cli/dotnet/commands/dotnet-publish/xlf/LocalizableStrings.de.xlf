@@ -55,7 +55,7 @@ Standardmäßig wird eine Framework-abhängige Anwendung veröffentlicht.</targe
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>The configuration to publish for. The default for publishing is 'Release.'</source>
+        <source>The configuration to publish for. The default for publishing is 'Release'.</source>
         <target state="needs-review-translation">Die Konfiguration für die Veröffentlichung. Der Standardwert für die meisten Projekte ist "Debug".</target>
         <note />
       </trans-unit>
