@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Tools.Pack
             var msbuildArgs = new List<string>()
             {
                 "-target:pack",
-                "-property:_ShouldDefaultToRelease=true"
+                "-property:PackRelease=true"
             };
 
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PackCommandParser.GetCommand()));
