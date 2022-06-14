@@ -16,6 +16,7 @@ using error = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
+using System.Runtime.CompilerServices;
 
 #nullable disable
 
@@ -136,6 +137,7 @@ namespace Microsoft.Build.Evaluation
                 // assembly in API consumers.
                 //
                 // https://github.com/microsoft/MSBuildLocator/issues/159
+                [MethodImplAttribute(MethodImplOptions.NoInlining)]
                 void ReadConfigToolset()
                 {
                     // Accumulation of properties is okay in the config file because it's deterministically ordered
