@@ -74,6 +74,13 @@ namespace Microsoft.Build.BackEnd
         private AutoResetEvent _terminatePacketPump;
 
         /// <summary>
+        /// True if this side is gracefully disconnecting.
+        /// In such case we have sent last packet to client side and we expect
+        /// client will soon broke pipe connection - unless server do it first.
+        /// </summary>
+        private bool _isClientDisconnecting;
+
+        /// <summary>
         /// The thread which runs the asynchronous packet pump
         /// </summary>
         private Thread _packetPump;
@@ -177,6 +184,14 @@ namespace Microsoft.Build.BackEnd
             {
                 EnqueuePacket(packet);
             }
+        }
+
+        /// <summary>
+        /// Called when we are about to send last packet to finalize graceful disconnection with client.
+        /// </summary>
+        public void ClientWillDisconnect()
+        {
+            _isClientDisconnecting = true;
         }
 
 #endregion
@@ -312,6 +327,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_asyncDataMonitor)
             {
+                _isClientDisconnecting = false;
                 _packetPump = new Thread(PacketPumpProc);
                 _packetPump.IsBackground = true;
                 _packetPump.Name = "OutOfProc Endpoint Packet Pump";
@@ -548,14 +564,25 @@ namespace Microsoft.Build.BackEnd
                                 // Incomplete read.  Abort.
                                 if (bytesRead == 0)
                                 {
-                                    CommunicationsUtilities.Trace("Parent disconnected abruptly");
+                                    if (_isClientDisconnecting)
+                                    {
+                                        CommunicationsUtilities.Trace("Parent disconnected gracefully.");
+                                        // Do not change link status to failed as this could make node think connection has failed
+                                        // and recycle node, while this is perfectly expected and handled race condition
+                                        // (both client and node is about to close pipe and client can be faster).
+                                    }
+                                    else
+                                    {
+                                        CommunicationsUtilities.Trace("Parent disconnected abruptly.");
+                                        ChangeLinkStatus(LinkStatus.Failed);
+                                    }
                                 }
                                 else
                                 {
                                     CommunicationsUtilities.Trace("Incomplete header read from server.  {0} of {1} bytes read", bytesRead, headerByte.Length);
+                                    ChangeLinkStatus(LinkStatus.Failed);
                                 }
 
-                                ChangeLinkStatus(LinkStatus.Failed);
                                 exitLoop = true;
                                 break;
                             }

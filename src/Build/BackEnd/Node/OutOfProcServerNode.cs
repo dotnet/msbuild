@@ -219,13 +219,13 @@ namespace Microsoft.Build.Execution
         {
             CommunicationsUtilities.Trace("Shutting down with reason: {0}, and exception: {1}.", _shutdownReason, _shutdownException);
 
+            // On Windows, a process holds a handle to the current directory,
+            // so reset it away from a user-requested folder that may get deleted.
+            NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
+
             exception = _shutdownException;
 
-            if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
-            {
-                _nodeEndpoint.OnLinkStatusChanged -= OnLinkStatusChanged;
-            }
-
+            _nodeEndpoint.OnLinkStatusChanged -= OnLinkStatusChanged;
             _nodeEndpoint.Disconnect();
 
             CommunicationsUtilities.Trace("Shut down complete.");
@@ -348,6 +348,7 @@ namespace Microsoft.Build.Execution
             // so reset it away from a user-requested folder that may get deleted.
             NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
 
+            _nodeEndpoint.ClientWillDisconnect();
             var response = new ServerNodeBuildResult(buildResult.exitCode, buildResult.exitType);
             SendPacket(response);
 
