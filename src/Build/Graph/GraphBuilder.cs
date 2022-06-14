@@ -48,8 +48,6 @@ namespace Microsoft.Build.Graph
         private readonly ProjectGraph.ProjectInstanceFactoryFunc _projectInstanceFactory;
         private IReadOnlyDictionary<string, IReadOnlyCollection<string>> _solutionDependencies;
 
-        private bool PlatformNegotiationEnabled = false;
-
         public GraphBuilder(
             IEnumerable<ProjectGraphEntryPoint> entryPoints,
             ProjectCollection projectCollection,
