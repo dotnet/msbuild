@@ -809,16 +809,28 @@ namespace Microsoft.Build.BackEnd
             }
             catch (InvalidProjectFileException ex)
             {
-                if (_projectLoggingContext != null)
+                if (_requestEntry.RequestConfiguration.ProjectFullPath.EndsWith("dwproj"))
+                {
+                    result = new BuildResult(_requestEntry.Request);
+                    if (_projectLoggingContext is null)
+                    {
+                        _nodeLoggingContext.LogWarning("SolutionParseUnknownProjectType", Path.GetFileName(_requestEntry.RequestConfiguration.ProjectFullPath));
+                    }
+                    else
+                    {
+                        _projectLoggingContext.LogWarning("SolutionParseUnknownProjectType", Path.GetFileName(_requestEntry.RequestConfiguration.ProjectFullPath));
+                    }
+                }
+                else if (_projectLoggingContext != null)
                 {
                     _projectLoggingContext.LogInvalidProjectFileError(ex);
+                    thrownException = ex;
                 }
                 else
                 {
                     _nodeLoggingContext.LogInvalidProjectFileError(ex);
+                    thrownException = ex;
                 }
-
-                thrownException = ex;
             }
             catch (Exception ex)
             {
