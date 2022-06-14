@@ -29,7 +29,7 @@ namespace Microsoft.TemplateEngine.TestHelper
 
             public InMemoryLogger(List<(LogLevel, string)> messagesCollection) => _messagesCollection = messagesCollection;
 
-            public IDisposable? BeginScope<TState>(TState state) where TState : notnull
+            public IDisposable BeginScope<TState>(TState state)
             {
                 return new Scope();
             }

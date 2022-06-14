@@ -516,7 +516,7 @@ namespace Dotnet_new3.IntegrationTests
                 .Fail();
 
             return Verifier.Verify(commandResult.StdErr, _verifySettings)
-                .AddScrubber(output => output.ScrubByRegex("\\-\\-debug\\:custom\\-hive [A-Za-z0-9\\-\\.\\\\\\/\\{\\}]+", "--debug:custom-hive %SETTINGS DIRECTORY%"));
+                .AddScrubber(output => output.ScrubByRegex("\\-\\-debug\\:custom\\-hive [A-Za-z0-9\\-\\.\\\\\\/\\{\\}\\:_]+", "--debug:custom-hive %SETTINGS DIRECTORY%"));
         }
 
         [Fact]

@@ -117,7 +117,7 @@ namespace Microsoft.TemplateEngine.TestHelper
             public bool IsEnabled(LogLevel logLevel)
                 => logLevel >= _minLogLevel;
 
-            public IDisposable? BeginScope<TState>(TState state) where TState : notnull => new NullScope();
+            public IDisposable BeginScope<TState>(TState state) => new NullScope();
 
             private class NullScope : IDisposable
             {
