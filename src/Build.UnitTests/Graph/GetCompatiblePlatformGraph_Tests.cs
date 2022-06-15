@@ -112,6 +112,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
                 GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GlobalProperties["Platform"].ShouldBe("AnyCPU");
                 GetFirstNodeWithProjectNumber(graph, 3).ProjectInstance.GlobalProperties["Platform"].ShouldBe("AnyCPU");
+                graph.ProjectNodes.Count.ShouldBe(3);
             }
         }
 
