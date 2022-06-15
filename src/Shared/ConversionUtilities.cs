@@ -96,12 +96,12 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool ValidBooleanTrue(string parameterValue)
         {
-            return String.Equals(parameterValue, "true", StringComparison.OrdinalIgnoreCase) ||
+            return !String.IsNullOrWhiteSpace(parameterValue) && (String.Equals(parameterValue, "true", StringComparison.OrdinalIgnoreCase) ||
                    String.Equals(parameterValue, "on", StringComparison.OrdinalIgnoreCase) ||
                    String.Equals(parameterValue, "yes", StringComparison.OrdinalIgnoreCase) ||
                    String.Equals(parameterValue, "!false", StringComparison.OrdinalIgnoreCase) ||
                    String.Equals(parameterValue, "!off", StringComparison.OrdinalIgnoreCase) ||
-                   String.Equals(parameterValue, "!no", StringComparison.OrdinalIgnoreCase);
+                   String.Equals(parameterValue, "!no", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -110,12 +110,12 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static bool ValidBooleanFalse(string parameterValue)
         {
-            return String.Equals(parameterValue, "false", StringComparison.OrdinalIgnoreCase) ||
+            return !String.IsNullOrWhiteSpace(parameterValue) && (String.Equals(parameterValue, "false", StringComparison.OrdinalIgnoreCase) ||
                    String.Equals(parameterValue, "off", StringComparison.OrdinalIgnoreCase) ||
                    String.Equals(parameterValue, "no", StringComparison.OrdinalIgnoreCase) ||
                    String.Equals(parameterValue, "!true", StringComparison.OrdinalIgnoreCase) ||
                    String.Equals(parameterValue, "!on", StringComparison.OrdinalIgnoreCase) ||
-                   String.Equals(parameterValue, "!yes", StringComparison.OrdinalIgnoreCase);
+                   String.Equals(parameterValue, "!yes", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
