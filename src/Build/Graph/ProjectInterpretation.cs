@@ -105,7 +105,7 @@ namespace Microsoft.Build.Graph
                 var requesterPlatform = "";
                 var requesterPlatformLookupTable = "";
 
-                if (ConversionUtilities.ValidBooleanTrue(requesterInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)) && !projectReferenceItem.HasMetadata(SetPlatformMetadataName))
+                if ( !projectReferenceItem.HasMetadata(SetPlatformMetadataName) && ConversionUtilities.ValidBooleanTrue(requesterInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)))
                 {
                     requesterPlatform = requesterInstance.GetPropertyValue("Platform");
                     requesterPlatformLookupTable = requesterInstance.GetPropertyValue("PlatformLookupTable");
