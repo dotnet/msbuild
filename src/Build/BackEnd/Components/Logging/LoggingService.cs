@@ -1432,20 +1432,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private void RouteBuildEvent(object loggingEvent)
         {
-            BuildEventArgs buildEventArgs = null;
-
-            if (loggingEvent is BuildEventArgs bea)
-            {
-                buildEventArgs = bea;
-            }
-            else if (loggingEvent is KeyValuePair<int, BuildEventArgs> kvp)
-            {
-                buildEventArgs = kvp.Value;
-            }
-            else
-            {
-                ErrorUtilities.ThrowInternalError("Unknown logging item in queue:" + loggingEvent.GetType().FullName);
-            }
+            BuildEventArgs buildEventArgs = loggingEvent as BuildEventArgs ?? (loggingEvent as KeyValuePair<int, BuildEventArgs>?)?.Value;
+            ErrorUtilities.VerifyThrow(buildEventArgs is not null, "Unknown logging item in queue:" + loggingEvent.GetType().FullName);
 
             if (buildEventArgs is BuildWarningEventArgs warningEvent)
             {
@@ -1489,14 +1477,12 @@ namespace Microsoft.Build.BackEnd.Logging
                     };
                 }
             }
-
-            if (loggingEvent is BuildErrorEventArgs errorEvent)
+            else if (loggingEvent is BuildErrorEventArgs errorEvent)
             {
                 // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
                 _buildSubmissionIdsThatHaveLoggedErrors.Add(errorEvent.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
             }
-
-            if (loggingEvent is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
+            else if (loggingEvent is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
             {
                 int key = GetWarningsAsErrorOrMessageKey(projectFinishedEvent);
                 _warningsAsErrorsByProject?.Remove(key);
@@ -1541,7 +1527,7 @@ namespace Microsoft.Build.BackEnd.Logging
             TryRaiseProjectStartedEvent(eventArg);
 
             // The event has not been through a filter yet. All events must go through a filter before they make it to a logger
-            if (_filterEventSource != null)   // Loggers may not be registered
+            if (_filterEventSource != null) // Loggers may not be registered
             {
                 // Send the event to the filter, the Consume will not return until all of the loggers which have registered to the event have process
                 // them.
@@ -1562,7 +1548,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         {
                             if (!sink.HaveLoggedBuildStartedEvent)
                             {
-                                sink.Consume(eventArg, (int)pair.Key);
+                                sink.Consume(eventArg, pair.Key);
                             }
 
                             // Reset the HaveLoggedBuildStarted event because no one else will be sending a build started event to any loggers at this time.

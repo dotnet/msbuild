@@ -24,30 +24,36 @@ namespace Microsoft.Build.UnitTests
             _ = ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix;
         }
 
-        [Fact]
-        public void RoundtripBuildStartedEventArgs()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void RoundtripBuildStartedEventArgs(bool serializeAllEnvironmentVariables)
         {
-            var args = new BuildStartedEventArgs(
-                "Message",
-                "HelpKeyword",
-                DateTime.Parse("3/1/2017 11:11:56 AM"));
-            Roundtrip(args,
-                e => e.Message,
-                e => e.HelpKeyword,
-                e => e.Timestamp.ToString());
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES", serializeAllEnvironmentVariables ? "1" : null);
+                var args = new BuildStartedEventArgs(
+                    "Message",
+                    "HelpKeyword",
+                    DateTime.Parse("3/1/2017 11:11:56 AM"));
+                Roundtrip(args,
+                    e => e.Message,
+                    e => e.HelpKeyword,
+                    e => e.Timestamp.ToString());
 
-            args = new BuildStartedEventArgs(
-                "M",
-                null,
-                new Dictionary<string, string>
-                {
+                args = new BuildStartedEventArgs(
+                    "M",
+                    null,
+                    new Dictionary<string, string>
+                    {
                     { "SampleName", "SampleValue" }
-                });
-            Roundtrip(args,
-                e => TranslationHelpers.ToString(e.BuildEnvironment),
-                e => e.HelpKeyword,
-                e => e.ThreadId.ToString(),
-                e => e.SenderName);
+                    });
+                Roundtrip(args,
+                    e => serializeAllEnvironmentVariables ? TranslationHelpers.ToString(e.BuildEnvironment) : null,
+                    e => e.HelpKeyword,
+                    e => e.ThreadId.ToString(),
+                    e => e.SenderName);
+            }
         }
 
         [Fact]
@@ -171,6 +177,17 @@ namespace Microsoft.Build.UnitTests
                 e => e.TaskName,
                 e => e.LineNumber.ToString(),
                 e => e.ColumnNumber.ToString());
+        }
+
+        [Fact]
+        public void RoundtripEnvironmentVariableReadEventArgs()
+        {
+            EnvironmentVariableReadEventArgs args = new("VarName", "VarValue");
+            args.BuildEventContext = new BuildEventContext(4, 5, 6, 7);
+            Roundtrip(args,
+                e => e.Message,
+                e => e.EnvironmentVariableName,
+                e => e.BuildEventContext.ToString());
         }
 
         [Fact]

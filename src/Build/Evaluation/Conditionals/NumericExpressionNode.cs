@@ -3,7 +3,7 @@
 
 using System;
 using System.Diagnostics;
-
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -23,18 +23,18 @@ namespace Microsoft.Build.Evaluation
             _value = value;
         }
 
-        internal override bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result)
+        internal override bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result, LoggingContext loggingContext = null)
         {
             result = default;
             return false;
         }
 
-        internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result)
+        internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result, LoggingContext loggingContext = null)
         {
             return ConversionUtilities.TryConvertDecimalOrHexToDouble(_value, out result);
         }
 
-        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result)
+        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result, LoggingContext loggingContext = null)
         {
             return Version.TryParse(_value, out result);
         }
@@ -50,7 +50,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Get the expanded value
         /// </summary>
-        internal override string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state)
+        internal override string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
         {
             return _value;
         }
