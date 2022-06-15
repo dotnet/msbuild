@@ -76,7 +76,7 @@ namespace Microsoft.Build.Graph.UnitTests
         }
 
         [Fact]
-        public void ResolvesMultibleReferencesToSameProject()
+        public void ResolvesMultipleReferencesToSameProject()
         {
             using (var env = TestEnvironment.Create())
             {
