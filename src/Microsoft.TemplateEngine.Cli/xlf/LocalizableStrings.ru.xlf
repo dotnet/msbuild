@@ -565,7 +565,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="MissingRequiredParameter">
         <source>Mandatory option '{0}' is missing for the template '{1}'.</source>
-        <target state="needs-review-translation">Отсутствует обязательный параметр {0} для шаблона {1}.</target>
+        <target state="new">Mandatory option '{0}' is missing for the template '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingTemplateContentDetected">
