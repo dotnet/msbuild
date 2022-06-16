@@ -202,8 +202,25 @@ namespace Microsoft.DotNet.Installer.Windows
         public bool TryGetPayloadFromCache(string packageId, string packageVersion, out MsiPayload payload)
         {
             string packageCacheDirectory = GetPackageDirectory(packageId, packageVersion);
-            string manifestPath = Path.Combine(packageCacheDirectory, "msi.json");
             payload = default;
+
+            string msiPath;
+            if (!TryGetMsiPathFromPackageData(packageCacheDirectory, out msiPath, out string manifestPath))
+            {
+                return false;
+            }
+
+            VerifyPackageSignature(msiPath);
+
+            payload = new MsiPayload(manifestPath, msiPath);
+
+            return true;
+        }
+
+        public bool TryGetMsiPathFromPackageData(string packageDataPath, out string msiPath, out string manifestPath)
+        {
+            msiPath = default;
+            manifestPath = Path.Combine(packageDataPath, "msi.json");
 
             // It's possible that the MSI is cached, but without the JSON manifest we cannot
             // trust that the MSI in the cache directory is the correct file.
@@ -216,18 +233,15 @@ namespace Microsoft.DotNet.Installer.Windows
             // The msi.json manifest contains the name of the actual MSI. The filename does not necessarily match the package
             // ID as it may have been shortened to support VS caching.
             MsiManifest msiManifest = JsonConvert.DeserializeObject<MsiManifest>(File.ReadAllText(manifestPath));
-            string msiPath = Path.Combine(Path.GetDirectoryName(manifestPath), msiManifest.Payload);
+            string possibleMsiPath = Path.Combine(Path.GetDirectoryName(manifestPath), msiManifest.Payload);
 
-            if (!File.Exists(msiPath))
+            if (!File.Exists(possibleMsiPath))
             {
-                Log?.LogMessage($"MSI package is not cached, '{msiPath}'");
+                Log?.LogMessage($"MSI package not found, '{possibleMsiPath}'");
                 return false;
             }
 
-            VerifyPackageSignature(msiPath);
-
-            payload = new MsiPayload(manifestPath, msiPath);
-
+            msiPath = possibleMsiPath;
             return true;
         }
 

@@ -23,24 +23,11 @@ using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 
 namespace Microsoft.DotNet.Workloads.Workload.Update
 {
-    internal class WorkloadUpdateCommand : WorkloadCommandBase
+    internal class WorkloadUpdateCommand : InstallingWorkloadCommand
     {
-        private readonly bool _printDownloadLinkOnly;
-        private readonly string _fromCacheOption;
-        private readonly string _downloadToCacheOption;
         private readonly bool _adManifestOnlyOption;
         private readonly bool _printRollbackDefinitionOnly;
-        private readonly string _fromRollbackDefinition;
-        private readonly PackageSourceLocation _packageSourceLocation;
-        private readonly bool _includePreviews;
         private readonly bool _fromPreviousSdk;
-        private readonly IInstaller _workloadInstallerFromConstructor;
-        private IWorkloadResolver _workloadResolver;
-        private readonly IWorkloadManifestUpdater _workloadManifestUpdaterFromConstructor;
-        private readonly ReleaseVersion _sdkVersion;
-        private readonly SdkFeatureBand _sdkFeatureBand;
-        private readonly string _userProfileDir;
-        private readonly string _dotnetPath;
         private readonly List<IInstaller> _installersToShutdown = new();
 
         public WorkloadUpdateCommand(
@@ -54,39 +41,20 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             string userProfileDir = null,
             string tempDirPath = null,
             string version = null)
-            : base(parseResult, reporter: reporter, tempDirPath: tempDirPath, nugetPackageDownloader: nugetPackageDownloader)
+            : base(parseResult, reporter: reporter, workloadResolver: workloadResolver, workloadInstaller: workloadInstaller,
+                  nugetPackageDownloader: nugetPackageDownloader, workloadManifestUpdater: workloadManifestUpdater,
+                  dotnetDir: dotnetDir, userProfileDir: userProfileDir, tempDirPath: tempDirPath, version: version)
+
         {
-            _printDownloadLinkOnly =
-                parseResult.GetValueForOption(WorkloadUpdateCommandParser.PrintDownloadLinkOnlyOption);
-            _fromCacheOption = parseResult.GetValueForOption(WorkloadUpdateCommandParser.FromCacheOption);
-            _includePreviews = parseResult.GetValueForOption(WorkloadUpdateCommandParser.IncludePreviewsOption);
             _fromPreviousSdk = parseResult.GetValueForOption(WorkloadUpdateCommandParser.FromPreviousSdkOption);
             _adManifestOnlyOption = parseResult.GetValueForOption(WorkloadUpdateCommandParser.AdManifestOnlyOption);
-            _downloadToCacheOption = parseResult.GetValueForOption(WorkloadUpdateCommandParser.DownloadToCacheOption);
-            _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
-            _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(WorkloadUpdateCommandParser.VersionOption), version, _dotnetPath, _userProfileDir);
-
             _printRollbackDefinitionOnly = parseResult.GetValueForOption(WorkloadUpdateCommandParser.PrintRollbackOption);
-            _fromRollbackDefinition = parseResult.GetValueForOption(WorkloadUpdateCommandParser.FromRollbackFileOption);
-
-            var configOption = parseResult.GetValueForOption(WorkloadUpdateCommandParser.ConfigOption);
-            var sourceOption = parseResult.GetValueForOption<string[]>(WorkloadUpdateCommandParser.SourceOption);
-            _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
-                new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides: sourceOption);
-
-            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString(), _userProfileDir);
-            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, _sdkVersion.ToString(), _userProfileDir);
-            _sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
-
-            _workloadInstallerFromConstructor = workloadInstaller;
-            _workloadManifestUpdaterFromConstructor = workloadManifestUpdater;
         }
 
-        IInstaller CreateWorkloadInstaller()
+        protected override IInstaller CreateWorkloadInstaller(IWorkloadResolver workloadResolver = null)
         {
             var installer = _workloadInstallerFromConstructor ?? WorkloadInstallerFactory.GetWorkloadInstaller(Reporter,
-                                _sdkFeatureBand, _workloadResolver, Verbosity, _userProfileDir, VerifySignatures, PackageDownloader,
+                                _sdkFeatureBand, workloadResolver ?? _workloadResolver, Verbosity, _userProfileDir, VerifySignatures, PackageDownloader,
                                 _dotnetPath, TempDirectoryPath, packageSourceLocation: _packageSourceLocation, RestoreActionConfiguration,
                                 elevationRequired: !_printDownloadLinkOnly && !_printRollbackDefinitionOnly && string.IsNullOrWhiteSpace(_downloadToCacheOption));
 
@@ -94,10 +62,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             return installer;
         }
 
-        IWorkloadManifestUpdater CreateWorkloadManifestUpdater(IInstaller installer)
+        protected override IWorkloadManifestUpdater CreateWorkloadManifestUpdater(IInstaller installer, IWorkloadResolver workloadResolver = null)
         {
-            return _workloadManifestUpdaterFromConstructor ?? new WorkloadManifestUpdater(Reporter, _workloadResolver, PackageDownloader, _userProfileDir, TempDirectoryPath,
-                installer.GetWorkloadInstallationRecordRepository(), _packageSourceLocation);
+            return _workloadManifestUpdaterFromConstructor ?? new WorkloadManifestUpdater(Reporter, workloadResolver ?? _workloadResolver, PackageDownloader, _userProfileDir, TempDirectoryPath,
+                installer.GetWorkloadInstallationRecordRepository(), installer, _packageSourceLocation);
         }
 
         public override int Execute()
@@ -233,84 +201,23 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
         private async Task DownloadToOfflineCacheAsync(DirectoryPath offlineCache, bool includePreviews)
         {
             var installer = CreateWorkloadInstaller();
-            var manifestUpdater = CreateWorkloadManifestUpdater(installer);
 
-            var manifestPackagePaths = await manifestUpdater.DownloadManifestPackagesAsync(includePreviews, offlineCache);
-            var tempManifestDir = Path.Combine(offlineCache.Value, "temp-manifests");
-            try
-            {
-                await manifestUpdater.ExtractManifestPackagesToTempDirAsync(manifestPackagePaths, new DirectoryPath(tempManifestDir));
-                var overlayManifestProvider = new TempDirectoryWorkloadManifestProvider(tempManifestDir, _sdkVersion.ToString());
-                _workloadResolver = WorkloadResolver.Create(overlayManifestProvider, _dotnetPath, _sdkVersion.ToString(), _userProfileDir);
-
-                //  Create new installer with the updated resolver
-                installer = CreateWorkloadInstaller();
-
-                var downloads = installer.GetDownloads(GetUpdatableWorkloads(installer), new SdkFeatureBand(_sdkVersion), false);
-
-                if (!Directory.Exists(offlineCache.Value))
-                {
-                    Directory.CreateDirectory(offlineCache.Value);
-                }
-
-                foreach (var download in downloads)
-                {
-                    Reporter.WriteLine(string.Format(Install.LocalizableStrings.DownloadingPackToCacheMessage, download.NuGetPackageId, download.NuGetPackageVersion, offlineCache.Value));
-
-                    PackageDownloader.DownloadPackageAsync(new PackageId(download.NuGetPackageId), new NuGetVersion(download.NuGetPackageVersion), downloadFolder: offlineCache,
-                        packageSourceLocation: _packageSourceLocation, includePreview: includePreviews).Wait();
-                }
-            }
-            finally
-            {
-                if (!string.IsNullOrWhiteSpace(tempManifestDir) && Directory.Exists(tempManifestDir))
-                {
-                    Directory.Delete(tempManifestDir, true);
-                }
-            }
+            await GetDownloads(GetUpdatableWorkloads(installer), skipManifestUpdate: false, includePreviews, offlineCache.Value);
         }
 
         private async Task<IEnumerable<string>> GetUpdatablePackageUrlsAsync(bool includePreview)
         {
             var installer = CreateWorkloadInstaller();
-            var manifestUpdater = CreateWorkloadManifestUpdater(installer);
 
-            IEnumerable<string> packageUrls = new List<string>();
-            DirectoryPath? tempPath = null;
+            var downloads = await GetDownloads(GetUpdatableWorkloads(installer), skipManifestUpdate: false, includePreview);
 
-            try
+            var urls = new List<string>();
+            foreach (var download in downloads)
             {
-                var manifestPackageUrls = manifestUpdater.GetManifestPackageUrls(includePreview);
-                packageUrls = packageUrls.Concat(manifestPackageUrls);
-
-                tempPath = new DirectoryPath(Path.Combine(TempDirectoryPath, "dotnet-manifest-extraction"));
-                await UseTempManifestsToResolvePacksAsync(manifestUpdater, tempPath.Value, includePreview);
-
-                //  Create new installer with the updated resolver
-                installer = CreateWorkloadInstaller();
-
-                var packUrls = installer.GetDownloads(GetUpdatableWorkloads(installer), new SdkFeatureBand(_sdkVersion), false)
-                    .Select(pack => PackageDownloader.GetPackageUrl(new PackageId(pack.NuGetPackageId), new NuGetVersion(pack.NuGetPackageVersion),
-                        packageSourceLocation: _packageSourceLocation, includePreview: includePreview).GetAwaiter().GetResult());
-
-                packageUrls = packageUrls.Concat(packUrls);
-                return packageUrls;
+                urls.Add(await PackageDownloader.GetPackageUrl(new PackageId(download.NuGetPackageId), new NuGetVersion(download.NuGetPackageVersion), _packageSourceLocation));
             }
-            finally
-            {
-                if (tempPath != null && tempPath.HasValue && Directory.Exists(tempPath.Value.Value))
-                {
-                    Directory.Delete(tempPath.Value.Value, true);
-                }
-            }
-        }
 
-        private async Task UseTempManifestsToResolvePacksAsync(IWorkloadManifestUpdater manifestUpdater, DirectoryPath tempPath, bool includePreview)
-        {
-            var manifestPackagePaths = await manifestUpdater.DownloadManifestPackagesAsync(includePreview, tempPath);
-            await manifestUpdater.ExtractManifestPackagesToTempDirAsync(manifestPackagePaths, tempPath);
-            var overlayManifestProvider = new TempDirectoryWorkloadManifestProvider(tempPath.Value, _sdkVersion.ToString());
-            _workloadResolver = WorkloadResolver.Create(overlayManifestProvider, _dotnetPath, _sdkVersion.ToString(), _userProfileDir);
+            return urls;
         }
 
         private IEnumerable<WorkloadId> GetUpdatableWorkloads(IInstaller installer)

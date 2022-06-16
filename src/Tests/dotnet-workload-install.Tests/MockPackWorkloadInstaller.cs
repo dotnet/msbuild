@@ -9,6 +9,11 @@ using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using System.Linq;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
+using Microsoft.DotNet.ToolPackage;
+using System.Threading.Tasks;
+using Microsoft.DotNet.Cli.NuGetPackageDownloader;
+using NuGet.Versioning;
+using System.IO;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -121,6 +126,37 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public void Shutdown()
         {
 
+        }
+
+        public PackageId GetManifestPackageId(ManifestId manifestId, SdkFeatureBand featureBand)
+        {
+            return new PackageId($"{manifestId}.Manifest-{featureBand}");
+        }
+
+        public List<(string nupkgPath, string targetPath)> ExtractCallParams = new();
+
+        public Task ExtractManifestAsync(string nupkgPath, string targetPath)
+        {
+            ExtractCallParams.Add((nupkgPath, targetPath));
+
+            if (Directory.Exists(targetPath))
+            {
+                Directory.Delete(targetPath, true);
+            }
+            Directory.CreateDirectory(targetPath);
+
+            string manifestContents = $@"{{
+  ""version"": ""1.0.42"",
+  ""workloads"": {{
+    }}
+  }},
+  ""packs"": {{
+  }}
+}}";
+
+            File.WriteAllText(Path.Combine(targetPath, "WorkloadManifest.json"), manifestContents);
+
+            return Task.CompletedTask;
         }
     }
 

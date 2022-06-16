@@ -3,8 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
@@ -95,7 +97,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 msis = msis.Where(m => !installedItems.Contains((m.NuGetPackageId, m.NuGetPackageVersion)));
             }
 
-            return msis.Select(m => new WorkloadDownload(m.NuGetPackageId, m.NuGetPackageVersion));
+            return msis.Select(m => new WorkloadDownload(m.NuGetPackageId, m.NuGetPackageVersion)).ToList(); ;
         }
 
         /// <summary>
@@ -274,7 +276,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             Log?.LogMessage($"Installing manifest: Id: {manifestUpdate.ManifestId}, version: {manifestUpdate.NewVersion}, feature band: {manifestUpdate.NewFeatureBand}, rollback: {isRollback}.");
 
             // Resolve the package ID for the manifest payload package
-            string msiPackageId = WorkloadManifestUpdater.GetManifestPackageId(new SdkFeatureBand(manifestUpdate.NewFeatureBand), manifestUpdate.ManifestId, InstallType.Msi).ToString();
+            string msiPackageId = GetManifestPackageId(manifestUpdate.ManifestId, new SdkFeatureBand(manifestUpdate.NewFeatureBand)).ToString();
             string msiPackageVersion = $"{manifestUpdate.NewVersion}";
 
             Log?.LogMessage($"Resolving {manifestUpdate.ManifestId} ({manifestUpdate.NewVersion}) to {msiPackageId} ({msiPackageVersion}).");
@@ -473,6 +475,91 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             Log?.LogMessage($"Restart required: {Restart}");
             ((TimestampedFileLogger)Log).Dispose();
             _shutdown = true;
+        }
+
+        public PackageId GetManifestPackageId(ManifestId manifestId, SdkFeatureBand featureBand)
+        {
+            return new PackageId($"{manifestId}.Manifest-{featureBand}.Msi.{RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant()}");
+        }
+
+        public async Task ExtractManifestAsync(string nupkgPath, string targetPath)
+        {
+            string extractionPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            if (Directory.Exists(extractionPath))
+            {
+                Directory.Delete(extractionPath, true);
+            }
+
+            try
+            {
+                Directory.CreateDirectory(extractionPath);
+
+                Log?.LogMessage($"Extracting '{nupkgPath}' to '{extractionPath}'");
+                await _nugetPackageDownloader.ExtractPackageAsync(nupkgPath, new DirectoryPath(extractionPath));
+                if (Directory.Exists(targetPath))
+                {
+                    Directory.Delete(targetPath, true);
+                }
+
+                //  Do we need to worry about signing validation here?  I think not, as if the manifest is ever actually installed, it will go through signing validation
+                string extractedManifestPath = Path.Combine(extractionPath, "data", "extractedManifest");
+                if (Directory.Exists(extractedManifestPath))
+                {
+                    Log?.LogMessage($"Copying manifest from '{extractionPath}' to '{targetPath}'");
+                    Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
+                    FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(extractedManifestPath, targetPath));
+                }
+                else
+                {
+                    string packageDataPath = Path.Combine(extractionPath, "data");
+                    if (!Cache.TryGetMsiPathFromPackageData(packageDataPath, out string msiPath, out _))
+                    {
+                        throw new FileNotFoundException("Manifest MSI not found in NuGet package", extractionPath);
+                    }
+                    string msiExtractionPath = Path.Combine(extractionPath, "msi");
+                    
+                    var psi = new ProcessStartInfo()
+                    {
+                        FileName = "msiexec",
+                        ArgumentList =
+                        {
+                            "/a",
+                            msiPath,
+                            $"TARGETDIR={msiExtractionPath}",
+                            "/QN",  //  Quiet: No UI
+                        }
+                    };
+
+                    var exitCode = psi.Execute();
+                    if (exitCode != 0)
+                    {
+                        throw new GracefulException("Failed to extract information from MSI: " + msiPath);
+                    }
+
+                    var manifestsFolder = Path.Combine(msiExtractionPath, "dotnet", "sdk-manifests");
+
+                    string manifestFolder = null;
+                    string manifestsFeatureBandFolder = Directory.GetDirectories(manifestsFolder).SingleOrDefault();
+                    if (manifestsFeatureBandFolder != null)
+                    {
+                        manifestFolder = Directory.GetDirectories(manifestsFeatureBandFolder).SingleOrDefault();
+                    }
+
+                    if (manifestFolder == null)
+                    {
+                        throw new GracefulException($"Expected single manifest feature band and manifest folder in MSI from package {nupkgPath}");
+                    }
+
+                    FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(manifestFolder, targetPath));
+                }
+            }
+            finally
+            {
+                if (!string.IsNullOrEmpty(extractionPath) && Directory.Exists(extractionPath))
+                {
+                    Directory.Delete(extractionPath, true);
+                }
+            }
         }
 
         private void LogPackInfo(PackInfo packInfo)

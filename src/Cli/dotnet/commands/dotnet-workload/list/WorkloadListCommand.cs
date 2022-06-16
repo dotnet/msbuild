@@ -63,13 +63,12 @@ namespace Microsoft.DotNet.Workloads.Workload.List
 
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, currentSdkReleaseVersion.ToString(), _userProfileDir);
 
-            _workloadRecordRepo = workloadRecordRepo ??
-                WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand, _workloadResolver, Verbosity, _userProfileDir,
-                VerifySignatures,
-                elevationRequired: false).GetWorkloadInstallationRecordRepository();
+            var installer = WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand, _workloadResolver,
+                Verbosity, _userProfileDir, VerifySignatures, elevationRequired: false);
+            _workloadRecordRepo = workloadRecordRepo ?? installer.GetWorkloadInstallationRecordRepository();
 
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(Reporter,
-                _workloadResolver, PackageDownloader, _userProfileDir, TempDirectoryPath, _workloadRecordRepo);
+                _workloadResolver, PackageDownloader, _userProfileDir, TempDirectoryPath, _workloadRecordRepo, installer);
         }
 
         public override int Execute()
