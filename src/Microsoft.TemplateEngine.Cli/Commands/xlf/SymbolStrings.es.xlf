@@ -100,7 +100,7 @@ Si el comando se especifica sin el argumento, muestra todos los paquetes de plan
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
         <source>Disables checking if the template meets the constraints to be run.</source>
-        <target state="new">Disables checking if the template meets the constraints to be run.</target>
+        <target state="translated">Deshabilita la comprobación de si la plantilla cumple las restricciones que se van a ejecutar.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_AddSource">

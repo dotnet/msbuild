@@ -260,7 +260,7 @@ Uruchom polecenie \"dotnet {1}--show-aliases\" bez argumentów, aby wyświetlić
       </trans-unit>
       <trans-unit id="BaseCommand_ExitCodeHelp">
         <source>For details on the exit code, refer to https://aka.ms/templating-exit-codes#{0}</source>
-        <target state="new">For details on the exit code, refer to https://aka.ms/templating-exit-codes#{0}</target>
+        <target state="translated">Aby uzyskać szczegółowe informacje na temat kodu zakończenia, zobacz stronę https://aka.ms/templating-exit-codes#{0}</target>
         <note>{0} is the exit code</note>
       </trans-unit>
       <trans-unit id="Change">
@@ -565,7 +565,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="MissingRequiredParameter">
         <source>Mandatory option '{0}' is missing for the template '{1}'.</source>
-        <target state="new">Mandatory option '{0}' is missing for the template '{1}'.</target>
+        <target state="translated">W przypadku szablonu „{1}” brakuje opcji obowiązkowej „{0}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingTemplateContentDetected">
@@ -808,22 +808,22 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplateCommand_DisplayConstraintResults_Error">
         <source>Failed to instatiate template '{0}', the following constraints are not met:</source>
-        <target state="new">Failed to instatiate template '{0}', the following constraints are not met:</target>
+        <target state="translated">Nie można zainicjować szablonu „{0}”, ponieważ następujące ograniczenia nie są spełnione:</target>
         <note>{0} - template name (user friendly)</note>
       </trans-unit>
       <trans-unit id="TemplateCommand_DisplayConstraintResults_Hint">
         <source>To run the template anyway, use '{0}' option:</source>
-        <target state="new">To run the template anyway, use '{0}' option:</target>
+        <target state="translated">Aby mimo to uruchomić szablon, użyj opcji „{0}”:</target>
         <note>{0} - additional option name (--force)</note>
       </trans-unit>
       <trans-unit id="TemplateCommand_DisplayConstraintResults_Hint_TemplateNotUsable">
         <source>The template might not be usable.</source>
-        <target state="new">The template might not be usable.</target>
+        <target state="translated">Szablon może nie być przydatny.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateCommand_DisplayConstraintResults_Warning">
         <source>Warning: the following constraints for the template '{0}' are not met:</source>
-        <target state="new">Warning: the following constraints for the template '{0}' are not met:</target>
+        <target state="translated">Ostrzeżenie: następujące ograniczenia szablonu „{0}”nie są spełnione:</target>
         <note>{0} - template name (user friendly)</note>
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_Description">
@@ -858,7 +858,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplateListCoordinator_Error_FailedConstraints">
         <source>{0} template(s) are hidden because their constraints are not satisfied. To show them, use the '{1}' option.</source>
-        <target state="new">{0} template(s) are hidden because their constraints are not satisfied. To show them, use the '{1}' option.</target>
+        <target state="translated">Szablony ({0}) są ukryte, ponieważ ich ograniczenia nie są satysfakcjonujące. Aby je wyświetlić, użyj opcji „{1}”.</target>
         <note>{0} - the count of templates that are not shown. {1} - option to be used (--ignore-constraints).</note>
       </trans-unit>
       <trans-unit id="TemplateOptions_Error_AllowedValuesForOptionList">
@@ -899,7 +899,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_ConstraintsNotice">
         <source>The following templates might not work because their constraints are not met:</source>
-        <target state="new">The following templates might not work because their constraints are not met:</target>
+        <target state="translated">Następujące szablony mogą nie działać, ponieważ ich ograniczenia nie są spełnione:</target>
         <note>The sentence is followed by the list of templates with information on their constraints. Each template and each restriction is given from new line.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Error_FoundNoPackagesToInstall">

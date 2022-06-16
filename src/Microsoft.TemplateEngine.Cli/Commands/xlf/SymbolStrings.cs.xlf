@@ -100,7 +100,7 @@ Pokud je příkaz zadán bez argumentu, zobrazí seznam všech nainstalovaných 
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
         <source>Disables checking if the template meets the constraints to be run.</source>
-        <target state="new">Disables checking if the template meets the constraints to be run.</target>
+        <target state="translated">Zakáže kontrolu, jestli šablona splňuje omezení, aby ji bylo možné spustit.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_AddSource">

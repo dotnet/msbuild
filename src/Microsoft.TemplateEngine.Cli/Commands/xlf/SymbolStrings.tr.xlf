@@ -100,7 +100,7 @@ Eğer komut bağımsız değişken olmadan belirtilirse, yüklü tüm şablon pa
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
         <source>Disables checking if the template meets the constraints to be run.</source>
-        <target state="new">Disables checking if the template meets the constraints to be run.</target>
+        <target state="translated">Şablonun çalıştırılacak kısıtlamaları karşılayıp karşılamadığını kontrol etmeyi devre dışı bırakır.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_AddSource">

@@ -100,7 +100,7 @@ If command is specified without the argument, it lists all the template packages
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
         <source>Disables checking if the template meets the constraints to be run.</source>
-        <target state="new">Disables checking if the template meets the constraints to be run.</target>
+        <target state="translated">템플릿이 실행할 제약 조건을 충족하는지 여부를 확인하지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_AddSource">

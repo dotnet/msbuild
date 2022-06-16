@@ -100,7 +100,7 @@ Wenn der Befehl ohne Argument angegeben wird, werden alle installierten Vorlagen
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
         <source>Disables checking if the template meets the constraints to be run.</source>
-        <target state="new">Disables checking if the template meets the constraints to be run.</target>
+        <target state="translated">Deaktiviert die Überprüfung, ob die Vorlage die auszuführenden Einschränkungen erfüllt.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_AddSource">

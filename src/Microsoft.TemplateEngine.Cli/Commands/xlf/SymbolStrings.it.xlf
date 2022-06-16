@@ -100,7 +100,7 @@ Se il comando è specificato senza l'argomento, elenca tutti i pacchetti di mode
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
         <source>Disables checking if the template meets the constraints to be run.</source>
-        <target state="new">Disables checking if the template meets the constraints to be run.</target>
+        <target state="translated">Disabilita il controllo se il modello soddisfa i vincoli per l'esecuzione.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_AddSource">

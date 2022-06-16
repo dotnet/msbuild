@@ -100,7 +100,7 @@ Jeśli polecenie jest określone bez argumentu, wyświetla wszystkie zainstalowa
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
         <source>Disables checking if the template meets the constraints to be run.</source>
-        <target state="new">Disables checking if the template meets the constraints to be run.</target>
+        <target state="translated">Wyłącza sprawdzanie, czy szablon spełnia ograniczenia do uruchomienia.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_AddSource">
