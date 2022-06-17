@@ -20,11 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Compatibility\Microsoft.DotNet.ApiCompatibility\Microsoft.DotNet.ApiCompatibility.csproj" />
-    <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
     <ProjectReference Include="..\..\Compatibility\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" />
-    <PackageReference Include="NuGet.Frameworks" Version="$(NuGetBuildTasksPackageVersion)" />
-    <PackageReference Include="NuGet.Packaging" Version="$(NuGetBuildTasksPackageVersion)" />
+    <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
   </ItemGroup>
 
   <Target Name="CopyCompatibilityFilesForTests" AfterTargets="Publish">
@@ -32,9 +29,7 @@
       <CompatibilityFiles Include="..\..\Compatibility\Microsoft.DotNet.Compatibility\**" />
       <CompatibilityFiles Include="..\..\Tasks\Microsoft.NET.Build.Tasks\targets\Microsoft.NET.Compatibility.targets" />   
   </ItemGroup>
-    <Copy
-      SourceFiles="@(CompatibilityFiles)"
-      DestinationFiles="@(CompatibilityFiles->'$(PublishDir)Compatibility\Microsoft.DotNet.Compatibility\%(RecursiveDir)%(Filename)%(Extension)')"/>
+    <Copy SourceFiles="@(CompatibilityFiles)" DestinationFiles="@(CompatibilityFiles->'$(PublishDir)Compatibility\Microsoft.DotNet.Compatibility\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />

@@ -12,6 +12,8 @@
 //  versions of cross-gened assemblies.  See https://github.com/dotnet/sdk/issues/1502
 #if NETCOREAPP || !EXTENSIONS
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.IO;

@@ -135,4 +135,7 @@
   <data name="GlobalJsonResolutionFailed" xml:space="preserve">
     <value>Unable to locate the .NET SDK as specified by global.json, please check that the specified version is installed.</value>
   </data>
+  <data name="GlobalJsonResolutionFailedSpecificVersion" xml:space="preserve">
+    <value>Unable to locate the .NET SDK version '{0}' as specified by global.json, please check that the specified version is installed.</value>
+  </data>
 </root>

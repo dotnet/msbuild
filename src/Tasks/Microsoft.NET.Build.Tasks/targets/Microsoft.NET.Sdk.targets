@@ -1116,6 +1116,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <NETSdkWarning Condition="'$(_SelfContainedWasSpecified)' != 'true' and
                    '$(_CommandLineDefinedRuntimeIdentifier)' == 'true' and
+                   '$(PublishAot)' != 'true' and
                    '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
                    $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '6.0'))"
                ResourceName="SelfContainedOptionShouldBeUsedWithRuntime" />
@@ -1154,8 +1155,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.CSharp.targets" Condition="'$(Language)' == 'C#'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.VisualBasic.targets" Condition="'$(Language)' == 'VB'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.FSharp.targets" Condition="'$(Language)' == 'F#'" />
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ILLink.targets" Condition="'$(Language)' != 'C++'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ILCompiler.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ILLink.targets" Condition="'$(Language)' != 'C++'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.Analyzers.targets" Condition="'$(Language)' == 'C#' or '$(Language)' == 'VB'" />
 
   <!-- Import WindowsDesktop targets if necessary -->

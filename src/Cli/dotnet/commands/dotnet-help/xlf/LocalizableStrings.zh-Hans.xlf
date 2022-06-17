@@ -57,6 +57,11 @@
         <target state="translated">主机选项(在命令之前传递)</target>
         <note />
       </trans-unit>
+      <trans-unit id="UserJwtsDefinition">
+        <source>Manage JSON Web Tokens in development.</source>
+        <target state="new">Manage JSON Web Tokens in development.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="VersionDescription">
         <source>Display the version of the .NET SDK, including the effects of any global.json</source>
         <target state="translated">显示 .NET SDK 的版本，包括任何 global.json 的影响</target>

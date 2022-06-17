@@ -27,7 +27,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     </AssemblyAttribute>
   </ItemGroup>
 
-
   <!-- We disable features for trimmed apps here so that the feature
       switches can flow to the runtimeconfig.json. Features are disabled
       by default since they may require assemblies, types or members that
@@ -61,7 +60,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Suppress warnings produced by the linker or by the ILLink Roslyn analyzer. -->
   <PropertyGroup Condition="'$(SuppressTrimAnalysisWarnings)' == 'true'">
     <!-- RequiresUnreferenceCodeAttribute method called -->
-    <NoWarn>$(NoWarn);IL2026</NoWarn>
+    <NoWarn>$(NoWarn);IL2026;IL2116</NoWarn>
     <!-- Invalid use of DynamicallyAccessedMembersAttribute -->
     <NoWarn>$(NoWarn);IL2041;IL2042;IL2043;IL2056</NoWarn>
     <!-- Reference to removed attribute type -->
@@ -82,14 +81,16 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NoWarn>$(NoWarn);IL2097;IL2098;IL2099;IL2106</NoWarn>
     <!-- Unknown value passed to Expression.Property -->
     <NoWarn>$(NoWarn);IL2103</NoWarn>
-    <!-- Multiple methods associated with state machine type -->
-    <NoWarn>$(NoWarn);IL2107</NoWarn>
+    <!-- Multiple methods associated with state machine type or user method -->
+    <NoWarn>$(NoWarn);IL2107;IL2117</NoWarn>
     <!-- Unannotated type derived from base type with RequiresUnreferencedCode -->
     <NoWarn>$(NoWarn);IL2109</NoWarn>
     <!-- Reflection access to members with DynamicallyAccessedMembers requirements -->
     <NoWarn>$(NoWarn);IL2110;IL2111;IL2114;IL2115</NoWarn>
     <!-- Reflection access to members with RequiresUnreferencedCode -->
     <NoWarn>$(NoWarn);IL2112;IL2113</NoWarn>
+    <!-- Reflection access to compiler-generated code -->
+    <NoWarn>$(NoWarn);IL2118;IL2119;IL2120</NoWarn>
   </PropertyGroup>
 
   <!--

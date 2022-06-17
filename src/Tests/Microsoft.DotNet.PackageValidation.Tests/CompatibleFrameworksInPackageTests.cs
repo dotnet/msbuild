@@ -1,7 +1,9 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.IO;
+using Microsoft.DotNet.PackageValidation.Validators;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
@@ -45,8 +47,8 @@ namespace PackageValidationTests
             PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
-            Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null);
-            new CompatibleFrameworkInPackageValidator(false, _log, null).Validate(package);
+            Package package = Package.Create(packCommand.GetNuGetPackage(), null);
+            new CompatibleFrameworkInPackageValidator(_log).Validate(new PackageValidatorOption(package));
             Assert.NotEmpty(_log.errors);
             // TODO: add asserts for assembly and header metadata.
             string assemblyName = $"{asset.TestProject.Name}.dll";
@@ -83,8 +85,8 @@ namespace PackageValidationTests
             PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
-            Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null);
-            new CompatibleFrameworkInPackageValidator(false, _log, null).Validate(package);
+            Package package = Package.Create(packCommand.GetNuGetPackage(), null);
+            new CompatibleFrameworkInPackageValidator(_log).Validate(new PackageValidatorOption(package));
             Assert.NotEmpty(_log.errors);
 
             string assemblyName = $"{asset.TestProject.Name}.dll";

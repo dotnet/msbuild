@@ -7,11 +7,6 @@
         <target state="translated"> Minimalna wymagana wersja platformy Roslyn to „{1}”, a używasz wersji „{0}” platformy Roslyn. Możesz aktualizować zestaw SDK, aby pobrać najnowszą wersję.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WroteSuppressions">
-        <source>Successfully wrote compatibility suppressions to '{0}'.</source>
-        <target state="translated">Zapisanie pomijania zgodności do „{0}” zakończyło się powodzeniem.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

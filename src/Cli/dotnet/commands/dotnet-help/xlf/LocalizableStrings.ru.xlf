@@ -57,6 +57,11 @@
         <target state="translated">Параметры узла (передаваемые перед командой)</target>
         <note />
       </trans-unit>
+      <trans-unit id="UserJwtsDefinition">
+        <source>Manage JSON Web Tokens in development.</source>
+        <target state="new">Manage JSON Web Tokens in development.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="VersionDescription">
         <source>Display the version of the .NET SDK, including the effects of any global.json</source>
         <target state="translated">Отображение версии пакета SDK для .NET, включая влияние всех файлов global.json.</target>

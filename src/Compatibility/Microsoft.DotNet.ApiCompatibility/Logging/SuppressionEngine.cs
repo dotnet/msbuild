@@ -11,7 +11,7 @@ using System.Threading;
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace Microsoft.DotNet.Compatibility.ErrorSuppression
+namespace Microsoft.DotNet.ApiCompatibility.Logging
 {
     /// <summary>
     /// Collection of Suppressions which is able to add suppressions, check if a specific error is suppressed, and write all suppressions
@@ -22,15 +22,18 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
         protected HashSet<Suppression> _validationSuppressions;
         private readonly ReaderWriterLockSlim _readerWriterLock = new();
         private readonly XmlSerializer _serializer = new(typeof(Suppression[]), new XmlRootAttribute("Suppressions"));
-        private readonly HashSet<string?> _noWarn;
+        private readonly HashSet<string> _noWarn;
 
-        protected SuppressionEngine(string? suppressionFile, string noWarn)
+        /// <summary>
+        /// Creates a new instance of <see cref="SuppressionEngine"/>.
+        /// </summary>
+        /// <param name="suppressionsFile">The path to the suppressions file to be used for initialization.</param>
+        /// <param name="noWarn">Suppression ids to suppress specific errors. Multiple suppressions are separated by a ';' character.</param>
+        public SuppressionEngine(string? suppressionsFile = null, string ? noWarn = null)
         {
-            _noWarn = string.IsNullOrEmpty(noWarn) ? new HashSet<string?>() : new HashSet<string?>(noWarn.Split(';'));
-            _validationSuppressions = ParseSuppressionFile(suppressionFile);
+            _validationSuppressions = ParseSuppressionFile(suppressionsFile);
+            _noWarn = string.IsNullOrEmpty(noWarn) ? new HashSet<string>() : new HashSet<string>(noWarn?.Split(';'));
         }
-
-        protected SuppressionEngine(string noWarn) : this(null, noWarn) { }
 
         /// <summary>
         /// Checks if the passed in error is suppressed or not.
@@ -40,17 +43,15 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
         /// <param name="left">Optional. The left operand in a APICompat error.</param>
         /// <param name="right">Optional. The right operand in a APICompat error.</param>
         /// <returns><see langword="true"/> if the error is already suppressed. <see langword="false"/> otherwise.</returns>
-        public bool IsErrorSuppressed(string? diagnosticId, string? target, string? left = null, string? right = null, bool isBaselineSuppression = false)
+        public bool IsErrorSuppressed(string diagnosticId, string? target, string? left = null, string? right = null, bool isBaselineSuppression = false)
         {
-            var suppressionToCheck = new Suppression()
+            return IsErrorSuppressed(new Suppression(diagnosticId)
             {
-                DiagnosticId = diagnosticId,
                 Target = target,
                 Left = left,
                 Right = right,
                 IsBaselineSuppression = isBaselineSuppression
-            };
-            return IsErrorSuppressed(suppressionToCheck);
+            });
         }
 
         /// <summary>
@@ -67,11 +68,11 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
                 {
                     return true;
                 }
-                else if (error.DiagnosticId == null || error.DiagnosticId.StartsWith("cp", StringComparison.InvariantCultureIgnoreCase))
+                else if (error.DiagnosticId.StartsWith("cp", StringComparison.InvariantCultureIgnoreCase))
                 {
                     // See if the error is globally suppressed by checking if the same diagnosticid and target or with the same left and right
-                    return _validationSuppressions.Contains(new Suppression { DiagnosticId = error.DiagnosticId, Target = error.Target, IsBaselineSuppression = error.IsBaselineSuppression}) ||
-                           _validationSuppressions.Contains(new Suppression { DiagnosticId = error.DiagnosticId, Left = error.Left, Right = error.Right, IsBaselineSuppression = error.IsBaselineSuppression });
+                    return _validationSuppressions.Contains(new Suppression(error.DiagnosticId) { Target = error.Target, IsBaselineSuppression = error.IsBaselineSuppression }) ||
+                           _validationSuppressions.Contains(new Suppression(error.DiagnosticId) { Left = error.Left, Right = error.Right, IsBaselineSuppression = error.IsBaselineSuppression });
                 }
 
                 return false;
@@ -89,17 +90,15 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
         /// <param name="target">The target of where the <paramref name="diagnosticId"/> should be applied.</param>
         /// <param name="left">Optional. The left operand in a APICompat error.</param>
         /// <param name="right">Optional. The right operand in a APICompat error.</param>
-        public void AddSuppression(string? diagnosticId, string? target, string? left = null, string? right = null, bool isBaselineSuppression = false)
+        public void AddSuppression(string diagnosticId, string? target, string? left = null, string? right = null, bool isBaselineSuppression = false)
         {
-            var suppressionToAdd = new Suppression()
+            AddSuppression(new Suppression(diagnosticId)
             {
-                DiagnosticId = diagnosticId,
                 Target = target,
                 Left = left,
                 Right = right,
                 IsBaselineSuppression = isBaselineSuppression
-            };
-            AddSuppression(suppressionToAdd);
+            });
         }
 
         /// <summary>
@@ -145,9 +144,11 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
                 _readerWriterLock.EnterReadLock();
                 try
                 {
-                    XmlTextWriter xmlWriter = new(writer, Encoding.UTF8);
-                    xmlWriter.Formatting = Formatting.Indented;
-                    xmlWriter.Indentation = 2;
+                    XmlTextWriter xmlWriter = new(writer, Encoding.UTF8)
+                    {
+                        Formatting = Formatting.Indented,
+                        Indentation = 2
+                    };
                     _serializer.Serialize(xmlWriter, _validationSuppressions.ToArray());
                     AfterWrittingSuppressionsCallback(writer);
                 }
@@ -165,21 +166,6 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
             // Do nothing. Used for tests.
         }
 
-        /// <summary>
-        /// Creates a new instance of <see cref="SuppressionEngine"/> based on the contents of a given suppression file.
-        /// </summary>
-        /// <param name="suppressionFile">The path to the suppressions file to be used for initialization.</param>
-        /// <returns>An instance of <see cref="SuppressionEngine"/>.</returns>
-        public static SuppressionEngine CreateFromFile(string suppressionFile, string noWarn = "")
-            => new SuppressionEngine(suppressionFile, noWarn);
-
-        /// <summary>
-        /// Creates a new instance of <see cref="SuppressionEngine"/> which is empty.
-        /// </summary>
-        /// <returns>An instance of <see cref="SuppressionEngine"/>.</returns>
-        public static SuppressionEngine Create(string noWarn = "")
-            => new SuppressionEngine(noWarn);
-
         private HashSet<Suppression> ParseSuppressionFile(string? file)
         {
             if (string.IsNullOrEmpty(file?.Trim()))
@@ -187,21 +173,15 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
                 return new HashSet<Suppression>();
             }
 
-            HashSet<Suppression> result;
-
             using (Stream reader = GetReadableStream(file!))
             {
-                Suppression[]? deserializedSuppressions = _serializer.Deserialize(reader) as Suppression[];
-                if (deserializedSuppressions == null)
+                if (_serializer.Deserialize(reader) is Suppression[] deserializedSuppressions)
                 {
-                    result = new HashSet<Suppression>();
+                    return new HashSet<Suppression>(deserializedSuppressions);
                 }
-                else
-                {
-                    result = new HashSet<Suppression>(deserializedSuppressions);
-                }
+
+                return new HashSet<Suppression>();
             }
-            return result;
         }
 
         protected virtual Stream GetReadableStream(string supressionFile) => new FileStream(supressionFile, FileMode.Open);

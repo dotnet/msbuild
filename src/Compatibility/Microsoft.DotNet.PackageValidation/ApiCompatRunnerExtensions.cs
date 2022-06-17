@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.PackageValidation
     {
         public static void QueueApiCompatFromContentItem(this ApiCompatRunner apiCompatRunner, string packageId, ContentItem leftItem, ContentItem rightItem, string header, bool isBaseline = false)
         {
-            string displayString = isBaseline ? Resources.Baseline + " " + leftItem.Path : null;
+            string? displayString = isBaseline ? Resources.Baseline + " " + leftItem.Path : null;
             MetadataInformation left = new(packageId, ((NuGetFramework)leftItem.Properties["tfm"]).GetShortFolderName(), leftItem.Path, displayString);
             MetadataInformation right = new(packageId, ((NuGetFramework)rightItem.Properties["tfm"]).GetShortFolderName(), rightItem.Path);
 

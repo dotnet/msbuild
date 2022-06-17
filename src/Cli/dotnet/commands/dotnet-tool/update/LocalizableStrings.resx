@@ -182,7 +182,10 @@ from the tool name you use when calling the tool. You can find the tool names
 and the corresponding package Ids for installed tools using the command
 'dotnet tool list'.</value>
   </data>
-  <data name="UpdateSucceededVersionNoChange" xml:space="preserve">
+  <data name="UpdateSucceededPreVersionNoChange" xml:space="preserve">
+    <value>Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</value>
+  </data>
+  <data name="UpdateSucceededStableVersionNoChange" xml:space="preserve">
     <value>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</value>
   </data>
   <data name="UpdateToolFailed" xml:space="preserve">

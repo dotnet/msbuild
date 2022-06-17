@@ -151,7 +151,16 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                     {
                         warnings = new List<string>();
                     }
-                    warnings.Add(Strings.GlobalJsonResolutionFailed);
+
+                    if (!string.IsNullOrWhiteSpace(resolverResult.RequestedVersion))
+                    {
+                        warnings.Add(string.Format(Strings.GlobalJsonResolutionFailedSpecificVersion, resolverResult.RequestedVersion));
+                    }
+                    else
+                    {
+                        warnings.Add(Strings.GlobalJsonResolutionFailed);
+                    }
+
                     if (propertiesToAdd == null)
                     {
                         propertiesToAdd = new Dictionary<string, string>();

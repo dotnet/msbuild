@@ -5,12 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using Microsoft.Build.Framework;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
-using Microsoft.DotNet.Compatibility.ErrorSuppression;
+using Microsoft.DotNet.ApiCompatibility.Logging;
 
 namespace Microsoft.DotNet.PackageValidation
 {
@@ -20,18 +18,30 @@ namespace Microsoft.DotNet.PackageValidation
     public class ApiCompatRunner
     {
         internal Dictionary<MetadataInformation, List<(MetadataInformation rightAssembly, string header)>> _dict = new();
-        private readonly ApiComparer _differ = new();
-        private readonly ICompatibilityLogger _log;
-        private readonly Dictionary<string, HashSet<string>> _referencePaths;
-        private bool _isBaselineSuppression = false;
-        private string _leftPackagePath;
-        private string _rightPackagePath;
+        private readonly ApiComparer _differ;
+        private readonly CompatibilityLoggerBase _log;
+        private readonly Dictionary<string, HashSet<string>>? _referencePaths;
+        private readonly string _leftPackagePath;
+        private readonly string _rightPackagePath;
+        private readonly bool _isBaselineSuppression;
 
-        public ApiCompatRunner(bool enableStrictMode, ICompatibilityLogger log, Dictionary<string, HashSet<string>> referencePaths)
+        public ApiCompatRunner(CompatibilityLoggerBase log,
+            bool enableStrictMode,
+            Dictionary<string, HashSet<string>>? referencePaths,
+            string leftPackagePath,
+            string? rightPackagePath = null)
         {
-            _differ.StrictMode = enableStrictMode;
+            _differ = new()
+            {
+                StrictMode = enableStrictMode
+            };
             _log = log;
-            _referencePaths = referencePaths ?? new();
+            _referencePaths = referencePaths;
+
+            _leftPackagePath = leftPackagePath;
+            _rightPackagePath = rightPackagePath ?? leftPackagePath;
+            // If assets from different packages are compared, mark the underlying suppression as baseline.
+            _isBaselineSuppression = !_leftPackagePath.Equals(_rightPackagePath, StringComparison.InvariantCultureIgnoreCase);
         }
 
         /// <summary>
@@ -43,7 +53,7 @@ namespace Microsoft.DotNet.PackageValidation
             {
                 IAssemblySymbol leftSymbols;
                 bool runWithReferences = false;
-                using(Stream leftAssemblyStream = GetFileStreamFromPackage(_leftPackagePath, left.AssemblyId))
+                using (Stream leftAssemblyStream = GetFileStreamFromPackage(_leftPackagePath, left.AssemblyId))
                 {
                     leftSymbols = GetAssemblySymbolFromStream(leftAssemblyStream, left, out runWithReferences);
                 }
@@ -51,16 +61,16 @@ namespace Microsoft.DotNet.PackageValidation
                 ElementContainer<IAssemblySymbol> leftContainer = new(leftSymbols, left);
 
                 List<ElementContainer<IAssemblySymbol>> rightContainerList = new();
-                foreach (var rightTuple in _dict[left])
+                foreach ((MetadataInformation rightAssembly, string header) in _dict[left])
                 {
                     IAssemblySymbol rightSymbols;
-                    using (Stream rightAssemblyStream = GetFileStreamFromPackage(_rightPackagePath, rightTuple.rightAssembly.AssemblyId))
+                    using (Stream rightAssemblyStream = GetFileStreamFromPackage(_rightPackagePath, rightAssembly.AssemblyId))
                     {
-                        rightSymbols = GetAssemblySymbolFromStream(rightAssemblyStream, rightTuple.rightAssembly, out bool resolvedReferences);
+                        rightSymbols = GetAssemblySymbolFromStream(rightAssemblyStream, rightAssembly, out bool resolvedReferences);
                         runWithReferences &= resolvedReferences;
                     }
 
-                    rightContainerList.Add(new ElementContainer<IAssemblySymbol>(rightSymbols, rightTuple.rightAssembly));
+                    rightContainerList.Add(new ElementContainer<IAssemblySymbol>(rightSymbols, rightAssembly));
                 }
 
                 _differ.WarnOnMissingReferences = runWithReferences;
@@ -68,44 +78,52 @@ namespace Microsoft.DotNet.PackageValidation
                     _differ.GetDifferences(leftContainer, rightContainerList);
 
                 int counter = 0;
-                foreach ((MetadataInformation, MetadataInformation, IEnumerable<CompatDifference> differences) diff in differences)
+                foreach ((MetadataInformation Left, MetadataInformation Right, IEnumerable<CompatDifference> differences) diff in differences)
                 {
-                    (MetadataInformation rightAssembly, string header) rightTuple = _dict[left][counter++];
-
-                    bool logHeaderMessage = true;
+                    bool headerLogged = false;
                     foreach (CompatDifference difference in diff.differences)
                     {
-                        if (logHeaderMessage)
+                        Suppression suppression = new(difference.DiagnosticId)
                         {
-                            _log.LogMessage(MessageImportance.Low, rightTuple.header);
-                            logHeaderMessage = false;
+                            Target = difference.ReferenceId,
+                            Left = diff.Left.AssemblyId,
+                            Right = diff.Right.AssemblyId,
+                            IsBaselineSuppression = _isBaselineSuppression
+                        };
+
+                        // If the error is suppressed, don't log anything.
+                        if (_log.SuppressionEngine.IsErrorSuppressed(suppression))
+                            continue;
+
+                        // Log the difference header only if there are non suppressed or baselined errors.
+                        if (!headerLogged && !_log.BaselineAllErrors)
+                        {
+                            headerLogged = true;
+                            (MetadataInformation rightAssembly, string header) = _dict[left][counter];
+                            _log.LogMessage(MessageImportance.Low, header);
                         }
 
-                        _log.LogError(
-                            new Suppression
-                            {
-                                DiagnosticId = difference.DiagnosticId,
-                                Target = difference.ReferenceId,
-                                Left = left.AssemblyId,
-                                Right = rightTuple.rightAssembly.AssemblyId,
-                                IsBaselineSuppression = _isBaselineSuppression
-                            },
+                        _log.LogError(suppression,
                             difference.DiagnosticId,
                             difference.Message);
                     }
+
+                    counter++;
                 }
             }
+
             _dict.Clear();
         }
 
         private IAssemblySymbol GetAssemblySymbolFromStream(Stream assemblyStream, MetadataInformation assemblyInformation, out bool resolvedReferences)
         {
             resolvedReferences = false;
-            HashSet<string> referencePathForTFM = null;
+            HashSet<string>? referencePathForTFM = null;
 
             // In order to enable reference support for baseline suppression we need a better way
             // to resolve references for the baseline package. Let's not enable it for now.
             bool shouldResolveReferences = !_isBaselineSuppression &&
+                _referencePaths != null &&
                 _referencePaths.TryGetValue(assemblyInformation.TargetFramework, out referencePathForTFM);
 
             AssemblySymbolLoader loader = new(resolveAssemblyReferences: shouldResolveReferences);
@@ -114,22 +132,20 @@ namespace Microsoft.DotNet.PackageValidation
                 resolvedReferences = true;
                 loader.AddReferenceSearchDirectories(referencePathForTFM);
             }
-            else if (!_isBaselineSuppression && _referencePaths.Count != 0)
+            else if (!_isBaselineSuppression && _referencePaths?.Count > 0)
             {
                 _log.LogWarning(
-                    new Suppression()
+                    new Suppression(ApiCompatibility.DiagnosticIds.SearchDirectoriesNotFoundForTfm)
                     {
-                        DiagnosticId = ApiCompatibility.DiagnosticIds.SearchDirectoriesNotFoundForTfm,
                         Target = assemblyInformation.DisplayString
                     },
                     ApiCompatibility.DiagnosticIds.SearchDirectoriesNotFoundForTfm,
                     Resources.MissingSearchDirectory,
-                    assemblyInformation.TargetFramework, assemblyInformation.DisplayString);
+                    assemblyInformation.TargetFramework,
+                    assemblyInformation.DisplayString);
             }
 
-            IAssemblySymbol symbol = loader.LoadAssembly(assemblyInformation.AssemblyName, assemblyStream);
-
-            return symbol;
+            return loader.LoadAssembly(assemblyInformation.AssemblyName, assemblyStream);
         }
 
         /// <summary>
@@ -140,7 +156,7 @@ namespace Microsoft.DotNet.PackageValidation
         /// <param name="header">The header for the api compat diagnostics.</param>
         public void QueueApiCompat(MetadataInformation leftMetadataInfo, MetadataInformation rightMetdataInfo, string header)
         {
-            if (_dict.TryGetValue(leftMetadataInfo, out var value))
+            if (_dict.TryGetValue(leftMetadataInfo, out List<(MetadataInformation rightAssembly, string header)>? value))
             {
                 if (!value.Contains((rightMetdataInfo, header)))
                     value.Add((rightMetdataInfo, header));
@@ -151,30 +167,13 @@ namespace Microsoft.DotNet.PackageValidation
             }
         }
 
-        internal void InitializePaths(string leftPackagePath, string rightPackagePath)
-        {
-            if (string.IsNullOrEmpty(leftPackagePath))
-                throw new ArgumentException(nameof(leftPackagePath));
-
-            if (string.IsNullOrEmpty(rightPackagePath))
-                throw new ArgumentException(nameof(rightPackagePath));
-
-            _leftPackagePath = leftPackagePath;
-            _rightPackagePath = rightPackagePath;
-
-            if (!_leftPackagePath.Equals(rightPackagePath, StringComparison.InvariantCultureIgnoreCase))
-            {
-                _isBaselineSuppression = true;
-            }
-        }
-
         private static Stream GetFileStreamFromPackage(string packagePath, string entry)
         {
-            MemoryStream ms = new MemoryStream();
+            MemoryStream ms = new();
             using (FileStream stream = File.OpenRead(packagePath))
             {
                 var zipFile = new ZipArchive(stream);
-                zipFile.GetEntry(entry).Open().CopyTo(ms);
+                zipFile.GetEntry(entry)?.Open().CopyTo(ms);
                 ms.Seek(0, SeekOrigin.Begin);
             }
             return ms;

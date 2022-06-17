@@ -4,9 +4,8 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using System.Xml.Serialization;
 
-namespace Microsoft.DotNet.Compatibility.ErrorSuppression
+namespace Microsoft.DotNet.ApiCompatibility.Logging
 {
     /// <summary>
     /// Represents a Suppression for a validation error.
@@ -16,7 +15,7 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
         /// <summary>
         /// The DiagnosticId representing the error to be suppressed.
         /// </summary>
-        public string? DiagnosticId { get; set; }
+        public string DiagnosticId { get; set; }
 
         /// <summary>
         /// The target of where to suppress the <see cref="DiagnosticId"/>
@@ -38,7 +37,23 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
         /// </summary>
         public bool IsBaselineSuppression { get; set; }
 
-        // It only makes sense to serialize IsBaselineSuppression when is true, if it is off, no need to have it on the file.
+        // Neccessary for XmlSerializer to instantiate an object of this class.
+        private Suppression()
+        {
+            DiagnosticId = string.Empty;
+        }
+
+        public Suppression(string diagnosticId)
+        {
+            DiagnosticId = diagnosticId;
+        }
+
+        /// <summary>
+        /// Only serialize the IsBaselineSuppression property when this is a baseline suppression. If it is not,
+        /// the property won't be serialized to keep the baseline file minimal. The method's name is important as
+        /// XmlSerializer will look for methods called ShouldSerializeX to determine if properties should be serialized.
+        /// </summary>
+        /// <returns>Returns true if IsBaselineSuppression should be serialized</returns>
         public bool ShouldSerializeIsBaselineSuppression() => IsBaselineSuppression;
 
         /// <inheritdoc/>
@@ -55,10 +70,11 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
                 => string.IsNullOrEmpty(first?.Trim()) && string.IsNullOrEmpty(second?.Trim()) || StringComparer.InvariantCultureIgnoreCase.Equals(first?.Trim(), second?.Trim());
         }
 
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
             int hashCode = 1447485498;
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(DiagnosticId?.ToLowerInvariant() ?? string.Empty);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(DiagnosticId.ToLowerInvariant());
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Target?.ToLowerInvariant() ?? string.Empty);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Left?.ToLowerInvariant() ?? string.Empty);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Right?.ToLowerInvariant() ?? string.Empty);

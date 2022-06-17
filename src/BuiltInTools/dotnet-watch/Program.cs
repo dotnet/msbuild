@@ -136,20 +136,17 @@ Examples:
                 }
             });
 
-            var listOption = new Option<bool>(
-                "--list",
-                "Lists all discovered files without starting the watcher");
-
-            var shortProjectOption = new Option<string>("-p", "The project to watch") { IsHidden = true };
+            var listOption = new Option<bool>("--list", "Lists all discovered files without starting the watcher.");
+            var shortProjectOption = new Option<string>("-p", "The project to watch.") { IsHidden = true };
             var longProjectOption = new Option<string>("--project","The project to watch");
-            var noHotReloadOption = new Option<bool>(
-                new[] { "--no-hot-reload" },
-                "Suppress hot reload for supported apps.");
+            var launchProfileOption = new Option<string>(new[] { "-lp", "--launch-profile" }, "The launch profile to start the project with (case-sensitive). " +
+                "This option is only supported when running 'dotnet watch' or 'dotnet watch run'.");
+            var noHotReloadOption = new Option<bool>("--no-hot-reload", "Suppress hot reload for supported apps.");
             var nonInteractiveOption = new Option<bool>(
-                new[] { "--non-interactive" },
-                "Runs dotnet-watch in non-interative mode. This option is only supported when running with Hot Reload enabled. " +
+                "--non-interactive",
+                "Runs dotnet-watch in non-interactive mode. This option is only supported when running with Hot Reload enabled. " +
                 "Use this option to prevent console input from being captured.");
-            var forwardedArguments = new Argument<string[]>("forwardedArgs", "Arguments to pass to the child dotnet process");
+            var forwardedArguments = new Argument<string[]>("forwardedArgs", "Arguments to pass to the child dotnet process.");
 
             var root = new RootCommand(Description)
             {
@@ -159,11 +156,12 @@ Examples:
                  nonInteractiveOption,
                  longProjectOption,
                  shortProjectOption,
+                 launchProfileOption,
                  listOption,
                  forwardedArguments
             };
 
-            var binder = new CommandLineOptionsBinder(longProjectOption, shortProjectOption, quiet, listOption, noHotReloadOption, nonInteractiveOption, verbose, forwardedArguments, reporter);
+            var binder = new CommandLineOptionsBinder(longProjectOption, shortProjectOption, launchProfileOption, quiet, listOption, noHotReloadOption, nonInteractiveOption, verbose, forwardedArguments, reporter);
             root.SetHandler((CommandLineOptions options) => handler(options), binder);
             return root;
         }
@@ -271,14 +269,14 @@ Examples:
                 _reporter.Output("Polling file watcher is enabled");
             }
 
-            var defaultProfile = LaunchSettingsProfile.ReadDefaultProfile(processInfo.WorkingDirectory, _reporter) ?? new();
+            var launchProfile = LaunchSettingsProfile.ReadLaunchProfile(processInfo.WorkingDirectory, options.LaunchProfile, _reporter) ?? new();
 
             var context = new DotNetWatchContext
             {
                 ProcessSpec = processInfo,
                 Reporter = _reporter,
                 SuppressMSBuildIncrementalism = watchOptions.SuppressMSBuildIncrementalism,
-                DefaultLaunchSettingsProfile = defaultProfile,
+                LaunchSettingsProfile = launchProfile,
             };
 
             context.ProjectGraph = TryReadProject(projectFile);
@@ -410,7 +408,7 @@ Examples:
                 if (assembly.Name is "Microsoft.CodeAnalysis" or "Microsoft.CodeAnalysis.CSharp")
                 {
                     var loadedAssembly = context.LoadFromAssemblyPath(Path.Combine(roslynPath, assembly.Name + ".dll"));
-                    // Avoid scenarioes where the assembly in rosylnPath is older than what we expect
+                    // Avoid scenarios where the assembly in rosylnPath is older than what we expect
                     if (loadedAssembly.GetName().Version < assembly.Version)
                     {
                         throw new Exception($"Found a version of {assembly.Name} that was lower than the target version of {assembly.Version}");
@@ -424,6 +422,7 @@ Examples:
         {
             private readonly Option<string> _longProjectOption;
             private readonly Option<string> _shortProjectOption;
+            private readonly Option<string> _launchProfileOption;
             private readonly Option<bool> _quietOption;
             private readonly Option<bool> _listOption;
             private readonly Option<bool> _noHotReloadOption;
@@ -436,6 +435,7 @@ Examples:
             internal CommandLineOptionsBinder(
                 Option<string> longProjectOption,
                 Option<string> shortProjectOption,
+                Option<string> launchProfileOption,
                 Option<bool> quietOption,
                 Option<bool> listOption,
                 Option<bool> noHotReloadOption,
@@ -446,6 +446,7 @@ Examples:
             {
                 _longProjectOption = longProjectOption;
                 _shortProjectOption = shortProjectOption;
+                _launchProfileOption = launchProfileOption;
                 _quietOption = quietOption;
                 _listOption = listOption;
                 _noHotReloadOption = noHotReloadOption;
@@ -479,6 +480,7 @@ Examples:
                     NonInteractive = parseResults.GetValueForOption(_nonInteractiveOption),
                     Verbose = parseResults.GetValueForOption(_verboseOption),
                     Project = projectValue,
+                    LaunchProfile = parseResults.GetValueForOption(_launchProfileOption),
                     RemainingArguments = parseResults.GetValueForArgument(_argumentsToForward),
                 };
                 return options;

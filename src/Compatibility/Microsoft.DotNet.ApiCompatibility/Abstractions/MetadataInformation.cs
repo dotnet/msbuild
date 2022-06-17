@@ -25,6 +25,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             DisplayString = displayString ?? assemblyId;
         }
 
+        public override bool Equals(object obj) =>
+            obj is MetadataInformation information && Equals(information);
+
         public bool Equals(MetadataInformation other) =>
             string.Equals(AssemblyName, other.AssemblyName, StringComparison.OrdinalIgnoreCase) &&
             string.Equals(TargetFramework, other.TargetFramework, StringComparison.OrdinalIgnoreCase) &&

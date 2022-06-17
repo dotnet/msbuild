@@ -3,6 +3,7 @@
 
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
+using Microsoft.NET.TestFramework;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -122,8 +123,8 @@ namespace Microsoft.DotNet.Tests.ParserTests
                 = ImmutableArray.Create(
                     "-c Debug",
                     "--configuration Debug",
-                    "-r win10-x64",
-                    "--runtime win10-x64",
+                    $"-r {ToolsetInfo.LatestWinRuntimeIdentifier}-x64",
+                    $"--runtime {ToolsetInfo.LatestWinRuntimeIdentifier}-x64",
                     @"-o c:\temp2",
                     @"--output c:\temp2",
                     "--no-build",

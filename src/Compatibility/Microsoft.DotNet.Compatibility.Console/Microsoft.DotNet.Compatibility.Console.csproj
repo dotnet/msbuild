@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>true</IsPackable>
+    <StrongNameKeyId>Open</StrongNameKeyId>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>packagevalidation</ToolCommandName>
+    <!-- At the moment this project exists only for internal testing and debugging. -->
+    <IsShippingPackage>false</IsShippingPackage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta3.22114.1" />
+    <PackageReference Include="System.CommandLine.DragonFruit" Version="0.4.0-alpha.22114.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.DotNet.ApiCompatibility\Microsoft.DotNet.ApiCompatibility.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" />
+  </ItemGroup>
+
+  <Import Project="..\Microsoft.DotNet.Compatibility.Shared\Microsoft.DotNet.Compatibility.Shared.projitems" Label="Shared" />
+
+</Project>

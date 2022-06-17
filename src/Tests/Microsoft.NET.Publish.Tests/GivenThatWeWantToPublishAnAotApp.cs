@@ -32,6 +32,44 @@ namespace Microsoft.NET.Publish.Tests
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData(LatestTfm)]
+        public void NativeAot_hw_runs_with_no_warnings_when_PublishAot_is_enabled(string targetFramework)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                var projectName = "HellowWorldNativeAotApp";
+                var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+                var testProject = CreateHelloWorldTestProject(targetFramework, projectName, true);
+                testProject.AdditionalProperties["PublishAot"] = "true";
+                var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                publishCommand
+                    .Execute($"/p:RuntimeIdentifier={rid}")
+                    .Should().Pass()
+                    .And.NotHaveStdOutContaining("IL2026")
+                    .And.NotHaveStdErrContaining("NETSDK1179")
+                    .And.NotHaveStdErrContaining("warning");
+
+                var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+                var sharedLibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".dll" : ".so";
+                var publishedDll = Path.Combine(publishDirectory, $"{projectName}{sharedLibSuffix}");
+                var publishedExe = Path.Combine(publishDirectory, $"{testProject.Name}{Constants.ExeSuffix}");
+
+                // NativeAOT published dir should not contain a non-host stand alone package
+                File.Exists(publishedDll).Should().BeFalse();
+                // The exe exist and should be native
+                File.Exists(publishedExe).Should().BeTrue();
+                IsNativeImage(publishedExe).Should().BeTrue();
+
+                var command = new RunExeCommand(Log, publishedExe)
+                    .Execute().Should().Pass()
+                    .And.HaveStdOutContaining("Hello World");
+            }
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(LatestTfm)]
         public void Only_Aot_warnings_are_produced_if_EnableAotAnalyzer_is_set(string targetFramework)
         {
             var projectName = "WarningAppWithAotAnalyzer";
@@ -223,6 +261,28 @@ namespace Microsoft.NET.Publish.Tests
                 File.Exists(publishedDll).Should().BeTrue();
                 IsNativeImage(publishedDll).Should().BeTrue();
             }
+        }
+
+        private TestProject CreateHelloWorldTestProject(string targetFramework, string projectName, bool isExecutable)
+        {
+            var testProject = new TestProject()
+            {
+                Name = projectName,
+                TargetFrameworks = targetFramework,
+                IsExe = isExecutable
+            };
+
+            testProject.SourceFiles[$"{projectName}.cs"] = @"
+using System;
+class Test
+{
+    static void Main(String[] args)
+    {
+        Console.WriteLine(""Hello World"");
+    }
+}";
+
+            return testProject;
         }
 
         private TestProject CreateTestProjectWithAnalysisWarnings(string targetFramework, string projectName, bool isExecutable)

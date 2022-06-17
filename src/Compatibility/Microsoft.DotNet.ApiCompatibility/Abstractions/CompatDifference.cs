@@ -32,8 +32,6 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// </summary>
         public string ReferenceId { get; }
 
-        private CompatDifference() { }
-
         /// <summary>
         /// Instantiate a new object representing the compatibility difference.
         /// </summary>

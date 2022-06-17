@@ -45,7 +45,9 @@ namespace Microsoft.NET.Build.Tests
                 var result = buildCommand.Execute($"/p:BuildingInsideVisualStudio={runningInVS}", $"/bl:binlog{runningInVS}.binlog")
                     .Should()
                     .Fail();
-                var warningString = "warning : Unable to locate the .NET SDK as specified by global.json, please check that the specified version is installed.";
+                var warningString = runningInVS
+                    ? "warning : Unable to locate the .NET SDK version '9.9.999' as specified by global.json, please check that the specified version is installed."
+                    : "warning : Unable to locate the .NET SDK as specified by global.json, please check that the specified version is installed.";
                 var errorString = "Unable to locate the .NET SDK. Check that it is installed, your PATH is configured for the correct architecture, and that the version specified in global.json (if any) matches the installed version.";
                 if (runningInVS)
                 {

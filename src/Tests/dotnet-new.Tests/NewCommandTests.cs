@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.New.Tests
                 .And.HaveStdOutContaining("dotnet new update [options]");
         }
 
-        [Fact(Skip = "https://github.com/dotnet/templating/issues/1971")]
+        [Fact]
         public void WhenTemplateNameIsNotUniquelyMatchedThenItIndicatesProblemToUser()
         {
             var cmd = new DotnetCommand(Log).Execute("new", "c");
@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.New.Tests
 
             if (!TestContext.IsLocalized())
             {
-                cmd.StdErr.Should().StartWith("Unable to determine the desired template from the input template name: c.");
+                cmd.StdErr.Should().StartWith("No templates found matching: 'c'.");
             }
         }
     }

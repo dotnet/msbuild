@@ -221,10 +221,25 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             var command = CreateUpdateCommand($"-g {_packageId}");
 
             command.Execute();
+            
+            _reporter.Lines.First().Should().Contain(string.Format(
+                LocalizableStrings.UpdateSucceededStableVersionNoChange,
+                _packageId, HigherPackageVersion));
+        }
+
+        [Fact]
+        public void GivenAnExistedSameVersionInstallationWhenCallWithPrereleaseItUsesAPrereleaseSuccessMessage()
+        {
+            CreateInstallCommand($"-g {_packageId} --version {HigherPreviewPackageVersion}").Execute();
+            _reporter.Lines.Clear();
+
+            var command = CreateUpdateCommand($"-g {_packageId} --version {HigherPreviewPackageVersion}");
+
+            command.Execute();
 
             _reporter.Lines.First().Should().Contain(string.Format(
-                LocalizableStrings.UpdateSucceededVersionNoChange,
-                _packageId, HigherPackageVersion));
+                LocalizableStrings.UpdateSucceededPreVersionNoChange,
+                _packageId, HigherPreviewPackageVersion));
         }
 
         [Fact]
