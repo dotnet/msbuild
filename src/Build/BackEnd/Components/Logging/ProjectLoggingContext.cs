@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -116,7 +117,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     properties = Enumerable.Empty<DictionaryEntry>();
                 }
-                else if (Traits.Instance.LogAllEnvironmentVariables)
+                else if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGNOENVIRONMENTVARIABLES")) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
                 {
                     properties = projectProperties.GetCopyOnReadEnumerable(property => new DictionaryEntry(property.Name, property.EvaluatedValue));
                 }
