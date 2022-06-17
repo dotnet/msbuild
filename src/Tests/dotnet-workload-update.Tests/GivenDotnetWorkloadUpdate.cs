@@ -224,10 +224,9 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             command.Execute();
 
             // Manifest packages should have been 'downloaded' and used for pack resolution
-            manifestUpdater.DownloadManifestPackagesCallCount.Should().Be(1);
-            manifestUpdater.ExtractManifestPackagesToTempDirCallCount.Should().Be(1);
-            // 7 android pack packages need to be updated
-            packageDownloader.DownloadCallParams.Count.Should().Be(7);
+            manifestUpdater.GetManifestPackageDownloadsCallCount.Should().Be(1);
+            // 7 android pack packages need to be updated, plus one manifest
+            packageDownloader.DownloadCallParams.Count.Should().Be(8);
             foreach (var downloadParams in packageDownloader.DownloadCallParams)
             {
                 downloadParams.downloadFolder.Value.Value.Should().Be(cachePath);
@@ -262,10 +261,9 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             command.Execute();
 
             _reporter.Lines.Should().Contain("==allPackageLinksJsonOutputStart==");
-            string.Join(" ", _reporter.Lines).Should().Contain("mock-url-xamarin.android.templates", "New pack urls should be included in output");
-            string.Join(" ", _reporter.Lines).Should().Contain("mock-url-xamarin.android.framework", "Urls for packs with updated versions should be included in output");
-            string.Join(" ", _reporter.Lines).Should().NotContain("mock-url-xamarin.android.sdk", "Urls for packs with the same version should not be included in output");
-            string.Join(" ", _reporter.Lines).Should().Contain("mock-manifest-url");
+            string.Join(" ", _reporter.Lines).Should().Contain("http://mock-url/xamarin.android.templates.1.0.3.nupkg", "New pack urls should be included in output");
+            string.Join(" ", _reporter.Lines).Should().Contain("http://mock-url/xamarin.android.framework.8.4.0.nupkg", "Urls for packs with updated versions should be included in output");
+            string.Join(" ", _reporter.Lines).Should().NotContain("xamarin.android.sdk", "Urls for packs with the same version should not be included in output");
         }
 
         [Theory]

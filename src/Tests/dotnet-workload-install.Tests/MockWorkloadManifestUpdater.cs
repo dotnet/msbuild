@@ -16,8 +16,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
     {
         public int UpdateAdvertisingManifestsCallCount = 0;
         public int CalculateManifestUpdatesCallCount = 0;
-        public int DownloadManifestPackagesCallCount = 0;
-        public int ExtractManifestPackagesToTempDirCallCount = 0;
+        public int GetManifestPackageDownloadsCallCount = 0;
         private IEnumerable<(ManifestVersionUpdate manifestUpdate,
             Dictionary<WorkloadId, WorkloadDefinition> Workloads)> _manifestUpdates;
         private string _tempDirManifestPath;
@@ -46,6 +45,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
         public Task<IEnumerable<WorkloadDownload>> GetManifestPackageDownloadsAsync(bool includePreviews)
         {
+            GetManifestPackageDownloadsCallCount++;
             return Task.FromResult<IEnumerable<WorkloadDownload>>(new List<WorkloadDownload>()
             {
                 new WorkloadDownload("mock-manifest-package", "1.0.5")
