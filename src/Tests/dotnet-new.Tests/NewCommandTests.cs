@@ -8,6 +8,7 @@ using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.Assertions;
+using System.IO;
 
 namespace Microsoft.DotNet.New.Tests
 {
@@ -77,6 +78,77 @@ namespace Microsoft.DotNet.New.Tests
             {
                 cmd.StdErr.Should().StartWith("No templates found matching: 'c'.");
             }
+        }
+
+        [Fact]
+        public void ItCanCreateTemplate_WithAddProjectReference()
+        {
+            TestDirectory tempDir = _testAssetsManager.CreateTestDirectory();
+            TestDirectory tempSettingsDir = _testAssetsManager.CreateTestDirectory();
+            string templateLocation = GetTestTemplatePath("AddProjectReference");
+            var cmd = new DotnetCommand(Log).Execute("new", "install", templateLocation, "--debug:custom-hive", tempSettingsDir.Path);
+            cmd.Should().Pass();
+
+            cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(tempDir.Path)
+                .Execute("new", "TestAssets.AddReference", "--debug:custom-hive", tempSettingsDir.Path);
+
+            cmd.Should().Pass()
+                .And.HaveStdOutContaining("Adding a project reference.")
+                .And.HaveStdOutContaining("Successfully added");
+        }
+
+        [Fact]
+        public void ItCanCreateTemplate_WithAddPackageReference()
+        {
+            TestDirectory tempDir = _testAssetsManager.CreateTestDirectory();
+            TestDirectory tempSettingsDir = _testAssetsManager.CreateTestDirectory();
+            string templateLocation = GetTestTemplatePath("AddPackageReference");
+            var cmd = new DotnetCommand(Log).Execute("new", "install", templateLocation, "--debug:custom-hive", tempSettingsDir.Path);
+            cmd.Should().Pass();
+
+            cmd = new DotnetCommand(Log).Execute("new", "TestAssets.AddReference", "-o", tempDir.Path, "--debug:custom-hive", tempSettingsDir.Path);
+            cmd.Should().Pass()
+                .And.HaveStdOutContaining("Adding a package reference.")
+                .And.HaveStdOutContaining("Successfully added")
+                .And.HaveStdOutContaining("reference: Newtonsoft.Json");
+        }
+
+        [Fact]
+        public void ItCanCreateTemplate_WithAddProjectToSolution()
+        {
+            TestDirectory tempDir = _testAssetsManager.CreateTestDirectory();
+            TestDirectory tempSettingsDir = _testAssetsManager.CreateTestDirectory();
+            string templateLocation = GetTestTemplatePath("AddProjectToSolution");
+            var cmd = new DotnetCommand(Log).Execute("new", "install", templateLocation, "--debug:custom-hive", tempSettingsDir.Path);
+            cmd.Should().Pass();
+
+            cmd = new DotnetCommand(Log).Execute("new", "TestAssets.AddProjectToSolution", "-o", tempDir.Path, "--debug:custom-hive", tempSettingsDir.Path);
+            cmd.Should().Pass()
+                .And.HaveStdOutContaining("Adding project reference(s) to solution file")
+                .And.HaveStdOutContaining("Successfully added");
+        }
+
+        [Fact]
+        public void ItCanCreateTemplate_WithRestore()
+        {
+            TestDirectory tempDir = _testAssetsManager.CreateTestDirectory();
+            TestDirectory tempSettingsDir = _testAssetsManager.CreateTestDirectory();
+
+            var cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(tempDir.Path)
+                .Execute("new", "console", "--debug:custom-hive", tempSettingsDir.Path);
+
+            cmd.Should().Pass()
+                .And.HaveStdOutContaining("Determining projects to restore...")
+                .And.HaveStdOutContaining("Restore succeeded.");
+        }
+
+        private static string GetTestTemplatePath(string templateName)
+        {
+            string templateFolder = Path.Combine(Path.GetDirectoryName(typeof(NewCommandTests).Assembly.Location), "TestTemplates", templateName);
+            Assert.True(Directory.Exists(templateFolder));
+            return Path.GetFullPath(templateFolder);
         }
     }
 }

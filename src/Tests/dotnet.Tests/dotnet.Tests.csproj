@@ -167,6 +167,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="TestTemplates\**\*" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Content Include="TestTemplates\**\*" Exclude="TestTemplates\**\bin\**;TestTemplates\**\obj\**" CopyToOutputDirectory="Always" />
     <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
