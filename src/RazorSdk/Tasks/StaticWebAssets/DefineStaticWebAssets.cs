@@ -21,7 +21,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
     // There is an asset pattern filter that can be used to apply the pattern to a subset of the candidate assets
     // which allows for applying a different set of values to a subset of the candidates without having to previously
     // filter them. The asset pattern filter is applied after we've determined the RelativePath for the candidate asset.
-    // There is also a RelativePathPattern that is used to automatically tranform the relative path of the candidates to match
+    // There is also a RelativePathPattern that is used to automatically transform the relative path of the candidates to match
     // the expected path of the final asset. This is typically use to remove a common path prefix, like `wwwroot` from the target
     // path of the assets and so on.
     public class DefineStaticWebAssets : Task
