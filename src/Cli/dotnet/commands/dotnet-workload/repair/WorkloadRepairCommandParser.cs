@@ -33,6 +33,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(SourceOption);
             command.AddOption(CommonOptions.VerbosityOption);
             command.AddWorkloadCommandNuGetRestoreActionConfigOptions();
+            command.AddOption(WorkloadInstallCommandParser.SkipSignCheckOption);
 
             command.SetHandler((parseResult) => new WorkloadRepairCommand(parseResult).Execute());
 

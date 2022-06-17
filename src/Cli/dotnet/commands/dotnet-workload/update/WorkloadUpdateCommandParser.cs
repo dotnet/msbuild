@@ -65,6 +65,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(PrintRollbackOption);
             command.AddOption(FromRollbackFileOption);
+            command.AddOption(WorkloadInstallCommandParser.SkipSignCheckOption);
 
             command.SetHandler((parseResult) => new WorkloadUpdateCommand(parseResult).Execute());
 
