@@ -241,6 +241,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public async Task<IEnumerable<WorkloadDownload>> GetManifestPackageDownloadsAsync(bool includePreviews)
         {
+            //  TODO:  add the fallback logic from 
             var packageIds = GetInstalledManifestIds()
                 .Select(manifestId => _workloadManifestInstaller.GetManifestPackageId(manifestId, _sdkFeatureBand));
 
@@ -249,7 +250,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 try
                 {
-                    var latestVersion = await _nugetPackageDownloader.GetLatestPackageVerion(packageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreviews);
+                    var latestVersion = await _nugetPackageDownloader.GetLatestPackageVersion(packageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreviews);
                     downloads.Add(new WorkloadDownload(packageId.ToString(), latestVersion.ToString()));
                 }
                 catch
@@ -271,6 +272,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             var manifestId = new ManifestId(manifest.Id);
             string currentFeatureBand = _sdkFeatureBand.ToString();
 
+
+            // TODO: abstract the fallback logic so it can be used in the get manifest package downloads async
             try
             {
                 var adManifestPath = GetAdvertisingManifestPath(_sdkFeatureBand, manifestId);
@@ -403,7 +406,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             try
             {
                 var currentVersion = NuGetVersion.Parse(_workloadResolver.GetManifestVersion(manifest.ToString()));
-                var latestVersion = await _nugetPackageDownloader.GetLatestPackageVerion(_workloadManifestInstaller.GetManifestPackageId(manifest, _sdkFeatureBand));
+                var latestVersion = await _nugetPackageDownloader.GetLatestPackageVersion(_workloadManifestInstaller.GetManifestPackageId(manifest, _sdkFeatureBand));
                 return latestVersion > currentVersion;
             }
             catch (Exception)

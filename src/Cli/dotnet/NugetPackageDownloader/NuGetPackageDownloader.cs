@@ -570,7 +570,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             return (source, foundPackages);
         }
 
-        public async Task<NuGetVersion> GetLatestPackageVerion(PackageId packageId,
+        public async Task<NuGetVersion> GetLatestPackageVersion(PackageId packageId,
              PackageSourceLocation packageSourceLocation = null,
              bool includePreview = false)
         {
