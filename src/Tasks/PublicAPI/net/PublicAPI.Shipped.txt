@@ -2242,8 +2242,6 @@ Microsoft.Build.Tasks.XslTransformation.XslCompiledDllPath.get -> Microsoft.Buil
 Microsoft.Build.Tasks.XslTransformation.XslCompiledDllPath.set -> void
 Microsoft.Build.Tasks.XslTransformation.XslContent.get -> string
 Microsoft.Build.Tasks.XslTransformation.XslContent.set -> void
-Microsoft.Build.Tasks.XslTransformation.PreserveWhitespace.get -> bool
-Microsoft.Build.Tasks.XslTransformation.PreserveWhitespace.set -> void
 Microsoft.Build.Tasks.XslTransformation.XslInputPath.get -> Microsoft.Build.Framework.ITaskItem
 Microsoft.Build.Tasks.XslTransformation.XslInputPath.set -> void
 Microsoft.Build.Tasks.XslTransformation.XslTransformation() -> void
