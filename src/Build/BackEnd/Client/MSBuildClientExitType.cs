@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-namespace Microsoft.Build.Execution
+namespace Microsoft.Build.Experimental
 {
     public enum MSBuildClientExitType
     {
@@ -24,10 +24,6 @@ namespace Microsoft.Build.Execution
         /// The build stopped unexpectedly, for example,
         /// because a named pipe between the server and the client was unexpectedly closed.
         /// </summary>
-        Unexpected,
-        /// <summary>
-        /// The build was cancelled.
-        /// </summary>
-        Cancelled
+        Unexpected
     }
 }
