@@ -144,6 +144,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                env.SetEnvironmentVariable("MSBUILDONLYLOGUSEDENVIRONMENTVARIABLES", "1");
                 env.SetEnvironmentVariable("EnvVar1", "itsValue");
                 env.SetEnvironmentVariable("EnvVar2", "value2");
                 env.SetEnvironmentVariable("EnvVar3", "value3");
