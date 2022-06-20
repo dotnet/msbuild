@@ -509,13 +509,15 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                             mode. This logging style is on by default.
                         ForceConsoleColor--Use ANSI console colors even if
                             console does not support it
-                        Verbosity--overrides the -verbosity setting for this
+                        PreferConsoleColor--Use ANSI console colors only if
+                            target console does support it
+                     Verbosity--overrides the -verbosity setting for this
                             logger.
                      Example:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="translated">  -consoleLoggerParameters:&lt;參數&gt;
+        <target state="needs-review-translation">  -consoleLoggerParameters:&lt;參數&gt;
                      主控台記錄器的參數。(簡短形式: -clp)
                      可用的參數為:
                         PerformanceSummary--顯示工作、目標
