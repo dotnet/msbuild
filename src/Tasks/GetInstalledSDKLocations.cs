@@ -124,6 +124,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override bool Execute()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(GetInstalledSDKLocations));
+                return false;
+            }
+
             // TargetPlatformVersion and TargetPlatformIdentifier are requried to correctly look for SDKs.
             if (String.IsNullOrEmpty(TargetPlatformVersion) || String.IsNullOrEmpty(TargetPlatformIdentifier))
             {

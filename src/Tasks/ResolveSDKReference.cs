@@ -259,6 +259,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override bool Execute()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(ResolveSDKReference));
+                return false;
+            }
+
             ResolvedSDKReferences = Array.Empty<ITaskItem>();
 
             if (InstalledSDKs.Length == 0)
