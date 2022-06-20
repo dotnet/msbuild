@@ -1276,7 +1276,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
     /// <summary>
     /// Console configuration of target Console at which we will render output.
-    /// It is supposed to be Console fromm other process to which output from this process will be redirected.
+    /// It is supposed to be Console from other process to which output from this process will be redirected.
     /// </summary>
     internal class TargetConsoleConfiguration : IConsoleConfiguration
     {
