@@ -16,11 +16,11 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
         public bool Process(IEngineEnvironmentSettings environment, IPostAction action, ICreationEffects creationEffects, ICreationResult templateCreationResult, string outputBasePath)
         {
-            if (string.IsNullOrEmpty(outputBasePath))
+            if (string.IsNullOrWhiteSpace(outputBasePath))
             {
-                Reporter.Error.WriteLine(LocalizableStrings.AddRefPostActionUnresolvedProjFile);
-                return false;
+                throw new ArgumentException($"'{nameof(outputBasePath)}' cannot be null or whitespace.", nameof(outputBasePath));
             }
+            outputBasePath = Path.GetFullPath(outputBasePath);
 
             IEnumerable<IReadOnlyList<string>>? allTargets = null;
             if (action.Args.TryGetValue("targetFiles", out string? singleTarget) && singleTarget != null && creationEffects is ICreationEffects2 creationEffects2)
@@ -29,7 +29,9 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
                 if (config.Type == JTokenType.String)
                 {
-                    allTargets = singleTarget.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(t => GetTargetForSource(creationEffects2, t));
+                    allTargets = singleTarget
+                        .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(t => GetTargetForSource(creationEffects2, t, outputBasePath));
                 }
                 else if (config is JArray arr)
                 {
@@ -47,7 +49,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
                     if (parts.Count > 0)
                     {
-                        allTargets = parts.Select(t => GetTargetForSource(creationEffects2, t));
+                        allTargets = parts.Select(t => GetTargetForSource(creationEffects2, t, outputBasePath));
                     }
                 }
             }
@@ -72,7 +74,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             bool success = true;
             foreach (var target in allTargets)
             {
-                success &= AddReference(environment, action, target);
+                success &= AddReference(environment, action, target, outputBasePath);
 
                 if (!success)
                 {
@@ -95,7 +97,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             }
         }
 
-        private bool AddReference(IEngineEnvironmentSettings environment, IPostAction actionConfig, IReadOnlyList<string> nearestProjectFilesFound)
+        private bool AddReference(IEngineEnvironmentSettings environment, IPostAction actionConfig, IReadOnlyList<string> nearestProjectFilesFound, string outputBasePath)
         {
             if (actionConfig.Args == null || !actionConfig.Args.TryGetValue("reference", out string? referenceToAdd))
             {
@@ -117,6 +119,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 if (string.Equals(referenceType, "project", StringComparison.OrdinalIgnoreCase))
                 {
                     // actually do the add ref
+                    referenceToAdd = NormalizePath(outputBasePath, referenceToAdd);
                     Dotnet addReferenceCommand = Dotnet.AddProjectToProjectReference(projectFile, referenceToAdd);
                     addReferenceCommand.CaptureStdOut();
                     addReferenceCommand.CaptureStdErr();

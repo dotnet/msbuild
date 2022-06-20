@@ -42,7 +42,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 }
             };
 
-            ICreationResult creationResult = new MockCreationResult(primaryOutputs: new[] { new MockCreationPath("outputProj1.csproj") });
+            ICreationResult creationResult = new MockCreationResult(primaryOutputs: new[] { new MockCreationPath(Path.GetFullPath("outputProj1.csproj")) });
 
             Assert.True(AddProjectsToSolutionPostAction.TryGetProjectFilesToAdd(_engineEnvironmentSettings, postAction, creationResult, string.Empty, out IReadOnlyList<string>? foundProjectFiles));
             Assert.Equal(1, foundProjectFiles?.Count);
@@ -64,9 +64,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             ICreationResult creationResult = new MockCreationResult(
                 primaryOutputs: new[]
                 {
-                    new MockCreationPath("outputProj1.csproj"),
-                    new MockCreationPath("dontFindMe.csproj"),
-                    new MockCreationPath("outputProj2.csproj")
+                    new MockCreationPath(Path.GetFullPath("outputProj1.csproj")),
+                    new MockCreationPath(Path.GetFullPath("dontFindMe.csproj")),
+                    new MockCreationPath(Path.GetFullPath("outputProj2.csproj"))
                 });
 
             Assert.True(AddProjectsToSolutionPostAction.TryGetProjectFilesToAdd(_engineEnvironmentSettings, postAction, creationResult, string.Empty, out IReadOnlyList<string>? foundProjectFiles));

@@ -16,11 +16,11 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
         public bool Process(IEngineEnvironmentSettings environment, IPostAction action, ICreationEffects creationEffects, ICreationResult templateCreationResult, string outputBasePath)
         {
-            if (string.IsNullOrEmpty(outputBasePath))
+            if (string.IsNullOrWhiteSpace(outputBasePath))
             {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.AddProjToSlnPostActionUnresolvedSlnFile));
-                return false;
+                throw new ArgumentException($"'{nameof(outputBasePath)}' cannot be null or whitespace.", nameof(outputBasePath));
             }
+            outputBasePath = Path.GetFullPath(outputBasePath);
 
             IReadOnlyList<string> nearestSlnFilesFound = FindSolutionFilesAtOrAbovePath(environment.Host.FileSystem, outputBasePath);
             if (nearestSlnFilesFound.Count != 1)
@@ -45,7 +45,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                             continue;
                         }
 
-                        foreach (string path in GetTargetForSource(creationEffects2, globText.ToString()))
+                        foreach (string path in GetTargetForSource(creationEffects2, globText.ToString(), outputBasePath))
                         {
                             if (Path.GetExtension(path).EndsWith("proj", StringComparison.OrdinalIgnoreCase))
                             {
@@ -56,7 +56,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 }
                 else if (config.Type == JTokenType.String)
                 {
-                    foreach (string path in GetTargetForSource(creationEffects2, config.ToString()))
+                    foreach (string path in GetTargetForSource(creationEffects2, config.ToString(), outputBasePath))
                     {
                         if (Path.GetExtension(path).EndsWith("proj", StringComparison.OrdinalIgnoreCase))
                         {
@@ -127,7 +127,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                             return false;
                         }
 
-                        filesToAdd.Add(Path.Combine(outputBasePath, templateCreationResult.PrimaryOutputs[index].Path));
+                        filesToAdd.Add(NormalizePath(outputBasePath, templateCreationResult.PrimaryOutputs[index].Path));
                     }
                     else
                     {
@@ -143,7 +143,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             {
                 foreach (string pathString in templateCreationResult.PrimaryOutputs.Select(x => x.Path))
                 {
-                    filesToAdd.Add(!string.IsNullOrEmpty(outputBasePath) ? Path.Combine(outputBasePath, pathString) : pathString);
+                    filesToAdd.Add(!string.IsNullOrEmpty(outputBasePath) ? NormalizePath(outputBasePath, pathString) : pathString);
                 }
 
                 projectFiles = filesToAdd;

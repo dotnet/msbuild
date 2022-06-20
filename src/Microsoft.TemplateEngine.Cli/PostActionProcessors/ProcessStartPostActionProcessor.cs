@@ -15,6 +15,12 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
         public bool Process(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationEffects creationEffects, ICreationResult templateCreationResult, string outputBasePath)
         {
+            if (string.IsNullOrWhiteSpace(outputBasePath))
+            {
+                throw new ArgumentException($"'{nameof(outputBasePath)}' cannot be null or whitespace.", nameof(outputBasePath));
+            }
+            outputBasePath = Path.GetFullPath(outputBasePath);
+
             if (!actionConfig.Args.TryGetValue("executable", out string? executable))
             {
                 Reporter.Error.WriteLine(LocalizableStrings.PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable);
