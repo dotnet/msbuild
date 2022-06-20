@@ -5,13 +5,13 @@ using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 {
-    internal class InstructionDisplayPostActionProcessor : IPostActionProcessor
+    internal class InstructionDisplayPostActionProcessor : PostActionProcessor2Base
     {
         private static readonly Guid ActionProcessorId = new Guid("AC1156F7-BB77-4DB8-B28F-24EEBCCA1E5C");
 
-        public Guid Id => ActionProcessorId;
+        public override Guid Id => ActionProcessorId;
 
-        public bool Process(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationEffects creationEffects, ICreationResult templateCreationResult, string outputBasePath)
+        protected override bool ProcessInternal(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationEffects creationEffects, ICreationResult templateCreationResult, string outputBasePath)
         {
             Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionDescription, actionConfig.Description));
             Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionInstructions, actionConfig.ManualInstructions));

@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Utils;
@@ -12,16 +13,57 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
     {
         internal static readonly Guid ActionProcessorId = new Guid("D396686C-DE0E-4DE6-906D-291CD29FC5DE");
 
-        public Guid Id => ActionProcessorId;
+        public override Guid Id => ActionProcessorId;
 
-        public bool Process(IEngineEnvironmentSettings environment, IPostAction action, ICreationEffects creationEffects, ICreationResult templateCreationResult, string outputBasePath)
+        internal static IReadOnlyList<string> FindSolutionFilesAtOrAbovePath(IPhysicalFileSystem fileSystem, string outputBasePath)
         {
-            if (string.IsNullOrWhiteSpace(outputBasePath))
-            {
-                throw new ArgumentException($"'{nameof(outputBasePath)}' cannot be null or whitespace.", nameof(outputBasePath));
-            }
-            outputBasePath = Path.GetFullPath(outputBasePath);
+            return FileFindHelpers.FindFilesAtOrAbovePath(fileSystem, outputBasePath, "*.sln");
+        }
 
+        // The project files to add are a subset of the primary outputs, specifically the primary outputs indicated by the primaryOutputIndexes post action argument (semicolon separated)
+        // If any indexes are out of range or non-numeric, this method returns false and projectFiles is set to null.
+        internal static bool TryGetProjectFilesToAdd(IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath, [NotNullWhen(true)]out IReadOnlyList<string>? projectFiles)
+        {
+            List<string> filesToAdd = new List<string>();
+
+            if ((actionConfig.Args != null) && actionConfig.Args.TryGetValue("primaryOutputIndexes", out string? projectIndexes))
+            {
+                foreach (string indexString in projectIndexes.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    if (int.TryParse(indexString.Trim(), out int index))
+                    {
+                        if (templateCreationResult.PrimaryOutputs.Count <= index || index < 0)
+                        {
+                            projectFiles = null;
+                            return false;
+                        }
+
+                        filesToAdd.Add(Path.GetFullPath(templateCreationResult.PrimaryOutputs[index].Path, outputBasePath));
+                    }
+                    else
+                    {
+                        projectFiles = null;
+                        return false;
+                    }
+                }
+
+                projectFiles = filesToAdd;
+                return true;
+            }
+            else
+            {
+                foreach (string pathString in templateCreationResult.PrimaryOutputs.Select(x => x.Path))
+                {
+                    filesToAdd.Add(Path.GetFullPath(pathString, outputBasePath));
+                }
+
+                projectFiles = filesToAdd;
+                return true;
+            }
+        }
+
+        protected override bool ProcessInternal(IEngineEnvironmentSettings environment, IPostAction action, ICreationEffects creationEffects, ICreationResult templateCreationResult, string outputBasePath)
+        {
             IReadOnlyList<string> nearestSlnFilesFound = FindSolutionFilesAtOrAbovePath(environment.Host.FileSystem, outputBasePath);
             if (nearestSlnFilesFound.Count != 1)
             {
@@ -29,58 +71,20 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 return false;
             }
 
-            IReadOnlyList<string>? projectFiles;
-
-            if (action.Args.TryGetValue("projectFiles", out string? configProjectFiles) && creationEffects is ICreationEffects2 creationEffects2)
-            {
-                JToken config = JToken.Parse(configProjectFiles);
-                List<string> allProjects = new List<string>();
-
-                if (config is JArray arr)
-                {
-                    foreach (JToken globText in arr)
-                    {
-                        if (globText.Type != JTokenType.String)
-                        {
-                            continue;
-                        }
-
-                        foreach (string path in GetTargetForSource(creationEffects2, globText.ToString(), outputBasePath))
-                        {
-                            if (Path.GetExtension(path).EndsWith("proj", StringComparison.OrdinalIgnoreCase))
-                            {
-                                allProjects.Add(path);
-                            }
-                        }
-                    }
-                }
-                else if (config.Type == JTokenType.String)
-                {
-                    foreach (string path in GetTargetForSource(creationEffects2, config.ToString(), outputBasePath))
-                    {
-                        if (Path.GetExtension(path).EndsWith("proj", StringComparison.OrdinalIgnoreCase))
-                        {
-                            allProjects.Add(path);
-                        }
-                    }
-                }
-
-                if (allProjects.Count == 0)
-                {
-                    Reporter.Error.WriteLine(LocalizableStrings.AddProjToSlnPostActionNoProjFiles);
-                    return false;
-                }
-
-                projectFiles = allProjects;
-            }
-            else
+            IReadOnlyList<string>? projectFiles = GetConfiguredFiles(action.Args, creationEffects, "projectFiles", outputBasePath, (path) => Path.GetExtension(path).EndsWith("proj", StringComparison.OrdinalIgnoreCase));
+            if (projectFiles is null)
             {
                 //If the author didn't opt in to the new behavior by specifying "projectFiles", use the old behavior
-                if (!TryGetProjectFilesToAdd(environment, action, templateCreationResult, outputBasePath, out projectFiles) || projectFiles == null)
+                if (!TryGetProjectFilesToAdd( action, templateCreationResult, outputBasePath, out projectFiles))
                 {
                     Reporter.Error.WriteLine(LocalizableStrings.AddProjToSlnPostActionNoProjFiles);
                     return false;
                 }
+            }
+            if (projectFiles.Count == 0)
+            {
+                Reporter.Error.WriteLine(LocalizableStrings.AddProjToSlnPostActionNoProjFiles);
+                return false;
             }
 
             string solutionFolder = GetSolutionFolder(action);
@@ -100,53 +104,6 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             else
             {
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.AddProjToSlnPostActionSucceeded, string.Join(" ", projectFiles), nearestSlnFilesFound[0], solutionFolder));
-                return true;
-            }
-        }
-
-        internal static IReadOnlyList<string> FindSolutionFilesAtOrAbovePath(IPhysicalFileSystem fileSystem, string outputBasePath)
-        {
-            return FileFindHelpers.FindFilesAtOrAbovePath(fileSystem, outputBasePath, "*.sln");
-        }
-
-        // The project files to add are a subset of the primary outputs, specifically the primary outputs indicated by the primaryOutputIndexes post action argument (semicolon separated)
-        // If any indexes are out of range or non-numeric, this method returns false and projectFiles is set to null.
-        internal static bool TryGetProjectFilesToAdd(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath, out IReadOnlyList<string>? projectFiles)
-        {
-            List<string> filesToAdd = new List<string>();
-
-            if ((actionConfig.Args != null) && actionConfig.Args.TryGetValue("primaryOutputIndexes", out string? projectIndexes))
-            {
-                foreach (string indexString in projectIndexes.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
-                {
-                    if (int.TryParse(indexString.Trim(), out int index))
-                    {
-                        if (templateCreationResult.PrimaryOutputs.Count <= index || index < 0)
-                        {
-                            projectFiles = null;
-                            return false;
-                        }
-
-                        filesToAdd.Add(NormalizePath(outputBasePath, templateCreationResult.PrimaryOutputs[index].Path));
-                    }
-                    else
-                    {
-                        projectFiles = null;
-                        return false;
-                    }
-                }
-
-                projectFiles = filesToAdd;
-                return true;
-            }
-            else
-            {
-                foreach (string pathString in templateCreationResult.PrimaryOutputs.Select(x => x.Path))
-                {
-                    filesToAdd.Add(!string.IsNullOrEmpty(outputBasePath) ? NormalizePath(outputBasePath, pathString) : pathString);
-                }
-
-                projectFiles = filesToAdd;
                 return true;
             }
         }

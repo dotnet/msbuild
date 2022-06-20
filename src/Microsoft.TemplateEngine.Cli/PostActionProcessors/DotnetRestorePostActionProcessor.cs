@@ -6,58 +6,26 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 {
-    internal class DotnetRestorePostActionProcessor : PostActionProcessor2Base, IPostActionProcessor
+    internal class DotnetRestorePostActionProcessor : PostActionProcessor2Base
     {
         private static readonly Guid ActionProcessorId = new Guid("210D431B-A78B-4D2F-B762-4ED3E3EA9025");
 
-        public Guid Id => ActionProcessorId;
+        public override Guid Id => ActionProcessorId;
 
-        public bool Process(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationEffects creationEffects, ICreationResult templateCreationResult, string outputBasePath)
+        protected override bool ProcessInternal(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationEffects creationEffects, ICreationResult templateCreationResult, string outputBasePath)
         {
-            if (string.IsNullOrWhiteSpace(outputBasePath))
-            {
-                throw new ArgumentException($"'{nameof(outputBasePath)}' cannot be null or whitespace.", nameof(outputBasePath));
-            }
-            outputBasePath = Path.GetFullPath(outputBasePath);
-
             bool allSucceeded = true;
-            IEnumerable<string>? targetFiles = null;
+            IEnumerable<string>? targetFiles = GetConfiguredFiles(actionConfig.Args, creationEffects, "files", outputBasePath);
 
-            if (actionConfig.Args.TryGetValue("files", out string? specificFilesString) && creationEffects is ICreationEffects2 creationEffects2)
+            if (targetFiles is null || !targetFiles.Any())
             {
-                JToken config = JToken.Parse(specificFilesString);
-
-                if (config.Type == JTokenType.String)
-                {
-                    targetFiles = specificFilesString.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).SelectMany(x => GetTargetForSource(creationEffects2, x, outputBasePath));
-                }
-                else if (config is JArray arr)
-                {
-                    List<string> allFiles = new List<string>();
-                    foreach (JToken child in arr)
-                    {
-                        if (child.Type != JTokenType.String)
-                        {
-                            continue;
-                        }
-
-                        allFiles.AddRange(GetTargetForSource(creationEffects2, child.ToString(), outputBasePath));
-                    }
-
-                    if (allFiles.Count > 0)
-                    {
-                        targetFiles = allFiles;
-                    }
-                }
-            }
-            else
-            {
+                //If the author didn't opt in to the new behavior by specifying "projectFiles", use the old behavior - primary outputs
                 if (templateCreationResult.PrimaryOutputs.Count == 0)
                 {
                     Reporter.Output.WriteLine(LocalizableStrings.NoPrimaryOutputsToRestore);
                     return true;
                 }
-                targetFiles = templateCreationResult.PrimaryOutputs.Select(output => NormalizePath(outputBasePath, output.Path));
+                targetFiles = templateCreationResult.PrimaryOutputs.Select(output => Path.GetFullPath(output.Path, outputBasePath));
             }
 
             if (targetFiles is null || !targetFiles.Any())
