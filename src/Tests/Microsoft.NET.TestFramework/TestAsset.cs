@@ -90,7 +90,7 @@ namespace Microsoft.NET.TestFramework
                 File.Copy(srcFile, destFile, true);
             }
 
-            string[][] Properties = { new string[] { "TargetFramework", "$(CurrentTargetFramework)", ToolsetInfo.CurrentTargetFramework }, new string[] { "RuntimeIdentifier", "$(LatestWinRuntimeIdentifier)", ToolsetInfo.LatestWinRuntimeIdentifier } };
+            string[][] Properties = { new string[] { "TargetFramework", "$(CurrentTargetFramework)", ToolsetInfo.CurrentTargetFramework }, new string[] { "RuntimeIdentifier", "$(LatestWinRuntimeIdentifier)", ToolsetInfo.LatestWinRuntimeIdentifier }, new string[] { "RuntimeIdentifier", "$(LatestRuntimeIdentifiers)", ToolsetInfo.LatestRuntimeIdentifiers } };
 
             foreach (string[] property in Properties)
             {
