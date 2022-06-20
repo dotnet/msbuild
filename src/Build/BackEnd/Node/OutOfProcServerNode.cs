@@ -320,19 +320,19 @@ namespace Microsoft.Build.Experimental
             Thread.CurrentThread.CurrentUICulture = command.UICulture;
 
             // Configure console configuration so Loggers can change their behavior based on Target (client) Console properties.
-            ConsoleConfiguration.Provider = new TargetConsoleConfiguration(command.ConsoleBufferWidth, command.AcceptAnsiColorCodes, command.ConsoleIsScreen, command.ConsoleBackgroundColor);
+            ConsoleConfiguration.Provider = command.ConsoleConfiguration;
 
             // Also try our best to increase chance custom Loggers which use Console static members will work as expected.
             try
             {
-                if (NativeMethodsShared.IsWindows && command.ConsoleBufferWidth > 0)
+                if (NativeMethodsShared.IsWindows && command.ConsoleConfiguration.BufferWidth > 0)
                 {
-                    Console.BufferWidth = command.ConsoleBufferWidth;
+                    Console.BufferWidth = command.ConsoleConfiguration.BufferWidth;
                 }
 
-                if ((int)command.ConsoleBackgroundColor != -1)
+                if ((int)command.ConsoleConfiguration.BackgroundColor != -1)
                 {
-                    Console.BackgroundColor = command.ConsoleBackgroundColor;
+                    Console.BackgroundColor = command.ConsoleConfiguration.BackgroundColor;
                 }
             }
             catch (Exception)

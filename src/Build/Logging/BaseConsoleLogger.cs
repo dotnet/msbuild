@@ -1278,20 +1278,50 @@ namespace Microsoft.Build.BackEnd.Logging
     /// Console configuration of target Console at which we will render output.
     /// It is supposed to be Console from other process to which output from this process will be redirected.
     /// </summary>
-    internal class TargetConsoleConfiguration : IConsoleConfiguration
+    internal class TargetConsoleConfiguration : IConsoleConfiguration, ITranslatable
     {
+        private int _bufferWidth;
+        private bool _acceptAnsiColorCodes;
+        private bool _outputIsScreen;
+        private ConsoleColor _backgroundColor;
+
         public TargetConsoleConfiguration(int bufferWidth, bool acceptAnsiColorCodes, bool outputIsScreen, ConsoleColor backgroundColor)
         {
-            BufferWidth = bufferWidth;
-            AcceptAnsiColorCodes = acceptAnsiColorCodes;
-            OutputIsScreen = outputIsScreen;
-            BackgroundColor = backgroundColor;
+            _bufferWidth = bufferWidth;
+            _acceptAnsiColorCodes = acceptAnsiColorCodes;
+            _outputIsScreen = outputIsScreen;
+            _backgroundColor = backgroundColor;
         }
 
-        public int BufferWidth { get; }
-        public bool AcceptAnsiColorCodes { get; }
-        public bool OutputIsScreen { get; }
-        public ConsoleColor BackgroundColor { get; }
+        /// <summary>
+        /// Constructor for deserialization
+        /// </summary>
+        private TargetConsoleConfiguration()
+        {
+        }
+
+        public int BufferWidth => _bufferWidth;
+
+        public bool AcceptAnsiColorCodes => _acceptAnsiColorCodes;
+
+        public bool OutputIsScreen => _outputIsScreen;
+
+        public ConsoleColor BackgroundColor => _backgroundColor;
+
+        public void Translate(ITranslator translator)
+        {
+            translator.Translate(ref _bufferWidth);
+            translator.Translate(ref _acceptAnsiColorCodes);
+            translator.Translate(ref _outputIsScreen);
+            translator.TranslateEnum(ref _backgroundColor, (int)_backgroundColor);
+        }
+
+        internal static TargetConsoleConfiguration FactoryForDeserialization(ITranslator translator)
+        {
+            TargetConsoleConfiguration configuration = new();
+            configuration.Translate(translator);
+            return configuration;
+        }
     }
 
     /// <summary>

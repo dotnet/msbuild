@@ -11,6 +11,7 @@ using System.IO.Pipes;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Client;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -79,26 +80,9 @@ namespace Microsoft.Build.Experimental
         private long _sizeOfConsoleWritePackets;
 
         /// <summary>
-        /// Width of the Console output device or -1 if unknown.
+        /// Capture configuration of Client Console.
         /// </summary>
-        private int _consoleBufferWidth;
-
-        /// <summary>
-        /// True if console output accept ANSI colors codes.
-        /// False if console does not support ANSI codes or output is redirected to non screen type such as file or nul.
-        /// </summary>
-        private bool _acceptAnsiColorCodes;
-
-        /// <summary>
-        /// True if console output is screen. It is expected that non screen output is post-processed and often does not need wrapping and coloring.
-        /// False if output is redirected to non screen type such as file or nul.
-        /// </summary>
-        private bool _consoleIsScreen;
-
-        /// <summary>
-        /// Background color of client console, -1 if not detectable.
-        /// </summary>
-        private ConsoleColor _consoleBackgroundColor;
+        private TargetConsoleConfiguration? _consoleConfiguration;
 
         /// <summary>
         /// Public constructor with parameters.
@@ -244,17 +228,20 @@ namespace Microsoft.Build.Experimental
 
         private void ConfigureAndQueryConsoleProperties()
         {
-            QueryIsScreenAndTryEnableAnsiColorCodes();
-            QueryConsoleBufferWidth();
-            QueryConsoleBackgroundColor();
+            var (acceptAnsiColorCodes, outputIsScreen) = QueryIsScreenAndTryEnableAnsiColorCodes();
+            int bufferWidth = QueryConsoleBufferWidth();
+            ConsoleColor backgroundColor = QueryConsoleBackgroundColor();
+
+            _consoleConfiguration = new TargetConsoleConfiguration(bufferWidth, acceptAnsiColorCodes, outputIsScreen, backgroundColor);
         }
 
-        private void QueryIsScreenAndTryEnableAnsiColorCodes()
+        private (bool acceptAnsiColorCodes, bool outputIsScreen) QueryIsScreenAndTryEnableAnsiColorCodes()
         {
+            bool acceptAnsiColorCodes = false;
+            bool outputIsScreen = false;
+
             if (NativeMethodsShared.IsWindows)
             {
-                _acceptAnsiColorCodes = false;
-                _consoleIsScreen = false;
                 try
                 {
                     IntPtr stdOut = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
@@ -275,13 +262,13 @@ namespace Microsoft.Build.Experimental
 
                         if (success)
                         {
-                            _acceptAnsiColorCodes = true;
+                            acceptAnsiColorCodes = true;
                         }
 
                         uint fileType = NativeMethodsShared.GetFileType(stdOut);
                         // The std out is a char type(LPT or Console)
-                        _consoleIsScreen = fileType == NativeMethodsShared.FILE_TYPE_CHAR;
-                        _acceptAnsiColorCodes &= _consoleIsScreen;
+                        outputIsScreen = fileType == NativeMethodsShared.FILE_TYPE_CHAR;
+                        acceptAnsiColorCodes &= outputIsScreen;
                     }
                 }
                 catch (Exception ex)
@@ -292,16 +279,18 @@ namespace Microsoft.Build.Experimental
             else
             {
                 // On posix OSes we expect console always supports VT100 coloring unless it is redirected
-                _acceptAnsiColorCodes = _consoleIsScreen = !Console.IsOutputRedirected;
+                acceptAnsiColorCodes = outputIsScreen = !Console.IsOutputRedirected;
             }
+
+            return (acceptAnsiColorCodes: acceptAnsiColorCodes, outputIsScreen: outputIsScreen);
         }
 
-        private void QueryConsoleBufferWidth()
+        private int QueryConsoleBufferWidth()
         {
-            _consoleBufferWidth = -1;
+            int consoleBufferWidth = -1;
             try
             {
-                _consoleBufferWidth = Console.BufferWidth;
+                consoleBufferWidth = Console.BufferWidth;
             }
             catch (Exception ex)
             {
@@ -309,6 +298,8 @@ namespace Microsoft.Build.Experimental
                 // this is probably temporary workaround till we understand what is the reason for that exception
                 CommunicationsUtilities.Trace("MSBuild client warning: problem during querying console buffer width.", ex);
             }
+
+            return consoleBufferWidth;
         }
 
         /// <summary>
@@ -316,16 +307,19 @@ namespace Microsoft.Build.Experimental
         /// is not way to check, but not-supported exception is thrown. Assume
         /// black, but don't crash.
         /// </summary>
-        private void QueryConsoleBackgroundColor()
+        private ConsoleColor QueryConsoleBackgroundColor()
         {
+            ConsoleColor consoleBackgroundColor;
             try
             {
-                _consoleBackgroundColor = Console.BackgroundColor;
+                consoleBackgroundColor = Console.BackgroundColor;
             }
             catch (PlatformNotSupportedException)
             {
-                _consoleBackgroundColor = ConsoleColor.Black;
+                consoleBackgroundColor = ConsoleColor.Black;
             }
+
+            return consoleBackgroundColor;
         }
 
         private bool TrySendPacket(Func<INodePacket> packetResolver)
@@ -420,10 +414,7 @@ namespace Microsoft.Build.Experimental
                         buildProcessEnvironment: envVars,
                         CultureInfo.CurrentCulture,
                         CultureInfo.CurrentUICulture,
-                        _consoleBufferWidth,
-                        _acceptAnsiColorCodes,
-                        _consoleIsScreen,
-                        _consoleBackgroundColor);
+                        _consoleConfiguration!);
         }
 
         private ServerNodeHandshake GetHandshake()
