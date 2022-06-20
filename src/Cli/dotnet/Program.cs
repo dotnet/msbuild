@@ -23,20 +23,10 @@ namespace Microsoft.DotNet.Cli
 {
     public class Program
     {
-        private const string TelemetryOptout = "DOTNET_CLI_TELEMETRY_OPTOUT";
-
         private static readonly string ToolPathSentinelFileName = $"{Product.Version}.toolpath.sentinel";
 
         public static int Main(string[] args)
         {
-#if NO_TELEMETRY_BY_DEFAULT
-            // opt out of telemetry by default if the env var is unset
-            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(TelemetryOptout)))
-            {
-                Environment.SetEnvironmentVariable(TelemetryOptout, "1");
-            }
-#endif
-
             //setting output encoding is not available on those platforms
             if (!OperatingSystem.IsIOS() && !OperatingSystem.IsAndroid() && !OperatingSystem.IsTvOS())
             {
@@ -178,7 +168,7 @@ namespace Microsoft.DotNet.Cli
                     bool generateAspNetCertificate =
                         environmentProvider.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", defaultValue: true);
                     bool telemetryOptout =
-                      environmentProvider.GetEnvironmentVariableAsBool(TelemetryOptout, defaultValue: false);
+                      environmentProvider.GetEnvironmentVariableAsBool(EnvironmentVariableNames.TELEMETRY_OPTOUT, defaultValue: CompileOptions.TelemetryOptOutDefault);
                     bool addGlobalToolsToPath =
                         environmentProvider.GetEnvironmentVariableAsBool("DOTNET_ADD_GLOBAL_TOOLS_TO_PATH", defaultValue: true);
                     bool nologo =
