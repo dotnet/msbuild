@@ -1942,11 +1942,20 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The attempt to publish the ZIP file through {0} failed with HTTP status code {1}. See the logs at &apos;{2}&apos;..
+        ///   Looks up a localized string similar to The attempt to publish the ZIP file through &apos;{0}&apos; failed with HTTP status code &apos;{1}&apos;..
         /// </summary>
         public static string ZIPDEPLOY_FailedDeploy {
             get {
                 return ResourceManager.GetString("ZIPDEPLOY_FailedDeploy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The attempt to publish the ZIP file through &apos;{0}&apos; failed with HTTP status code &apos;{1}&apos;. See the logs at &apos;{2}&apos;..
+        /// </summary>
+        public static string ZIPDEPLOY_FailedDeployWithLogs {
+            get {
+                return ResourceManager.GetString("ZIPDEPLOY_FailedDeployWithLogs", resourceCulture);
             }
         }
         
