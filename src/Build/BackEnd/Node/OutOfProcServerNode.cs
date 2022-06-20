@@ -10,8 +10,9 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
 using System.Threading.Tasks;
+using Microsoft.Build.Execution;
 
-namespace Microsoft.Build.Execution
+namespace Microsoft.Build.Experimental
 {
     /// <summary>
     /// This class represents an implementation of INode for out-of-proc server nodes aka MSBuild server 
@@ -19,8 +20,6 @@ namespace Microsoft.Build.Execution
     public sealed class OutOfProcServerNode : INode, INodePacketFactory, INodePacketHandler
     {
         private readonly Func<string, (int exitCode, string exitType)> _buildFunction;
-
-        private readonly Action _onCancel;
 
         /// <summary>
         /// The endpoint used to talk to the host.
@@ -62,14 +61,11 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private readonly bool _debugCommunications;
 
-        private Task? _buildTask;
-
         private string _serverBusyMutexName = default!;
 
-        public OutOfProcServerNode(Func<string, (int exitCode, string exitType)> buildFunction, Action onCancel)
+        public OutOfProcServerNode(Func<string, (int exitCode, string exitType)> buildFunction)
         {
             _buildFunction = buildFunction;
-            _onCancel = onCancel;
             new Dictionary<string, string>();
             _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
 
@@ -219,13 +215,13 @@ namespace Microsoft.Build.Execution
         {
             CommunicationsUtilities.Trace("Shutting down with reason: {0}, and exception: {1}.", _shutdownReason, _shutdownException);
 
+            // On Windows, a process holds a handle to the current directory,
+            // so reset it away from a user-requested folder that may get deleted.
+            NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
+
             exception = _shutdownException;
 
-            if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
-            {
-                _nodeEndpoint.OnLinkStatusChanged -= OnLinkStatusChanged;
-            }
-
+            _nodeEndpoint.OnLinkStatusChanged -= OnLinkStatusChanged;
             _nodeEndpoint.Disconnect();
 
             CommunicationsUtilities.Trace("Shut down complete.");
@@ -279,14 +275,14 @@ namespace Microsoft.Build.Execution
                     HandleServerNodeBuildCommandAsync((ServerNodeBuildCommand)packet);
                     break;
                 case NodePacketType.ServerNodeBuildCancel:
-                    _onCancel();
+                    BuildManager.DefaultBuildManager.CancelAllSubmissions();
                     break;
             }
         }
 
         private void HandleServerNodeBuildCommandAsync(ServerNodeBuildCommand command)
         {
-            _buildTask = Task.Run(() =>
+            Task.Run(() =>
             {
                 try
                 {
@@ -297,10 +293,6 @@ namespace Microsoft.Build.Execution
                     _shutdownException = e;
                     _shutdownReason = NodeEngineShutdownReason.Error;
                     _shutdownEvent.Set();
-                }
-                finally
-                {
-                    _buildTask = null;
                 }
             });
         }
@@ -348,6 +340,7 @@ namespace Microsoft.Build.Execution
             // so reset it away from a user-requested folder that may get deleted.
             NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
 
+            _nodeEndpoint.ClientWillDisconnect();
             var response = new ServerNodeBuildResult(buildResult.exitCode, buildResult.exitType);
             SendPacket(response);
 

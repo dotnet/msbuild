@@ -5,7 +5,7 @@
 namespace Microsoft.Build.BackEnd
 {
     internal sealed class ServerNodeBuildCancel : INodePacket
-    {
+    { 
         public NodePacketType Type => NodePacketType.ServerNodeBuildCancel;
 
         public void Translate(ITranslator translator)
