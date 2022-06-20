@@ -20,6 +20,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 {
+    [PlatformSpecific(TestPlatforms.Windows)]
     public class ResolveSDKReferenceTestFixture
     {
         private Microsoft.Build.UnitTests.MockEngine.GetStringDelegate _resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
