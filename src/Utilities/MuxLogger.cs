@@ -862,12 +862,7 @@ namespace Microsoft.Build.Utilities
                         _firstProjectStartedEventContext = buildEvent.BuildEventContext;
 
                         // We've never seen a project started event, so raise the build started event and save this project started event.
-                        BuildStartedEventArgs startedEvent = new BuildStartedEventArgs(
-                            _buildStartedEvent.Message,
-                            _buildStartedEvent.HelpKeyword,
-                            string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGNOENVIRONMENTVARIABLES")) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4) ?
-                            _buildStartedEvent.BuildEnvironment :
-                            null);
+                        BuildStartedEventArgs startedEvent = new BuildStartedEventArgs(_buildStartedEvent.Message, _buildStartedEvent.HelpKeyword, Traits.Instance.LogAllEnvironmentVariables ? _buildStartedEvent.BuildEnvironment : null);
                         RaiseBuildStartedEvent(sender, startedEvent);
                     }
 
