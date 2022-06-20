@@ -102,8 +102,6 @@
     <Compile Remove="ResourceHandling\GenerateResourceOutOfProc_Tests.cs" />
     <Compile Remove="ResourceHandling\ResGen_Tests.cs" />
     <Compile Remove="ResourceHandling\ResGenDependencies_Tests.cs" />
-    <Compile Remove="GetInstalledSDKLocations_Tests.cs" />
-    <Compile Remove="GetSDKReference_Tests.cs" />
     <Compile Remove="LC_Tests.cs" />
     <Compile Remove="MockTypeInfo.cs" />
     <Compile Remove="MockTypeLib.cs" />
@@ -124,7 +122,6 @@
     <Compile Remove="AssemblyDependency\VerifyTargetFrameworkHigherThanRedist.cs" />
     <Compile Remove="AssemblyDependency\WinMDTests.cs" />
     <Compile Remove="ResolveComReference_Tests.cs" />
-    <Compile Remove="ResolveSDKReference_Tests.cs" />
     <Compile Remove="SdkToolsPathUtility_Tests.cs" />
     <Compile Remove="TlbImp_Tests.cs" />
     <Compile Remove="VisualBasicParserUtilitites_Tests.cs" />

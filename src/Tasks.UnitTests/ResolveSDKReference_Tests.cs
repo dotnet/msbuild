@@ -3701,6 +3701,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
     /// <summary>
     /// Test the output groups which will be used to generate the recipe fileGatherSDKOutputGroups
     /// </summary>
+    [PlatformSpecific(TestPlatforms.Windows)]
     public class GatherSDKOutputGroupsTestFixture
     {
         [Fact]
