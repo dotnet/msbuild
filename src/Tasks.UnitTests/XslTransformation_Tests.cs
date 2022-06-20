@@ -65,7 +65,22 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// The contents of xsl document for tests.
         /// </summary>
-        private readonly string _xslDocument = "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:msxsl=\"urn:schemas-microsoft-com:xslt\" exclude-result-prefixes=\"msxsl\"><xsl:output method=\"xml\" indent=\"yes\"/><xsl:template match=\"@* | node()\"><surround><xsl:copy><xsl:apply-templates select=\"@* | node()\"/></xsl:copy></surround></xsl:template></xsl:stylesheet>";
+        private readonly string _xslDocument = 
+@"<xsl:stylesheet version=""1.0""
+                xmlns:xsl=""http://www.w3.org/1999/XSL/Transform""
+                xmlns:msxsl=""urn:schemas-microsoft-com:xslt""
+                exclude-result-prefixes=""msxsl"">
+    <xsl:output method=""xml"" indent=""yes""/>
+    <xsl:template match=""@* | node()"">
+        <surround>
+            <xsl:copy>
+                <xsl:apply-templates select=""@* | node()""/>
+            </xsl:copy>
+        </surround>
+    </xsl:template>
+</xsl:stylesheet>";
+
+
 #if FEATURE_COMPILED_XSL
         /// <summary>
         /// The contents of another xsl document for tests
@@ -842,6 +857,57 @@ namespace Microsoft.Build.UnitTests
                 catch (Exception e)
                 {
                     Assert.Contains("error?", e.Message);
+                }
+            }
+
+            CleanUp(dir);
+        }
+
+        /// <summary>
+        /// Xslt PreserveWhitespace = true
+        /// </summary>
+        [Fact]
+        public void XsltPreserveWhitespace()
+        {
+            string dir;
+            TaskItem[] xmlPaths;
+            TaskItem xslPath;
+            TaskItem[] outputPaths;
+            MockEngine engine;
+            Prepare(out dir, out xmlPaths, out xslPath, out _, out outputPaths, out _, out _, out engine);
+
+            // load transformed xsl and assert it is well formatted
+            {
+                XslTransformation t = new XslTransformation();
+                
+                t.BuildEngine = engine;
+                t.XslInputPath = xslPath;
+                t.XmlInputPaths = xmlPaths;
+                t.OutputPaths = outputPaths;
+                t.Parameters = _xslParameters;
+                t.PreserveWhitespace = true;
+
+                t.Execute();
+                Console.WriteLine(engine.Log);
+                using (StreamReader sr = new StreamReader(t.OutputPaths[0].ItemSpec))
+                {
+                    string fileContents = sr.ReadToEnd();
+                    Assert.True(fileContents.Equals(
+@"<?xml version=""1.0"" encoding=""utf-8""?>
+<surround>
+  <root>
+    <surround Name=""param1"" />
+    <surround Value=""value111"" />
+    <surround>
+      <abc>
+        <surround>
+          <cde />
+        </surround>
+      </abc>
+    </surround>
+  </root>
+</surround>")
+                    );
                 }
             }
 
