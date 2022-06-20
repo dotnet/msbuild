@@ -1,4 +1,6 @@
-[
+{
+  "version": "1.0",
+  "tasks": [
     {
       "taskType": "trigger",
       "capabilityId": "AutoMerge",
@@ -174,6 +176,18 @@
             "parameters": {
               "label": "Area-Compatibility"
             }
+          },
+          {
+            "name": "hasLabel",
+            "parameters": {
+              "label": "untriaged"
+            }
+          },
+          {
+            "name": "noActivitySince",
+            "parameters": {
+              "days": 3
+            }
           }
         ],
         "taskName": "Notify compatibility of new untriaged bugs",
@@ -183,13 +197,11 @@
             "parameters": {
               "comment": "@dotnet/area-infrastructure-libraries a new issue has been filed in the Compatibility area, please triage"
             }
-          },
-          {
-            "name": "closeIssue",
-            "parameters": {}
           }
         ]
       },
       "disabled": false
     }
-  ]
+  ],
+  "userGroups": []
+}
