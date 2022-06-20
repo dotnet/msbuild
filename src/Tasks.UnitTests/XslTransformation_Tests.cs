@@ -892,7 +892,7 @@ namespace Microsoft.Build.UnitTests
                 using (StreamReader sr = new StreamReader(t.OutputPaths[0].ItemSpec))
                 {
                     string fileContents = sr.ReadToEnd();
-                    Assert.True(fileContents.Equals(
+                    Assert.Equal(
 @"<?xml version=""1.0"" encoding=""utf-8""?>
 <surround>
   <root>
@@ -906,8 +906,8 @@ namespace Microsoft.Build.UnitTests
       </abc>
     </surround>
   </root>
-</surround>")
-                    );
+</surround>",
+                    fileContents);
                 }
             }
 
