@@ -1,7 +1,8 @@
 # Documents Index
 
-This repo includes documents that explain how to use and build the product. It also provides detailed information about the project.
+## References
 
-Here is a good example of this file: https://github.com/dotnet/coreclr/blob/master/Documentation/README.md.
-
-This is where a TOC goes!
+* [OCI Image Format spec](https://github.com/opencontainers/image-spec/blob/main/spec.md)
+* [Docker Registry API docs](https://docs.docker.com/registry/spec/api/)
+* [Setting up a local Docker registry](https://docs.docker.com/registry/)
+* [Tutorial: Containerize a .NET app](https://docs.microsoft.com/dotnet/core/docker/build-container?tabs=windows)
