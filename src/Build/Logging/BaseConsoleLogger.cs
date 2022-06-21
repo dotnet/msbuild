@@ -1050,6 +1050,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     return true;
                 case "SHOWENVIRONMENT":
                     showEnvironment = true;
+                    Traits.Instance.LogAllEnvironmentVariables = true;
                     return true;
                 case "SHOWPROJECTFILE":
                     if (parameterValue == null)
