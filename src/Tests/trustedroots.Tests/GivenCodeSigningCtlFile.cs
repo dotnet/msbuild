@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tests
             _certificates.ImportFromPemFile(_filePath);
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/sdk/issues/26115")]
         public void File_contains_certificates_very_commonly_used_in_NuGet_org_package_signatures()
         {
             // CN=DigiCert Assured ID Root CA, OU=www.digicert.com, O=DigiCert Inc, C=US
