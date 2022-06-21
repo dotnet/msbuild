@@ -509,13 +509,15 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                             mode. This logging style is on by default.
                         ForceConsoleColor--Use ANSI console colors even if
                             console does not support it
-                        Verbosity--overrides the -verbosity setting for this
+                        PreferConsoleColor--Use ANSI console colors only if
+                            target console does support it
+                     Verbosity--overrides the -verbosity setting for this
                             logger.
                      Example:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="translated">  -consoleLoggerParameters:&lt;paramètres&gt;
+        <target state="needs-review-translation">  -consoleLoggerParameters:&lt;paramètres&gt;
          Paramètres du journaliseur de la console. (Forme abrégée : -clp)
          Paramètres disponibles :
             PerformanceSummary--Affiche la durée des tâches, des cibles

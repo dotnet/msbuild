@@ -60,6 +60,7 @@ internal static class NativeMethods
     internal static HandleRef NullHandleRef = new HandleRef(null, IntPtr.Zero);
 
     internal static IntPtr NullIntPtr = new IntPtr(0);
+    internal static IntPtr InvalidHandle = new IntPtr(-1);
 
     // As defined in winnt.h:
     internal const ushort PROCESSOR_ARCHITECTURE_INTEL = 0;

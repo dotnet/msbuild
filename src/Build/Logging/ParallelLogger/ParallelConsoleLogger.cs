@@ -88,7 +88,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     // Get the size of the console buffer so messages can be formatted to the console width
                     try
                     {
-                        _bufferWidth = Console.BufferWidth;
+                        _bufferWidth = ConsoleConfiguration.BufferWidth;
                         _alignMessages = true;
                     }
                     catch (Exception)
