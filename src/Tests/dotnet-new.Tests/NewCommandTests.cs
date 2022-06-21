@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void WhenTemplateNameIsNotUniquelyMatchedThenItIndicatesProblemToUser()
         {
-            var cmd = new DotnetCommand(Log).Execute("new", "c");
+            var cmd = new DotnetCommand(Log).Execute("new", "c", "--debug:ephemeral-hive");
 
             cmd.ExitCode.Should().NotBe(0);
 
