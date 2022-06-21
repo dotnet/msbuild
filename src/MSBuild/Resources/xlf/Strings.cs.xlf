@@ -512,13 +512,15 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                             mode. This logging style is on by default.
                         ForceConsoleColor--Use ANSI console colors even if
                             console does not support it
-                        Verbosity--overrides the -verbosity setting for this
+                        PreferConsoleColor--Use ANSI console colors only if
+                            target console does support it
+                     Verbosity--overrides the -verbosity setting for this
                             logger.
                      Example:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="translated">  -consoleloggerparameters:&lt;parameters&gt;
+        <target state="needs-review-translation">  -consoleloggerparameters:&lt;parameters&gt;
                      Parametry protokolovacího nástroje konzoly. (Krátký tvar: -clp)
                      Dostupné parametry:
                         PerformanceSummary – zobrazí dobu zpracování úloh, cílů

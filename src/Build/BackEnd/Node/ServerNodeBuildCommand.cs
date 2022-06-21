@@ -1,10 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-//
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -22,6 +23,7 @@ namespace Microsoft.Build.BackEnd
         private Dictionary<string, string> _buildProcessEnvironment = default!;
         private CultureInfo _culture = default!;
         private CultureInfo _uiCulture = default!;
+        private TargetConsoleConfiguration _consoleConfiguration = default!;
 
         /// <summary>
         /// Retrieves the packet type.
@@ -58,6 +60,11 @@ namespace Microsoft.Build.BackEnd
         public CultureInfo UICulture => _uiCulture;
 
         /// <summary>
+        /// Console configuration of Client.
+        /// </summary>
+        public TargetConsoleConfiguration ConsoleConfiguration => _consoleConfiguration;
+
+        /// <summary>
         /// Private constructor for deserialization
         /// </summary>
         private ServerNodeBuildCommand()
@@ -72,13 +79,17 @@ namespace Microsoft.Build.BackEnd
 #endif
             string startupDirectory,
             Dictionary<string, string> buildProcessEnvironment,
-            CultureInfo culture, CultureInfo uiCulture)
+            CultureInfo culture, CultureInfo uiCulture,
+            TargetConsoleConfiguration consoleConfiguration)
         {
+            ErrorUtilities.VerifyThrowInternalNull(consoleConfiguration, nameof(consoleConfiguration));
+
             _commandLine = commandLine;
             _startupDirectory = startupDirectory;
             _buildProcessEnvironment = buildProcessEnvironment;
             _culture = culture;
             _uiCulture = uiCulture;
+            _consoleConfiguration = consoleConfiguration;
         }
 
         /// <summary>
@@ -92,6 +103,7 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
             translator.TranslateCulture(ref _culture);
             translator.TranslateCulture(ref _uiCulture);
+            translator.Translate(ref _consoleConfiguration, TargetConsoleConfiguration.FactoryForDeserialization);
         }
 
         /// <summary>

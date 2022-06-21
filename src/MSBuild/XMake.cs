@@ -3209,7 +3209,7 @@ namespace Microsoft.Build.CommandLine
                 // Always use ANSI escape codes when the build is initiated by server
                 if (s_isServerNode)
                 {
-                    consoleParameters = AggregateParameters(consoleParameters, new[] { "FORCECONSOLECOLOR" });
+                    consoleParameters = $"PREFERCONSOLECOLOR;{consoleParameters}";
                 }
 
                 // Check to see if there is a possibility we will be logging from an out-of-proc node.
