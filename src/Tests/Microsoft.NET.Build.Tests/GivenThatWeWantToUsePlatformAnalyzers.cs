@@ -284,6 +284,7 @@ namespace Microsoft.NET.Build.Tests
 
             testProject.AdditionalProperties.Add("CodeAnalysisTreatWarningsAsErrors", "false");
             testProject.AdditionalProperties.Add("TreatWarningsAsErrors", "true");
+            testProject.AdditionalProperties.Add("NoWarn", "NU1505");
             var testAsset = _testAssetsManager
                 .CreateTestProject(testProject, identifier: "analyzerConsoleApp", targetExtension: ".csproj");
 
