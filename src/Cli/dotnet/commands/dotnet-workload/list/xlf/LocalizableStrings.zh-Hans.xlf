@@ -23,7 +23,7 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
-        <source>Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
+        <source>Updates are available for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
         <target state="translated">以下工作负载: {0} 可用更新。运行“dotnet 工作负载更新”以获取最新版本。</target>
         <note />
       </trans-unit>
