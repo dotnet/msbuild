@@ -202,7 +202,7 @@ namespace Microsoft.TemplateEngine.Cli
                         Reporter.Output.WriteLine(LocalizableStrings.FileActionsWouldHaveBeenTaken);
                         if (instantiateResult.CreationEffects != null)
                         {
-                            foreach (IFileChange change in instantiateResult.CreationEffects.FileChanges)
+                            foreach (IFileChange change in instantiateResult.CreationEffects.FileChanges.OrderBy(fc => fc.TargetRelativePath, StringComparer.Ordinal))
                             {
                                 string targetPathToReport = AdjustReportedPath(change.TargetRelativePath, templateArgs.OutputPath, _environmentSettings.Host.FileSystem);
                                 Reporter.Output.WriteLine($"  {GetChangeString(change.ChangeKind)}: {targetPathToReport}");
