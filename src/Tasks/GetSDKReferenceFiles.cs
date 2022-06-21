@@ -1091,7 +1091,11 @@ namespace Microsoft.Build.Tasks
                 string currentAssembly = String.Empty;
                 try
                 {
+#if NETCOREAPP
                     currentAssembly = Assembly.GetExecutingAssembly().Location;
+#else
+                    currentAssembly = Assembly.GetExecutingAssembly().CodeBase;
+#endif
                     var codeBase = new Uri(currentAssembly);
                     DateTime currentCodeLastWriteTime = File.GetLastWriteTimeUtc(codeBase.LocalPath);
                     if (FileSystems.Default.FileExists(referencesCacheFile) && currentCodeLastWriteTime < referencesCacheFileLastWriteTimeUtc)
