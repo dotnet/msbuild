@@ -2679,7 +2679,7 @@ namespace Microsoft.Build.CommandLine
                 {
                     // Since build function has to reuse code from *this* class and OutOfProcServerNode is in different assembly
                     // we have to pass down xmake build invocation to avoid circular dependency
-                    Func<string, (int exitCode, string exitType)> buildFunction = (commandLine) =>
+                    OutOfProcServerNode.BuildCallback buildFunction = (commandLine) =>
                     {
                         int exitCode;
                         ExitType exitType;
@@ -2690,13 +2690,7 @@ namespace Microsoft.Build.CommandLine
                         }
                         else
                         {
-                            exitType = Execute(
-#if FEATURE_GET_COMMANDLINE
-                                    commandLine
-#else
-                                    QuotingUtilities.SplitUnquoted(commandLine).ToArray()
-#endif
-                                );
+                            exitType = Execute(commandLine);
                             exitCode = exitType == ExitType.Success ? 0 : 1;
                         }
                         exitCode = exitType == ExitType.Success ? 0 : 1;

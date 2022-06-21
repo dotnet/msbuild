@@ -13,7 +13,11 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal sealed class ServerNodeBuildCommand : INodePacket
     {
+#if FEATURE_GET_COMMANDLINE
         private string _commandLine = default!;
+#else
+        private string[] _commandLine = default!;
+#endif
         private string _startupDirectory = default!;
         private Dictionary<string, string> _buildProcessEnvironment = default!;
         private CultureInfo _culture = default!;
@@ -25,9 +29,13 @@ namespace Microsoft.Build.BackEnd
         public NodePacketType Type => NodePacketType.ServerNodeBuildCommand;
 
         /// <summary>
-        /// The startup directory
+        /// Command line including arguments
         /// </summary>
+#if FEATURE_GET_COMMANDLINE
         public string CommandLine => _commandLine;
+#else
+        public string[] CommandLine => _commandLine;
+#endif
 
         /// <summary>
         /// The startup directory
@@ -56,7 +64,15 @@ namespace Microsoft.Build.BackEnd
         {
         }
 
-        public ServerNodeBuildCommand(string commandLine, string startupDirectory, Dictionary<string, string> buildProcessEnvironment, CultureInfo culture, CultureInfo uiCulture)
+        public ServerNodeBuildCommand(
+#if FEATURE_GET_COMMANDLINE
+            string commandLine,
+#else
+            string[] commandLine,
+#endif
+            string startupDirectory,
+            Dictionary<string, string> buildProcessEnvironment,
+            CultureInfo culture, CultureInfo uiCulture)
         {
             _commandLine = commandLine;
             _startupDirectory = startupDirectory;

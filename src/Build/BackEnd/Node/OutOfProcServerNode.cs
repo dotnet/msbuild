@@ -19,7 +19,17 @@ namespace Microsoft.Build.Experimental
     /// </summary>
     public sealed class OutOfProcServerNode : INode, INodePacketFactory, INodePacketHandler
     {
-        private readonly Func<string, (int exitCode, string exitType)> _buildFunction;
+        /// <summary>
+        /// A callback used to execute command line build.
+        /// </summary>
+        public delegate (int exitCode, string exitType) BuildCallback(
+#if FEATURE_GET_COMMANDLINE
+            string commandLine);
+#else
+            string[] commandLine);
+#endif
+
+        private readonly BuildCallback _buildFunction;
 
         /// <summary>
         /// The endpoint used to talk to the host.
@@ -63,7 +73,7 @@ namespace Microsoft.Build.Experimental
 
         private string _serverBusyMutexName = default!;
 
-        public OutOfProcServerNode(Func<string, (int exitCode, string exitType)> buildFunction)
+        public OutOfProcServerNode(BuildCallback buildFunction)
         {
             _buildFunction = buildFunction;
             new Dictionary<string, string>();
