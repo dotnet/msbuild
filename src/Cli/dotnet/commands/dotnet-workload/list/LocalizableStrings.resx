@@ -124,7 +124,7 @@
     <value>Installed Workload Ids</value>
   </data>
   <data name="WorkloadUpdatesAvailable" xml:space="preserve">
-    <value>Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</value>
+    <value>Updates are available for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</value>
   </data>
   <data name="WorkloadListFooter" xml:space="preserve">
     <value>Use `dotnet workload search` to find additional workloads to install.</value>
