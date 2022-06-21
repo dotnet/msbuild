@@ -8,7 +8,6 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
@@ -1477,12 +1476,14 @@ namespace Microsoft.Build.BackEnd.Logging
                     };
                 }
             }
-            else if (loggingEvent is BuildErrorEventArgs errorEvent)
+
+            if (loggingEvent is BuildErrorEventArgs errorEvent)
             {
                 // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
                 _buildSubmissionIdsThatHaveLoggedErrors.Add(errorEvent.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
             }
-            else if (loggingEvent is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
+
+            if (loggingEvent is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
             {
                 int key = GetWarningsAsErrorOrMessageKey(projectFinishedEvent);
                 _warningsAsErrorsByProject?.Remove(key);
@@ -1708,10 +1709,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private string GetAndVerifyProjectFileFromContext(BuildEventContext context)
         {
-            _projectFileMap.TryGetValue(context.ProjectContextId, out string projectFile);
-
             // PERF: Not using VerifyThrow to avoid boxing an int in the non-error case.
-            if (projectFile == null)
+            if (!_projectFileMap.TryGetValue(context.ProjectContextId, out string projectFile))
             {
                 ErrorUtilities.ThrowInternalError("ContextID {0} should have been in the ID-to-project file mapping but wasn't!", context.ProjectContextId);
             }
