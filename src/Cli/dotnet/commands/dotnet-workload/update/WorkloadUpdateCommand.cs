@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 var packageUrls = GetUpdatablePackageUrlsAsync(_includePreviews).GetAwaiter().GetResult();
 
                 Reporter.WriteLine("==allPackageLinksJsonOutputStart==");
-                Reporter.WriteLine(JsonSerializer.Serialize(packageUrls));
+                Reporter.WriteLine(JsonSerializer.Serialize(packageUrls, new JsonSerializerOptions() { WriteIndented = true }));
                 Reporter.WriteLine("==allPackageLinksJsonOutputEnd==");
             }
             else if (_adManifestOnlyOption)

@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 var packageUrls = GetPackageDownloadUrlsAsync(_workloadIds.Select(id => new WorkloadId(id)), _skipManifestUpdate, _includePreviews).GetAwaiter().GetResult();
 
                 Reporter.WriteLine("==allPackageLinksJsonOutputStart==");
-                Reporter.WriteLine(JsonSerializer.Serialize(packageUrls));
+                Reporter.WriteLine(JsonSerializer.Serialize(packageUrls, new JsonSerializerOptions() { WriteIndented = true }));
                 Reporter.WriteLine("==allPackageLinksJsonOutputEnd==");
             }
             else if (!string.IsNullOrWhiteSpace(_downloadToCacheOption))
