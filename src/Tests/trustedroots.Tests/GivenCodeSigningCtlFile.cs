@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tests
             _certificates.ImportFromPemFile(_filePath);
         }
 
-        [Fact(Skip="https://github.com/dotnet/sdk/issues/26115")]
+        [Fact]
         public void File_contains_certificates_very_commonly_used_in_NuGet_org_package_signatures()
         {
             // CN=DigiCert Assured ID Root CA, OU=www.digicert.com, O=DigiCert Inc, C=US
@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Tests
 
         private void VerifyCertificateExists(string thumbprint)
         {
-            _certificates.Find(X509FindType.FindByThumbprint, thumbprint, validOnly: true)
+            _certificates.Find(X509FindType.FindByThumbprint, thumbprint, validOnly: false)
                 .Count
                 .Should()
                 .Be(1, $"a certificate with thumbprint '{thumbprint}' should be in '{_filePath}'");
