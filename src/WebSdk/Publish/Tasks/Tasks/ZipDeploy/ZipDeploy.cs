@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -124,7 +123,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
                     }
                     else if (deploymentResponse is null || deploymentResponse?.Status == DeployStatus.Failed || deploymentResponse?.Status == DeployStatus.Unknown)
                     {
-                        Log.LogError(string.Format(Resources.ZIPDEPLOY_Failed,
+                        Log.LogError(string.Format(Resources.ZIPDEPLOY_FailedDeployWithLogs,
                             zipDeployPublishUrl,
                             deploymentResponse?.Status ?? DeployStatus.Unknown,
                             deploymentResponse?.GetLogUrlWithId()));
