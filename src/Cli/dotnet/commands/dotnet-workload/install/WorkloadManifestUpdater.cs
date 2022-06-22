@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
+using System.Security.AccessControl;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli;
@@ -239,25 +240,36 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         }
 
 
-        public async Task<IEnumerable<WorkloadDownload>> GetManifestPackageDownloadsAsync(bool includePreviews)
+        public async Task<IEnumerable<WorkloadDownload>> GetManifestPackageDownloadsAsync(bool includePreview)
         {
             //  TODO:  add the fallback logic from 
             var packageIds = GetInstalledManifestIds()
                 .Select(manifestId => _workloadManifestInstaller.GetManifestPackageId(manifestId, _sdkFeatureBand));
 
             var downloads = new List<WorkloadDownload>();
-            foreach (var packageId in packageIds)
+            foreach (var packageId in packageIds)       // loop over the manifests that are returned the workload resolver
             {
                 try
                 {
-                    var latestVersion = await _nugetPackageDownloader.GetLatestPackageVersion(packageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreviews);
-                    downloads.Add(new WorkloadDownload(packageId.ToString(), latestVersion.ToString()));
+                    bool success;
+                    (success, var latestVersion) = await GetPackageVersion(packageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreview);
+                    if (!success)
+                    {
+                        (success, latestVersion) = await GetPackageVersion(new PackageId ("microsoft.net.workload.mono.toolchain.manifest-6.0.500"), packageSourceLocation: _packageSourceLocation, includePreview: includePreview);
+                        downloads.Add(new WorkloadDownload("microsoft.net.workload.mono.toolchain.manifest-6.0.500", latestVersion.ToString()));
+                    }
+                    if (!success)
+                    {
+                        _reporter.WriteLine(string.Format(LocalizableStrings.FailedToGetPackageManifestUrl, packageId));
+                        return null;
+                    }
                 }
                 catch
                 {
                     _reporter.WriteLine(string.Format(LocalizableStrings.FailedToGetPackageManifestUrl, packageId));
                 }
             }
+
             return downloads;
         }
 
@@ -274,6 +286,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
 
             // TODO: abstract the fallback logic so it can be used in the get manifest package downloads async
+                    // could update the fallback logic to get the latest package version and then update after
             try
             {
                 var adManifestPath = GetAdvertisingManifestPath(_sdkFeatureBand, manifestId);
@@ -514,7 +527,22 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        private string GetAdvertisingManifestPath(SdkFeatureBand featureBand, ManifestId manifestId) =>
+        private async Task<(bool, NuGetVersion)> GetPackageVersion(PackageId packageId, PackageSourceLocation packageSourceLocation = null, bool includePreview = false)
+        {
+            try
+            {
+                var latestVersion = await _nugetPackageDownloader.GetLatestPackageVersion(packageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreview);
+                return (true, latestVersion);
+            }
+            catch
+            {
+                return (false, null);
+            }
+
+        }
+        
+
+private string GetAdvertisingManifestPath(SdkFeatureBand featureBand, ManifestId manifestId) =>
             Path.Combine(_userProfileDir, "sdk-advertising", featureBand.ToString(), manifestId.ToString());
     }
 }
