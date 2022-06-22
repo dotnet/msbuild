@@ -39,7 +39,6 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--verbosity", "minimal" }, "-verbosity:minimal")]
         [InlineData(new string[] { "<project>" }, "<project>")]
         [InlineData(new string[] { "<project>", "<extra-args>" }, "<project> <extra-args>")]
-        [InlineData(new string[] { "--disable-build-servers" }, "-p:UseRazorBuildServer=false -p:UseSharedCompilation=false /nodeReuse:false")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
             CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
@@ -57,7 +56,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
                 command.GetArgumentsToMSBuild()
                     .Should()
-                    .Be($"{ExpectedPrefix} -restore -target:Publish {expectedAdditionalArgs}");
+                    .Be($"{ExpectedPrefix} -restore -target:Publish{expectedAdditionalArgs}");
             });
         }
 
@@ -78,7 +77,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
             command.GetArgumentsToMSBuild()
                    .Should()
-                   .Be($"{ExpectedPrefix} -nologo -target:Publish {expectedAdditionalArgs}");
+                   .Be($"{ExpectedPrefix} -nologo -target:Publish{expectedAdditionalArgs}");
         }
 
         [Fact]

@@ -427,24 +427,19 @@ public static class Program
         public void It_publishes_on_release_if_PublishRelease_property_set()
         {
             var helloWorldAsset = _testAssetsManager
-           .CopyTestAsset("HelloWorld")
-           .WithSource()
-           .WithProjectChanges(project =>
-           {
-               var ns = project.Root.Name.Namespace;
-               var propertyGroup = new XElement(ns + "PropertyGroup");
-               project.Root.Add(propertyGroup);
-               propertyGroup.Add(new XElement(ns + "PublishRelease", "true"));
-           });
+               .CopyTestAsset("HelloWorld", "PackHelloWorld")
+               .WithSource();
+
+            System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PublishRelease>true</PublishRelease></PropertyGroup></Project>");
 
             new BuildCommand(helloWorldAsset)
-            .Execute()
-            .Should()
-            .Pass();
+           .Execute()
+           .Should()
+           .Pass();
 
-            var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
+            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
 
-            packCommand
+            publishCommand
             .Execute()
             .Should()
             .HaveStdOutContaining("Release")
