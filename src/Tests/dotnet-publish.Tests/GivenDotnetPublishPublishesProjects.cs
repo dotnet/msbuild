@@ -18,7 +18,8 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 {
     public class GivenDotnetPublishPublishesProjects : SdkTest
     {
-        private static string _expectedConfigurationDefault = "Release";
+
+        private static string _expectedConfigurationDefault = "Debug";
 
         public GivenDotnetPublishPublishesProjects(ITestOutputHelper log) : base(log)
         {

@@ -23,7 +23,6 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         }
 
         const string ExpectedPrefix = "-maxcpucount -verbosity:m";
-        const string ExpectedConfiguration = "-property:PublishRelease=true";
 
         [Theory]
         [InlineData(new string[] { }, "")]
@@ -58,7 +57,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
                 command.GetArgumentsToMSBuild()
                     .Should()
-                    .Be($"{ExpectedPrefix} -restore -target:Publish {ExpectedConfiguration}{expectedAdditionalArgs}");
+                    .Be($"{ExpectedPrefix} -restore -target:Publish {expectedAdditionalArgs}");
             });
         }
 
@@ -75,11 +74,11 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             command.SeparateRestoreCommand
                    .GetArgumentsToMSBuild()
                    .Should()
-                   .Be($"{ExpectedPrefix} -target:Restore {ExpectedConfiguration}");
+                   .Be($"{ExpectedPrefix} -target:Restore");
 
             command.GetArgumentsToMSBuild()
                    .Should()
-                   .Be($"{ExpectedPrefix} -nologo -target:Publish {ExpectedConfiguration}{expectedAdditionalArgs}");
+                   .Be($"{ExpectedPrefix} -nologo -target:Publish {expectedAdditionalArgs}");
         }
 
         [Fact]
@@ -95,7 +94,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             // NOTE --no-build implies no-restore hence no -restore argument to msbuild below.
             command.GetArgumentsToMSBuild()
                    .Should()
-                   .Be($"{ExpectedPrefix} -target:Publish {ExpectedConfiguration} -property:NoBuild=true");
+                   .Be($"{ExpectedPrefix} -target:Publish -property:NoBuild=true");
         }
 
         [Fact]
@@ -106,7 +105,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
             command.GetArgumentsToMSBuild()
                .Should()
-               .Be($"{ExpectedPrefix} -restore -target:Publish {ExpectedConfiguration} -property:Prop1=prop1 -property:Prop2=prop2");
+               .Be($"{ExpectedPrefix} -restore -target:Publish -property:Prop1=prop1 -property:Prop2=prop2");
         }
     }
 }

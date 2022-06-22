@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
     {
         private static string _tfm = "netcoreapp3.1";
         private static string _arch = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
-        private static string _expectedConfigurationDefault = "Release";
+        private static string _expectedConfigurationDefault = "Debug";
 
         public GivenDotnetStoresAndPublishesProjects(ITestOutputHelper log) : base(log)
         {

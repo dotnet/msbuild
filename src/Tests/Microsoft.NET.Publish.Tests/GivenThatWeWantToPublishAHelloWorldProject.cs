@@ -424,6 +424,35 @@ public static class Program
         }
 
         [Fact]
+        public void It_publishes_on_release_if_PublishRelease_property_set()
+        {
+            var helloWorldAsset = _testAssetsManager
+           .CopyTestAsset("HelloWorld")
+           .WithSource()
+           .WithProjectChanges(project =>
+           {
+               var ns = project.Root.Name.Namespace;
+               var propertyGroup = new XElement(ns + "PropertyGroup");
+               project.Root.Add(propertyGroup);
+               propertyGroup.Add(new XElement(ns + "PublishRelease", "true"));
+           });
+
+            new BuildCommand(helloWorldAsset)
+            .Execute()
+            .Should()
+            .Pass();
+
+            var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
+
+            packCommand
+            .Execute()
+            .Should()
+            .HaveStdOutContaining("Release")
+            .And
+            .Pass();
+        }
+
+        [Fact]
         public void It_allows_unsupported_rid_with_override()
         {
             var helloWorldAsset = _testAssetsManager

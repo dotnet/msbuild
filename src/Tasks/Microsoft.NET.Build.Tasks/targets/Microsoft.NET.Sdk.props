@@ -16,7 +16,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DisableHandlePackageFileConflicts>true</DisableHandlePackageFileConflicts>
   </PropertyGroup>
   
-  <!-- Default configuration and platform to Debug|AnyCPU, unless we are publishing or packing.-->
+  <!-- Default configuration and platform to Debug|AnyCPU-->
   <PropertyGroup>
     <Configurations Condition=" '$(Configurations)' == '' ">Debug;Release</Configurations>
     <Platforms Condition=" '$(Platforms)' == '' ">AnyCPU</Platforms>

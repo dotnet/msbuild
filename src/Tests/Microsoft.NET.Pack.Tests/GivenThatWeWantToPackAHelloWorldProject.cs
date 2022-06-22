@@ -84,5 +84,29 @@ namespace Microsoft.NET.Pack.Tests
                 .And
                 .HaveStdOutContaining("NETSDK1085");
         }
+
+        [Fact]
+        public void It_packs_with_release_if_PackRelease_property_set()
+        {
+            var helloWorldAsset = _testAssetsManager
+               .CopyTestAsset("HelloWorld", "PackHelloWorld")
+               .WithSource();
+
+            System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PackRelease>true</PackRelease></PropertyGroup></Project>");
+
+            new BuildCommand(helloWorldAsset)
+           .Execute()
+           .Should()
+           .Pass();
+
+            var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
+
+            packCommand
+            .Execute()
+            .Should()
+            .HaveStdOutContaining("Release")
+            .And
+            .Pass();
+        }
     }
 }

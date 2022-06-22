@@ -34,8 +34,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
             var msbuildArgs = new List<string>()
             {
-                "-target:Publish",
-                "-property:PublishRelease=true"
+                "-target:Publish"
             };
 
             CommonOptions.ValidateSelfContainedOptions(parseResult.HasOption(PublishCommandParser.SelfContainedOption),
