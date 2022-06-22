@@ -7,6 +7,8 @@ using System;
 using System.IO;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class XmlPeek_Tests
@@ -34,7 +36,7 @@ namespace Microsoft.Build.UnitTests
 ";
 
         private string _xmlFileNoNsNoDtd = @"<?xml version='1.0' encoding='utf-8'?>
-        
+
 <class AccessModifier='public' Name='test'>
   <variable Type='String' Name='a'></variable>
   <variable Type='String' Name='b'></variable>
@@ -301,7 +303,7 @@ namespace Microsoft.Build.UnitTests
         public void PeekWithoutUsingTask()
         {
             string projectContents = @"
-<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+<Project ToolsVersion='msbuilddefaulttoolsversion'>
   <Target Name='x'>
     <XmlPeek Query='abc' ContinueOnError='true' />
   </Target>

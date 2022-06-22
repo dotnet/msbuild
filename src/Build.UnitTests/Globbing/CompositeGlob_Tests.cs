@@ -8,6 +8,8 @@ using Microsoft.Build.Globbing;
 using Microsoft.Build.Globbing.Extensions;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests.Globbing
 {
     public class CompositeGlobTests

@@ -8,6 +8,8 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>

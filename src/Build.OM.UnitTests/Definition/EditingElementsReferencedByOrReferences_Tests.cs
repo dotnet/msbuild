@@ -9,6 +9,8 @@ using System.Xml;
 using Microsoft.Build.Evaluation;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
     /// <summary>
@@ -23,7 +25,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void ChangeItemTypeInReferencedItem()
         {
             Project project = GetProject(
-@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+@"<Project>
   <ItemGroup>
     <I Include=""X"" />
     <I Include=""@(I);Y"" />
@@ -34,7 +36,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             item.ItemType = "J";
 
             string expected =
-@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+@"<Project>
   <ItemGroup>
     <J Include=""X"" />
     <I Include=""@(I);Y"" />
@@ -57,7 +59,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void RemoveItemInList()
         {
             Project project = GetProject(
-@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+@"<Project>
   <ItemGroup>
     <I Include=""X"" />
     <I Include=""@(I);Y;Z"" />
@@ -68,7 +70,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.RemoveItem(item);
 
             string expected =
-@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+@"<Project>
   <ItemGroup>
     <I Include=""X"" />
     <I Include=""X"" />
@@ -86,7 +88,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void RenameItemInList()
         {
             Project project = GetProject(
-@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+@"<Project>
   <ItemGroup>
     <I Include=""X"" />
     <I Include=""@(I);Y"" />
@@ -97,7 +99,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             item.Rename("Z");
 
             string expected =
-@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+@"<Project>
   <ItemGroup>
     <I Include=""X"" />
     <I Include=""X"" />
@@ -115,7 +117,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void RemoveMetadata1()
         {
             Project project = GetProject(
-@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+@"<Project>
   <ItemDefinitionGroup>
     <I>
       <M>A</M>
@@ -141,7 +143,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             item1.RemoveMetadata("M");
 
             string expected =
-@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+@"<Project>
   <ItemDefinitionGroup>
     <I>
       <M>A</M>
@@ -166,7 +168,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void RemoveMetadata2()
         {
             Project project = GetProject(
-@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+@"<Project>
   <ItemDefinitionGroup>
     <I>
       <M>A</M>
@@ -187,7 +189,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             item1.RemoveMetadata("M");
 
             string expected =
-@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+@"<Project>
   <ItemDefinitionGroup>
     <I>
       <M>A</M>
@@ -218,7 +220,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void RemoveMetadata3()
         {
             Project project = GetProject(
-        @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+        @"<Project>
   <ItemDefinitionGroup>
     <I>
       <M>A</M>
@@ -243,7 +245,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             item2.RemoveMetadata("M");
 
             string expected =
-@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+@"<Project>
   <ItemDefinitionGroup>
     <I>
       <M>A</M>
@@ -272,7 +274,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void RemoveReferencedMetadata()
         {
             Project project = GetProject(
-@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+@"<Project>
   <ItemGroup>
     <I Include=""i"">
       <M>m</M>
@@ -287,7 +289,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             item.RemoveMetadata("M");
 
             string expected =
-@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+@"<Project>
   <ItemGroup>
     <I Include=""i"">
       <N>%(I.M)</N>
@@ -311,7 +313,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void RemoveProperty()
         {
             Project project = GetProject(
-@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+@"<Project>
   <PropertyGroup>
     <P>A</P>
     <P>$(P)B</P>
@@ -322,7 +324,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.RemoveProperty(property);
 
             string expected =
-@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+@"<Project>
   <PropertyGroup>
     <P>A</P>
   </PropertyGroup>

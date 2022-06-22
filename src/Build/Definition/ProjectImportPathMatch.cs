@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

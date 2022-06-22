@@ -14,6 +14,8 @@ using Xunit;
 
 using Task = System.Threading.Tasks.Task;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.UnitTests
 {
     public class DownloadFile_Tests

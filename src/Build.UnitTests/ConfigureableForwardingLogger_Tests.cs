@@ -9,6 +9,8 @@ using Microsoft.Build.BackEnd.Logging;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class ConfigureableForwardingLogger_Tests

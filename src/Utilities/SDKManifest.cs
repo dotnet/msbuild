@@ -11,6 +11,8 @@ using System.Xml;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
@@ -352,13 +354,8 @@ namespace Microsoft.Build.Utilities
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 ReadError = true;
                 ReadErrorMessage = e.Message;
             }

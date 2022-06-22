@@ -13,6 +13,8 @@ using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
 #if RUNTIME_TYPE_NETCORE

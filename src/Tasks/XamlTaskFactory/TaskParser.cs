@@ -11,6 +11,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using XamlTypes = Microsoft.Build.Framework.XamlTypes;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Xaml
 {
     /// <summary>
@@ -126,13 +128,8 @@ namespace Microsoft.Build.Tasks.Xaml
                 if (!isRootedPath)
                     maybeFullPath = Path.GetFullPath(contentOrFile);
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 // We will get an exception if the contents are not a path (for instance, they are actual XML.)
             }
 

@@ -4,8 +4,6 @@
 using System.Diagnostics;
 using System.IO;
 
-#nullable enable
-
 namespace Microsoft.Build.Shared
 {
     internal static class NamedPipeUtil

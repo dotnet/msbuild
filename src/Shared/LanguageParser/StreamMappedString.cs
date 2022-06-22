@@ -5,6 +5,8 @@ using System;
 using System.IO;
 using System.Text;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared.LanguageParser
 {
     /// <summary>

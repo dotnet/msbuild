@@ -11,6 +11,8 @@ using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     /// <summary>
@@ -950,6 +952,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             public AssemblyAttributeFlags(string path)
             {
                 using (MetadataReader r = MetadataReader.Create(path))
+                {
                     if (r != null)
                     {
                         IsSigned = !String.IsNullOrEmpty(r.PublicKeyToken);
@@ -958,6 +961,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         HasPrimaryInteropAssemblyAttribute = r.HasAssemblyAttribute("System.Runtime.InteropServices.PrimaryInteropAssemblyAttribute");
                         HasImportedFromTypeLibAttribute = r.HasAssemblyAttribute("System.Runtime.InteropServices.ImportedFromTypeLibAttribute");
                     }
+                }
             }
         }
         #endregion

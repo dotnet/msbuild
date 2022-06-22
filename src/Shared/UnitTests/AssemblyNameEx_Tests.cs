@@ -13,6 +13,8 @@ using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class AssemblyNameEx_Tests

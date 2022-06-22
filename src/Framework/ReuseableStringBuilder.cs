@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Text;
 using System.Threading;
 using Microsoft.Build.Eventing;
@@ -49,7 +50,11 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public int Length
         {
-            get { return _borrowedBuilder?.Length ?? 0; }
+            get
+            {
+                return _borrowedBuilder?.Length ?? 0;
+            }
+
             set
             {
                 LazyPrepare();
@@ -110,6 +115,28 @@ namespace Microsoft.Build.Framework
         {
             LazyPrepare();
             _borrowedBuilder.Append(value, startIndex, count);
+            return this;
+        }
+
+        /// <inheritdoc cref="StringBuilder.AppendFormat(IFormatProvider, string, object[])"/>
+        internal ReuseableStringBuilder AppendFormat(
+            CultureInfo currentCulture,
+            string format,
+            params object[] args)
+        {
+            LazyPrepare();
+            _borrowedBuilder.AppendFormat(
+                currentCulture,
+                format,
+                args);
+            return this;
+        }
+
+        /// <inheritdoc cref="StringBuilder.AppendLine()"/>
+        internal ReuseableStringBuilder AppendLine()
+        {
+            LazyPrepare();
+            _borrowedBuilder.AppendLine();
             return this;
         }
 
@@ -236,7 +263,7 @@ namespace Microsoft.Build.Framework
                     // If user wants bigger capacity than maximum capacity, respect it.
                     returned = new StringBuilder(SelectBracketedCapacity(capacity));
 #if DEBUG
-                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: returned.GetHashCode(), newCapacity:capacity, oldCapacity:0, type:"miss");
+                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: returned.GetHashCode(), newCapacity: capacity, oldCapacity: 0, type: "miss");
 #endif
                 }
                 else if (returned.Capacity < capacity)

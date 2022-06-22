@@ -11,6 +11,8 @@ using Shouldly;
 using Xunit;
 using CommonWriterType = System.Action<string, string, System.Collections.Generic.IEnumerable<string>>;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public sealed class PrintLineDebugger_Tests

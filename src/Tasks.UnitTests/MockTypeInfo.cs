@@ -10,6 +10,8 @@ using VarEnum = System.Runtime.InteropServices.VarEnum;
 using IFixedTypeInfo = Microsoft.Build.Tasks.IFixedTypeInfo;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>

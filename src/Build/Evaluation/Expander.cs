@@ -19,7 +19,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using AvailableStaticMethods = Microsoft.Build.Internal.AvailableStaticMethods;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
@@ -27,6 +26,9 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TaskItemFactory;
 
 using Microsoft.NET.StringTools;
+using Microsoft.Build.BackEnd.Logging;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -417,9 +419,9 @@ namespace Microsoft.Build.Evaluation
         ///
         /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.
         /// </summary>
-        internal string ExpandIntoStringAndUnescape(string expression, ExpanderOptions options, IElementLocation elementLocation)
+        internal string ExpandIntoStringAndUnescape(string expression, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext = null)
         {
-            string result = ExpandIntoStringLeaveEscaped(expression, options, elementLocation);
+            string result = ExpandIntoStringLeaveEscaped(expression, options, elementLocation, loggingContext);
 
             return (result == null) ? null : EscapingUtilities.UnescapeAll(result);
         }
@@ -431,7 +433,7 @@ namespace Microsoft.Build.Evaluation
         ///
         /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.
         /// </summary>
-        internal string ExpandIntoStringLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
+        internal string ExpandIntoStringLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext = null)
         {
             if (expression.Length == 0)
             {
@@ -441,7 +443,7 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
 
             string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
-            result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _usedUninitializedProperties, _fileSystem);
+            result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _usedUninitializedProperties, _fileSystem, loggingContext);
             result = ItemExpander.ExpandItemVectorsIntoString<I>(this, result, _items, options, elementLocation);
             result = FileUtilities.MaybeAdjustFilePath(result);
 
@@ -471,11 +473,11 @@ namespace Microsoft.Build.Evaluation
         /// Use this form when the result is going to be processed further, for example by matching against the file system,
         /// so literals must be distinguished, and you promise to unescape after that.
         /// </summary>
-        internal SemiColonTokenizer ExpandIntoStringListLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
+        internal SemiColonTokenizer ExpandIntoStringListLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext = null)
         {
             ErrorUtilities.VerifyThrow((options & ExpanderOptions.BreakOnNotEmpty) == 0, "not supported");
 
-            return ExpressionShredder.SplitSemiColonSeparatedList(ExpandIntoStringLeaveEscaped(expression, options, elementLocation));
+            return ExpressionShredder.SplitSemiColonSeparatedList(ExpandIntoStringLeaveEscaped(expression, options, elementLocation, loggingContext));
         }
 
         /// <summary>
@@ -1075,7 +1077,8 @@ namespace Microsoft.Build.Evaluation
                 ExpanderOptions options,
                 IElementLocation elementLocation,
                 UsedUninitializedProperties usedUninitializedProperties,
-                IFileSystem fileSystem)
+                IFileSystem fileSystem,
+                LoggingContext loggingContext = null)
             {
                 return
                     ConvertToString(
@@ -1085,7 +1088,8 @@ namespace Microsoft.Build.Evaluation
                             options,
                             elementLocation,
                             usedUninitializedProperties,
-                            fileSystem));
+                            fileSystem,
+                            loggingContext));
             }
 
             /// <summary>
@@ -1111,7 +1115,8 @@ namespace Microsoft.Build.Evaluation
                 ExpanderOptions options,
                 IElementLocation elementLocation,
                 UsedUninitializedProperties usedUninitializedProperties,
-                IFileSystem fileSystem)
+                IFileSystem fileSystem,
+                LoggingContext loggingContext = null)
             {
                 if (((options & ExpanderOptions.ExpandProperties) == 0) || String.IsNullOrEmpty(expression))
                 {
@@ -1187,12 +1192,11 @@ namespace Microsoft.Build.Evaluation
                         }
                         else if ((expression.Length - (propertyStartIndex + 2)) > 9 && tryExtractRegistryFunction && s_invariantCompareInfo.IndexOf(expression, "Registry:", propertyStartIndex + 2, 9, CompareOptions.OrdinalIgnoreCase) == propertyStartIndex + 2)
                         {
-                            // if FEATURE_WIN32_REGISTRY is off, treat the property value as if there's no Registry value at that location, rather than fail
                             propertyBody = expression.Substring(propertyStartIndex + 2, propertyEndIndex - propertyStartIndex - 2);
 
                             // If the property body starts with any of our special objects, then deal with them
                             // This is a registry reference, like $(Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation)
-                            propertyValue = ExpandRegistryValue(propertyBody, elementLocation); // This func returns an empty string if not FEATURE_WIN32_REGISTRY
+                            propertyValue = ExpandRegistryValue(propertyBody, elementLocation); // This func returns an empty string if not on Windows
                         }
 
                         // Compat hack: as a special case, $(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\9.0\VSTSDB@VSTSDBDirectory) should return String.Empty
@@ -1226,7 +1230,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         else // This is a regular property
                         {
-                            propertyValue = LookupProperty(properties, expression, propertyStartIndex + 2, propertyEndIndex - 1, elementLocation, usedUninitializedProperties);
+                            propertyValue = LookupProperty(properties, expression, propertyStartIndex + 2, propertyEndIndex - 1, elementLocation, usedUninitializedProperties, loggingContext);
                         }
 
                         if (propertyValue != null)
@@ -1464,7 +1468,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Look up a simple property reference by the name of the property, e.g. "Foo" when expanding $(Foo).
             /// </summary>
-            private static object LookupProperty(IPropertyProvider<T> properties, string propertyName, int startIndex, int endIndex, IElementLocation elementLocation, UsedUninitializedProperties usedUninitializedProperties)
+            private static object LookupProperty(IPropertyProvider<T> properties, string propertyName, int startIndex, int endIndex, IElementLocation elementLocation, UsedUninitializedProperties usedUninitializedProperties, LoggingContext loggingContext = null)
             {
                 T property = properties.GetProperty(propertyName, startIndex, endIndex);
 
@@ -1509,6 +1513,11 @@ namespace Microsoft.Build.Evaluation
                 }
                 else
                 {
+                    if (property is ProjectPropertyInstance.EnvironmentDerivedProjectPropertyInstance environmentDerivedProperty)
+                    {
+                        environmentDerivedProperty.loggingContext = loggingContext;
+                    }
+
                     propertyValue = property.EvaluatedValueEscaped;
                 }
 
@@ -1568,7 +1577,6 @@ namespace Microsoft.Build.Evaluation
                 return value;
             }
 
-#if FEATURE_WIN32_REGISTRY
             /// <summary>
             /// Given a string like "Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation", return the value at that location
             /// in the registry. If the value isn't found, returns String.Empty.
@@ -1579,6 +1587,16 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private static string ExpandRegistryValue(string registryExpression, IElementLocation elementLocation)
             {
+#if RUNTIME_TYPE_NETCORE
+                // .NET Core MSBuild used to always return empty, so match that behavior
+                // on non-Windows (no registry), and with a changewave (in case someone
+                // had a registry property and it breaks when it lights up).
+                if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+                {
+                    return string.Empty;
+                }
+#endif
+
                 // Remove "Registry:" prefix
                 string registryLocation = registryExpression.Substring(9);
 
@@ -1644,28 +1662,14 @@ namespace Microsoft.Build.Evaluation
                             result = String.Empty;
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception ex) when (!ExceptionHandling.NotExpectedRegistryException(ex))
                     {
-                        if (ExceptionHandling.NotExpectedRegistryException(ex))
-                        {
-                            throw;
-                        }
-
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidRegistryPropertyExpression", "$(" + registryExpression + ")", ex.Message);
                     }
                 }
 
                 return result;
             }
-#else
-            /// <summary>
-            /// Given a string like "Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation", returns String.Empty, as FEATURE_WIN32_REGISTRY is off.
-            /// </summary>
-            private static string ExpandRegistryValue(string registryExpression, IElementLocation elementLocation)
-            {
-                return String.Empty;
-            }
-#endif
         }
 
         /// <summary>
@@ -2213,7 +2217,7 @@ namespace Microsoft.Build.Evaluation
                             }
                             catch (ArgumentException)
                             {
-                                //  Prior to porting to .NET Core, this code was passing false as the throwOnBindFailure parameter to Delegate.CreateDelegate.
+                                // Prior to porting to .NET Core, this code was passing false as the throwOnBindFailure parameter to Delegate.CreateDelegate.
                                 //  Since MethodInfo.CreateDelegate doesn't have this option, we catch the ArgumentException to preserve the previous behavior
                                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnknownItemFunction", functionName);
                             }
@@ -2243,8 +2247,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         if (Traits.Instance.UseLazyWildCardEvaluation)
                         {
-                            foreach (
-                                var resultantItem in
+                            foreach (var resultantItem in
                                 EngineFileUtilities.GetFileListEscaped(
                                     item.ProjectDirectory,
                                     item.EvaluatedIncludeEscaped,
@@ -2297,15 +2300,10 @@ namespace Microsoft.Build.Evaluation
 
                             result = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(directoryToUse, item.Key, definingProjectEscaped, functionName);
                         }
-                        catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+                        // InvalidOperationException is how GetItemSpecModifier communicates invalid conditions upwards, so
+                        // we do not want to rethrow in that case.
+                        catch (Exception e) when (!ExceptionHandling.NotExpectedException(e) || e is InvalidOperationException)
                         {
-                            // InvalidOperationException is how GetItemSpecModifier communicates invalid conditions upwards, so
-                            // we do not want to rethrow in that case.
-                            if (ExceptionHandling.NotExpectedException(e) && !(e is InvalidOperationException))
-                            {
-                                throw;
-                            }
-
                             ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidItemFunctionExpression", functionName, item.Key, e.Message);
                         }
 
@@ -3392,9 +3390,9 @@ namespace Microsoft.Build.Evaluation
                         // The object that we're about to call methods on may have escaped characters
                         // in it, we want to operate on the unescaped string in the function, just as we
                         // want to pass arguments that are unescaped (see below)
-                        if (objectInstance is string)
+                        if (objectInstance is string objectInstanceString)
                         {
-                            objectInstance = EscapingUtilities.UnescapeAll((string)objectInstance);
+                            objectInstance = EscapingUtilities.UnescapeAll(objectInstanceString);
                         }
                     }
 
@@ -3504,33 +3502,26 @@ namespace Microsoft.Build.Evaluation
                                 // First use InvokeMember using the standard binder - this will match and coerce as needed
                                 functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
                             }
-                            catch (MissingMethodException ex) // Don't catch and retry on any other exception
+                            // If we're invoking a method, then there are deeper attempts that can be made to invoke the method.
+                            // If not, we were asked to get a property or field but found that we cannot locate it. No further argument coersion is possible, so throw.
+                            catch (MissingMethodException ex) when ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
                             {
-                                // If we're invoking a method, then there are deeper attempts that
-                                // can be made to invoke the method
-                                if ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
-                                {
-                                    // The standard binder failed, so do our best to coerce types into the arguments for the function
-                                    // This may happen if the types need coercion, but it may also happen if the object represents a type that contains open type parameters, that is, ContainsGenericParameters returns true.
-                                    functionResult = LateBindExecute(ex, _bindingFlags, objectInstance, args, false /* is not constructor */);
-                                }
-                                else
-                                {
-                                    // We were asked to get a property or field, and we found that we cannot
-                                    // locate it. Since there is no further argument coersion possible
-                                    // we'll throw right now.
-                                    throw;
-                                }
+                                // The standard binder failed, so do our best to coerce types into the arguments for the function
+                                // This may happen if the types need coercion, but it may also happen if the object represents a type that contains open type parameters, that is, ContainsGenericParameters returns true.
+                                functionResult = LateBindExecute(ex, _bindingFlags, objectInstance, args, false /* is not constructor */);
                             }
                         }
                     }
 
                     // If the result of the function call is a string, then we need to escape the result
                     // so that we maintain the "engine contains escaped data" state.
-                    // The exception is that the user is explicitly calling MSBuild::Unescape or MSBuild::Escape
-                    if (functionResult is string && !String.Equals("Unescape", _methodMethodName, StringComparison.OrdinalIgnoreCase) && !String.Equals("Escape", _methodMethodName, StringComparison.OrdinalIgnoreCase))
+                    // The exception is that the user is explicitly calling MSBuild::Unescape, MSBuild::Escape, or ConvertFromBase64
+                    if (functionResult is string functionResultString &&
+                        !String.Equals("Unescape", _methodMethodName, StringComparison.OrdinalIgnoreCase) &&
+                        !String.Equals("Escape", _methodMethodName, StringComparison.OrdinalIgnoreCase) &&
+                        !String.Equals("ConvertFromBase64", _methodMethodName, StringComparison.OrdinalIgnoreCase))
                     {
-                        functionResult = EscapingUtilities.Escape((string)functionResult);
+                        functionResult = EscapingUtilities.Escape(functionResultString);
                     }
 
                     // We have nothing left to parse, so we'll return what we have
@@ -3565,13 +3556,8 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // Any other exception was thrown by trying to call it
-                catch (Exception ex)
+                catch (Exception ex) when (!ExceptionHandling.NotExpectedFunctionException(ex))
                 {
-                    if (ExceptionHandling.NotExpectedFunctionException(ex))
-                    {
-                        throw;
-                    }
-
                     // If there's a :: in the expression, they were probably trying for a static function
                     // invocation. Give them some more relevant info in that case
                     if (s_invariantCompareInfo.IndexOf(_expression, "::", CompareOptions.OrdinalIgnoreCase) > -1)
@@ -3785,9 +3771,8 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
                 }
-                else if (objectInstance is string[])
+                else if (objectInstance is string[] stringArray)
                 {
-                    string[] stringArray = (string[])objectInstance;
                     if (string.Equals(_methodMethodName, "GetValue", StringComparison.OrdinalIgnoreCase))
                     {
                         if (TryGetArg(args, out int index))
@@ -4095,6 +4080,22 @@ namespace Microsoft.Build.Evaluation
                             if (TryGetArgs(args, out string arg1, out int arg2))
                             {
                                 returnVal = IntrinsicFunctions.GetTargetPlatformVersion(arg1, arg2);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.ConvertToBase64), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.ConvertToBase64(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.ConvertFromBase64), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.ConvertFromBase64(arg0);
                                 return true;
                             }
                         }

@@ -19,6 +19,8 @@ using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.Build.UnitTests.ObjectModelHelpers;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     public class SdkResultOutOfProc_Tests : IDisposable
@@ -69,8 +71,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Need to set this env variable to enable Process.GetCurrentProcess().Id in the project file.
             _env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
 
-            //  Set this if you need to debug the out of process build
-            //_env.SetEnvironmentVariable("MSBUILDDEBUGONSTART", "1");
+            // Set this if you need to debug the out of process build
+            // _env.SetEnvironmentVariable("MSBUILDDEBUGONSTART", "1");
         }
 
         public void Dispose()
@@ -125,7 +127,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ValidateResolverResults(result);
         }
 
-        //  Test scenario where using an SdkResolver in a project that hasn't been evaluated
+        // Test scenario where using an SdkResolver in a project that hasn't been evaluated
         //  in the main node (which is where the SdkResolver runs).  This validates that
         //  the SdkResult is correctly transferred between nodes.
         [Fact]

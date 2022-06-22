@@ -11,6 +11,8 @@ using Xunit.Abstractions;
 using System;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests
 {
     sealed public class ChangeWaves_Tests

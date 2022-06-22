@@ -10,6 +10,8 @@ using Microsoft.Build.Shared.AssemblyFoldersFromConfig;
 using Microsoft.Build.Utilities;
 using ProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
 {
     internal class AssemblyFoldersFromConfig : IEnumerable<AssemblyFoldersFromConfigInfo>
@@ -78,7 +80,6 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                 (from folder in collection.AssemblyFolders
                  let targetVersion = VersionUtilities.ConvertToVersion(targetRuntimeVersion)
                  let replacementVersion = GetFrameworkVersion(folder.FrameworkVersion)
-                 
                  where targetVersion != null && targetVersion >= replacementVersion
                  orderby folder.FrameworkVersion descending 
                  select folder).ToList();

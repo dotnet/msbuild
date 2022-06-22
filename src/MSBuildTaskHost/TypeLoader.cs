@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Threading;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

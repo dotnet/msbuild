@@ -5,6 +5,8 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>

@@ -3,10 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+#if FEATURE_APARTMENT_STATE
 using System.Diagnostics.CodeAnalysis;
+#endif
 using System.Linq;
 using System.Reflection;
+#if FEATURE_APARTMENT_STATE
 using System.Runtime.ExceptionServices;
+#endif
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Collections;
@@ -22,6 +26,8 @@ using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -375,7 +381,8 @@ namespace Microsoft.Build.BackEnd
                 _targetChildInstance.ConditionLocation,
                 _targetLoggingContext.LoggingService,
                 _targetLoggingContext.BuildEventContext,
-                FileSystems.Default);
+                FileSystems.Default,
+                loggingContext: _targetLoggingContext);
 
             if (!condition)
             {
@@ -393,8 +400,19 @@ namespace Microsoft.Build.BackEnd
             // If this is an Intrinsic task, it gets handled in a special fashion.
             if (_taskNode == null)
             {
-                ExecuteIntrinsicTask(bucket);
-                taskResult = new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, null);
+                try
+                {
+                    ExecuteIntrinsicTask(bucket);
+                    taskResult = new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, null);
+                }
+                catch (InvalidProjectFileException e)
+                {
+                    // Make sure the Invalid Project error gets logged *before* TaskFinished.  Otherwise,
+                    // the log is confusing.
+                    _targetLoggingContext.LogInvalidProjectFileError(e);
+                    _continueOnError = ContinueOnError.ErrorAndStop;
+                    taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, e);
+                }
             }
             else
             {
@@ -455,6 +473,7 @@ namespace Microsoft.Build.BackEnd
                             // the log is confusing.
                             taskLoggingContext.LogInvalidProjectFileError(e);
                             _continueOnError = ContinueOnError.ErrorAndStop;
+                            taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, e);
                         }
                         finally
                         {
@@ -605,7 +624,7 @@ namespace Microsoft.Build.BackEnd
                     if (!_targetLoggingContext.LoggingService.OnlyLogCriticalEvents)
                     {
                         // Expand the expression for the Log.  Since we know the condition evaluated to false, leave unexpandable properties in the condition so as not to cause an error
-                        string expanded = bucket.Expander.ExpandIntoStringAndUnescape(_targetChildInstance.Condition, ExpanderOptions.ExpandAll | ExpanderOptions.LeavePropertiesUnexpandedOnError | ExpanderOptions.Truncate, _targetChildInstance.ConditionLocation);
+                        string expanded = bucket.Expander.ExpandIntoStringAndUnescape(_targetChildInstance.Condition, ExpanderOptions.ExpandAll | ExpanderOptions.LeavePropertiesUnexpandedOnError | ExpanderOptions.Truncate, _targetChildInstance.ConditionLocation, loggingContext: _targetLoggingContext);
 
                         // Whilst we are within the processing of the task, we haven't actually started executing it, so
                         // our skip task message needs to be in the context of the target. However any errors should be reported

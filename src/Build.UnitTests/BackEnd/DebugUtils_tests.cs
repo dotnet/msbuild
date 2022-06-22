@@ -8,6 +8,8 @@ using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class DebugUtils_Tests

@@ -6,6 +6,8 @@ using System.Collections;
 using Microsoft.Build.Framework;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.TrackedDependencies
 {
     /***************************************************************************

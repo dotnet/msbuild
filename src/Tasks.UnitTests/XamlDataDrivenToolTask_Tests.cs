@@ -8,6 +8,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
 {
     /// <summary>
@@ -87,7 +89,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         }
 
         /// <summary>
-        /// Tests the basic string array type 
+        /// Tests the basic string array type
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -102,7 +104,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         }
 
         /// <summary>
-        /// Tests the basic string array type, with an array that contains multiple values. 
+        /// Tests the basic string array type, with an array that contains multiple values.
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -224,9 +226,9 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         }
 
         /// <summary>
-        /// XamlTaskFactory does not, in and of itself, support the idea of "always" switches or default values.  At least 
-        /// for Dev10, the workaround is to create a property as usual, and then specify the required values in the .props 
-        /// file.  Since these unit tests are just testing the task itself, this method serves as our ".props file".  
+        /// XamlTaskFactory does not, in and of itself, support the idea of "always" switches or default values.  At least
+        /// for Dev10, the workaround is to create a property as usual, and then specify the required values in the .props
+        /// file.  Since these unit tests are just testing the task itself, this method serves as our ".props file".
         /// </summary>
         public object CreateFakeTask()
         {
@@ -240,19 +242,19 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
     }
 
     /// <summary>
-    /// Tests for XamlDataDrivenToolTask / XamlTaskFactory in the context of a project file.  
+    /// Tests for XamlDataDrivenToolTask / XamlTaskFactory in the context of a project file.
     /// </summary>
     public class ProjectFileTests
     {
         /// <summary>
-        /// Tests that when a call to a XamlDataDrivenTask fails, the commandline is reported in the error message. 
+        /// Tests that when a call to a XamlDataDrivenTask fails, the commandline is reported in the error message.
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         public void CommandLineErrorsReportFullCommandlineAmpersandTemp()
         {
             string projectFile = @"
-                      <Project ToolsVersion=`msbuilddefaulttoolsversion` DefaultTargets=`XamlTaskFactory` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                      <Project ToolsVersion=`msbuilddefaulttoolsversion` DefaultTargets=`XamlTaskFactory`>
                         <UsingTask TaskName=`TestTask` TaskFactory=`XamlTaskFactory` AssemblyName=`Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a`>
                           <Task>
                             <![CDATA[
@@ -299,14 +301,14 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
 
 
         /// <summary>
-        /// Tests that when a call to a XamlDataDrivenTask fails, the commandline is reported in the error message. 
+        /// Tests that when a call to a XamlDataDrivenTask fails, the commandline is reported in the error message.
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         public void CommandLineErrorsReportFullCommandline()
         {
             string projectFile = @"
-                      <Project ToolsVersion=`msbuilddefaulttoolsversion` DefaultTargets=`XamlTaskFactory` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                      <Project ToolsVersion=`msbuilddefaulttoolsversion` DefaultTargets=`XamlTaskFactory`>
                         <UsingTask TaskName=`TestTask` TaskFactory=`XamlTaskFactory` AssemblyName=`Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a`>
                           <Task>
                             <![CDATA[
@@ -336,14 +338,14 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         }
 
         /// <summary>
-        /// Tests that when a call to a XamlDataDrivenTask fails, the commandline is reported in the error message. 
+        /// Tests that when a call to a XamlDataDrivenTask fails, the commandline is reported in the error message.
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
         public void SquareBracketEscaping()
         {
             string projectFile = @"
-                      <Project ToolsVersion=`msbuilddefaulttoolsversion` DefaultTargets=`XamlTaskFactory` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                      <Project ToolsVersion=`msbuilddefaulttoolsversion` DefaultTargets=`XamlTaskFactory`>
                         <UsingTask TaskName=`TestTask` TaskFactory=`XamlTaskFactory` AssemblyName=`Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a`>
                           <Task>
                             <![CDATA[

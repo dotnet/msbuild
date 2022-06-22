@@ -8,6 +8,7 @@
     <EnableCentralPackageVersions>false</EnableCentralPackageVersions>
 
     <IsShipping>false</IsShipping>
+    <ExcludeFromSourceBuild>true</ExcludeFromSourceBuild>
   </PropertyGroup>
 
   <!-- Import parent props -->

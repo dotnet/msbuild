@@ -6,6 +6,8 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared.FileSystem
 {
     /// <summary>

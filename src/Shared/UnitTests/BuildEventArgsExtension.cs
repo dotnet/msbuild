@@ -6,6 +6,8 @@ using Microsoft.Build.Framework;
 using System.Collections.Generic;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>

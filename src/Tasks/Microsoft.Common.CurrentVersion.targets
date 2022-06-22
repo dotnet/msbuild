@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 Microsoft.Common.CurrentVersion.targets
 
@@ -13,8 +13,7 @@ Visual Basic, and Visual C#.
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
-
-<Project DefaultTargets="Build" TreatAsLocalProperty="OutDir" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" TreatAsLocalProperty="OutDir">
 
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="'$(MicrosoftCommonPropsHasBeenImported)' != 'true' and Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
 
@@ -625,16 +624,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             (9) Treat the reference's Include as if it were a real file name.
             (10) Look in the application's output folder (like bin\debug)
         -->
-    <AssemblySearchPaths Condition="$(AssemblySearchPathUseCandidateAssemblyFiles) != 'false'">{CandidateAssemblyFiles}</AssemblySearchPaths>
-    <AssemblySearchPaths Condition="$(AssemblySearchPathUseReferencePath) != 'false'">$(AssemblySearchPaths);$(ReferencePath)</AssemblySearchPaths>
-    <AssemblySearchPaths Condition="$(AssemblySearchPathUseHintPathFromItem) != 'false'">$(AssemblySearchPaths);{HintPathFromItem}</AssemblySearchPaths>
-    <AssemblySearchPaths Condition="$(AssemblySearchPathUseTargetFrameworkDirectory) != 'false'">$(AssemblySearchPaths);{TargetFrameworkDirectory}</AssemblySearchPaths>
-    <AssemblySearchPaths Condition="$(AssemblySearchPathUseAssemblyFoldersConfigFileSearchPath) != 'false'">$(AssemblySearchPaths);$(AssemblyFoldersConfigFileSearchPath)</AssemblySearchPaths>
-    <AssemblySearchPaths Condition="$(AssemblySearchPathUseRegistry) != 'false'">$(AssemblySearchPaths);{Registry:$(FrameworkRegistryBase),$(TargetFrameworkVersion),$(AssemblyFoldersSuffix)$(AssemblyFoldersExConditions)}</AssemblySearchPaths>
-    <AssemblySearchPaths Condition="$(AssemblySearchPathUseAssemblyFolders) != 'false'">$(AssemblySearchPaths);{AssemblyFolders}</AssemblySearchPaths>
-    <AssemblySearchPaths Condition="$(AssemblySearchPathUseGAC) != 'false'">$(AssemblySearchPaths);{GAC}</AssemblySearchPaths>
-    <AssemblySearchPaths Condition="$(AssemblySearchPathUseRawFileName) != 'false'">$(AssemblySearchPaths);{RawFileName}</AssemblySearchPaths>
-    <AssemblySearchPaths Condition="$(AssemblySearchPathUseOutDir) != 'false'">$(AssemblySearchPaths);$(OutDir)</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseCandidateAssemblyFiles)' != 'false'">{CandidateAssemblyFiles}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseReferencePath)' != 'false'">$(AssemblySearchPaths);$(ReferencePath)</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseHintPathFromItem)' != 'false'">$(AssemblySearchPaths);{HintPathFromItem}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseTargetFrameworkDirectory)' != 'false'">$(AssemblySearchPaths);{TargetFrameworkDirectory}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseAssemblyFoldersConfigFileSearchPath)' != 'false'">$(AssemblySearchPaths);$(AssemblyFoldersConfigFileSearchPath)</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseRegistry)' != 'false'">$(AssemblySearchPaths);{Registry:$(FrameworkRegistryBase),$(TargetFrameworkVersion),$(AssemblyFoldersSuffix)$(AssemblyFoldersExConditions)}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseAssemblyFolders)' != 'false'">$(AssemblySearchPaths);{AssemblyFolders}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseGAC)' != 'false'">$(AssemblySearchPaths);{GAC}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseRawFileName)' != 'false'">$(AssemblySearchPaths);{RawFileName}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseOutDir)' != 'false'">$(AssemblySearchPaths);$(OutDir)</AssemblySearchPaths>
   </PropertyGroup>
 
   <!-- ContinueOnError takes 3 values:  WarnAndContinue (true), ErrorAndStop (false), and ErrorAndContinue.
@@ -648,6 +647,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <MSBuildWarningsAsMessages Condition="'$(MSBuildWarningsAsMessages)'==''">$(NoWarn)</MSBuildWarningsAsMessages>
     <MSBuildWarningsAsErrors Condition="'$(MSBuildWarningsAsErrors)'==''">$(WarningsAsErrors)</MSBuildWarningsAsErrors>
+    <MSBuildWarningsNotAsErrors Condition="'$(MSBuildWarningsNotAsErrors)'==''">$(WarningsNotAsErrors)</MSBuildWarningsNotAsErrors>
   </PropertyGroup>
 
   <!-- Common Project System support -->
@@ -1610,8 +1610,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ====================================================================================
                                         _GetProjectReferencePlatformProperties
 
-    If a project is opted in via $(EnableDynamicPlatformResolution), this target calls the 
-    GetCompatiblePlatform task on all ProjectReference items to determine the most compatible 
+    If a project is opted in via $(EnableDynamicPlatformResolution), this target calls the
+    GetCompatiblePlatform task on all ProjectReference items to determine the most compatible
     platform for each project. It then sets SetPlatform metadata on each ProjectReference.
     This prevents overbuilding a project when 'AnyCPU' is available.
 
@@ -1637,7 +1637,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ItemGroup>
 
     <ItemGroup>
-      <_ProjectReferencePlatformPossibilities Include="@(_MSBuildProjectReferenceExistent)" 
+      <_ProjectReferencePlatformPossibilities Include="@(_MSBuildProjectReferenceExistent)"
                                               Condition="'%(_MSBuildProjectReferenceExistent.SkipGetPlatformProperties)' != 'true'"/>
     </ItemGroup>
 
@@ -1737,7 +1737,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
    -->
    <ItemGroup>
       <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' == '' and ('%(Extension)' == '.vcxproj' or '%(Extension)' == '.nativeproj')">
-        <!-- 
+        <!--
           Platform negotiation requires the MSBuild task call to GetTargetFrameworks.
           Don't skip when opted into the feature.
         -->
@@ -1759,7 +1759,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
     <ItemGroup>
       <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SetTargetFramework)' != ''">
-        <!-- 
+        <!--
           Platform negotiation requires the MSBuild task call to GetTargetFrameworks.
           Don't skip when opted into the feature.
         -->
@@ -1828,7 +1828,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             https://github.com/dotnet/sdk/issues/416
 
         Furthermore, if we're referencing a .vcxproj or .nativeproj, those items won't be populated into `AnnotatedProjects`
-        by `GetReferenceNearestTargetFrameworkTask`, so let them flow when `EnableDynamicPlatformResolution` is set. 
+        by `GetReferenceNearestTargetFrameworkTask`, so let them flow when `EnableDynamicPlatformResolution` is set.
       -->
       <AnnotatedProjects Include="@(_ProjectReferenceTargetFrameworkPossibilities)"
                          Condition="'$(ReferringTargetFrameworkForProjectReferences)' == '' or
@@ -1887,6 +1887,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
         <!-- Extract necessary information for SetPlatform negotiation -->
         <IsVcxOrNativeProj Condition="'$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj'">true</IsVcxOrNativeProj>
+        <Platform Condition="$([MSBuild]::AreFeaturesEnabled('17.4'))">$(Platform)</Platform>
         <Platforms>$(Platforms)</Platforms>
         <!-- .vcxproj and .nativeproj contain a `ProjectConfiguration` item that have `Platform` metadata within.
              Build the `Platforms` property from that. -->
@@ -4187,7 +4188,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       use the built DLL as the entry point
     -->
     <ItemGroup Condition="'$(UseAppHost)' == 'true' and '$(_IsExecutable)' == 'true' and exists('$(AppHostIntermediatePath)')">
-      <EntryPointForLauncher Include="$(AppHostIntermediatePath)"/>
+      <EntryPointForLauncher Include="$(AppHostIntermediatePath)" TargetPath="$(AssemblyName).exe"/>
       <ContentWithTargetPath Include="@(EntryPointForLauncher)"/>
     </ItemGroup>
     <ItemGroup Condition="'$(EntryPointForLauncher)'==''">
@@ -5984,6 +5985,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         SigningTarget="$(_DeploymentApplicationDir)$(_DeploymentTargetApplicationManifestFileName)"
         TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
         TargetFrameworkVersion="$(TargetFrameworkVersion)"
+        DisallowMansignTimestampFallback="$(DisallowMansignTimestampFallback)"
         Condition="'$(_DeploymentSignClickOnceManifests)'=='true'" />
 
     <!-- Update entry point path in deploy manifest -->
@@ -6004,6 +6006,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         SigningTarget="$(PublishDir)$(TargetDeployManifestFileName)"
         TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
         TargetFrameworkVersion="$(TargetFrameworkVersion)"
+        DisallowMansignTimestampFallback="$(DisallowMansignTimestampFallback)"
         Condition="'$(_DeploymentSignClickOnceManifests)'=='true'" />
 
     <SignFile
@@ -6108,7 +6111,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- This item represents the native manifest, example: WindowsApplication1.exe.manifest or Native.ClassLibrary1.manifest -->
     <ItemGroup>
-      <_BuiltProjectOutputGroupOutputIntermediate Include="$(OutDir)$(_DeploymentTargetApplicationManifestFileName)" Condition="'@(NativeReference)'!='' or '@(_IsolatedComReference)'!=''">
+      <_BuiltProjectOutputGroupOutputIntermediate Include="$(OutDir)$(_DeploymentTargetApplicationManifestFileName)" Condition="('@(NativeReference)'!='' or '@(_IsolatedComReference)'!='') And Exists('$(OutDir)$(_DeploymentTargetApplicationManifestFileName)')">
         <TargetPath>$(_DeploymentTargetApplicationManifestFileName)</TargetPath>
         <!-- For compatibility with 2.0 -->
         <OriginalItemSpec>$(OutDir)$(_DeploymentTargetApplicationManifestFileName)</OriginalItemSpec>

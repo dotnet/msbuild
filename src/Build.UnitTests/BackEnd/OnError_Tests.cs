@@ -13,6 +13,8 @@ using System.Reflection;
 using Shouldly;
 using System.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /*

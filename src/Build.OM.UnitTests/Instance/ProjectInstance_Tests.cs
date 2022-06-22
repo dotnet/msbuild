@@ -16,6 +16,8 @@ using Microsoft.Build.Shared;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
     /// <summary>
@@ -252,7 +254,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         public void ItemEvaluationCopiesMetadata()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1'>
                                 <m>m1</m>
@@ -297,7 +299,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 string path = Path.Combine(directory, "*.exe");
 
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                           <ItemGroup>
                             <i Include='" + path + @"'/>
@@ -402,13 +404,13 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             ProjectInstance instance1 = new Project().CreateProjectInstance();
 
-            BuildRequestData buildRequestData1 = new BuildRequestData(instance1, new string[] { });
+            BuildRequestData buildRequestData1 = new BuildRequestData(instance1, Array.Empty<string>());
 
             BuildManager.DefaultBuildManager.Build(new BuildParameters(), buildRequestData1);
 
             new Project().CreateProjectInstance();
 
-            BuildRequestData buildRequestData2 = new BuildRequestData(instance1, new string[] { });
+            BuildRequestData buildRequestData2 = new BuildRequestData(instance1, Array.Empty<string>());
 
             BuildManager.DefaultBuildManager.Build(new BuildParameters(), buildRequestData2);
         }
@@ -527,8 +529,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
-        /// Validate that the DefiningProject* metadata is set to the correct project based on a variety 
-        /// of means of item creation. 
+        /// Validate that the DefiningProject* metadata is set to the correct project based on a variety
+        /// of means of item creation.
         /// </summary>
         [Fact]
         public void TestDefiningProjectMetadata()
@@ -572,7 +574,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
   </Target>
 
   <Target Name=`Validate` DependsOnTargets=`AddFromMainProject;AddFromImport`>
-    <Warning Text=`A is wrong: EXPECTED: [a] ACTUAL: [%(A.DefiningProjectName)]` Condition=`'%(A.DefiningProjectName)' != 'a'` />    
+    <Warning Text=`A is wrong: EXPECTED: [a] ACTUAL: [%(A.DefiningProjectName)]` Condition=`'%(A.DefiningProjectName)' != 'a'` />
     <Warning Text=`B is wrong: EXPECTED: [a] ACTUAL: [%(B.DefiningProjectName)]` Condition=`'%(B.DefiningProjectName)' != 'a'` />
     <Warning Text=`C is wrong: EXPECTED: [b] ACTUAL: [%(C.DefiningProjectName)]` Condition=`'%(C.DefiningProjectName)' != 'b'` />
     <Warning Text=`D is wrong: EXPECTED: [b] ACTUAL: [%(D.DefiningProjectName)]` Condition=`'%(D.DefiningProjectName)' != 'b'` />
@@ -831,7 +833,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
-        /// Test operation fails on immutable project instance 
+        /// Test operation fails on immutable project instance
         /// </summary>
         [Fact]
         public void ImmutableProjectInstance_SetNewProperty()
@@ -993,7 +995,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         private static ProjectInstance GetSampleProjectInstance(bool isImmutable = false)
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i>
                               <n>n1</n>

@@ -8,6 +8,8 @@ using System.Diagnostics;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Collections
 {
     /// <summary>
@@ -146,9 +148,9 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Returns an enumerable which copies the underlying data on read.
         /// </summary>
-        public IEnumerable<T> GetCopyOnReadEnumerable()
+        public IEnumerable<TResult> GetCopyOnReadEnumerable<TResult>(Func<T, TResult> selector)
         {
-            return new CopyOnReadEnumerable<T>(this, _itemLists);
+            return new CopyOnReadEnumerable<T, TResult>(this, _itemLists, selector);
         }
 
         /// <summary>
@@ -383,7 +385,7 @@ namespace Microsoft.Build.Collections
         /// All items of a type are returned consecutively in their correct order.
         /// However the order in which item types are returned is not defined.
         /// </summary>
-        private sealed class Enumerator : IEnumerator<T>, IDisposable
+        private sealed class Enumerator : IEnumerator<T>
         {
             /// <summary>
             /// Enumerator over lists
@@ -403,14 +405,6 @@ namespace Microsoft.Build.Collections
                 _listEnumerator = listEnumerable.GetEnumerator(); // Now get the enumerator, since we now have the lock.
                 _itemEnumerator = null; // Must assign all struct fields first
                 _itemEnumerator = GetNextItemEnumerator();
-            }
-
-            /// <summary>
-            /// Finalizer
-            /// </summary>
-            ~Enumerator()
-            {
-                Dispose(false);
             }
 
             /// <summary>
@@ -464,28 +458,16 @@ namespace Microsoft.Build.Collections
             /// </summary>
             public void Dispose()
             {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
-
-            /// <summary>
-            /// The real disposer.
-            /// </summary>
-            private void Dispose(bool disposing)
-            {
-                if (disposing)
+                if (_listEnumerator != null)
                 {
-                    if (_listEnumerator != null)
+                    if (_itemEnumerator != null)
                     {
-                        if (_itemEnumerator != null)
-                        {
-                            _itemEnumerator.Dispose();
-                            _itemEnumerator = null;
-                        }
-
-                        _listEnumerator.Dispose();
-                        _listEnumerator = null;
+                        _itemEnumerator.Dispose();
+                        _itemEnumerator = null;
                     }
+
+                    _listEnumerator.Dispose();
+                    _listEnumerator = null;
                 }
             }
 

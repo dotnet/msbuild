@@ -7,6 +7,8 @@ using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /*

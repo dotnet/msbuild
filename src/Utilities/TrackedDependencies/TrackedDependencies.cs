@@ -8,6 +8,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
@@ -46,7 +48,7 @@ namespace Microsoft.Build.Utilities
                     }
                     else
                     {
-                        files = FileMatcher.Default.GetFiles(null, item.ItemSpec);
+                        files = FileMatcher.Default.GetFiles(null, item.ItemSpec).FileList;
                     }
 
                     foreach (string file in files)

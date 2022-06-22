@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared.FileSystem
 {
     /// <summary>
@@ -22,7 +24,7 @@ namespace Microsoft.Build.Shared.FileSystem
             get
             {
 #if !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-                return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0);
+                return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0) && NativeMethodsShared.IsWindows;
 #else
                 // We need to mock usage of ChangeWaves class,
                 // because Microsoft.Build.Engine.OM.UnitTests should not have access to internals of Microsoft.Build.Framework.

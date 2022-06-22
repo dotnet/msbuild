@@ -13,6 +13,8 @@ using Microsoft.Build.Construction;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
@@ -29,7 +31,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose X='Y'/>
                     </Project>
                 ";
@@ -48,7 +50,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose Condition='true'/>
                     </Project>
                 ";
@@ -66,7 +68,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose>
                             <X/>
                         </Choose>
@@ -86,7 +88,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose>
                             <When>
                                 <PropertyGroup><x/></PropertyGroup>
@@ -111,7 +113,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose>
                             <Otherwise/>
                         </Choose>
@@ -131,7 +133,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose>
                             <Otherwise/>
                             <Otherwise/>
@@ -152,7 +154,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose>
                             <Otherwise/>
                             <When Condition='c'/>
@@ -176,7 +178,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose/>
                     </Project>
                 ";
@@ -195,7 +197,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadChooseOnlyWhen()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose>
                             <When Condition='c'/>
                         </Choose>
@@ -216,7 +218,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadChooseBothWhenOtherwise()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose>
                             <When Condition='c1'/>
                             <When Condition='c2'/>
@@ -252,7 +254,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     builder2.Append("</When></Choose>");
                 }
 
-                string content = "<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>";
+                string content = "<Project>";
                 content += builder1.ToString();
                 content += builder2.ToString();
                 content += @"</Project>";
@@ -268,13 +270,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void SettingWhenConditionDirties()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose>
                             <When Condition='true'>
                               <PropertyGroup>
                                 <p>v1</p>
-                              </PropertyGroup> 
-                            </When>      
+                              </PropertyGroup>
+                            </When>
                         </Choose>
                     </Project>
                 ";

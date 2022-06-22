@@ -6,6 +6,8 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Logging.StructuredLogger
 {
     /// <summary>

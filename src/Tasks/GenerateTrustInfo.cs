@@ -7,6 +7,8 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -85,16 +87,9 @@ namespace Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("GenerateManifest.NoPermissionSetForTargetZone", dotNetVersion);
                 return false;
             }
-            catch (ArgumentException ex)
+            catch (ArgumentException ex) when (String.Equals(ex.ParamName, "TargetZone", StringComparison.OrdinalIgnoreCase))
             {
-                if (String.Equals(ex.ParamName, "TargetZone", StringComparison.OrdinalIgnoreCase))
-                {
-                    Log.LogWarningWithCodeFromResources("GenerateManifest.InvalidItemValue", "TargetZone", TargetZone);
-                }
-                else
-                {
-                    throw;
-                }
+                Log.LogWarningWithCodeFromResources("GenerateManifest.InvalidItemValue", "TargetZone", TargetZone);
             }
 
             // Write trust-info back to a stand-alone trust file

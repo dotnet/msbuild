@@ -5,6 +5,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     [ComVisible(false)]

@@ -11,13 +11,6 @@ using System.Reflection;
 using System.Globalization;
 using System.Threading;
 
-#if (!STANDALONEBUILD)
-using Microsoft.Internal.Performance;
-#if MSBUILDENABLEVSPROFILING 
-using Microsoft.VisualStudio.Profiler;
-#endif
-#endif
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
 
@@ -200,7 +193,7 @@ namespace Microsoft.Build.BuildEngine
         // this seed is used to generate unique logger ids for each distributed logger
         private int lastUsedLoggerId;
 
-        // this boolean is true if central logging is enabled 
+        // this boolean is true if central logging is enabled
         private bool enabledCentralLogging;
 
         // The class used to observe engine operation to collect data and detect errors
@@ -212,7 +205,7 @@ namespace Microsoft.Build.BuildEngine
         // Number of CPUs this engine is instantiated with
         private int numberOfCpus;
 
-        // The current directory at the time the Engine was constructed -- 
+        // The current directory at the time the Engine was constructed --
         // if msbuild.exe is hosting, this is the current directory when
         // msbuild.exe was started
         private string startupDirectory;
@@ -350,7 +343,7 @@ namespace Microsoft.Build.BuildEngine
             ToolsetDefinitionLocations locations
         )
         {
-            // No need to check whether locations parameter 
+            // No need to check whether locations parameter
             // is null, because it is a value type
 
             this.startupDirectory = Environment.CurrentDirectory;
@@ -908,8 +901,8 @@ namespace Microsoft.Build.BuildEngine
                 // It already exists: replace it with the new toolset
                 toolsetStateMap[toolset.ToolsVersion] = new ToolsetState(this, toolset);
 
-                // We must be sure to notify all of the loaded projects with this 
-                // tools version that they are dirty so they will later pick up any changes 
+                // We must be sure to notify all of the loaded projects with this
+                // tools version that they are dirty so they will later pick up any changes
                 // to the ToolsetState.
                 DirtyProjectsUsingToolsVersion(toolset.ToolsVersion);
             }
@@ -982,7 +975,7 @@ namespace Microsoft.Build.BuildEngine
                     if (pathTo20Framework == null)
                     {
                         // We have been given no default, so we want to choose 2.0, but .NET 2.0 is not installed.
-                        // In general we do not verify that MSBuildToolsPath's point to a valid location, 
+                        // In general we do not verify that MSBuildToolsPath's point to a valid location,
                         // so failing here would be inconsistent. The build might not even use this toolset.
                         // Instead, synthesize what would be the path to the .NET 2.0 install location.
                         // If the build tries to use the default toolset, the problem will be discovered then.
@@ -1126,7 +1119,7 @@ namespace Microsoft.Build.BuildEngine
             lastUsedLoggerId++;
             forwardingLogger.LoggerId = loggerId;
 
-            //Create and configure the local node logger 
+            //Create and configure the local node logger
             IForwardingLogger localForwardingLogger = null;
             try
             {
@@ -1136,7 +1129,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     InternalLoggerException.Throw(null, null, "LoggerNotFoundError", true, forwardingLogger.Name);
                 }
-                // Configure the object 
+                // Configure the object
                 EventRedirector newRedirector = new EventRedirector(forwardingLogger.LoggerId, primaryLoggingServices);
                 localForwardingLogger.BuildEventRedirector = newRedirector;
                 localForwardingLogger.Parameters = forwardingLogger.LoggerSwitchParameters;
@@ -1163,7 +1156,7 @@ namespace Microsoft.Build.BuildEngine
             // Register the local forwarding logger to listen for all local events
             RegisterLoggerInternal(localForwardingLogger, eventSourceForForwarding, true);
 
-            //Register this logger's node logger with the node manager so that all 
+            //Register this logger's node logger with the node manager so that all
             //the nodes instantiate this node logger and forward the events
             nodeManager.RegisterNodeLogger(forwardingLogger);
 
@@ -1279,7 +1272,7 @@ namespace Microsoft.Build.BuildEngine
                     // Post the event to old style loggers and forwarding loggers on parent node
                     LoggingServices.LogBuildFinished(buildResult);
 
-                    // Cause the forwarding loggers to process BuildFinished event and whatever other events 
+                    // Cause the forwarding loggers to process BuildFinished event and whatever other events
                     // were in the queue (on the child the event are flushed to the level of the outofproc logging service)
                     LoggingServices.ProcessPostedLoggingEvents();
 
@@ -1296,15 +1289,15 @@ namespace Microsoft.Build.BuildEngine
                 // For each of the projects that the host has actually loaded (and holding on to),
                 // remove all projects with that same fullpath from the ProjectManager.  There are
                 // a couple of reasons for this:
-                // 1.   Because the host is hanging on to this projects, during design-time the host 
+                // 1.   Because the host is hanging on to this projects, during design-time the host
                 //      might decide to change the GlobalProperties on one of these projects.  He might
                 //      change the GlobalProperties such that they now are equivalent to the GlobalProperties
-                //      for one of the projects in the ProjectManager.  That would get weird because 
+                //      for one of the projects in the ProjectManager.  That would get weird because
                 //      we'd end up with two projects with the same fullpath and same GlobalProperties,
                 //      and we wouldn't know which one to choose (on the next build).
-                // 2.   Because the host is hanging on to the projects, it may decide to make in-memory 
+                // 2.   Because the host is hanging on to the projects, it may decide to make in-memory
                 //      changes to the project.  On next build, we need to take those changes into
-                //      account, and any instances of Project in the ProjectManager won't have those 
+                //      account, and any instances of Project in the ProjectManager won't have those
                 //      changes.
                 this.cacheOfBuildingProjects.RemoveProjects(loadedProjectFullPath);
             }
@@ -1376,7 +1369,7 @@ namespace Microsoft.Build.BuildEngine
 
             // Host is mucking with this project.  Remove the cached versions of
             // all projects with this same full path.  Over aggressively getting rid
-            // of stuff from the cache is better than accidentally leaving crud in 
+            // of stuff from the cache is better than accidentally leaving crud in
             // there.
             UnloadProject(project, true /* Unload all versions */);
         }
@@ -1433,7 +1426,7 @@ namespace Microsoft.Build.BuildEngine
 
                 // Host is mucking with this project.  Remove the cached versions of
                 // all projects with this same full path.  Over aggressively getting rid
-                // of stuff from the cache is better than accidentally leaving crud in 
+                // of stuff from the cache is better than accidentally leaving crud in
                 // there.
                 this.cacheOfBuildingProjects.RemoveProjects(oldFullFileName);
             }
@@ -1454,7 +1447,7 @@ namespace Microsoft.Build.BuildEngine
 
                 // Host is mucking with this project.  Remove the cached versions of
                 // all projects with this same full path.  Over aggressively getting rid
-                // of stuff from the cache is better than accidentally leaving crud in 
+                // of stuff from the cache is better than accidentally leaving crud in
                 // there.
                 this.cacheOfBuildingProjects.RemoveProjects(newFullFileName);
             }
@@ -1463,7 +1456,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 // MSBuild projects keep track of PropertyGroups that are imported from other
                 // files.  It does this tracking by using the project file name of the imported
-                // file.  So when a project gets renamed, as is being done here, we need 
+                // file.  So when a project gets renamed, as is being done here, we need
                 // to go update all those imported PropertyGroup records with the new filename.
 
                 // Loop through every loaded project, and inform it about the newly named
@@ -1632,7 +1625,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 int eventType;
 
-                // See if we have anything to do without waiting on the handles which is expensive 
+                // See if we have anything to do without waiting on the handles which is expensive
                 // for kernel mode objects.
                 if (this.engineAbortCachedValue)
                 {
@@ -1693,7 +1686,7 @@ namespace Microsoft.Build.BuildEngine
                     // Execute the command
                     engineCommand.Execute(this);
 
-                    // Don't consider node status request to be activity 
+                    // Don't consider node status request to be activity
                     if (!(engineCommand is RequestStatusEngineCommand))
                     {
                         lastLoopActivity = DateTime.Now.Ticks;
@@ -1863,14 +1856,6 @@ namespace Microsoft.Build.BuildEngine
                 SetBuildItemCurrentDirectory(project);
                 if (initialCall)
                 {
-#if (!STANDALONEBUILD)
-                    CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildEngineBuildProjectBegin);
-#endif
-#if MSBUILDENABLEVSPROFILING 
-                    string beginProjectBuild = String.Format(CultureInfo.CurrentCulture, "Build Project {0} Using Old OM - Start", project.FullFileName);
-                    DataCollection.CommentMarkProfile(8802, beginProjectBuild);
-#endif 
-
                     // Make sure we were passed in a project object.
                     error.VerifyThrowArgument(project != null, "MissingProject", "Project");
 
@@ -1941,13 +1926,6 @@ namespace Microsoft.Build.BuildEngine
 
                 if (buildRequest?.BuildCompleted == true || exitedDueToError)
                 {
-#if (!STANDALONEBUILD)
-                    CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildEngineBuildProjectEnd);
-#endif
-#if MSBUILDENABLEVSPROFILING 
-                    string endProjectBuild = String.Format(CultureInfo.CurrentCulture, "Build Project {0} Using Old OM - End", project.FullFileName);
-                    DataCollection.CommentMarkProfile(8803, endProjectBuild);
-#endif 
                 }
             }
         }
@@ -2088,7 +2066,7 @@ namespace Microsoft.Build.BuildEngine
 
             if (0 == (buildRequest.BuildSettings & BuildSettings.DoNotResetPreviouslyBuiltTargets))
             {
-                // Reset the build state for all projects that are still cached from the 
+                // Reset the build state for all projects that are still cached from the
                 // last build and the currently loaded projects that we just added to
                 // the ProjectManager.
                 this.cacheOfBuildingProjects.ResetBuildStatusForAllProjects();
@@ -2353,7 +2331,7 @@ namespace Microsoft.Build.BuildEngine
             Hashtable[] targetOutputsWorkingCopy = new Hashtable[buildRequests.Length];
             for (int i = 0; i < buildRequests.Length; i++)
             {
-                // if the caller wants to retrieve target outputs, create a working copy to avoid clobbering 
+                // if the caller wants to retrieve target outputs, create a working copy to avoid clobbering
                 // other data in the hashtable
                 if (targetOutputsPerProject[i] != null)
                 {
@@ -2421,10 +2399,10 @@ namespace Microsoft.Build.BuildEngine
             {
                 // Post build finished event if the finally is not being executed due to an exception
                 EndingEngineExecution(overallResult, exitedDueToError);
-                // Reset the current directory to the value before this 
+                // Reset the current directory to the value before this
                 // project built
                 Environment.CurrentDirectory = currentDirectory;
-                // We reset the path back to the original value in case the 
+                // We reset the path back to the original value in case the
                 // host is depending on the current directory to find projects
                 Project.PerThreadProjectDirectory = currentPerThreadProjectDirectory;
             }
@@ -2452,7 +2430,7 @@ namespace Microsoft.Build.BuildEngine
             buildRequest.ProjectToBuild = project;
             // Set the request build flags
             buildRequest.BuildSettings = buildFlags;
-            // Set the boolean requesting the project start/finish events 
+            // Set the boolean requesting the project start/finish events
             buildRequest.FireProjectStartedFinishedEvents = true;
             // Set the dictionary to return target outputs in, if any
             buildRequest.OutputsByTarget = targetOutputs;
@@ -2503,7 +2481,7 @@ namespace Microsoft.Build.BuildEngine
                 ArrayList actuallyBuiltTargets;
 
                 // If the tools version is empty take a quick peek at the project file to determine if it has a tools version defined
-                if(String.IsNullOrEmpty(buildRequest.ToolsetVersion))
+                if (String.IsNullOrEmpty(buildRequest.ToolsetVersion))
                 {
                     buildRequest.ToolsetVersion = XmlUtilities.GetAttributeValueForElementFromFile(buildRequest.ProjectFileName, XMakeAttributes.project, XMakeAttributes.toolsVersion);
                     buildRequest.ToolsVersionPeekedFromProjectFile = true;
@@ -2521,7 +2499,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     // There's no cached result: we have to build it. Figure out which node to build it on.
                     Project matchingProjectCurrentlyLoaded = null;
-                    
+
                     // See if we have a project loaded by the host already that matches the full path, in the
                     // list of projects which were loaded at the beginning of the build.
                     Project projectCurrentlyLoaded = (Project)this.projectsLoadedByHost[projectFileInfo.FullName];
@@ -2594,7 +2572,7 @@ namespace Microsoft.Build.BuildEngine
 
                     if (evaluationNode != EngineCallback.inProcNode)
                     {
-                        // The project will be evaluated remotely so add a record 
+                        // The project will be evaluated remotely so add a record
                         // indicating where this project is being evaluated
                         if (evaluationNode != EngineCallback.parentNode)
                         {
@@ -2617,7 +2595,7 @@ namespace Microsoft.Build.BuildEngine
                     }
                     else
                     {
-                        // Increment number of projects in progress 
+                        // Increment number of projects in progress
                         if (!buildRequest.IsGeneratedRequest)
                         {
                             IncrementProjectsInProgress();
@@ -2759,7 +2737,7 @@ namespace Microsoft.Build.BuildEngine
                         // If a user customized his build process and is explicitly passing in Properties to the
                         // <MSBuild> task, then we would be entering this codepath for a totally legitimate
                         // scenario, so we don't want to disallow it.  We just want to know about it if it happens
-                        // to anyone before we ship, just so we can investigate to see if there may be a bug 
+                        // to anyone before we ship, just so we can investigate to see if there may be a bug
                         // somewhere.
                         if (this.projectsLoadedByHost.Count > 1)
                         {
@@ -3070,7 +3048,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal void ResetPerBuildDataStructures()
         {
-            // Reset the build state for all projects that are still cached from the 
+            // Reset the build state for all projects that are still cached from the
             // last build and the currently loaded projects that we just added to
             // the ProjectManager.
             this.cacheOfBuildingProjects.ResetBuildStatusForAllProjects();

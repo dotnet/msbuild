@@ -13,6 +13,8 @@ using System.Xml.Serialization;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     /// <summary>
@@ -757,22 +759,20 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     Debug.Fail("Comparing null objects");
                     return 0;
                 }
-                if (!(x is BaseReference) || !(y is BaseReference))
+
+                if (x is BaseReference xRef && y is BaseReference yRef)
                 {
-                    Debug.Fail("Comparing objects that are not BaseReferences");
-                    return 0;
+                    if (xRef.SortName == null || yRef.SortName == null)
+                    {
+                        Debug.Fail("Objects do not have a SortName");
+                        return 0;
+                    }
+
+                    return xRef.SortName.CompareTo(yRef.SortName);
                 }
 
-                BaseReference xRef = x as BaseReference;
-                BaseReference yRef = y as BaseReference;
-
-                if (xRef.SortName == null || yRef.SortName == null)
-                {
-                    Debug.Fail("Objects do not have a SortName");
-                    return 0;
-                }
-
-                return xRef.SortName.CompareTo(yRef.SortName);
+                Debug.Fail("Comparing objects that are not BaseReferences");
+                return 0;
             }
         }
 

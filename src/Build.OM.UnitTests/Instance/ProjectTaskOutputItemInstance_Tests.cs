@@ -8,6 +8,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
     /// <summary>
@@ -34,7 +36,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         private static ProjectTaskOutputItemInstance GetSampleTaskOutputInstance()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                        <Target Name='t'>
                             <t1>
                                 <Output TaskParameter='p' Condition='c' ItemName='i'/>

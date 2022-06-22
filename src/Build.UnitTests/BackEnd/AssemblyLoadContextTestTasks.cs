@@ -4,6 +4,8 @@
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace AssemblyLoadContextTest
 {
     public class RegisterObject : Task

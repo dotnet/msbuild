@@ -9,6 +9,8 @@ using System.CodeDom.Compiler;
 
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>

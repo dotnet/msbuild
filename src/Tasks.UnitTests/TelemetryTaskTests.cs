@@ -4,6 +4,8 @@
 using Microsoft.Build.UnitTests;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.UnitTests
 {
     public sealed class TelemetryTaskTests

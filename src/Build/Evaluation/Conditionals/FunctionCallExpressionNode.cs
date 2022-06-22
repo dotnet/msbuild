@@ -4,9 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -27,7 +30,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Evaluate node as boolean
         /// </summary>
-        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
+        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
         {
             if (String.Equals(_functionName, "exists", StringComparison.OrdinalIgnoreCase))
             {

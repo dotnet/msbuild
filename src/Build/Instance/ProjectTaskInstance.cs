@@ -9,6 +9,8 @@ using System.Diagnostics;
 using System;
 using Microsoft.Build.BackEnd;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>

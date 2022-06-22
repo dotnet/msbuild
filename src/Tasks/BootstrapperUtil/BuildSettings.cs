@@ -3,12 +3,16 @@
 
 using System.Runtime.InteropServices;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {
     /// <summary>
     /// This class defines the settings for the bootstrapper build operation.
     /// </summary>
-    [ComVisible(true), Guid("5D13802C-C830-4b41-8E7A-F69D9DD6A095"), ClassInterface(ClassInterfaceType.None)]
+    [ComVisible(true)]
+    [Guid("5D13802C-C830-4b41-8E7A-F69D9DD6A095")]
+    [ClassInterface(ClassInterfaceType.None)]
     public class BuildSettings : IBuildSettings
     {
         public BuildSettings()

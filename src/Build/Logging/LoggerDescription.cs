@@ -10,7 +10,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd;
 
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
-using System.Linq;
+
+#nullable disable
 
 namespace Microsoft.Build.Logging
 {
@@ -167,22 +168,10 @@ namespace Microsoft.Build.Logging
                     InternalLoggerException.Throw(null, null, "LoggerNotFoundError", true, this.Name);
                 }
             }
-            catch (Exception e /* Wrap all other exceptions in a more meaningful exception*/)
+            catch (Exception e) // Wrap other exceptions in a more meaningful exception. LoggerException and InternalLoggerException are already meaningful.
+            when (!(e is LoggerException /* Polite logger Failure*/ || e is InternalLoggerException /* LoggerClass not found*/ || ExceptionHandling.IsCriticalException(e)))
             {
-                // Two of the possible exceptions are already in reasonable exception types
-                if (e is LoggerException /* Polite logger Failure*/ || e is InternalLoggerException /* LoggerClass not found*/)
-                {
-                    throw;
-                }
-                else
-                {
-                    if (ExceptionHandling.IsCriticalException(e))
-                    {
-                        throw;
-                    }
-
-                    InternalLoggerException.Throw(e, null, "LoggerCreationError", true, Name);
-                }
+                InternalLoggerException.Throw(e, null, "LoggerCreationError", true, Name);
             }
 
             return forwardingLogger;
@@ -238,25 +227,15 @@ namespace Microsoft.Build.Logging
                 string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LoggerInstantiationFailureErrorInvalidCast", _loggerClassName, _loggerAssembly.AssemblyLocation, e.Message);
                 throw new LoggerException(message, e.InnerException);
             }
-            catch (TargetInvocationException e)
+            catch (TargetInvocationException e) when (e.InnerException is LoggerException le)
             {
                 // At this point, the interesting stack is the internal exception;
                 // the outer exception is System.Reflection stuff that says nothing
                 // about the nature of the logger failure.
-                Exception innerException = e.InnerException;
-
-                if (innerException is LoggerException)
-                {
-                    // Logger failed politely during construction. In order to preserve
-                    // the stack trace at which the error occurred we wrap the original
-                    // exception instead of throwing.
-                    LoggerException l = ((LoggerException)innerException);
-                    throw new LoggerException(l.Message, innerException, l.ErrorCode, l.HelpKeyword);
-                }
-                else
-                {
-                    throw;
-                }
+                // Logger failed politely during construction. In order to preserve
+                // the stack trace at which the error occurred we wrap the original
+                // exception instead of throwing.
+                throw new LoggerException(le.Message, le, le.ErrorCode, le.HelpKeyword);
             }
 
             return logger;
@@ -281,11 +260,7 @@ namespace Microsoft.Build.Logging
         {
             return type.GetTypeInfo().IsClass &&
                 !type.GetTypeInfo().IsAbstract &&
-#if FEATURE_TYPE_GETINTERFACE
                 (type.GetTypeInfo().GetInterface("IForwardingLogger") != null);
-#else
-                (type.GetInterfaces().Any(interfaceType => interfaceType.Name == "IForwardingLogger"));
-#endif
         }
 
         /// <summary>
@@ -297,11 +272,7 @@ namespace Microsoft.Build.Logging
         {
             return type.GetTypeInfo().IsClass &&
                 !type.GetTypeInfo().IsAbstract &&
-#if FEATURE_TYPE_GETINTERFACE
                 (type.GetTypeInfo().GetInterface("ILogger") != null);
-#else
-                (type.GetInterfaces().Any(interfaceType => interfaceType.Name == "ILogger"));
-#endif
         }
 
         /// <summary>

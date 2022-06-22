@@ -174,7 +174,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 lock (sharedLock)
                 {
-                    if(writeableData != null)
+                    if (writeableData != null)
                     {
                         writeableData[key] = value;
                     }

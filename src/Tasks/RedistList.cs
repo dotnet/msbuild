@@ -16,6 +16,8 @@ using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -249,7 +251,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public static RedistList GetRedistListFromPath(string path)
         {
-            string[] redistListPaths = (path == null) ? Array.Empty<string>(): GetRedistListPathsFromDisk(path);
+            string[] redistListPaths = (path == null) ? Array.Empty<string>() : GetRedistListPathsFromDisk(path);
 
             var assemblyTableInfos = new AssemblyTableInfo[redistListPaths.Length];
             for (int i = 0; i < redistListPaths.Length; ++i)

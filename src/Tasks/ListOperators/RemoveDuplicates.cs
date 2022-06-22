@@ -6,6 +6,8 @@ using System.Collections.Generic;
 
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

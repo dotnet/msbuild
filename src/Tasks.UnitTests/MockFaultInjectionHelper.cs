@@ -3,6 +3,8 @@
 
 using System;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class MockFaultInjectionHelper<FailurePointEnum>

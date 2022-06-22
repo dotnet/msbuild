@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     internal sealed class RoslynCodeTaskFactoryTaskInfo : IEquatable<RoslynCodeTaskFactoryTaskInfo>

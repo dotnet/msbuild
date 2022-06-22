@@ -13,6 +13,8 @@ using Microsoft.Build.Utilities;
 using TaskHostPacketHelpers = Microsoft.Build.UnitTests.BackEnd.TaskHostConfiguration_Tests.TaskHostPacketHelpers;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>

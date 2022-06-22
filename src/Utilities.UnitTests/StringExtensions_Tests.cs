@@ -7,6 +7,8 @@ using Xunit;
 
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class StringExtensions_Tests

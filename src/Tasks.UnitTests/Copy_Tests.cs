@@ -21,6 +21,8 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class Copy_Tests : IDisposable
@@ -511,7 +513,7 @@ namespace Microsoft.Build.UnitTests
                 using (StreamReader sr = FileUtilities.OpenRead(destinationFile)) // HIGHCHAR: Test reads ASCII (not ANSI).
                     destinationFileContents = sr.ReadToEnd();
 
-                Assert.Equal("This is a source temp file.", destinationFileContents); //                     "Expected the destination file to contain the contents of source file."
+                Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
 
                 ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
             }
@@ -820,9 +822,11 @@ namespace Microsoft.Build.UnitTests
                     engine.AssertLogContains("MSB3021"); // copy failed
                     engine.AssertLogContains("MSB3026"); // DID retry
 
-#if !RUNTIME_TYPE_NETCORE && !MONO
-                    engine.AssertLogContains(Process.GetCurrentProcess().Id.ToString()); // the file is locked by the current process
-#endif
+                    if (NativeMethodsShared.IsWindows)
+                    {
+                        engine.AssertLogContains(Process.GetCurrentProcess().Id.ToString()); // the file is locked by the current process
+                    }
+
                     Assert.Equal(2, engine.Errors); // retries failed and the actual failure
                     Assert.Equal(10, engine.Warnings);
                 }
@@ -1339,7 +1343,7 @@ namespace Microsoft.Build.UnitTests
                     me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
                 }
 
-                Assert.Equal("This is a source temp file.", destinationFileContents); //                     "Expected the destination file to contain the contents of source file."
+                Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
 
                 Assert.Single(t.DestinationFiles);
                 Assert.Single(t.CopiedFiles);
@@ -1399,7 +1403,7 @@ namespace Microsoft.Build.UnitTests
                     destinationFileContents = sr.ReadToEnd();
                 }
 
-                Assert.Equal("This is a source temp file.", destinationFileContents); //                     "Expected the destination file to contain the contents of source file."
+                Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
 
                 Assert.Single(t.DestinationFiles);
                 Assert.Single(t.CopiedFiles);
@@ -2167,7 +2171,7 @@ namespace Microsoft.Build.UnitTests
 
                 // Read the destination file (it should have the same modified content as the source)
                 destinationFileContents = File.ReadAllText(destFile);
-                Assert.Equal("This is another source temp file.", destinationFileContents); //"Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
+                Assert.Equal("This is another source temp file.", destinationFileContents); // "Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
 
                 ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
             }
@@ -2251,9 +2255,9 @@ namespace Microsoft.Build.UnitTests
                 me.AssertLogContains("0x80070011");
 
                 string destinationFileContents = File.ReadAllText(destFile1);
-                Assert.Equal("This is source temp file 1.", destinationFileContents); //"Expected the destination file to contain the contents of source file."
+                Assert.Equal("This is source temp file 1.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
                 destinationFileContents = File.ReadAllText(destFile2);
-                Assert.Equal("This is source temp file 2.", destinationFileContents); //"Expected the destination file to contain the contents of source file."
+                Assert.Equal("This is source temp file 2.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
 
                 Assert.Equal(2, t.DestinationFiles.Length);
                 Assert.Equal(2, t.CopiedFiles.Length);
@@ -2269,7 +2273,7 @@ namespace Microsoft.Build.UnitTests
 
                 // Read the destination file (it should have the same modified content as the source)
                 destinationFileContents = File.ReadAllText(destFile1);
-                Assert.Equal("This is source temp file 1.", destinationFileContents); //"Expected the destination copied file to contain the contents of original source file only."
+                Assert.Equal("This is source temp file 1.", destinationFileContents); // "Expected the destination copied file to contain the contents of original source file only."
 
                 ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
             }
@@ -2346,7 +2350,7 @@ namespace Microsoft.Build.UnitTests
                 me.AssertLogContains("0x80070476");
 
                 string destinationFileContents = File.ReadAllText(destFile);
-                Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination file to contain the contents of source file."
+                Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
 
                 Assert.Single(t.DestinationFiles);
                 Assert.Single(t.CopiedFiles);
@@ -2360,7 +2364,7 @@ namespace Microsoft.Build.UnitTests
 
                 // Read the destination file (it should have the same modified content as the source)
                 destinationFileContents = File.ReadAllText(destFile);
-                Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination copied file to contain the contents of original source file only."
+                Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination copied file to contain the contents of original source file only."
 
                 ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
             }
@@ -2397,9 +2401,7 @@ namespace Microsoft.Build.UnitTests
 
             if (NativeMethodsShared.IsWindows)
             {
-#pragma warning disable CA1416 // Suppress Warning saying that WindowsPrincipal might not be compatible on Windows (Which shouldn't be an issue...)
                 if (!new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null)))
-#pragma warning restore CA1416 // Suppress Warning saying that WindowsPrincipal might not be compatible on Windows (Which shouldn't be an issue...)
                 {
                     isPrivileged = false;
                     Assert.True(true, "It seems that you don't have the permission to create symbolic links. Try to run this test again with higher privileges");
@@ -2441,7 +2443,7 @@ namespace Microsoft.Build.UnitTests
                     me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.SymbolicLinkComment", sourceFile, destFile);
 
                     string destinationFileContents = File.ReadAllText(destFile);
-                    Assert.Equal("This is a source temp file.", destinationFileContents); //"Expected the destination symbolic linked file to contain the contents of source file."
+                    Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination symbolic linked file to contain the contents of source file."
 
                     Assert.Single(t.DestinationFiles);
                     Assert.Single(t.CopiedFiles);
@@ -2456,7 +2458,7 @@ namespace Microsoft.Build.UnitTests
 
                     // Read the destination file (it should have the same modified content as the source)
                     destinationFileContents = File.ReadAllText(destFile);
-                    Assert.Equal("This is another source temp file.", destinationFileContents); //"Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
+                    Assert.Equal("This is another source temp file.", destinationFileContents); // "Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
 
                     ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3891"); // Didn't do retries
                 }

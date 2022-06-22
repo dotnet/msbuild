@@ -14,6 +14,8 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.ResourceHandling;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <remarks>

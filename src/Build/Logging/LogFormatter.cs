@@ -5,6 +5,8 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.Logging
 {
     /// <summary>

@@ -16,6 +16,8 @@ using Xunit;
 
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Definition
 {
     /// <summary>
@@ -100,7 +102,7 @@ namespace Microsoft.Build.UnitTests.Definition
             {
                 return; // "TODO: under Unix this runs out of stack. Investigate"
             }
-            ToolsetReader reader = new ToolsetRegistryReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>());  //we don't use the test registry key because we want to verify the install
+            ToolsetReader reader = new ToolsetRegistryReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>());  // we don't use the test registry key because we want to verify the install
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
             string msbuildOverrideTasksPath;
@@ -591,12 +593,12 @@ namespace Microsoft.Build.UnitTests.Definition
 
             string msbuildOverrideTasksPath;
             string defaultOverrideToolsVersion;
-            //should not throw
+            // should not throw
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.True(values.ContainsKey("tv1"));
 
-            //should not contain the second toolset because it does not define a tools/bin path
+            // should not contain the second toolset because it does not define a tools/bin path
             Assert.False(values.ContainsKey("tv2"));
 
             Assert.True(values.ContainsKey("tv3"));

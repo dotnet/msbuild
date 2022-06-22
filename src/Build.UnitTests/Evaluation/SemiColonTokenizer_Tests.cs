@@ -6,6 +6,8 @@ using Microsoft.Build.Evaluation;
 using Xunit;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Evaluation
 {
     public class SemiColonTokenizer_Tests

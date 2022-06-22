@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
@@ -50,7 +52,11 @@ namespace Microsoft.Build.Evaluation
 
                 public ItemData this[int index]
                 {
-                    get { return _listBuilder[index]; }
+                    get
+                    {
+                        return _listBuilder[index];
+                    }
+
                     set
                     {
                         // Update the dictionary if it exists.
@@ -76,7 +82,6 @@ namespace Microsoft.Build.Evaluation
                                 ItemDataCollectionValue<I> newDictionaryEntry = _dictionaryBuilder[newNormalizedValue];
                                 newDictionaryEntry.Add(value.Item);
                                 _dictionaryBuilder[newNormalizedValue] = newDictionaryEntry;
-
                             }
                             else
                             {

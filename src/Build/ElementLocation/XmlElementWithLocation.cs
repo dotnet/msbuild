@@ -6,6 +6,8 @@ using System.Xml;
 using System.Diagnostics;
 using Microsoft.Build.ObjectModelRemoting;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <summary>

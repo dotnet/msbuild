@@ -17,6 +17,8 @@ using Shouldly.Configuration;
 using Microsoft.NET.StringTools;
 #endif
 
+#nullable disable
+
 namespace Microsoft.NET.StringTools.Tests
 {
     public class StringTools_Tests

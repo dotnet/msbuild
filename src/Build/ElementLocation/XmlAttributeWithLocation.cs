@@ -5,6 +5,8 @@ using System;
 using System.Xml;
 using System.Diagnostics;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <summary>

@@ -1,5 +1,7 @@
 ﻿using System;
 
+#nullable disable
+
 namespace Xunit
 {
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]

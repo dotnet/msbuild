@@ -13,6 +13,8 @@ using Shouldly;
 using Xunit;
 using static Microsoft.Build.Unittest.BuildResultUtilities;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     public class CacheAggregator_Tests

@@ -14,6 +14,8 @@ using Microsoft.Build.Utilities;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public sealed class MSBuildTask_Tests : IDisposable

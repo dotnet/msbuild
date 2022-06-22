@@ -10,6 +10,8 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -21,7 +23,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// AssemblyContextLoader used to load DLLs outside of msbuild.exe directory
         /// </summary>
-        private static readonly CoreClrAssemblyLoader s_coreClrAssemblyLoader;
+        private static readonly CoreClrAssemblyLoader s_coreClrAssemblyLoader = new CoreClrAssemblyLoader();
 #endif
 
         /// <summary>
@@ -38,13 +40,6 @@ namespace Microsoft.Build.Shared
         /// Type filter for this typeloader
         /// </summary>
         private Func<Type, object, bool> _isDesiredType;
-
-#if FEATURE_ASSEMBLYLOADCONTEXT
-        static TypeLoader()
-        {
-            s_coreClrAssemblyLoader = new CoreClrAssemblyLoader();
-        }
-#endif
 
         /// <summary>
         /// Constructor.

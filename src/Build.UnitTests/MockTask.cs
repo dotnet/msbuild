@@ -8,6 +8,8 @@ using Microsoft.Build.Framework;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     internal class MockTaskBase

@@ -23,6 +23,8 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 
+#nullable disable
+
 namespace System.Security.Cryptography
 {
     internal static partial class CngLightup

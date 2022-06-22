@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>

@@ -7,6 +7,8 @@ using System.Xml;
 using System.Text;
 using System.Text.RegularExpressions;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

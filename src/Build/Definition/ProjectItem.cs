@@ -12,6 +12,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
@@ -182,8 +184,14 @@ namespace Microsoft.Build.Evaluation
         {
             [DebuggerStepThrough]
             get
-            { return _xml.Include; }
-            set { Rename(value); }
+            {
+                return _xml.Include;
+            }
+
+            set
+            {
+                Rename(value);
+            }
         }
 
         /// <summary>

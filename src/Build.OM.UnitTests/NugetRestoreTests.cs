@@ -10,6 +10,8 @@ using Xunit;
 #endif
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.OM.UnitTests
 {
     public sealed class NugetRestoreTests

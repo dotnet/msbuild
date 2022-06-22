@@ -3,6 +3,8 @@
 
 using System.Diagnostics.CodeAnalysis;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

@@ -92,9 +92,19 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="DuplicateOverrideUsingTaskElement">
+        <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
+        <target state="translated">MSB4275: Došlo k pokusu o vytvoření více přepsání stejné úlohy: {0}</target>
+        <note>{StrBegin="MSB4275: "}</note>
+      </trans-unit>
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
         <target state="translated">MSB4257: Zadaný výstupní soubor mezipaměti pro výsledky je prázdný.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentDerivedPropertyRead">
+        <source>Property '{0}' with value '{1}' expanded from the environment.</source>
+        <target state="new">Property '{0}' with value '{1}' expanded from the environment.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
@@ -219,20 +229,98 @@
         <target state="translated">MSB4265: Musí se zadat jeden modul plug-in mezipaměti projektu, ale našlo se jich více: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="OverrideUsingTaskElementCreated">
+        <source>Created an override using task: {0} at {1}</source>
+        <target state="translated">Vytvořilo se přepsání pomocí úlohy: {0} v {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheBeginBuild">
+        <source>Initializing project cache plugin.</source>
+        <target state="translated">Inicializuje se modul plug-in mezipaměti projektu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheEndBuild">
+        <source>Shutting down project cache plugin.</source>
+        <target state="translated">Vypíná se modul plug-in mezipaměti projektu.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectCacheException">
         <source>MSB4273: The project cache threw an unhandled exception from the {0} method.</source>
         <target state="translated">MSB4273: Mezipaměť projektu vyvolala neošetřenou výjimku z metody {0}.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithDefaultTargets">
+        <source>Project cache hit for "{0}" (default targets).</source>
+        <target state="translated">Přístup do mezipaměti projektu pro „{0}“ (výchozí cíle).</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithOutputs">
+        <source>{0} -&gt; Cache Hit</source>
+        <target state="translated">{0} -&gt; Přístup do mezipaměti</target>
+        <note>
+      {StrBegin="{0} -&gt; "}LOCALIZATION: This string is used to indicate progress and matches the format for a log message from Microsoft.Common.CurrentVersion.targets. {0} is a project name.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithTargetNames">
+        <source>Project cache hit for "{0}" ({1} target(s)).</source>
+        <target state="translated">Přístup do mezipaměti projektu pro „{0}“ ({1} cíl(e/ů)).</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
       </trans-unit>
       <trans-unit id="ProjectCacheInitializationFailed">
         <source>MSB4266: Failed to initialize the project cache.</source>
         <target state="translated">MSB4266: Nepovedlo se inicializovat mezipaměť projektu.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheMissWithDefaultTargets">
+        <source>Project cache miss for "{0}" (default targets).</source>
+        <target state="translated">Neúspěšný přístup do mezipaměti projektu pro „{0}“ (výchozí cíle).</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheMissWithTargetNames">
+        <source>Project cache miss for "{0}" ({1} target(s)).</source>
+        <target state="translated">Neúspěšný přístup do mezipaměti projektu pro „{0}“ ({1} cíl(e/ů)).</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheNotApplicableWithDefaultTargets">
+        <source>Project cache not applicable for "{0}" (default targets).</source>
+        <target state="translated">Přístup do mezipaměti nepoužitelný pro „{0}“ (výchozí cíle).</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheNotApplicableWithTargetNames">
+        <source>Project cache not applicable for "{0}" ({1} target(s)).</source>
+        <target state="translated">Přístup do mezipaměti nepoužitelný pro „{0}“ ({1} cíl(e/ů)).</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectCacheQueryFailed">
         <source>MSB4267: The project cache failed while being queried for the following project: {0}. The cache is queried in parallel for multiple projects so this specific project might not be the cause.</source>
         <target state="translated">MSB4267: Při dotazování na následující projekt selhala jeho mezipaměť: {0}. Na mezipaměť se dotazy posílají paralelně pro několik projektů, takže tento konkrétní projekt nemusí být příčinou.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheQueryStartedWithDefaultTargets">
+        <source>Querying project cache for "{0}" (default targets):</source>
+        <target state="translated">Dotazování mezipaměti projektu pro „{0}“ (výchozí cíle):</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheQueryStartedWithTargetNames">
+        <source>Querying project cache for "{0}" (targets: {1}):</source>
+        <target state="translated">Dotazování mezipaměti projektu pro „{0}“ (cíle: {1}):</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
       </trans-unit>
       <trans-unit id="ProjectCacheShutdownFailed">
         <source>MSB4268: The project cache failed to shut down properly.</source>
@@ -345,6 +433,13 @@
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
     </note>
+      </trans-unit>
+      <trans-unit id="UnhandledMSBuildError">
+        <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled.
+    {0}</source>
+        <target state="translated">Jedná se o neošetřenou výjimku v MSBuildu – HLASUJTE PROSÍM PRO EXISTUJÍCÍ PROBLÉM NEBO VYTVOŘTE NOVÝ NA https://aka.ms/msbuild/unhandled.
+    {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="UninitializedPropertyRead">
         <source>Read uninitialized property "{0}"</source>
@@ -2079,8 +2174,8 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MustSetRecordDuplicateInputs">
-        <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateImports flag.</source>
-        <target state="translated">Projekt nebyl načten s příznakem ProjectLoadSettings.RecordDuplicateImports.</target>
+        <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</source>
+        <target state="translated">Projekt nebyl načten s příznakem ProjectLoadSettings.RecordDuplicateButNotCircularImports.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_CannotSaveFileLoadedAsReadOnly">

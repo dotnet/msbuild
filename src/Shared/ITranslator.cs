@@ -7,6 +7,8 @@ using System.Globalization;
 using System.IO;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -125,6 +127,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="value">The value to be translated.</param>
         void Translate(ref int value);
+
+        /// <summary>
+        /// Translates an <see langword="int"/> array.
+        /// </summary>
+        /// <param name="array">The array to be translated.</param>
+        void Translate(ref int[] array);
 
         /// <summary>
         /// Translates a long.

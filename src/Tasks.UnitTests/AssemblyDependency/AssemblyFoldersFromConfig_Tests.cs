@@ -8,6 +8,8 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 {
     public class AssemblyFoldersFromConfig_Tests : ResolveAssemblyReferenceTestFixture

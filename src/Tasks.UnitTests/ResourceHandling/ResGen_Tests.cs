@@ -12,6 +12,8 @@ using Microsoft.Build.Utilities;
 using ResGen = Microsoft.Build.Tasks.GenerateResource.ResGen;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class ResGen_Tests
@@ -224,11 +226,11 @@ namespace Microsoft.Build.UnitTests
             // reference switch adds space + "/r:", (4 characters)
             int referenceSwitchDelta = 4;
 
-            //subtract one because leading space is added to command line arguments
+            // subtract one because leading space is added to command line arguments
             int maxCommandLineLength = 28000 - 1;
             int referencePathLength = 200;
 
-            //min reference argument is " /r:a.dll"
+            // min reference argument is " /r:a.dll"
             int minReferenceArgumentLength = referenceSwitchDelta + "a.dll".Length;
 
             // reference name is of the form aaa...aaa###.dll (repeated a characters followed by 3

@@ -10,6 +10,8 @@ using Marshal = System.Runtime.InteropServices.Marshal;
 using COMException = System.Runtime.InteropServices.COMException;
 using VarEnum = System.Runtime.InteropServices.VarEnum;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     // Abstract the method for releasing COM objects for unit testing. 

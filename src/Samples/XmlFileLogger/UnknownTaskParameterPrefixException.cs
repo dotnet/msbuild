@@ -3,6 +3,8 @@
 
 using System;
 
+#nullable disable
+
 namespace Microsoft.Build.Logging.StructuredLogger
 {
     internal class UnknownTaskParameterPrefixException : Exception

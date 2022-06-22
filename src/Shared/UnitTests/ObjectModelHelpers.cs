@@ -13,7 +13,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.FileSystem;
@@ -25,6 +27,8 @@ using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -120,7 +124,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     return new Project(p, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, c)
                         .Items
-                        .Select(i => (TestItem) new ProjectItemTestItemAdapter(i))
+                        .Select(i => (ITestItem)new ProjectItemTestItemAdapter(i))
                         .ToList();
                 },
             projectContents,
@@ -131,7 +135,7 @@ namespace Microsoft.Build.UnitTests
             normalizeSlashes);
         }
 
-        internal static void AssertItemEvaluationFromGenericItemEvaluator(Func<string, ProjectCollection, IList<TestItem>> itemEvaluator, string projectContents, string[] inputFiles, string[] expectedInclude, bool makeExpectedIncludeAbsolute = false, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false)
+        internal static void AssertItemEvaluationFromGenericItemEvaluator(Func<string, ProjectCollection, IList<ITestItem>> itemEvaluator, string projectContents, string[] inputFiles, string[] expectedInclude, bool makeExpectedIncludeAbsolute = false, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false)
         {
             using (var env = TestEnvironment.Create())
             using (var collection = new ProjectCollection())
@@ -195,14 +199,14 @@ namespace Microsoft.Build.UnitTests
         }
 
         // todo Make IItem<M> public and add these new members to it.
-        internal interface TestItem
+        internal interface ITestItem
         {
             string EvaluatedInclude { get; }
             int DirectMetadataCount { get; }
             string GetMetadataValue(string key);
         }
 
-        internal class ProjectItemTestItemAdapter : TestItem
+        internal class ProjectItemTestItemAdapter : ITestItem
         {
             private readonly ProjectItem _projectInstance;
 
@@ -221,7 +225,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        internal class ProjectItemInstanceTestItemAdapter : TestItem
+        internal class ProjectItemInstanceTestItemAdapter : ITestItem
         {
             private readonly ProjectItemInstance _projectInstance;
 
@@ -242,14 +246,14 @@ namespace Microsoft.Build.UnitTests
 
         internal static void AssertItems(string[] expectedItems, ICollection<ProjectItem> items, Dictionary<string, string> expectedDirectMetadata = null, bool normalizeSlashes = false)
         {
-            var converteditems = items.Select(i => (TestItem) new ProjectItemTestItemAdapter(i)).ToList();
+            var converteditems = items.Select(i => (ITestItem)new ProjectItemTestItemAdapter(i)).ToList();
             AssertItems(expectedItems, converteditems, expectedDirectMetadata, normalizeSlashes);
         }
 
         /// <summary>
         /// Asserts that the list of items has the specified evaluated includes.
         /// </summary>
-        internal static void AssertItems(string[] expectedItems, IList<TestItem> items, Dictionary<string, string> expectedDirectMetadata = null, bool normalizeSlashes = false)
+        internal static void AssertItems(string[] expectedItems, IList<ITestItem> items, Dictionary<string, string> expectedDirectMetadata = null, bool normalizeSlashes = false)
         {
             if (expectedDirectMetadata == null)
             {
@@ -269,11 +273,11 @@ namespace Microsoft.Build.UnitTests
 
         public static void AssertItems(string[] expectedItems, IList<ProjectItem> items, Dictionary<string, string>[] expectedDirectMetadataPerItem, bool normalizeSlashes = false)
         {
-            var convertedItems = items.Select(i => (TestItem) new ProjectItemTestItemAdapter(i)).ToList();
+            var convertedItems = items.Select(i => (ITestItem)new ProjectItemTestItemAdapter(i)).ToList();
             AssertItems(expectedItems, convertedItems, expectedDirectMetadataPerItem, normalizeSlashes);
         }
 
-        public static void AssertItems(string[] expectedItems, IList<TestItem> items, Dictionary<string, string>[] expectedDirectMetadataPerItem, bool normalizeSlashes = false)
+        public static void AssertItems(string[] expectedItems, IList<ITestItem> items, Dictionary<string, string>[] expectedDirectMetadataPerItem, bool normalizeSlashes = false)
         {
             if (items.Count != 0 || expectedDirectMetadataPerItem.Length != 0)
             {
@@ -425,7 +429,7 @@ namespace Microsoft.Build.UnitTests
                         Assert.Equal(
                                 expectedMetadataValue,
                                 actualMetadataValue
-                            //string.Format
+                            // string.Format
                             //    (
                             //        "Item '{0}' has metadata {1}={2} instead of expected {1}={3}.",
                             //        actualItem.ItemSpec,
@@ -465,7 +469,7 @@ namespace Microsoft.Build.UnitTests
             item.GetMetadataValue(key).ShouldBe(value);
         }
 
-        internal static void AssertItemHasMetadata(Dictionary<string, string> expected, TestItem item)
+        internal static void AssertItemHasMetadata(Dictionary<string, string> expected, ITestItem item)
         {
             expected ??= new Dictionary<string, string>();
 
@@ -714,7 +718,7 @@ namespace Microsoft.Build.UnitTests
             string toolsVersion /* may be null */
             )
         {
-            XmlReaderSettings readerSettings = new XmlReaderSettings {DtdProcessing = DtdProcessing.Ignore};
+            XmlReaderSettings readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
 
             Project project = new Project
                 (
@@ -877,19 +881,10 @@ namespace Microsoft.Build.UnitTests
 
                     break;
                 }
-                catch (Exception ex)
+                // After all the retries fail, we fail with the actual problem instead of some difficult-to-understand issue later.
+                catch (Exception ex) when (retries < 4)
                 {
-                    if (retries < 4)
-                    {
-                        Console.WriteLine(ex.ToString());
-                    }
-                    else
-                    {
-                        // All the retries have failed. We will now fail with the
-                        // actual problem now instead of with some more difficult-to-understand
-                        // issue later.
-                        throw;
-                    }
+                    Console.WriteLine(ex.ToString());
                 }
             }
         }
@@ -924,19 +919,10 @@ namespace Microsoft.Build.UnitTests
                     }
                     break;
                 }
-                catch (Exception ex)
+                // After all the retries fail, we fail with the actual problem instead of some difficult-to-understand issue later.
+                catch (Exception ex) when (retries < 4)
                 {
-                    if (retries < 4)
-                    {
-                        Console.WriteLine(ex.ToString());
-                    }
-                    else
-                    {
-                        // All the retries have failed. We will now fail with the
-                        // actual problem now instead of with some more difficult-to-understand
-                        // issue later.
-                        throw;
-                    }
+                    Console.WriteLine(ex.ToString());
                 }
             }
 
@@ -1118,7 +1104,7 @@ namespace Microsoft.Build.UnitTests
         {
             return
                 $@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             {fragment}
                         </ItemGroup>
@@ -1400,15 +1386,15 @@ namespace Microsoft.Build.UnitTests
                 if (logger != null)
                 {
                     parameters.Loggers = parameters.Loggers == null
-                        ? new[] {logger}
-                        : parameters.Loggers.Concat(new[] {logger});
+                        ? new[] { logger }
+                        : parameters.Loggers.Concat(new[] { logger });
                 }
 
                 var request = new BuildRequestData(
                     projectFile,
                     new Dictionary<string, string>(),
                     MSBuildConstants.CurrentToolsVersion,
-                    new string[] {},
+                    Array.Empty<string>(),
                     null);
 
                 var result = buildManager.Build(
@@ -1417,6 +1403,109 @@ namespace Microsoft.Build.UnitTests
 
                 return result;
             }
+        }
+
+        internal enum ExpectedBuildResult
+        {
+            // The build should fail with a logged error upon drive enumerationg wildcard detection and setting of environment variable.
+            FailWithError,
+            // The build should succeed with a logged warning upon drive enumerating wildcard detection (regardless of environment variable value).
+            SucceedWithWarning,
+            // The build should succeed with no logged warnings and errors, as there are no drive enumerating wildcards.
+            SucceedWithNoErrorsAndWarnings
+        }
+
+        /// <summary>
+        /// Verify that a drive enumerating wildcard warning is logged or exception is thrown. 
+        /// </summary>
+        internal static void CleanContentsAndBuildTargetWithDriveEnumeratingWildcard(string content, string failOnDriveEnumerationEnvVar, string targetName, ExpectedBuildResult expectedBuildResult, ITestOutputHelper testOutput = null)
+        {
+            using (var env = TestEnvironment.Create(testOutput))
+            {
+                // Clean file contents by replacing single quotes with double quotes, etc.
+                content = ObjectModelHelpers.CleanupFileContents(content);
+                var testProject = env.CreateTestProjectWithFiles(content.Cleanup());
+
+                // Reset state
+                ResetStateForDriveEnumeratingWildcardTests(env, failOnDriveEnumerationEnvVar);
+
+                // Setup and build test target
+                BuildTargetWithDriveEnumeratingWildcardUsingBuildManager(env, testProject.ProjectFile, targetName, expectedBuildResult, testOutput);
+            }
+        }
+
+        internal static void ResetStateForDriveEnumeratingWildcardTests(TestEnvironment env, string setEnvVar)
+        {
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDFAILONDRIVEENUMERATINGWILDCARD", setEnvVar);
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+        }
+
+        internal static void BuildTargetWithDriveEnumeratingWildcardUsingBuildManager(TestEnvironment env, string testProjectFile, string targetName, ExpectedBuildResult expectedBuildResult, ITestOutputHelper testOutput = null)
+        {
+            try
+            {
+                // Setup build
+                MockLogger mockLogger = (testOutput == null) ? new MockLogger() : new MockLogger(testOutput);
+                var p = ProjectInstance.FromFile(testProjectFile, new ProjectOptions());
+                BuildManager buildManager = BuildManager.DefaultBuildManager;
+                BuildRequestData data = new BuildRequestData(p, new[] { targetName });
+                BuildParameters parameters = new BuildParameters()
+                {
+                    Loggers = new ILogger[] { mockLogger },
+                };
+
+                // Perform build using build manager
+                BuildResult buildResult = buildManager.Build(parameters, data);
+
+                // Verify result based on value of ExpectedBuildResult
+                if (expectedBuildResult == ExpectedBuildResult.FailWithError)
+                {
+                    VerifyErrorLoggedForDriveEnumeratingWildcard(buildResult, mockLogger, targetName, testProjectFile);
+                }
+                else if (expectedBuildResult == ExpectedBuildResult.SucceedWithWarning)
+                {
+                    VerifyWarningLoggedForDriveEnumeratingWildcard(buildResult, mockLogger, targetName, testProjectFile);
+                }
+                else if (expectedBuildResult == ExpectedBuildResult.SucceedWithNoErrorsAndWarnings)
+                {
+                    VerifyNoErrorsAndWarningsForDriveEnumeratingWildcard(buildResult, mockLogger, targetName);
+                }
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
+        private static void VerifyErrorLoggedForDriveEnumeratingWildcard(BuildResult buildResult, MockLogger mockLogger, string targetName, string testProjectFile)
+        {
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
+            buildResult[targetName].ResultCode.ShouldBe(TargetResultCode.Failure);
+            mockLogger.ErrorCount.ShouldBe(1);
+            mockLogger.Errors[0].Code.ShouldBe("MSB5029");
+            mockLogger.Errors[0].Message.ShouldContain(testProjectFile);
+        }
+
+        private static void VerifyWarningLoggedForDriveEnumeratingWildcard(BuildResult buildResult, MockLogger mockLogger, string targetName, string testProjectFile)
+        {
+            VerifySuccessOfBuildAndTargetResults(buildResult, targetName);
+            mockLogger.WarningCount.ShouldBe(1);
+            mockLogger.Warnings[0].Code.ShouldBe("MSB5029");
+            mockLogger.Warnings[0].Message.ShouldContain(testProjectFile);
+        }
+
+        private static void VerifyNoErrorsAndWarningsForDriveEnumeratingWildcard(BuildResult buildResult, MockLogger mockLogger, string targetName)
+        {
+            VerifySuccessOfBuildAndTargetResults(buildResult, targetName);
+            mockLogger.WarningCount.ShouldBe(0);
+            mockLogger.ErrorCount.ShouldBe(0);
+        }
+
+        private static void VerifySuccessOfBuildAndTargetResults(BuildResult buildResult, string targetName)
+        {
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            buildResult[targetName].ResultCode.ShouldBe(TargetResultCode.Success);
         }
 
         /// <summary>
@@ -1601,7 +1690,7 @@ namespace Microsoft.Build.UnitTests
 
             sb.Append("</ItemGroup>");
 
-            
+
             foreach (var defaultTarget in (defaultTargets ?? string.Empty).Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
             {
                 sb.Append("<Target Name='").Append(defaultTarget).Append("'/>");
@@ -1799,7 +1888,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal static void VerifyAssertLineByLine(string expected, string actual, bool ignoreFirstLineOfActual, ITestOutputHelper testOutput = null)
         {
-            Action<string> LogLine = testOutput == null ? (Action<string>) Console.WriteLine : testOutput.WriteLine;
+            Action<string> LogLine = testOutput == null ? (Action<string>)Console.WriteLine : testOutput.WriteLine;
 
             string[] actualLines = SplitIntoLines(actual);
 
@@ -1950,7 +2039,7 @@ namespace Microsoft.Build.UnitTests
                 _env = env;
 
                 Logger = new MockLogger(_env.Output);
-                var loggers = new[] {Logger};
+                var loggers = new[] { Logger };
 
                 var actualBuildParameters = buildParameters ?? new BuildParameters();
 
@@ -1982,7 +2071,7 @@ namespace Microsoft.Build.UnitTests
                 var buildRequestData = new BuildRequestData(projectFile,
                     globalProperties ?? new Dictionary<string, string>(),
                     MSBuildConstants.CurrentToolsVersion,
-                    entryTargets ?? new string[0],
+                    entryTargets ?? Array.Empty<string>(),
                     null);
 
                 var completion = new TaskCompletionSource<BuildResult>();
@@ -2002,7 +2091,7 @@ namespace Microsoft.Build.UnitTests
 
             public GraphBuildResult BuildGraph(ProjectGraph graph, string[] entryTargets = null)
             {
-                return _buildManager.BuildRequest(new GraphBuildRequestData(graph, entryTargets ?? new string[0]));
+                return _buildManager.BuildRequest(new GraphBuildRequestData(graph, entryTargets ?? Array.Empty<string>()));
             }
 
             public void Dispose()

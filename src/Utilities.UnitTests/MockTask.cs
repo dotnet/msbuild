@@ -5,6 +5,8 @@ using System.Reflection;
 using System.Resources;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     internal sealed class MockTask : Task

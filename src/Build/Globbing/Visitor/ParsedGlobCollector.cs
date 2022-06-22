@@ -1,5 +1,7 @@
 using System.Collections.Immutable;
 
+#nullable disable
+
 namespace Microsoft.Build.Globbing.Visitor
 {
     internal class ParsedGlobCollector : GlobVisitor

@@ -6,6 +6,8 @@ using Microsoft.Build.Utilities;
 using System.Collections;
 using System.Collections.Generic;
 
+#nullable disable
+
 namespace NullMetadataTask
 {
     public class NullMetadataTask : Task

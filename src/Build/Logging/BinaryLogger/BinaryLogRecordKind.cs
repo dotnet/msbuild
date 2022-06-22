@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Build.Logging
+﻿#nullable disable
+
+namespace Microsoft.Build.Logging
 {
     internal enum BinaryLogRecordKind
     {

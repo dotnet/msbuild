@@ -17,10 +17,14 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+#if FEATURE_WIN32_REGISTRY
 using Microsoft.Win32;
+#endif
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using ObjectModel = System.Collections.ObjectModel;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -568,13 +572,8 @@ namespace Microsoft.Build.Evaluation
                             s_dev10IsInstalled = false;
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (!ExceptionHandling.NotExpectedRegistryException(e))
                     {
-                        if (ExceptionHandling.NotExpectedRegistryException(e))
-                        {
-                            throw;
-                        }
-
                         // if it's a registry exception, just shrug, eat it, and move on with life on the assumption that whatever
                         // went wrong, it's pretty clear that Dev10 probably isn't installed.
                         s_dev10IsInstalled = false;
@@ -922,7 +921,7 @@ namespace Microsoft.Build.Evaluation
 
                     reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.msbuildRuntimeType,
 #if RUNTIME_TYPE_NETCORE
-                        "Core",
+                        Traits.Instance.ForceEvaluateAsFullFramework ? "Full" : "Core",
 #elif MONO
                         NativeMethodsShared.IsMono ? "Mono" : "Full");
 #else

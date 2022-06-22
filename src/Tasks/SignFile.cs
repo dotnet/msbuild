@@ -4,11 +4,14 @@
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Security.Cryptography;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -17,6 +20,7 @@ namespace Microsoft.Build.Tasks
     /// provided and optionally uses a timestamp if a URL is provided.
     /// It can sign ClickOnce manifests as well as exe's.
     /// </summary>
+    [SupportedOSPlatform("windows")]
     public sealed class SignFile : Task
     {
         public SignFile()
@@ -35,14 +39,24 @@ namespace Microsoft.Build.Tasks
         public String TargetFrameworkVersion { get; set; }
 
         public string TimestampUrl { get; set; }
+        public bool DisallowMansignTimestampFallback { get; set; } = false;
 
         public override bool Execute()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(SignFile));
+                return false;
+            }
             try
             {
-                SecurityUtilities.SignFile(CertificateThumbprint,
-                TimestampUrl == null ? null : new Uri(TimestampUrl),
-                SigningTarget.ItemSpec, TargetFrameworkVersion, TargetFrameworkIdentifier);
+                SecurityUtilities.SignFile(
+                    CertificateThumbprint,
+                    TimestampUrl == null ? null : new Uri(TimestampUrl),
+                    SigningTarget.ItemSpec, 
+                    TargetFrameworkVersion, 
+                    TargetFrameworkIdentifier,
+                    DisallowMansignTimestampFallback);
                 return true;
             }
             catch (ArgumentException ex) when (ex.ParamName.Equals("certThumbprint"))

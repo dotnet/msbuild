@@ -5,6 +5,8 @@ using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using Microsoft.Build.Shared;
 using System.Diagnostics;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

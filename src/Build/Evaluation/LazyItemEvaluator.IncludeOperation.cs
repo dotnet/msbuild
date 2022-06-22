@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
@@ -109,15 +111,19 @@ namespace Microsoft.Build.Evaluation
                             {
                                 MSBuildEventSource.Log.ExpandGlobStart(_rootDirectory, glob, string.Join(", ", excludePatternsForGlobs));
                             }
+
                             using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
                             {
                                 includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
                                     _rootDirectory,
                                     glob,
                                     excludePatternsForGlobs,
-                                    fileMatcher: FileMatcher
-                                );
+                                    fileMatcher: FileMatcher,
+                                    loggingMechanism: _lazyEvaluator._loggingContext,
+                                    includeLocation: _itemElement.IncludeLocation,
+                                    excludeLocation: _itemElement.ExcludeLocation);
                             }
+
                             if (MSBuildEventSource.Log.IsEnabled())
                             {
                                 MSBuildEventSource.Log.ExpandGlobStop(_rootDirectory, glob, string.Join(", ", excludePatternsForGlobs));

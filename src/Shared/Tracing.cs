@@ -7,6 +7,8 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
+#nullable disable
+
 namespace Microsoft.Build.Internal
 {
     /// <summary>

@@ -5,6 +5,8 @@ using System;
 using System.Xml;
 using System.Collections.Generic;
 
+#nullable disable
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>

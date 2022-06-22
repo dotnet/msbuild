@@ -10,6 +10,8 @@ using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class FileUtilities_Tests
@@ -142,7 +144,6 @@ namespace Microsoft.Build.UnitTests
                 Assert.Equal(@"../", FileUtilities.MakeRelative(@"/abc/def/xyz", @"/abc/def/"));
                 Assert.Equal(@"../ghi/", FileUtilities.MakeRelative(@"/abc/def/xyz", @"/abc/def/ghi/"));
                 Assert.Equal(@".", FileUtilities.MakeRelative(@"/abc/def", @"/abc/def/"));
-
             }
         }
 
@@ -332,10 +333,10 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(FileUtilities.FixFilePath(@"foo/bar\"), FileUtilities.EnsureTrailingSlash(@"foo/bar")); // "test 2"
 
             // Already has a trailing slash to start with.
-            Assert.Equal(FileUtilities.FixFilePath(@"foo/bar/"), FileUtilities.EnsureTrailingSlash(@"foo/bar/")); //test 3"
-            Assert.Equal(FileUtilities.FixFilePath(@"foo\bar\"), FileUtilities.EnsureTrailingSlash(@"foo\bar\")); //test 4"
-            Assert.Equal(FileUtilities.FixFilePath(@"foo/bar\"), FileUtilities.EnsureTrailingSlash(@"foo/bar\")); //test 5"
-            Assert.Equal(FileUtilities.FixFilePath(@"foo\bar/"), FileUtilities.EnsureTrailingSlash(@"foo\bar/")); //"test 5"
+            Assert.Equal(FileUtilities.FixFilePath(@"foo/bar/"), FileUtilities.EnsureTrailingSlash(@"foo/bar/")); // test 3"
+            Assert.Equal(FileUtilities.FixFilePath(@"foo\bar\"), FileUtilities.EnsureTrailingSlash(@"foo\bar\")); // test 4"
+            Assert.Equal(FileUtilities.FixFilePath(@"foo/bar\"), FileUtilities.EnsureTrailingSlash(@"foo/bar\")); // test 5"
+            Assert.Equal(FileUtilities.FixFilePath(@"foo\bar/"), FileUtilities.EnsureTrailingSlash(@"foo\bar/")); // "test 5"
         }
 
         /// <summary>
@@ -1087,6 +1088,46 @@ namespace Microsoft.Build.UnitTests
             expectedTruncatedPath = expectedTruncatedPath.Replace('/', Path.DirectorySeparatorChar);
 
             FileUtilities.TruncatePathToTrailingSegments(path, trailingSegments).ShouldBe(expectedTruncatedPath);
+        }
+
+        /// <summary>
+        /// Exercises FileUtilities.EnsureSingleQuotes
+        /// </summary>
+        [Theory]
+        [InlineData(null, null)] // Null test
+        [InlineData("", "")] // Empty string test
+        [InlineData(@" ", @"' '")] // One character which is a space
+        [InlineData(@"'", @"'''")] // One character which is a single quote
+        [InlineData(@"""", @"'""'")] // One character which is a double quote
+        [InlineData(@"example", @"'example'")] // Unquoted string
+        [InlineData(@"'example'", @"'example'")] // Single quoted string
+        [InlineData(@"""example""", @"'example'")] // Double quoted string
+        [InlineData(@"'example""", @"''example""'")] // Mixed Quotes - Leading Single
+        [InlineData(@"""example'", @"'""example''")] // Mixed Quotes - Leading Double
+        [InlineData(@"ex""am'ple", @"'ex""am'ple'")] // Interior Quotes
+        public void EnsureSingleQuotesTest(string path, string expectedResult)
+        {
+            FileUtilities.EnsureSingleQuotes(path).ShouldBe(expectedResult);
+        }
+
+        /// <summary>
+        /// Exercises FileUtilities.EnsureDoubleQuotes
+        /// </summary>
+        [Theory]
+        [InlineData(null, null)] // Null test
+        [InlineData("", "")] // Empty string test
+        [InlineData(@" ", @""" """)] // One character which is a space
+        [InlineData(@"'", @"""'""")] // One character which is a single quote
+        [InlineData(@"""", @"""""""")] // One character which is a double quote
+        [InlineData(@"example", @"""example""")] // Unquoted string
+        [InlineData(@"'example'", @"""example""")] // Single quoted string
+        [InlineData(@"""example""", @"""example""")] // Double quoted string
+        [InlineData(@"'example""", @"""'example""""")] // Mixed Quotes - Leading Single
+        [InlineData(@"""example'", @"""""example'""")] // Mixed Quotes - Leading Double
+        [InlineData(@"ex""am'ple", @"""ex""am'ple""")] // Interior Quotes
+        public void EnsureDoubleQuotesTest(string path, string expectedResult)
+        {
+            FileUtilities.EnsureDoubleQuotes(path).ShouldBe(expectedResult);
         }
     }
 }

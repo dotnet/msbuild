@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     // TODO: this should be unified with Shared\ErrorUtilities.cs, but it is hard to untangle everything

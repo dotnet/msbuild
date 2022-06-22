@@ -7,6 +7,8 @@ using System.Runtime.Serialization;
 using System.Security.Permissions; // for SecurityPermissionAttribute
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>

@@ -4,6 +4,8 @@
 using System.Reflection;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

@@ -7,6 +7,8 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>
@@ -218,7 +220,6 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(globalProperties, nameof(globalProperties));
 
             ProjectFullPath = FileUtilities.NormalizePath(projectFullPath);
-            TargetNames = (ICollection<string>)targetsToBuild.Clone();
             GlobalPropertiesDictionary = new PropertyDictionary<ProjectPropertyInstance>(globalProperties.Count);
             foreach (KeyValuePair<string, string> propertyPair in globalProperties)
             {

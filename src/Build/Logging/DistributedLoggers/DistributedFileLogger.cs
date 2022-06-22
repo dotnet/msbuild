@@ -7,6 +7,8 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Logging
 {
     /// <summary>

@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Text;
 
+#nullable disable
+
 namespace System.Collections.Generic {
 
     /// <summary>

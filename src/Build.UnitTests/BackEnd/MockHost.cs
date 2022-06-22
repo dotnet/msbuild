@@ -10,6 +10,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>

@@ -5,6 +5,8 @@ using System;
 using System.Globalization;
 using System.Threading;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

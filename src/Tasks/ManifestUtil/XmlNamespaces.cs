@@ -3,6 +3,8 @@
 
 using System.Xml;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     internal static class XmlNamespaces

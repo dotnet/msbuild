@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>

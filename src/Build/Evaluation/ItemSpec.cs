@@ -4,9 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -154,23 +157,25 @@ namespace Microsoft.Build.Evaluation
         /// <param name="itemSpecLocation">The xml location the itemspec comes from</param>
         /// <param name="projectDirectory">The directory that the project is in.</param>
         /// <param name="expandProperties">Expand properties before breaking down fragments. Defaults to true</param>
+        /// <param name="loggingContext">Context in which to log</param>
         public ItemSpec(
             string itemSpec,
             Expander<P, I> expander,
             IElementLocation itemSpecLocation,
             string projectDirectory,
-            bool expandProperties = true)
+            bool expandProperties = true,
+            LoggingContext loggingContext = null)
         {
             ItemSpecString = itemSpec;
             Expander = expander;
             ItemSpecLocation = itemSpecLocation;
 
-            Fragments = BuildItemFragments(itemSpecLocation, projectDirectory, expandProperties);
+            Fragments = BuildItemFragments(itemSpecLocation, projectDirectory, expandProperties, loggingContext);
         }
 
-        private List<ItemSpecFragment> BuildItemFragments(IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties)
+        private List<ItemSpecFragment> BuildItemFragments(IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties, LoggingContext loggingContext)
         {
-            //  Code corresponds to Evaluator.CreateItemsFromInclude
+            // Code corresponds to Evaluator.CreateItemsFromInclude
             var evaluatedItemspecEscaped = ItemSpecString;
 
             if (string.IsNullOrEmpty(evaluatedItemspecEscaped))
@@ -184,7 +189,8 @@ namespace Microsoft.Build.Evaluation
                 evaluatedItemspecEscaped = Expander.ExpandIntoStringLeaveEscaped(
                     ItemSpecString,
                     ExpanderOptions.ExpandProperties,
-                    itemSpecLocation);
+                    itemSpecLocation,
+                    loggingContext);
             }
 
             var semicolonCount = 0;
@@ -221,7 +227,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         // The expression is not of the form "@(X)". Treat as string
 
-                        //  Code corresponds to EngineFileUtilities.GetFileList
+                        // Code corresponds to EngineFileUtilities.GetFileList
                         if (!FileMatcher.HasWildcards(splitEscaped))
                         {
                             // No real wildcards means we just return the original string.  Don't even bother
@@ -259,7 +265,7 @@ namespace Microsoft.Build.Evaluation
         {
             isItemListExpression = false;
 
-            //  Code corresponds to Expander.ExpandSingleItemVectorExpressionIntoItems
+            // Code corresponds to Expander.ExpandSingleItemVectorExpressionIntoItems
             if (expression.Length == 0)
             {
                 return null;

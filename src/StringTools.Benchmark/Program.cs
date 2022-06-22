@@ -3,6 +3,8 @@
 
 using BenchmarkDotNet.Running;
 
+#nullable disable
+
 namespace Microsoft.NET.StringTools.Benchmark
 {
     public class Program

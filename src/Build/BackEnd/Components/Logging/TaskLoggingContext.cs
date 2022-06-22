@@ -7,6 +7,8 @@ using Microsoft.Build.Execution;
 using System;
 using System.Collections.Generic;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.Logging
 {
     /// <summary>
@@ -151,6 +153,11 @@ namespace Microsoft.Build.BackEnd.Logging
         internal ICollection<string> GetWarningsAsErrors()
         {
             return LoggingService.GetWarningsAsErrors(BuildEventContext);
+        }
+
+        internal ICollection<string> GetWarningsNotAsErrors()
+        {
+            return LoggingService.GetWarningsNotAsErrors(BuildEventContext);
         }
 
         internal ICollection<string> GetWarningsAsMessages()

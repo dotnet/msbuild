@@ -6,6 +6,8 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>

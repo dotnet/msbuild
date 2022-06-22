@@ -14,6 +14,8 @@ using Microsoft.Build.Shared.FileSystem;
 
 #if FEATURE_FILE_TRACKER
 
+#nullable disable
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>

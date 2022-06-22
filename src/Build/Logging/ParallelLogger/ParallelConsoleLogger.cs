@@ -13,6 +13,8 @@ using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.Logging
 {
     /// <summary>
@@ -81,7 +83,6 @@ namespace Microsoft.Build.BackEnd.Logging
             // If forceNoAlign is set there is no point getting the console width as there will be no aligning of the text
             if (!_forceNoAlign)
             {
-#if FEATURE_CONSOLE_BUFFERWIDTH
                 if (runningWithCharacterFileType)
                 {
                     // Get the size of the console buffer so messages can be formatted to the console width
@@ -98,7 +99,6 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
                 }
                 else
-#endif
                 {
                     _alignMessages = false;
                 }
@@ -472,13 +472,13 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Print out all of the errors under the ProjectEntryPoint / target
                 foreach (BuildEventArgs errorWarningEvent in valuePair.Value)
                 {
-                    if (errorWarningEvent is BuildErrorEventArgs)
+                    if (errorWarningEvent is BuildErrorEventArgs buildErrorEventArgs)
                     {
-                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildErrorEventArgs, showProjectFile, FindLogOutputProperties(errorWarningEvent)), false);
+                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(buildErrorEventArgs, showProjectFile, FindLogOutputProperties(errorWarningEvent)), false);
                     }
-                    else if (errorWarningEvent is BuildWarningEventArgs)
+                    else if (errorWarningEvent is BuildWarningEventArgs buildWarningEventArgs)
                     {
-                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(errorWarningEvent as BuildWarningEventArgs, showProjectFile, FindLogOutputProperties(errorWarningEvent)), false);
+                        WriteMessageAligned("  " + EventArgsFormatting.FormatEventMessage(buildWarningEventArgs, showProjectFile, FindLogOutputProperties(errorWarningEvent)), false);
                     }
                 }
                 WriteNewLine();
@@ -573,6 +573,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             ReuseableStringBuilder projectConfigurationDescription = null;
+            bool descriptionEmpty = true;
 
             Internal.Utilities.EnumerateItems(items, item =>
             {
@@ -592,7 +593,14 @@ namespace Microsoft.Build.BackEnd.Logging
                     };
 
                     // Add the item value to the string to be printed in error/warning messages.
-                    projectConfigurationDescription.Append(" ").Append(itemSpec);
+                    if (!descriptionEmpty)
+                    {
+                        projectConfigurationDescription.Append(" "); 
+                    }
+
+                    projectConfigurationDescription.Append(itemSpec);
+
+                    descriptionEmpty = false;
                 }
             });
 
@@ -653,7 +661,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         // should be shown
                         string targets = startedEvent.TargetNames;
                         string projectName = startedEvent.ProjectFile ?? string.Empty;
-                        
+
                         // Show which targets were built as part of this project
                         if (string.IsNullOrEmpty(targets))
                         {
@@ -1196,16 +1204,21 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private void PrintMessage(BuildMessageEventArgs e, bool lightenText)
         {
-            string nonNullMessage;
+            string nonNullMessage = null;
+
+            if (e is EnvironmentVariableReadEventArgs environmentPropertyReadEventArgs)
+            {
+                nonNullMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EnvironmentDerivedPropertyRead", environmentPropertyReadEventArgs.EnvironmentVariableName, e.Message);
+            }
 
             // Include file information if present.
             if (e.File != null)
             {
-                nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile, FindLogOutputProperties(e));
+                nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile, FindLogOutputProperties(e), nonNullMessage);
             }
             else
             {
-                nonNullMessage = e.Message ?? string.Empty;
+                nonNullMessage ??= e.Message ?? string.Empty;
             }
 
             int prefixAdjustment = 0;
@@ -1378,7 +1391,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         }
                         else
                         {
-                            //there is not enough room just print the message out and let the console do the formatting
+                            // there is not enough room just print the message out and let the console do the formatting
                             WriteBasedOnPrefix(nonNullMessage, prefixAlreadyWritten, adjustedPrefixWidth);
                         }
                     }
@@ -1686,7 +1699,7 @@ namespace Microsoft.Build.BackEnd.Logging
             /// </summary>
             internal void AddEventStarted(string projectTargetNames, BuildEventContext buildEventContext, DateTime eventTimeStamp, IEqualityComparer<BuildEventContext> comparer)
             {
-                //If the projectTargetNames are set then we should be a project started event
+                // If the projectTargetNames are set then we should be a project started event
                 if (!string.IsNullOrEmpty(projectTargetNames))
                 {
                     // Create a new performance counter for the project entry point to calculate how much time and how many calls
@@ -1779,10 +1792,10 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         #region Per-build Members
-        //Holds messages that were going to be shown before the project started event, buffer them until the project started event is shown
+        // Holds messages that were going to be shown before the project started event, buffer them until the project started event is shown
         private Dictionary<BuildEventContext, List<BuildMessageEventArgs>> _deferredMessages;
         private BuildEventManager _buildEventManager;
-        //  Has the build started
+        // Has the build started
         private bool _hasBuildStarted;
         private bool? _showCommandLine;
         private bool _showTimeStamp;

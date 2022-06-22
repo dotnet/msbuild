@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+#if FEATURE_ASPNET_COMPILER
 using System.Collections;
+#endif
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
@@ -24,11 +26,14 @@ using IProperty = Microsoft.Build.Evaluation.IProperty;
 using Constants = Microsoft.Build.Internal.Constants;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 
+#if FEATURE_ASPNET_COMPILER
 using FrameworkName = System.Runtime.Versioning.FrameworkName;
+#endif
 using Microsoft.Build.Execution;
-using Microsoft.Build.Utilities;
 
 using Microsoft.NET.StringTools;
+
+#nullable disable
 
 namespace Microsoft.Build.Construction
 {
@@ -1777,7 +1782,7 @@ namespace Microsoft.Build.Construction
                     {
                         condition.Append(" or (");
                         condition.Append(GetConditionStringForConfiguration(solutionConfiguration));
-                        condition.Append(")");
+                        condition.Append(')');
                     }
                 }
                 else if (String.Equals(solutionConfiguration.ConfigurationName, "Release", StringComparison.OrdinalIgnoreCase) ||
@@ -1788,7 +1793,7 @@ namespace Microsoft.Build.Construction
                     // so these should be available in the solution project
                     condition.Append(" or (");
                     condition.Append(GetConditionStringForConfiguration(solutionConfiguration));
-                    condition.Append(")");
+                    condition.Append(')');
                 }
             }
 
@@ -1974,9 +1979,9 @@ namespace Microsoft.Build.Construction
             }
         }
 
-        ///<summary>
+        /// <summary>
         /// Creates the target used to build all of the references in the traversal project.
-        ///</summary>
+        /// </summary>
         private static void AddTraversalReferencesTarget(ProjectInstance traversalProject, string targetName, string outputItem)
         {
             string outputItemAsItem = null;
@@ -2191,14 +2196,8 @@ namespace Microsoft.Build.Construction
                             AddDependencyByGuid(project, referencedWebProjectGuid);
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e)) // We don't want any problems scanning the project file to result in aborting the build.
                     {
-                        // We don't want any problems scanning the project file to result in aborting the build.
-                        if (ExceptionHandling.IsCriticalException(e))
-                        {
-                            throw;
-                        }
-
                         _loggingService.LogWarning
                             (
                             _projectBuildEventContext,

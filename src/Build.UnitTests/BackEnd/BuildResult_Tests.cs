@@ -14,6 +14,8 @@ using Microsoft.Build.Unittest;
 using Xunit;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     public class BuildResult_Tests
@@ -28,14 +30,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestConstructorGood()
         {
-            BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
             BuildResult result2 = new BuildResult(request);
         }
 
         [Fact]
         public void Clone()
         {
-            BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
             BuildResult result1 = new BuildResult(request);
             result1.ResultsByTarget.Add("FOO", BuildResultUtilities.GetEmptySucceedingTargetResult());
             Assert.True(result1.ResultsByTarget.ContainsKey("foo")); // test comparer
@@ -68,11 +70,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestConfigurationId()
         {
-            BuildRequest request = CreateNewBuildRequest(-1, new string[0]);
+            BuildRequest request = CreateNewBuildRequest(-1, Array.Empty<string>());
             BuildResult result = new BuildResult(request);
             Assert.Equal(-1, result.ConfigurationId);
 
-            BuildRequest request2 = CreateNewBuildRequest(1, new string[0]);
+            BuildRequest request2 = CreateNewBuildRequest(1, Array.Empty<string>());
             BuildResult result2 = new BuildResult(request2);
             Assert.Equal(1, result2.ConfigurationId);
         }
@@ -80,7 +82,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestExceptionGood()
         {
-            BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
             BuildResult result = new BuildResult(request);
             Assert.Null(result.Exception);
             AccessViolationException e = new AccessViolationException();
@@ -92,20 +94,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestOverallResult()
         {
-            BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
             BuildResult result = new BuildResult(request);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
 
             result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
 
-            result.AddResultsForTarget("bar", new TargetResult(new TaskItem[0] { }, new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, new Exception())));
+            result.AddResultsForTarget("bar", new TargetResult(Array.Empty<TaskItem>(), new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, new Exception())));
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
 
-            result.AddResultsForTarget("baz", new TargetResult(new TaskItem[0] { }, BuildResultUtilities.GetStopWithErrorResult(new Exception())));
+            result.AddResultsForTarget("baz", new TargetResult(Array.Empty<TaskItem>(), BuildResultUtilities.GetStopWithErrorResult(new Exception())));
             Assert.Equal(BuildResultCode.Failure, result.OverallResult);
 
-            BuildRequest request2 = CreateNewBuildRequest(2, new string[0]);
+            BuildRequest request2 = CreateNewBuildRequest(2, Array.Empty<string>());
             BuildResult result2 = new BuildResult(request2);
             result2.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
             result2.AddResultsForTarget("bar", BuildResultUtilities.GetEmptyFailingTargetResult());
@@ -115,7 +117,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestPacketType()
         {
-            BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
             BuildResult result = new BuildResult(request);
             Assert.Equal(NodePacketType.BuildResult, ((INodePacket)result).Type);
         }
@@ -123,7 +125,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestAddAndRetrieve()
         {
-            BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
             BuildResult result = new BuildResult(request);
             result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
             result.AddResultsForTarget("bar", BuildResultUtilities.GetEmptyFailingTargetResult());
@@ -137,7 +139,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<KeyNotFoundException>(() =>
             {
-                BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+                BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 BuildResult result = new BuildResult(request);
                 ITargetResult targetResult = result["foo"];
             }
@@ -149,7 +151,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<KeyNotFoundException>(() =>
             {
-                BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+                BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 BuildResult result = new BuildResult(request);
                 result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
                 ITargetResult targetResult = result["bar"];
@@ -162,7 +164,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+                BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 BuildResult result = new BuildResult(request);
                 result.AddResultsForTarget(null, BuildResultUtilities.GetEmptySucceedingTargetResult());
             }
@@ -174,7 +176,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+                BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 BuildResult result = new BuildResult(request);
                 result.AddResultsForTarget("foo", null);
             }
@@ -186,7 +188,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+                BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 BuildResult result = new BuildResult(request);
                 result.AddResultsForTarget(null, BuildResultUtilities.GetEmptySucceedingTargetResult());
             }
@@ -195,7 +197,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestMergeResults()
         {
-            BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
             BuildResult result = new BuildResult(request);
             result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
 
@@ -222,7 +224,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+                BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 BuildResult result = new BuildResult(request);
                 result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
 
@@ -236,11 +238,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<InternalErrorException>(() =>
             {
-                BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+                BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 BuildResult result = new BuildResult(request);
                 result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
 
-                BuildRequest request2 = CreateNewBuildRequest(2, new string[0]);
+                BuildRequest request2 = CreateNewBuildRequest(2, Array.Empty<string>());
                 BuildResult result2 = new BuildResult(request2);
                 result2.AddResultsForTarget("bar", BuildResultUtilities.GetEmptySucceedingTargetResult());
 
@@ -251,7 +253,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestHasResultsForTarget()
         {
-            BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
             BuildResult result = new BuildResult(request);
             result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
 
@@ -262,7 +264,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestEnumerator()
         {
-            BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
             BuildResult result = new BuildResult(request);
             int countFound = 0;
             foreach (KeyValuePair<string, TargetResult> resultPair in result.ResultsByTarget)
@@ -322,7 +324,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result.DefaultTargets = new List<string> { "c", "d" };
 
             result.AddResultsForTarget("alpha", new TargetResult(new TaskItem[] { fooTaskItem }, BuildResultUtilities.GetSuccessResult()));
-            result.AddResultsForTarget("omega", new TargetResult(new TaskItem[] { }, BuildResultUtilities.GetStopWithErrorResult(new ArgumentException("The argument was invalid"))));
+            result.AddResultsForTarget("omega", new TargetResult(Array.Empty<TaskItem>(), BuildResultUtilities.GetStopWithErrorResult(new ArgumentException("The argument was invalid"))));
 
             Assert.Equal(NodePacketType.BuildResult, (result as INodePacket).Type);
             ((ITranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());

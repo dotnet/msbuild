@@ -5,6 +5,8 @@ using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Setup.Configuration;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

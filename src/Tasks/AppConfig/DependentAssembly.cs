@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

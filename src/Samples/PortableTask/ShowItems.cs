@@ -4,6 +4,8 @@
 using Microsoft.Build.Framework;
 using System.Reflection;
 
+#nullable disable
+
 namespace PortableTask
 {
     public class ShowItems : Microsoft.Build.Utilities.Task

@@ -11,6 +11,8 @@ using Microsoft.Build.Shared;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.OM.UnitTests.Construction
 {
     public class ProjectFormatting_Tests : IDisposable
@@ -69,7 +71,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
         [Fact]
         public void ProjectWhitespaceFormatting()
         {
-            //  Note that there are two spaces after the <ItemGroup> tag on the second line
+            // Note that there are two spaces after the <ItemGroup> tag on the second line
             string content = ObjectModelHelpers.CleanupFileContents(@"
 <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
   <ItemGroup>  

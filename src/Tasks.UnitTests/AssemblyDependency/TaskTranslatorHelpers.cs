@@ -7,6 +7,8 @@ using Microsoft.Build.Tasks;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
     public class TaskTranslatorHelpers

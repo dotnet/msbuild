@@ -16,6 +16,8 @@ using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.Build.UnitTests.ObjectModelHelpers;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests
 {
     /// <summary>
@@ -299,7 +301,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 var buildRequestData = new BuildRequestData(
                     projectInstance,
-                    new string[]{},
+                    Array.Empty<string>(),
                     projectCollection.HostServices);
 
                 var result = _buildManager.Build(parameters, buildRequestData);

@@ -7,6 +7,8 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using System.Globalization;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>

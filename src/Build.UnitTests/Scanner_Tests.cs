@@ -13,6 +13,8 @@ using Xunit;
 
 
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class ScannerTest
@@ -129,24 +131,6 @@ namespace Microsoft.Build.UnitTests
             Scanner lexer = new Scanner(pattern, ParserOptions.AllowProperties);
             AdvanceToScannerError(lexer);
             lexer._errorState.ShouldBeFalse();
-        }
-
-        [Fact]
-        public void SpacePropertyOptOutWave16_10()
-        {
-            using TestEnvironment env = TestEnvironment.Create();
-            ChangeWaves.ResetStateForTests();
-            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave16_10.ToString());
-            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-
-            Scanner lexer = new Scanner("$(x )", ParserOptions.AllowProperties);
-            AdvanceToScannerError(lexer);
-            Assert.Null(lexer.UnexpectedlyFound);
-
-            lexer = new Scanner("$( x)", ParserOptions.AllowProperties);
-            AdvanceToScannerError(lexer);
-            Assert.Null(lexer.UnexpectedlyFound);
-            ChangeWaves.ResetStateForTests();
         }
 
         /// <summary>
@@ -446,7 +430,7 @@ namespace Microsoft.Build.UnitTests
 
             lexer = new Scanner("'String with an embedded \\' in it'", ParserOptions.AllowAll);
             Assert.True(lexer.Advance() && lexer.IsNext(Token.TokenType.String));
-            //          Assert.AreEqual(String.Compare("String with an embedded ' in it", lexer.IsNextString()), 0);
+            // Assert.AreEqual(String.Compare("String with an embedded ' in it", lexer.IsNextString()), 0);
 
             lexer = new Scanner("'String with a $(Property) inside'", ParserOptions.AllowAll);
             Assert.True(lexer.Advance() && lexer.IsNext(Token.TokenType.String));

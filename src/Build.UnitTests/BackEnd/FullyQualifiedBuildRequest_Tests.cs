@@ -7,6 +7,8 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     public class FullyQualifiedBuildRequest_Tests
@@ -14,13 +16,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestConstructorGood()
         {
-            BuildRequestData data1 = new BuildRequestData("foo", new Dictionary<string, string>(), "tools", new string[0], null);
+            BuildRequestData data1 = new BuildRequestData("foo", new Dictionary<string, string>(), "tools", Array.Empty<string>(), null);
             FullyQualifiedBuildRequest request = new FullyQualifiedBuildRequest(new BuildRequestConfiguration(data1, "2.0"), new string[1] { "foo" }, true);
 
-            request = new FullyQualifiedBuildRequest(new BuildRequestConfiguration(data1, "2.0"), new string[0] { }, true);
+            request = new FullyQualifiedBuildRequest(new BuildRequestConfiguration(data1, "2.0"), Array.Empty<string>(), true);
 
-            BuildRequestData data3 = new BuildRequestData("foo", new Dictionary<string, string>(), "tools", new string[0], null);
-            request = new FullyQualifiedBuildRequest(new BuildRequestConfiguration(data1, "2.0"), new string[0] { }, false);
+            BuildRequestData data3 = new BuildRequestData("foo", new Dictionary<string, string>(), "tools", Array.Empty<string>(), null);
+            request = new FullyQualifiedBuildRequest(new BuildRequestConfiguration(data1, "2.0"), Array.Empty<string>(), false);
         }
 
         [Fact]
@@ -38,14 +40,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                FullyQualifiedBuildRequest request = new FullyQualifiedBuildRequest(new BuildRequestConfiguration(new BuildRequestData("foo", new Dictionary<string, string>(), "tools", new string[0], null), "2.0"), null, true);
+                FullyQualifiedBuildRequest request = new FullyQualifiedBuildRequest(new BuildRequestConfiguration(new BuildRequestData("foo", new Dictionary<string, string>(), "tools", Array.Empty<string>(), null), "2.0"), null, true);
             }
            );
         }
         [Fact]
         public void TestProperties()
         {
-            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "tools", new string[0], null);
+            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "tools", Array.Empty<string>(), null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(data, "2.0");
             FullyQualifiedBuildRequest request = new FullyQualifiedBuildRequest(config, new string[1] { "foo" }, true);
             Assert.Equal(request.Config, config);

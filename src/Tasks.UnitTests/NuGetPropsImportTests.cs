@@ -6,6 +6,8 @@ using System;
 using System.IO;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
@@ -14,7 +16,7 @@ namespace Microsoft.Build.UnitTests
     public sealed class NuGetPropsImportTests : IDisposable
     {
         private const string NuGetPropsContent = @"
-                <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project>
                     <PropertyGroup>
                         <NuGetPropsIsImported>true</NuGetPropsIsImported>
                     </PropertyGroup>
@@ -41,7 +43,7 @@ namespace Microsoft.Build.UnitTests
             // src\Foo\Foo.csproj
             // ---------------------
             ObjectModelHelpers.CreateFileInTempProjectDirectory(projectRelativePath, $@"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion`>
                     <PropertyGroup>
                         <{NuGetPropsPropertyName}>{nugetPropsRelativePath}</{NuGetPropsPropertyName}>
                     </PropertyGroup>
@@ -67,7 +69,7 @@ namespace Microsoft.Build.UnitTests
             // src\Foo\Foo.csproj
             // ---------------------
             ObjectModelHelpers.CreateFileInTempProjectDirectory(projectRelativePath, $@"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion`>
                     <PropertyGroup>
                         <{NuGetPropsPropertyName}>{nugetPropsRelativePath}</{NuGetPropsPropertyName}>
                     </PropertyGroup>

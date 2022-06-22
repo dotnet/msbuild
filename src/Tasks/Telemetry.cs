@@ -6,6 +6,8 @@ using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

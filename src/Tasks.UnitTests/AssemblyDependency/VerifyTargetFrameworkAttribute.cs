@@ -5,6 +5,8 @@ using Microsoft.Build.Utilities;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
     /// <summary>

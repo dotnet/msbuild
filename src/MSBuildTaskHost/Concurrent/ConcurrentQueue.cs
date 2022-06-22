@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared.Concurrent
 {
     // The following class is back-ported from .NET 4.X CoreFX library because
@@ -547,12 +549,16 @@ namespace Microsoft.Build.Shared.Concurrent
             }
         }
     }
+
     /// <summary>Padded head and tail indices, to avoid false sharing between producers and consumers.</summary>
     [DebuggerDisplay("Head = {Head}, Tail = {Tail}")]
     [StructLayout(LayoutKind.Explicit, Size = 192)] // padding before/between/after fields based on typical cache line size of 64
     internal struct PaddedHeadAndTail
     {
-        [FieldOffset(64)] public int Head;
-        [FieldOffset(128)] public int Tail;
+        [FieldOffset(64)]
+        public int Head;
+
+        [FieldOffset(128)]
+        public int Tail;
     }
 }

@@ -10,6 +10,8 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -165,10 +167,12 @@ namespace Microsoft.Build.Shared
                     }
 
                     AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
-                    if (candidateAssemblyName.Version >= assemblyName.Version)
+                    if (candidateAssemblyName.Version != assemblyName.Version)
                     {
-                        return LoadAndCache(context, candidatePath);
+                        continue;
                     }
+
+                    return LoadAndCache(context, candidatePath);
                 }
             }
 

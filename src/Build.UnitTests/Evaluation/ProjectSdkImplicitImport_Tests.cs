@@ -21,6 +21,8 @@ using SdkResult = Microsoft.Build.Framework.SdkResult;
 using SdkResultFactory = Microsoft.Build.Framework.SdkResultFactory;
 using SdkReferencePropertyExpansionMode = Microsoft.Build.Framework.EscapeHatches.SdkReferencePropertyExpansionMode;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>

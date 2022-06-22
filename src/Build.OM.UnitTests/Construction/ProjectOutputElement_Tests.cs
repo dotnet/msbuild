@@ -9,6 +9,8 @@ using Microsoft.Build.Construction;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
@@ -55,7 +57,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1>
                                 <Output TaskParameter='p'/>
@@ -78,7 +80,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1>
                                 <Output TaskParameter='p' PropertyName='MSBuildProjectFile'/>
@@ -101,7 +103,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1>
                                 <Output ItemName='i'/>
@@ -124,7 +126,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1>
                                 <Output TaskName='' ItemName='i'/>
@@ -147,7 +149,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1>
                                 <Output ItemName='i' TaskParameter='x'>
@@ -172,7 +174,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1>
                                 <Output TaskParameter='t' PropertyName='p' ItemName=''/>
@@ -195,7 +197,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1>
                                 <Output TaskParameter='t' ItemName='i' PropertyName=''/>
@@ -285,7 +287,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         private static ProjectOutputElement GetOutputItem()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1>
                                 <Output TaskParameter='p' ItemName='i1' />
@@ -307,7 +309,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         private static ProjectOutputElement GetOutputProperty()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1>
                                 <Output TaskParameter='p' PropertyName='p1' />

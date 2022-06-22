@@ -6,6 +6,8 @@ using System.Xml;
 using Microsoft.Build.Tasks;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class DependentAssembly_Tests

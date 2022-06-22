@@ -12,6 +12,8 @@ using Xunit;
 using System;
 using System.Collections.Generic;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Definition
 {
     /// <summary>
@@ -596,7 +598,7 @@ namespace Microsoft.Build.UnitTests.Definition
             var paths = pathsTable[kind];
             Assert.Equal(paths.SearchPaths.Count, expectedPaths.Length);
 
-            for (int i = 0; i < paths.SearchPaths.Count; i ++)
+            for (int i = 0; i < paths.SearchPaths.Count; i++)
             {
                 Assert.Equal(paths.SearchPaths[i], expectedPaths[i]);
             }

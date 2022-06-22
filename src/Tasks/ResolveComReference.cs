@@ -18,6 +18,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     internal interface IResolveComReferenceTaskContract
@@ -185,7 +187,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         public override bool Execute()
         {
-            Log.LogErrorFromResources("TaskRequiresFrameworkFailure", nameof(ResolveComReference));
+            Log.LogErrorWithCodeFromResources("TaskRequiresFrameworkFailure", nameof(ResolveComReference));
             return false;
         }
 
@@ -430,7 +432,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                SetCopyLocalToFalseOnGacOrNoPIAAssemblies(resolvedReferenceList, GlobalAssemblyCache.GetGacPath());
+                SetCopyLocalToFalseOnGacOrNoPIAAssemblies(resolvedReferenceList, GlobalAssemblyCache.GacPath);
 
                 ResolvedModules = moduleList.ToArray();
                 ResolvedFiles = resolvedReferenceList.ToArray();
@@ -1297,7 +1299,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         internal IEnumerable<string> GetResolvedAssemblyReferenceItemSpecs()
         {
-            return (ResolvedAssemblyReferences == null) ? Array.Empty<string>(): ResolvedAssemblyReferences.Select(rar => rar.ItemSpec);
+            return (ResolvedAssemblyReferences == null) ? Array.Empty<string>() : ResolvedAssemblyReferences.Select(rar => rar.ItemSpec);
         }
 
         /// <summary>

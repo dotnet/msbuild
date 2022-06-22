@@ -330,7 +330,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                 {
                     if (String.Equals(modifier, ItemSpecModifiers.FullPath, StringComparison.OrdinalIgnoreCase))
                     {
-                        if(currentDirectory == null)
+                        if (currentDirectory == null)
                         {
                             currentDirectory = String.Empty;
                         }

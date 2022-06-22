@@ -3,6 +3,8 @@
 
 using System.Runtime.InteropServices;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>

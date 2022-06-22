@@ -5,6 +5,8 @@ using System;
 using System.Globalization;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -17,7 +19,11 @@ namespace Microsoft.Build.Tasks
     /// </comment>
     public sealed class FormatVersion : TaskExtension
     {
-        private enum _FormatType { Version, Path }
+        private enum _FormatType
+        {
+            Version,
+            Path,
+        }
 
         private _FormatType _formatType = _FormatType.Version;
 

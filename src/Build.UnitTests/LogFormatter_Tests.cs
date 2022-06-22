@@ -6,6 +6,8 @@ using Microsoft.Build.BackEnd.Logging;
 using System.Globalization;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class LogFormatterTest

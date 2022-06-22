@@ -4,6 +4,8 @@ using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
 using System.Globalization;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests
 {
     public class FileUtilitiesRegex_Tests
@@ -11,7 +13,7 @@ namespace Microsoft.Build.Engine.UnitTests
         private string _directoryStart = new string(MSBuildConstants.BackslashChar[0], 2);
         private string _altDirectoryStart = new string(MSBuildConstants.ForwardSlash[0], 2);
 
-        //below are the legacy regex used before explcitly checking these patterns to reduce allocations
+        // below are the legacy regex used before explcitly checking these patterns to reduce allocations
 
         // regular expression used to match file-specs comprising exactly "<drive letter>:" (with no trailing characters)
         internal static readonly Regex DrivePattern = new Regex(@"^[A-Za-z]:$", RegexOptions.Compiled);
@@ -523,66 +525,19 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        public void UncPatternEmptyString_LegacyRegex()
+        public void PatternEmptyString_LegacyRegex()
         {
-            string winDirectory = string.Format("", _directoryStart);
-            string unixDirectory = string.Format("", _altDirectoryStart);
-
-            UncPattern.IsMatch(winDirectory).ShouldBe(false);
-            UncPattern.IsMatch(unixDirectory).ShouldBe(false);
+            UncPattern.IsMatch(string.Empty).ShouldBeFalse();
+            StartsWithUncPattern.IsMatch(string.Empty).ShouldBeFalse();
+            StartsWithUncPattern.Match(string.Empty).Success.ShouldBeFalse();
         }
 
         [Fact]
-        public void UncPatternEmptyString()
+        public void PatternEmptyString()
         {
-            string winDirectory = string.Format("", _directoryStart);
-            string unixDirectory = string.Format("", _altDirectoryStart);
-
-            FileUtilitiesRegex.IsUncPattern(winDirectory).ShouldBe(false);
-            FileUtilitiesRegex.IsUncPattern(unixDirectory).ShouldBe(false);
-        }
-
-        [Fact]
-        public void StartWithUncPatternEmptyString_LegacyRegex()
-        {
-            string winDirectory = string.Format("", _directoryStart);
-            string unixDirectory = string.Format("", _altDirectoryStart);
-
-            StartsWithUncPattern.IsMatch(winDirectory).ShouldBe(false);
-            StartsWithUncPattern.IsMatch(unixDirectory).ShouldBe(false);
-        }
-
-        [Fact]
-        public void StartsWithUncPatternEmptyString()
-        {
-            string winDirectory = string.Format("", _directoryStart);
-            string unixDirectory = string.Format("", _altDirectoryStart);
-
-            FileUtilitiesRegex.StartsWithUncPattern(winDirectory).ShouldBe(false);
-            FileUtilitiesRegex.StartsWithUncPattern(unixDirectory).ShouldBe(false);
-        }
-
-        [Fact]
-        public void MatchLengthStartWithUncPatternEmptyString_LegacyRegex()
-        {
-            string winDirectory = string.Format("", _directoryStart);
-            string unixDirectory = string.Format("", _altDirectoryStart);
-
-            var match = StartsWithUncPattern.Match(winDirectory);
-            match.Success.ShouldBeFalse();
-
-            match = StartsWithUncPattern.Match(unixDirectory);
-            match.Success.ShouldBeFalse();
-        }
-
-        [Fact]
-        public void MatchLengthStartWithUncPatternEmptyString()
-        {
-            string winDirectory = string.Format("", _directoryStart);
-            string unixDirectory = string.Format("", _altDirectoryStart);
-
-            FileUtilitiesRegex.StartsWithUncPatternMatchLength(winDirectory).ShouldBe(-1);
-            FileUtilitiesRegex.StartsWithUncPatternMatchLength(unixDirectory).ShouldBe(-1);
+            FileUtilitiesRegex.IsUncPattern(string.Empty).ShouldBeFalse();
+            FileUtilitiesRegex.StartsWithUncPattern(string.Empty).ShouldBeFalse();
+            FileUtilitiesRegex.StartsWithUncPatternMatchLength(string.Empty).ShouldBe(-1);
         }
     }
 }

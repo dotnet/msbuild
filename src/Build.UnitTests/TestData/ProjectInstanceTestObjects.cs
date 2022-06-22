@@ -7,6 +7,8 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.UnitTests;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests.TestData
 {
     internal static class ProjectInstanceTestObjects

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>Microsoft.Build.Conversion.Core</AssemblyName>
     <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
@@ -8,6 +8,7 @@
     <PackageDescription>This package contains the $(MSBuildProjectName) assembly which contains logic for converting projects.  NOTE: This assembly is deprecated.</PackageDescription>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
     <NoWarn>$(NoWarn);1570;1572;1573;1587</NoWarn>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <!-- Source Files -->

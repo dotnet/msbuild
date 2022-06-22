@@ -10,6 +10,8 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -83,15 +85,7 @@ namespace Microsoft.Build.BackEnd
                 t =>
                 {
                     ConstructorInfo constructor = null;
-#if FEATURE_TYPE_GETCONSTRUCTOR
                     constructor = type.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
-#else
-                    constructor =
-                        type
-                            .GetTypeInfo()
-                            .GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic)
-                            .FirstOrDefault(c => c.GetParameters().Length == 0);
-#endif
                     ErrorUtilities.VerifyThrowInvalidOperation(
                         constructor != null,
                         $"{typeName} must have a private parameterless constructor");

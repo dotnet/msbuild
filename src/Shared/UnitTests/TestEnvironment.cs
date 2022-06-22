@@ -18,6 +18,8 @@ using Xunit.Abstractions;
 using TempPaths = System.Collections.Generic.Dictionary<string, string>;
 using CommonWriterType = System.Action<string, string, System.Collections.Generic.IEnumerable<string>>;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public partial class TestEnvironment : IDisposable
@@ -177,7 +179,7 @@ namespace Microsoft.Build.UnitTests
         public TransientTempPath CreateNewTempPathWithSubfolder(string subfolder)
         {
             var folder = CreateFolder(null, true, subfolder);
-            return SetTempPath(folder.Path, true);
+            return WithTransientTestState(SetTempPath(folder.Path, true));
         }
 
         /// <summary>
@@ -189,10 +191,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public TransientTempPath SetTempPath(string tempPath, bool deleteTempDirectory = false)
         {
-            var transientTempPath = new TransientTempPath(tempPath, deleteTempDirectory);
-            _variants.Add(transientTempPath);
-
-            return transientTempPath;
+            return WithTransientTestState(new TransientTempPath(tempPath, deleteTempDirectory));
         }
 
         /// <summary>
@@ -201,7 +200,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="extension">Extensions of the file (defaults to '.tmp')</param>
         public TransientTestFile CreateFile(string extension = ".tmp")
         {
-            return WithTransientTestState(new TransientTestFile(extension, createFile:true, expectedAsOutput:false));
+            return WithTransientTestState(new TransientTestFile(extension, createFile: true, expectedAsOutput: false));
         }
 
         public TransientTestFile CreateFile(string fileName, string contents = "")
@@ -257,17 +256,6 @@ namespace Microsoft.Build.UnitTests
         public TransientTestFile ExpectFile(string extension = ".tmp")
         {
             return WithTransientTestState(new TransientTestFile(extension, createFile: false, expectedAsOutput: true));
-        }
-
-        /// <summary>
-        /// Create a temp file name under a specific temporary folder. The file is expected to exist when the test completes.
-        /// </summary>
-        /// <param name="transientTestFolder">Temp folder</param>
-        /// <param name="extension">Extension of the file (defaults to '.tmp')</param>
-        /// <returns></returns>
-        public TransientTestFile ExpectFile(TransientTestFolder transientTestFolder, string extension = ".tmp")
-        {
-            return WithTransientTestState(new TransientTestFile(transientTestFolder.Path, extension, createFile: false, expectedAsOutput: true));
         }
 
         /// <summary>
@@ -386,7 +374,7 @@ namespace Microsoft.Build.UnitTests
         {
             var currentValue = _accessorFunc();
 
-            //  Something like the following might be preferrable, but the assertion method truncates the values leaving us without
+            // Something like the following might be preferrable, but the assertion method truncates the values leaving us without
             //  useful information.  So use Assert.True instead
             //  Assert.Equal($"{_name}: {_originalValue}", $"{_name}: {_accessorFunc()}");
 

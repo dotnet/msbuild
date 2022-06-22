@@ -9,6 +9,8 @@ using Microsoft.Build.Construction;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
@@ -23,7 +25,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadNoParameters()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1/>
                         </Target>
@@ -45,7 +47,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadContinueOnError()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1 ContinueOnError='coe'/>
                         </Target>
@@ -64,7 +66,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadCondition()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1 Condition='c'/>
                         </Target>
@@ -85,7 +87,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1>
                                 <X/>
@@ -100,14 +102,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
         /// <summary>
         /// Read task with empty parameter.
-        /// Although MSBuild does not set these on tasks, they 
+        /// Although MSBuild does not set these on tasks, they
         /// are visible in the XML objects for editing purposes.
         /// </summary>
         [Fact]
         public void ReadEmptyParameter()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1 p1='' />
                         </Target>
@@ -128,7 +130,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadParameters()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1 p1='v1' p2='v2' />
                         </Target>
@@ -314,7 +316,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         private static ProjectTaskElement GetBasicTask()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1 p1='v1' />
                         </Target>

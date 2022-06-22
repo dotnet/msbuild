@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 
+#nullable disable
+
 namespace PortableTask
 {
     public class Sleep : Microsoft.Build.Utilities.Task

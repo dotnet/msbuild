@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.UnitTests
 {
     public class HintPathResolver_Tests : IDisposable

@@ -16,6 +16,8 @@ using ObjectModel = System.Collections.ObjectModel;
 using Xunit;
 using Microsoft.Build.BackEnd;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Collections
 {
     /// <summary>

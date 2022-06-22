@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -118,8 +120,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentNull(configMetadata, nameof(configMetadata));
             lock (_lockObject)
             {
-                int configId;
-                if (!_configurationIdsByMetadata.TryGetValue(configMetadata, out configId))
+                if (!_configurationIdsByMetadata.TryGetValue(configMetadata, out int configId))
                 {
                     return null;
                 }
@@ -214,10 +215,9 @@ namespace Microsoft.Build.BackEnd
             {
                 foreach (KeyValuePair<ConfigurationMetadata, int> metadata in _configurationIdsByMetadata)
                 {
-                    BuildRequestConfiguration configuration;
                     int configId = metadata.Value;
 
-                    if (_configurations.TryGetValue(configId, out configuration))
+                    if (_configurations.TryGetValue(configId, out BuildRequestConfiguration configuration))
                     {
                         // We do not want to retain this configuration
                         if (!configuration.ExplicitlyLoaded)

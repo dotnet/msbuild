@@ -4,6 +4,8 @@
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 
+#nullable disable
+
 namespace Microsoft.Build.ObjectModelRemoting
 {
     /// <summary>

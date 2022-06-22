@@ -12,6 +12,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     public class WhitespacePreservation_Tests

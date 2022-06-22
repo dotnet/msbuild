@@ -3,6 +3,8 @@
 
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 #if BUILD_ENGINE
 namespace Microsoft.Build.BackEnd.Components.Caching
 #else

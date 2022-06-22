@@ -4,6 +4,8 @@
 using System.Diagnostics;
 using System.Threading;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework.Profiler
 {
     /// <summary>

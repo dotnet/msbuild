@@ -18,6 +18,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Graph
 {
     /// <summary>
@@ -60,7 +62,7 @@ namespace Microsoft.Build.Graph
 
         internal GraphBuilder.GraphEdges TestOnly_Edges => Edges;
 
-        public GraphConstructionMetrics ConstructionMetrics { get; private set;}
+        public GraphConstructionMetrics ConstructionMetrics { get; private set; }
 
         /// <summary>
         /// Various metrics on graph construction.
@@ -351,7 +353,7 @@ namespace Microsoft.Build.Graph
         ///     on <see cref="ProjectInstanceFactoryFunc" /> for other scenarios.
         /// </param>
         /// <param name="cancellationToken">
-        ///     The <see cref="T:System.Threading.CancellationToken" /> token to observe.
+        ///     The <see cref="CancellationToken"/> to observe.
         /// </param>
         /// <exception cref="InvalidProjectFileException">
         ///     If the evaluation of any project in the graph fails
@@ -395,7 +397,7 @@ namespace Microsoft.Build.Graph
         ///     Number of threads to participate in building the project graph.
         /// </param>
         /// <param name="cancellationToken">
-        ///     The <see cref="T:System.Threading.CancellationToken" /> token to observe.
+        ///     The <see cref="CancellationToken"/> to observe.
         /// </param>
         /// <exception cref="InvalidProjectFileException">
         ///     If the evaluation of any project in the graph fails
@@ -522,7 +524,7 @@ namespace Microsoft.Build.Graph
                 }
             }
 
-            sb.Append("}");
+            sb.Append('}');
 
             return sb.ToString();
 

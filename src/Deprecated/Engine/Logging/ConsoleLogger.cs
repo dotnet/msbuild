@@ -137,7 +137,7 @@ namespace Microsoft.Build.BuildEngine
                     consoleLogger = new ParallelConsoleLogger(verbosity, write, colorSet, colorReset);
                 }
 
-                if(!string.IsNullOrEmpty(parameters))
+                if (!string.IsNullOrEmpty(parameters))
                 {
                     consoleLogger.Parameters = parameters;
                     parameters = null;

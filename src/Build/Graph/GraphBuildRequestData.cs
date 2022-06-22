@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Graph
 {
     public record GraphBuildOptions

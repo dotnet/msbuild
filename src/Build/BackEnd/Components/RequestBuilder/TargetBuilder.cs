@@ -15,6 +15,9 @@ using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingCont
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+using System.Linq;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -403,7 +406,7 @@ namespace Microsoft.Build.BackEnd
                 (
                 !_cancellationToken.IsCancellationRequested &&
                 !stopProcessingStack &&
-                !_targetsToBuild.IsEmpty
+                _targetsToBuild.Any()
                 )
             {
                 TargetEntry currentTargetEntry = _targetsToBuild.Peek();
@@ -611,7 +614,7 @@ namespace Microsoft.Build.BackEnd
                 // Pop down to our parent, since any other dependencies our parent had should no longer
                 // execute.  If we encounter an error target on the way down, also stop since the failure
                 // of one error target in a set declared in OnError should not cause the others to stop running.
-                while ((!_targetsToBuild.IsEmpty) && (_targetsToBuild.Peek() != topEntry.ParentEntry) && !_targetsToBuild.Peek().ErrorTarget)
+                while ((_targetsToBuild.Any()) && (_targetsToBuild.Peek() != topEntry.ParentEntry) && !_targetsToBuild.Peek().ErrorTarget)
                 {
                     TargetEntry entry = _targetsToBuild.Pop();
                     entry.LeaveLegacyCallTargetScopes();

@@ -7,6 +7,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.NET.StringTools;
 
+#nullable disable
+
 #if BUILD_ENGINE
 namespace Microsoft.Build.BackEnd
 #else

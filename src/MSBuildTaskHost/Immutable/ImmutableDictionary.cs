@@ -4,6 +4,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+#nullable disable
+
 namespace System.Collections.Immutable
 {
     static class ImmutableExtensions

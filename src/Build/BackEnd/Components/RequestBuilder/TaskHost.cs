@@ -22,7 +22,8 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.Caching;
 using System.Reflection;
 using Microsoft.Build.Eventing;
-using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -703,12 +704,32 @@ namespace Microsoft.Build.BackEnd
             get
             {
                 // Test compatibility
-                if(_taskLoggingContext == null)
+                if (_taskLoggingContext == null)
                 {
                     return null;
                 }
 
                 return _warningsAsErrors ??= _taskLoggingContext.GetWarningsAsErrors();
+            }
+        }
+
+        private ICollection<string> _warningsNotAsErrors;
+
+        /// <summary>
+        /// Contains all warnings that should be logged as errors.
+        /// Non-null empty set when all warnings should be treated as errors.
+        /// </summary>
+        private ICollection<string> WarningsNotAsErrors
+        {
+            get
+            {
+                // Test compatibility
+                if (_taskLoggingContext == null)
+                {
+                    return null;
+                }
+
+                return _warningsNotAsErrors ??= _taskLoggingContext.GetWarningsNotAsErrors();
             }
         }
 
@@ -746,7 +767,12 @@ namespace Microsoft.Build.BackEnd
             }
 
             // An empty set means all warnings are errors.
-            return WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningCode);
+            return (WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningCode)) || WarningsAsErrors.Contains(warningCode);
+        }
+
+        private bool WarningAsErrorNotOverriden(string warningCode)
+        {
+            return WarningsNotAsErrors?.Contains(warningCode) != true;
         }
 
         #endregion
@@ -901,7 +927,6 @@ namespace Microsoft.Build.BackEnd
 #endif
                 MessageImportance minimumImportance = _taskHost._taskLoggingContext?.LoggingService.MinimumRequiredMessageImportance ?? MessageImportance.Low;
                 return importance <= minimumImportance;
-
             }
 
             /// <inheritdoc/>

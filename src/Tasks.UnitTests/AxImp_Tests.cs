@@ -6,6 +6,8 @@ using Microsoft.Build.Tasks;
 
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
 {
     sealed public class AxImp_Tests

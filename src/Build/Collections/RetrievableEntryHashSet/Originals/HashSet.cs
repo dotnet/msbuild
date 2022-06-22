@@ -8,6 +8,8 @@ using System.Text;
 using System.Diagnostics.CodeAnalysis;
 using System.Security;
 
+#nullable disable
+
 namespace System.Collections.Generic {
 
     /// <summary>

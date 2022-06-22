@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +8,10 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using static Microsoft.Build.Execution.ProjectPropertyInstance;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -70,6 +72,17 @@ namespace Microsoft.Build.BackEnd.Logging
         {
         }
 
+        private IEnumerable<DictionaryEntry> FilterEnvironmentDerivedProperties(PropertyDictionary<ProjectPropertyInstance> properties)
+        {
+            foreach (ProjectPropertyInstance property in properties)
+            {
+                if (property is not EnvironmentDerivedProjectPropertyInstance)
+                {
+                    yield return new DictionaryEntry(property.Name, property.EvaluatedValue);
+                }
+            }
+        }
+
         /// <summary>
         /// Constructs a project logging contexts.
         /// </summary>
@@ -89,11 +102,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             _projectFullPath = projectFullPath;
 
-            ProjectPropertyInstanceEnumeratorProxy properties = null;
-            ProjectItemInstanceEnumeratorProxy items = null;
-
-            IEnumerable<ProjectPropertyInstance> projectPropertiesEnumerator = projectProperties == null ? Enumerable.Empty<ProjectPropertyInstance>() : null;
-            IEnumerable<ProjectItemInstance> projectItemsEnumerator = projectItems == null ? Enumerable.Empty<ProjectItemInstance>() : null;
+            IEnumerable<DictionaryEntry> properties = null;
+            IEnumerable<DictionaryEntry> items = null;
 
             string[] propertiesToSerialize = LoggingService.PropertiesToSerialize;
 
@@ -102,18 +112,20 @@ namespace Microsoft.Build.BackEnd.Logging
                 !LoggingService.IncludeEvaluationPropertiesAndItems &&
                 (!LoggingService.RunningOnRemoteNode || LoggingService.SerializeAllProperties))
             {
-                if (projectProperties != null)
+                if (projectProperties is null)
                 {
-                    projectPropertiesEnumerator = projectProperties.GetCopyOnReadEnumerable();
+                    properties = Enumerable.Empty<DictionaryEntry>();
+                }
+                else if (Traits.Instance.LogAllEnvironmentVariables)
+                {
+                    properties = projectProperties.GetCopyOnReadEnumerable(property => new DictionaryEntry(property.Name, property.EvaluatedValue));
+                }
+                else
+                {
+                    properties = FilterEnvironmentDerivedProperties(projectProperties);
                 }
 
-                if (projectItems != null)
-                {
-                    projectItemsEnumerator = projectItems.GetCopyOnReadEnumerable();
-                }
-
-                properties = new ProjectPropertyInstanceEnumeratorProxy(projectPropertiesEnumerator);
-                items = new ProjectItemInstanceEnumeratorProxy(projectItemsEnumerator);
+                items = projectItems?.GetCopyOnReadEnumerable(item => new DictionaryEntry(item.ItemType, new TaskItem(item))) ?? Enumerable.Empty<DictionaryEntry>();
             }
 
             if (projectProperties != null &&
@@ -133,7 +145,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
                 }
 
-                properties = new ProjectPropertyInstanceEnumeratorProxy(projectPropertiesToSerialize);
+                properties = projectPropertiesToSerialize.Select((ProjectPropertyInstance property) => new DictionaryEntry(property.Name, property.EvaluatedValue));
             }
 
             this.BuildEventContext = LoggingService.LogProjectStarted
@@ -177,106 +189,6 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ErrorUtilities.VerifyThrow(this.IsValid, "invalid");
             return new TargetLoggingContext(this, projectFullPath, target, parentTargetName, buildReason);
-        }
-
-        /// <summary>
-        /// An enumerable wrapper for items that clones items as they are requested,
-        /// so that writes have no effect on the items.
-        /// </summary>
-        /// <remarks>
-        /// This class is designed to be passed to loggers.
-        /// The expense of copying items is only incurred if and when
-        /// a logger chooses to enumerate over it.
-        /// The type of the items enumerated over is imposed by backwards compatibility for ProjectStartedEvent.
-        /// </remarks>
-        private class ProjectItemInstanceEnumeratorProxy : IEnumerable<DictionaryEntry>
-        {
-            /// <summary>
-            /// Enumerable that this proxies
-            /// </summary>
-            private IEnumerable<ProjectItemInstance> _backingItems;
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            /// <param name="backingItems">Enumerator this class should proxy</param>
-            internal ProjectItemInstanceEnumeratorProxy(IEnumerable<ProjectItemInstance> backingItems)
-            {
-                _backingItems = backingItems;
-            }
-
-            /// <summary>
-            /// Returns an enumerator that provides copies of the items
-            /// in the backing store.
-            /// Each dictionary entry has key of the item type and value of an ITaskItem.
-            /// Type of the enumerator is imposed by backwards compatibility for ProjectStartedEvent.
-            /// </summary>
-            public IEnumerator<DictionaryEntry> GetEnumerator()
-            {
-                foreach (ProjectItemInstance item in _backingItems)
-                {
-                    yield return new DictionaryEntry(item.ItemType, new TaskItem(item));
-                }
-            }
-
-            /// <summary>
-            /// Returns an enumerator that provides copies of the items
-            /// in the backing store.
-            /// </summary>
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return (IEnumerator)GetEnumerator();
-            }
-        }
-
-        /// <summary>
-        /// An enumerable wrapper for properties that clones properties as they are requested,
-        /// so that writes have no effect on the properties.
-        /// </summary>
-        /// <remarks>
-        /// This class is designed to be passed to loggers.
-        /// The expense of copying items is only incurred if and when
-        /// a logger chooses to enumerate over it.
-        /// The type of the items enumerated over is imposed by backwards compatibility for ProjectStartedEvent.
-        /// </remarks>
-        private class ProjectPropertyInstanceEnumeratorProxy : IEnumerable<DictionaryEntry>
-        {
-            /// <summary>
-            /// Enumerable that this proxies
-            /// </summary>
-            private IEnumerable<ProjectPropertyInstance> _backingProperties;
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            /// <param name="backingProperties">Enumerator this class should proxy</param>
-            internal ProjectPropertyInstanceEnumeratorProxy(IEnumerable<ProjectPropertyInstance> backingProperties)
-            {
-                _backingProperties = backingProperties;
-            }
-
-            /// <summary>
-            /// Returns an enumerator that provides copies of the properties
-            /// in the backing store.
-            /// Each DictionaryEntry has key of the property name and value of the property value.
-            /// Type of the enumerator is imposed by backwards compatibility for ProjectStartedEvent.
-            /// </summary>
-            public IEnumerator<DictionaryEntry> GetEnumerator()
-            {
-                foreach (ProjectPropertyInstance property in _backingProperties)
-                {
-                    yield return new DictionaryEntry(property.Name, property.EvaluatedValue);
-                }
-            }
-
-            /// <summary>
-            /// Returns an enumerator that provides copies of the properties
-            /// in the backing store.
-            /// </summary>
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return (IEnumerator)GetEnumerator();
-            }
         }
     }
 }

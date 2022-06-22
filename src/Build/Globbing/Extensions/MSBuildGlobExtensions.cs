@@ -4,6 +4,8 @@
 using System.Collections.Generic;
 using Microsoft.Build.Globbing.Visitor;
 
+#nullable disable
+
 namespace Microsoft.Build.Globbing.Extensions
 {
     /// <summary>

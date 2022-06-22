@@ -1,4 +1,4 @@
-﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build">
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -54,6 +54,10 @@
     <PackageReference Remove="xunit" />
     <PackageReference Include="xunit.core" />
     <PackageReference Include="xunit.assert" />
+
+    <!-- Force updated reference to this package because xunit and shouldly
+         are netstandard1.6 and transitively bring in an old reference -->
+    <PackageReference Include="System.Security.Cryptography.X509Certificates" />
 
     <PackageReference Include="Microsoft.DotNet.XUnitExtensions" />
 

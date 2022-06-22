@@ -13,7 +13,8 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Shared.FileSystem;
 using Xunit;
 using Xunit.Abstractions;
-using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -61,7 +62,7 @@ namespace Microsoft.Build.UnitTests
                 File.WriteAllBytes(Path.Combine(testFolder.Path, file), new byte[1]);
             }
 
-            string[] fileMatches = FileMatcher.Default.GetFiles(testFolder.Path, pattern);
+            string[] fileMatches = FileMatcher.Default.GetFiles(testFolder.Path, pattern).FileList;
 
             fileMatches.Length.ShouldBe(expectedMatchCount, $"Matches: '{String.Join("', '", fileMatches)}'");
         }
@@ -82,7 +83,7 @@ namespace Microsoft.Build.UnitTests
 
             void VerifyImpl(FileMatcher fileMatcher, string include, string[] excludes, bool shouldHaveNoMatches = false, string customMessage = null)
             {
-                string[] matchedFiles = fileMatcher.GetFiles(testFolder.Path, include, excludes?.ToList());
+                string[] matchedFiles = fileMatcher.GetFiles(testFolder.Path, include, excludes?.ToList()).FileList;
 
                 if (shouldHaveNoMatches)
                 {
@@ -1041,8 +1042,8 @@ namespace Microsoft.Build.UnitTests
                 // On Linux *. * does not pick up files with no extension
                 ValidateFileMatch(Path.Combine("..", "..", "*.*"), Path.Combine("..", "..", "File"), false);
             }
-            ValidateNoFileMatch(Path.Combine("..", "..", "*.*"), Path.Combine(new [] {"..", "..", "dir1", "dir2", "File.txt"}), false);
-            ValidateNoFileMatch(Path.Combine("..", "..", "*.*"), Path.Combine(new [] {"..", "..", "dir1", "dir2", "File"}), false);
+            ValidateNoFileMatch(Path.Combine("..", "..", "*.*"), Path.Combine(new[] { "..", "..", "dir1", "dir2", "File.txt" }), false);
+            ValidateNoFileMatch(Path.Combine("..", "..", "*.*"), Path.Combine(new[] { "..", "..", "dir1", "dir2", "File" }), false);
         }
 
         [Fact]
@@ -1138,7 +1139,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Unc()
         {
-            //Check UNC functionality
+            // Check UNC functionality
             ValidateFileMatch
                 (
                 "\\\\server\\c$\\**\\*.cs",
@@ -1255,7 +1256,7 @@ namespace Microsoft.Build.UnitTests
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 string longString = new string('X', 500) + "*"; // need a wildcard to do anything
-                string[] result = FileMatcher.Default.GetFiles(@"c:\", longString);
+                string[] result = FileMatcher.Default.GetFiles(@"c:\", longString).FileList;
 
                 Assert.Equal(longString, result[0]); // Does not throw
                 ChangeWaves.ResetStateForTests();
@@ -1292,12 +1293,12 @@ namespace Microsoft.Build.UnitTests
             string workingPath = _env.CreateFolder().Path;
             string workingPathSubfolder = Path.Combine(workingPath, "SubDir");
             string offendingPattern = Path.Combine(workingPath, @"*\..\bar");
-            string[] files = new string[0];
+            string[] files = Array.Empty<string>();
 
             Directory.CreateDirectory(workingPath);
             Directory.CreateDirectory(workingPathSubfolder);
 
-            files = FileMatcher.Default.GetFiles(workingPath, offendingPattern);
+            files = FileMatcher.Default.GetFiles(workingPath, offendingPattern).FileList;
         }
 
         [Fact]
@@ -1309,7 +1310,7 @@ namespace Microsoft.Build.UnitTests
 
             Directory.CreateDirectory(workingPath);
             File.WriteAllText(fileName, "Hello there.");
-            var files = FileMatcher.Default.GetFiles(workingPath, offendingPattern);
+            var files = FileMatcher.Default.GetFiles(workingPath, offendingPattern).FileList;
 
             string result = String.Join(", ", files);
             Console.WriteLine(result);
@@ -1329,7 +1330,7 @@ namespace Microsoft.Build.UnitTests
             Directory.CreateDirectory(workingPath);
             Directory.CreateDirectory(workingPathSubdir);
             File.AppendAllText(workingPathSubdirBing, "y");
-            var files = FileMatcher.Default.GetFiles(workingPath, offendingPattern);
+            var files = FileMatcher.Default.GetFiles(workingPath, offendingPattern).FileList;
 
             string result = String.Join(", ", files);
             Console.WriteLine(result);
@@ -1352,19 +1353,19 @@ namespace Microsoft.Build.UnitTests
                 {
                     env.SetEnvironmentVariable("MsBuildCacheFileEnumerations", "1");
 
-                    var testProject = env.CreateTestProjectWithFiles(string.Empty, new[] {"a.cs", "b.cs", "c.cs"});
+                    var testProject = env.CreateTestProjectWithFiles(string.Empty, new[] { "a.cs", "b.cs", "c.cs" });
 
-                    var files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs");
+                    var files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs").FileList;
                     Array.Sort(files);
-                    Assert.Equal(new []{"a.cs", "b.cs", "c.cs"}, files);
+                    Assert.Equal(new[] { "a.cs", "b.cs", "c.cs" }, files);
 
-                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string>{"a.cs"});
+                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string> { "a.cs" }).FileList;
                     Array.Sort(files);
-                    Assert.Equal(new[] {"b.cs", "c.cs" }, files);
+                    Assert.Equal(new[] { "b.cs", "c.cs" }, files);
 
-                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string>{"a.cs", "c.cs"});
+                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string> { "a.cs", "c.cs" }).FileList;
                     Array.Sort(files);
-                    Assert.Equal(new[] {"b.cs" }, files);
+                    Assert.Equal(new[] { "b.cs" }, files);
                 }
             }
             finally
@@ -1372,6 +1373,146 @@ namespace Microsoft.Build.UnitTests
                 FileMatcher.ClearFileEnumerationsCache();
             }
         }
+
+        [PlatformSpecific(TestPlatforms.Any)]
+        [Theory]
+        [InlineData(@"\", "**")]
+        [InlineData(@"\\", "**")]
+        [InlineData(@"\\\\\\\\", "**")]
+        [InlineData("/", "**/*.cs")]
+        [InlineData("/", "**")]
+        [InlineData("//", "**")]
+        [InlineData("////////", "**")]
+        public void DriveEnumeratingWildcardIsObservedOnAnyPlatform(string directoryPart, string wildcardPart) =>
+            DriveEnumeratingWildcardIsObserved(directoryPart, wildcardPart);
+
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [Theory]
+        [InlineData(@"\", "**")]
+        [InlineData(@"c:\", "**")]
+        [InlineData(@"c:\\", "**")]
+        [InlineData(@"c:\\\\\\\\", "**")]
+        [InlineData(@"c:\", @"**\*.cs")]
+        public void DriveEnumeratingWildcardIsObservedOnWindows(string directoryPart, string wildcardPart)
+        {
+            DriveEnumeratingWildcardIsObserved(directoryPart, wildcardPart);
+            DriveEnumeratingWildcardFailsAndReturns(directoryPart, wildcardPart);
+        }
+
+        private void DriveEnumeratingWildcardIsObserved(string directoryPart, string wildcardPart) =>
+            FileMatcher.IsDriveEnumeratingWildcardPattern(directoryPart, wildcardPart).ShouldBeTrue();
+
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [Theory]
+        [InlineData(@"\", "**")]
+        [InlineData("/", "**/*.cs")]
+        [InlineData("/", "**")]
+        [InlineData("//", "**")]
+        [InlineData("////////", "**")]
+        public void DriveEnumeratingWildcardFailsAndReturnsOnUnix(string directoryPart, string wildcardPart)
+        {
+            DriveEnumeratingWildcardFailsAndReturns(directoryPart, wildcardPart);
+        }
+
+        private void DriveEnumeratingWildcardFailsAndReturns(string directoryPart, string wildcardPart)
+        {
+            string driveEnumeratingWildcard = string.Concat(directoryPart, wildcardPart);
+
+            using (var env = TestEnvironment.Create())
+            {
+                try
+                {
+                    // Set env var to fail on drive enumerating wildcard detection
+                    Helpers.ResetStateForDriveEnumeratingWildcardTests(env, "1");
+
+                    (string[] fileList, FileMatcher.SearchAction action, string excludeFileSpec) = FileMatcher.Default.GetFiles(
+                        string.Empty,
+                        driveEnumeratingWildcard);
+
+                    action.ShouldBe(FileMatcher.SearchAction.FailOnDriveEnumeratingWildcard);
+                    fileList.ShouldBeEmpty();
+                    excludeFileSpec.ShouldBe(string.Empty);
+
+                    // Handle failing with drive enumerating exclude
+                    (fileList, action, excludeFileSpec) = FileMatcher.Default.GetFiles(
+                        string.Empty,
+                        @"/*/*.cs",
+                        new List<string> { driveEnumeratingWildcard });
+
+                    action.ShouldBe(FileMatcher.SearchAction.FailOnDriveEnumeratingWildcard);
+                    fileList.ShouldBeEmpty();
+                    excludeFileSpec.ShouldBe(driveEnumeratingWildcard);
+                }
+                finally
+                {
+                    ChangeWaves.ResetStateForTests();
+                }
+            }
+        }
+
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [Theory]
+        [InlineData(@"z:\**")]
+        [InlineData(@"z:\\**")]
+        [InlineData(@"z:\\\\\\\\**")]
+        [InlineData(@"z:\**\*.cs")]
+        public void DriveEnumeratingWildcardIsLoggedOnWindows(string driveEnumeratingWildcard)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                try
+                {
+                    // Set env var to log on drive enumerating wildcard detection
+                    Helpers.ResetStateForDriveEnumeratingWildcardTests(env, "0");
+
+                    (_, FileMatcher.SearchAction action, string excludeFileSpec) = FileMatcher.Default.GetFiles(
+                        string.Empty,
+                        driveEnumeratingWildcard);
+
+                    action.ShouldBe(FileMatcher.SearchAction.LogDriveEnumeratingWildcard);
+                    excludeFileSpec.ShouldBe(string.Empty);
+
+                    // Handle logging with drive enumerating exclude
+                    (_, action, excludeFileSpec) = FileMatcher.Default.GetFiles(
+                        string.Empty,
+                        @"/*/*.cs",
+                        new List<string> { driveEnumeratingWildcard });
+
+                    action.ShouldBe(FileMatcher.SearchAction.LogDriveEnumeratingWildcard);
+                    excludeFileSpec.ShouldBe(driveEnumeratingWildcard);
+                }
+                finally
+                {
+                    ChangeWaves.ResetStateForTests();
+                }
+            }
+        }
+
+        [PlatformSpecific(TestPlatforms.Any)]
+        [Theory]
+        [InlineData(@"\", @"*\*.cs")]
+        [InlineData(@"\\", @"*\*.cs")]
+        [InlineData(@"\", @"*\*.*")]
+        [InlineData(@"/", @"*/*.cs")]
+        [InlineData(@"//", @"*/*.cs")]
+        [InlineData(@"/", @"*/*.*")]
+        public void DriveEnumeratingWildcardIsNotObservedOnAnyPlatform(string directoryPart, string wildcardPart) =>
+            DriveEnumeratingWildcardIsNotObserved(directoryPart, wildcardPart);
+
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [Theory]
+        [InlineData(@"c:\", "**")]
+        [InlineData(@"c:\\", "**")]
+        [InlineData(@"c:\\\\\\\\", "**")]
+        [InlineData(@"c:\", @"**\*.cs")]
+        public void DriveEnumeratingWildcardIsNotObservedOnUnix(string directoryPart, string wildcardPart)
+        {
+            DriveEnumeratingWildcardIsNotObserved(directoryPart, wildcardPart);
+        }
+
+        private void DriveEnumeratingWildcardIsNotObserved(string directoryPart, string wildcardPart) =>
+            FileMatcher.IsDriveEnumeratingWildcardPattern(directoryPart, wildcardPart).ShouldBeFalse();
 
         [Fact]
         public void RemoveProjectDirectory()
@@ -1422,7 +1563,7 @@ namespace Microsoft.Build.UnitTests
 
         [Theory]
         [InlineData(
-            @"src/**/*.cs", //  Include Pattern
+            @"src/**/*.cs", // Include Pattern
             new string[] //  Matching files
             {
                 @"src/a.cs",
@@ -1430,7 +1571,7 @@ namespace Microsoft.Build.UnitTests
             }
             )]
         [InlineData(
-            @"src/test/**/*.cs", //  Include Pattern
+            @"src/test/**/*.cs", // Include Pattern
             new string[] //  Matching files
             {
                 @"src/test/a.cs",
@@ -1438,7 +1579,7 @@ namespace Microsoft.Build.UnitTests
             }
             )]
         [InlineData(
-            @"src/test/**/a/b/**/*.cs", //  Include Pattern
+            @"src/test/**/a/b/**/*.cs", // Include Pattern
             new string[] //  Matching files
             {
                 @"src/test/dir\a\b\a.cs",
@@ -1452,18 +1593,18 @@ namespace Microsoft.Build.UnitTests
 
         [Theory]
         [InlineData(
-            @"**\*.cs", //  Include Pattern
+            @"**\*.cs", // Include Pattern
             new[] //  Exclude patterns
             {
                 @"bin\**"
             },
-            new string[] //  Matching files
+            new string[] // Matching files
             {
             },
-            new string[] //  Non matching files
+            new string[] // Non matching files
             {
             },
-            new[] //  Non matching files that shouldn't be touched
+            new[] // Non matching files that shouldn't be touched
             {
                 @"bin\foo.cs",
                 @"bin\bar\foo.cs",
@@ -1471,21 +1612,21 @@ namespace Microsoft.Build.UnitTests
             }
             )]
         [InlineData(
-            @"**\*.cs", //  Include Pattern
+            @"**\*.cs", // Include Pattern
             new[] //  Exclude patterns
             {
                 @"bin\**"
             },
-            new[] //  Matching files
+            new[] // Matching files
             {
                 "a.cs",
                 @"b\b.cs",
             },
-            new[] //  Non matching files
+            new[] // Non matching files
             {
                 @"b\b.txt"
             },
-            new[] //  Non matching files that shouldn't be touched
+            new[] // Non matching files that shouldn't be touched
             {
                 @"bin\foo.cs",
                 @"bin\bar\foo.cs",
@@ -1501,26 +1642,24 @@ namespace Microsoft.Build.UnitTests
         public void ExcludeSpecificFiles()
         {
             MatchDriverWithDifferentSlashes(
-                @"**\*.cs",     //  Include Pattern
+                @"**\*.cs",     // Include Pattern
                 new[]    //  Exclude patterns
                 {
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
                 },
-                new[]    //  Matching files
+                new[]    // Matching files
                 {
                     @"foo.cs",
                     @"Properties\AssemblyInfo.cs",
                     @"Foo\Bar\Baz\Buzz.cs"
                 },
-                new[]    //  Non matching files
+                new[]    // Non matching files
                 {
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
                 },
-                new string[]    //  Non matching files that shouldn't be touched
-                {
-                }
+                Array.Empty<string>()    // Non matching files that shouldn't be touched
             );
         }
 
@@ -1528,27 +1667,27 @@ namespace Microsoft.Build.UnitTests
         public void ExcludePatternAndSpecificFiles()
         {
             MatchDriverWithDifferentSlashes(
-                @"**\*.cs",     //  Include Pattern
+                @"**\*.cs",     // Include Pattern
                 new[]    //  Exclude patterns
                 {
                     @"bin\**",
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
                 },
-                new[]    //  Matching files
+                new[]    // Matching files
                 {
                     @"foo.cs",
                     @"Properties\AssemblyInfo.cs",
                     @"Foo\Bar\Baz\Buzz.cs"
                 },
-                new[]    //  Non matching files
+                new[]    // Non matching files
                 {
                     @"foo.txt",
                     @"Foo\foo.txt",
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
                 },
-                new[]    //  Non matching files that shouldn't be touched
+                new[]    // Non matching files that shouldn't be touched
                 {
                     @"bin\foo.cs",
                     @"bin\bar\foo.cs",
@@ -2384,7 +2523,7 @@ namespace Microsoft.Build.UnitTests
                 String.Empty, /* we don't need project directory as we use mock filesystem */
                 filespec,
                 excludeFilespecs?.ToList()
-            );
+            ).FileList;
 
             Func<string[], string[]> normalizeAllFunc = (paths => normalizeAllPaths ? paths.Select(MockFileSystem.Normalize).ToArray() : paths);
             Func<string[], string[]> normalizeMatching = (paths => normalizeExpectedMatchingFiles ? paths.Select(MockFileSystem.Normalize).ToArray() : paths);

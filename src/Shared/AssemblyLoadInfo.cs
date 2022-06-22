@@ -6,6 +6,8 @@ using System.IO;
 using Microsoft.Build.BackEnd;
 using System.Diagnostics;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

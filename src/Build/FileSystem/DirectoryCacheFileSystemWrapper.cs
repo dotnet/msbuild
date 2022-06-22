@@ -12,6 +12,8 @@ using System.Linq;
 using Path = Microsoft.IO.Path;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.FileSystem
 {
     internal class DirectoryCacheFileSystemWrapper : IFileSystem

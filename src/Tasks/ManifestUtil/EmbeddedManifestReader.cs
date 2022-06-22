@@ -6,6 +6,8 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     internal class EmbeddedManifestReader
@@ -44,7 +46,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             IntPtr hResInfo = NativeMethods.FindResource(hModule, pName, NativeMethods.RT_MANIFEST);
             if (hResInfo == IntPtr.Zero)
             {
-                return false; //continue looking
+                return false; // continue looking
             }
             IntPtr hResource = NativeMethods.LoadResource(hModule, hResInfo);
             NativeMethods.LockResource(hResource);
@@ -53,7 +55,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             Marshal.Copy(hResource, buffer, 0, buffer.Length);
             _manifest = new MemoryStream(buffer, false);
-            return false; //found what we are looking for
+            return false; // found what we are looking for
         }
 
         public static Stream Read(string path)

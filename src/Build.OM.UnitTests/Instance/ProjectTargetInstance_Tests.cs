@@ -9,6 +9,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
     /// <summary>
@@ -133,7 +135,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         private static ProjectTargetInstance GetSampleTargetInstance()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t' Inputs='i' Outputs='o' Condition='c' DependsOnTargets='d' BeforeTargets='b' AfterTargets='a' KeepDuplicateOutputs='k' Returns='r'>
                             <t1/>
                         </Target>

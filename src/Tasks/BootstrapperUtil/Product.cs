@@ -8,17 +8,23 @@ using System.Globalization;
 using System.Xml;
 using System.Runtime.InteropServices;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {
     internal enum CopyAllFilesType
     {
-        CopyAllFilesFalse, CopyAllFilesTrue, CopyAllFilesIfNotHomeSite
-    };
+        CopyAllFilesFalse,
+        CopyAllFilesTrue,
+        CopyAllFilesIfNotHomeSite,
+    }
 
     /// <summary>
     /// This class represents a product in the found by the BootstrapperBuilder in the Path property.
     /// </summary>
-    [ComVisible(true), Guid("532BF563-A85D-4088-8048-41F51AC5239F"), ClassInterface(ClassInterfaceType.None)]
+    [ComVisible(true)]
+    [Guid("532BF563-A85D-4088-8048-41F51AC5239F")]
+    [ClassInterface(ClassInterfaceType.None)]
     public class Product : IProduct
     {
         private readonly Dictionary<string, Package> _cultures = new Dictionary<string, Package>(StringComparer.OrdinalIgnoreCase);

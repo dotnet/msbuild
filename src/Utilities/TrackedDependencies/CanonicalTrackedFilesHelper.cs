@@ -8,6 +8,8 @@ using Microsoft.Build.Shared;
 
 #if FEATURE_FILE_TRACKER
 
+#nullable disable
+
 namespace Microsoft.Build.Utilities
 {
     internal static class CanonicalTrackedFilesHelper

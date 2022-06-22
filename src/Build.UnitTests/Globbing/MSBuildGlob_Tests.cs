@@ -9,6 +9,8 @@ using Microsoft.Build.Globbing;
 using Microsoft.Build.Shared;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests.Globbing
 {
     /// <summary>

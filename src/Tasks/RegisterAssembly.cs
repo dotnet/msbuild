@@ -16,6 +16,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -341,7 +343,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // Persist the type library
-                UCOMICreateITypeLib createTypeLib = (UCOMICreateITypeLib)convertedTypeLib;
+                ICreateTypeLib createTypeLib = (ICreateTypeLib)convertedTypeLib;
 
                 createTypeLib.SaveAllChanges();
             }

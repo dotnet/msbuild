@@ -18,6 +18,8 @@ using System.Security.Permissions;
 using System.Runtime.Versioning;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Runtime.Serialization;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared.AssemblyFoldersFromConfig
 {
     [DataContract(Name="AssemblyFolder", Namespace = "")]

@@ -8,6 +8,8 @@ using System;
 using System.Linq;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Construction
 {
     public class ProjectImportElement_Tests

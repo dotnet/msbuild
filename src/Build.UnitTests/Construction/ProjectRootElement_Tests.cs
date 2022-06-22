@@ -7,6 +7,8 @@ using System.Text;
 using Microsoft.Build.Construction;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Construction
 {
     /// <summary>
@@ -67,7 +69,7 @@ bar", false)]
             {
                 // reset all hooks
                 XmlDocumentWithLocation.ClearReadOnlyFlags_UnitTestsOnly();
-                env.SetEnvironmentVariable("MSBUILDLOADALLFILESASREADONLY", null); //clear
+                env.SetEnvironmentVariable("MSBUILDLOADALLFILESASREADONLY", null); // clear
                 env.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", null); // clear
                 env.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", null); // clear
                 var testFiles = env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>());

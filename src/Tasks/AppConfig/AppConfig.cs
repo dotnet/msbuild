@@ -6,6 +6,8 @@ using System.Xml;
 
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

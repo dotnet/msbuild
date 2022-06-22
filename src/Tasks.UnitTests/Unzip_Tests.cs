@@ -11,6 +11,8 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.UnitTests
 {
     public class Unzip_Tests

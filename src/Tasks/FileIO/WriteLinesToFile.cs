@@ -8,6 +8,8 @@ using System;
 using System.IO;
 using System.Text;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

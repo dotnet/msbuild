@@ -8,6 +8,8 @@ using Microsoft.Build.Shared;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class ProcessExtensions_Tests
@@ -17,7 +19,7 @@ namespace Microsoft.Build.UnitTests
         {
             var psi =
                 NativeMethodsShared.IsWindows ?
-                    new ProcessStartInfo("powershell", "-NoLogo -NoProfile -command \"Start-Sleep -Seconds 600\"") :
+                    new ProcessStartInfo("rundll32", "kernel32.dll, Sleep") :
                     new ProcessStartInfo("sleep", "600");
 
             Process p = Process.Start(psi); // sleep 10m.

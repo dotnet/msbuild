@@ -15,6 +15,8 @@ using Microsoft.Build.Shared;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
@@ -26,8 +28,8 @@ namespace Microsoft.Build.BackEnd
     // For instance, if items were generated from an expression @(Foo->'%(Filename).obj'), then
     // the inner dictionary would have a key of "@(Foo->'%(Filename).obj')", in which would be 
     // contained a list of the items which were created/transformed using that pattern.    
-    using ItemVectorPartitionCollection = Dictionary<string, Dictionary<string, IList<ProjectItemInstance>>>;
-    using ItemVectorPartition = Dictionary<string, IList<ProjectItemInstance>>;
+    using ItemVectorPartitionCollection = System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, System.Collections.Generic.IList<Microsoft.Build.Execution.ProjectItemInstance>>>;
+    using ItemVectorPartition = System.Collections.Generic.Dictionary<string, System.Collections.Generic.IList<Microsoft.Build.Execution.ProjectItemInstance>>;
 
     /// <summary>
     /// Enumeration of the results of target dependency analysis.

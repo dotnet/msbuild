@@ -1,10 +1,12 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
+using Shouldly;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Collections
 {
@@ -13,63 +15,43 @@ namespace Microsoft.Build.UnitTests.OM.Collections
     /// </summary>
     public class CopyOnReadEnumerable_Tests
     {
-        /// <summary>
-        /// Verify basic case
-        /// </summary>
         [Fact]
-        public void NonCloneableBackingCollection()
+        public void EnumeratesBackingCollection()
         {
             List<int> values = new List<int>(new int[] { 1, 2, 3 });
 
-            CopyOnReadEnumerable<int> enumerable = new CopyOnReadEnumerable<int>(values, values);
+            CopyOnReadEnumerable<int, string> enumerable = new CopyOnReadEnumerable<int, string>(values, values, i => i.ToString());
 
             using (IEnumerator<int> enumerator = values.GetEnumerator())
             {
-                foreach (int i in enumerable)
+                foreach (string s in enumerable)
                 {
                     enumerator.MoveNext();
-                    Assert.Equal(i, enumerator.Current);
+                    enumerator.Current.ToString().ShouldBe(s);
                 }
+                enumerator.MoveNext().ShouldBeFalse();
             }
         }
 
-        /// <summary>
-        /// Verify cloning case
-        /// </summary>
         [Fact]
-        public void CloneableBackingCollection()
+        public void CopiesBackingCollection()
         {
-            List<Cloneable> values = new List<Cloneable>(new Cloneable[] { new Cloneable(), new Cloneable(), new Cloneable() });
+            List<string> values = new List<string>(new string[] { "a", "b", "c" });
 
-            CopyOnReadEnumerable<Cloneable> enumerable = new CopyOnReadEnumerable<Cloneable>(values, values);
+            CopyOnReadEnumerable<string, string> enumerable = new CopyOnReadEnumerable<string, string>(values, values, s => s);
 
-            using (IEnumerator<Cloneable> enumerator = values.GetEnumerator())
+            int expectedCount = values.Count;
+            var enumerator = enumerable.GetEnumerator();
+
+            // The list has been copied and adding to it has no effect on the enumerable.
+            values.Add("d");
+
+            int actualCount = 0;
+            while (enumerator.MoveNext())
             {
-                foreach (Cloneable i in enumerable)
-                {
-                    enumerator.MoveNext();
-                    Assert.False(Object.ReferenceEquals(i, enumerator.Current)); // "Enumerator copied references."
-                }
+                actualCount++;
             }
-        }
-
-        /// <summary>
-        /// A class used for testing cloneable backing collections.
-        /// </summary>
-        private class Cloneable : IDeepCloneable<Cloneable>
-        {
-            #region IDeepCloneable<Cloneable> Members
-
-            /// <summary>
-            /// Clones the object.
-            /// </summary>
-            /// <returns>The new instance.</returns>
-            public Cloneable DeepClone()
-            {
-                return new Cloneable();
-            }
-
-            #endregion
+            actualCount.ShouldBe(expectedCount);
         }
     }
 }

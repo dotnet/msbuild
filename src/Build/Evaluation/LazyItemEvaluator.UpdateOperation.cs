@@ -9,6 +9,8 @@ using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>

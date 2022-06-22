@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

@@ -3,6 +3,8 @@
 
 using Microsoft.Build.BackEnd;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

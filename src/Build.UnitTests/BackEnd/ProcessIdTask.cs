@@ -4,6 +4,8 @@
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using System.Diagnostics;
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>

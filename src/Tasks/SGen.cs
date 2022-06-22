@@ -1,13 +1,19 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if !RUNTIME_TYPE_NETCORE
 using System;
 using System.IO;
 using System.Diagnostics;
+#endif
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+#if !RUNTIME_TYPE_NETCORE
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+#endif
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -364,7 +370,7 @@ namespace Microsoft.Build.Tasks
 
                 commandLineBuilder.AppendWhenTrue("/proxytypes", Bag, "UseProxyTypes");
 
-                //add the keep switch
+                // add the keep switch
                 commandLineBuilder.AppendWhenTrue("/keep", Bag, "UseKeep");
 
                 // Append the references, if any.
@@ -380,7 +386,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                //Append the Types to the command line, if any.
+                // Append the Types to the command line, if any.
                 if (Types != null)
                 {
                     foreach (string type in Types)

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Xml;
 
 using Microsoft.Build.Evaluation;
@@ -12,6 +13,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
@@ -240,19 +243,18 @@ namespace Microsoft.Build.UnitTests.OM.Instance
            );
         }
 
-#if FEATURE_COM_INTEROP
         /// <summary>
         /// Test which ensures that setting an Any affinity for a project with a remote host object does not throws.
         /// </summary>
         [Fact]
-        [SkipOnMono("disable com tests on mono")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void TestNoContradictoryRemoteHostObjectAffinity()
         {
             HostServices hostServices = new HostServices();
             hostServices.RegisterHostObject("project", "target", "task", "moniker");
             hostServices.SetNodeAffinity("project", NodeAffinity.Any);
         }
-#endif
 
         /// <summary>
         /// Test which ensures that setting the InProc affinity for a project with a host object is allowed.
@@ -296,12 +298,12 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
         }
 
-#if FEATURE_COM_INTEROP
         /// <summary>
         /// Test which ensures the remote host object cannot affect a project which has the Any affinity specifically set.
         /// </summary>
         [Fact]
-        [SkipOnMono("disable com tests on mono")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void TestRegisterRemoteHostObjectNoAffect_Any2()
         {
             HostServices hostServices = new HostServices();
@@ -309,7 +311,6 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             hostServices.RegisterHostObject("project", "target", "task", "moniker");
             hostServices.GetNodeAffinity("project").ShouldBe(NodeAffinity.Any);
         }
-#endif
 
         /// <summary>
         /// Test which ensures the host object can be set for a project which has an out-of-proc affinity only because that affinity
@@ -336,12 +337,12 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             hostServices.RegisterHostObject("project", "target", "task", hostObject);
         }
 
-#if FEATURE_COM_INTEROP
         /// <summary>
         /// Test which ensures the affinity for a project can be changed once the in process host object is registered
         /// </summary>
         [Fact]
-        [SkipOnMono("disable com tests on mono")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void TestAffinityChangeAfterRegisterInprocessHostObject()
         {
             HostServices hostServices = new HostServices();
@@ -351,7 +352,6 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             hostServices.RegisterHostObject("project", "target", "task", hostObject);
             hostServices.GetNodeAffinity("project").ShouldBe(NodeAffinity.InProc);
         }
-#endif
 
         /// <summary>
         /// Test which ensures the affinity for a project can be changed once the host object is cleared.
@@ -398,10 +398,10 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             HostServices hostServices = new HostServices();
             ProjectInstance project = CreateDummyProject("foo.proj");
 
-            BuildRequestData data = new BuildRequestData(project, new string[] { }, hostServices);
+            BuildRequestData data = new BuildRequestData(project, Array.Empty<string>(), hostServices);
 
             hostServices.SetNodeAffinity(project.FullPath, NodeAffinity.InProc);
-            BuildRequestData data2 = new BuildRequestData(project, new string[] { }, hostServices);
+            BuildRequestData data2 = new BuildRequestData(project, Array.Empty<string>(), hostServices);
         }
 
         /// <summary>
@@ -447,12 +447,12 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Assert.False(hostServices.HasInProcessHostObject(project2.FullPath));
         }
 
-#if FEATURE_COM_INTEROP
         /// <summary>
         /// Tests that register overrides existing reigsted remote host object.
         /// </summary>
         [Fact]
-        [SkipOnMono("disable com tests on mono")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void TestRegisterOverrideExistingRegisted()
         {
             var hostServices = new HostServices();
@@ -477,7 +477,6 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             resultObject.GetState().ShouldBe(2);
         }
-#endif
 
         /// <summary>
         /// Creates a dummy project instance.

@@ -8,6 +8,8 @@ using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.AssemblyFoldersFromConfig;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

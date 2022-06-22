@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
     using System.Collections.Generic;
@@ -34,7 +36,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public string DirectoryPath => this.ProjectXml.DirectoryPath;
         public string FullPath { get => this.ProjectXml.FullPath; set => this.ProjectXml.FullPath = value; }
         public ElementLocation ProjectFileLocation => this.ProjectXml.ProjectFileLocation;
-        public Encoding Encoding => this.ProjectXml.Encoding; //!! more complicated in reality when passing cross process.
+        public Encoding Encoding => this.ProjectXml.Encoding; // !! more complicated in reality when passing cross process.
         public string RawXml => this.ProjectXml.RawXml;
         public bool PreserveFormatting => this.ProjectXml.PreserveFormatting;
         public MockProjectChooseElementLinkRemoter CreateChooseElement()

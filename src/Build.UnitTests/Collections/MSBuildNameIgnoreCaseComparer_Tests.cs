@@ -8,6 +8,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Collections
 {
     /// <summary>

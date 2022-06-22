@@ -12,6 +12,8 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Internal
 {
     /// <summary>
@@ -299,39 +301,23 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.Environment::GetFolderPath", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::GetLogicalDrives", environmentType);
 
-// All the following properties only have getters
-#if FEATURE_GET_COMMANDLINE
+                        // All the following properties only have getters
                         availableStaticMethods.TryAdd("System.Environment::CommandLine", environmentType);
-#endif
-#if FEATURE_64BIT_ENVIRONMENT_QUERY
                         availableStaticMethods.TryAdd("System.Environment::Is64BitOperatingSystem", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::Is64BitProcess", environmentType);
-#endif
-
                         availableStaticMethods.TryAdd("System.Environment::MachineName", environmentType);
-#if FEATURE_OSVERSION
+                        availableStaticMethods.TryAdd("System.Environment::NewLine", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::OSVersion", environmentType);
-#endif
                         availableStaticMethods.TryAdd("System.Environment::ProcessorCount", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::StackTrace", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::SystemDirectory", environmentType);
-#if FEATURE_SYSTEMPAGESIZE
                         availableStaticMethods.TryAdd("System.Environment::SystemPageSize", environmentType);
-#endif
                         availableStaticMethods.TryAdd("System.Environment::TickCount", environmentType);
-#if FEATURE_USERDOMAINNAME
                         availableStaticMethods.TryAdd("System.Environment::UserDomainName", environmentType);
-#endif
-#if FEATURE_USERINTERACTIVE
                         availableStaticMethods.TryAdd("System.Environment::UserInteractive", environmentType);
-#endif
                         availableStaticMethods.TryAdd("System.Environment::UserName", environmentType);
-#if FEATURE_DOTNETVERSION
                         availableStaticMethods.TryAdd("System.Environment::Version", environmentType);
-#endif
-#if FEATURE_WORKINGSET
                         availableStaticMethods.TryAdd("System.Environment::WorkingSet", environmentType);
-#endif
 
                         availableStaticMethods.TryAdd("System.IO.Directory::GetDirectories", directoryType);
                         availableStaticMethods.TryAdd("System.IO.Directory::GetFiles", directoryType);
@@ -345,9 +331,7 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.IO.File::GetLastWriteTime", fileType);
                         availableStaticMethods.TryAdd("System.IO.File::ReadAllText", fileType);
 
-#if FEATURE_CULTUREINFO_GETCULTUREINFO
                         availableStaticMethods.TryAdd("System.Globalization.CultureInfo::GetCultureInfo", new Tuple<string, Type>(null, typeof(CultureInfo))); // user request
-#endif
                         availableStaticMethods.TryAdd("System.Globalization.CultureInfo::new", new Tuple<string, Type>(null, typeof(CultureInfo))); // user request
                         availableStaticMethods.TryAdd("System.Globalization.CultureInfo::CurrentUICulture", new Tuple<string, Type>(null, typeof(CultureInfo))); // user request
 
@@ -357,6 +341,7 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.Char", new Tuple<string, Type>(null, typeof(Char)));
                         availableStaticMethods.TryAdd("System.Convert", new Tuple<string, Type>(null, typeof(Convert)));
                         availableStaticMethods.TryAdd("System.DateTime", new Tuple<string, Type>(null, typeof(DateTime)));
+                        availableStaticMethods.TryAdd("System.DateTimeOffset", new Tuple<string, Type>(null, typeof(DateTimeOffset)));
                         availableStaticMethods.TryAdd("System.Decimal", new Tuple<string, Type>(null, typeof(Decimal)));
                         availableStaticMethods.TryAdd("System.Double", new Tuple<string, Type>(null, typeof(Double)));
                         availableStaticMethods.TryAdd("System.Enum", new Tuple<string, Type>(null, typeof(Enum)));

@@ -12,6 +12,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -46,12 +48,12 @@ namespace Microsoft.Build.Tasks
         public ITaskItem DestinationFolder { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether read-only files should be overwritten.
+        /// Gets or sets a value that indicates whether read-only files should be overwritten.
         /// </summary>
         public bool OverwriteReadOnlyFiles { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether files should be skipped if the destination is unchanged.
+        /// Gets or sets a value that indicates whether files should be skipped if the destination is unchanged.
         /// </summary>
         public bool SkipUnchangedFiles { get; set; } = true;
 
@@ -62,12 +64,12 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] SourceFiles { get; set; }
 
         /// <summary>
-        /// Gets or sets an MSBuild glob expression that will be used to determine which files to include being unzipped from the archive.
+        /// Gets or sets an MSBuild glob expression that specifies which files to include being unzipped from the archive.
         /// </summary>
         public string Include { get; set; }
 
         /// <summary>
-        /// Gets or sets an MSBuild glob expression that will be used to determine which files to exclude from being unzipped from the archive.
+        /// Gets or sets an MSBuild glob expression that specifies which files to exclude from being unzipped from the archive.
         /// </summary>
         public string Exclude { get; set; }
 

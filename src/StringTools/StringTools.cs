@@ -6,7 +6,6 @@ using System;
 namespace Microsoft.NET.StringTools
 {
     public static class Strings
-
     {
         #region Fields
 

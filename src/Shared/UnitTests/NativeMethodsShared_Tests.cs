@@ -11,6 +11,8 @@ using Xunit;
 
 
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public sealed class NativeMethodsShared_Tests
@@ -52,11 +54,11 @@ namespace Microsoft.Build.UnitTests
                 // Make sure the pointer passed back for the method is not null
                 Assert.NotEqual(processHandle, NativeMethodsShared.NullIntPtr);
 
-                //Actually call the method
+                // Actually call the method
                 GetProcessIdDelegate processIdDelegate = Marshal.GetDelegateForFunctionPointer<GetProcessIdDelegate>(processHandle);
                 uint processId = processIdDelegate();
 
-                //Make sure the return value is the same as retrieved from the .net methods to make sure everything works
+                // Make sure the return value is the same as retrieved from the .net methods to make sure everything works
                 Assert.Equal((uint)Process.GetCurrentProcess().Id, processId); // "Expected the .net processId to match the one from GetCurrentProcessId"
             }
             finally

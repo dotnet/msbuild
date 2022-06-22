@@ -13,6 +13,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -286,7 +288,7 @@ namespace Microsoft.Build.Tasks
                 // .NETCore Launcher.exe based deployment: If the file is apphost.exe, we need to set 'TargetPath' metadata
                 // to {assemblyname}.exe so that the file gets published as {assemblyname}.exe and not apphost.exe.
                 //
-                if (LauncherBasedDeployment && 
+                if (LauncherBasedDeployment &&
                     targetPath.Equals(Constants.AppHostExe, StringComparison.InvariantCultureIgnoreCase) &&
                     !String.IsNullOrEmpty(AssemblyName))
                 {
@@ -750,7 +752,7 @@ namespace Microsoft.Build.Tasks
             if (item.ItemSpec.EndsWith(".dll") && identity == null && !isDotNetCore)
             {
                 // It is possible that a native dll gets passed in here that was declared as a content file
-                // in a referenced nuget package, which will yield null here. We just need to ignore those 
+                // in a referenced nuget package, which will yield null here. We just need to ignore those
                 // for .NET FX case since those aren't actually references we care about. For .NET Core, native
                 // dll can be passed as a reference so we won't ignore it if isDotNetCore is true.
                 return true;
@@ -866,7 +868,7 @@ namespace Microsoft.Build.Tasks
                 int i = fusionName.IndexOf(',');
                 if (i > 0)
                 {
-                    string simpleName = fusionName.Substring(0, i); //example: "ClassLibrary1, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" -> "ClassLibrary1"
+                    string simpleName = fusionName.Substring(0, i); // example: "ClassLibrary1, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" -> "ClassLibrary1"
                     key = simpleName.ToLowerInvariant();
                     // If there are multiple with same simple name then we'll take the first one and ignore the rest, which is not an unreasonable thing to do
                     if (!_simpleNameDictionary.ContainsKey(key))
@@ -875,7 +877,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            
+
             IEnumerator IEnumerable.GetEnumerator()
             {
                 return _dictionary.Values.GetEnumerator();

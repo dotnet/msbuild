@@ -5,6 +5,8 @@ using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

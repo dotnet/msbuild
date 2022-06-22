@@ -3,6 +3,8 @@
 
 using System;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -25,7 +27,7 @@ namespace Microsoft.Build.Framework
         private readonly int _targetId;
 
         /// <summary>
-        ///The node-unique project request context the event was in
+        /// The node-unique project request context the event was in
         /// </summary>
         private readonly int _projectContextId;
 
@@ -95,7 +97,7 @@ namespace Microsoft.Build.Framework
             int targetId,
             int taskId
         )
-            :this(submissionId, nodeId, InvalidEvaluationId, projectInstanceId, projectContextId, targetId, taskId)
+            : this(submissionId, nodeId, InvalidEvaluationId, projectInstanceId, projectContextId, targetId, taskId)
         {
         }
 
@@ -215,7 +217,7 @@ namespace Microsoft.Build.Framework
         {
             var hash = 17;
             // submission ID does not contribute to equality
-            //hash = hash * 31 + _submissionId;
+            // hash = hash * 31 + _submissionId;
             hash = (hash * 31) + _nodeId;
             hash = (hash * 31) + _evaluationId;
             hash = (hash * 31) + _targetId;

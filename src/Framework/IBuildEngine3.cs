@@ -4,6 +4,8 @@
 using System.Collections;
 using System.Collections.Generic;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>

@@ -13,6 +13,8 @@ using EventSourceSink = Microsoft.Build.BackEnd.Logging.EventSourceSink;
 using Project = Microsoft.Build.Evaluation.Project;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class FileLogger_Tests

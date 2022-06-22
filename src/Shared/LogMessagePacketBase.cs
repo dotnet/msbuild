@@ -2,25 +2,25 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 
-#if !TASKHOST
-using Microsoft.Build.Evaluation;
+#if !TASKHOST && !MSBUILDENTRYPOINTEXE
+using Microsoft.Build.Collections;
 using Microsoft.Build.Framework.Profiler;
-using Microsoft.Build.Execution;
+using System.Collections;
+using System.Linq;
 #endif
 
 #if FEATURE_APPDOMAIN
 using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAssemblyResolver;
 #endif
+
+#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -130,6 +130,11 @@ namespace Microsoft.Build.Shared
         /// Event is a TelemetryEventArgs
         /// </summary>
         Telemetry = 18,
+
+        /// <summary>
+        /// Event is an EnvironmentVariableReadEventArgs
+        /// </summary>
+        EnvironmentVariableReadEvent = 19,
     }
     #endregion
 
@@ -141,21 +146,10 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal abstract class LogMessagePacketBase : INodePacket
     {
-#if FEATURE_DOTNETVERSION
         /// <summary>
         /// The packet version, which is based on the CLR version. Cached because querying Environment.Version each time becomes an allocation bottleneck.
         /// </summary>
         private static readonly int s_defaultPacketVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
-#else
-        private static readonly int s_defaultPacketVersion = GetDefaultPacketVersion();
-
-        private static int GetDefaultPacketVersion()
-        {
-            Assembly coreAssembly = typeof(object).GetTypeInfo().Assembly;
-            Version coreAssemblyVersion = coreAssembly.GetName().Version;
-            return 1000 + (coreAssemblyVersion.Major * 10) + coreAssemblyVersion.Minor;
-        }
-#endif
 
         /// <summary>
         /// Dictionary of methods used to read BuildEventArgs.
@@ -334,7 +328,8 @@ namespace Microsoft.Build.Shared
 
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
                 if (_buildEvent is ProjectEvaluationStartedEventArgs ||
-                    _buildEvent is ProjectEvaluationFinishedEventArgs)
+                    _buildEvent is ProjectEvaluationFinishedEventArgs ||
+                    _buildEvent is EnvironmentVariableReadEventArgs)
                 {
                     // switch to serialization methods that we provide in this file
                     // and don't use the WriteToStream inherited from LazyFormattedBuildEventArgs
@@ -414,6 +409,7 @@ namespace Microsoft.Build.Shared
                 else
                 {
                     _buildEvent = ReadEventFromStream(_eventType, translator);
+                    ErrorUtilities.VerifyThrow(_buildEvent is not null, "Not Supported LoggingEventType {0}", _eventType.ToString());
                 }
             }
             else
@@ -488,17 +484,13 @@ namespace Microsoft.Build.Shared
                     delegateMethod = methodInfo.CreateDelegate(type, firstArgument);
 #endif
                 }
-                catch (FileLoadException)
+                catch (FileLoadException) when (i < 5)
                 {
                     // Sometimes, in 64-bit processes, the fusion load of Microsoft.Build.Framework.dll
-                    // spontaneously fails when trying to bind to the delegate.  However, it seems to 
-                    // not repeat on additional tries -- so we'll try again a few times.  However, if 
-                    // it keeps happening, it's probably a real problem, so we want to go ahead and 
-                    // throw to let the user know what's up.  
-                    if (i == 5)
-                    {
-                        throw;
-                    }
+                    // spontaneously fails when trying to bind to the delegate.  However, it seems to
+                    // not repeat on additional tries -- so we'll try again a few times.  However, if
+                    // it keeps happening, it's probably a real problem, so we want to go ahead and
+                    // throw to let the user know what's up.
                 }
             }
 
@@ -524,6 +516,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.TaskStartedEvent => new TaskStartedEventArgs(null, null, null, null, null),
                 LoggingEventType.TaskFinishedEvent => new TaskFinishedEventArgs(null, null, null, null, null, false),
                 LoggingEventType.TaskCommandLineEvent => new TaskCommandLineEventArgs(null, null, MessageImportance.Normal),
+                LoggingEventType.EnvironmentVariableReadEvent => new EnvironmentVariableReadEventArgs(),
 #if !TASKHOST // MSBuildTaskHost is targeting Microsoft.Build.Framework.dll 3.5
                 LoggingEventType.TaskParameterEvent => new TaskParameterEventArgs(0, null, null, true, default),
                 LoggingEventType.ProjectEvaluationStartedEvent => new ProjectEvaluationStartedEventArgs(),
@@ -622,6 +615,10 @@ namespace Microsoft.Build.Shared
             {
                 return LoggingEventType.BuildErrorEvent;
             }
+            else if (eventType == typeof(EnvironmentVariableReadEventArgs))
+            {
+                return LoggingEventType.EnvironmentVariableReadEvent;
+            }
             else
             {
                 return LoggingEventType.CustomEvent;
@@ -676,10 +673,27 @@ namespace Microsoft.Build.Shared
                 case LoggingEventType.ProjectFinishedEvent:
                     WriteExternalProjectFinishedEventToStream((ExternalProjectFinishedEventArgs)buildEvent, translator);
                     break;
+                case LoggingEventType.EnvironmentVariableReadEvent:
+                    WriteEnvironmentVariableReadEventArgs((EnvironmentVariableReadEventArgs)buildEvent, translator);
+                    break;
                 default:
                     ErrorUtilities.ThrowInternalError("Not Supported LoggingEventType {0}", eventType.ToString());
                     break;
             }
+        }
+
+        /// <summary>
+        /// Serializes EnvironmentVariableRead Event argument to the stream. Does not work properly on TaskHosts due to BuildEventContext serialization not being
+        /// enabled on TaskHosts, but that shouldn't matter, as this should never be called from a TaskHost anyway.
+        /// </summary>
+        private void WriteEnvironmentVariableReadEventArgs(EnvironmentVariableReadEventArgs environmentVariableReadEventArgs, ITranslator translator)
+        {
+            string name = environmentVariableReadEventArgs.EnvironmentVariableName;
+            translator.Translate(ref name);
+            BuildEventContext context = environmentVariableReadEventArgs.BuildEventContext;
+#if !CLR2COMPATIBILITY
+            translator.Translate(ref context);
+#endif
         }
 
         /// <summary>
@@ -1016,33 +1030,33 @@ namespace Microsoft.Build.Shared
             translator.Translate(ref helpKeyword);
             translator.Translate(ref senderName);
 
-            BuildEventArgs buildEvent = null;
-            switch (eventType)
+            return eventType switch
             {
-                case LoggingEventType.TaskCommandLineEvent:
-                    buildEvent = ReadTaskCommandLineEventFromStream(translator, message, helpKeyword, senderName);
-                    break;
-                case LoggingEventType.BuildErrorEvent:
-                    buildEvent = ReadTaskBuildErrorEventFromStream(translator, message, helpKeyword, senderName);
-                    break;
-                case LoggingEventType.ProjectStartedEvent:
-                    buildEvent = ReadExternalProjectStartedEventFromStream(translator, message, helpKeyword, senderName);
-                    break;
-                case LoggingEventType.ProjectFinishedEvent:
-                    buildEvent = ReadExternalProjectFinishedEventFromStream(translator, message, helpKeyword, senderName);
-                    break;
-                case LoggingEventType.BuildMessageEvent:
-                    buildEvent = ReadBuildMessageEventFromStream(translator, message, helpKeyword, senderName);
-                    break;
-                case LoggingEventType.BuildWarningEvent:
-                    buildEvent = ReadBuildWarningEventFromStream(translator, message, helpKeyword, senderName);
-                    break;
-                default:
-                    ErrorUtilities.ThrowInternalError("Not Supported LoggingEventType {0}", eventType.ToString());
-                    break;
-            }
+                LoggingEventType.TaskCommandLineEvent => ReadTaskCommandLineEventFromStream(translator, message, helpKeyword, senderName),
+                LoggingEventType.BuildErrorEvent => ReadTaskBuildErrorEventFromStream(translator, message, helpKeyword, senderName),
+                LoggingEventType.ProjectStartedEvent => ReadExternalProjectStartedEventFromStream(translator, message, helpKeyword, senderName),
+                LoggingEventType.ProjectFinishedEvent => ReadExternalProjectFinishedEventFromStream(translator, message, helpKeyword, senderName),
+                LoggingEventType.BuildMessageEvent => ReadBuildMessageEventFromStream(translator, message, helpKeyword, senderName),
+                LoggingEventType.BuildWarningEvent => ReadBuildWarningEventFromStream(translator, message, helpKeyword, senderName),
+                LoggingEventType.EnvironmentVariableReadEvent => ReadEnvironmentVariableReadEventFromStream(translator, message, helpKeyword, senderName),
+                _ => null,
+            };
+        }
 
-            return buildEvent;
+        /// <summary>
+        /// Read and reconstruct an EnvironmentVariableReadEventArgs from the stream. This message should never be called from a TaskHost, so although the context translation does not work, that's ok.
+        /// </summary>
+        private EnvironmentVariableReadEventArgs ReadEnvironmentVariableReadEventFromStream(ITranslator translator, string message, string helpKeyword, string senderName)
+        {
+            string environmentVariableName = null;
+            translator.Translate(ref environmentVariableName);
+            BuildEventContext context = null;
+#if !CLR2COMPATIBILITY
+            translator.Translate(ref context);
+#endif
+            EnvironmentVariableReadEventArgs args = new(environmentVariableName, message);
+            args.BuildEventContext = context;
+            return args;
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -12,6 +12,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Graph
 {
@@ -36,11 +38,13 @@ namespace Microsoft.Build.Graph
         {
         }
 
-        private static readonly ImmutableList<GlobalPropertiesModifier> ModifierForNonMultitargetingNodes = new[] {(GlobalPropertiesModifier) ProjectReferenceGlobalPropertiesModifier}.ToImmutableList();
+        private static readonly ImmutableList<GlobalPropertiesModifier> ModifierForNonMultitargetingNodes = new[] { (GlobalPropertiesModifier)ProjectReferenceGlobalPropertiesModifier }.ToImmutableList();
 
         internal enum ProjectType
         {
-            OuterBuild, InnerBuild, NonMultitargeting
+            OuterBuild,
+            InnerBuild,
+            NonMultitargeting,
         }
 
         internal readonly struct ReferenceInfo
@@ -94,7 +98,16 @@ namespace Microsoft.Build.Graph
 
                 var referenceGlobalProperties = GetGlobalPropertiesForItem(projectReferenceItem, requesterInstance.GlobalPropertiesDictionary, globalPropertiesModifiers);
 
-                var referenceConfig = new ConfigurationMetadata(projectReferenceFullPath, referenceGlobalProperties);
+                var requesterPlatform = "";
+                var requesterPlatformLookupTable = "";
+
+                if (ConversionUtilities.ValidBooleanTrue(requesterInstance.GetPropertyValue("EnableDynamicPlatformResolution")))
+                {
+                    requesterPlatform = requesterInstance.GetPropertyValue("Platform");
+                    requesterPlatformLookupTable = requesterInstance.GetPropertyValue("PlatformLookupTable");
+                }
+
+                var referenceConfig = new ConfigurationMetadata(projectReferenceFullPath, referenceGlobalProperties, requesterPlatform, requesterPlatformLookupTable, projectReferenceItem.HasMetadata("SetPlatform"));
 
                 yield return new ReferenceInfo(referenceConfig, projectReferenceItem);
             }
@@ -192,7 +205,7 @@ namespace Microsoft.Build.Graph
                     project: outerBuild,
                     itemType: InnerBuildReferenceItemName,
                     includeEscaped: outerBuild.FullPath,
-                    directMetadata: new[] {new KeyValuePair<string, string>(ItemMetadataNames.PropertiesMetadataName, $"{globalPropertyName}={globalPropertyValue}")},
+                    directMetadata: new[] { new KeyValuePair<string, string>(ItemMetadataNames.PropertiesMetadataName, $"{globalPropertyName}={globalPropertyValue}") },
                     definingFileEscaped: outerBuild.FullPath);
             }
         }

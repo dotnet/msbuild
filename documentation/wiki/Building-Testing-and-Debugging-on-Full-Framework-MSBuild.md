@@ -4,7 +4,7 @@ These instructions refer to working with the `master` branch.
 
 ## Required Software
 
-**Latest Microsoft Visual Studio 2019**: You can download the Visual Studio Community edition from [https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx](https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx).
+**Latest Microsoft Visual Studio 2022**: You can download the Visual Studio Community edition from [https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx](https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx).
 
 All command lines should be executed from a Visual Studio developer command prompt.
 

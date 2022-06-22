@@ -16,6 +16,8 @@ using System.Xml.Serialization;
 using Microsoft.Build.Shared.FileSystem;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     /// <summary>
@@ -268,12 +270,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     {
                         identity = new AssemblyIdentity(r.Name, r.Version, r.PublicKeyToken, r.Culture, r.ProcessorArchitecture);
                     }
-                    catch (ArgumentException e)
+                    catch (ArgumentException e) when (e.HResult == unchecked((int)0x80070057))
                     {
-                        if (e.HResult != unchecked((int)0x80070057))
-                        {
-                            throw;
-                        }
                         // 0x80070057 - "Value does not fall within the expected range." is returned from 
                         // GetAssemblyIdentityFromFile for WinMD components
                     }

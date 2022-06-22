@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.InteropServices;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     /// <summary>

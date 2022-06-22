@@ -7,6 +7,8 @@ using System.Linq;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

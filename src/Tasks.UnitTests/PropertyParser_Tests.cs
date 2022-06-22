@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using Microsoft.Build.Tasks;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public sealed class PropertyParser_Tests

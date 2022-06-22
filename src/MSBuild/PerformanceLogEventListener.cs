@@ -9,6 +9,8 @@ using System.Text;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.CommandLine
 {
     internal sealed class PerformanceLogEventListener : EventListener

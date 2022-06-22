@@ -9,6 +9,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Win32;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

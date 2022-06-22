@@ -12,6 +12,8 @@ using Microsoft.Build.Shared;
 using Xunit;
 using Microsoft.Build.Tasks;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
 {
     public class FakeSDKStructure : IDisposable
@@ -66,11 +68,11 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
                         new[] { tempPath, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "3.0", "SDKManifest.xml" }),
                     "Hello");
 
-                //Bad because of v in the sdk version
+                // Bad because of v in the sdk version
                 Directory.CreateDirectory(
                     Path.Combine(new[] { tempPath, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "v1.1" }));
 
-                //Bad because no extensionSDKs directory under the platform version
+                // Bad because no extensionSDKs directory under the platform version
                 Directory.CreateDirectory(Path.Combine(tempPath, "Windows", "v3.0") + Path.DirectorySeparatorChar);
 
                 // Bad because the directory under the identifier is not a version

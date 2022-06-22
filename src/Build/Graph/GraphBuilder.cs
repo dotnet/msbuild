@@ -16,11 +16,17 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Graph
 {
     internal class GraphBuilder
     {
-        internal static readonly string SolutionItemReference = "_SolutionReference";
+        private const string PlatformLookupTableMetadataName = "PlatformLookupTable";
+        private const string PlatformMetadataName = "Platform";
+        private const string PlatformsMetadataName = "Platforms";
+        private const string EnableDynamicPlatformResolutionMetadataName = "EnableDynamicPlatformResolution";
+        internal const string SolutionItemReference = "_SolutionReference";
         
         /// <summary>
         /// The thread calling BuildGraph() will act as an implicit worker
@@ -45,6 +51,8 @@ namespace Microsoft.Build.Graph
 
         private readonly ProjectGraph.ProjectInstanceFactoryFunc _projectInstanceFactory;
         private IReadOnlyDictionary<string, IReadOnlyCollection<string>> _solutionDependencies;
+
+        private bool PlatformNegotiationEnabled = false;
 
         public GraphBuilder(
             IEnumerable<ProjectGraphEntryPoint> entryPoints,
@@ -124,7 +132,7 @@ namespace Microsoft.Build.Graph
 
         private void AddEdgesFromProjectReferenceItems(Dictionary<ConfigurationMetadata, ParsedProject> allParsedProjects, GraphEdges edges)
         {
-            var transitiveReferenceCache = new Dictionary<ProjectGraphNode, HashSet<ProjectGraphNode>>(allParsedProjects.Count);
+            Dictionary<ProjectGraphNode, HashSet<ProjectGraphNode>> transitiveReferenceCache = new(allParsedProjects.Count);
 
             foreach (var parsedProject in allParsedProjects)
             {
@@ -162,28 +170,30 @@ namespace Microsoft.Build.Graph
 
             HashSet<ProjectGraphNode> GetTransitiveProjectReferencesExcludingSelf(ParsedProject parsedProject)
             {
-                if (transitiveReferenceCache.TryGetValue(parsedProject.GraphNode, out HashSet<ProjectGraphNode> cachedTransitiveReferences))
+                if (transitiveReferenceCache.TryGetValue(parsedProject.GraphNode, out HashSet<ProjectGraphNode> transitiveReferences))
                 {
-                    return cachedTransitiveReferences;
-                }
-                else
-                {
-                    var transitiveReferences = new HashSet<ProjectGraphNode>();
-
-                    foreach (var referenceInfo in parsedProject.ReferenceInfos)
-                    {
-                        transitiveReferences.Add(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode);
-
-                        foreach (var transitiveReference in GetTransitiveProjectReferencesExcludingSelf(allParsedProjects[referenceInfo.ReferenceConfiguration]))
-                        {
-                            transitiveReferences.Add(transitiveReference);
-                        }
-                    }
-
-                    transitiveReferenceCache.Add(parsedProject.GraphNode, transitiveReferences);
-
                     return transitiveReferences;
                 }
+
+                transitiveReferences = new();
+
+                // Add the results to the cache early, even though it'll be incomplete until the loop below finishes. This helps handle cycles by not allowing them to recurse infinitely.
+                // Note that this makes transitive references incomplete in the case of a cycle, but direct dependencies are always added so a cycle will still be detected and an exception will still be thrown.
+                transitiveReferenceCache[parsedProject.GraphNode] = transitiveReferences;
+
+                foreach (ProjectInterpretation.ReferenceInfo referenceInfo in parsedProject.ReferenceInfos)
+                {
+                    ParsedProject reference = allParsedProjects[referenceInfo.ReferenceConfiguration];
+                    transitiveReferences.Add(reference.GraphNode);
+
+                    // Perf note: avoiding UnionWith to avoid boxing the HashSet enumerator.
+                    foreach (ProjectGraphNode transitiveReference in GetTransitiveProjectReferencesExcludingSelf(reference))
+                    {
+                        transitiveReferences.Add(transitiveReference);
+                    }
+                }
+
+                return transitiveReferences;
             }
         }
 
@@ -257,7 +267,7 @@ namespace Microsoft.Build.Graph
                 valueComparer: StringComparer.OrdinalIgnoreCase,
                 items: solutionEntryPoint.GlobalProperties ?? ImmutableDictionary<string, string>.Empty);
 
-            var solution = SolutionFile.Parse(FileUtilities.NormalizePath(solutionEntryPoint.ProjectFile));
+            var solution = SolutionFile.Parse(solutionEntryPoint.ProjectFile);
 
             if (solution.SolutionParserWarnings.Count != 0 || solution.SolutionParserErrorCodes.Count != 0)
             {
@@ -302,7 +312,7 @@ namespace Microsoft.Build.Graph
 
             IReadOnlyCollection<ProjectInSolution> GetBuildableProjects(SolutionFile solutionFile)
             {
-                return solutionFile.ProjectsInOrder.Where(p => p.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat).ToImmutableArray();
+                return solutionFile.ProjectsInOrder.Where(p => p.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat && solutionFile.ProjectShouldBuild(p.RelativePath)).ToImmutableArray();
             }
 
             SolutionConfigurationInSolution SelectSolutionConfiguration(SolutionFile solutionFile, ImmutableDictionary<string, string> globalProperties)
@@ -384,7 +394,7 @@ namespace Microsoft.Build.Graph
 
                     AddGraphBuildGlobalVariable(globalPropertyDictionary);
 
-                    var configurationMetadata = new ConfigurationMetadata(FileUtilities.NormalizePath(entryPoint.ProjectFile), globalPropertyDictionary);
+                    var configurationMetadata = new ConfigurationMetadata(entryPoint.ProjectFile, globalPropertyDictionary);
                     entryPointConfigurationMetadata.Add(configurationMetadata);
                 }
 
@@ -495,18 +505,44 @@ namespace Microsoft.Build.Graph
         {
             // TODO: ProjectInstance just converts the dictionary back to a PropertyDictionary, so find a way to directly provide it.
             var globalProperties = configurationMetadata.GlobalProperties.ToDictionary();
+            ProjectGraphNode graphNode;
+            ProjectInstance projectInstance;
+            var negotiatePlatform = PlatformNegotiationEnabled && !configurationMetadata.IsSetPlatformHardCoded;
 
-            var projectInstance = _projectInstanceFactory(
-                configurationMetadata.ProjectFullPath,
-                globalProperties,
-                _projectCollection);
+            projectInstance = _projectInstanceFactory(
+                                configurationMetadata.ProjectFullPath,
+                                negotiatePlatform ? null : globalProperties, // Platform negotiation requires an evaluation with no global properties first
+                                _projectCollection);
+
+            if (ConversionUtilities.ValidBooleanTrue(projectInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)))
+            {
+                PlatformNegotiationEnabled = true;
+            }
 
             if (projectInstance == null)
             {
                 throw new InvalidOperationException(ResourceUtilities.GetResourceString("NullReferenceFromProjectInstanceFactory"));
             }
 
-            var graphNode = new ProjectGraphNode(projectInstance);
+            if (negotiatePlatform)
+            {
+                var selectedPlatform = PlatformNegotiation.GetNearestPlatform(projectInstance.GetPropertyValue(PlatformMetadataName), projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), configurationMetadata.PreviousPlatformLookupTable, projectInstance.FullPath, configurationMetadata.PreviousPlatform);
+
+                if (selectedPlatform.Equals(String.Empty))
+                {
+                    globalProperties.Remove(PlatformMetadataName);
+                }
+                else
+                {
+                    globalProperties[PlatformMetadataName] = selectedPlatform;
+                }
+                projectInstance = _projectInstanceFactory(
+                                configurationMetadata.ProjectFullPath,
+                                globalProperties,
+                                _projectCollection);           
+            }
+
+            graphNode = new ProjectGraphNode(projectInstance);
 
             var referenceInfos = ParseReferences(graphNode);
 

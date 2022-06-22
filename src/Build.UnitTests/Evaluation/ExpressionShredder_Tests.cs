@@ -9,6 +9,8 @@ using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Evaluation
 {
     /// <summary>
@@ -441,7 +443,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             if (expected == null)
             {
                 // passing "null" means you expect an empty array back
-                expected = new string[] { };
+                expected = Array.Empty<string>();
             }
 
             Assert.Equal(actual, expected, StringComparer.Ordinal);

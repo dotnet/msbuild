@@ -92,9 +92,19 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="DuplicateOverrideUsingTaskElement">
+        <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
+        <target state="translated">MSB4275: Tentative de création de plusieurs remplacements de la même tâche : {0}</target>
+        <note>{StrBegin="MSB4275: "}</note>
+      </trans-unit>
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
         <target state="translated">MSB4257: Le fichier cache des résultats de sortie spécifié est vide.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentDerivedPropertyRead">
+        <source>Property '{0}' with value '{1}' expanded from the environment.</source>
+        <target state="new">Property '{0}' with value '{1}' expanded from the environment.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
@@ -219,20 +229,98 @@
         <target state="translated">MSB4265: un seul plug-in de cache de projet doit être spécifié, mais plusieurs plug-ins ont été trouvés : {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="OverrideUsingTaskElementCreated">
+        <source>Created an override using task: {0} at {1}</source>
+        <target state="translated">Remplacement créé à l’aide de la tâche : {0} au {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheBeginBuild">
+        <source>Initializing project cache plugin.</source>
+        <target state="translated">Initialisation du plug-in du cache de projet.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheEndBuild">
+        <source>Shutting down project cache plugin.</source>
+        <target state="translated">Arrêt du plug-in du cache de projet.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectCacheException">
         <source>MSB4273: The project cache threw an unhandled exception from the {0} method.</source>
         <target state="translated">MSB4273: le cache de projet a levé une exception non gérée à partir de la méthode {0}.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithDefaultTargets">
+        <source>Project cache hit for "{0}" (default targets).</source>
+        <target state="translated">Le cache de projet a été atteint pour « {0} » (cibles par défaut).</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithOutputs">
+        <source>{0} -&gt; Cache Hit</source>
+        <target state="translated">{0} -&gt; accès au cache</target>
+        <note>
+      {StrBegin="{0} -&gt; "}LOCALIZATION: This string is used to indicate progress and matches the format for a log message from Microsoft.Common.CurrentVersion.targets. {0} is a project name.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithTargetNames">
+        <source>Project cache hit for "{0}" ({1} target(s)).</source>
+        <target state="translated">Le cache de projet a été atteint pour « {0} » ({1} cible(s) ).</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
       </trans-unit>
       <trans-unit id="ProjectCacheInitializationFailed">
         <source>MSB4266: Failed to initialize the project cache.</source>
         <target state="translated">MSB4266: échec de l'initialisation du cache de projet.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheMissWithDefaultTargets">
+        <source>Project cache miss for "{0}" (default targets).</source>
+        <target state="translated">Absence du cache de projet pour « {0} » (cibles par défaut).</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheMissWithTargetNames">
+        <source>Project cache miss for "{0}" ({1} target(s)).</source>
+        <target state="translated">Absence du cache de projet pour « {0} » ({1} cible(s) ).</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheNotApplicableWithDefaultTargets">
+        <source>Project cache not applicable for "{0}" (default targets).</source>
+        <target state="translated">Cache de projet non applicable pour « {0} » (cibles par défaut).</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheNotApplicableWithTargetNames">
+        <source>Project cache not applicable for "{0}" ({1} target(s)).</source>
+        <target state="translated">Cache de projet non applicable pour « {0} » (cible(s){1} ).</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectCacheQueryFailed">
         <source>MSB4267: The project cache failed while being queried for the following project: {0}. The cache is queried in parallel for multiple projects so this specific project might not be the cause.</source>
         <target state="translated">MSB4267: échec du cache de projet au moment où il a été interrogé pour le projet suivant : {0}. Dans la mesure où le cache est interrogé en parallèle pour plusieurs projets, ce projet spécifique n'est peut-être pas à l'origine du problème.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheQueryStartedWithDefaultTargets">
+        <source>Querying project cache for "{0}" (default targets):</source>
+        <target state="translated">Interrogation du cache de projet pour « {0} » (cibles par défaut) :</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheQueryStartedWithTargetNames">
+        <source>Querying project cache for "{0}" (targets: {1}):</source>
+        <target state="translated">Interrogation du cache de projet pour « {0} » (cibles : {1}) :</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
       </trans-unit>
       <trans-unit id="ProjectCacheShutdownFailed">
         <source>MSB4268: The project cache failed to shut down properly.</source>
@@ -345,6 +433,13 @@
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
     </note>
+      </trans-unit>
+      <trans-unit id="UnhandledMSBuildError">
+        <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled.
+    {0}</source>
+        <target state="translated">Il s’agit d’une exception non gérée dans MSBuild -- VOTEZ POUR UN PROBLÈME EXISTANT OU ENTREZ UN NOUVEAU FICHIER À https://aka.ms/msbuild/unhandled.
+    {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="UninitializedPropertyRead">
         <source>Read uninitialized property "{0}"</source>
@@ -2079,8 +2174,8 @@ Utilisation :          {0} Utilisation moyenne : {1:###.0}</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MustSetRecordDuplicateInputs">
-        <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateImports flag.</source>
-        <target state="translated">Le projet n'a pas été chargé avec l'indicateur ProjectLoadSettings.RecordDuplicateImports.</target>
+        <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</source>
+        <target state="translated">Le projet n'a pas été chargé avec l'indicateur ProjectLoadSettings.RecordDuplicateButNotCircularImports.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_CannotSaveFileLoadedAsReadOnly">

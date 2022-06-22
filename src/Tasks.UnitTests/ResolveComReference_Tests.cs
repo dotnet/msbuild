@@ -18,6 +18,8 @@ using System.IO;
 using Microsoft.Build.BackEnd;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class ResolveComReference_Tests
@@ -753,7 +755,12 @@ namespace Microsoft.Build.UnitTests
             CheckAxReferenceRCWTlbExists(RcwStyle.PreexistingPia /* pass in the PIA reference */, true /* include version in the interop name */);
         }
 
-        private enum RcwStyle { GenerateTlb, PreexistingTlb, PreexistingPia };
+        private enum RcwStyle
+        {
+            GenerateTlb,
+            PreexistingTlb,
+            PreexistingPia,
+        }
 
         /// <summary>
         /// Helper method that will new up an AX and matching TLB reference, and verify that the AX reference
@@ -813,7 +820,7 @@ namespace Microsoft.Build.UnitTests
                         includeVersionInInteropName,
                         tlbRefInfo.attr.wMajorVerNum,
                         tlbRefInfo.attr.wMinorVerNum
-                        )); //                     "Expected Ax reference's RCW name to match the new TLB"
+                        )); // "Expected Ax reference's RCW name to match the new TLB"
         }
     }
 }

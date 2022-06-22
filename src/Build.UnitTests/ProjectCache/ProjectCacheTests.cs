@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#nullable enable
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -35,7 +34,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             _env = TestEnvironment.Create(output);
 
             BuildManager.ProjectCacheItems.ShouldBeEmpty();
-            _env.WithInvariant(new CustomConditionInvariant(() => BuildManager.ProjectCacheItems.Count == 0));
+            _env.WithInvariant(new CustomConditionInvariant(() => BuildManager.ProjectCacheItems.IsEmpty));
         }
 
         public void Dispose()
@@ -43,7 +42,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             _env.Dispose();
         }
 
-        private static readonly string AssemblyMockCache = nameof(AssemblyMockCache);
+        private const string AssemblyMockCache = nameof(AssemblyMockCache);
 
         private static readonly Lazy<string> SamplePluginAssemblyPath =
             new Lazy<string>(
@@ -160,7 +159,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             public override string ToString()
             {
-                //return base.ToString();
+                // return base.ToString();
                 return string.Join(
                     ", ",
                     GraphEdges.Select(e => $"{Node(e.Key)}->{FormatChildren(e.Value)}"));
@@ -306,7 +305,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
                 if (_projectQuerySleepTime is not null)
                 {
-                    await Task.Delay(_projectQuerySleepTime.Value);
+                    await Task.Delay(_projectQuerySleepTime.Value, cancellationToken);
                 }
 
                 QueryStartStops.Enqueue(queryId);
@@ -481,7 +480,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             buildSession.Logger.FullLog.ShouldContain("Static graph based");
 
-            AssertCacheBuild(graph, testData, mockCache, buildSession.Logger, graphResult.ResultsByNode);
+            AssertCacheBuild(graph, testData, mockCache, buildSession.Logger, graphResult.ResultsByNode, targets: "Build");
         }
 
         [Theory]
@@ -519,7 +518,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             buildSession.Logger.FullLog.ShouldContain("Static graph based");
 
-            AssertCacheBuild(graph, testData, mockCache, buildSession.Logger, nodesToBuildResults);
+            AssertCacheBuild(graph, testData, mockCache, buildSession.Logger, nodesToBuildResults, targets: null);
         }
 
         [Theory]
@@ -538,7 +537,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             graph.ShouldNotBeNull();
 
-            AssertCacheBuild(graph!, testData, null, logger, nodesToBuildResults);
+            AssertCacheBuild(graph!, testData, null, logger, nodesToBuildResults, targets: null);
         }
 
         [Fact]
@@ -660,7 +659,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 if (assertBuildResults)
                 {
                     logger.FullLog.ShouldContain("Visual Studio Workaround based");
-                    logger.FullLog.ShouldContain("Running project cache with Visual Studio workaround");
 
                     foreach (var node in graph.ProjectNodes)
                     {
@@ -837,7 +835,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             buildSession.Logger.FullLog.ShouldContain("Static graph based");
 
             buildSession.Logger.AssertMessageCount("MSB4274", 1);
-
         }
 
         private void AssertCacheBuild(
@@ -845,7 +842,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             GraphCacheResponse testData,
             InstanceMockCache? instanceMockCache,
             MockLogger mockLogger,
-            IReadOnlyDictionary<ProjectGraphNode, BuildResult> projectPathToBuildResults)
+            IReadOnlyDictionary<ProjectGraphNode, BuildResult> projectPathToBuildResults,
+            string? targets)
         {
             if (instanceMockCache != null)
             {
@@ -868,7 +866,14 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             {
                 var expectedCacheResponse = testData.GetExpectedCacheResultForNode(node);
 
-                mockLogger.FullLog.ShouldContain($"====== Querying project cache for project {node.ProjectInstance.FullPath}");
+                if (string.IsNullOrEmpty(targets))
+                {
+                    mockLogger.FullLog.ShouldContain(string.Format(ResourceUtilities.GetResourceString("ProjectCacheQueryStartedWithDefaultTargets"), node.ProjectInstance.FullPath));
+                }
+                else
+                {
+                    mockLogger.FullLog.ShouldContain(string.Format(ResourceUtilities.GetResourceString("ProjectCacheQueryStartedWithTargetNames"), node.ProjectInstance.FullPath, targets));
+                }
 
                 if (instanceMockCache != null)
                 {
@@ -1011,7 +1016,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             buildSession.Logger.FullLog.ShouldContain("Explicit entry-point based");
 
-            AssertCacheBuild(graph, testData, null, buildSession.Logger, graphResult.ResultsByNode);
+            AssertCacheBuild(graph, testData, null, buildSession.Logger, graphResult.ResultsByNode, targets: "Build");
         }
 
         [Fact]
@@ -1034,7 +1039,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             buildSession.Logger.FullLog.ShouldContain("Static graph based");
 
-            AssertCacheBuild(graph, testData, null, buildSession.Logger, graphResult.ResultsByNode);
+            AssertCacheBuild(graph, testData, null, buildSession.Logger, graphResult.ResultsByNode, targets: "Build");
         }
 
         [Fact]
@@ -1296,8 +1301,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 {
                     {1, new []{2}}
                 },
-                extraContentPerProjectNumber:null,
-                extraContentForAllNodes:@$"
+                extraContentPerProjectNumber: null,
+                extraContentForAllNodes: @$"
 <ItemGroup>
     <{ItemTypeNames.ProjectCachePlugin} Include=`{SamplePluginAssemblyPath.Value}` />
     <{ItemTypeNames.ProjectReferenceTargets} Include=`Build` Targets=`Build` />
@@ -1497,7 +1502,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         [Theory]
         [InlineData(false, false)]
         // TODO: Reenable when this gets into the main branch.
-        //[InlineData(true, true)]
+        // [InlineData(true, true)]
         public void ParallelStressTestForVsWorkaround(bool useSynchronousLogging, bool disableInprocNode)
         {
             var currentBuildEnvironment = BuildEnvironmentHelper.Instance;
@@ -1569,7 +1574,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 StringShouldContainSubstring(buildSession.Logger.FullLog, $"{AssemblyMockCache}: GetCacheResultAsync for", graph.ProjectNodes.Count);
 
                 buildSession.Logger.FullLog.ShouldContain("Visual Studio Workaround based");
-                buildSession.Logger.FullLog.ShouldContain("Running project cache with Visual Studio workaround");
             }
             finally
             {

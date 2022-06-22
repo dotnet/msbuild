@@ -9,6 +9,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests.TestComparers
 {
     internal class TaskRegistryComparers

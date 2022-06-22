@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.IO;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.UnitTests
 {
     public class RARPrecomputedCache_Tests

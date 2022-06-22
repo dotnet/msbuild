@@ -4,6 +4,8 @@
 using System.Xml;
 using System.Collections.Generic;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

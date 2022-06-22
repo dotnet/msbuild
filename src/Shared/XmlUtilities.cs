@@ -5,6 +5,8 @@ using System;
 using System.Xml;
 using Microsoft.Build.Construction;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

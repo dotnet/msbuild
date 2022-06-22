@@ -13,6 +13,8 @@ using Microsoft.Build.Shared.FileSystem;
 // NOTE: This is nearly identical to the MSBuild task in Microsoft.Build.Tasks.  We are deprecating that task,
 // so this is the governing implementation.
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <remarks>

@@ -8,6 +8,8 @@ using Microsoft.Build.Framework;
 
 // This CallTarget intrinsic task replaces the one on Microsoft.Build.Tasks, which is now deprecated.
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <remarks>

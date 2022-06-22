@@ -528,6 +528,9 @@ Microsoft.Build.Construction.ProjectUsingTaskElement.AssemblyFileLocation.get ->
 Microsoft.Build.Construction.ProjectUsingTaskElement.AssemblyName.get -> string
 Microsoft.Build.Construction.ProjectUsingTaskElement.AssemblyName.set -> void
 Microsoft.Build.Construction.ProjectUsingTaskElement.AssemblyNameLocation.get -> Microsoft.Build.Construction.ElementLocation
+Microsoft.Build.Construction.ProjectUsingTaskElement.Override.get -> string
+Microsoft.Build.Construction.ProjectUsingTaskElement.Override.set -> void
+Microsoft.Build.Construction.ProjectUsingTaskElement.OverrideLocation.get -> Microsoft.Build.Construction.ElementLocation
 Microsoft.Build.Construction.ProjectUsingTaskElement.ParameterGroup.get -> Microsoft.Build.Construction.UsingTaskParameterGroupElement
 Microsoft.Build.Construction.ProjectUsingTaskElement.Runtime.get -> string
 Microsoft.Build.Construction.ProjectUsingTaskElement.Runtime.set -> void
@@ -578,6 +581,8 @@ Microsoft.Build.Construction.UsingTaskParameterGroupElement.AddParameter(string 
 Microsoft.Build.Construction.UsingTaskParameterGroupElement.AddParameter(string name, string output, string required, string parameterType) -> Microsoft.Build.Construction.ProjectUsingTaskParameterElement
 Microsoft.Build.Construction.UsingTaskParameterGroupElement.Parameters.get -> System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectUsingTaskParameterElement>
 Microsoft.Build.Definition.ProjectOptions
+Microsoft.Build.Definition.ProjectOptions.DirectoryCacheFactory.get -> Microsoft.Build.FileSystem.IDirectoryCacheFactory
+Microsoft.Build.Definition.ProjectOptions.DirectoryCacheFactory.set -> void
 Microsoft.Build.Definition.ProjectOptions.EvaluationContext.get -> Microsoft.Build.Evaluation.Context.EvaluationContext
 Microsoft.Build.Definition.ProjectOptions.EvaluationContext.set -> void
 Microsoft.Build.Definition.ProjectOptions.GlobalProperties.get -> System.Collections.Generic.IDictionary<string, string>
@@ -959,6 +964,8 @@ Microsoft.Build.Execution.BuildParameters.AllowFailureWithoutError.set -> void
 Microsoft.Build.Execution.BuildParameters.BuildParameters() -> void
 Microsoft.Build.Execution.BuildParameters.BuildParameters(Microsoft.Build.Evaluation.ProjectCollection projectCollection) -> void
 Microsoft.Build.Execution.BuildParameters.BuildProcessEnvironment.get -> System.Collections.Generic.IDictionary<string, string>
+Microsoft.Build.Execution.BuildParameters.BuildThreadPriority.get -> System.Threading.ThreadPriority
+Microsoft.Build.Execution.BuildParameters.BuildThreadPriority.set -> void
 Microsoft.Build.Execution.BuildParameters.Clone() -> Microsoft.Build.Execution.BuildParameters
 Microsoft.Build.Execution.BuildParameters.Culture.get -> System.Globalization.CultureInfo
 Microsoft.Build.Execution.BuildParameters.Culture.set -> void
@@ -1027,6 +1034,8 @@ Microsoft.Build.Execution.BuildParameters.WarningsAsErrors.get -> System.Collect
 Microsoft.Build.Execution.BuildParameters.WarningsAsErrors.set -> void
 Microsoft.Build.Execution.BuildParameters.WarningsAsMessages.get -> System.Collections.Generic.ISet<string>
 Microsoft.Build.Execution.BuildParameters.WarningsAsMessages.set -> void
+Microsoft.Build.Execution.BuildParameters.WarningsNotAsErrors.get -> System.Collections.Generic.ISet<string>
+Microsoft.Build.Execution.BuildParameters.WarningsNotAsErrors.set -> void
 Microsoft.Build.Execution.BuildRequestData
 Microsoft.Build.Execution.BuildRequestData.BuildRequestData(Microsoft.Build.Execution.ProjectInstance projectInstance, string[] targetsToBuild) -> void
 Microsoft.Build.Execution.BuildRequestData.BuildRequestData(Microsoft.Build.Execution.ProjectInstance projectInstance, string[] targetsToBuild, Microsoft.Build.Execution.HostServices hostServices) -> void
@@ -1317,6 +1326,7 @@ Microsoft.Build.Experimental.ProjectCache.CacheResultType.CacheMiss = 2 -> Micro
 Microsoft.Build.Experimental.ProjectCache.CacheResultType.CacheNotApplicable = 3 -> Microsoft.Build.Experimental.ProjectCache.CacheResultType
 Microsoft.Build.Experimental.ProjectCache.CacheResultType.None = 0 -> Microsoft.Build.Experimental.ProjectCache.CacheResultType
 Microsoft.Build.Experimental.ProjectCache.PluginLoggerBase
+Microsoft.Build.Experimental.ProjectCache.PluginLoggerBase.PluginLoggerBase() -> void
 Microsoft.Build.Experimental.ProjectCache.PluginTargetResult
 Microsoft.Build.Experimental.ProjectCache.PluginTargetResult.PluginTargetResult() -> void
 Microsoft.Build.Experimental.ProjectCache.PluginTargetResult.PluginTargetResult(string targetName, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Framework.ITaskItem2> taskItems, Microsoft.Build.Execution.BuildResultCode resultCode) -> void
@@ -1338,6 +1348,15 @@ Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase.ProjectCachePlu
 Microsoft.Build.Experimental.ProjectCache.ProxyTargets
 Microsoft.Build.Experimental.ProjectCache.ProxyTargets.ProxyTargets(System.Collections.Generic.IReadOnlyDictionary<string, string> proxyTargetToRealTargetMap) -> void
 Microsoft.Build.Experimental.ProjectCache.ProxyTargets.ProxyTargetToRealTargetMap.get -> System.Collections.Generic.IReadOnlyDictionary<string, string>
+Microsoft.Build.FileSystem.FindPredicate
+Microsoft.Build.FileSystem.FindTransform<TResult>
+Microsoft.Build.FileSystem.IDirectoryCache
+Microsoft.Build.FileSystem.IDirectoryCache.DirectoryExists(string path) -> bool
+Microsoft.Build.FileSystem.IDirectoryCache.EnumerateDirectories<TResult>(string path, string pattern, Microsoft.Build.FileSystem.FindPredicate predicate, Microsoft.Build.FileSystem.FindTransform<TResult> transform) -> System.Collections.Generic.IEnumerable<TResult>
+Microsoft.Build.FileSystem.IDirectoryCache.EnumerateFiles<TResult>(string path, string pattern, Microsoft.Build.FileSystem.FindPredicate predicate, Microsoft.Build.FileSystem.FindTransform<TResult> transform) -> System.Collections.Generic.IEnumerable<TResult>
+Microsoft.Build.FileSystem.IDirectoryCache.FileExists(string path) -> bool
+Microsoft.Build.FileSystem.IDirectoryCacheFactory
+Microsoft.Build.FileSystem.IDirectoryCacheFactory.GetDirectoryCacheForEvaluation(int evaluationId) -> Microsoft.Build.FileSystem.IDirectoryCache
 Microsoft.Build.FileSystem.MSBuildFileSystemBase
 Microsoft.Build.FileSystem.MSBuildFileSystemBase.MSBuildFileSystemBase() -> void
 Microsoft.Build.Globbing.CompositeGlob
@@ -1768,6 +1787,7 @@ static Microsoft.Build.Experimental.ProjectCache.CacheResult.IndicateCacheHit(Sy
 static Microsoft.Build.Experimental.ProjectCache.CacheResult.IndicateNonCacheHit(Microsoft.Build.Experimental.ProjectCache.CacheResultType resultType) -> Microsoft.Build.Experimental.ProjectCache.CacheResult
 static Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor.FromAssemblyPath(string pluginAssemblyPath, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> entryPoints, Microsoft.Build.Graph.ProjectGraph projectGraph, System.Collections.Generic.IReadOnlyDictionary<string, string> pluginSettings = null) -> Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor
 static Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor.FromInstance(Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase pluginInstance, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> entryPoints, Microsoft.Build.Graph.ProjectGraph projectGraph, System.Collections.Generic.IReadOnlyDictionary<string, string> pluginSettings = null) -> Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor
+static Microsoft.Build.Globbing.CompositeGlob.Create(System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.IMSBuildGlob> globs) -> Microsoft.Build.Globbing.IMSBuildGlob
 static Microsoft.Build.Globbing.Extensions.MSBuildGlobExtensions.GetParsedGlobs(this Microsoft.Build.Globbing.IMSBuildGlob glob) -> System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.MSBuildGlob>
 static Microsoft.Build.Globbing.MSBuildGlob.Parse(string fileSpec) -> Microsoft.Build.Globbing.MSBuildGlob
 static Microsoft.Build.Globbing.MSBuildGlob.Parse(string globRoot, string fileSpec) -> Microsoft.Build.Globbing.MSBuildGlob

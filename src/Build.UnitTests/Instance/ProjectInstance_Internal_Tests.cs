@@ -19,6 +19,8 @@ using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.Build.Engine.UnitTests.TestComparers.ProjectInstanceModelTestComparers;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
     /// <summary>
@@ -42,7 +44,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             try
             {
                 string projectFileContent = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <UsingTask TaskName='t0' AssemblyFile='af0'/>
                         <UsingTask TaskName='t1' AssemblyFile='af1a'/>
                         <ItemGroup>
@@ -52,7 +54,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                     </Project>";
 
                 string importContent = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <UsingTask TaskName='t1' AssemblyName='an1' Condition=""'$(p)'=='v'""/>
                         <UsingTask TaskName='t2' AssemblyName='an2' Condition=""'@(i)'=='i0'""/>
                         <UsingTask TaskName='t3' AssemblyFile='af' Condition='false'/>
@@ -89,19 +91,19 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             try
             {
                 string projectFileContent = @"
-                    <Project DefaultTargets='d0a;d0b' InitialTargets='i0a;i0b' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project DefaultTargets='d0a;d0b' InitialTargets='i0a;i0b'>
                         <Import Project='{0}'/>
                         <Import Project='{1}'/>
                     </Project>";
 
                 string import1Content = @"
-                    <Project DefaultTargets='d1a;d1b' InitialTargets='i1a;i1b' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project DefaultTargets='d1a;d1b' InitialTargets='i1a;i1b'>
                         <Import Project='{0}'/>
                     </Project>";
 
-                string import2Content = @"<Project DefaultTargets='d2a;2db' InitialTargets='i2a;i2b' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'/>";
+                string import2Content = @"<Project DefaultTargets='d2a;2db' InitialTargets='i2a;i2b'/>";
 
-                string import3Content = @"<Project DefaultTargets='d3a;d3b' InitialTargets='i3a;i3b' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'/>";
+                string import3Content = @"<Project DefaultTargets='d3a;d3b' InitialTargets='i3a;i3b'/>";
 
                 string import2Path = ObjectModelHelpers.CreateFileInTempProjectDirectory("import2.targets", import2Content);
                 string import3Path = ObjectModelHelpers.CreateFileInTempProjectDirectory("import3.targets", import3Content);
@@ -133,7 +135,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             try
             {
                 string projectFileContent = @"
-                    <Project DefaultTargets='d0a%3bd0b' InitialTargets='i0a%3bi0b' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project DefaultTargets='d0a%3bd0b' InitialTargets='i0a%3bi0b'>
                     </Project>";
 
                 ProjectInstance project = new Project(ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)))).CreateProjectInstance();
@@ -154,7 +156,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         public void GetPropertyGroupUnderTarget()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <Target Name='t'>
                             <PropertyGroup Condition='c1'>
                                 <p1 Condition='c2'>v1</p1>
@@ -186,12 +188,12 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         public void GetItemGroupUnderTarget()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup Condition='c1'>
                                 <i Include='i1' Exclude='e1' Condition='c2'>
-                                    <m Condition='c3'>m1</m>    
-                                    <n>n1</n>                        
+                                    <m Condition='c3'>m1</m>
+                                    <n>n1</n>
                                 </i>
                                 <j Remove='r1'/>
                                 <k>
@@ -335,8 +337,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
-        /// Test ProjectInstance's surfacing of the sub-toolset version when it is overridden by a value in the 
-        /// environment 
+        /// Test ProjectInstance's surfacing of the sub-toolset version when it is overridden by a value in the
+        /// environment
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -388,8 +390,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
-        /// Verify that if a sub-toolset version is passed to the constructor, it all other heuristic methods for 
-        /// getting the sub-toolset version. 
+        /// Verify that if a sub-toolset version is passed to the constructor, it all other heuristic methods for
+        /// getting the sub-toolset version.
         /// </summary>
         [Fact]
         public void GetSubToolsetVersion_FromConstructor()
@@ -400,7 +402,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 Environment.SetEnvironmentVariable("VisualStudioVersion", "ABC");
 
-                string projectContent = @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                string projectContent = @"<Project>
                         <Target Name='t'>
                             <Message Text='Hello'/>
                         </Target>
@@ -530,7 +532,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             Assert.Equal(first.Toolset, second.Toolset);
         }
-        
+
         /// <summary>
         /// Cloning project copies toolsversion
         /// </summary>
@@ -557,7 +559,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Directory.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
 
             string projectFileContent = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <UsingTask TaskName='Microsoft.Build.Tasks.Message' AssemblyFile='Microsoft.Build.Tasks.Core.dll'/>
                         <ItemGroup>
                             <i Include='i0'/>
@@ -681,7 +683,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             original.TranslateEntireState = true;
 
-            ((ITranslatable) original).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable)original).Translate(TranslationHelpers.GetWriteTranslator());
             var copy = ProjectInstance.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             Assert.Equal(original, copy, new ProjectInstanceComparer());
@@ -890,7 +892,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             if (globalProperties == null)
             {
-                // choose some interesting defaults if we weren't explicitly asked to use a set. 
+                // choose some interesting defaults if we weren't explicitly asked to use a set.
                 globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 globalProperties.Add("g1", "v1");
                 globalProperties.Add("g2", "v2");
@@ -926,7 +928,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             string toolsVersionSubstring = toolsVersion != null ? "ToolsVersion=\"" + toolsVersion + "\" " : String.Empty;
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' InitialTargets='it' DefaultTargets='dt' " + toolsVersionSubstring + @">
+                    <Project InitialTargets='it' DefaultTargets='dt' " + toolsVersionSubstring + @">
                         <PropertyGroup>
                             <p1>v1</p1>
                             <p2>v2</p2>

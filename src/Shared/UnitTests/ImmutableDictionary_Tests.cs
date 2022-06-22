@@ -4,7 +4,7 @@
 // We don't automatically run these tests against the BCL implementation of ImmutableDictionary as it would require dual-compiling
 // this file. When making changes to this test, though, it is recommended to run them manually by uncommenting the following line.
 // This helps ensure that the real thing has the same behavior that we expect in our implementation.
-//#define _TEST_BCL_IMMUTABLE_DICTIONARY
+// #define _TEST_BCL_IMMUTABLE_DICTIONARY
 
 extern alias MSBuildTaskHost;
 
@@ -20,6 +20,8 @@ using ImmutableDictionary = System.Collections.Immutable.ImmutableDictionary<str
 #else
 using ImmutableDictionary = MSBuildTaskHost::System.Collections.Immutable.ImmutableDictionary<string, string>;
 #endif
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {

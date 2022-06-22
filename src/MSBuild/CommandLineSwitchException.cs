@@ -9,6 +9,8 @@ using System.Security.Permissions;
 
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.CommandLine
 {
     /// <summary>
@@ -54,7 +56,6 @@ namespace Microsoft.Build.CommandLine
             StreamingContext context
         ) :
             base(info, context)
-
         {
             ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
 

@@ -6,6 +6,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class ErrorWarningMessage_Tests
@@ -354,6 +356,3 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
-
-
-

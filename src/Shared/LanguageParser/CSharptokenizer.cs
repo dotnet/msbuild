@@ -4,6 +4,8 @@
 using System.IO;
 using System.Collections;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared.LanguageParser
 {
     /*

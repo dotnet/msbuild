@@ -4,6 +4,8 @@ using System.Runtime.Serialization;
 using System.Xml;
 
 
+#nullable disable
+
 namespace Microsoft.Build.Shared.AssemblyFoldersFromConfig
 {
     [DataContract(Name = "AssemblyFoldersConfig", Namespace = "")]

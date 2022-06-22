@@ -6,6 +6,8 @@ using System.IO;
 using System.Runtime.Serialization;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -283,7 +285,7 @@ namespace Microsoft.Build.Framework
             base.CreateFromStream(reader, version);
             importance = (MessageImportance)reader.ReadInt32();
 
-            //The data in the stream beyond this point are new to 4.0
+            // The data in the stream beyond this point are new to 4.0
             if (version > 20)
             {
                 subcategory = reader.ReadByte() == 0 ? null : reader.ReadString();

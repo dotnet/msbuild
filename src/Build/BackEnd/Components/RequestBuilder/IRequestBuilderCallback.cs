@@ -5,6 +5,8 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Collections;
 using System.Threading.Tasks;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

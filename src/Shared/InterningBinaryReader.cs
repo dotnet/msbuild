@@ -15,6 +15,8 @@ using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 
 using Microsoft.NET.StringTools;
 
+#nullable disable
+
 namespace Microsoft.Build
 {
     /// <summary>

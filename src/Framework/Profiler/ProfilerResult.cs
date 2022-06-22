@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework.Profiler
 {
     /// <summary>
@@ -26,12 +28,10 @@ namespace Microsoft.Build.Framework.Profiler
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (!(obj is ProfilerResult))
+            if (!(obj is ProfilerResult result))
             {
                 return false;
             }
-
-            var result = (ProfilerResult)obj;
 
             return (ProfiledLocations == result.ProfiledLocations) ||
                    (ProfiledLocations.Count == result.ProfiledLocations.Count &&
@@ -71,13 +71,8 @@ namespace Microsoft.Build.Framework.Profiler
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (!(obj is ProfiledLocation))
-            {
-                return false;
-            }
-
-            var location = (ProfiledLocation)obj;
-            return InclusiveTime.Equals(location.InclusiveTime) &&
+            return obj is ProfiledLocation location &&
+                   InclusiveTime.Equals(location.InclusiveTime) &&
                    ExclusiveTime.Equals(location.ExclusiveTime) &&
                    NumberOfHits == location.NumberOfHits;
         }

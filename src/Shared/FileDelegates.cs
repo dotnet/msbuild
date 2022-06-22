@@ -3,6 +3,8 @@
 
 using System.IO;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

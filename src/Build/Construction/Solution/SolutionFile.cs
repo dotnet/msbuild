@@ -22,6 +22,8 @@ using System.Collections.ObjectModel;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <remarks>
@@ -497,10 +499,9 @@ namespace Microsoft.Build.Construction
                 SolutionReader = new StreamReader(fileStream, Encoding.GetEncoding(0)); // HIGHCHAR: If solution files have no byte-order marks, then assume ANSI rather than ASCII.
                 ParseSolution();
             }
-            catch (Exception e)
+            catch (Exception e) when (ExceptionUtilities.IsIoRelatedException(e))
             {
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(!ExceptionUtilities.IsIoRelatedException(e), new BuildEventFileInfo(_solutionFile), "InvalidProjectFile", e.Message);
-                throw;
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(_solutionFile), "InvalidProjectFile", e.Message);
             }
             finally
             {
@@ -1228,9 +1229,9 @@ namespace Microsoft.Build.Construction
                 }
                 else if (String.Equals(propertyName, "TargetFrameworkMoniker", StringComparison.OrdinalIgnoreCase))
                 {
-                    //Website project need to back support 3.5 msbuild parser for the Blend (it is not move to .Net4.0 yet.)
-                    //However, 3.5 version of Solution parser can't handle a equal sign in the value.  
-                    //The "=" in targetframeworkMoniker was escaped to "%3D" for Orcas
+                    // Website project need to back support 3.5 msbuild parser for the Blend (it is not move to .Net4.0 yet.)
+                    // However, 3.5 version of Solution parser can't handle a equal sign in the value.  
+                    // The "=" in targetframeworkMoniker was escaped to "%3D" for Orcas
                     string targetFrameworkMoniker = TrimQuotes(propertyValue);
                     proj.TargetFrameworkMoniker = Shared.EscapingUtilities.UnescapeAll(targetFrameworkMoniker);
                 }
@@ -1420,7 +1421,7 @@ namespace Microsoft.Build.Construction
 
                 string fullConfigurationName = configurationNames[0].Trim();
 
-                //Fixing bug 555577: Solution file can have description information, in which case we ignore.
+                // Fixing bug 555577: Solution file can have description information, in which case we ignore.
                 if (String.Equals(fullConfigurationName, "DESCRIPTION", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;

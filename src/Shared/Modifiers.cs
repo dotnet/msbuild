@@ -7,6 +7,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Collections.Generic;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

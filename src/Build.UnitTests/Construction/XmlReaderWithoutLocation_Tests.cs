@@ -6,6 +6,8 @@ using System.Xml;
 using System.IO;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Construction
 {
     public class XmlReaderWithoutLocation_Tests
@@ -155,7 +157,7 @@ namespace Microsoft.Build.UnitTests.Construction
         {
             XmlReader reader = XmlReader.Create(new StringReader
                 (
-                @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                @"<Project>
                       <Target Name='foo'/>
                   </Project>"
                 ));

@@ -7,6 +7,8 @@ using Microsoft.Build.Tasks;
 using System.Collections.Generic;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class FindInvalidProjectReferences_Tests

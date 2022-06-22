@@ -3,6 +3,8 @@
 
 using System;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary> 
@@ -88,4 +90,3 @@ namespace Microsoft.Build.Framework
         }
     }
 }
-

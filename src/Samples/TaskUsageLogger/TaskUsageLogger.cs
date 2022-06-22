@@ -15,6 +15,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace TaskUsageLogger
 {
     /// <summary>

@@ -5,6 +5,8 @@ using System;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

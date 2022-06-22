@@ -1,14 +1,15 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-#if FEATURE_WIN32_REGISTRY
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.Build.Tasks;
+using System.Runtime.Versioning;
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using ProcessorArchitecture = System.Reflection.ProcessorArchitecture;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -39,6 +40,7 @@ namespace Microsoft.Build.Shared
     ///     {AssemblyFoldersSuffix} = [ PocketPC | SmartPhone | WindowsCE]\AssemblyFoldersEx
     ///
     /// </summary>
+    [SupportedOSPlatform("windows")]
     internal class AssemblyFoldersEx : IEnumerable<AssemblyFoldersExInfo>
     {
         /// <summary>
@@ -496,4 +498,3 @@ namespace Microsoft.Build.Shared
         }
     }
 }
-#endif

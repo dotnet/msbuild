@@ -10,6 +10,8 @@ using BaseConsoleLogger = Microsoft.Build.BackEnd.Logging.BaseConsoleLogger;
 using SerialConsoleLogger = Microsoft.Build.BackEnd.Logging.SerialConsoleLogger;
 using ParallelConsoleLogger = Microsoft.Build.BackEnd.Logging.ParallelConsoleLogger;
 
+#nullable disable
+
 namespace Microsoft.Build.Logging
 {
     #region Delegates

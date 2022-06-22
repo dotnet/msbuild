@@ -8,6 +8,8 @@ using System.Collections.Concurrent;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -222,8 +224,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_resultsByConfiguration)
             {
-                BuildResult removedResult;
-                _resultsByConfiguration.TryRemove(configurationId, out removedResult);
+                _resultsByConfiguration.TryRemove(configurationId, out BuildResult removedResult);
 
                 removedResult?.ClearCachedFiles();
             }

@@ -6,6 +6,8 @@ using System.IO;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     internal static class CacheSerialization
@@ -25,7 +27,8 @@ namespace Microsoft.Build.Execution
 
                 Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
 
-                using (var fileStream = File.OpenWrite(fullPath))
+                // Use FileStream constructor (File.OpenWrite should not be used as it doesn't reset the length of the file!)
+                using (var fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     var translator = BinaryTranslator.GetWriteTranslator(fileStream);
 

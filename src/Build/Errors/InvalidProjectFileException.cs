@@ -9,6 +9,8 @@ using System.Security.Permissions;
 
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Exceptions
 {
     /// <summary>

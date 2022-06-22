@@ -10,6 +10,8 @@ using System.Diagnostics;
 
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -230,8 +232,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (GlobalLock)
             {
-                List<BuildRequest> requests = null;
-                if (_unresolvedConfigurations?.TryGetValue(unresolvedConfigId, out requests) != true)
+                if (_unresolvedConfigurations?.TryGetValue(unresolvedConfigId, out List<BuildRequest> requests) != true)
                 {
                     return false;
                 }

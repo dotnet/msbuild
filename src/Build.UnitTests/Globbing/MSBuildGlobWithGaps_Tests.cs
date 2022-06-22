@@ -6,6 +6,8 @@ using System.Linq;
 using Microsoft.Build.Globbing;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests.Globbing
 {
     public class MSBuildGlobWithGaps_Tests

@@ -4,6 +4,8 @@
 using System;
 using System.IO;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -35,6 +37,11 @@ namespace Microsoft.Build.Shared
         /// Name of the property that indicates a list of warnings to treat as errors.
         /// </summary>
         internal const string WarningsAsErrors = "MSBuildWarningsAsErrors";
+
+        /// <summary>
+        /// Name of the property that indicates a list of warnings to not treat as errors.
+        /// </summary>
+        internal const string WarningsNotAsErrors = "MSBuildWarningsNotAsErrors";
 
         /// <summary>
         /// Name of the property that indicates the list of warnings to treat as messages.

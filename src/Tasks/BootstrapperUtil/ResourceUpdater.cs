@@ -8,6 +8,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {
     internal class ResourceUpdater

@@ -9,6 +9,8 @@ using Microsoft.Build.Collections;
 
 using EscapingUtilities = Microsoft.Build.Shared.EscapingUtilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

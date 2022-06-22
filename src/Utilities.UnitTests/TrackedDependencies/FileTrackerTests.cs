@@ -20,6 +20,8 @@ using BackEndNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 
 // PLEASE NOTE: This is a UNICODE file as it contains UNICODE characters!
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.FileTracking
 {
     public sealed class FileTrackerTests : IDisposable

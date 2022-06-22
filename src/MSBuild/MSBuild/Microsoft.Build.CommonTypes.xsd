@@ -207,6 +207,13 @@ elementFormDefault="qualified">
                   </xs:documentation>
                 </xs:annotation>
               </xs:element>
+              <xs:element name="GeneratePathProperty">
+                <xs:annotation>
+                  <xs:documentation>
+                    <!-- _locID_text="PackageReference_GeneratePathProperty" _locComment="" -->Set to true to generate a Pkg* property that points to the restored location of the NuGet package contents. If unset, does not create the property.
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
             </xs:choice>
           </xs:sequence>
           <xs:attribute name="Include" type="xs:string">
@@ -248,6 +255,13 @@ elementFormDefault="qualified">
             <xs:annotation>
               <xs:documentation>
                 <!-- _locID_text="PackageReference_Attribute_NoWarn" _locComment="" -->Semicolon-separated list of warning codes to ignore (such as NU1605)
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="GeneratePathProperty" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="PackageReference_Attribute_GeneratePathProperty" _locComment="" -->Set to true to generate a Pkg* property that points to the restored location of the NuGet package contents
               </xs:documentation>
             </xs:annotation>
           </xs:attribute>
@@ -1677,7 +1691,7 @@ elementFormDefault="qualified">
     <xs:element name="DeployDirSuffix" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="DisableFastUpToDateCheck" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="DisableFastUpToDateCheck" _locComment="" -->Whether Visual Studio should do its own faster up-to-date check before Building, rather than invoke MSBuild to do a possibly more accurate one. You would set this to false if you have a heavily customized build process and builds in Visual Studio are not occurring when they should.</xs:documentation>
+            <xs:documentation><!-- _locID_text="DisableFastUpToDateCheck" _locComment="" -->Whether Visual Studio should do its own faster up-to-date check before Building, rather than invoke MSBuild to do a possibly more accurate one. You would set this to true if you have a heavily customized build process and builds in Visual Studio are not occurring when they should.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="DocumentationFile" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -3187,25 +3201,25 @@ elementFormDefault="qualified">
             </xs:documentation>
         </xs:annotation>
     </xs:element>
-    <xs:element name="AssemblySearchPathUseCandidateAssemblyFiles" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseCandidateAssemblyFiles" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseReferencePath" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseReferencePath" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseHintPathFromItem" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseHintPathFromItem" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseTargetFrameworkDirectory" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseTargetFrameworkDirectory" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseAssemblyFoldersConfigFileSearchPath" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseAssemblyFoldersConfigFileSearchPath" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseRegistry" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseRegistry" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseAssemblyFolders" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseAssemblyFolders" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseGAC" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseGAC" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseRawFileName" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseRawFileName" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseOutDir" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseOutDir" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
     <xs:element name="ResolveAssemblyReference" substitutionGroup="msb:Task">
         <xs:complexType>
@@ -3372,6 +3386,9 @@ elementFormDefault="qualified">
                     <xs:attribute name="CertificateThumbprint" use="required" />
                     <xs:attribute name="SigningTarget" use="required" />
                     <xs:attribute name="TimestampUrl" />
+                    <xs:attribute name="TargetFrameworkIdentifier" />
+                    <xs:attribute name="TargetFrameworkVersion" />
+                    <xs:attribute name="DisallowMansignTimestampFallback" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -5367,6 +5384,81 @@ elementFormDefault="qualified">
         </xs:complexType>
     </xs:element>
 
+    <!-- ============================ -->
+    <!-- Fast up-to-date check items. -->
+    <!-- ============================ -->
+
+    <xs:element name="UpToDateCheckInput" substitutionGroup="msb:Item">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="UpToDateCheckInputDescription" _locComment="" -->Defines an item to be considered an input to the project for the fast up-to-date check.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="msb:SimpleItemType">
+                    <xs:attribute name="Set">
+                        <xs:annotation>
+                            <xs:documentation><!-- _locID_text="UpToDateCheckInput_Set" _locComment="" -->Optional group(s) of inputs and outputs that should be considered in isolation during build. Useful when a build involves multiple discrete compilation/transpilation steps. Semicolon-delimited when multiple sets are required.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="Kind">
+                        <xs:annotation>
+                            <xs:documentation><!-- _locID_text="UpToDateCheckInput_Kind" _locComment="" -->Optional identifier for this item that allows it to be omitted from the fast up-to-date check via a global property.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="UpToDateCheckOutput" substitutionGroup="msb:Item">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="UpToDateCheckOutputDescription" _locComment="" -->Defines an item to be considered an output of the project for the fast up-to-date check.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="msb:SimpleItemType">
+                    <xs:attribute name="Set">
+                        <xs:annotation>
+                            <xs:documentation><!-- _locID_text="UpToDateCheckOutput_Set" _locComment="" -->Optional group(s) of inputs and outputs that should be considered in isolation during build. Useful when a build involves multiple discrete compilation/transpilation steps. Semicolon-delimited when multiple sets are required.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="Kind">
+                        <xs:annotation>
+                            <xs:documentation><!-- _locID_text="UpToDateCheckOutput_Kind" _locComment="" -->Optional identifier for this item that allows it to be omitted from the fast up-to-date check via a global property.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="UpToDateCheckBuilt" substitutionGroup="msb:Item">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="UpToDateCheckBuiltDescription" _locComment="" -->Defines an item to be considered an output of the project for the fast up-to-date check, with optional corresponding input via 'Original' metadata. When 'Original' metadata is specified, the input and output are considered in isolation. Useful when a single file will be copied (and potentially transformed in doing so) during build.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="msb:SimpleItemType">
+                    <xs:attribute name="Set">
+                        <xs:annotation>
+                            <xs:documentation><!-- _locID_text="UpToDateCheckBuilt_Set" _locComment="" -->Optional group(s) of inputs and outputs that should be considered in isolation during build. Useful when a build involves multiple discrete compilation/transpilation steps. Semicolon-delimited when multiple sets are required.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="Kind">
+                        <xs:annotation>
+                            <xs:documentation><!-- _locID_text="UpToDateCheckBuilt_Kind" _locComment="" -->Optional identifier for this item that allows it to be omitted from the fast up-to-date check via a global property.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="Original">
+                        <xs:annotation>
+                            <xs:documentation><!-- _locID_text="UpToDateCheckBuilt_Original" _locComment="" -->Optional location of the input item that produces this output. Useful when a file is copied (and potentially transformed in doing so) during build. If multiple inputs and/or outputs are involved, use 'Set' metadata instead.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
     <!-- ================ -->
     <!-- Packaging tasks. -->
     <!-- ================ -->
@@ -5986,6 +6078,7 @@ elementFormDefault="qualified">
                     <xs:attribute name="RetryDelayMilliseconds" />
                     <xs:attribute name="SkipUnchangedFiles" />
                     <xs:attribute name="SourceUrl" use="required" />
+                    <xs:attribute name="Timeout" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>

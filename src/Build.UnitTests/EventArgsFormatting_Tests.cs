@@ -7,6 +7,8 @@ using Xunit;
 
 
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
@@ -133,7 +135,6 @@ namespace Microsoft.Build.UnitTests
             EventArgsFormatting.FormatEventMessage("error", "CS",
                       null, "312", "source.cs", 233, 236, 4, 8, 0);
             // No exception was thrown
-
         }
     }
 }

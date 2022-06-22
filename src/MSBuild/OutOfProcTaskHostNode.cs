@@ -19,6 +19,8 @@ using Microsoft.Build.Shared;
 using System.Runtime.Remoting;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.CommandLine
 {
     /// <summary>
@@ -278,6 +280,8 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private ICollection<string> WarningsAsErrors { get; set; }
 
+        private ICollection<string> WarningsNotAsErrors { get; set; }
+
         private ICollection<string> WarningsAsMessages { get; set; }
 
         public bool ShouldTreatWarningAsError(string warningCode)
@@ -288,7 +292,12 @@ namespace Microsoft.Build.CommandLine
                 return false;
             }
 
-            return WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningCode);
+            return (WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningCode)) || WarningsAsMessages.Contains(warningCode);
+        }
+
+        private bool WarningAsErrorNotOverriden(string warningCode)
+        {
+            return WarningsNotAsErrors?.Contains(warningCode) != true;
         }
         #endregion
 
@@ -866,6 +875,7 @@ namespace Microsoft.Build.CommandLine
             _updateEnvironment = !taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBuildTaskHostDoNotUpdateEnvironment", "1", StringComparison.OrdinalIgnoreCase);
             _updateEnvironmentAndLog = taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBuildTaskHostUpdateEnvironmentAndLog", "1", StringComparison.OrdinalIgnoreCase);
             WarningsAsErrors = taskConfiguration.WarningsAsErrors;
+            WarningsNotAsErrors = taskConfiguration.WarningsNotAsErrors;
             WarningsAsMessages = taskConfiguration.WarningsAsMessages;
             try
             {
@@ -905,22 +915,14 @@ namespace Microsoft.Build.CommandLine
                     taskParams
                 );
             }
-            catch (Exception e)
+            catch (ThreadAbortException)
             {
-                if (e is ThreadAbortException)
-                {
-                    // This thread was aborted as part of Cancellation, we will return a failure task result
-                    taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
-                }
-                else
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-                else
-                {
-                    taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedDuringExecution, e);
-                }
+                // This thread was aborted as part of Cancellation, we will return a failure task result
+                taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
+            }
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+            {
+                taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedDuringExecution, e);
             }
             finally
             {
@@ -931,10 +933,7 @@ namespace Microsoft.Build.CommandLine
                     IDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
                     currentEnvironment = UpdateEnvironmentForMainNode(currentEnvironment);
 
-                    if (taskResult == null)
-                    {
-                        taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
-                    }
+                    taskResult ??= new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
 
                     lock (_taskCompleteLock)
                     {

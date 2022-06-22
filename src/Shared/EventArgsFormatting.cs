@@ -7,6 +7,8 @@ using System.Text;
 
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -51,10 +53,11 @@ namespace Microsoft.Build.Shared
         /// <param name="e">Message to format</param>
         /// <param name="showProjectFile"><code>true</code> to show the project file which issued the event, otherwise <code>false</code>.</param>
         /// <param name="projectConfigurationDescription">Properties to Print along with message</param>
+        /// <param name="nonNullMessage">The complete message (including property name) for an environment-derived property</param>
         /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildMessageEventArgs e, bool showProjectFile, string projectConfigurationDescription)
+        internal static string FormatEventMessage(BuildMessageEventArgs e, bool showProjectFile, string projectConfigurationDescription, string nonNullMessage = null)
         {
-            return FormatEventMessage("message", e.Subcategory, e.Message,
+            return FormatEventMessage("message", e.Subcategory, nonNullMessage ?? e.Message,
                             e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
                             e.ColumnNumber, e.EndColumnNumber, e.ThreadId, projectConfigurationDescription);
         }
@@ -142,13 +145,14 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="e">Message to format</param>
         /// <param name="showProjectFile">Show project file or not</param>
+        /// <param name="nonNullMessage">For an EnvironmentVariableReadEventArgs, adds an explanatory note and the name of the variable.</param>
         /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildMessageEventArgs e, bool showProjectFile)
+        internal static string FormatEventMessage(BuildMessageEventArgs e, bool showProjectFile, string nonNullMessage = null)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
             // "message" should not be localized
-            return FormatEventMessage("message", e.Subcategory, e.Message,
+            return FormatEventMessage("message", e.Subcategory, nonNullMessage ?? e.Message,
                 e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber, e.ColumnNumber, e.EndColumnNumber, e.ThreadId, null);
         }
 
@@ -217,7 +221,9 @@ namespace Microsoft.Build.Shared
             string logOutputProperties
         )
         {
-            StringBuilder format = new StringBuilder();
+            // capacity is the longest possible path through the below
+            // to avoid reallocating while constructing the string
+            using ReuseableStringBuilder format = new(51);
 
             // Uncomment these lines to show show the processor, if present.
             /*
@@ -306,15 +312,30 @@ namespace Microsoft.Build.Shared
 
             // If the project file was specified, tack that onto the very end.
             // Check for additional properties that should be output with project file
-            if (projectFile != null && !String.Equals(projectFile, file))
+            if (projectFile != null)
             {
-                if (logOutputProperties?.Length > 0)
+                // If the project file was specified, tack that onto the very end.
+                if (!string.Equals(projectFile, file))
                 {
-                    format.Append(" [{10}::{11}]");
+                    // Check for additional properties that should be output with project file
+                    if (logOutputProperties?.Length > 0)
+                    {
+                        format.Append(" [{10}::{11}]");
+                    }
+                    else
+                    {
+                        format.Append(" [{10}]");
+                    }
                 }
                 else
                 {
-                    format.Append(" [{10}]");
+                    // If the file location of the error _was_ the project file, append only the
+                    // additional output properties
+
+                    if (logOutputProperties?.Length > 0)
+                    {
+                        format.Append(" [{11}]");
+                    }
                 }
             }
 
@@ -326,9 +347,11 @@ namespace Microsoft.Build.Shared
 
             string finalFormat = format.ToString();
 
+            // Reuse the string builder to create the final message
+            ReuseableStringBuilder formattedMessage = format.Clear();
+
             // If there are multiple lines, show each line as a separate message.
             string[] lines = SplitStringOnNewLines(message);
-            StringBuilder formattedMessage = new StringBuilder();
 
             for (int i = 0; i < lines.Length; i++)
             {

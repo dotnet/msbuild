@@ -4,6 +4,8 @@ using System.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public  class FailingBuilderTask : Task

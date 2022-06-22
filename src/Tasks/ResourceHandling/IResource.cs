@@ -3,6 +3,8 @@
 
 using System.Resources;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.ResourceHandling
 {
     internal interface IResource

@@ -3,6 +3,8 @@
 
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
@@ -32,13 +34,31 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal enum TokenType
         {
-            Comma, LeftParenthesis, RightParenthesis,
-            LessThan, GreaterThan, LessThanOrEqualTo, GreaterThanOrEqualTo,
-            And, Or,
-            EqualTo, NotEqualTo, Not,
-            Property, String, Numeric, ItemList, ItemMetadata, Function,
-            EndOfInput
-        };
+            Comma,
+            LeftParenthesis,
+            RightParenthesis,
+
+            LessThan,
+            GreaterThan,
+            LessThanOrEqualTo,
+            GreaterThanOrEqualTo,
+
+            And,
+            Or,
+
+            EqualTo,
+            NotEqualTo,
+            Not,
+
+            Property,
+            String,
+            Numeric,
+            ItemList,
+            ItemMetadata,
+            Function,
+
+            EndOfInput,
+        }
 
         private TokenType _tokenType;
         private string _tokenString;

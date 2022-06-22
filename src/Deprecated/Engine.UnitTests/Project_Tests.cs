@@ -4641,7 +4641,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             Project myProject = new Project(myEngine);
 
             string expectedValue = null;
-            if(Environment.Is64BitOperatingSystem)
+            if (Environment.Is64BitOperatingSystem)
             {
                 expectedValue = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
             }

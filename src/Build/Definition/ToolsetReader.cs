@@ -17,6 +17,8 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
@@ -426,7 +428,7 @@ namespace Microsoft.Build.Evaluation
                     // Register toolset paths into list of immutable directories
                     //   example: C:\Windows\Microsoft.NET\Framework\v4.0.30319\
                     FileClassifier.Shared.RegisterImmutableDirectory(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPath32")?.EvaluatedValue?.Trim());
-                    //   example:  C:\Windows\Microsoft.NET\Framework64\v4.0.30319\
+                    // example:  C:\Windows\Microsoft.NET\Framework64\v4.0.30319\
                     FileClassifier.Shared.RegisterImmutableDirectory(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPath64")?.EvaluatedValue?.Trim());
 
                     if (toolset != null)

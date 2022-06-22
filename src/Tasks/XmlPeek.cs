@@ -11,6 +11,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -84,13 +86,8 @@ namespace Microsoft.Build.Tasks
             {
                 xmlinput = new XmlInput(XmlInputPath, XmlContent);
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("XmlPeek.ArgumentError", e.Message);
                 return false;
             }
@@ -105,13 +102,8 @@ namespace Microsoft.Build.Tasks
                     xr.Dispose();
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("XmlPeekPoke.InputFileError", XmlInputPath.ItemSpec, e.Message);
                 return false;
             }
@@ -127,13 +119,8 @@ namespace Microsoft.Build.Tasks
                 // Create the expression from query
                 expr = nav.Compile(_query);
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("XmlPeekPoke.XPathError", _query, e.Message);
                 return false;
             }
@@ -145,13 +132,8 @@ namespace Microsoft.Build.Tasks
             {
                 LoadNamespaces(ref xmlNamespaceManager, Namespaces);
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("XmlPeek.NamespacesError", e.Message);
                 return false;
             }

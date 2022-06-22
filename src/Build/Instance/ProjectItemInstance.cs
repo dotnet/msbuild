@@ -17,6 +17,8 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>
@@ -32,7 +34,6 @@ namespace Microsoft.Build.Execution
         ITaskItem2,
         IMetadataTable,
         ITranslatable,
-        IDeepCloneable<ProjectItemInstance>,
         IMetadataContainer
     {
         /// <summary>
@@ -580,19 +581,6 @@ namespace Microsoft.Build.Execution
 
         #endregion
 
-        #region IDeepCloneable<T>
-
-        /// <summary>
-        /// Deep clone the item.
-        /// Any metadata inherited from item definitions are also copied.
-        /// </summary>
-        ProjectItemInstance IDeepCloneable<ProjectItemInstance>.DeepClone()
-        {
-            return DeepClone();
-        }
-
-        #endregion
-
         /// <summary>
         /// Set all the supplied metadata on all the supplied items.
         /// </summary>
@@ -794,7 +782,7 @@ namespace Microsoft.Build.Execution
             /// Creates an instance of this class given the item-spec.
             /// </summary>
             internal TaskItem(string includeEscaped, string definingFileEscaped)
-                : this(includeEscaped, includeEscaped, null, null, null, /* mutable */ false, definingFileEscaped)
+                : this(includeEscaped, includeEscaped, null, null, null, immutable: false, definingFileEscaped)
             {
             }
 
@@ -830,13 +818,6 @@ namespace Microsoft.Build.Execution
             /// </summary>
             internal TaskItem(ProjectItemInstance item)
                 : this(item._taskItem, false /* no original itemspec */)
-            {
-            }
-
-            /// <summary>
-            /// Constructor for deserialization only.
-            /// </summary>
-            private TaskItem()
             {
             }
 
@@ -928,12 +909,16 @@ namespace Microsoft.Build.Execution
             {
                 get
                 {
-                    List<string> names = new List<string>((List<string>)CustomMetadataNames);
+                    CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadataCollection = MetadataCollection;
 
-                    foreach (string name in FileUtilities.ItemSpecModifiers.All)
+                    List<string> names = new List<string>(capacity: metadataCollection.Count + FileUtilities.ItemSpecModifiers.All.Length);
+
+                    foreach (ProjectMetadataInstance metadatum in metadataCollection)
                     {
-                        names.Add(name);
+                        names.Add(metadatum.Name);
                     }
+
+                    names.AddRange(FileUtilities.ItemSpecModifiers.All);
 
                     return names;
                 }
@@ -946,37 +931,6 @@ namespace Microsoft.Build.Execution
             public int MetadataCount
             {
                 get { return MetadataNames.Count; }
-            }
-
-            /// <summary>
-            /// Gets the names of custom metadata on the item.
-            /// If there is none, returns an empty collection.
-            /// Does not include built-in metadata.
-            /// Computed, not necessarily fast.
-            /// </summary>
-            public ICollection CustomMetadataNames
-            {
-                get
-                {
-                    List<string> names = new List<string>();
-
-                    foreach (ProjectMetadataInstance metadatum in MetadataCollection)
-                    {
-                        names.Add(metadatum.Name);
-                    }
-
-                    return names;
-                }
-            }
-
-            /// <summary>
-            /// Gets the number of custom metadata set on the item.
-            /// Does not include built-in metadata.
-            /// Computed, not necessarily fast.
-            /// </summary>
-            public int CustomMetadataCount
-            {
-                get { return CustomMetadataNames.Count; }
             }
 
             /// <summary>
@@ -1156,7 +1110,7 @@ namespace Microsoft.Build.Execution
                             }
                             else
                             {
-                                Debug.Fail($"metadatum from {_itemDefinitions[i]} is null, see https://github.com/microsoft/msbuild/issues/5267");
+                                Debug.Fail($"metadatum from {_itemDefinitions[i]} is null, see https://github.com/dotnet/msbuild/issues/5267");
                             }
                         }
                     }
@@ -1172,7 +1126,7 @@ namespace Microsoft.Build.Execution
                             }
                             else
                             {
-                                Debug.Fail("metadatum in _directMetadata is null, see https://github.com/microsoft/msbuild/issues/5267");
+                                Debug.Fail("metadatum in _directMetadata is null, see https://github.com/dotnet/msbuild/issues/5267");
                             }
                         }
                     }
@@ -1574,9 +1528,8 @@ namespace Microsoft.Build.Execution
                     return true;
                 }
 
-                // Since both sides are this class, we know both sides support ITaskItem2.
-                ITaskItem2 thisAsITaskItem2 = this as ITaskItem2;
-                ITaskItem2 otherAsITaskItem2 = other as ITaskItem2;
+                ITaskItem2 thisAsITaskItem2 = this;
+                ITaskItem2 otherAsITaskItem2 = other;
 
                 // This is case-insensitive. See GetHashCode().
                 if (!MSBuildNameIgnoreCaseComparer.Default.Equals(thisAsITaskItem2.EvaluatedIncludeEscaped, otherAsITaskItem2.EvaluatedIncludeEscaped))
@@ -1584,13 +1537,45 @@ namespace Microsoft.Build.Execution
                     return false;
                 }
 
-                if (this.CustomMetadataCount != other.CustomMetadataCount)
+                // Metadata can come from both item definitions and direct values, and they must
+                // be applied in order, with later values overriding newer ones. Here we determine
+                // the set of metadata names on 'this', to avoid computing the full metadata collection
+                // of both 'this' and 'other'. Once we have the names for 'this', we enumerate 'other'
+                // and ensure the names we see there are set-equal to the names we produce here.
+                var thisNames = new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
+
+                if (_itemDefinitions is not null)
+                {
+                    foreach (ProjectItemDefinitionInstance itemDefinition in _itemDefinitions)
+                    {
+                        thisNames.UnionWith(itemDefinition.MetadataNames);
+                    }
+                }
+
+                if (_directMetadata is not null)
+                {
+                    foreach (ProjectMetadataInstance metadatum in _directMetadata)
+                    {
+                        thisNames.Add(metadatum.Name);
+                    }
+                }
+
+                CopyOnWritePropertyDictionary<ProjectMetadataInstance> otherMetadata = other.MetadataCollection;
+
+                if (otherMetadata.Count != thisNames.Count)
                 {
                     return false;
                 }
 
-                foreach (string name in this.CustomMetadataNames)
+                foreach (ProjectMetadataInstance metadatum in otherMetadata)
                 {
+                    string name = metadatum.Name;
+
+                    if (!thisNames.Remove(name))
+                    {
+                        return false;
+                    }
+
                     // This is case-insensitive, so that for example "en-US" and "en-us" match and are bucketed together.
                     // In this respect, therefore, we have to consider item metadata value case as not significant.
                     if (!String.Equals
@@ -1606,7 +1591,7 @@ namespace Microsoft.Build.Execution
                 }
 
                 // Do not consider mutability for equality comparison
-                return true;
+                return thisNames.Count == 0;
             }
 
 #endregion

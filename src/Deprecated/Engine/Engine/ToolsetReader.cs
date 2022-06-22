@@ -343,7 +343,7 @@ namespace Microsoft.Build.BuildEngine
                         );
                     }
                 }
-                else if(ReservedPropertyNames.IsReservedProperty(property.Name))
+                else if (ReservedPropertyNames.IsReservedProperty(property.Name))
                 {
                     // We don't allow toolsets to define reserved properties
                     string baseMessage = ResourceUtilities.FormatResourceString("CannotModifyReservedProperty", property.Name);

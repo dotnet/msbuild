@@ -8,9 +8,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
-#if (!STANDALONEBUILD)
-using Microsoft.Internal.Performance;
-#endif
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;

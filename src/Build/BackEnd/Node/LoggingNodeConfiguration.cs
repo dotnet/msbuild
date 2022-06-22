@@ -5,6 +5,8 @@
 // <summary>A packet which contains information needed for a node to configure itself for build.</summary>
 //-----------------------------------------------------------------------
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     internal sealed class LoggingNodeConfiguration : ITranslatable

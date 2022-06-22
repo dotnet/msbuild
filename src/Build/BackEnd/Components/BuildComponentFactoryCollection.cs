@@ -6,6 +6,8 @@ using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

@@ -17,6 +17,8 @@ using Xunit.Abstractions;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 {
     [Trait("Category", "mono-osx-failing")]
@@ -3261,7 +3263,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             Assert.True(t.ExecuteAsTool); // "ExecuteAsTool should default to true"
         }
 
-        //  Regression test for https://github.com/dotnet/msbuild/issues/2206
+        // Regression test for https://github.com/dotnet/msbuild/issues/2206
         [Theory]
         [InlineData("\n")]
         [InlineData("\r\n")]
@@ -3616,7 +3618,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
             if (tagName != null)
             {
-                txt.Append("[");
+                txt.Append('[');
                 txt.Append(tagName);
                 txt.Append("]\xd\xa");
             }
@@ -3736,7 +3738,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <returns>The name of the resx file</returns>
         public static string WriteTestResX(bool useType, string linkedBitmap, string extraToken, string resxFileToWrite = null, TestEnvironment env = null)
         {
-            return WriteTestResX(useType, linkedBitmap, extraToken, useInvalidType: false, resxFileToWrite:resxFileToWrite);
+            return WriteTestResX(useType, linkedBitmap, extraToken, useInvalidType: false, resxFileToWrite: resxFileToWrite);
         }
 
         /// <summary>

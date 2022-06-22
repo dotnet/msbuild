@@ -10,6 +10,8 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Xunit;
 using Microsoft.Build.Engine.UnitTests.TestComparers;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
@@ -23,7 +25,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestConstructorNoItems()
         {
-            TargetResult result = new TargetResult(new TaskItem[] { }, BuildResultUtilities.GetStopWithErrorResult());
+            TargetResult result = new TargetResult(Array.Empty<TaskItem>(), BuildResultUtilities.GetStopWithErrorResult());
             Assert.Empty(result.Items);
             Assert.Null(result.Exception);
             Assert.Equal(TargetResultCode.Failure, result.ResultCode);

@@ -3,9 +3,11 @@
 
 using System;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
-    using NodeEngineShutdownReason = Execution.NodeEngineShutdownReason;
+    using NodeEngineShutdownReason = Microsoft.Build.Execution.NodeEngineShutdownReason;
 
     #region Delegates
     /// <summary>

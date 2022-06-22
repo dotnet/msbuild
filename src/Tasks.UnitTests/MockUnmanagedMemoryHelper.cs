@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using Marshal = System.Runtime.InteropServices.Marshal;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>

@@ -7,6 +7,8 @@ using System.Collections.Generic;
 
 using Microsoft.NET.StringTools;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

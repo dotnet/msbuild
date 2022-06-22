@@ -514,6 +514,11 @@
         <target state="translated">MSB3667: Unter "{0}" ist bereits eine Datei vorhanden. Wenn Sie einen vorab berechneten Cache erstellen möchten, stellen Sie sicher, dass Sie ein einzelnes Projekt erstellen, das von Ihren Assemblys abhängt, statt Ihre Assemblys selbst zu erstellen. Wenn Sie die Aufgabe "ResolveAssemblyReference" normal ausführen, legen Sie den Parameter "AssemblyInformationCacheOutputPath" der Aufgabe "ResolveAssemblyReference" nicht fest.</target>
         <note>{StrBegin="MSB3667: "}</note>
       </trans-unit>
+      <trans-unit id="General.TaskRequiresWindows">
+        <source>MSB3096: Task "{0}" is only supported when building on Windows.</source>
+        <target state="translated">MSB3096: Die Aufgabe „{0}“ wird nur beim Erstellen unter Windows unterstützt.</target>
+        <note>{StrBegin="MSB3096: "}</note>
+      </trans-unit>
       <trans-unit id="General.UndefineProperties">
         <source>Removing Properties:</source>
         <target state="translated">Eigenschaften werden entfernt:</target>
@@ -1357,9 +1362,14 @@
         <note>{StrBegin="MSB3981: "}</note>
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.NoPlatformsListed">
-        <source>MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' metadata set. It will be built without a specified platform.</source>
-        <target state="translated">MSB3982: EnableDynamicPlatformResolution ist "true". Das referenzierte Projekt "{0}" enthält jedoch keine Metadaten für "Platforms". Es wird ohne eine angegebene Plattform erstellt.</target>
+        <source>MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</source>
+        <target state="new">MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</target>
         <note>{StrBegin="MSB3982: "}</note>
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform">
+        <source>Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</source>
+        <target state="new">Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</target>
+        <note />
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.SamePlatform">
         <source>ProjectReference and current project have the same platform.</source>
@@ -1541,6 +1551,11 @@
         <source>MSB3216: Cannot register assembly "{0}" - access denied. Please make sure you're running the application as administrator. {1}</source>
         <target state="translated">MSB3216: Die "{0}"-Assembly kann nicht registriert werden – Zugriff verweigert. Stellen Sie sicher, dass Sie die Anwendung als Administrator ausführen. {1}</target>
         <note>{StrBegin="MSB3216: "}</note>
+      </trans-unit>
+      <trans-unit id="RemoveDir.EmptyPath">
+        <source>MSB3232: An empty directory was passed to RemoveDir and was ignored.</source>
+        <target state="new">MSB3232: An empty directory was passed to RemoveDir and was ignored.</target>
+        <note>{StrBegin="MSB3232: "}</note>
       </trans-unit>
       <trans-unit id="RemoveDir.Error">
         <source>MSB3231: Unable to remove directory "{0}". {1}</source>

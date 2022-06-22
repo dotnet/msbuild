@@ -4,6 +4,8 @@
 using System.IO;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Framework
 {
     /// <summary>
@@ -19,7 +21,7 @@ namespace Microsoft.Build.UnitTests.Framework
         public void DoNotCrashOnInvalidFormatExpression()
         {
             string content = @"
- <Project DefaultTargets=`t` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+ <Project DefaultTargets=`t` ToolsVersion=`msbuilddefaulttoolsversion`>
    <UsingTask
      TaskName=`Crash`
      TaskFactory=`CodeTaskFactory`

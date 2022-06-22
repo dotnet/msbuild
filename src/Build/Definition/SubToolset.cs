@@ -11,6 +11,8 @@ using Microsoft.Build.Shared;
 
 using ObjectModel = System.Collections.ObjectModel;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

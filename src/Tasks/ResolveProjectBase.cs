@@ -11,6 +11,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -136,11 +138,11 @@ namespace Microsoft.Build.Tasks
 
             // Example:
             //
-            //<SolutionConfiguration>
+            // <SolutionConfiguration>
             //  <ProjectConfiguration Project="{786E302A-96CE-43DC-B640-D6B6CC9BF6C0}" AbsolutePath="c:foo\Project1\A.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
             //  <ProjectConfiguration Project="{881C1674-4ECA-451D-85B6-D7C59B7F16FA}" AbsolutePath="c:foo\Project2\B.csproj" BuildProjectInSolution="True">Debug|AnyCPU<ProjectDependency Project="{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}" /></ProjectConfiguration>
             //  <ProjectConfiguration Project="{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}" AbsolutePath="c:foo\Project3\C.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
-            //</SolutionConfiguration>
+            // </SolutionConfiguration>
             //
             if (doc?.DocumentElement != null)
             {

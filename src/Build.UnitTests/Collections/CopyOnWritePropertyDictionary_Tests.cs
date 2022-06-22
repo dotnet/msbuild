@@ -61,7 +61,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             dic["b"].ShouldBeSameAs(b);
 
             // Cannot set a null value
-            Assert.ThrowsAny<Exception>(() => dic["a"] = null);
+            Assert.ThrowsAny<Exception>(() => dic["a"] = null!);
 
             // Value's key must match the specified key
             Assert.ThrowsAny<Exception>(() => dic["a"] = b);
@@ -206,7 +206,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
 
             public string EscapedValue => Key;
 
-            public bool Equals(MockValue other)
+            public bool Equals(MockValue? other)
             {
                 return other != null && Key == other.Key;
             }

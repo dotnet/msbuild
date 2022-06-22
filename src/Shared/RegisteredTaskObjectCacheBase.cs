@@ -5,9 +5,10 @@ using System;
 using System.Collections.Concurrent;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 #if BUILD_ENGINE
 using Microsoft.Build.Shared;
-
 namespace Microsoft.Build.BackEnd.Components.Caching
 #else
 namespace Microsoft.Build.Shared
@@ -94,7 +95,7 @@ namespace Microsoft.Build.Shared
         protected bool IsCollectionEmptyOrUncreated(RegisteredTaskObjectLifetime lifetime)
         {
             var collection = GetCollectionForLifetime(lifetime, dontCreate: true);
-            return (collection == null) || (collection.Count == 0);
+            return (collection == null) || collection.IsEmpty;
         }
 
         /// <summary>
@@ -147,13 +148,8 @@ namespace Microsoft.Build.Shared
                         IDisposable disposable = obj as IDisposable;
                         disposable?.Dispose();
                     }
-                    catch (Exception ex)
+                    catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                     {
-                        if (ExceptionHandling.IsCriticalException(ex))
-                        {
-                            throw;
-                        }
-
                         // Eat it.  We don't have a way to log here because at a minimum the build has already completed.
                     }
                 }

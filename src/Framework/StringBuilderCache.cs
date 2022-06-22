@@ -1,36 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-/*============================================================
-**
-**
-** Purpose: provide a cached reusable instance of StringBuilder
-**          per thread  it's an optimization that reduces the
-**          number of instances constructed and collected.
-**
-**  Acquire - is used to get a string builder to use of a
-**            particular size.  It can be called any number of
-**            times, if a StringBuilder is in the cache then
-**            it will be returned and the cache emptied.
-**            subsequent calls will return a new StringBuilder.
-**
-**            A StringBuilder instance is cached in
-**            Thread Local Storage and so there is one per thread
-**
-**  Release - Place the specified builder in the cache if it is
-**            not too big.
-**            The StringBuilder should not be used after it has
-**            been released.
-**            Unbalanced Releases are perfectly acceptable.  It
-**            will merely cause the runtime to create a new
-**            StringBuilder next time Acquire is called.
-**
-**  GetStringAndRelease
-**          - ToString() the StringBuilder, Release it to the
-**            cache and return the resulting string
-**
-===========================================================*/
-
 using System;
 using System.Diagnostics;
 using System.Text;
@@ -38,8 +8,16 @@ using System.Text;
 using Microsoft.Build.Eventing;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
+    /// <summary>
+    /// A cached reusable instance of StringBuilder.
+    /// </summary>
+    /// <remarks>
+    /// An optimization that reduces the number of instances of <see cref="StringBuilder"/> constructed and collected.
+    /// </remarks>
     internal static class StringBuilderCache
     {
         // The value 512 was chosen empirically as 95% percentile of returning string length.
@@ -48,6 +26,17 @@ namespace Microsoft.Build.Framework
         [ThreadStatic]
         private static StringBuilder t_cachedInstance;
 
+        /// <summary>
+        /// Get a <see cref="StringBuilder"/> of at least the specified capacity.
+        /// </summary>
+        /// <param name="capacity">The suggested starting size of this instance.</param>
+        /// <returns>A <see cref="StringBuilder"/> that may or may not be reused.</returns>
+        /// <remarks>
+        /// It can be called any number of times; if a <see cref="StringBuilder"/> is in the cache then
+        /// it will be returned and the cache emptied. Subsequent calls will return a new <see cref="StringBuilder"/>.
+        ///
+        /// <para>The <see cref="StringBuilder"/> instance is cached in Thread Local Storage and so there is one per thread.</para>
+        /// </remarks>
         public static StringBuilder Acquire(int capacity = 16 /*StringBuilder.DefaultCapacity*/)
         {
             if (capacity <= MAX_BUILDER_SIZE)
@@ -76,6 +65,24 @@ namespace Microsoft.Build.Framework
             return stringBuilder;
         }
 
+        /// <summary>
+        /// Place the specified builder in the cache if it is not too big. Unbalanced Releases are acceptable.
+        /// The StringBuilder should not be used after it has
+        ///            been released.
+        ///            Unbalanced Releases are perfectly acceptable.It
+        /// will merely cause the runtime to create a new
+        /// StringBuilder next time Acquire is called.
+        /// </summary>
+        /// <param name="sb">The <see cref="StringBuilder"/> to cache. Likely returned from <see cref="Acquire(int)"/>.</param>
+        /// <remarks>
+        /// The StringBuilder should not be used after it has been released.
+        ///
+        /// <para>
+        /// Unbalanced Releases are perfectly acceptable.It
+        /// will merely cause the runtime to create a new
+        /// StringBuilder next time Acquire is called.
+        /// </para>
+        /// </remarks>
         public static void Release(StringBuilder sb)
         {
             if (sb.Capacity <= MAX_BUILDER_SIZE)
@@ -90,6 +97,14 @@ namespace Microsoft.Build.Framework
 #endif
         }
 
+        /// <summary>
+        /// Get a string and return its builder to the cache.
+        /// </summary>
+        /// <param name="sb">Builder to cache (if it's not too big).</param>
+        /// <returns>The <see langword="string"/> equivalent to <paramref name="sb"/>'s contents.</returns>
+        /// <remarks>
+        /// Convenience method equivalent to calling <see cref="StringBuilder.ToString()"/> followed by <see cref="Release"/>.
+        /// </remarks>
         public static string GetStringAndRelease(StringBuilder sb)
         {
             string result = sb.ToString();

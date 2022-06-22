@@ -13,6 +13,8 @@ using System.Runtime.Remoting;
 using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

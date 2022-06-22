@@ -5,7 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
@@ -13,6 +13,8 @@ using Shouldly;
 using Xunit;
 
 #pragma warning disable 0219
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -80,22 +82,20 @@ namespace Microsoft.Build.UnitTests
             }
            );
         }
-        /// <summary>
-        /// Even without any custom metadata metadatanames should
-        /// return the built in metadata
-        /// </summary>
+
         [Fact]
-        public void MetadataNamesNoCustomMetadata()
+        public void MetadataNamesAndCount()
         {
             TaskItem taskItem = new TaskItem("x");
 
-            taskItem.MetadataNames.Count.ShouldBe(FileUtilities.ItemSpecModifiers.All.Length);
+            // Without custom metadata, should return the built in metadata
+            taskItem.MetadataNames.Cast<string>().ShouldBeSetEquivalentTo(FileUtilities.ItemSpecModifiers.All);
             taskItem.MetadataCount.ShouldBe(FileUtilities.ItemSpecModifiers.All.Length);
 
             // Now add one
             taskItem.SetMetadata("m", "m1");
 
-            taskItem.MetadataNames.Count.ShouldBe(FileUtilities.ItemSpecModifiers.All.Length + 1);
+            taskItem.MetadataNames.Cast<string>().ShouldBeSetEquivalentTo(FileUtilities.ItemSpecModifiers.All.Concat(new[] { "m" }));
             taskItem.MetadataCount.ShouldBe(FileUtilities.ItemSpecModifiers.All.Length + 1);
         }
 

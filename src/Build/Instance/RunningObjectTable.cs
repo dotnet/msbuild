@@ -3,12 +3,14 @@
 
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
-#if FEATURE_COM_INTEROP
     /// <summary>
     /// Wrapper for the COM Running Object Table.
     /// </summary>
@@ -21,6 +23,11 @@ namespace Microsoft.Build.Execution
 
         public RunningObjectTable()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                return;
+            }
+
             if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
             {
                 Ole32.GetRunningObjectTable(0, out var rot);
@@ -33,7 +40,9 @@ namespace Microsoft.Build.Execution
                 _rotTask =
                 Task.Run(() =>
                     {
+#pragma warning disable CA1416 // Validate platform compatibility: we checked above but the analyzer misses it
                         Ole32.GetRunningObjectTable(0, out var rot);
+#pragma warning restore CA1416 // Validate platform compatibility
                         return rot;
                     });
             }
@@ -42,6 +51,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Attempts to retrieve an item from the ROT.
         /// </summary>
+        [SupportedOSPlatform("windows")]
         public object GetObject(string itemName)
         {
             var rot = _rotTask.GetAwaiter().GetResult();
@@ -73,6 +83,7 @@ namespace Microsoft.Build.Execution
             return obj;
         }
 
+        [SupportedOSPlatform("windows")]
         private static class Ole32
         {
             [DllImport(nameof(Ole32))]
@@ -87,5 +98,4 @@ namespace Microsoft.Build.Execution
                 out IRunningObjectTable pprot);
         }
     }
-#endif
 }

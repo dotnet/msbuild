@@ -7,6 +7,8 @@ using System.Linq;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public abstract class ProjectExtensionsImportTestBase : IDisposable
@@ -19,7 +21,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         protected virtual string BasicProjectImportContents => $@"
-            <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+            <Project>
                 <PropertyGroup>
                 <{PropertyNameToSignalImportSucceeded}>true</{PropertyNameToSignalImportSucceeded}>
                 </PropertyGroup>
@@ -50,7 +52,7 @@ namespace Microsoft.Build.UnitTests
             // ---------------------
 
             Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(ObjectModelHelpers.CreateFileInTempProjectDirectory(_projectRelativePath, @"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion`>
                     <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
 
                     <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.targets` />
@@ -81,7 +83,7 @@ namespace Microsoft.Build.UnitTests
             // ---------------------
 
             Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(ObjectModelHelpers.CreateFileInTempProjectDirectory(_projectRelativePath, $@"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion`>
                     <PropertyGroup>
                         <{PropertyNameToEnableImport}>false</{PropertyNameToEnableImport}>
                     </PropertyGroup>
@@ -113,7 +115,7 @@ namespace Microsoft.Build.UnitTests
             // ---------------------
 
             Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(ObjectModelHelpers.CreateFileInTempProjectDirectory(_projectRelativePath, $@"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion`>
                     <PropertyGroup>
                         <MSBuildProjectExtensionsPath>{Path.GetDirectoryName(CustomImportProjectPath)}</MSBuildProjectExtensionsPath>
                     </PropertyGroup>
@@ -140,7 +142,7 @@ namespace Microsoft.Build.UnitTests
             // ---------------------
 
             Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(ObjectModelHelpers.CreateFileInTempProjectDirectory(_projectRelativePath, @"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion`>
                     <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
 
                     <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.targets` />
@@ -158,7 +160,7 @@ namespace Microsoft.Build.UnitTests
         public void ErrorIfChangedInBodyOfProject()
         {
             Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(ObjectModelHelpers.CreateFileInTempProjectDirectory(_projectRelativePath, @"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion`>
                     <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
 
                     <PropertyGroup>
@@ -171,20 +173,20 @@ namespace Microsoft.Build.UnitTests
 
             MockLogger logger = new MockLogger();
 
-            project.Build("_CheckForInvalidConfigurationAndPlatform", new[] {logger}).ShouldBeFalse();
+            project.Build("_CheckForInvalidConfigurationAndPlatform", new[] { logger }).ShouldBeFalse();
 
             logger.Errors.Select(i => i.Code).FirstOrDefault().ShouldBe("MSB3540");
         }
 
         /// <summary>
-        /// Ensures that an error is logged if BaseIntermediateOutputPath is modified after it was set by Microsoft.Common.props and 
+        /// Ensures that an error is logged if BaseIntermediateOutputPath is modified after it was set by Microsoft.Common.props and
         /// EnableBaseIntermediateOutputPathMismatchWarning is 'true'.
         /// </summary>
         [Fact]
         public void WarningIfBaseIntermediateOutputPathIsChangedInBodyOfProject()
         {
             Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(ObjectModelHelpers.CreateFileInTempProjectDirectory(_projectRelativePath, @"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion`>
                     <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
 
                     <PropertyGroup>

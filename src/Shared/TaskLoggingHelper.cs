@@ -16,6 +16,8 @@ using System.Runtime.Remoting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 #if BUILD_ENGINE
 namespace Microsoft.Build.BackEnd
 #else
@@ -691,7 +693,7 @@ namespace Microsoft.Build.Utilities
             // All of our errors should have an error code, so the user has something
             // to look up in the documentation. To help find errors without error codes,
             // temporarily uncomment this line and run the unit tests.
-            //if (null == errorCode) File.AppendAllText("c:\\errorsWithoutCodes", message + "\n");
+            // if (null == errorCode) File.AppendAllText("c:\\errorsWithoutCodes", message + "\n");
             // We don't have a Debug.Assert for this, because it would be triggered by <Error> and <Warning> tags.
 
             // If the task has missed out all location information, add the location of the task invocation;
@@ -1045,7 +1047,7 @@ namespace Microsoft.Build.Utilities
             // All of our warnings should have an error code, so the user has something
             // to look up in the documentation. To help find warnings without error codes,
             // temporarily uncomment this line and run the unit tests.
-            //if (null == warningCode) File.AppendAllText("c:\\warningsWithoutCodes", message + "\n");
+            // if (null == warningCode) File.AppendAllText("c:\\warningsWithoutCodes", message + "\n");
             // We don't have a Debug.Assert for this, because it would be triggered by <Error> and <Warning> tags.
 
             // If the task has missed out all location information, add the location of the task invocation;

@@ -1,9 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <CLSCompliant>false</CLSCompliant>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsShipping>false</IsShipping>
+    <IsTestProject>false</IsTestProject><!-- while this project references xunit it isn't itself a test -->
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="xunit.core" />

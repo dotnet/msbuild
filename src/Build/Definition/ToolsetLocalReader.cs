@@ -8,6 +8,8 @@ using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using System.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     internal class ToolsetLocalReader : ToolsetReader

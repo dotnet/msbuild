@@ -8,6 +8,8 @@ using System.Diagnostics;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.CommandLine
 {
     /// <summary>
@@ -66,7 +68,7 @@ namespace Microsoft.Build.CommandLine
         [MTAThread]
         public static int Main()
         {
-            int exitCode = (Execute() == ExitType.Success ? 0 : 1);
+            int exitCode = Execute() == ExitType.Success ? 0 : 1;
             return exitCode;
         }
 

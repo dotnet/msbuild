@@ -7,9 +7,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
 
@@ -19,10 +19,13 @@ using Microsoft.Win32.SafeHandles;
 
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework;
+
 internal static class NativeMethods
 {
-    #region Constants
+#region Constants
 
     internal const uint ERROR_INSUFFICIENT_BUFFER = 0x8007007A;
     internal const uint STARTUP_LOADER_SAFEMODE = 0x10;
@@ -47,16 +50,13 @@ internal static class NativeMethods
     internal const int MAX_PATH = 260;
 
     private const string kernel32Dll = "kernel32.dll";
-    private const string mscoreeDLL = "mscoree.dll";
 
     private const string WINDOWS_FILE_SYSTEM_REGISTRY_KEY = @"SYSTEM\CurrentControlSet\Control\FileSystem";
     private const string WINDOWS_LONG_PATHS_ENABLED_VALUE_NAME = "LongPathsEnabled";
 
     internal static DateTime MinFileDate { get; } = DateTime.FromFileTimeUtc(0);
 
-#if FEATURE_HANDLEREF
     internal static HandleRef NullHandleRef = new HandleRef(null, IntPtr.Zero);
-#endif
 
     internal static IntPtr NullIntPtr = new IntPtr(0);
 
@@ -72,15 +72,9 @@ internal static class NativeMethods
     internal const uint WAIT_OBJECT_0 = 0x00000000;
     internal const uint WAIT_TIMEOUT = 0x00000102;
 
-#if FEATURE_CHARSET_AUTO
-    internal const CharSet AutoOrUnicode = CharSet.Auto;
-#else
-        internal const CharSet AutoOrUnicode = CharSet.Unicode;
-#endif
+#endregion
 
-    #endregion
-
-    #region Enums
+#region Enums
 
     private enum PROCESSINFOCLASS : int
     {
@@ -205,9 +199,9 @@ internal static class NativeMethods
         Unknown
     }
 
-    #endregion
+#endregion
 
-    #region Structs
+#region Structs
 
     /// <summary>
     /// Structure that contain information about the system on which we are running
@@ -252,11 +246,11 @@ internal static class NativeMethods
     /// <summary>
     /// Contains information about the current state of both physical and virtual memory, including extended memory
     /// </summary>
-    [StructLayout(LayoutKind.Sequential, CharSet = AutoOrUnicode)]
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
     internal class MemoryStatus
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:MemoryStatus"/> class.
+        /// Initializes a new instance of the <see cref="MemoryStatus"/> class.
         /// </summary>
         public MemoryStatus()
         {
@@ -575,9 +569,9 @@ internal static class NativeMethods
         return -1;
     }
 
-    #endregion
+#endregion
 
-    #region Member data
+#region Member data
 
     internal static bool HasMaxPath => MaxPath == MAX_PATH;
 
@@ -630,9 +624,7 @@ internal static class NativeMethods
         }
     }
 
-    // CA1416 warns about code that can only run on Windows, but we verified we're running on Windows before this.
-    // This is the most reasonable way to resolve this part because other ways would require ifdef'ing on NET472.
-#pragma warning disable CA1416
+    [SupportedOSPlatform("windows")]
     private static bool IsLongPathsEnabledRegistry()
     {
         using (RegistryKey fileSystemKey = Registry.LocalMachine.OpenSubKey(WINDOWS_FILE_SYSTEM_REGISTRY_KEY))
@@ -641,7 +633,6 @@ internal static class NativeMethods
             return fileSystemKey != null && Convert.ToInt32(longPathsEnabledValue) == 1;
         }
     }
-#pragma warning restore CA1416
 
     /// <summary>
     /// Cached value for IsUnixLike (this method is called frequently during evaluation).
@@ -716,10 +707,10 @@ internal static class NativeMethods
 #if !CLR2COMPATIBILITY
     private static bool? _isWindows;
 #endif
-
     /// <summary>
     /// Gets a flag indicating if we are running under some version of Windows
     /// </summary>
+    [SupportedOSPlatformGuard("windows")]
     internal static bool IsWindows
     {
 #if CLR2COMPATIBILITY
@@ -874,9 +865,9 @@ internal static class NativeMethods
     /// </summary>
     internal static ProcessorArchitectures ProcessorArchitectureNative => SystemInformation.ProcessorArchitectureTypeNative;
 
-    #endregion
+#endregion
 
-    #region Wrapper methods
+#region Wrapper methods
 
     /// <summary>
     /// Really truly non pumping wait.
@@ -957,13 +948,13 @@ internal static class NativeMethods
 
             if (length > 0)
             {
-                StringBuilder fullPathBuffer = new StringBuilder(length);
+                char[] fullPathBuffer = new char[length];
                 length = GetShortPathName(path, fullPathBuffer, length);
                 errorCode = Marshal.GetLastWin32Error();
 
                 if (length > 0)
                 {
-                    string fullPath = fullPathBuffer.ToString();
+                    string fullPath = new(fullPathBuffer, 0, length);
                     path = fullPath;
                 }
             }
@@ -996,13 +987,13 @@ internal static class NativeMethods
 
             if (length > 0)
             {
-                StringBuilder fullPathBuffer = new StringBuilder(length);
+                char[] fullPathBuffer = new char[length];
                 length = GetLongPathName(path, fullPathBuffer, length);
                 errorCode = Marshal.GetLastWin32Error();
 
                 if (length > 0)
                 {
-                    string fullPath = fullPathBuffer.ToString();
+                    string fullPath = new(fullPathBuffer, 0, length);
                     path = fullPath;
                 }
             }
@@ -1091,7 +1082,7 @@ internal static class NativeMethods
 
                 if (success && (data.fileAttributes & NativeMethods.FILE_ATTRIBUTE_DIRECTORY) == 0)
                 {
-                    long dt = ((long) (data.ftLastWriteTimeHigh) << 32) | ((long) data.ftLastWriteTimeLow);
+                    long dt = ((long)(data.ftLastWriteTimeHigh) << 32) | ((long)data.ftLastWriteTimeLow);
                     fileModifiedTime = DateTime.FromFileTimeUtc(dt);
 
                     // If file is a symlink _and_ we're not instructed to do the wrong thing, get a more accurate timestamp.
@@ -1225,14 +1216,10 @@ internal static class NativeMethods
                     // Kill this process, so that no further children can be created.
                     thisProcess.Kill();
                 }
-                catch (Win32Exception e)
+                catch (Win32Exception e) when (e.NativeErrorCode == ERROR_ACCESS_DENIED)
                 {
                     // Access denied is potentially expected -- it happens when the process that
                     // we're attempting to kill is already dead.  So just ignore in that case.
-                    if (e.NativeErrorCode != ERROR_ACCESS_DENIED)
-                    {
-                        throw;
-                    }
                 }
 
                 // Now enumerate our children.  Children of this process are any process which has this process id as its parent
@@ -1462,9 +1449,9 @@ internal static class NativeMethods
         }
     }
 
-    #endregion
+#endregion
 
-    #region PInvoke
+#region PInvoke
 
     /// <summary>
     /// Gets the current OEM code page which is used by console apps
@@ -1479,17 +1466,6 @@ internal static class NativeMethods
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static extern bool GetFileAttributesEx(String name, int fileInfoLevel, ref WIN32_FILE_ATTRIBUTE_DATA lpFileInformation);
 
-    [DllImport(kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
-    private static extern uint SearchPath
-    (
-        string path,
-        string fileName,
-        string extension,
-        int numBufferChars,
-        [Out] StringBuilder buffer,
-        int[] filePart
-    );
-
     [DllImport("kernel32.dll", PreserveSig = true, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static extern bool FreeLibrary([In] IntPtr module);
@@ -1500,30 +1476,14 @@ internal static class NativeMethods
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true)]
     internal static extern IntPtr LoadLibrary(string fileName);
 
-    [DllImport(mscoreeDLL, SetLastError = true, CharSet = CharSet.Unicode)]
-    internal static extern uint GetRequestedRuntimeInfo(String pExe,
-                                            String pwszVersion,
-                                            String pConfigurationFile,
-                                            uint startupFlags,
-                                            uint runtimeInfoFlags,
-                                            [Out] StringBuilder pDirectory,
-                                            int dwDirectory,
-                                            out uint dwDirectoryLength,
-                                            [Out] StringBuilder pVersion,
-                                            int cchBuffer,
-                                            out uint dwlength);
-
     /// <summary>
-    /// Gets the fully qualified filename of the currently executing .exe
+    /// Gets the fully qualified filename of the currently executing .exe.
     /// </summary>
+    /// <param name="hModule"><see cref="HandleRef"/> of the module for which we are finding the file name.</param>
+    /// <param name="buffer">The character buffer used to return the file name.</param>
+    /// <param name="length">The length of the buffer.</param>
     [DllImport(kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
-    internal static extern int GetModuleFileName(
-#if FEATURE_HANDLEREF
-            HandleRef hModule,
-#else
-            IntPtr hModule,
-#endif
-            [Out] StringBuilder buffer, int length);
+    internal static extern int GetModuleFileName(HandleRef hModule, [Out] char[] buffer, int length);
 
     [DllImport("kernel32.dll")]
     internal static extern IntPtr GetStdHandle(int nStdHandle);
@@ -1568,19 +1528,19 @@ internal static class NativeMethods
     private static extern int NtQueryInformationProcess(SafeProcessHandle hProcess, PROCESSINFOCLASS pic, ref PROCESS_BASIC_INFORMATION pbi, uint cb, ref int pSize);
 
     [return: MarshalAs(UnmanagedType.Bool)]
-    [DllImport("kernel32.dll", CharSet = AutoOrUnicode, SetLastError = true)]
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     private static extern bool GlobalMemoryStatusEx([In, Out] MemoryStatus lpBuffer);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, BestFitMapping = false)]
-    internal static extern int GetShortPathName(string path, [Out] StringBuilder fullpath, [In] int length);
+    internal static extern int GetShortPathName(string path, [Out] char[] fullpath, [In] int length);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, BestFitMapping = false)]
-    internal static extern int GetLongPathName([In] string path, [Out] StringBuilder fullpath, [In] int length);
+    internal static extern int GetLongPathName([In] string path, [Out] char[] fullpath, [In] int length);
 
-    [DllImport("kernel32.dll", CharSet = AutoOrUnicode, SetLastError = true)]
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     internal static extern bool CreatePipe(out SafeFileHandle hReadPipe, out SafeFileHandle hWritePipe, SecurityAttributes lpPipeAttributes, int nSize);
 
-    [DllImport("kernel32.dll", CharSet = AutoOrUnicode, SetLastError = true)]
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     internal static extern bool ReadFile(SafeFileHandle hFile, byte[] lpBuffer, uint nNumberOfBytesToRead, out uint lpNumberOfBytesRead, IntPtr lpOverlapped);
 
     /// <summary>
@@ -1597,7 +1557,7 @@ internal static class NativeMethods
     internal const uint FILE_FLAG_OPEN_REPARSE_POINT = 0x00200000;
     internal const uint OPEN_EXISTING = 3;
 
-    [DllImport("kernel32.dll", CharSet = AutoOrUnicode, CallingConvention = CallingConvention.StdCall,
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall,
         SetLastError = true)]
     internal static extern SafeFileHandle CreateFile(
         string lpFileName,
@@ -1624,9 +1584,9 @@ internal static class NativeMethods
     [DllImport("kernel32.dll", SetLastError = true)]
     internal static extern bool SetThreadErrorMode(int newMode, out int oldMode);
 
-    #endregion
+#endregion
 
-    #region Extensions
+#region Extensions
 
     /// <summary>
     /// Waits while pumping APC messages.  This is important if the waiting thread is an STA thread which is potentially
@@ -1658,24 +1618,20 @@ internal static class NativeMethods
         // VS needs this in order to allow the in-proc compilers to properly initialize, since they will make calls from the
         // build thread which the main thread (blocked on BuildSubmission.Execute) must service.
         int waitIndex;
-#if FEATURE_HANDLE_SAFEWAITHANDLE
         IntPtr handlePtr = handle.SafeWaitHandle.DangerousGetHandle();
-#else
-            IntPtr handlePtr = handle.GetSafeWaitHandle().DangerousGetHandle();
-#endif
         int returnValue = CoWaitForMultipleHandles(COWAIT_FLAGS.COWAIT_NONE, timeout, 1, new IntPtr[] { handlePtr }, out waitIndex);
 
         if (!(returnValue == 0 || ((uint)returnValue == RPC_S_CALLPENDING && timeout != Timeout.Infinite)))
         {
-           throw new InternalErrorException($"Received {returnValue} from CoWaitForMultipleHandles, but expected 0 (S_OK)");
+            throw new InternalErrorException($"Received {returnValue} from CoWaitForMultipleHandles, but expected 0 (S_OK)");
         }
 
         return returnValue == 0;
     }
 
-    #endregion
+#endregion
 
-    #region helper methods
+#region helper methods
 
     internal static bool DirectoryExists(string fullPath)
     {
@@ -1718,6 +1674,6 @@ internal static class NativeMethods
         return GetFileAttributesEx(path, 0, ref data);
     }
 
-    #endregion
+#endregion
 
 }

@@ -6,16 +6,27 @@ using System;
 using System.IO;
 using Microsoft.Build.Shared;
 using System.Reflection;
-using Xunit;
 using Microsoft.Build.UnitTests.Shared;
+using Xunit;
+using Xunit.Abstractions;
+using Shouldly;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
     public class TypeLoader_Tests
     {
         private static readonly string ProjectFileFolder = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "PortableTask");
-        private static readonly string ProjectFileName = "portableTaskTest.proj";
-        private static readonly string DLLFileName = "PortableTask.dll";
+        private const string ProjectFileName = "portableTaskTest.proj";
+        private const string DLLFileName = "PortableTask.dll";
+
+        private readonly ITestOutputHelper _output;
+
+        public TypeLoader_Tests(ITestOutputHelper testOutputHelper)
+        {
+            _output = testOutputHelper;
+        }
 
         [Fact]
         public void Basic()
@@ -48,19 +59,18 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LoadNonExistingAssembly()
         {
-            using (var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder))
-            {
-                string projectFilePath = Path.Combine(dir.Path, ProjectFileName);
+            using var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder);
 
-                string dllName = "NonExistent.dll";
+            string projectFilePath = Path.Combine(dir.Path, ProjectFileName);
 
-                bool successfulExit;
-                string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag /p:AssemblyPath=" + dllName, out successfulExit);
-                Assert.False(successfulExit);
+            string dllName = "NonExistent.dll";
 
-                string dllPath = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, dllName);
-                CheckIfCorrectAssemblyLoaded(output, dllPath, false);
-            }
+            bool successfulExit;
+            string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag /p:AssemblyPath=" + dllName, out successfulExit, _output);
+            successfulExit.ShouldBeFalse();
+
+            string dllPath = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, dllName);
+            CheckIfCorrectAssemblyLoaded(output, dllPath, false);
         }
 
         [Fact]
@@ -71,7 +81,7 @@ namespace Microsoft.Build.UnitTests
                 string projectFilePath = Path.Combine(dir.Path, ProjectFileName);
 
                 bool successfulExit;
-                string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag", out successfulExit);
+                string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag", out successfulExit, _output);
                 Assert.True(successfulExit);
 
                 string dllPath = Path.Combine(dir.Path, DLLFileName);
@@ -93,7 +103,7 @@ namespace Microsoft.Build.UnitTests
                 try
                 {
                     bool successfulExit;
-                    string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag /p:AssemblyPath=" + movedDLLPath, out successfulExit);
+                    string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag /p:AssemblyPath=" + movedDLLPath, out successfulExit, _output);
                     Assert.True(successfulExit);
 
                     CheckIfCorrectAssemblyLoaded(output, movedDLLPath);
@@ -117,7 +127,7 @@ namespace Microsoft.Build.UnitTests
                 try
                 {
                     bool successfulExit;
-                    string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag /p:AssemblyPath=" + copiedDllPath, out successfulExit);
+                    string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag /p:AssemblyPath=" + copiedDllPath, out successfulExit, _output);
                     Assert.True(successfulExit);
 
                     CheckIfCorrectAssemblyLoaded(output, originalDLLPath);
@@ -299,4 +309,3 @@ namespace Microsoft.Build.UnitTests
 #endif
     }
 }
-

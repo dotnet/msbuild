@@ -10,6 +10,8 @@ using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <summary>

@@ -11,6 +11,8 @@ using Microsoft.Build.Execution;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using System.Threading.Tasks;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>

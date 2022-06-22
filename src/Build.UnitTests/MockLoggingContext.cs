@@ -4,6 +4,8 @@
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests
 {
     /// <summary>

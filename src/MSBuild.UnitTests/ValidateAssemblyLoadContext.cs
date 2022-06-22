@@ -8,6 +8,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using System.Runtime.Loader;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class ValidateAssemblyLoadContext : Task

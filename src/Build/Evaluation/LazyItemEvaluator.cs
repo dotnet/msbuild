@@ -18,6 +18,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
@@ -97,7 +99,8 @@ namespace Microsoft.Build.Evaluation
                     element.ConditionLocation,
                     lazyEvaluator._loggingContext.LoggingService,
                     lazyEvaluator._loggingContext.BuildEventContext,
-                    lazyEvaluator.FileSystem
+                    lazyEvaluator.FileSystem,
+                    loggingContext: lazyEvaluator._loggingContext
                     );
                 MSBuildEventSource.Log.EvaluateConditionStop(condition, result);
 
@@ -341,7 +344,7 @@ namespace Microsoft.Build.Evaluation
                         break;
                     }
 
-                    //  If this is a remove operation, then add any globs that will be removed
+                    // If this is a remove operation, then add any globs that will be removed
                     //  to a list of globs to ignore in previous operations
                     if (currentList._memoizedOperation.Operation is RemoveOperation removeOperation)
                     {
@@ -369,7 +372,7 @@ namespace Microsoft.Build.Evaluation
                 Dictionary<string, UpdateOperation> itemsWithNoWildcards = new Dictionary<string, UpdateOperation>(StringComparer.OrdinalIgnoreCase);
                 bool addedToBatch = false;
 
-                //  Walk back down the stack of item lists applying operations
+                // Walk back down the stack of item lists applying operations
                 while (itemListStack.Count > 0)
                 {
                     var currentList = itemListStack.Pop();
@@ -422,7 +425,7 @@ namespace Microsoft.Build.Evaluation
                         ProcessNonWildCardItemUpdates(itemsWithNoWildcards, items);
                     }
 
-                    //  If this is a remove operation, then it could modify the globs to ignore, so pop the potentially
+                    // If this is a remove operation, then it could modify the globs to ignore, so pop the potentially
                     //  modified entry off the stack of globs to ignore
                     if (currentList._memoizedOperation.Operation is RemoveOperation)
                     {
@@ -448,7 +451,8 @@ namespace Microsoft.Build.Evaluation
                 {
                     for (int i = 0; i < items.Count; i++)
                     {
-                        if (itemsWithNoWildcards.TryGetValue(FileUtilities.GetFullPath(items[i].Item.EvaluatedInclude, items[i].Item.ProjectDirectory), out UpdateOperation op))
+                        string fullPath = FileUtilities.GetFullPath(items[i].Item.EvaluatedIncludeEscaped, items[i].Item.ProjectDirectory);
+                        if (itemsWithNoWildcards.TryGetValue(fullPath, out UpdateOperation op))
                         {
                             items[i] = op.UpdateItem(items[i]);
                         }
@@ -558,12 +562,12 @@ namespace Microsoft.Build.Evaluation
             // Process include
             ProcessItemSpec(rootDirectory, itemElement.Include, itemElement.IncludeLocation, operationBuilder);
 
-            //  Code corresponds to Evaluator.EvaluateItemElement
+            // Code corresponds to Evaluator.EvaluateItemElement
 
             // Process exclude (STEP 4: Evaluate, split, expand and subtract any Exclude)
             if (itemElement.Exclude.Length > 0)
             {
-                //  Expand properties here, because a property may have a value which is an item reference (ie "@(Bar)"), and
+                // Expand properties here, because a property may have a value which is an item reference (ie "@(Bar)"), and
                 //  if so we need to add the right item reference
                 string evaluatedExclude = _expander.ExpandIntoStringLeaveEscaped(itemElement.Exclude, ExpanderOptions.ExpandProperties, itemElement.ExcludeLocation);
 
@@ -621,7 +625,7 @@ namespace Microsoft.Build.Evaluation
 
         private void ProcessItemSpec(string rootDirectory, string itemSpec, IElementLocation itemSpecLocation, OperationBuilder builder)
         {
-            builder.ItemSpec = new ItemSpec<P, I>(itemSpec, _outerExpander, itemSpecLocation, rootDirectory);
+            builder.ItemSpec = new ItemSpec<P, I>(itemSpec, _outerExpander, itemSpecLocation, rootDirectory, loggingContext: _loggingContext);
 
             foreach (ItemSpecFragment fragment in builder.ItemSpec.Fragments)
             {
@@ -632,7 +636,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private static IEnumerable<string> GetExpandedMetadataValuesAndConditions(ICollection<ProjectMetadataElement> metadata, Expander<P, I> expander)
+        private static IEnumerable<string> GetExpandedMetadataValuesAndConditions(ICollection<ProjectMetadataElement> metadata, Expander<P, I> expander, LoggingContext loggingContext = null)
         {
             // Since we're just attempting to expand properties in order to find referenced items and not expanding metadata,
             // unexpected errors may occur when evaluating property functions on unexpanded metadata. Just ignore them if that happens.
@@ -646,7 +650,8 @@ namespace Microsoft.Build.Evaluation
                 yield return expander.ExpandIntoStringLeaveEscaped(
                     metadatumElement.Value,
                     expanderOptions,
-                    metadatumElement.Location);
+                    metadatumElement.Location,
+                    loggingContext);
 
                 yield return expander.ExpandIntoStringLeaveEscaped(
                     metadatumElement.Condition,
@@ -661,7 +666,7 @@ namespace Microsoft.Build.Evaluation
             {
                 operationBuilder.Metadata.AddRange(itemElement.Metadata);
 
-                var itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(GetExpandedMetadataValuesAndConditions(itemElement.Metadata, _expander));
+                var itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(GetExpandedMetadataValuesAndConditions(itemElement.Metadata, _expander, _loggingContext));
                 if (itemsAndMetadataFound.Items != null)
                 {
                     foreach (var itemType in itemsAndMetadataFound.Items)

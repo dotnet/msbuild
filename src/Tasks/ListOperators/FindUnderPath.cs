@@ -8,6 +8,8 @@ using Microsoft.Build.Shared;
 
 using Microsoft.NET.StringTools;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

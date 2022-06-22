@@ -11,6 +11,8 @@ using System.Runtime.InteropServices;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -18,8 +20,11 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     internal enum StrongNameLevel
     {
-        None, DelaySigned, FullySigned, Unknown
-    };
+        None,
+        DelaySigned,
+        FullySigned,
+        Unknown,
+    }
 
     /// <summary>
     /// Strong naming utilities.

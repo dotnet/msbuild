@@ -10,6 +10,8 @@ using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>

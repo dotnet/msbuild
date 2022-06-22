@@ -8,6 +8,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>

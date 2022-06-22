@@ -4,6 +4,8 @@
 using BenchmarkDotNet.Attributes;
 using System.Text;
 
+#nullable disable
+
 namespace Microsoft.NET.StringTools.Benchmark
 {
     [MemoryDiagnoser]

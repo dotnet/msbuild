@@ -65,7 +65,7 @@ namespace Microsoft.Build.BuildEngine
         {
             if (String.Equals("LOGFILE", parameterName, StringComparison.OrdinalIgnoreCase))
             {
-                if(string.IsNullOrEmpty(parameterValue))
+                if (string.IsNullOrEmpty(parameterValue))
                 {
                     string message = ResourceUtilities.FormatResourceString("InvalidFileLoggerFile", string.Empty, ResourceUtilities.FormatResourceString("logfilePathNullOrEmpty"));
                     throw new LoggerException(message);

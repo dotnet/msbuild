@@ -13,6 +13,8 @@ using Microsoft.Build.Shared;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
@@ -40,7 +42,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Import/>
                     </Project>
                 ";
@@ -58,7 +60,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Import Project=''/>
                     </Project>
                 ";
@@ -76,7 +78,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Import Project='p' X='Y'/>
                     </Project>
                 ";
@@ -92,7 +94,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadBasic()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Import Project='i1.proj' />
                         <Import Project='i2.proj' Condition='c'/>
                     </Project>
@@ -115,7 +117,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void SetProjectValid()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Import Project='i1.proj' />
                     </Project>
                 ";
@@ -137,7 +139,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<ArgumentException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Import Project='i1.proj' />
                     </Project>
                 ";
@@ -173,7 +175,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 string content = String.Format
                     (
-    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+    @"<Project>
     <Import Project='{0}'/>
 </Project>",
                     file1
@@ -213,7 +215,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 string content = String.Format
                     (
-    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+    @"<Project>
     <Import Project='{0}'/>
 </Project>",
                     file
@@ -248,14 +250,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             string projectfileContent = String.Format
                 (
                 @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Import Project='{0}'/>
                     </Project>
                 ",
                  testTempPath + "\\..\\x.targets"
                  );
             string targetsfileContent = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                     </Project>
                 ";
             try

@@ -11,6 +11,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Shouldly;
 
+#nullable disable
+
 namespace MockCacheFromAssembly
 {
     public class AssemblyMockCache : ProjectCachePluginBase

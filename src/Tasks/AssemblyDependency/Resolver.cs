@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

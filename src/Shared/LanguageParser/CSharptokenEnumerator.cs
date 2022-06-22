@@ -5,6 +5,8 @@ using System;
 using System.IO;
 using System.Diagnostics;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared.LanguageParser
 {
     /*

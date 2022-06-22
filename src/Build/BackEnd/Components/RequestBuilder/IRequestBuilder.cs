@@ -4,6 +4,8 @@
 using Microsoft.Build.Execution;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

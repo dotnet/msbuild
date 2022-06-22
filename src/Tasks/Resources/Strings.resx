@@ -571,6 +571,10 @@
     <value>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</value>
     <comment>{StrBegin="MSB3094: "}</comment>
   </data>
+  <data name="General.TaskRequiresWindows">
+    <value>MSB3096: Task "{0}" is only supported when building on Windows.</value>
+    <comment>{StrBegin="MSB3096: "}</comment>
+  </data>
   <!--
         The GenerateBindingRedirects message bucket is: MSB3831 - MSB3840
 
@@ -1333,6 +1337,10 @@
   </data>
   <data name="RemoveDir.SkippingNonexistentDirectory">
     <value>Directory "{0}" doesn't exist. Skipping.</value>
+  </data>
+  <data name="RemoveDir.EmptyPath">
+    <value>MSB3232: An empty directory was passed to RemoveDir and was ignored.</value>
+    <comment>{StrBegin="MSB3232: "}</comment>
   </data>
   <!--
         The ResGen message bucket is: MSB3451 - MSB3460
@@ -2902,7 +2910,7 @@
     <comment>{StrBegin="MSB3981: "}</comment>
   </data>
   <data name="GetCompatiblePlatform.NoPlatformsListed">
-    <value>MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' metadata set. It will be built without a specified platform.</value>
+    <value>MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</value>
     <comment>{StrBegin="MSB3982: "}</comment>
   </data>
   <data name="GetCompatiblePlatform.InvalidLookupTableFormat">
@@ -2923,6 +2931,9 @@
   </data>
   <data name="GetCompatiblePlatform.AnyCPUDefault">
     <value>Choosing AnyCPU by default.</value>
+  </data>
+  <data name="GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform">
+    <value>Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</value>
   </data>
   <!--
         The tasks message bucket is: MSB3001 - MSB3999

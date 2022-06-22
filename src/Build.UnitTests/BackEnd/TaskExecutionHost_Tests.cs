@@ -22,6 +22,8 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Xunit;
 using Microsoft.Build.Engine.UnitTests.TestComparers;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
@@ -897,7 +899,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestEmptyStringInStringArrayParameterIntoItemList()
         {
             SetTaskParameter("StringArrayParam", "");
-            ValidateOutputItems("StringArrayOutput", new ITaskItem[] { });
+            ValidateOutputItems("StringArrayOutput", Array.Empty<ITaskItem>());
         }
 
         /// <summary>
@@ -908,7 +910,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestEmptyStringParameterIntoItemList()
         {
             SetTaskParameter("StringParam", "");
-            ValidateOutputItems("StringOutput", new ITaskItem[] { });
+            ValidateOutputItems("StringOutput", Array.Empty<ITaskItem>());
         }
 
         /// <summary>
@@ -917,7 +919,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestNullITaskItemArrayParameter()
         {
-            ValidateOutputItems("ItemArrayNullOutput", new ITaskItem[] { });
+            ValidateOutputItems("ItemArrayNullOutput", Array.Empty<ITaskItem>());
         }
 
         /// <summary>
@@ -928,7 +930,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                ValidateOutputItems("ArrayListOutput", new ITaskItem[] { });
+                ValidateOutputItems("ArrayListOutput", Array.Empty<ITaskItem>());
             }
            );
         }
@@ -1135,11 +1137,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             return type.GetTypeInfo().IsClass &&
                 !type.GetTypeInfo().IsAbstract &&
-#if FEATURE_TYPE_GETINTERFACE
                 (type.GetInterface("Microsoft.Build.Framework.ITaskFactory") != null);
-#else
-                type.GetInterfaces().Any(interfaceType => interfaceType.FullName == "Microsoft.Build.Framework.ITaskFactory");
-#endif
         }
 
         /// <summary>
@@ -1203,7 +1201,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             itemsByName.Add(item2);
             _twoItems = new ITaskItem[] { new TaskItem(item), new TaskItem(item2) };
 
-            _bucket = new ItemBucket(new string[0], new Dictionary<string, string>(), new Lookup(itemsByName, new PropertyDictionary<ProjectPropertyInstance>()), 0);
+            _bucket = new ItemBucket(Array.Empty<string>(), new Dictionary<string, string>(), new Lookup(itemsByName, new PropertyDictionary<ProjectPropertyInstance>()), 0);
             _host.FindTask(null);
             _host.InitializeForBatch(talc, _bucket, null);
             _parametersSetOnTask = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);

@@ -12,10 +12,12 @@ using Microsoft.Build.Collections;
 
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
-    using ItemsMetadataUpdateDictionary = Dictionary<ProjectItemInstance, Lookup.MetadataModifications>;
-    using ItemTypeToItemsMetadataUpdateDictionary = Dictionary<string, Dictionary<ProjectItemInstance, Lookup.MetadataModifications>>;
+    using ItemsMetadataUpdateDictionary = System.Collections.Generic.Dictionary<Microsoft.Build.Execution.ProjectItemInstance, Microsoft.Build.BackEnd.Lookup.MetadataModifications>;
+    using ItemTypeToItemsMetadataUpdateDictionary = System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<Microsoft.Build.Execution.ProjectItemInstance, Microsoft.Build.BackEnd.Lookup.MetadataModifications>>;
 
     /// <summary>
     /// Contains a list of item and property collections, optimized to allow

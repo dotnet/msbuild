@@ -6,6 +6,8 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAndUnification.AppConfig
 {
     public sealed class NonSpecificVersionStrictPrimary : ResolveAssemblyReferenceTestFixture
@@ -85,7 +87,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// In this case,
         /// - A single primary non-version-strict reference was passed in to assembly version 1.0.0.0
         /// - An app.config was passed in that promotes a *different* assembly version name from 
-        //    1.0.0.0 to 2.0.0.0
+        ///   1.0.0.0 to 2.0.0.0
         /// - Version 1.0.0.0 of the file exists.
         /// - Version 2.0.0.0 of the file exists.
         /// Expected:

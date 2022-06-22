@@ -29,6 +29,8 @@ using ObjectModel = System.Collections.ObjectModel;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     using Utilities = Microsoft.Build.Internal.Utilities;
@@ -964,8 +966,14 @@ namespace Microsoft.Build.Execution
         {
             [DebuggerStepThrough]
             get
-            { return TaskRegistry; }
-            set { TaskRegistry = value; }
+            {
+                return TaskRegistry;
+            }
+
+            set
+            {
+                TaskRegistry = value;
+            }
         }
 
         /// <summary>
@@ -1072,8 +1080,14 @@ namespace Microsoft.Build.Execution
         {
             [DebuggerStepThrough]
             get
-            { return InitialTargets; }
-            set { InitialTargets = value; }
+            {
+                return InitialTargets;
+            }
+
+            set
+            {
+                InitialTargets = value;
+            }
         }
 
         /// <summary>
@@ -1084,8 +1098,14 @@ namespace Microsoft.Build.Execution
         {
             [DebuggerStepThrough]
             get
-            { return DefaultTargets; }
-            set { DefaultTargets = value; }
+            {
+                return DefaultTargets;
+            }
+
+            set
+            {
+                DefaultTargets = value;
+            }
         }
 
         /// <summary>
@@ -1455,10 +1475,10 @@ namespace Microsoft.Build.Execution
         /// immutable if we are immutable.
         /// Only called during evaluation, so does not check for immutability.
         /// </summary>
-        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable)
+        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable, LoggingContext loggingContext)
         {
             // Mutability not verified as this is being populated during evaluation
-            ProjectPropertyInstance property = ProjectPropertyInstance.Create(name, evaluatedValueEscaped, mayBeReserved, _isImmutable);
+            ProjectPropertyInstance property = ProjectPropertyInstance.Create(name, evaluatedValueEscaped, mayBeReserved, _isImmutable, isEnvironmentVariable, loggingContext);
             _properties.Set(property);
             return property;
         }
@@ -2577,19 +2597,8 @@ namespace Microsoft.Build.Execution
                         clearedVariables.Add(environmentVariable);
                     }
                 }
-#if (!STANDALONEBUILD)
-                wrapperProjectXml = Microsoft.Build.BuildEngine.SolutionWrapperProject.Generate(projectFile, toolsVersion, projectBuildEventContext);
-#else
                 wrapperProjectXml = "";
-#endif
             }
-#if (!STANDALONEBUILD)
-            catch (Microsoft.Build.BuildEngine.InvalidProjectFileException ex)
-            {
-                // Whenever calling the old engine, we must translate its exception types into ours
-                throw new InvalidProjectFileException(ex.ProjectFile, ex.LineNumber, ex.ColumnNumber, ex.EndLineNumber, ex.EndColumnNumber, ex.Message, ex.ErrorSubcategory, ex.ErrorCode, ex.HelpKeyword, ex.InnerException);
-            }
-#endif
             finally
             {
                 // Set the cleared environment variables back to what they were.
@@ -2957,7 +2966,7 @@ namespace Microsoft.Build.Execution
             {
                 // Allow reserved property names, since this is how they are added to the project instance. 
                 // The caller has prevented users setting them themselves.
-                ProjectPropertyInstance instance = ProjectPropertyInstance.Create(property.Name, ((IProperty)property).EvaluatedValueEscaped, true /* MAY be reserved name */, isImmutable);
+                ProjectPropertyInstance instance = ProjectPropertyInstance.Create(property.Name, ((IProperty)property).EvaluatedValueEscaped, true /* MAY be reserved name */, isImmutable, property.IsEnvironmentProperty);
                 _properties.Set(instance);
             }
         }

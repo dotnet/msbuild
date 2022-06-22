@@ -6,6 +6,8 @@ using System.IO;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.UnitTests.TestResources
 {
     public class TestBinary : IXunitSerializable

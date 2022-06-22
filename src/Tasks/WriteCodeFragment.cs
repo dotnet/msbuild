@@ -17,6 +17,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -144,7 +146,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_SYSTEM_CONFIGURATION
             (e is ConfigurationException || e is SecurityException)
 #else
-            (e.GetType().Name == "ConfigurationErrorsException") //TODO: catch specific exception type once it is public https://github.com/dotnet/corefx/issues/40456
+            (e.GetType().Name == "ConfigurationErrorsException") // TODO: catch specific exception type once it is public https://github.com/dotnet/corefx/issues/40456
 #endif
             {
                 Log.LogErrorWithCodeFromResources("WriteCodeFragment.CouldNotCreateProvider", Language, e.Message);
@@ -443,7 +445,6 @@ namespace Microsoft.Build.Tasks
                         }
 
                         break;
-
                 }
 
                 attribute.Arguments.Add(new CodeAttributeArgument(parameter.Name, value));

@@ -5,6 +5,8 @@ using System;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using BuildResult = Microsoft.Build.Execution.BuildResult;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     #region Delegates

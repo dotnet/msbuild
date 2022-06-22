@@ -11,15 +11,17 @@ using Shouldly;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Definition
 {
     /// <summary>
-    /// Tests some manipulations of Project and ProjectCollection that require dealing with internal data. 
+    /// Tests some manipulations of Project and ProjectCollection that require dealing with internal data.
     /// </summary>
     public class Project_Internal_Tests
     {
         /// <summary>
-        /// Set default tools version; subsequent projects should use it 
+        /// Set default tools version; subsequent projects should use it
         /// </summary>
         [Fact]
         public void SetDefaultToolsVersion()
@@ -29,8 +31,8 @@ namespace Microsoft.Build.UnitTests.Definition
             try
             {
                 // In the new world of figuring out the ToolsVersion to use, we completely ignore the default
-                // ToolsVersion in the ProjectCollection.  However, this test explicitly depends on modifying 
-                // that, so we need to turn the new defaulting behavior off in order to verify that this still works.  
+                // ToolsVersion in the ProjectCollection.  However, this test explicitly depends on modifying
+                // that, so we need to turn the new defaulting behavior off in order to verify that this still works.
                 Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
@@ -42,7 +44,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Assert.Equal("x", collection.DefaultToolsVersion);
 
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'/>
                     </Project>
                 ";
@@ -59,10 +61,10 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
         /// <summary>
-        /// If the ToolsVersion in the project file is bogus, we'll default to the current ToolsVersion and successfully 
-        /// load it.  Make sure we can RE-load it, too, and successfully pick up the correct copy of the loaded project. 
-        /// 
-        /// ... Make sure we can do this even if we're not using the "always default everything to current anyway" codepath. 
+        /// If the ToolsVersion in the project file is bogus, we'll default to the current ToolsVersion and successfully
+        /// load it.  Make sure we can RE-load it, too, and successfully pick up the correct copy of the loaded project.
+        ///
+        /// ... Make sure we can do this even if we're not using the "always default everything to current anyway" codepath.
         /// </summary>
         [Fact]
         public void ReloadProjectWithInvalidToolsVersionInFile()
@@ -72,13 +74,13 @@ namespace Microsoft.Build.UnitTests.Definition
             try
             {
                 // In the new world of figuring out the ToolsVersion to use, we completely ignore the default
-                // ToolsVersion in the ProjectCollection.  However, this test explicitly depends on modifying 
-                // that, so we need to turn the new defaulting behavior off in order to verify that this still works.  
+                // ToolsVersion in the ProjectCollection.  However, this test explicitly depends on modifying
+                // that, so we need to turn the new defaulting behavior off in order to verify that this still works.
                 Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
                 string content = @"
-                    <Project ToolsVersion='bogus' xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project ToolsVersion='bogus'>
                         <Target Name='t'/>
                     </Project>
                 ";
@@ -116,10 +118,10 @@ namespace Microsoft.Build.UnitTests.Definition
 
             try
             {
-                // In the new world of figuring out the ToolsVersion to use, we completely ignore what 
+                // In the new world of figuring out the ToolsVersion to use, we completely ignore what
                 // is written in the project file.  However, this test explicitly depends on effectively
-                // modifying the "project file" (through the construction model OM), so we need to turn 
-                // that behavior off in order to verify that it still works.  
+                // modifying the "project file" (through the construction model OM), so we need to turn
+                // that behavior off in order to verify that it still works.
                 Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
@@ -167,10 +169,10 @@ namespace Microsoft.Build.UnitTests.Definition
 
             try
             {
-                // In the new world of figuring out the ToolsVersion to use, we completely ignore what 
+                // In the new world of figuring out the ToolsVersion to use, we completely ignore what
                 // is written in the project file.  However, this test explicitly depends on effectively
-                // modifying the "project file" (through the construction model OM), so we need to turn 
-                // that behavior off in order to verify that it still works.  
+                // modifying the "project file" (through the construction model OM), so we need to turn
+                // that behavior off in order to verify that it still works.
                 Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
@@ -200,13 +202,13 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ProjectEvaluationShouldRespectConditionsIfProjectLoadSettingsSaysSo()
         {
             var projectContents = @"
-<Project>   
+<Project>
    <ItemDefinitionGroup Condition=`1 == 2`>
      <I>
        <m>v</m>
      </I>
    </ItemDefinitionGroup>
-   
+
    <PropertyGroup Condition=`1 == 2`>
      <P1>v</P1>
    </PropertyGroup>

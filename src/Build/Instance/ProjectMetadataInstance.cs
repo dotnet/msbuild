@@ -8,6 +8,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.BackEnd;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>
@@ -16,7 +18,7 @@ namespace Microsoft.Build.Execution
     /// IMMUTABLE OBJECT.
     /// </summary>
     [DebuggerDisplay("{_name}={EvaluatedValue}")]
-    public class ProjectMetadataInstance : IEquatable<ProjectMetadataInstance>, ITranslatable, IMetadatum, IDeepCloneable<ProjectMetadataInstance>, IImmutable
+    public class ProjectMetadataInstance : IEquatable<ProjectMetadataInstance>, ITranslatable, IMetadatum, IImmutable
     {
         /// <summary>
         /// Name of the metadatum

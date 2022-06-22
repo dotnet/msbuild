@@ -11,6 +11,8 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using CommonWriterType = System.Action<string, string, System.Collections.Generic.IEnumerable<string>>;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared.Debugging
 {
     /// <summary>

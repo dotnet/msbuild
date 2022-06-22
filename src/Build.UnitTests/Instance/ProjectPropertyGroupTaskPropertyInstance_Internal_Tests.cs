@@ -9,6 +9,8 @@ using Xunit;
 
 using static Microsoft.Build.Engine.UnitTests.TestData.ProjectInstanceTestObjects;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests.Instance
 {
     public class ProjectPropertyGroupTaskPropertyInstance_Internal_Tests

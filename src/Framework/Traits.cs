@@ -2,7 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Microsoft.Build.Framework;
+
+#nullable disable
 
 namespace Microsoft.Build.Framework
 {
@@ -41,6 +42,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public readonly bool UseLazyWildCardEvaluation = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildSkipEagerWildCardEvaluationRegexes"));
         public readonly bool LogExpandedWildcards = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGEXPANDEDWILDCARDS"));
+        public readonly bool ThrowOnDriveEnumeratingWildcard = Environment.GetEnvironmentVariable("MSBUILDFAILONDRIVEENUMERATINGWILDCARD") == "1";
 
         /// <summary>
         /// Cache file existence for the entire process
@@ -67,6 +69,11 @@ namespace Microsoft.Build.Framework
         public static readonly string MSBuildNodeHandshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
 
         /// <summary>
+        /// Override property "MSBuildRuntimeType" to "Full", ignoring the actual runtime type of MSBuild.
+        /// </summary>
+        public readonly bool ForceEvaluateAsFullFramework = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildForceEvaluateAsFullFramework"));
+
+        /// <summary>
         /// Setting the associated environment variable to 1 restores the pre-15.8 single
         /// threaded (slower) copy behavior. Zero implies Int32.MaxValue, less than zero
         /// (default) uses the empirical default in Copy.cs, greater than zero can allow
@@ -83,6 +90,15 @@ namespace Microsoft.Build.Framework
         /// Log statistics about property functions which require reflection
         /// </summary>
         public readonly bool LogPropertyFunctionsRequiringReflection = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection"));
+
+        /// <summary>
+        /// Log all environment variables whether or not they are used in a build in the binary log.
+        /// </summary>
+        public bool LogAllEnvironmentVariables => string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDONLYLOGUSEDENVIRONMENTVARIABLES"))
+#if !TASKHOST
+            && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4)
+#endif
+            ;
 
         /// <summary>
         /// Log property tracking information.
@@ -439,7 +455,6 @@ namespace Microsoft.Build.Framework
         /// <remarks>
         /// Clone from ErrorUtilities which isn't (yet?) available in Framework.
         /// </remarks>
-
         private static readonly bool s_throwExceptions = String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDONOTTHROWINTERNAL"));
 
         /// <summary>

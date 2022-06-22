@@ -3,6 +3,8 @@
 
 using System.ComponentModel;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework.XamlTypes
 {
     /// <summary>

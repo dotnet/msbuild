@@ -10,6 +10,8 @@ using System.Security.Permissions;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Exceptions
 {
     /// <summary>

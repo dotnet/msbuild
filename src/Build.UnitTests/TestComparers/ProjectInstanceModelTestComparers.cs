@@ -13,6 +13,8 @@ using EvaluatorData =
     Microsoft.Build.Evaluation.IEvaluatorData<Microsoft.Build.Execution.ProjectPropertyInstance, Microsoft.Build.Execution.ProjectItemInstance,
         Microsoft.Build.Execution.ProjectMetadataInstance, Microsoft.Build.Execution.ProjectItemDefinitionInstance>;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests.TestComparers
 {
     public static class ProjectInstanceModelTestComparers

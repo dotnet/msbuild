@@ -9,6 +9,8 @@ using Microsoft.Build.Construction;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
@@ -36,7 +38,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadPropertyWithChildren()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <PropertyGroup>
                             <p>A<B>C<D/></B>E</p>
                         </PropertyGroup>
@@ -48,7 +50,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectPropertyElement property = Helpers.GetFirst(propertyGroup.Properties);
 
             Assert.Equal("p", property.Name);
-            Assert.Equal(@"A<B xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">C<D /></B>E", property.Value);
+            Assert.Equal(@"A<B>C<D /></B>E", property.Value);
         }
 
         /// <summary>
@@ -60,7 +62,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <PropertyGroup>
                             <" + "\u03A3" + @"/>
                         </PropertyGroup>
@@ -80,7 +82,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <PropertyGroup>
                             <PropertyGroup/>
                         </PropertyGroup>
@@ -100,7 +102,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <PropertyGroup>
                             <MSBuildProjectFile/>
                         </PropertyGroup>
@@ -120,7 +122,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <PropertyGroup>
                             <p XX='YY'/>
                         </PropertyGroup>
@@ -140,7 +142,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <PropertyGroup>
                             <p>
                                 <X/>
@@ -273,7 +275,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         private static ProjectPropertyElement GetPropertyXml()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <PropertyGroup>
                             <p Condition='c'>v</p>
                         </PropertyGroup>

@@ -142,6 +142,9 @@
   <data name="WaitingForEndOfBuild" xml:space="preserve">
     <value>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</value>
   </data>
+  <data name="EnvironmentDerivedPropertyRead">
+    <value>Property '{0}' with value '{1}' expanded from the environment.</value>
+  </data>
   <data name="SubmissionAlreadyComplete" xml:space="preserve">
     <value>The operation cannot be completed because the submission has already been executed.</value>
   </data>
@@ -332,6 +335,13 @@
   <data name="TryingExtensionsPath" xml:space="preserve">
     <value>Trying to import {0} using extensions path {1}</value>
   </data>
+  <data name="DuplicateOverrideUsingTaskElement" xml:space="preserve">
+    <value>MSB4275: Attempted to create multiple overrides of the same task: {0}</value>
+    <comment>{StrBegin="MSB4275: "}</comment>
+  </data>
+  <data name="OverrideUsingTaskElementCreated" xml:space="preserve">
+    <value>Created an override using task: {0} at {1}</value>
+  </data>
   <data name="OverrideTasksFileFailure" xml:space="preserve">
     <value>MSB4194: The override tasks file could not be successfully loaded. {0}</value>
     <comment>
@@ -462,6 +472,10 @@
   <data name="FailedToReceiveTaskThreadStatus" xml:space="preserve">
     <value>MSB4187: Failed to receive a response from the task thread in the timeout period "{0}" ms. Shutting down.</value>
     <comment>{StrBegin="MSB4187: "}</comment>
+  </data>
+  <data name="UnhandledMSBuildError" xml:space="preserve">
+    <value>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled.
+    {0}</value>
   </data>
   <data name="IllFormedCondition" xml:space="preserve">
     <value>MSB4088: Condition "{0}" is improperly constructed.</value>
@@ -1542,7 +1556,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Project has not been given a path to save to.</value>
   </data>
   <data name="OM_MustSetRecordDuplicateInputs" xml:space="preserve">
-    <value>Project was not loaded with the ProjectLoadSettings.RecordDuplicateImports flag.</value>
+    <value>Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</value>
   </data>
   <data name="OM_CannotSaveFileLoadedAsReadOnly" xml:space="preserve">
     <value>Project or targets file "{0}" was loaded in read-only mode, and cannot be saved.</value>
@@ -1898,5 +1912,65 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="ProxyRequestNotScheduledOnInprocNode" xml:space="preserve">
     <value>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</value>
+  </data>
+  <data name="ProjectCacheBeginBuild" xml:space="preserve">
+    <value>Initializing project cache plugin.</value>
+  </data>
+  <data name="ProjectCacheEndBuild" xml:space="preserve">
+    <value>Shutting down project cache plugin.</value>
+  </data>
+  <data name="ProjectCacheQueryStartedWithDefaultTargets" xml:space="preserve">
+    <value>Querying project cache for "{0}" (default targets):</value>
+    <comment>
+      LOCALIZATION: {0} is a file path.
+    </comment>
+  </data>
+  <data name="ProjectCacheQueryStartedWithTargetNames" xml:space="preserve">
+    <value>Querying project cache for "{0}" (targets: {1}):</value>
+    <comment>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </comment>
+  </data>
+  <data name="ProjectCacheHitWithDefaultTargets" xml:space="preserve">
+    <value>Project cache hit for "{0}" (default targets).</value>
+    <comment>
+      LOCALIZATION: {0} is a file path.
+    </comment>
+  </data>
+  <data name="ProjectCacheHitWithTargetNames" xml:space="preserve">
+    <value>Project cache hit for "{0}" ({1} target(s)).</value>
+    <comment>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </comment>
+  </data>
+  <data name="ProjectCacheHitWithOutputs" xml:space="preserve">
+    <value>{0} -> Cache Hit</value>
+    <comment>
+      {StrBegin="{0} -> "}LOCALIZATION: This string is used to indicate progress and matches the format for a log message from Microsoft.Common.CurrentVersion.targets. {0} is a project name.
+    </comment>
+  </data>
+  <data name="ProjectCacheMissWithDefaultTargets" xml:space="preserve">
+    <value>Project cache miss for "{0}" (default targets).</value>
+    <comment>
+      LOCALIZATION: {0} is a file path.
+    </comment>
+  </data>
+  <data name="ProjectCacheMissWithTargetNames" xml:space="preserve">
+    <value>Project cache miss for "{0}" ({1} target(s)).</value>
+    <comment>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </comment>
+  </data>
+  <data name="ProjectCacheNotApplicableWithDefaultTargets" xml:space="preserve">
+    <value>Project cache not applicable for "{0}" (default targets).</value>
+    <comment>
+      LOCALIZATION: {0} is a file path.
+    </comment>
+  </data>
+  <data name="ProjectCacheNotApplicableWithTargetNames" xml:space="preserve">
+    <value>Project cache not applicable for "{0}" ({1} target(s)).</value>
+    <comment>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </comment>
   </data>
 </root>

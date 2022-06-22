@@ -11,6 +11,8 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class XmlPoke_Tests
@@ -18,7 +20,7 @@ namespace Microsoft.Build.UnitTests
         private const string XmlNamespaceUsedByTests = "http://nsurl";
 
         private const string _xmlFileWithNs = @"<?xml version='1.0' encoding='utf-8'?>
-        
+
 <class AccessModifier='public' Name='test' xmlns:s='" + XmlNamespaceUsedByTests + @"'>
   <s:variable Type='String' Name='a'></s:variable>
   <s:variable Type='String' Name='b'></s:variable>
@@ -27,7 +29,7 @@ namespace Microsoft.Build.UnitTests
 </class>";
 
         private const string _xmlFileNoNs = @"<?xml version='1.0' encoding='utf-8'?>
-        
+
 <class AccessModifier='public' Name='test'>
   <variable Type='String' Name='a'></variable>
   <variable Type='String' Name='b'></variable>
@@ -271,16 +273,16 @@ namespace Microsoft.Build.UnitTests
         public void PokeWithoutUsingTask()
         {
             string projectContents = @"
-<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+<Project ToolsVersion='msbuilddefaulttoolsversion'>
   <Target Name='x'>
     <XmlPoke Value='abc' Query='def' XmlInputPath='ghi.jkl' ContinueOnError='true' />
   </Target>
 </Project>";
 
-            // The task will error, but ContinueOnError means that it will just be a warning.  
+            // The task will error, but ContinueOnError means that it will just be a warning.
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents);
 
-            // Verify that the task was indeed found. 
+            // Verify that the task was indeed found.
             logger.AssertLogDoesntContain("MSB4036");
         }
 

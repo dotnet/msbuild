@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
     using System;
@@ -169,8 +171,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             // children are not copied.
             Assert.Empty(newCopyFrom.View.Items);
             // but attributes are (even non standard)
-            //Assert.Equal("2", ProjectElementLink.GetAttributeValue(existingItemGroup, "FunnyAttribute", true));
-            //Assert.Equal("2", ProjectElementLink.GetAttributeValue(newCopyFrom.View, "FunnyAttribute", true));
+            // Assert.Equal("2", ProjectElementLink.GetAttributeValue(existingItemGroup, "FunnyAttribute", true));
+            // Assert.Equal("2", ProjectElementLink.GetAttributeValue(newCopyFrom.View, "FunnyAttribute", true));
             newCopyFrom.VerifyNotSame(ourGroup1);
 
 
@@ -186,7 +188,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             Assert.NotSame(realExistingItemGroup, newDeepCopy.Real);
             // TODO XmlLocation is (correctly) different for the items, need to find a way to bypass it.
             var context = new ValidationContext();
-            context.ValidateLocation = delegate (ElementLocation a, ElementLocation e) { return;};
+            context.ValidateLocation = delegate (ElementLocation a, ElementLocation e) { return; };
 
             ViewValidation.Verify(newDeepCopy.View, realExistingItemGroup, context);
             newDeepCopy.View.Label = "DeepCopyFrom";

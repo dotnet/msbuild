@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Evaluation
 {
     public class SimpleVersion_Tests

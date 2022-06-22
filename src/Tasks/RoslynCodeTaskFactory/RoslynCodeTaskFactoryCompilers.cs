@@ -7,6 +7,8 @@ using System;
 using System.IO;
 using System.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     internal abstract class RoslynCodeTaskFactoryCompilerBase : ToolTaskExtension

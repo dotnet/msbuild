@@ -8,6 +8,8 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Exceptions;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
@@ -22,7 +24,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadNoChildren()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i/>
                         </ItemDefinitionGroup>
@@ -43,7 +45,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadBasic()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i>
                                 <m1>v1</m1>
@@ -73,7 +75,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadBuiltInElementName()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <PropertyGroup/>
                         </ItemDefinitionGroup>
@@ -90,7 +92,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadMetadata()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i1 m1='v1'>
                                 <m2 Condition='c'>v2</m2>
@@ -122,63 +124,63 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i Include='inc' />
-                        </ItemDefinitionGroup> 
+                        </ItemDefinitionGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i Update='upd' />
                         </ItemDefinitionGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i Remove='rem' />
                         </ItemDefinitionGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i Exclude='excl' />
                         </ItemDefinitionGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i KeepMetadata='true' />
                         </ItemDefinitionGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i RemoveMetadata='true' />
                         </ItemDefinitionGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i KeepDuplicates='true' />
                         </ItemDefinitionGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i cOndiTion='true' />
                         </ItemDefinitionGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i LabeL='text' />
                         </ItemDefinitionGroup>
