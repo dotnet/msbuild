@@ -66,17 +66,9 @@
         MSBuild depends on a new version of SRM/SCI; HostModel a very old one.
         In order to keep working with MSBuild 17.2, which had binding redirects
         for SCI 0-5.0.0.0 but not 6, this task must compile against 5, even
-        though that's not transitively correct. Nothing uses updated API
-        surface so it all works ok.
-
-        To accomplish this, explicitly reference the current version of the
-        packages, but exclude assets so it doesn't get passed to the compiler.
-        Also download an old version and (later in the target ReferenceOlderSCIandSRM)
-        pass them to the compiler. -->
-    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" IncludeAssets="none" />
-    <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" IncludeAssets="none" />
-    <PackageDownload Include="System.Collections.Immutable" Version="[5.0.0]" GeneratePathProperty="true" />
-    <PackageDownload Include="System.Reflection.Metadata" Version="[5.0.0]" GeneratePathProperty="true" />
+        though that's not the very latest. -->
+    <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+    <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
   </ItemGroup>
 
   <!-- These are loaded from the CLI's copy on .NET Core, we don't need to duplicate them on disk -->
@@ -114,15 +106,6 @@
     <None Include="..\Common\Resources\xlf\**\*" LinkBase="Resources\xlf" />
     <UpToDateCheckInput Include="@(None)" />
   </ItemGroup>
-
-  <Target Name="ReferenceOlderSCIandSRM" AfterTargets="ResolveAssemblyReferences" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <ItemGroup>
-      <ReferencePath Include="$(NuGetPackageRoot)system.collections.immutable\5.0.0\lib\net461\System.Collections.Immutable.dll" />
-      <ReferencePath Include="$(NuGetPackageRoot)system.reflection.metadata\5.0.0\lib\net461\System.Reflection.Metadata.dll" />
-      <ReferenceCopyLocalPaths Include="$(NuGetPackageRoot)system.collections.immutable\5.0.0\lib\net461\System.Collections.Immutable.dll" />
-      <ReferenceCopyLocalPaths Include="$(NuGetPackageRoot)system.reflection.metadata\5.0.0\lib\net461\System.Reflection.Metadata.dll" />
-    </ItemGroup>
-  </Target>
 
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
     <PropertyGroup>
