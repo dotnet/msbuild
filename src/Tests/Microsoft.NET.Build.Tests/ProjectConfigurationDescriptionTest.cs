@@ -18,7 +18,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.2.1.25201")]
         public void ProjectConfigurationDescription_DefaultTest()
         {
             const string errorTargetFramework = "net48";
