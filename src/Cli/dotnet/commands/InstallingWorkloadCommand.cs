@@ -41,6 +41,8 @@ namespace Microsoft.DotNet.Workloads.Workload
         protected IWorkloadResolver _workloadResolver;
         protected readonly IInstaller _workloadInstallerFromConstructor;
         protected readonly IWorkloadManifestUpdater _workloadManifestUpdaterFromConstructor;
+        protected IInstaller _workloadInstaller;
+        protected IWorkloadManifestUpdater _workloadManifestUpdater;
 
         public InstallingWorkloadCommand(
             ParseResult parseResult,
@@ -74,18 +76,11 @@ namespace Microsoft.DotNet.Workloads.Workload
             _workloadManifestUpdaterFromConstructor = workloadManifestUpdater;
         }
 
-        protected abstract IInstaller CreateWorkloadInstaller(IWorkloadResolver workloadResolver = null);
-        protected abstract IWorkloadManifestUpdater CreateWorkloadManifestUpdater(IInstaller installer, IWorkloadResolver workloadResolver = null);
-
-
         protected async Task<List<WorkloadDownload>> GetDownloads(IEnumerable<WorkloadId> workloadIds, bool skipManifestUpdate, bool includePreview, string downloadFolder = null)
         {
             List<WorkloadDownload> ret = new();
 
             DirectoryPath? tempPath = null;
-
-            var installer = CreateWorkloadInstaller();
-            var manifestUpdater = CreateWorkloadManifestUpdater(installer);
 
             try
             {
@@ -104,7 +99,7 @@ namespace Microsoft.DotNet.Workloads.Workload
                         folderForManifestDownloads = tempPath.Value;
                     }
 
-                    var manifestDownloads = await manifestUpdater.GetManifestPackageDownloadsAsync(includePreview);
+                    var manifestDownloads = await _workloadManifestUpdater.GetManifestPackageDownloadsAsync(includePreview);
 
                     foreach (var download in manifestDownloads)
                     {
@@ -116,16 +111,16 @@ namespace Microsoft.DotNet.Workloads.Workload
                             _packageSourceLocation, downloadFolder: folderForManifestDownloads);
 
                         //  Extract manifest from package
-                        await installer.ExtractManifestAsync(downloadedPackagePath, Path.Combine(extractedManifestsPath, download.NuGetPackageId));
+                        await _workloadInstaller.ExtractManifestAsync(downloadedPackagePath, Path.Combine(extractedManifestsPath, download.Id));
                     }
 
                     //  Use updated, extracted manifests to resolve packs
                     var overlayProvider = new TempDirectoryWorkloadManifestProvider(extractedManifestsPath, _sdkVersion.ToString());
                     var newResolver = _workloadResolver.CreateOverlayResolver(overlayProvider);
-                    installer = CreateWorkloadInstaller(newResolver);
+                    _workloadInstaller.ReplaceWorkloadResolver(newResolver);
                 }
 
-                var packDownloads = installer.GetDownloads(workloadIds, _sdkFeatureBand, false);
+                var packDownloads = _workloadInstaller.GetDownloads(workloadIds, _sdkFeatureBand, false);
                 ret.AddRange(packDownloads);
 
                 if (downloadFolder != null)

@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         protected readonly string _userProfileDir;
         protected readonly DirectoryPath _tempPackagesDir;
         private readonly INuGetPackageDownloader _nugetPackageDownloader;
-        private readonly IWorkloadResolver _workloadResolver;
+        private IWorkloadResolver _workloadResolver;
         private readonly SdkFeatureBand _sdkFeatureBand;
         private readonly FileBasedInstallationRecordRepository _installationRecordRepository;
         private readonly PackageSourceLocation _packageSourceLocation;
@@ -70,6 +70,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         public IWorkloadInstallationRecordRepository GetWorkloadInstallationRecordRepository()
         {
             return _installationRecordRepository;
+        }
+
+        public void ReplaceWorkloadResolver(IWorkloadResolver workloadResolver)
+        {
+            _workloadResolver = workloadResolver;
         }
 
         IEnumerable<PackInfo> GetPacksInWorkloads(IEnumerable<WorkloadId> workloadIds)
@@ -282,7 +287,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 packs = packs.Where(p => !PackIsInstalled(p));
             }
 
-            return packs.Select(p => new WorkloadDownload(p.ResolvedPackageId, p.Version)).ToList();
+            return packs.Select(p => new WorkloadDownload(p.Id, p.ResolvedPackageId, p.Version)).ToList();
         }
 
         public void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null)

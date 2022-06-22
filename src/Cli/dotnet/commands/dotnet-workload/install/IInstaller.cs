@@ -20,13 +20,20 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         void RepairWorkloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null);
 
-        IEnumerable<WorkloadDownload> GetDownloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, bool includeInstalledItems);
-
         void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null);
 
         void InstallWorkloadManifest(ManifestVersionUpdate manifestUpdate, ITransactionContext transactionContext, DirectoryPath? offlineCache = null, bool isRollback = false);
 
         IWorkloadInstallationRecordRepository GetWorkloadInstallationRecordRepository();
+
+        IEnumerable<WorkloadDownload> GetDownloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, bool includeInstalledItems);
+
+        /// <summary>
+        /// Replace the workload resolver used by this installer. Typically used to call <see cref="GetDownloads(IEnumerable{WorkloadId}, SdkFeatureBand, bool)"/>
+        /// for a set of workload manifests that isn't currently installed
+        /// </summary>
+        /// <param name="workloadResolver">A new workload resolver to use</param>
+        void ReplaceWorkloadResolver(IWorkloadResolver workloadResolver);
 
         void Shutdown();
 
@@ -44,12 +51,18 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
     public class WorkloadDownload
     {
+        /// <summary>
+        /// The ID of the workload pack or manifest to be downloaded (not necessarily the same as the <see cref="NuGetPackageId"/>)
+        /// </summary>
+        public string Id { get; }
+
         public string NuGetPackageId { get; }
 
         public string NuGetPackageVersion { get; }
 
-        public WorkloadDownload(string nuGetPackageId, string nuGetPackageVersion)
+        public WorkloadDownload(string id, string nuGetPackageId, string nuGetPackageVersion)
         {
+            Id = id;
             NuGetPackageId = nuGetPackageId;
             NuGetPackageVersion = nuGetPackageVersion;
         }

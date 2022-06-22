@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 packs = packs.Where(p => !InstalledPacks.Any(installed => installed.ResolvedPackageId == p.ResolvedPackageId && installed.Version == p.Version));
             }
 
-            return packs.Select(p => new WorkloadDownload(p.ResolvedPackageId, p.Version));
+            return packs.Select(p => new WorkloadDownload(p.ResolvedPackageId, p.ResolvedPackageId, p.Version));
         }
 
         public void Shutdown()
@@ -157,6 +157,11 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             File.WriteAllText(Path.Combine(targetPath, "WorkloadManifest.json"), manifestContents);
 
             return Task.CompletedTask;
+        }
+
+        public void ReplaceWorkloadResolver(IWorkloadResolver workloadResolver)
+        {
+            WorkloadResolver = workloadResolver;
         }
     }
 

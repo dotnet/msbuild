@@ -245,16 +245,17 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 .Select(manifestId => _workloadManifestInstaller.GetManifestPackageId(manifestId, _sdkFeatureBand));
 
             var downloads = new List<WorkloadDownload>();
-            foreach (var packageId in packageIds)
+            foreach (var manifest in _workloadResolver.GetInstalledManifests())
             {
                 try
                 {
+                    var packageId = _workloadManifestInstaller.GetManifestPackageId(new ManifestId(manifest.Id), _sdkFeatureBand);
                     var latestVersion = await _nugetPackageDownloader.GetLatestPackageVerion(packageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreviews);
-                    downloads.Add(new WorkloadDownload(packageId.ToString(), latestVersion.ToString()));
+                    downloads.Add(new WorkloadDownload(manifest.Id, packageId.ToString(), latestVersion.ToString()));
                 }
                 catch
                 {
-                    _reporter.WriteLine(string.Format(LocalizableStrings.FailedToGetPackageManifestUrl, packageId));
+                    _reporter.WriteLine(string.Format(LocalizableStrings.FailedToGetPackageManifestUrl, manifest.Id));
                 }
             }
             return downloads;
