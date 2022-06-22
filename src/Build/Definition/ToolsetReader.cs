@@ -16,6 +16,7 @@ using error = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
+using System.Runtime.CompilerServices;
 
 #nullable disable
 
@@ -128,10 +129,22 @@ namespace Microsoft.Build.Evaluation
                     configurationReader = new ToolsetConfigurationReader(environmentProperties, globalProperties);
                 }
 
-                // Accumulation of properties is okay in the config file because it's deterministically ordered
-                defaultToolsVersionFromConfiguration = configurationReader.ReadToolsets(toolsets, globalProperties,
-                    initialProperties, true /* accumulate properties */, out overrideTasksPathFromConfiguration,
-                    out defaultOverrideToolsVersionFromConfiguration);
+                ReadConfigToolset();
+
+                // This is isolated into its own function in order to isolate loading of
+                // System.Configuration.ConfigurationManager.dll to codepaths that really
+                // need it as a way of mitigating the need to update references to that
+                // assembly in API consumers.
+                //
+                // https://github.com/microsoft/MSBuildLocator/issues/159
+                [MethodImplAttribute(MethodImplOptions.NoInlining)]
+                void ReadConfigToolset()
+                {
+                    // Accumulation of properties is okay in the config file because it's deterministically ordered
+                    defaultToolsVersionFromConfiguration = configurationReader.ReadToolsets(toolsets, globalProperties,
+                                    initialProperties, true /* accumulate properties */, out overrideTasksPathFromConfiguration,
+                                    out defaultOverrideToolsVersionFromConfiguration);
+                }
             }
 
             string defaultToolsVersionFromRegistry = null;
