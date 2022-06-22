@@ -94,8 +94,8 @@ namespace Microsoft.DotNet.New.Tests
                 .Execute("new", "TestAssets.AddReference", "--debug:custom-hive", tempSettingsDir.Path);
 
             cmd.Should().Pass()
-                .And.HaveStdOutContaining("Adding a project reference.")
-                .And.HaveStdOutContaining("Successfully added");
+                .And.HaveStdOutContaining("Adding a project reference")
+                .And.HaveStdOutContaining("Successfully added a reference to the project file.");
         }
 
         [Fact]
@@ -109,9 +109,8 @@ namespace Microsoft.DotNet.New.Tests
 
             cmd = new DotnetCommand(Log).Execute("new", "TestAssets.AddReference", "-o", tempDir.Path, "--debug:custom-hive", tempSettingsDir.Path);
             cmd.Should().Pass()
-                .And.HaveStdOutContaining("Adding a package reference.")
-                .And.HaveStdOutContaining("Successfully added")
-                .And.HaveStdOutContaining("reference: Newtonsoft.Json");
+                .And.HaveStdOutContaining("Adding a package reference Newtonsoft.Json (version: 13.0.1) to project file")
+                .And.HaveStdOutContaining("Successfully added a reference to the project file.");
         }
 
         [Fact]
@@ -125,8 +124,7 @@ namespace Microsoft.DotNet.New.Tests
 
             cmd = new DotnetCommand(Log).Execute("new", "TestAssets.AddProjectToSolution", "-o", tempDir.Path, "--debug:custom-hive", tempSettingsDir.Path);
             cmd.Should().Pass()
-                .And.HaveStdOutContaining("Adding project reference(s) to solution file")
-                .And.HaveStdOutContaining("Successfully added");
+                .And.HaveStdOutContaining("Successfully added project(s) to a solution file.");
         }
 
         [Fact]
