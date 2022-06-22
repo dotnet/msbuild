@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             GetManifestPackageDownloadsCallCount++;
             return Task.FromResult<IEnumerable<WorkloadDownload>>(new List<WorkloadDownload>()
             {
-                new WorkloadDownload("mock-manifest-package", "1.0.5")
+                new WorkloadDownload("mock-manifest", "mock-manifest-package", "1.0.5")
             });
         }
 

@@ -242,34 +242,23 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public async Task<IEnumerable<WorkloadDownload>> GetManifestPackageDownloadsAsync(bool includePreview)
         {
-            //  TODO:  add the fallback logic from 
             var packageIds = GetInstalledManifestIds()
                 .Select(manifestId => _workloadManifestInstaller.GetManifestPackageId(manifestId, _sdkFeatureBand));
 
             var downloads = new List<WorkloadDownload>();
-            foreach (var packageId in packageIds)       // loop over the manifests that are returned the workload resolver
+            foreach (var manifest in _workloadResolver.GetInstalledManifests())
             {
                 try
                 {
-                    bool success;
-                    (success, var latestVersion) = await GetPackageVersion(packageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreview);
-                    if (!success)
-                    {
-                        (success, latestVersion) = await GetPackageVersion(new PackageId ("microsoft.net.workload.mono.toolchain.manifest-6.0.500"), packageSourceLocation: _packageSourceLocation, includePreview: includePreview);
-                        downloads.Add(new WorkloadDownload("microsoft.net.workload.mono.toolchain.manifest-6.0.500", latestVersion.ToString()));
-                    }
-                    if (!success)
-                    {
-                        _reporter.WriteLine(string.Format(LocalizableStrings.FailedToGetPackageManifestUrl, packageId));
-                        return null;
-                    }
+                    var packageId = _workloadManifestInstaller.GetManifestPackageId(new ManifestId(manifest.Id), _sdkFeatureBand);
+                    var latestVersion = await _nugetPackageDownloader.GetLatestPackageVerion(packageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreviews);
+                    downloads.Add(new WorkloadDownload(manifest.Id, packageId.ToString(), latestVersion.ToString()));
                 }
                 catch
                 {
-                    _reporter.WriteLine(string.Format(LocalizableStrings.FailedToGetPackageManifestUrl, packageId));
+                    _reporter.WriteLine(string.Format(LocalizableStrings.FailedToGetPackageManifestUrl, manifest.Id));
                 }
             }
-
             return downloads;
         }
 

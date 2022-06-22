@@ -78,6 +78,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
+        public void ReplaceWorkloadResolver(IWorkloadResolver workloadResolver)
+        {
+            _workloadResolver = workloadResolver;
+        }
+
         private IEnumerable<(WorkloadPackId Id, string Version)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
         {
             string dependent = $"{DependentPrefix},{sdkFeatureBand},{HostArchitecture}";
@@ -90,14 +95,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public IEnumerable<WorkloadDownload> GetDownloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, bool includeInstalledItems)
         {
-            IEnumerable<AcquirableMsi> msis = GetMsisForWorkloads(workloadIds);
+            IEnumerable<WorkloadDownload> msis = GetMsisForWorkloads(workloadIds);
             if (!includeInstalledItems)
             {
                 HashSet<(string id, string version)> installedItems = new(GetInstalledPacks(sdkFeatureBand).Select(t => (t.Id.ToString(), t.Version)));
-                msis = msis.Where(m => !installedItems.Contains((m.NuGetPackageId, m.NuGetPackageVersion)));
+                msis = msis.Where(m => !installedItems.Contains((m.Id, m.NuGetPackageVersion)));
             }
 
-            return msis.Select(m => new WorkloadDownload(m.NuGetPackageId, m.NuGetPackageVersion)).ToList(); ;
+            return msis.ToList(); ;
         }
 
         /// <summary>
@@ -415,7 +420,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
     
         }
 
-        void RollBackMsiInstall(AcquirableMsi msiToRollback, DirectoryPath? offlineCache = null)
+        void RollBackMsiInstall(WorkloadDownload msiToRollback, DirectoryPath? offlineCache = null)
         {
             try
             {
