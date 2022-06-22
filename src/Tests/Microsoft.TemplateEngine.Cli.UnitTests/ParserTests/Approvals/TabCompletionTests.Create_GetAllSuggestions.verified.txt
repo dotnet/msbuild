@@ -49,6 +49,13 @@
     Documentation: Create an empty solution containing no projects
   },
   {
+    Label: solution,
+    Kind: Value,
+    SortText: solution,
+    InsertText: solution,
+    Documentation: Create an empty solution containing no projects
+  },
+  {
     Label: tool-manifest,
     Kind: Value,
     SortText: tool-manifest,

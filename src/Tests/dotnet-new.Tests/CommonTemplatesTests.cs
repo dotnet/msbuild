@@ -185,6 +185,7 @@ Restore succeeded\.",
         [InlineData("global.json file", "globaljson")]
         [InlineData("NuGet Config", "nugetconfig")]
         [InlineData("Solution File", "sln")]
+        [InlineData("Solution File", "solution")]
         [InlineData("Dotnet local tool manifest file", "tool-manifest")]
         [InlineData("Web Config", "webconfig")]
         public void AllCommonItemsCreate(string expectedTemplateName, string templateShortName)

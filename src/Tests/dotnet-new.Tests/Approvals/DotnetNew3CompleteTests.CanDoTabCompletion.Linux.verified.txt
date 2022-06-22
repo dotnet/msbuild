@@ -5,6 +5,7 @@ gitignore
 globaljson
 nugetconfig
 sln
+solution
 tool-manifest
 webconfig
 --help
