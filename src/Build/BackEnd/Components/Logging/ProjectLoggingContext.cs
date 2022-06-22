@@ -116,7 +116,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     properties = Enumerable.Empty<DictionaryEntry>();
                 }
-                else if (Traits.Instance.LogAllEnvironmentVariables)
+                else if (Traits.LogAllEnvironmentVariables)
                 {
                     properties = projectProperties.GetCopyOnReadEnumerable(property => new DictionaryEntry(property.Name, property.EvaluatedValue));
                 }

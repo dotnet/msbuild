@@ -231,7 +231,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 WriteLinePrettyFromResource("BuildStartedWithTime", e.Timestamp);
             }
 
-            if (Traits.Instance.LogAllEnvironmentVariables)
+            if (Traits.LogAllEnvironmentVariables)
             {
                 WriteEnvironment(e.BuildEnvironment);
             }

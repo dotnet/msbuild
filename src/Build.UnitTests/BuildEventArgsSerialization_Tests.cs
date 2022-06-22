@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData(false)]
         public void RoundtripBuildStartedEventArgs(bool serializeAllEnvironmentVariables)
         {
-            Traits.Instance.LogAllEnvironmentVariables = serializeAllEnvironmentVariables;
+            Traits.LogAllEnvironmentVariables = serializeAllEnvironmentVariables;
             var args = new BuildStartedEventArgs(
                 "Message",
                 "HelpKeyword",
@@ -52,7 +52,7 @@ namespace Microsoft.Build.UnitTests
                 e => e.ThreadId.ToString(),
                 e => e.SenderName);
 
-            Traits.Instance.LogAllEnvironmentVariables = false;
+            Traits.LogAllEnvironmentVariables = false;
         }
 
         [Fact]

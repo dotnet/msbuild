@@ -94,7 +94,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Log all environment variables whether or not they are used in a build in the binary log.
         /// </summary>
-        public bool LogAllEnvironmentVariables = false;
+        public static bool LogAllEnvironmentVariables = false;
 
         /// <summary>
         /// Log property tracking information.
