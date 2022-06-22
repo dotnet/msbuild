@@ -368,6 +368,7 @@ namespace Microsoft.NET.Build.Tests
                 TargetFrameworks = targetFramework,
                 IsSdkProject = true
             };
+            appProject.AdditionalProperties["NoWarn"] = "NU1505";
             appProject.ReferencedProjects.Add(libProject);
             var createdAppProject = _testAssetsManager.CreateTestProject(appProject);
             var publishCommand = new PublishCommand(createdAppProject);
