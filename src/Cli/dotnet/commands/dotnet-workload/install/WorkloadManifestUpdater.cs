@@ -240,7 +240,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         }
 
 
-        public async Task<IEnumerable<WorkloadDownload>> GetManifestPackageDownloadsAsync(bool includePreview)
+        public async Task<IEnumerable<WorkloadDownload>> GetManifestPackageDownloadsAsync(bool includePreviews)
         {
             var packageIds = GetInstalledManifestIds()
                 .Select(manifestId => _workloadManifestInstaller.GetManifestPackageId(manifestId, _sdkFeatureBand));
@@ -251,7 +251,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 try
                 {
                     var packageId = _workloadManifestInstaller.GetManifestPackageId(new ManifestId(manifest.Id), _sdkFeatureBand);
-                    var latestVersion = await _nugetPackageDownloader.GetLatestPackageVerion(packageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreviews);
+                    var latestVersion = await _nugetPackageDownloader.GetLatestPackageVersion(packageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreviews);
                     downloads.Add(new WorkloadDownload(manifest.Id, packageId.ToString(), latestVersion.ToString()));
                 }
                 catch
