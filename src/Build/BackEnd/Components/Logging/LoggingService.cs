@@ -1709,8 +1709,10 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private string GetAndVerifyProjectFileFromContext(BuildEventContext context)
         {
+            _projectFileMap.TryGetValue(context.ProjectContextId, out string projectFile);
+
             // PERF: Not using VerifyThrow to avoid boxing an int in the non-error case.
-            if (!_projectFileMap.TryGetValue(context.ProjectContextId, out string projectFile))
+            if (projectFile == null)
             {
                 ErrorUtilities.ThrowInternalError("ContextID {0} should have been in the ID-to-project file mapping but wasn't!", context.ProjectContextId);
             }
