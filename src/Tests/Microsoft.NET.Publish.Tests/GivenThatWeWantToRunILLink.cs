@@ -1105,6 +1105,8 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName);
             testProject.AdditionalProperties["WarningsNotAsErrors"] = "IL2075;IL2026;IL2046";
+            testProject.AdditionalProperties["NoWarn"] = "NU1505";
+
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var publishCommand = new PublishCommand(testAsset);
@@ -1183,7 +1185,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var publishCommand = new PublishCommand(testAsset);
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
-                                    "/p:TreatWarningsAsErrors=true", "/p:ILLinkTreatWarningsAsErrors=false", "/p:NoWarn=IL2026%3BIL2046")
+                                    "/p:TreatWarningsAsErrors=true", "/p:ILLinkTreatWarningsAsErrors=false", "/p:NoWarn=IL2026%3BIL2046%3BNU1505")
                 .Should().Pass()
                 // This warning is produced by both the analyzer and the linker. Ignore it for this test.
                 .And.NotHaveStdOutContaining("warning IL2026")
@@ -1517,6 +1519,7 @@ namespace Microsoft.NET.Publish.Tests
                 TargetFrameworks = targetFramework,
                 IsExe = isExe
             };
+            testProject.AdditionalProperties["NoWarn"] = "$(NoWarn);NU1505";
 
             testProject.SourceFiles[$"{projectName}.cs"] = @"
 using System;
