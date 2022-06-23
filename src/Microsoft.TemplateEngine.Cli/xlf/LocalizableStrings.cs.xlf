@@ -425,7 +425,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="Generic_NoCallbackError">
         <source>No callback is configured. Running post action is not possible.</source>
-        <target state="new">No callback is configured. Running post action is not possible.</target>
+        <target state="translated">Není nakonfigurováno žádné zpětné volání. Spuštění akce příspěvku není možné.</target>
         <note />
       </trans-unit>
       <trans-unit id="HostSpecificDataLoader_Warning_FailedToRead">
@@ -668,7 +668,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Failed">
         <source>Failed to add project(s) to a solution file.</source>
-        <target state="new">Failed to add project(s) to a solution file.</target>
+        <target state="translated">Přidání projektu/ů do souboru řešení se nezdařilo.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Running">
@@ -676,30 +676,30 @@ The header is followed by the list of parameters and their errors (might be seve
     project(s): {0}
     to solution file: {1}
     solution folder: {2}</source>
-        <target state="new">Adding
-    project(s): {0}
-    to solution file: {1}
-    solution folder: {2}</target>
+        <target state="translated">Přidávání
+    projektu/ů: {0}
+    do souboru řešení: {1}
+    složka řešení: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Succeeded">
         <source>Successfully added project(s) to a solution file.</source>
-        <target state="new">Successfully added project(s) to a solution file.</target>
+        <target state="translated">Projekt(y) se úspěšně přidal(y) do souboru řešení.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_AddPackageReference">
         <source>Adding a package reference {0} to project file {1}:</source>
-        <target state="new">Adding a package reference {0} to project file {1}:</target>
+        <target state="translated">Přidávání reference balíčku {0} do souboru projektu {1}:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_AddPackageReference_WithVersion">
         <source>Adding a package reference {0} (version: {1}) to project file {2}:</source>
-        <target state="new">Adding a package reference {0} (version: {1}) to project file {2}:</target>
+        <target state="translated">Přidávání reference balíčku {0} (verze: {1}) do souboru projektu {2}:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_AddProjectReference">
         <source>Adding a project reference {0} to project file {1}:</source>
-        <target state="new">Adding a project reference {0} to project file {1}:</target>
+        <target state="translated">Přidávání reference projektu {0} do souboru projektu {1}:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_ActionMisconfigured">
@@ -729,12 +729,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Failed">
         <source>Failed to add a reference to the project file.</source>
-        <target state="new">Failed to add a reference to the project file.</target>
+        <target state="translated">Přidání reference do souboru projektu se nezdařilo.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Succeeded">
         <source>Successfully added a reference to the project file.</source>
-        <target state="new">Successfully added a reference to the project file.</target>
+        <target state="translated">Reference se úspěšně přidala do souboru projektu.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
@@ -749,7 +749,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_Restore_Error_NoProjectsToRestore">
         <source>No projects are configured to restore. Check primary outputs configuration in template.json.</source>
-        <target state="new">No projects are configured to restore. Check primary outputs configuration in template.json.</target>
+        <target state="translated">Nejsou nakonfigurovány žádné projekty k obnovení. Ověřte konfiguraci primárních výstupů v template.json.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_Restore_Failed">
@@ -759,7 +759,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_Restore_Running">
         <source>Restoring {0}:</source>
-        <target state="new">Restoring {0}:</target>
+        <target state="translated">Obnovování {0}:</target>
         <note>{0} - path to a project to restore</note>
       </trans-unit>
       <trans-unit id="PostAction_Restore_Succeeded">

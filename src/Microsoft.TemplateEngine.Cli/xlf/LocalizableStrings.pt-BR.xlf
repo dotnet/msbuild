@@ -425,7 +425,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="Generic_NoCallbackError">
         <source>No callback is configured. Running post action is not possible.</source>
-        <target state="new">No callback is configured. Running post action is not possible.</target>
+        <target state="translated">Nenhum retorno de chamada está configurado. Não é possível executar a ação de postagem.</target>
         <note />
       </trans-unit>
       <trans-unit id="HostSpecificDataLoader_Warning_FailedToRead">
@@ -668,7 +668,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Failed">
         <source>Failed to add project(s) to a solution file.</source>
-        <target state="new">Failed to add project(s) to a solution file.</target>
+        <target state="translated">Falha ao adicionar projeto(s) a um arquivo de solução.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Running">
@@ -676,30 +676,30 @@ The header is followed by the list of parameters and their errors (might be seve
     project(s): {0}
     to solution file: {1}
     solution folder: {2}</source>
-        <target state="new">Adding
-    project(s): {0}
-    to solution file: {1}
-    solution folder: {2}</target>
+        <target state="translated">Adicionando
+    projeto(s): {0}
+    ao arquivo de solução: {1}
+    pasta de solução: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Succeeded">
         <source>Successfully added project(s) to a solution file.</source>
-        <target state="new">Successfully added project(s) to a solution file.</target>
+        <target state="translated">Projeto(s) adicionado(s) com sucesso a um arquivo de solução.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_AddPackageReference">
         <source>Adding a package reference {0} to project file {1}:</source>
-        <target state="new">Adding a package reference {0} to project file {1}:</target>
+        <target state="translated">Adicionando uma referência de pacote {0} ao arquivo de projeto {1}:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_AddPackageReference_WithVersion">
         <source>Adding a package reference {0} (version: {1}) to project file {2}:</source>
-        <target state="new">Adding a package reference {0} (version: {1}) to project file {2}:</target>
+        <target state="translated">Adicionando uma referência de pacote {0} (versão: {1}) ao arquivo de projeto {2}:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_AddProjectReference">
         <source>Adding a project reference {0} to project file {1}:</source>
-        <target state="new">Adding a project reference {0} to project file {1}:</target>
+        <target state="translated">Adicionando uma referência de projeto {0} ao arquivo de projeto {1}:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_ActionMisconfigured">
@@ -729,12 +729,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Failed">
         <source>Failed to add a reference to the project file.</source>
-        <target state="new">Failed to add a reference to the project file.</target>
+        <target state="translated">Falha ao adicionar uma referência ao arquivo de projeto.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Succeeded">
         <source>Successfully added a reference to the project file.</source>
-        <target state="new">Successfully added a reference to the project file.</target>
+        <target state="translated">Adicionada com sucesso uma referência ao arquivo de projeto.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
@@ -749,7 +749,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_Restore_Error_NoProjectsToRestore">
         <source>No projects are configured to restore. Check primary outputs configuration in template.json.</source>
-        <target state="new">No projects are configured to restore. Check primary outputs configuration in template.json.</target>
+        <target state="translated">Nenhum projeto está configurado para restauração. Verifique a configuração das saídas primárias em template.json.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_Restore_Failed">
@@ -759,7 +759,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_Restore_Running">
         <source>Restoring {0}:</source>
-        <target state="new">Restoring {0}:</target>
+        <target state="translated">Restaurando {0}:</target>
         <note>{0} - path to a project to restore</note>
       </trans-unit>
       <trans-unit id="PostAction_Restore_Succeeded">
