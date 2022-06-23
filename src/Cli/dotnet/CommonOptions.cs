@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Cli
     internal static class CommonOptions
     {
         public static Option<string[]> PropertiesOption =
-            new ForwardedOption<string[]>(new string[] { "-property", "/p" })
+            new ForwardedOption<string[]>(new string[] { "-property", "/p", "-p" })
             {
                 IsHidden = true
             }.ForwardAsProperty()

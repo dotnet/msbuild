@@ -116,7 +116,23 @@ namespace Microsoft.DotNet.Cli
         public static bool TokenPerLine(string tokenToReplace, out IReadOnlyList<string> replacementTokens, out string errorMessage) {
             var filePath = Path.GetFullPath(tokenToReplace);
             if (File.Exists(filePath)) {
-                replacementTokens = File.ReadAllLines(filePath).Where(line => !line.StartsWith("#")).Select(line => $"\"{line}\"").ToArray();
+                var lines = File.ReadAllLines(filePath);
+                var trimmedLines =
+                    lines
+                        // Remove content in the lines that contain #, starting from the point of the #
+                        .Select(line => {
+                            var hashPos = line.IndexOf('#');
+                            if (hashPos == -1) {
+                                return line;
+                            } else if (hashPos == 0) {
+                                return "";
+                            } else {
+                                return line.Substring(hashPos).Trim();
+                            }
+                        })
+                        // Remove empty lines
+                        .Where(line => line.Length > 0);
+                replacementTokens = trimmedLines.ToArray();
                 errorMessage = null;
                 return true;
             } else {
