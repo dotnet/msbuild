@@ -120,9 +120,8 @@ namespace Microsoft.DotNet.Cli
                 errorMessage = null;
                 return true;
             } else {
-                // don't report an error here, since MSBuild doesn't in the case of nonexistent response files
                 replacementTokens = null;
-                errorMessage = null;
+                errorMessage = string.Format(CommonLocalizableStrings.ResponseFileNotFound, tokenToReplace);
                 return false;
             }
         }
