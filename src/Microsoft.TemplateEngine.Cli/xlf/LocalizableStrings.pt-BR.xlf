@@ -658,12 +658,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Error_NoProjectsToAdd">
         <source>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</source>
-        <target state="new">Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</target>
+        <target state="translated">A adição de referência de projeto à ação de solução não está configurada corretamente no modelo. Não é possível determinar os arquivos de projeto a serem adicionados.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Error_NoSolutionFile">
         <source>Unable to determine which solution file to add the reference to.</source>
-        <target state="new">Unable to determine which solution file to add the reference to.</target>
+        <target state="translated">Não foi possível determinar o arquivo de projeto ao qual adicionar a referência.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Failed">
@@ -704,27 +704,27 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_ActionMisconfigured">
         <source>Add reference action is not configured correctly in the template.</source>
-        <target state="new">Add reference action is not configured correctly in the template.</target>
+        <target state="translated">A ação de referência Adicionar não está configurada corretamente no modelo.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_FrameworkNotSupported">
         <source>Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</source>
-        <target state="new">Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</target>
+        <target state="translated">Não é possível adicionar automaticamente a referência de estrutura {0} ao projeto. Edite manualmente o arquivo de projeto para adicioná-lo.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_ProjFileListHeader">
         <source>Project files found:</source>
-        <target state="new">Project files found:</target>
+        <target state="translated">Arquivos de projeto encontrados:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_UnresolvedProjFile">
         <source>Unable to determine which project file to add the reference to.</source>
-        <target state="new">Unable to determine which project file to add the reference to.</target>
+        <target state="translated">Não foi possível determinar o arquivo de projeto ao qual adicionar a referência.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_UnsupportedRefType">
         <source>Adding reference type {0} is not supported.</source>
-        <target state="new">Adding reference type {0} is not supported.</target>
+        <target state="translated">Não há suporte para adicionar o tipo de referência {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Failed">
@@ -744,7 +744,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_Restore_Error_FailedToDetermineProjectToRestore">
         <source>Couldn't determine files to restore.</source>
-        <target state="new">Couldn't determine files to restore.</target>
+        <target state="translated">Não foi possível determinar os arquivos a serem restaurados.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_Restore_Error_NoProjectsToRestore">
@@ -754,7 +754,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_Restore_Failed">
         <source>Restore failed.</source>
-        <target state="new">Restore failed.</target>
+        <target state="translated">Falha na restauração.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_Restore_Running">
@@ -764,7 +764,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_Restore_Succeeded">
         <source>Restore succeeded.</source>
-        <target state="new">Restore succeeded.</target>
+        <target state="translated">A restauração foi bem-sucedida.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessingPostActions">

@@ -658,12 +658,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Error_NoProjectsToAdd">
         <source>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</source>
-        <target state="new">Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</target>
+        <target state="translated">Çözüme proje başvurusu ekleme eylemi şablonda doğru şekilde yapılandırılmadı. Eklenecek proje dosyaları belirlenemiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Error_NoSolutionFile">
         <source>Unable to determine which solution file to add the reference to.</source>
-        <target state="new">Unable to determine which solution file to add the reference to.</target>
+        <target state="translated">Başvurunun hangi çözüm dosyasına ekleneceği belirlenemiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Failed">
@@ -704,27 +704,27 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_ActionMisconfigured">
         <source>Add reference action is not configured correctly in the template.</source>
-        <target state="new">Add reference action is not configured correctly in the template.</target>
+        <target state="translated">Add reference eylemi şablonda doğru yapılandırılmamış.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_FrameworkNotSupported">
         <source>Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</source>
-        <target state="new">Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</target>
+        <target state="translated">{0} çerçeve başvurusu projeye otomatik olarak eklenemiyor. Proje dosyasını el ile düzenleyerek ekleyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_ProjFileListHeader">
         <source>Project files found:</source>
-        <target state="new">Project files found:</target>
+        <target state="translated">Bulunan proje dosyaları:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_UnresolvedProjFile">
         <source>Unable to determine which project file to add the reference to.</source>
-        <target state="new">Unable to determine which project file to add the reference to.</target>
+        <target state="translated">Başvurunun hangi proje dosyasına ekleneceği belirlenemiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_UnsupportedRefType">
         <source>Adding reference type {0} is not supported.</source>
-        <target state="new">Adding reference type {0} is not supported.</target>
+        <target state="translated">{0} başvuru türünün eklenmesi desteklenmiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Failed">
@@ -744,7 +744,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_Restore_Error_FailedToDetermineProjectToRestore">
         <source>Couldn't determine files to restore.</source>
-        <target state="new">Couldn't determine files to restore.</target>
+        <target state="translated">Geri yüklenecek dosyalar belirlenemedi.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_Restore_Error_NoProjectsToRestore">
@@ -754,7 +754,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_Restore_Failed">
         <source>Restore failed.</source>
-        <target state="new">Restore failed.</target>
+        <target state="translated">Geri yükleme başarısız oldu.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_Restore_Running">
@@ -764,7 +764,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_Restore_Succeeded">
         <source>Restore succeeded.</source>
-        <target state="new">Restore succeeded.</target>
+        <target state="translated">Geri yükleme başarılı oldu.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessingPostActions">
