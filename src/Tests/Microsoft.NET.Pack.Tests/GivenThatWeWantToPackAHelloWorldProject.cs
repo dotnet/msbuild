@@ -95,24 +95,43 @@ namespace Microsoft.NET.Pack.Tests
             System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PackRelease>true</PackRelease></PropertyGroup></Project>");
 
             new BuildCommand(helloWorldAsset)
-           .Execute()
-           .Should()
-           .Pass();
+               .Execute()
+               .Should()
+               .Pass();
 
-            var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
+            var packCommand = new DotnetPackCommand(Log, helloWorldAsset.TestRoot);
 
             packCommand
-            .Execute()
-            .Should()
-            .HaveStdOutContaining("Release")
-            .And
-            .Pass();
+                .Execute()
+                .Should()
+                .HaveStdOutContaining("Release")
+                .And
+                .Pass();
         }
 
         [Fact]
-        public void A_PackRelease_property_does_not_override_other_commands()
+        public void A_PackRelease_property_does_not_override_other_command_configuration()
         {
-            Assert.True(false);
+            var helloWorldAsset = _testAssetsManager
+               .CopyTestAsset("HelloWorld", "PackHelloWorld")
+               .WithSource();
+
+            System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PackRelease>true</PackRelease></PropertyGroup></Project>");
+
+            new BuildCommand(helloWorldAsset)
+               .Execute()
+               .Should()
+               .Pass();
+
+            // Another command, which should not be affected by PackRelease
+            var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
+
+            publishCommand
+                .Execute()
+                .Should()
+                .NotHaveStdOutContaining("Release")
+                .And
+                .Pass();
         }
     }
 }

@@ -437,7 +437,7 @@ public static class Program
            .Should()
            .Pass();
 
-            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
+            var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
 
             publishCommand
             .Execute()
@@ -445,12 +445,6 @@ public static class Program
             .HaveStdOutContaining("Release")
             .And
             .Pass();
-        }
-
-        [Fact]
-        public void A_PublishRelease_property_does_not_override_other_commands()
-        {
-            Assert.True(false);
         }
 
         [Fact]

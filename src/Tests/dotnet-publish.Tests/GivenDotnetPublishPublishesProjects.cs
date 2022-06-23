@@ -343,5 +343,31 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should()
                 .Pass();
         }
+
+
+        [Fact]
+        public void A_PublishRelease_property_does_not_override_other_command_configuration()
+        {
+            var helloWorldAsset = _testAssetsManager
+               .CopyTestAsset("HelloWorld", "PackHelloWorld")
+               .WithSource();
+
+            System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PublishRelease>true</PublishRelease></PropertyGroup></Project>");
+
+            new BuildCommand(helloWorldAsset)
+               .Execute()
+               .Should()
+               .Pass();
+
+            // Another command, which should not be affected by PublishRelease
+            var packCommand = new DotnetPackCommand(Log, helloWorldAsset.TestRoot);
+
+            packCommand
+                .Execute()
+                .Should()
+                .NotHaveStdOutContaining("Release")
+                .And
+                .Pass();
+        }
     }
 }
