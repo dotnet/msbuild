@@ -1,0 +1,1 @@
+static Microsoft.Build.Utilities.ToolLocationHelper.GetPathToBuildDlls(string toolsVersion) -> string

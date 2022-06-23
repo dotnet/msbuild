@@ -113,7 +113,7 @@ namespace Microsoft.Build.Tasks
 
             CodeCompileUnit dom = generator.GenerateCode();
 
-            string pathToMSBuildBinaries = ToolLocationHelper.GetPathToBuildTools(ToolLocationHelper.CurrentToolsVersion);
+            string pathToMSBuildBinaries = ToolLocationHelper.GetPathToBuildDlls(ToolLocationHelper.CurrentToolsVersion);
 
             // create the code generator options    
             // Since we are running msbuild 12.0 these had better load.

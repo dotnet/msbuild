@@ -3556,6 +3556,23 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
+        /// Given a ToolsVersion, return the path to the MSBuild dll's.
+        /// </summary>
+        /// <remarks>This was created for XamlToolTask, which only looks for the dll's surrounding msbuild.exe.
+        /// arm64 MSBuild specifically uses the dll's in the root folder.</remarks>
+        public static string GetPathToBuildDlls(string toolsVersion)
+        {
+            return toolsVersion switch
+            {
+                "2.0" => GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20, UtilitiesDotNetFrameworkArchitecture.Current),
+                "3.5" => GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35, UtilitiesDotNetFrameworkArchitecture.Current),
+                "4.0" => GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version40, UtilitiesDotNetFrameworkArchitecture.Current),
+                // When looking for MSBuild dll's under a VS installation, the root is the "canonical" location for all dll's.
+                _ => BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot,
+            };
+        }
+
+        /// <summary>
         /// Given a ToolsVersion, return the path to the MSBuild tools for that ToolsVersion
         /// </summary>
         /// <param name="toolsVersion">The ToolsVersion for which to get the tools path</param>
