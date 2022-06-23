@@ -1095,6 +1095,7 @@ namespace Microsoft.Build.CommandLine
                     cpuCount,
                     onlyLogCriticalEvents,
                     loadProjectsReadOnly: !preprocessOnly,
+                    useAsynchronousLogging: false,
                     reuseProjectRootElementCache: s_isServerNode
                 );
 
@@ -2120,7 +2121,7 @@ namespace Microsoft.Build.CommandLine
             // NOTE: we heed the nologo switch even if there are switch errors
             if (!recursing && !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoLogo] && !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Preprocess))
             {
-                DisplayCopyrightMessage();
+                DisplayVersionMessage();
             }
 
 
@@ -3752,9 +3753,9 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Displays the application copyright message/logo.
+        /// Displays the application version message/logo.
         /// </summary>
-        private static void DisplayCopyrightMessage()
+        private static void DisplayVersionMessage()
         {
 #if RUNTIME_TYPE_NETCORE
             const string frameworkName = ".NET";
@@ -3764,7 +3765,7 @@ namespace Microsoft.Build.CommandLine
             const string frameworkName = ".NET Framework";
 #endif
 
-            Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CopyrightMessage", ProjectCollection.DisplayVersion, frameworkName));
+            Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildVersionMessage", ProjectCollection.DisplayVersion, frameworkName));
         }
 
         /// <summary>

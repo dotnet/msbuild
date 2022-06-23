@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 Microsoft.Common.CurrentVersion.targets
 
@@ -13,7 +13,6 @@ Visual Basic, and Visual C#.
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
-
 <Project DefaultTargets="Build" TreatAsLocalProperty="OutDir">
 
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="'$(MicrosoftCommonPropsHasBeenImported)' != 'true' and Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -1888,6 +1887,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
         <!-- Extract necessary information for SetPlatform negotiation -->
         <IsVcxOrNativeProj Condition="'$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj'">true</IsVcxOrNativeProj>
+        <Platform Condition="$([MSBuild]::AreFeaturesEnabled('17.4'))">$(Platform)</Platform>
         <Platforms>$(Platforms)</Platforms>
         <!-- .vcxproj and .nativeproj contain a `ProjectConfiguration` item that have `Platform` metadata within.
              Build the `Platforms` property from that. -->
@@ -1906,9 +1906,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </_AdditionalTargetFrameworkInfoPropertyWithValue>
     </ItemGroup>
 
+    <PropertyGroup>
+      <_UseAttributeForTargetFrameworkInfoPropertyNames Condition="'$(_UseAttributeForTargetFrameworkInfoPropertyNames)' == ''">false</_UseAttributeForTargetFrameworkInfoPropertyNames>
+    </PropertyGroup>
+
     <CombineTargetFrameworkInfoProperties
         RootElementName="$(TargetFramework)"
-        PropertiesAndValues="@(_AdditionalTargetFrameworkInfoPropertyWithValue)">
+        PropertiesAndValues="@(_AdditionalTargetFrameworkInfoPropertyWithValue)"
+        UseAttributeForTargetFrameworkInfoPropertyNames="$(_UseAttributeForTargetFrameworkInfoPropertyNames)">
       <Output TaskParameter="Result"
               PropertyName="_AdditionalTargetFrameworkInfoProperties"/>
     </CombineTargetFrameworkInfoProperties>
@@ -6106,7 +6111,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- This item represents the native manifest, example: WindowsApplication1.exe.manifest or Native.ClassLibrary1.manifest -->
     <ItemGroup>
-      <_BuiltProjectOutputGroupOutputIntermediate Include="$(OutDir)$(_DeploymentTargetApplicationManifestFileName)" Condition="'@(NativeReference)'!='' or '@(_IsolatedComReference)'!=''">
+      <_BuiltProjectOutputGroupOutputIntermediate Include="$(OutDir)$(_DeploymentTargetApplicationManifestFileName)" Condition="('@(NativeReference)'!='' or '@(_IsolatedComReference)'!='') And Exists('$(OutDir)$(_DeploymentTargetApplicationManifestFileName)')">
         <TargetPath>$(_DeploymentTargetApplicationManifestFileName)</TargetPath>
         <!-- For compatibility with 2.0 -->
         <OriginalItemSpec>$(OutDir)$(_DeploymentTargetApplicationManifestFileName)</OriginalItemSpec>

@@ -1662,7 +1662,7 @@ namespace Microsoft.Build.Execution
             // this has to be called out of the lock (_syncLock)
             // because processing events can callback to 'this' instance and cause deadlock
             Debug.Assert(!Monitor.IsEntered(_syncLock));
-            ((LoggingService) ((IBuildComponentHost) this).LoggingService).WaitForThreadToProcessEvents();
+            ((LoggingService) ((IBuildComponentHost) this).LoggingService).WaitForLoggingToProcessEvents();
         }
 
         /// <summary>
@@ -2652,26 +2652,20 @@ namespace Microsoft.Build.Execution
                         break;
 
                     case ScheduleActionType.CreateNode:
-                        var newNodes = new List<NodeInfo>();
+                        IList<NodeInfo> newNodes = _nodeManager.CreateNodes(GetNodeConfiguration(), response.RequiredNodeType, response.NumberOfNodesToCreate);
 
-                        for (int i = 0; i < response.NumberOfNodesToCreate; i++)
+                        if (newNodes?.Count != response.NumberOfNodesToCreate || newNodes.Any(n => n == null))
                         {
-                            NodeInfo createdNode = _nodeManager.CreateNode(GetNodeConfiguration(), response.RequiredNodeType);
+                            BuildEventContext buildEventContext = new BuildEventContext(0, Scheduler.VirtualNode, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                            ((IBuildComponentHost)this).LoggingService.LogError(buildEventContext, new BuildEventFileInfo(String.Empty), "UnableToCreateNode", response.RequiredNodeType.ToString("G"));
 
-                            if (createdNode != null)
-                            {
-                                _noNodesActiveEvent.Reset();
-                                _activeNodes.Add(createdNode.NodeId);
-                                newNodes.Add(createdNode);
-                                ErrorUtilities.VerifyThrow(_activeNodes.Count != 0, "Still 0 nodes after asking for a new node.  Build cannot proceed.");
-                            }
-                            else
-                            {
-                                BuildEventContext buildEventContext = new BuildEventContext(0, Scheduler.VirtualNode, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-                                ((IBuildComponentHost)this).LoggingService.LogError(buildEventContext, new BuildEventFileInfo(String.Empty), "UnableToCreateNode", response.RequiredNodeType.ToString("G"));
+                            throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnableToCreateNode", response.RequiredNodeType.ToString("G")));
+                        }
 
-                                throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnableToCreateNode", response.RequiredNodeType.ToString("G")));
-                            }
+                        foreach (var node in newNodes)
+                        {
+                            _noNodesActiveEvent.Reset();
+                            _activeNodes.Add(node.NodeId);
                         }
 
                         IEnumerable<ScheduleResponse> newResponses = _scheduler.ReportNodesCreated(newNodes);

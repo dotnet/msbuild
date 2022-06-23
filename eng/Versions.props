@@ -8,7 +8,7 @@
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
-    <MicroBuildPluginsSwixBuildVersion>1.0.672</MicroBuildPluginsSwixBuildVersion>
+    <MicroBuildPluginsSwixBuildVersion>1.1.87</MicroBuildPluginsSwixBuildVersion>
     <MonoBuild Condition="'$(Configuration)' == 'Debug-MONO' or '$(Configuration)' == 'Release-MONO'">true</MonoBuild>
   </PropertyGroup>
   <!-- Repo Toolset Features -->
@@ -25,18 +25,18 @@
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
-    <SystemResourcesExtensionsPackageVersion>4.6.0</SystemResourcesExtensionsPackageVersion>
+    <SystemResourcesExtensionsPackageVersion>6.0.0</SystemResourcesExtensionsPackageVersion>
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
     <!-- DotNetCliVersion MUST match the dotnet version in global.json.
          Otherwise, this version of dotnet will not be installed and the build will error out. -->
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>6.0.0-beta.22212.5</MicrosoftDotNetXUnitExtensionsVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>6.0.0-beta.22314.7</MicrosoftDotNetXUnitExtensionsVersion>
     <MicrosoftExtensionsDependencyModelVersion>6.0.0-preview.2.21154.6</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftIORedistVersion>6.0.0</MicrosoftIORedistVersion>
-    <MicrosoftNetCompilersToolsetVersion>4.2.0-4.22212.4</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>6.2.0-preview.2.109</NuGetBuildTasksVersion>
+    <MicrosoftNetCompilersToolsetVersion>4.2.0-4.22307.8</MicrosoftNetCompilersToolsetVersion>
+    <NuGetBuildTasksVersion>6.2.0-rc.146</NuGetBuildTasksVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
     <SystemTextJsonVersion>6.0.0</SystemTextJsonVersion>
     <SystemThreadingTasksDataflowVersion>6.0.0</SystemThreadingTasksDataflowVersion>

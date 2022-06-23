@@ -37,7 +37,15 @@ namespace Microsoft.Build.Shared
         {
             _directory = Directory.GetParent(assemblyPath)!.FullName;
 
-            _resolver = File.Exists(assemblyPath) ? new AssemblyDependencyResolver(assemblyPath) : null;
+            // We check for the assemblyPath because it will fail with an AssemblyDependencyResolver-specific error
+            // if it does not exist. We should instead fall back to the standard failure.
+            // The second check is because AssemblyDependencyResolver loads assemblies differently than we do by default.
+            // We should maintain previous behavior in the absence of new data (a .deps.json file) indicating that we
+            // should do something different.
+            // Setting the _resolver to null essentially just opts out of the new behavior.
+            _resolver = File.Exists(assemblyPath) && File.Exists(Path.ChangeExtension(assemblyPath, ".deps.json"))
+                ? new AssemblyDependencyResolver(assemblyPath) :
+                null;
         }
 
         protected override Assembly? Load(AssemblyName assemblyName)
