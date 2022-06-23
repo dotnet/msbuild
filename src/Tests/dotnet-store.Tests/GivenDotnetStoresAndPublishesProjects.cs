@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
     {
         private static string _tfm = "netcoreapp3.1";
         private static string _arch = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
-        private static string _expectedConfigurationDefault = "Debug";
+        private static string _defaultConfiguration = "Debug";
 
         public GivenDotnetStoresAndPublishesProjects(ITestOutputHelper log) : base(log)
         {
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Execute()
                 .Should().Pass();
 
-            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _expectedConfigurationDefault;
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
             var profileFilter = Path.Combine(localAssemblyCache, _arch, _tfm, "artifact.xml");
 
             new DotnetPublishCommand(Log,
@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Execute()
                 .Should().Pass();
 
-            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _expectedConfigurationDefault;
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
 
             new DotnetPublishCommand(Log,
                     "-f", _tfm,
@@ -148,7 +148,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Execute()
                 .Should().Pass();
 
-            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _expectedConfigurationDefault;
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
 
             new DotnetPublishCommand(Log,
                     "-f", _tfm,

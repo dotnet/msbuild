@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
     public class GivenDotnetPublishPublishesProjects : SdkTest
     {
 
-        private static string _expectedConfigurationDefault = "Debug";
+        private static string _defaultConfiguration = "Debug";
 
         public GivenDotnetPublishPublishesProjects(ITestOutputHelper log) : base(log)
         {
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Execute("--framework", ToolsetInfo.CurrentTargetFramework)
                 .Should().Pass();
 
-            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _expectedConfigurationDefault;
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
             var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "publish", $"{testAppName}.dll");
 
             new DotnetCommand(Log)
@@ -207,7 +207,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Execute(args?.Split() ?? Array.Empty<string>())
                 .Should().Pass();
 
-            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _expectedConfigurationDefault;
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
             return new DirectoryInfo(Path.Combine(testProjectDirectory, "bin", configuration, ToolsetInfo.CurrentTargetFramework, rid ?? "", "publish"));
         }
 
@@ -228,7 +228,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Execute("--no-restore")
                 .Should().Pass();
 
-            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _expectedConfigurationDefault;
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
 
             var outputProgram = Path.Combine(rootDir, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "publish", $"TestAppSimple.dll");
 
@@ -279,7 +279,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should()
                 .Pass();
 
-            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _expectedConfigurationDefault;
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
 
             var outputProgram = Path.Combine(rootPath, "bin", configuration, ToolsetInfo.CurrentTargetFramework, rid, "publish", $"TestAppSimple.dll");
 

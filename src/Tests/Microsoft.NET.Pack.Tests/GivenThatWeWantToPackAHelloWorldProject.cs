@@ -108,5 +108,11 @@ namespace Microsoft.NET.Pack.Tests
             .And
             .Pass();
         }
+
+        [Fact]
+        public void A_PackRelease_property_does_not_override_other_commands()
+        {
+            Assert.True(false);
+        }
     }
 }
