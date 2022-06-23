@@ -109,6 +109,24 @@ namespace Microsoft.DotNet.Cli
                 .FirstOrDefault(c => c.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
         }
 
+        /// <summary>
+        /// Implements token-per-line response file handling for the CLI. We use this instead of the built-in S.CL handling
+        /// to ensure backwards-compatibility with MSBuild.
+        /// </summary>
+        public static bool TokenPerLine(string tokenToReplace, out IReadOnlyList<string> replacementTokens, out string errorMessage) {
+            var filePath = Path.GetFullPath(tokenToReplace);
+            if (File.Exists(filePath)) {
+                replacementTokens = File.ReadAllLines(filePath).Where(line => !line.StartsWith("#")).ToArray();
+                errorMessage = null;
+                return true;
+            } else {
+                // don't report an error here, since MSBuild doesn't in the case of nonexistent response files
+                replacementTokens = null;
+                errorMessage = null;
+                return false;
+            }
+        }
+
         public static System.CommandLine.Parsing.Parser Instance { get; } = new CommandLineBuilder(ConfigureCommandLine(RootCommand))
             .UseExceptionHandler(ExceptionHandler)
             .UseHelp()
@@ -118,6 +136,7 @@ namespace Microsoft.DotNet.Cli
             .UseSuggestDirective()
             .DisablePosixBinding()
             .EnableLegacyDoubleDashBehavior()
+            .UseTokenReplacer(TokenPerLine)
             .Build();
 
         private static void ExceptionHandler(Exception exception, InvocationContext context)
