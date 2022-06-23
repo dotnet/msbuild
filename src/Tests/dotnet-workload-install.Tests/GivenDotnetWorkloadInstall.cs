@@ -488,7 +488,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             Directory.GetFiles(installRecordPath).Count().Should().Be(2);
         }
 
-        [Fact(Skip="Disable tests that might be updating workload manifest")]
+        [Fact(Skip="https://github.com/dotnet/sdk/issues/25175")]
         public void HideManifestUpdateCheckWhenVerbosityIsQuiet()
         {
             var command = new DotnetCommand(Log);
@@ -503,7 +503,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
 
-        [Theory(Skip="Disable tests that might be updating workload manifest")]
+        [Theory(Skip="https://github.com/dotnet/sdk/issues/25175")]
         [InlineData("--verbosity:minimal")]
         [InlineData("--verbosity:normal")]
         public void HideManifestUpdatesWhenVerbosityIsMinimalOrNormal(string verbosityFlag)
@@ -519,7 +519,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 .NotHaveStdOutContaining(Workloads.Workload.Install.LocalizableStrings.AdManifestUpdated);
         }
 
-        [Theory(Skip="Disable tests that might be updating workload manifest")]
+        [Theory(Skip="https://github.com/dotnet/sdk/issues/25175")]
         [InlineData("--verbosity:detailed")]
         [InlineData("--verbosity:diagnostic")]
         public void ShowManifestUpdatesWhenVerbosityIsDetailedOrDiagnostic(string verbosityFlag)
