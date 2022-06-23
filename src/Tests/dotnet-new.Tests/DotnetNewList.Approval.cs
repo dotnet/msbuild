@@ -21,10 +21,10 @@ namespace Microsoft.DotNet.New.Tests
         [Theory]
         [InlineData("-l")]
         [InlineData("--list")]
-        public Task CanShowDeprecationMessage_WhenLegacyCommandIsUsed(string commandName)
+        public Task BasicTest_WhenLegacyCommandIsUsed(string commandName)
         {
             var commandResult = new DotnetNewCommand(_log, commandName)
-                .WithCustomHive(TestUtils.CreateTemporaryFolder())
+                .WithCustomHive(_sharedHome.HomeDirectory)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute();
 
@@ -39,10 +39,10 @@ namespace Microsoft.DotNet.New.Tests
         }
 
         [Fact]
-        public Task DoNotShowDeprecationMessage_WhenNewCommandIsUsed()
+        public Task BasicTest_WhenListCommandIsUsed()
         {
             var commandResult = new DotnetNewCommand(_log, "list")
-                .WithCustomHive(TestUtils.CreateTemporaryFolder())
+                .WithCustomHive(_sharedHome.HomeDirectory)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute();
 

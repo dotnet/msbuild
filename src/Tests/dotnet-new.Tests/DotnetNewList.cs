@@ -26,27 +26,9 @@ namespace Microsoft.DotNet.New.Tests
         public DotnetNewList(SharedHomeDirectory sharedHome, VerifySettingsFixture verifySettings, ITestOutputHelper log) : base(log)
         {
             _sharedHome = sharedHome;
+            _sharedHome.InstallPackage("Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0");
             _log = log;
             _verifySettings = verifySettings.Settings;
-        }
-
-        [Theory]
-        [InlineData("--list")]
-        [InlineData("list")]
-        [InlineData("-l")]
-        public void BasicTest(string command)
-        {
-            new DotnetNewCommand(_log, command.Split(" "))
-                .WithCustomHive(_sharedHome.HomeDirectory)
-                .Execute()
-                .Should()
-                .ExitWith(0)
-                .And.NotHaveStdErr()
-                .And.HaveStdOutContaining($"These templates matched your input:")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
-                .And.HaveStdOutMatching("dotnet gitignore file\\s+gitignore\\s+Config")
-                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library");
         }
 
         [Theory]
@@ -123,34 +105,6 @@ namespace Microsoft.DotNet.New.Tests
                 .And.HaveStdOutMatching("Console App\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.NotHaveStdOutMatching("dotnet gitignore file\\s+gitignore\\s+Config")
                 .And.NotHaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library");
-        }
-
-        [Theory]
-        [InlineData("--list")]
-        [InlineData("list")]
-        [InlineData("-l")]
-        public void CanSortByName(string command)
-        {
-            string home = TestUtils.CreateTemporaryFolder();
-
-            var commandResult = new DotnetNewCommand(_log, command)
-                .WithCustomHive(home)
-                .Execute();
-            commandResult
-                .Should()
-                .ExitWith(0)
-                .And.NotHaveStdErr();
-
-            var stdOutput = commandResult.StdOut.Replace("\r\n", "\n");
-            var templateDetailList = Regex.Match(stdOutput, "(?<=(-+  ){3}-+\n)[\\s\\S]*").Value;
-            Assert.False(string.IsNullOrEmpty(templateDetailList), "No template was listed.");
-            int firstColumnWidth = Regex.Match(stdOutput, "(?<=Template Name {2,}Short Name {2,}Language {2,}Tags +\n)-+").Value.Length;
-            string pattern = $"^.{{{firstColumnWidth}}}(?= {2}\\w+)";
-            var templateNameMatches = Regex.Matches(templateDetailList, $"^.{{{firstColumnWidth}}}(?= {{2}}\\w+)", RegexOptions.Multiline);
-            var templateNameList = templateNameMatches.Select(x => x.Value).ToList();
-            var sortedNameList = new List<string>(templateNameList);
-            sortedNameList.Sort();
-            Assert.Equal(templateNameList, sortedNameList);
         }
 
         [Fact]
