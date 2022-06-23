@@ -22,11 +22,6 @@ using Microsoft.Build.Eventing;
 #endif
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-<<<<<<< HEAD
-=======
-using Microsoft.Build.Shared.FileSystem;
-using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
->>>>>>> main
 using Task = System.Threading.Tasks.Task;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
