@@ -600,27 +600,51 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(81, Keywords = Keywords.All)]
-        public void CreateLoadedTypeStart(string assemblyName)
+        public void SdkResolverServiceFindResolversManifestsStart()
         {
-            WriteEvent(81, assemblyName);
+            WriteEvent(81);
         }
 
         [Event(82, Keywords = Keywords.All)]
-        public void CreateLoadedTypeStop(string assemblyName)
+        public void SdkResolverServiceFindResolversManifestsStop(int resolverManifestCount)
         {
-            WriteEvent(82, assemblyName);
+            WriteEvent(82, resolverManifestCount);
         }
 
         [Event(83, Keywords = Keywords.All)]
-        public void LoadAssemblyAndFindTypeStart()
+        public void SdkResolverServiceLoadResolversStart()
         {
             WriteEvent(83);
         }
 
         [Event(84, Keywords = Keywords.All)]
+        public void SdkResolverServiceLoadResolversStop(string manifestName, int resolverCount)
+        {
+            WriteEvent(84, manifestName, resolverCount);
+        }
+
+        [Event(85, Keywords = Keywords.All)]
+        public void CreateLoadedTypeStart(string assemblyName)
+        {
+            WriteEvent(85, assemblyName);
+        }
+
+        [Event(86, Keywords = Keywords.All)]
+        public void CreateLoadedTypeStop(string assemblyName)
+        {
+            WriteEvent(86, assemblyName);
+        }
+
+        [Event(87, Keywords = Keywords.All)]
+        public void LoadAssemblyAndFindTypeStart()
+        {
+            WriteEvent(87);
+        }
+
+        [Event(88, Keywords = Keywords.All)]
         public void LoadAssemblyAndFindTypeStop(string assemblyPath, int numberOfPublicTypesSearched)
         {
-            WriteEvent(84, assemblyPath, numberOfPublicTypesSearched);
+            WriteEvent(88, assemblyPath, numberOfPublicTypesSearched);
         }
 
         #endregion
