@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.Cli
         public static bool TokenPerLine(string tokenToReplace, out IReadOnlyList<string> replacementTokens, out string errorMessage) {
             var filePath = Path.GetFullPath(tokenToReplace);
             if (File.Exists(filePath)) {
-                replacementTokens = File.ReadAllLines(filePath).Where(line => !line.StartsWith("#")).ToArray();
+                replacementTokens = File.ReadAllLines(filePath).Where(line => !line.StartsWith("#")).Select(line => $"\"{line}\"").ToArray();
                 errorMessage = null;
                 return true;
             } else {
