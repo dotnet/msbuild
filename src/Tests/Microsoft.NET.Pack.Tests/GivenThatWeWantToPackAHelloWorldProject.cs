@@ -89,7 +89,7 @@ namespace Microsoft.NET.Pack.Tests
         public void It_packs_with_release_if_PackRelease_property_set()
         {
             var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld", "PackHelloWorld")
+               .CopyTestAsset("HelloWorld", "PackReleaseHelloWorld")
                .WithSource();
 
             System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PackRelease>true</PackRelease></PropertyGroup></Project>");
@@ -113,7 +113,7 @@ namespace Microsoft.NET.Pack.Tests
         public void A_PackRelease_property_does_not_override_other_command_configuration()
         {
             var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld", "PackHelloWorld")
+               .CopyTestAsset("HelloWorld", "PackPropertiesHelloWorld")
                .WithSource();
 
             System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PackRelease>true</PackRelease></PropertyGroup></Project>");

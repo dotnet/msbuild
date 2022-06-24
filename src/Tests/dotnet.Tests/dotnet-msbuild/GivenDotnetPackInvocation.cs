@@ -17,6 +17,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
     {
         const string ExpectedPrefix = "-maxcpucount -verbosity:m -restore -target:pack";
         const string ExpectedNoBuildPrefix = "-maxcpucount -verbosity:m -target:pack";
+        const string ExpectedProperties = "-property:_IsPacking=true";
 
         private static readonly string WorkingDirectory =
             TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetPackInvocation));
@@ -49,7 +50,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 var expectedPrefix = args.FirstOrDefault() == "--no-build" ? ExpectedNoBuildPrefix : ExpectedPrefix;
 
                 command.SeparateRestoreCommand.Should().BeNull();
-                command.GetArgumentsToMSBuild().Should().Be($"{expectedPrefix}{expectedAdditionalArgs}");
+                command.GetArgumentsToMSBuild().Should().Be($"{expectedPrefix} {ExpectedProperties}{expectedAdditionalArgs}");
             });
         }
     }

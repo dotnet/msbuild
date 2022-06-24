@@ -349,7 +349,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         public void A_PublishRelease_property_does_not_override_other_command_configuration()
         {
             var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld", "PackHelloWorld")
+               .CopyTestAsset("HelloWorld", "PublishPropertiesHelloWorld")
                .WithSource();
 
             System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PublishRelease>true</PublishRelease></PropertyGroup></Project>");

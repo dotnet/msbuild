@@ -427,7 +427,7 @@ public static class Program
         public void It_publishes_on_release_if_PublishRelease_property_set()
         {
             var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld", "PackHelloWorld")
+               .CopyTestAsset("HelloWorld", "PublishReleaseHelloWorld")
                .WithSource();
 
             System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PublishRelease>true</PublishRelease></PropertyGroup></Project>");
