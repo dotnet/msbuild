@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Build;
 using Microsoft.DotNet.Tools.Publish;
+using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
