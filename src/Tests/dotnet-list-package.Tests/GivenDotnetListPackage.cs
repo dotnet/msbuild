@@ -181,7 +181,7 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
                 .Should()
                 .Pass()
                 .And.NotHaveStdErr()
-                .And.HaveStdOutContaining("System.IO.FileSystem");
+                .And.NotHaveStdOutContaining("System.IO.FileSystem");
         }
 
         [Theory]
