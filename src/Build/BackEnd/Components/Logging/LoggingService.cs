@@ -1433,7 +1433,10 @@ namespace Microsoft.Build.BackEnd.Logging
         private void RouteBuildEvent(object loggingEvent)
         {
             BuildEventArgs buildEventArgs = loggingEvent as BuildEventArgs ?? (loggingEvent as KeyValuePair<int, BuildEventArgs>?)?.Value;
-            ErrorUtilities.VerifyThrow(buildEventArgs is not null, "Unknown logging item in queue:" + loggingEvent.GetType().FullName);
+            if (buildEventArgs is null)
+            {
+                ErrorUtilities.ThrowInternalError("Unknown logging item in queue:" + loggingEvent.GetType().FullName);
+            }
 
             if (buildEventArgs is BuildWarningEventArgs warningEvent)
             {
