@@ -47,6 +47,11 @@
         <target state="translated">インターフェイス メンバーが {2} に存在しないため、インターフェイス メンバー '{0}' を {1} に追加できません</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotAddVirtualToMember">
+        <source>Cannot add virtual keyword to member '{0}'.</source>
+        <target state="new">Cannot add virtual keyword to member '{0}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
         <source>Type '{0}' does not implement interface '{1}' on {2} but it does on {3}</source>
         <target state="translated">型 '{0}' は、{2} でインターフェイス '{1}' を実装していませんが、{3} で実装します</target>
@@ -55,6 +60,11 @@
       <trans-unit id="CannotRemoveBaseType">
         <source>Type '{0}' does not inherit from base type '{1}' on {2} but it does on {3}</source>
         <target state="translated">型 '{0}' は {2} では基本データ型 '{1}' から継承していませんが、{3} では継承しています</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotRemoveVirtualFromMember">
+        <source>Cannot remove virtual keyword from member '{0}'.</source>
+        <target state="new">Cannot remove virtual keyword from member '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveReference">

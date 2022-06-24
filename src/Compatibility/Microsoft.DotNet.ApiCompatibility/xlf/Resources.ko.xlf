@@ -47,6 +47,11 @@
         <target state="translated">인터페이스 멤버 '{0}'이(가) {2}에 없으므로 {1}에 추가할 수 없습니다</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotAddVirtualToMember">
+        <source>Cannot add virtual keyword to member '{0}'.</source>
+        <target state="new">Cannot add virtual keyword to member '{0}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
         <source>Type '{0}' does not implement interface '{1}' on {2} but it does on {3}</source>
         <target state="translated">'{0}' 유형은 '{1}' 인터페이스를 {2}에 구현하지 않지만 {3}에는 구현합니다</target>
@@ -55,6 +60,11 @@
       <trans-unit id="CannotRemoveBaseType">
         <source>Type '{0}' does not inherit from base type '{1}' on {2} but it does on {3}</source>
         <target state="translated">'{0}' 유형은 {2}의 기본 유형 {1}에서는 상속되지 않지만 {3}에서는 상속됩니다</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotRemoveVirtualFromMember">
+        <source>Cannot remove virtual keyword from member '{0}'.</source>
+        <target state="new">Cannot remove virtual keyword from member '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveReference">

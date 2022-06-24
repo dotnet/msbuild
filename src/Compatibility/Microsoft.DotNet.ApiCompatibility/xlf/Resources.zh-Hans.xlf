@@ -47,6 +47,11 @@
         <target state="translated">无法将接口成员“{0}”添加到 {1}，因为它在 {2} 上不存在</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotAddVirtualToMember">
+        <source>Cannot add virtual keyword to member '{0}'.</source>
+        <target state="new">Cannot add virtual keyword to member '{0}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
         <source>Type '{0}' does not implement interface '{1}' on {2} but it does on {3}</source>
         <target state="translated">类型“{0}”不在 {1} 上实现接口“{2}”，但它在 {3} 上实现</target>
@@ -55,6 +60,11 @@
       <trans-unit id="CannotRemoveBaseType">
         <source>Type '{0}' does not inherit from base type '{1}' on {2} but it does on {3}</source>
         <target state="translated">类型“{0}”不从 {2} 上的基类型“{1}”继承，但在 {3} 上继承</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotRemoveVirtualFromMember">
+        <source>Cannot remove virtual keyword from member '{0}'.</source>
+        <target state="new">Cannot remove virtual keyword from member '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveReference">

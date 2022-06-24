@@ -19,6 +19,8 @@ namespace Microsoft.DotNet.ApiCompatibility
         public const string CannotSealType = "CP0009";
         public const string EnumTypesMustMatch = "CP0010";
         public const string EnumValuesMustMatch = "CP0011";
+        public const string CannotRemoveVirtualFromMember = "CP0012";
+        public const string CannotAddVirtualToMember = "CP0013";
 
         // Assembly loading ids
         public const string AssemblyNotFound = "CP1001";

@@ -47,6 +47,11 @@
         <target state="translated">無法將介面成員 '{0}' 新增至 {1}，因為其不存在於 {2} 上</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotAddVirtualToMember">
+        <source>Cannot add virtual keyword to member '{0}'.</source>
+        <target state="new">Cannot add virtual keyword to member '{0}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
         <source>Type '{0}' does not implement interface '{1}' on {2} but it does on {3}</source>
         <target state="translated">類型 '{0}' 沒有在 {2} 上實作介面 '{1}'，但在 {3} 上有</target>
@@ -55,6 +60,11 @@
       <trans-unit id="CannotRemoveBaseType">
         <source>Type '{0}' does not inherit from base type '{1}' on {2} but it does on {3}</source>
         <target state="translated">類型 '{0}' 在 {2} 並未繼承來自 '{1}' 的基底類型，但在 {3} 上有</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotRemoveVirtualFromMember">
+        <source>Cannot remove virtual keyword from member '{0}'.</source>
+        <target state="new">Cannot remove virtual keyword from member '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveReference">

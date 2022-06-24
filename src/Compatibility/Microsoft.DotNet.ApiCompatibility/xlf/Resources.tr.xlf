@@ -47,6 +47,11 @@
         <target state="translated">'{0}' arabirim üyesi {2} üzerinde bulunmadığından {1} konumuna eklenemiyor</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotAddVirtualToMember">
+        <source>Cannot add virtual keyword to member '{0}'.</source>
+        <target state="new">Cannot add virtual keyword to member '{0}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
         <source>Type '{0}' does not implement interface '{1}' on {2} but it does on {3}</source>
         <target state="translated">'{0}' türü, {2} üzerinde '{1}' arabirimini uygulamıyor ancak bu {3} üzerinde uyguluyor</target>
@@ -55,6 +60,11 @@
       <trans-unit id="CannotRemoveBaseType">
         <source>Type '{0}' does not inherit from base type '{1}' on {2} but it does on {3}</source>
         <target state="translated">'{0}' türü {2} üzerinde '{1}' temel türünden devralmıyor ancak {3} üzerinde devralıyor</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotRemoveVirtualFromMember">
+        <source>Cannot remove virtual keyword from member '{0}'.</source>
+        <target state="new">Cannot remove virtual keyword from member '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveReference">
