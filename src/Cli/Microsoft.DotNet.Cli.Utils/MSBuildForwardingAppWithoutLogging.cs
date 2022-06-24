@@ -54,11 +54,7 @@ namespace Microsoft.DotNet.Cli.Utils
             _argsToForward = argsToForward;
             MSBuildPath = msbuildPath ?? defaultMSBuildPath;
 
-            if (UseMSBuildServer)
-            {
-                // Force MSBuild to use msbuild server mode.
-                EnvironmentVariable("MSBUILDUSESERVER", "1");
-            }
+            EnvironmentVariable("MSBUILDUSESERVER", UseMSBuildServer ? "1" : "0");
 
             // If DOTNET_CLI_RUN_MSBUILD_OUTOFPROC is set or we're asked to execute a non-default binary, call MSBuild out-of-proc.
             if (AlwaysExecuteMSBuildOutOfProc || !string.Equals(MSBuildPath, defaultMSBuildPath, StringComparison.OrdinalIgnoreCase))
@@ -99,6 +95,9 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (value == string.Empty || value == "\0")
             {
+                // Do not allow MSBUILDUSESERVER as null env vars are not properly transferred to build nodes
+                _msbuildRequiredEnvironmentVariables["MSBUILDUSESERVER"] = "0";
+
                 // Unlike ProcessStartInfo.EnvironmentVariables, Environment.SetEnvironmentVariable can't set a variable
                 // to an empty value, so we just fall back to calling MSBuild out-of-proc if we encounter this case.
                 // https://github.com/dotnet/runtime/issues/50554
