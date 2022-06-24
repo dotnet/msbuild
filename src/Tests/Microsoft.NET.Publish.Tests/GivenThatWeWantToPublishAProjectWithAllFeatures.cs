@@ -47,7 +47,7 @@ namespace Microsoft.NET.Publish.Tests
                 // TestLibrary has a hard dependency on Newtonsoft.Json.
                 // TestApp has a PrivateAssets=All dependency on Microsoft.Extensions.DependencyModel, which depends on Newtonsoft.Json.
                 // This verifies that P2P references get walked correctly when doing PrivateAssets exclusion.
-                VerifyDependency(dependencyContext, "Newtonsoft.Json", "lib/netstandard1.0/", null);
+                VerifyDependency(dependencyContext, "Newtonsoft.Json", "lib/netstandard1.3/", null);
 
                 // Verify P2P references get created correctly in the .deps.json file.
                 VerifyDependency(dependencyContext, "TestLibrary", "", null,
@@ -263,6 +263,15 @@ namespace Microsoft.NET.Publish.Tests
                         "NoneCopyOutputPreserveNewest.txt",
                         "CopyToOutputFromProjectReference.txt",
                         "Humanizer.dll",
+                        "Microsoft.CSharp.dll",
+                        "System.Dynamic.Runtime.dll",
+                        "System.Xml.XmlDocument.dll",
+                        "System.ComponentModel.Primitives.dll",
+                        "System.Collections.NonGeneric.dll",
+                        "System.ComponentModel.TypeConverter.dll",
+                        "System.ComponentModel.dll",
+                        "System.Collections.Specialized.dll",
+                        "System.Runtime.Serialization.Formatters.dll",
                         "System.AppContext.dll",
                         "System.Buffers.dll",
                         "System.Collections.Concurrent.dll",
@@ -380,6 +389,12 @@ namespace Microsoft.NET.Publish.Tests
                         "TestLibrary.dll",
                         "TestLibrary.pdb",
                         "Newtonsoft.Json.dll",
+                        "System.Collections.NonGeneric.dll",
+                        "System.Collections.Specialized.dll",
+                        "System.ComponentModel.Primitives.dll",
+                        "System.ComponentModel.TypeConverter.dll",
+                        "System.Runtime.Serialization.Formatters.dll",
+                        "System.Xml.XmlDocument.dll",
                         "System.Runtime.Serialization.Primitives.dll",
                         "CompileCopyToOutput.cs",
                         "Resource1.resx",
