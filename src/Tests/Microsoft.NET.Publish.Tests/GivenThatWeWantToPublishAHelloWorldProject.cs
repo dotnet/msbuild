@@ -428,7 +428,8 @@ public static class Program
         {
             var helloWorldAsset = _testAssetsManager
                .CopyTestAsset("HelloWorld", "PublishReleaseHelloWorld")
-               .WithSource();
+               .WithSource()
+               .WithTargetFramework("net7.0");
 
             System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PublishRelease>true</PublishRelease></PropertyGroup></Project>");
 
@@ -442,9 +443,9 @@ public static class Program
             publishCommand
             .Execute()
             .Should()
-            .HaveStdOutContaining("Release")
-            .And
             .Pass();
+
+            Assert.True(File.Exists(helloWorldAsset.Path + "\\bin\\Release\\net7.0\\HelloWorld.dll"));
         }
 
         [Fact]

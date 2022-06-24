@@ -104,9 +104,9 @@ namespace Microsoft.NET.Pack.Tests
             packCommand
                 .Execute()
                 .Should()
-                .HaveStdOutContaining("Release")
-                .And
                 .Pass();
+
+            Assert.True(File.Exists(helloWorldAsset.Path + "\\bin\\Release\\HelloWorld.1.0.0.nupkg"));
         }
 
         [Fact]
@@ -114,7 +114,8 @@ namespace Microsoft.NET.Pack.Tests
         {
             var helloWorldAsset = _testAssetsManager
                .CopyTestAsset("HelloWorld", "PackPropertiesHelloWorld")
-               .WithSource();
+               .WithSource()
+               .WithTargetFramework("net7.0");
 
             System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PackRelease>true</PackRelease></PropertyGroup></Project>");
 
@@ -129,9 +130,9 @@ namespace Microsoft.NET.Pack.Tests
             publishCommand
                 .Execute()
                 .Should()
-                .NotHaveStdOutContaining("Release")
-                .And
                 .Pass();
+
+            Assert.False(File.Exists(helloWorldAsset.Path + "\\bin\\Release\\net7.0\\HelloWorld.dll"));
         }
     }
 }
