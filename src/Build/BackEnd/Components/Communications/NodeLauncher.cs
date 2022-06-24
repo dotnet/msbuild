@@ -24,6 +24,31 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public Process Start(string msbuildLocation, string commandLineArgs)
         {
+            // Disable MSBuild server for a child process.
+            // In case of starting msbuild server it prevents an infinite recurson. In case of starting msbuild node we also do not want this variable to be set.
+            string useMSBuildServerEnvVarValue = Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName);
+            try
+            {
+                if (useMSBuildServerEnvVarValue is not null)
+                {
+                    Environment.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, "0");
+                }
+                return PrivateStart(msbuildLocation, commandLineArgs);
+            }
+            finally
+            {
+                if (useMSBuildServerEnvVarValue is not null)
+                {
+                    Environment.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, useMSBuildServerEnvVarValue);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates a new MSBuild process
+        /// </summary>
+        private Process PrivateStart(string msbuildLocation, string commandLineArgs)
+        {
             // Should always have been set already.
             ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, nameof(msbuildLocation));
 
