@@ -31,9 +31,10 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
             RestoringCommand command = buildCommand ? 
                 BuildCommand.FromArgs(arguments) : 
                 PublishCommand.FromArgs(arguments);
+            var expectedArguments = arguments.Select(a => a.Replace("-p:", "-property:"));
             command.GetArgumentsToMSBuild().Split(' ')
                 .Should()
-                .Contain(arguments);
+                .Contain(expectedArguments);
         }
     }
 }
