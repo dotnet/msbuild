@@ -522,21 +522,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         throw new FileNotFoundException("Manifest MSI not found in NuGet package", extractionPath);
                     }
                     string msiExtractionPath = Path.Combine(extractionPath, "msi");
-                    
-                    var psi = new ProcessStartInfo()
-                    {
-                        FileName = "msiexec",
-                        ArgumentList =
-                        {
-                            "/a",
-                            msiPath,
-                            $"TARGETDIR={msiExtractionPath}",
-                            "/QN",  //  Quiet: No UI
-                        }
-                    };
 
-                    var exitCode = psi.Execute();
-                    if (exitCode != 0)
+
+                    _ = WindowsInstaller.SetInternalUI(InstallUILevel.None);
+                    var result = WindowsInstaller.InstallProduct(msiPath, $"TARGETDIR={msiExtractionPath} ACTION=ADMIN");
+
+                    if (result != Error.SUCCESS)
                     {
                         throw new GracefulException("Failed to extract information from MSI: " + msiPath);
                     }
