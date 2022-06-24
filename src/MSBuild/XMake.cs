@@ -1095,7 +1095,7 @@ namespace Microsoft.Build.CommandLine
                     cpuCount,
                     onlyLogCriticalEvents,
                     loadProjectsReadOnly: !preprocessOnly,
-                    useAsynchronousLogging: false,
+                    useAsynchronousLogging: true,
                     reuseProjectRootElementCache: s_isServerNode
                 );
 
