@@ -566,9 +566,6 @@ namespace Microsoft.Build.CommandLine
                 string outputResultsCache = null;
                 CommandLineSwitches.SwitchesFromResponseFiles ??= new();
 
-                // Reset the value of LogAllEnvironmentVariables. It may have been changed via ShowEnvironment in a previous build.
-                Traits.LogAllEnvironmentVariables = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES")) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4);
-
                 GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile);
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
                                             switchesFromAutoResponseFile,

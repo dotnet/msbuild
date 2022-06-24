@@ -940,7 +940,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         public virtual void Shutdown()
         {
-            // do nothing
+            Traits.LogAllEnvironmentVariables = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES")) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4);
         }
 
         internal abstract void ResetConsoleLoggerState();
