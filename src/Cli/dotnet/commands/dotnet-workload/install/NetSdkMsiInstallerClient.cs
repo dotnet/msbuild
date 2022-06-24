@@ -506,7 +506,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     Directory.Delete(targetPath, true);
                 }
 
-                //  Do we need to worry about signing validation here?  I think not, as if the manifest is ever actually installed, it will go through signing validation
                 string extractedManifestPath = Path.Combine(extractionPath, "data", "extractedManifest");
                 if (Directory.Exists(extractedManifestPath))
                 {
