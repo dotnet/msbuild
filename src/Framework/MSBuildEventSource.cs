@@ -600,17 +600,40 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(81, Keywords = Keywords.All)]
-        public void MSBuildServerBuildStart(string commandLine)
+        public void SdkResolverServiceFindResolversManifestsStart()
         {
-            WriteEvent(81, commandLine);
+            WriteEvent(81);
         }
 
         [Event(82, Keywords = Keywords.All)]
-        public void MSBuildServerBuildStop(string commandLine, int countOfConsoleMessages, long sumSizeOfConsoleMessages, string clientExitType, string serverExitType)
+        public void SdkResolverServiceFindResolversManifestsStop(int resolverManifestCount)
         {
-            WriteEvent(82, commandLine, countOfConsoleMessages, sumSizeOfConsoleMessages, clientExitType, serverExitType);
+            WriteEvent(82, resolverManifestCount);
         }
 
+        [Event(83, Keywords = Keywords.All)]
+        public void SdkResolverServiceLoadResolversStart()
+        {
+            WriteEvent(83);
+        }
+
+        [Event(84, Keywords = Keywords.All)]
+        public void SdkResolverServiceLoadResolversStop(string manifestName, int resolverCount)
+        {
+            WriteEvent(84, manifestName, resolverCount);
+        }
+
+        [Event(85, Keywords = Keywords.All)]
+        public void MSBuildServerBuildStart(string commandLine)
+        {
+            WriteEvent(85, commandLine);
+        }
+
+        [Event(86, Keywords = Keywords.All)]
+        public void MSBuildServerBuildStop(string commandLine, int countOfConsoleMessages, long sumSizeOfConsoleMessages, string clientExitType, string serverExitType)
+        {
+            WriteEvent(86, commandLine, countOfConsoleMessages, sumSizeOfConsoleMessages, clientExitType, serverExitType);
+        }
         #endregion
     }
 }
