@@ -127,7 +127,7 @@ namespace Microsoft.DotNet.Cli
                             } else if (hashPos == 0) {
                                 return "";
                             } else {
-                                return line.Substring(hashPos).Trim();
+                                return line.Substring(0, hashPos).Trim();
                             }
                         })
                         // Remove empty lines

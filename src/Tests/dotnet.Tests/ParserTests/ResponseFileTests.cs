@@ -48,5 +48,28 @@ namespace Microsoft.DotNet.Tests.ParserTests
             Log.WriteLine($"Token string is {tokenString}");
             tokens.Skip(1).Should().BeEquivalentTo(tokenized);
         }
+
+        [Fact]
+        public void Can_skip_empty_and_commented_lines() {
+             var tempFileDir = _testAssetsManager.CreateTestDirectory().Path;
+            var tempFilePath = Path.Combine(tempFileDir, "skips.rsp");
+            var lines = new[] {
+                "build",
+                "",
+                "run# but skip this",
+                "# and this"
+            };
+            File.WriteAllLines(tempFilePath, lines);
+
+            var parser = Parser.Instance;
+            var parseResult = parser.Parse(new []{ "dotnet", $"@{tempFilePath}" });
+            var tokens = parseResult.Tokens.Select(t => t.Value);
+            var tokenized = new [] {
+                "build",
+                "run"
+            };
+
+            tokens.Skip(1).Should().BeEquivalentTo(tokenized);
+        }
     }
 }
