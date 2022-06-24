@@ -7,7 +7,7 @@ and preserve caches between builds.
 
 The primary ways to use MSBuild are via Visual Studio and via CLI using `dotnet build`/`dotnet msbuild` commands. MSBuild Server is not supported in Visual Studio, becuase Visual studio itself
 works like MSBuild Server. For CLI is the server functionality enabled by default and can be disabled by setting `DOTNET_CLI_DO_NOT_USE_MSBUILD_SERVER` environment variable to value `1`.
-In order to re-enable using of MSBuild Server, remove the variable or set the valute to `0`.
+In order to re-enable using of MSBuild Server, remove the variable or set the value to `0`.
 
 ## Communication protocol
 
