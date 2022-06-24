@@ -91,7 +91,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             if (_printDownloadLinkOnly)
             {
                 Reporter.WriteLine(string.Format(LocalizableStrings.ResolvingPackageUrls, string.Join(", ", _workloadIds)));
-                var packageUrls = GetPackageDownloadUrlsAsync(_workloadIds.Select(id => new WorkloadId(id)), _skipManifestUpdate, _includePreviews).GetAwaiter().GetResult();
+
+                //  Take the union of the currently installed workloads and the ones that are being requested.  This is so that if there are updates to the manifests
+                //  which require new packs for currently installed workloads, those packs will be downloaded.
+                //  If the packs are already installed, they won't be included in the results
+                var existingWorkloads = GetInstalledWorkloads(false);
+                var workloadsToDownload = existingWorkloads.Union(_workloadIds.Select(id => new WorkloadId(id))).ToList();
+
+                var packageUrls = GetPackageDownloadUrlsAsync(workloadsToDownload, _skipManifestUpdate, _includePreviews).GetAwaiter().GetResult();
 
                 Reporter.WriteLine("==allPackageLinksJsonOutputStart==");
                 Reporter.WriteLine(JsonSerializer.Serialize(packageUrls, new JsonSerializerOptions() { WriteIndented = true }));
@@ -101,7 +108,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 try
                 {
-                    DownloadToOfflineCacheAsync(_workloadIds.Select(id => new WorkloadId(id)), new DirectoryPath(_downloadToCacheOption), _skipManifestUpdate, _includePreviews).Wait();
+                    //  Take the union of the currently installed workloads and the ones that are being requested.  This is so that if there are updates to the manifests
+                    //  which require new packs for currently installed workloads, those packs will be downloaded.
+                    //  If the packs are already installed, they won't be included in the results
+                    var existingWorkloads = GetInstalledWorkloads(false);
+                    var workloadsToDownload = existingWorkloads.Union(_workloadIds.Select(id => new WorkloadId(id))).ToList();
+
+                    DownloadToOfflineCacheAsync(workloadsToDownload, new DirectoryPath(_downloadToCacheOption), _skipManifestUpdate, _includePreviews).Wait();
                 }
                 catch (Exception e)
                 {
