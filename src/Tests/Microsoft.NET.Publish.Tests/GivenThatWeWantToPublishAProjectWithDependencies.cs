@@ -141,6 +141,7 @@ namespace Microsoft.NET.Publish.Tests
             DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory(targetFramework);
 
             publishDirectory.Should().OnlyHaveFiles(new[] {
+                "Newtonsoft.Json.dll",
                 $"{project}.dll",
                 $"{project}.pdb",
                 $"{project}.deps.json",
@@ -149,9 +150,6 @@ namespace Microsoft.NET.Publish.Tests
 
             var runtimeConfig = ReadJson(Path.Combine(publishDirectory.FullName, $"{project}.runtimeconfig.json"));
             runtimeConfig["runtimeOptions"]["tfm"].ToString().Should().Be(targetFramework);
-
-            var depsJson = ReadJson(Path.Combine(publishDirectory.FullName, $"{project}.deps.json"));
-            depsJson["libraries"]["Newtonsoft.Json/9.0.1"]["runtimeStoreManifestName"].ToString().Should().Be($"{manifestFileName1};{manifestFileName2}");
 
             // The end-to-end test of running the published app happens in the dotnet/cli repo.
             // See https://github.com/dotnet/cli/blob/358568b07f16749108dd33e7fea2f2c84ccf4563/test/dotnet-store.Tests/GivenDotnetStoresAndPublishesProjects.cs
@@ -198,7 +196,7 @@ namespace Microsoft.NET.Publish.Tests
                 $"{FileConstants.DynamicLibPrefix}coreclr{FileConstants.DynamicLibSuffix}"
             });
 
-            publishDirectory.Should().NotHaveFiles(new[] {
+            publishDirectory.Should().HaveFiles(new[] {
                 "Newtonsoft.Json.dll",
             });
         }
