@@ -106,7 +106,8 @@ namespace Microsoft.NET.Pack.Tests
                 .Should()
                 .Pass();
 
-            Assert.True(File.Exists(helloWorldAsset.Path + "\\bin\\Release\\HelloWorld.1.0.0.nupkg"));
+            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", "HelloWorld.1.0.0.nupkg");
+            Assert.True(File.Exists(expectedAssetPath));
         }
 
         [Fact]
@@ -132,7 +133,8 @@ namespace Microsoft.NET.Pack.Tests
                 .Should()
                 .Pass();
 
-            Assert.False(File.Exists(helloWorldAsset.Path + "\\bin\\Release\\net7.0\\HelloWorld.dll"));
+            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", "net7.0", "HelloWorld.dll");
+            Assert.False(File.Exists(expectedAssetPath));
         }
     }
 }

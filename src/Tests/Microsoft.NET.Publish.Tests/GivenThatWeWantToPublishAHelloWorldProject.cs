@@ -445,7 +445,8 @@ public static class Program
             .Should()
             .Pass();
 
-            Assert.True(File.Exists(helloWorldAsset.Path + "\\bin\\Release\\net7.0\\HelloWorld.dll"));
+            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", "net7.0", "HelloWorld.dll");
+            Assert.True(File.Exists(expectedAssetPath));
         }
 
         [Fact]

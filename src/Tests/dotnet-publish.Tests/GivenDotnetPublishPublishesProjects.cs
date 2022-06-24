@@ -367,7 +367,8 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should()
                 .Pass();
 
-            Assert.False(File.Exists(helloWorldAsset.Path + "\\bin\\Release\\HelloWorld.1.0.0.nupkg"));
+            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", "HelloWorld.1.0.0.nupkg");
+            Assert.False(File.Exists(expectedAssetPath));
         }
     }
 }
