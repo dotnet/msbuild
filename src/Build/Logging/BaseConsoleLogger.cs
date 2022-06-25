@@ -33,6 +33,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private static bool _supportReadingBackgroundColor = true;
 
+        protected internal IEventSource _eventSource;
+
         #region Properties
 
         /// <summary>
@@ -940,7 +942,10 @@ namespace Microsoft.Build.BackEnd.Logging
 
         public virtual void Shutdown()
         {
-            Traits.LogAllEnvironmentVariables = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES")) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4);
+            if (_eventSource is IInternalEventSource internalEventSource)
+            {
+                internalEventSource.ShouldLogAllEnvironmentVariables = null;
+            }
         }
 
         internal abstract void ResetConsoleLoggerState();
@@ -957,6 +962,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="eventSource">Available events.</param>
         public virtual void Initialize(IEventSource eventSource)
         {
+            _eventSource = eventSource;
+
             // Always show perf summary for diagnostic verbosity.
             if (IsVerbosityAtLeast(LoggerVerbosity.Diagnostic))
             {
@@ -1050,7 +1057,11 @@ namespace Microsoft.Build.BackEnd.Logging
                     return true;
                 case "SHOWENVIRONMENT":
                     showEnvironment = true;
-                    Traits.LogAllEnvironmentVariables = true;
+                    if (_eventSource is IInternalEventSource internalEventSource)
+                    {
+                        internalEventSource.ShouldLogAllEnvironmentVariables = true;
+                    }
+
                     return true;
                 case "SHOWPROJECTFILE":
                     if (parameterValue == null)

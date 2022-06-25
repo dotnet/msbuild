@@ -20,7 +20,7 @@ namespace Microsoft.Build.BackEnd.Logging
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IEventSource4, IBuildEventSink
+        IEventSource4, IBuildEventSink, IInternalEventSource
     {
         #region Events
 
@@ -167,6 +167,14 @@ namespace Microsoft.Build.BackEnd.Logging
             get;
             private set;
         }
+
+        public bool? ShouldLogAllEnvironmentVariables
+        {
+            get => _shouldLogAllEnvironmentVariables ??= !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES")) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4);
+            set => _shouldLogAllEnvironmentVariables = value;
+        }
+
+        private bool? _shouldLogAllEnvironmentVariables = null;
 
         #endregion
 

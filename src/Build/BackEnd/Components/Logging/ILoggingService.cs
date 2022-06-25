@@ -65,6 +65,12 @@ namespace Microsoft.Build.BackEnd.Logging
             get;
         }
 
+        bool ShouldLogAllEnvironmentVariables
+        {
+            get;
+            set;
+        }
+
         /// <summary>
         /// Returns the synchronous/asynchronous mode for the logging service.
         /// </summary>

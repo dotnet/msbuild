@@ -562,6 +562,12 @@ namespace Microsoft.Build.BackEnd.Logging
             set => _includeEvaluationPropertiesAndItems = value;
         }
 
+        public bool ShouldLogAllEnvironmentVariables
+        {
+            get => _filterEventSource.ShouldLogAllEnvironmentVariables;
+            set => _filterEventSource.ShouldLogAllEnvironmentVariables = value;
+        }
+
         /// <summary>
         /// Determines if the specified submission has logged an errors.
         /// </summary>

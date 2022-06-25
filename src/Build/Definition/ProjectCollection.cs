@@ -1829,7 +1829,7 @@ namespace Microsoft.Build.Evaluation
         /// The ReusableLogger wraps a logger and allows it to be used for both design-time and build-time.  It internally swaps
         /// between the design-time and build-time event sources in response to Initialize and Shutdown events.
         /// </summary>
-        internal class ReusableLogger : INodeLogger, IEventSource4
+        internal class ReusableLogger : INodeLogger, IEventSource4, IInternalEventSource
         {
             /// <summary>
             /// The logger we are wrapping.
@@ -1933,6 +1933,8 @@ namespace Microsoft.Build.Evaluation
             private bool _includeTaskInputs;
 
             private bool _includeEvaluationPropertiesAndItems;
+
+            private bool? _shouldLogAllEnvironmentVariables = null;
 
             /// <summary>
             /// Constructor.
@@ -2110,6 +2112,11 @@ namespace Microsoft.Build.Evaluation
                 get => _originalLogger.Parameters;
 
                 set => _originalLogger.Parameters = value;
+            }
+            public bool? ShouldLogAllEnvironmentVariables
+            {
+                get => _shouldLogAllEnvironmentVariables ??= !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES")) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4);
+                set => _shouldLogAllEnvironmentVariables = value;
             }
 
             /// <summary>

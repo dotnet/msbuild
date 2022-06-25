@@ -32,6 +32,12 @@ namespace Microsoft.Build.BackEnd.Logging
 
         protected bool _hasLoggedErrors;
 
+        internal bool ShouldLogAllEnvironmentVariables
+        {
+            get => _loggingService.ShouldLogAllEnvironmentVariables;
+            set => _loggingService.ShouldLogAllEnvironmentVariables = value;
+        }
+
         /// <summary>
         /// Constructs the logging context from a logging service and an event context.
         /// </summary>
