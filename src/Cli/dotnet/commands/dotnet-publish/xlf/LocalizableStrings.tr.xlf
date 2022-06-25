@@ -55,8 +55,8 @@ Varsayılan durum, çerçeveye bağımlı bir uygulama yayımlamaktır.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
-        <target state="translated">Yayımlanacak yapılandırma. Çoğu proje için varsayılan, ‘Hata Ayıklama’ seçeneğidir.</target>
+        <source>The configuration to publish for. The default is 'Debug'. Use the `PublishRelease` property to make 'Release' the default for this command.</source>
+        <target state="needs-review-translation">Yayımlanacak yapılandırma. Çoğu proje için varsayılan, ‘Hata Ayıklama’ seçeneğidir.</target>
         <note />
       </trans-unit>
     </body>

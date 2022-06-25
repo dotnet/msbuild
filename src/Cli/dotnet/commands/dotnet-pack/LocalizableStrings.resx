@@ -148,7 +148,7 @@
     <value>The project to pack, defaults to the project file in the current directory. Can be a path to any project file</value>
   </data>
   <data name="ConfigurationOptionDescription" xml:space="preserve">
-    <value>The configuration to use for building the package. The default for most projects is 'Debug'.</value>
+    <value>The configuration to use for building the package. The default is 'Debug'. Use the `PackRelease` property to make 'Release' the default for this command.</value>
   </data>
   <data name="CmdNoLogo" xml:space="preserve">
     <value>Do not display the startup banner or the copyright message.</value>
