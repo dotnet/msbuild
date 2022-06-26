@@ -4244,6 +4244,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// If DTD processing is disabled, the server should not receive any connection request.
         /// </summary>
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7623")]
         public async void VerifyDTDProcessingIsDisabled2()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -4521,7 +4522,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void VerifyPropertyTrackingLoggingDefault()
         {
-            // Having nothing defined should default to nothing being logged.
+            // Having just environment variables defined should default to nothing being logged except one environment variable read.
             this.VerifyPropertyTrackingLoggingScenario(
                 null,
                 logger =>
@@ -4534,7 +4535,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldBeEmpty();
+                        .ShouldHaveSingleItem()
+                        .EnvironmentVariableName
+                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents
@@ -4563,7 +4566,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldBeEmpty();
+                        .ShouldHaveSingleItem()
+                        .EnvironmentVariableName
+                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents
@@ -4592,7 +4597,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldBeEmpty();
+                        .ShouldHaveSingleItem()
+                        .EnvironmentVariableName
+                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents
@@ -4621,7 +4628,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldBeEmpty();
+                        .ShouldHaveSingleItem()
+                        .EnvironmentVariableName
+                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents
@@ -4705,7 +4714,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldBeEmpty();
+                        .ShouldHaveSingleItem()
+                        .EnvironmentVariableName
+                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents

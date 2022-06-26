@@ -304,7 +304,7 @@ namespace Microsoft.Build.Tasks
 
                 File.Copy(sourceFileState.Name, destinationFileState.Name, true);
             }
-            
+
             // Files were successfully copied or linked. Those are equivalent here.
             WroteAtLeastOneFile = true;
 
@@ -587,7 +587,11 @@ namespace Microsoft.Build.Tasks
             foreach (List<int> partition in partitionsByDestination.Values)
             {
                 bool partitionAccepted = partitionCopyActionBlock.Post(partition);
-                if (!partitionAccepted)
+                if (_cancellationTokenSource.IsCancellationRequested)
+                {
+                    break;
+                }
+                else if (!partitionAccepted)
                 {
                     // Retail assert...
                     ErrorUtilities.ThrowInternalError("Failed posting a file copy to an ActionBlock. Should not happen with block at max int capacity.");
@@ -941,17 +945,17 @@ namespace Microsoft.Build.Tasks
             return String.Equals(fullSourcePath, fullDestinationPath, filenameComparison);
         }
 
-    	private static int GetParallelismFromEnvironment()
-	    {
-	        int parallelism = Traits.Instance.CopyTaskParallelism;
-	        if (parallelism < 0)
-	        {
-	            parallelism = DefaultCopyParallelism;
-	        }
+        private static int GetParallelismFromEnvironment()
+        {
+            int parallelism = Traits.Instance.CopyTaskParallelism;
+            if (parallelism < 0)
+            {
+                parallelism = DefaultCopyParallelism;
+            }
             else if (parallelism == 0)
-	        {
-	            parallelism = int.MaxValue;
-	        }
+            {
+                parallelism = int.MaxValue;
+            }
             return parallelism;
         }
     }

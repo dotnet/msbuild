@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
-
+using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -136,6 +137,46 @@ namespace Microsoft.Build.UnitTests
             binaryLogger.Parameters = $"LogFile={_logFile}";
 
             ObjectModelHelpers.BuildProjectExpectSuccess(s_testProject, binaryLogger);
+        }
+
+        [Fact]
+        public void UnusedEnvironmentVariablesDoNotAppearInBinaryLog()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDONLYLOGUSEDENVIRONMENTVARIABLES", "1");
+                env.SetEnvironmentVariable("EnvVar1", "itsValue");
+                env.SetEnvironmentVariable("EnvVar2", "value2");
+                env.SetEnvironmentVariable("EnvVar3", "value3");
+                string contents = @"
+<Project DefaultTargets=""PrintEnvVar"">
+
+<PropertyGroup>
+<MyProp1>value</MyProp1>
+<MyProp2>$(EnvVar2)</MyProp2>
+</PropertyGroup>
+
+<Target Name=""PrintEnvVar"">
+<Message Text=""Environment variable EnvVar3 has value $(EnvVar3)"" Importance=""High"" />
+</Target>
+
+</Project>";
+                TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
+                TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
+                BinaryLogger logger = new();
+                logger.Parameters = _logFile;
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} -bl:{logger.Parameters}", out bool success);
+                success.ShouldBeTrue();
+                RunnerUtilities.ExecMSBuild($"{logger.Parameters} -flp:logfile={Path.Combine(logFolder.Path, "logFile.log")};verbosity=diagnostic", out success);
+                success.ShouldBeTrue();
+                string text = File.ReadAllText(Path.Combine(logFolder.Path, "logFile.log"));
+                text.ShouldContain("EnvVar2");
+                text.ShouldContain("value2");
+                text.ShouldContain("EnvVar3");
+                text.ShouldContain("value3");
+                text.ShouldNotContain("EnvVar1");
+                text.ShouldNotContain("itsValue");
+            }
         }
 
         [Fact]

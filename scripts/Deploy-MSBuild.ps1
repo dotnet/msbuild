@@ -60,8 +60,10 @@ if ($runtime -eq "Detect") {
         Write-Host "Detected path that does not look like an sdk. Writing .NET Framework assemblies."
     }
 }
-else if ($runtime -eq "Full") {
-    $runtime = "Desktop"
+else {
+    if ($runtime -eq "Full") {
+        $runtime = "Desktop"
+    }
 }
 
 if ($runtime -eq "Desktop") {
