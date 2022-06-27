@@ -342,7 +342,7 @@ namespace Microsoft.Build.Construction
                     // not an MSBuild file. It will however have ToolsVersion="2.0" which is not supported with an empty
                     // schema. This is not a great solution, but it should cover the customer reported issue. See:
                     // https://github.com/dotnet/msbuild/issues/2064
-                    if (emptyNamespace && !projectElementInvalid && mainProjectElement.GetAttribute("ToolsVersion") != "2.0")
+                    if (emptyNamespace && !projectElementInvalid && mainProjectElement.GetAttribute("ToolsVersion") != "2.0" && !Path.GetExtension(AbsolutePath).Equals(".dwproj", StringComparison.OrdinalIgnoreCase))
                     {
                         _canBeMSBuildProjectFile = true;
                         return _canBeMSBuildProjectFile;
