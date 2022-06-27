@@ -81,7 +81,7 @@ namespace Microsoft.NET.Publish.Tests
             var publishCommand = new PublishCommand(testProjectInstance);
             publishCommand.Execute(TelemetryTestLogger).StdOut.Should()
                 .Contain(
-                    "{\"EventName\":\"PublishProperties\",\"Properties\":{\"PublishReadyToRun\":\"True\",\"PublishTrimmed\":\"null\",\"PublishSingleFile\":\"null\",\"PublishAot\":\"null\"}")
+                    "{\"EventName\":\"PublishProperties\",\"Properties\":{\"PublishReadyToRun\":\"True\",\"PublishTrimmed\":\"null\",\"PublishSingleFile\":\"null\",\"PublishAot\":\"null\",\"PublishProtocol\":\"null\"}")
                 .And.Contain(
                     "{\"EventName\":\"ReadyToRun\",\"Properties\":{\"PublishReadyToRunUseCrossgen2\":\"True\",")
                 .And.MatchRegex(
@@ -112,7 +112,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
             var publishCommand = new PublishCommand(testProjectInstance);
             publishCommand.Execute(TelemetryTestLogger).StdOut.Should().Contain(
-                "{\"EventName\":\"PublishProperties\",\"Properties\":{\"PublishReadyToRun\":\"null\",\"PublishTrimmed\":\"true\",\"PublishSingleFile\":\"null\",\"PublishAot\":\"True\"}");
+                "{\"EventName\":\"PublishProperties\",\"Properties\":{\"PublishReadyToRun\":\"null\",\"PublishTrimmed\":\"true\",\"PublishSingleFile\":\"null\",\"PublishAot\":\"True\",\"PublishProtocol\":\"null\"}");
         }
 
 
