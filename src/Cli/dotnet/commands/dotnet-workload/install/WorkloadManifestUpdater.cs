@@ -250,9 +250,31 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 try
                 {
+                    
                     var packageId = _workloadManifestInstaller.GetManifestPackageId(new ManifestId(manifest.Id), _sdkFeatureBand);
-                    var latestVersion = await _nugetPackageDownloader.GetLatestPackageVersion(packageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreviews);
-                    downloads.Add(new WorkloadDownload(manifest.Id, packageId.ToString(), latestVersion.ToString()));
+
+                    bool success;
+                    (success, var latestVersion) = await GetPackageVersion(packageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreviews);
+                    if (success)
+                    {
+                        downloads.Add(new WorkloadDownload(manifest.Id, packageId.ToString(), latestVersion.ToString()));
+                    }
+                    if (!success)
+                    {
+                        var newFeatureBand = new SdkFeatureBand(manifest.ManifestFeatureBand);
+                        var newPackageId = _workloadManifestInstaller.GetManifestPackageId(new ManifestId(manifest.Id), newFeatureBand);
+
+                        (success, latestVersion) = await GetPackageVersion(newPackageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreviews);
+                        
+                        if (success)
+                        {
+                            downloads.Add(new WorkloadDownload(manifest.Id, newPackageId.ToString(), latestVersion.ToString()));
+                        }
+                    }
+                    if (!success)
+                    {
+                        _reporter.WriteLine(string.Format(LocalizableStrings.FailedToGetPackageManifestUrl, packageId));
+                    }
                 }
                 catch
                 {
