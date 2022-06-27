@@ -10,8 +10,7 @@
     <PackageId>Microsoft.NET.StringTools</PackageId>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-    <VersionPrefix>1.0.0</VersionPrefix>
-    <AssemblyVersion></AssemblyVersion>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <SemanticVersioningV1>true</SemanticVersioningV1>
 
     <AssemblyName>Microsoft.NET.StringTools</AssemblyName>
