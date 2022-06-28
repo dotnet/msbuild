@@ -65,20 +65,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// The contents of xsl document for tests.
         /// </summary>
-        private readonly string _xslDocument = 
-@"<xsl:stylesheet version=""1.0""
-                xmlns:xsl=""http://www.w3.org/1999/XSL/Transform""
-                xmlns:msxsl=""urn:schemas-microsoft-com:xslt""
-                exclude-result-prefixes=""msxsl"">
-    <xsl:output method=""xml"" indent=""yes""/>
-    <xsl:template match=""@* | node()"">
-        <surround>
-            <xsl:copy>
-                <xsl:apply-templates select=""@* | node()""/>
-            </xsl:copy>
-        </surround>
-    </xsl:template>
-</xsl:stylesheet>";
+        private readonly string _xslDocument = "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:msxsl=\"urn:schemas-microsoft-com:xslt\" exclude-result-prefixes=\"msxsl\"><xsl:output method=\"xml\" indent=\"yes\"/><xsl:template match=\"@* | node()\"><surround><xsl:copy><xsl:apply-templates select=\"@* | node()\"/></xsl:copy></surround></xsl:template></xsl:stylesheet>";
 
 
 #if FEATURE_COMPILED_XSL
