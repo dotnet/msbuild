@@ -50,7 +50,7 @@ Server requires to introduce new packet types for IPC.
 | Text                     | String        | The text that is written to the output stream. It includes ANSI escape codes for formatting. |
 | OutputType               | Byte          | Identification of the output stream (1 = standard output, 2 = error output) |
 
-`ServerNodeBuildResult` informs about finished build.
+`ServerNodeBuildResult` indicates how the build finished.
 
 | Property name            | Type          | Description |
 |---|---|---|
