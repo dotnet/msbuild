@@ -590,6 +590,25 @@ EndGlobal
         }
 
         [Fact]
+        public void WhenDirectoryContaining472ProjectIsGivenProjectIsAdded()
+        {
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAnd472CsprojFiles")
+                .WithSource()
+                .Path;
+
+            var cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute("sln", "add", "Lib");
+            cmd.Should().Pass();
+
+            var slnPath = Path.Combine(projectDirectory, "App.sln");
+            var expectedSlnContents = GetExpectedSlnContents(slnPath, ExpectedSlnFileAfterAddingLibProj);
+            File.ReadAllText(slnPath)
+                .Should().BeVisuallyEquivalentTo(expectedSlnContents);
+        }
+
+        [Fact]
         public void WhenDirectoryContainsNoProjectsItCancelsWholeOperation()
         {
             var projectDirectory = _testAssetsManager
