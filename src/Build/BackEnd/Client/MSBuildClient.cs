@@ -481,7 +481,8 @@ namespace Microsoft.Build.Experimental
                 case NodePacketType.ServerNodeBuildResult:
                     HandleServerNodeBuildResult((ServerNodeBuildResult)packet);
                     break;
-                default: throw new InvalidOperationException($"Unexpected packet type {packet.GetType().Name}");
+                default:
+                    throw new InvalidOperationException($"Unexpected packet type {packet.GetType().Name}");
             }
         }
 
