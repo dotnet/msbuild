@@ -386,12 +386,8 @@ namespace Microsoft.Build.Experimental
                 "/nodemode:8"
             };
 
-            string? useMSBuildServerEnvVarValue = Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName);
             try
             {
-                // Disable MSBuild server for a child process, preventing an infinite recurson.
-                Environment.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, "");
-
                 NodeLauncher nodeLauncher = new NodeLauncher();
                 CommunicationsUtilities.Trace("Starting Server...");
                 Process msbuildProcess = nodeLauncher.Start(_msbuildLocation, string.Join(" ", msBuildServerOptions));
@@ -402,10 +398,6 @@ namespace Microsoft.Build.Experimental
                 CommunicationsUtilities.Trace("Failed to launch the msbuild server: {0}", ex);
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.LaunchError;
                 return false;
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, useMSBuildServerEnvVarValue);
             }
 
             return true;
