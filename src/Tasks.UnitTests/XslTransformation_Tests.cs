@@ -861,7 +861,13 @@ namespace Microsoft.Build.UnitTests
             TaskItem xslPath;
             TaskItem[] outputPaths;
             MockEngine engine;
-            Prepare(out dir, out xmlPaths, out xslPath, out _, out outputPaths, out _, out _, out engine);
+
+            Prepare(out dir, out _, out _, out _, out outputPaths, out _, out _, out engine);
+
+            var testingDocsDir = Path.Combine("TestDocuments", "Fdl2Proto");
+
+            xmlPaths = new TaskItem[] { new TaskItem(Path.Combine(testingDocsDir, "sila.xml")) };
+            xslPath = new TaskItem(Path.Combine(testingDocsDir, "fdl2proto.xsl"));
 
             // load transformed xsl and assert it is well formatted
             {
@@ -871,30 +877,22 @@ namespace Microsoft.Build.UnitTests
                 t.XslInputPath = xslPath;
                 t.XmlInputPaths = xmlPaths;
                 t.OutputPaths = outputPaths;
-                t.Parameters = _xslParameters;
+                t.UseTrustedSettings = true;
                 t.PreserveWhitespace = true;
 
                 t.Execute();
                 Console.WriteLine(engine.Log);
+
+                string expectedOutput;
+                using (StreamReader sr = new StreamReader(Path.Combine(testingDocsDir, "expected.proto")))
+                {
+                    expectedOutput = sr.ReadToEnd();
+                }
+
                 using (StreamReader sr = new StreamReader(t.OutputPaths[0].ItemSpec))
                 {
                     string fileContents = sr.ReadToEnd();
-                    Assert.Equal(
-@"<?xml version=""1.0"" encoding=""utf-8""?>
-<surround>
-  <root>
-    <surround Name=""param1"" />
-    <surround Value=""value111"" />
-    <surround>
-      <abc>
-        <surround>
-          <cde />
-        </surround>
-      </abc>
-    </surround>
-  </root>
-</surround>",
-                    fileContents);
+                    Assert.Equal(expectedOutput, fileContents);
                 }
             }
 
