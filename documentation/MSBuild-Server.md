@@ -1,7 +1,6 @@
 # MSBuild Server
 
-MSBuild Server is basically an another type of node which can accept build request from clients and utilize worker nodes in current fashion to build projects. Main purpose of the server node is to avoid expensive MSBuild process start during build from tools like .NET SDK,
-and preserve caches between builds.
+MSBuild Server nodes accept build requests from clients and use worker nodes in the current fashion to build projects. The main purpose of the server node is to preserve caches between builds and avoid expensive MSBuild process start operations during build from tools like the .NET SDK.
 
 ## Usage
 
