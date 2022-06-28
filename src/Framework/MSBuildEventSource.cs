@@ -623,6 +623,30 @@ namespace Microsoft.Build.Eventing
             WriteEvent(84, manifestName, resolverCount);
         }
 
+        [Event(85, Keywords = Keywords.All)]
+        public void CreateLoadedTypeStart(string assemblyName)
+        {
+            WriteEvent(85, assemblyName);
+        }
+
+        [Event(86, Keywords = Keywords.All)]
+        public void CreateLoadedTypeStop(string assemblyName)
+        {
+            WriteEvent(86, assemblyName);
+        }
+
+        [Event(87, Keywords = Keywords.All)]
+        public void LoadAssemblyAndFindTypeStart()
+        {
+            WriteEvent(87);
+        }
+
+        [Event(88, Keywords = Keywords.All)]
+        public void LoadAssemblyAndFindTypeStop(string assemblyPath, int numberOfPublicTypesSearched)
+        {
+            WriteEvent(88, assemblyPath, numberOfPublicTypesSearched);
+        }
+
         #endregion
     }
 }
