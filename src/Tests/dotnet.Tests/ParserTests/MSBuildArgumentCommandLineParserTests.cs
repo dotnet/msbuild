@@ -25,22 +25,28 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
         [Theory]
         [InlineData(new string[] { "-property:prop1=true", "-p:prop2=false" }, true)]
         [InlineData(new string[] { "-property:prop1=true", "-p:prop2=false" }, false)]
+        [InlineData(new string[] { "-p:teamcity_buildConfName=\"Build, Test and Publish\"" }, false)]
+        [InlineData(new string[] { "-p:teamcity_buildConfName=\"Build, Test and Publish\"" }, true)]
         [InlineData(new string[] { "-detailedSummary" }, true)]
         [InlineData(new string[] { "-clp:NoSummary" }, true)]
         [InlineData(new string[] { "-orc" }, true)]
         [InlineData(new string[] { "-orc" }, false)]
         public void MSBuildArgumentsAreForwardedCorrectly(string[] arguments, bool buildCommand)
         {
-            RestoringCommand command = buildCommand ? 
-                BuildCommand.FromArgs(arguments) : 
+            RestoringCommand command = buildCommand ?
+                BuildCommand.FromArgs(arguments) :
                 PublishCommand.FromArgs(arguments);
             var expectedArguments = arguments.Select(a => a.Replace("-property:", "--property:").Replace("-p:", "--property:"));
-            command.GetArgumentsToMSBuild().Split(' ')
-                .Should()
-                .Contain(expectedArguments);
+            var argString = command.GetArgumentsToMSBuild();
+
+            foreach (var expectedArg in expectedArguments)
+            {
+                argString.Should().Contain(expectedArg);
+            }
         }
 
         [Theory]
+        [InlineData(new string[] { "-p:teamcity_buildConfName=\"Build, Test and Publish\"" }, new string[] { "--property:teamcity_buildConfName=\"Build, Test and Publish\"" })]
         [InlineData(new string[] { "-p:prop1=true", "-p:prop2=false" }, new string[] { "--property:prop1=true", "--property:prop2=false" })]
         [InlineData(new string[] { "-p:prop1=\".;/opt/usr\"" }, new string[] { "--property:prop1=\".%3B/opt/usr\"" })]
         public void Can_pass_msbuild_properties_safely(string[] tokens, string[] forwardedTokens) {
