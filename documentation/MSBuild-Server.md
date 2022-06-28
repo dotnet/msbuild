@@ -15,7 +15,7 @@ The server node uses same IPC approach as current worker nodes - named pipes. Th
 
 1. Try to connect to server
    - If server is not running, start new instance
-   - If server is busy or the connection is broken, fallback to classic build 
+   - If server is busy or the connection is broken, fall back to previous build behavior
 2. Initiate handshake
 2. Issue build command with `ServerNodeBuildCommand` packet
 3. Read packets from pipe
