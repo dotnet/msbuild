@@ -584,6 +584,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// <remarks>
         /// Will fail if the workloadId provided is invalid.
         /// </remarks>
+        /// <exception>KeyNotFoundException</exception>
+        /// <exception>ArgumentNullException</exception>
         public WorkloadManifest GetManifestFromWorkload(WorkloadId workloadId)
         {
             return _workloads[workloadId].manifest;
