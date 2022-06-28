@@ -71,6 +71,12 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup> 
+    <Content Include="TestDocuments\**"> 
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory> 
+    </Content> 
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <Compile Remove="CommandLineGenerator_Tests.cs" />
     <Compile Remove="XamlDataDrivenToolTask_Tests.cs" />
