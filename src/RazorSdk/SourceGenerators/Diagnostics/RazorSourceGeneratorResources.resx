@@ -121,7 +121,7 @@
     <value>Invalid RazorLangVersion</value>
   </data>
   <data name="InvalidRazorLangMessage" xml:space="preserve">
-    <value>Invalid value '{0}'' for RazorLangVersion. Valid values include 'Latest' or a valid version in range 1.0 to 5.0.</value>
+    <value>Invalid value '{0}'' for RazorLangVersion. Valid values include 'Latest' or a valid version in range 1.0 to 7.0.</value>
   </data>
   <data name="RecomputingTagHelpersTitle" xml:space="preserve">
     <value>Recomputing tag helpers</value>
