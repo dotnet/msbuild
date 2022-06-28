@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
                 BuildCommand.FromArgs(arguments) :
                 PublishCommand.FromArgs(arguments);
             var expectedArguments = arguments.Select(a => a.Replace("-property:", "--property:").Replace("-p:", "--property:"));
-            var argString = command.GetArgumentsToMSBuild();
+            var argString = command.MSBuildArguments;
 
             foreach (var expectedArg in expectedArguments)
             {
