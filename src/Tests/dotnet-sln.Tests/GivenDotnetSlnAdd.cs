@@ -570,30 +570,13 @@ EndGlobal
                 .Should().BeVisuallyEquivalentTo(expectedSlnContents);
         }
 
-        [Fact]
-        public void WhenDirectoryContainingProjectIsGivenProjectIsAdded()
+        [Theory]
+        [InlineData("TestAppWithSlnAndCsprojFiles")]
+        [InlineData("TestAppWithSlnAnd472CsprojFiles")]
+        public void WhenDirectoryContainingProjectIsGivenProjectIsAdded(string testAsset)
         {
             var projectDirectory = _testAssetsManager
-                .CopyTestAsset("TestAppWithSlnAndCsprojFiles")
-                .WithSource()
-                .Path;
-
-            var cmd = new DotnetCommand(Log)
-                .WithWorkingDirectory(projectDirectory)
-                .Execute("sln", "add", "Lib");
-            cmd.Should().Pass();
-
-            var slnPath = Path.Combine(projectDirectory, "App.sln");
-            var expectedSlnContents = GetExpectedSlnContents(slnPath, ExpectedSlnFileAfterAddingLibProj);
-            File.ReadAllText(slnPath)
-                .Should().BeVisuallyEquivalentTo(expectedSlnContents);
-        }
-
-        [Fact]
-        public void WhenDirectoryContaining472ProjectIsGivenProjectIsAdded()
-        {
-            var projectDirectory = _testAssetsManager
-                .CopyTestAsset("TestAppWithSlnAnd472CsprojFiles")
+                .CopyTestAsset(testAsset)
                 .WithSource()
                 .Path;
 
