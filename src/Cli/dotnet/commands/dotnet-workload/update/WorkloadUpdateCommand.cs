@@ -196,28 +196,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
 
         private IEnumerable<WorkloadId> GetUpdatableWorkloads()
         {
-            var currentFeatureBand = new SdkFeatureBand(_sdkVersion);
-            if (_fromPreviousSdk)
-            {
-                var priorFeatureBands = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetFeatureBandsWithInstallationRecords()
-                    .Where(featureBand => featureBand.CompareTo(currentFeatureBand) < 0);
-                if (priorFeatureBands.Any())
-                {
-                    var maxPriorFeatureBand = priorFeatureBands.Max();
-                    return _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(maxPriorFeatureBand);
-                }
-                return new List<WorkloadId>();
-            }
-            else
-            {
-                var workloads = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(currentFeatureBand);
-                if (workloads == null || !workloads.Any())
-                {
-                    Reporter.WriteLine(LocalizableStrings.NoWorkloadsToUpdate);
-                }
+            var workloads = GetInstalledWorkloads(_fromPreviousSdk);
 
-                return workloads;
+            if (workloads == null || !workloads.Any())
+            {
+                Reporter.WriteLine(LocalizableStrings.NoWorkloadsToUpdate);
             }
+
+            return workloads;
         }
     }
 }

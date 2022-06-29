@@ -101,6 +101,11 @@ namespace Microsoft.DotNet.Workloads.Workload
 
                     var manifestDownloads = await _workloadManifestUpdater.GetManifestPackageDownloadsAsync(includePreview);
 
+                    if (!manifestDownloads.Any())
+                    {
+                        Reporter.WriteLine(Strings.SkippingManifestUpdate);
+                    }
+
                     foreach (var download in manifestDownloads)
                     {
                         //  Add package to the list of downloads
@@ -144,6 +149,28 @@ namespace Microsoft.DotNet.Workloads.Workload
             }
 
             return ret;
+        }
+
+        protected IEnumerable<WorkloadId> GetInstalledWorkloads(bool fromPreviousSdk)
+        {
+            var currentFeatureBand = new SdkFeatureBand(_sdkVersion);
+            if (fromPreviousSdk)
+            {
+                var priorFeatureBands = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetFeatureBandsWithInstallationRecords()
+                    .Where(featureBand => featureBand.CompareTo(currentFeatureBand) < 0);
+                if (priorFeatureBands.Any())
+                {
+                    var maxPriorFeatureBand = priorFeatureBands.Max();
+                    return _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(maxPriorFeatureBand);
+                }
+                return new List<WorkloadId>();
+            }
+            else
+            {
+                var workloads = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(currentFeatureBand);
+
+                return workloads ?? Enumerable.Empty<WorkloadId>();
+            }
         }
     }
 

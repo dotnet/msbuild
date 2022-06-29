@@ -506,7 +506,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     Directory.Delete(targetPath, true);
                 }
 
-                //  Do we need to worry about signing validation here?  I think not, as if the manifest is ever actually installed, it will go through signing validation
                 string extractedManifestPath = Path.Combine(extractionPath, "data", "extractedManifest");
                 if (Directory.Exists(extractedManifestPath))
                 {
@@ -519,26 +518,17 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     string packageDataPath = Path.Combine(extractionPath, "data");
                     if (!Cache.TryGetMsiPathFromPackageData(packageDataPath, out string msiPath, out _))
                     {
-                        throw new FileNotFoundException("Manifest MSI not found in NuGet package", extractionPath);
+                        throw new FileNotFoundException(String.Format(LocalizableStrings.ManifestMsiNotFoundInNuGetPackage, extractionPath));
                     }
                     string msiExtractionPath = Path.Combine(extractionPath, "msi");
-                    
-                    var psi = new ProcessStartInfo()
-                    {
-                        FileName = "msiexec",
-                        ArgumentList =
-                        {
-                            "/a",
-                            msiPath,
-                            $"TARGETDIR={msiExtractionPath}",
-                            "/QN",  //  Quiet: No UI
-                        }
-                    };
 
-                    var exitCode = psi.Execute();
-                    if (exitCode != 0)
+
+                    _ = WindowsInstaller.SetInternalUI(InstallUILevel.None);
+                    var result = WindowsInstaller.InstallProduct(msiPath, $"TARGETDIR={msiExtractionPath} ACTION=ADMIN");
+
+                    if (result != Error.SUCCESS)
                     {
-                        throw new GracefulException("Failed to extract information from MSI: " + msiPath);
+                        throw new GracefulException(String.Format(LocalizableStrings.FailedToExtractMsi, msiPath));
                     }
 
                     var manifestsFolder = Path.Combine(msiExtractionPath, "dotnet", "sdk-manifests");
@@ -552,7 +542,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                     if (manifestFolder == null)
                     {
-                        throw new GracefulException($"Expected single manifest feature band and manifest folder in MSI from package {nupkgPath}");
+                        throw new GracefulException(String.Format(LocalizableStrings.ExpectedSingleManifest, nupkgPath));
                     }
 
                     FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(manifestFolder, targetPath));

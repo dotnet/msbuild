@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Tests
 
         private void VerifyCertificateExists(string thumbprint)
         {
-            _certificates.Find(X509FindType.FindByThumbprint, thumbprint, validOnly: true)
+            _certificates.Find(X509FindType.FindByThumbprint, thumbprint, validOnly: false)
                 .Count
                 .Should()
                 .Be(1, $"a certificate with thumbprint '{thumbprint}' should be in '{_filePath}'");

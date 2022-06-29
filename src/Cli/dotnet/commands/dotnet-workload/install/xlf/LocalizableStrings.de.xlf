@@ -47,6 +47,11 @@
         <target state="translated">Das Paket {0}, Version {1}, wird in den Offlinecache {2} heruntergeladen…</target>
         <note />
       </trans-unit>
+      <trans-unit id="ExpectedSingleManifest">
+        <source>Expected single manifest feature band and manifest folder in MSI from package {0}</source>
+        <target state="new">Expected single manifest feature band and manifest folder in MSI from package {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="FailedAdManifestUpdate">
         <source>Failed to update the advertising manifest {0}: {1}.</source>
         <target state="translated">Fehler beim Aktualisieren des Ankündigungsmanifests "{0}": {1}.</target>
@@ -55,6 +60,11 @@
       <trans-unit id="FailedToDownloadPackageManifest">
         <source>Failed to download manifest package {0}.</source>
         <target state="translated">Fehler beim Herunterladen des Manifestpakets "{0}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToExtractMsi">
+        <source>Failed to extract information from MSI: {0}</source>
+        <target state="new">Failed to extract information from MSI: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToGetPackageManifestUrl">
@@ -150,6 +160,11 @@
       <trans-unit id="ManifestDoesNotExist">
         <source>No manifest with ID {0} exists.</source>
         <target state="translated">Es ist kein Manifest mit der ID {0} vorhanden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestMsiNotFoundInNuGetPackage">
+        <source>Manifest MSI not found in NuGet package {0}</source>
+        <target state="new">Manifest MSI not found in NuGet package {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">
