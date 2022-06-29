@@ -101,6 +101,11 @@ namespace Microsoft.DotNet.Workloads.Workload
 
                     var manifestDownloads = await _workloadManifestUpdater.GetManifestPackageDownloadsAsync(includePreview);
 
+                    if (!manifestDownloads.Any())
+                    {
+                        Reporter.WriteLine(Strings.SkippingManifestUpdate);
+                    }
+
                     foreach (var download in manifestDownloads)
                     {
                         //  Add package to the list of downloads
