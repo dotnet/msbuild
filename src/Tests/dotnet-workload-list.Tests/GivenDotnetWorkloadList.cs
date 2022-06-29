@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
 
             foreach (var workload in expectedWorkloads)
             {
-                _reporter.Lines.Select(line => line.Trim()).Should().Contain($"{workload}             5.0.0/SampleManifest      SDK 6.0.100");
+                _reporter.Lines.Select(line => line.Trim()).Should().Contain($"{workload}             5.0.0/TestProjects      SDK 6.0.100");
             }
         }
 
