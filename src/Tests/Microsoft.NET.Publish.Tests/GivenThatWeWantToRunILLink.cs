@@ -546,7 +546,7 @@ namespace Microsoft.NET.Publish.Tests
                 .And.NotHaveStdOutMatching("IL2104.*'ProjectReference'")
                 .And.NotHaveStdOutMatching("IL2104.*'TransitiveProjectReference'");
         }
-        
+
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData(LatestTfm)]
         public void ILLink_accepts_option_to_show_all_warnings(string targetFramework)
