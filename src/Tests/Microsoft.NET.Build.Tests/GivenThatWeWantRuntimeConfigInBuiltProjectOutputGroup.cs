@@ -74,6 +74,7 @@ namespace Microsoft.NET.Build.Tests
 
             File.Exists(configFile).Should().BeTrue();
             File.ReadAllText(configFile).Should().NotContain("\"System.Runtime.TieredCompilation\"");
+            File.ReadAllText(configFile).Should().NotContain("\"System.Runtime.TieredPGO\"");
             File.ReadAllText(configFile).Should().NotContain("\"System.GC.Concurrent\"");
             File.ReadAllText(configFile).Should().NotContain("\"System.Threading.ThreadPool.MinThreads\"");
 
@@ -83,6 +84,7 @@ namespace Microsoft.NET.Build.Tests
                 var propertyGroup = new XElement(ns + "PropertyGroup");
                 project.Root.Add(propertyGroup);
                 propertyGroup.Add(new XElement(ns + "TieredCompilation", "false"));
+                propertyGroup.Add(new XElement(ns + "TieredPGO", "false"));
                 propertyGroup.Add(new XElement(ns + "ConcurrentGarbageCollection", "false"));
                 propertyGroup.Add(new XElement(ns + "ThreadPoolMinThreads", "2"));
             });
@@ -94,6 +96,7 @@ namespace Microsoft.NET.Build.Tests
 
             File.Exists(configFile).Should().BeTrue();
             File.ReadAllText(configFile).Should().Contain("\"System.Runtime.TieredCompilation\": false");
+            File.ReadAllText(configFile).Should().Contain("\"System.Runtime.TieredPGO\": true");
             File.ReadAllText(configFile).Should().Contain("\"System.GC.Concurrent\": false");
             File.ReadAllText(configFile).Should().Contain("\"System.Threading.ThreadPool.MinThreads\": 2");
         }
@@ -116,6 +119,7 @@ namespace Microsoft.NET.Build.Tests
                 var propertyGroup = new XElement(ns + "PropertyGroup");
                 project.Root.Add(propertyGroup);
                 propertyGroup.Add(new XElement(ns + "TieredCompilation", "true"));
+                propertyGroup.Add(new XElement(ns + "TieredPGO", "true"));
                 propertyGroup.Add(new XElement(ns + "ConcurrentGarbageCollection", "true"));
                 propertyGroup.Add(new XElement(ns + "ThreadPoolMinThreads", "3"));
             });
@@ -129,6 +133,7 @@ namespace Microsoft.NET.Build.Tests
 
             File.Exists(configFile).Should().BeTrue();
             File.ReadAllText(configFile).Should().Contain("\"System.Runtime.TieredCompilation\": true");
+            File.ReadAllText(configFile).Should().Contain("\"System.Runtime.TieredPGO\": true");
             File.ReadAllText(configFile).Should().Contain("\"System.GC.Concurrent\": true");
             File.ReadAllText(configFile).Should().Contain("\"System.Threading.ThreadPool.MinThreads\": 3");
 
@@ -138,6 +143,7 @@ namespace Microsoft.NET.Build.Tests
                 var propertyGroup = new XElement(ns + "PropertyGroup");
                 project.Root.Add(propertyGroup);
                 propertyGroup.Add(new XElement(ns + "TieredCompilation", "false"));
+                propertyGroup.Add(new XElement(ns + "TieredPGO", "false"));
                 propertyGroup.Add(new XElement(ns + "ConcurrentGarbageCollection", "false"));
                 propertyGroup.Add(new XElement(ns + "ThreadPoolMinThreads", "2"));
             });
@@ -149,6 +155,7 @@ namespace Microsoft.NET.Build.Tests
 
             File.Exists(configFile).Should().BeTrue();
             File.ReadAllText(configFile).Should().Contain("\"System.Runtime.TieredCompilation\": false");
+            File.ReadAllText(configFile).Should().Contain("\"System.Runtime.TieredPGO\": false");
             File.ReadAllText(configFile).Should().Contain("\"System.GC.Concurrent\": false");
             File.ReadAllText(configFile).Should().Contain("\"System.Threading.ThreadPool.MinThreads\": 2");
         }

@@ -487,6 +487,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     Condition="'$(TieredCompilationQuickJitForLoops)' != ''"
                                     Value="$(TieredCompilationQuickJitForLoops)" />
 
+    <RuntimeHostConfigurationOption Include="System.Runtime.TieredPGO"
+                                    Condition="'$(TieredPGO)' != ''"
+                                    Value="$(TieredPGO)" />
+
     <RuntimeHostConfigurationOption Include="System.StartupHookProvider.IsSupported"
                                     Condition="'$(StartupHookSupport)' != ''"
                                     Value="$(StartupHookSupport)"
