@@ -267,6 +267,21 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         }
 
         [Theory]
+        [InlineData("6.0.600")]
+        public void GivenWorkloadUpdateAndPriorSdkVersionItPrintsCorrectDownloadUrls(string updateVersion)
+        {
+            var mockWorkloadIds = new WorkloadId[] { new WorkloadId("wasm-tools") };
+            var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--source", @"C:\src\nugetPackages", "--print-download-link-only", "--sdk-version", updateVersion, "--from-previous-sdk"});
+            (_, var command, _, _, _, _) = GetTestInstallers(parseResult, installedWorkloads: mockWorkloadIds, includeInstalledPacks: false);
+
+            command.Execute();
+
+            _reporter.Lines.Should().Contain("==allPackageLinksJsonOutputStart==");
+            _reporter.Lines.Should().Contain(@"C:\\src\\nugetPackages\\microsoft.net.workload.mono.toolchain.manifest-6.0.400.6.0.5.nupkg");
+            _reporter.Lines.Should().Contain(@"C:\\src\\nugetPackages\\microsoft.net.runtime.monotargets.sdk.7.0.0.nupkg");
+        }
+
+        [Theory]
         [InlineData(true)]
         [InlineData(false)]
         public void GivenWorkloadUpdateAcrossFeatureBandsItErrorsWhenManifestsDoNotExist(bool userLocal)
