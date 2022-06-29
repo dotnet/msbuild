@@ -17,6 +17,11 @@
         <target state="translated">使用 `dotnet workload search` 尋找其他要安裝的工作負載。</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadManfiestVersionColumn">
+        <source>Manifest Version</source>
+        <target state="new">Manifest Version</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WorkloadSourceColumn">
         <source>Installation Source</source>
         <target state="translated">安裝來源</target>

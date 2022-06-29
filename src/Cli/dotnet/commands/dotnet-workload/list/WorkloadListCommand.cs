@@ -105,9 +105,13 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                 }
 
                 Reporter.WriteLine();
-
                 PrintableTable<KeyValuePair<string, string>> table = new();
                 table.AddColumn(LocalizableStrings.WorkloadIdColumn, workload => workload.Key);
+                table.AddColumn(LocalizableStrings.WorkloadManfiestVersionColumn, workload => {
+                    var m = _workloadResolver.GetManifestFromWorkload(new WorkloadId(workload.Key));
+                    return m.Version + "/" +
+                    new WorkloadManifestInfo(m.Id, m.Version, Path.GetDirectoryName(m.ManifestPath)!).ManifestFeatureBand;
+                });
                 table.AddColumn(LocalizableStrings.WorkloadSourceColumn, workload => workload.Value);
 
                 table.PrintRows(installedWorkloads.AsEnumerable(), l => Reporter.WriteLine(l));

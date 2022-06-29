@@ -576,6 +576,21 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             return false;
         }
 
+        /// <summary>
+        /// Finds the manifest for a specified workload.
+        /// </summary>
+        /// <param name="workloadId">The workload Id for which we want the corresponding manifest.</param>
+        /// <returns>The manifest for a corresponding workload.</returns>
+        /// <remarks>
+        /// Will fail if the workloadId provided is invalid.
+        /// </remarks>
+        /// <exception>KeyNotFoundException</exception>
+        /// <exception>ArgumentNullException</exception>
+        public WorkloadManifest GetManifestFromWorkload(WorkloadId workloadId)
+        {
+            return _workloads[workloadId].manifest;
+        }
+
         public WorkloadResolver CreateOverlayResolver(IWorkloadManifestProvider overlayManifestProvider)
         {
             // we specifically don't assign the overlayManifestProvider to the new resolver
