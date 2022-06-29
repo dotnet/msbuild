@@ -1,5 +1,5 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.Collections.Generic;
@@ -14,7 +14,11 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal sealed class ServerNodeBuildCommand : INodePacket
     {
+#if FEATURE_GET_COMMANDLINE
         private string _commandLine = default!;
+#else
+        private string[] _commandLine = default!;
+#endif
         private string _startupDirectory = default!;
         private Dictionary<string, string> _buildProcessEnvironment = default!;
         private CultureInfo _culture = default!;
@@ -27,9 +31,13 @@ namespace Microsoft.Build.BackEnd
         public NodePacketType Type => NodePacketType.ServerNodeBuildCommand;
 
         /// <summary>
-        /// The startup directory
+        /// Command line including arguments
         /// </summary>
+#if FEATURE_GET_COMMANDLINE
         public string CommandLine => _commandLine;
+#else
+        public string[] CommandLine => _commandLine;
+#endif
 
         /// <summary>
         /// The startup directory
@@ -63,7 +71,15 @@ namespace Microsoft.Build.BackEnd
         {
         }
 
-        public ServerNodeBuildCommand(string commandLine, string startupDirectory, Dictionary<string, string> buildProcessEnvironment, CultureInfo culture, CultureInfo uiCulture,
+        public ServerNodeBuildCommand(
+#if FEATURE_GET_COMMANDLINE
+            string commandLine,
+#else
+            string[] commandLine,
+#endif
+            string startupDirectory,
+            Dictionary<string, string> buildProcessEnvironment,
+            CultureInfo culture, CultureInfo uiCulture,
             TargetConsoleConfiguration consoleConfiguration)
         {
             ErrorUtilities.VerifyThrowInternalNull(consoleConfiguration, nameof(consoleConfiguration));

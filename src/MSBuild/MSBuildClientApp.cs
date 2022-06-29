@@ -46,9 +46,8 @@ namespace Microsoft.Build.CommandLine
 
             return Execute(
                 commandLine,
-                cancellationToken,
-                msbuildLocation
-            );
+                msbuildLocation,
+                cancellationToken);
         }
 
         /// <summary>
@@ -57,9 +56,9 @@ namespace Microsoft.Build.CommandLine
         /// <param name="commandLine">The command line to process. The first argument
         /// on the command line is assumed to be the name/path of the executable, and
         /// is ignored.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
         /// <param name="msbuildLocation"> Full path to current MSBuild.exe if executable is MSBuild.exe,
         /// or to version of MSBuild.dll found to be associated with the current process.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A value of type <see cref="MSBuildApp.ExitType"/> that indicates whether the build succeeded,
         /// or the manner in which it failed.</returns>
         public static MSBuildApp.ExitType Execute(
@@ -68,18 +67,11 @@ namespace Microsoft.Build.CommandLine
 #else
             string[] commandLine,
 #endif
-            CancellationToken cancellationToken,
-            string msbuildLocation
-        )
+            string msbuildLocation,
+            CancellationToken cancellationToken)
         {
-            // MSBuild client orchestration.
-#if !FEATURE_GET_COMMANDLINE
-            string commandLineString = string.Join(" ", commandLine); 
-#else
-            string commandLineString = commandLine;
-#endif
-            MSBuildClient msbuildClient = new MSBuildClient(msbuildLocation); 
-            MSBuildClientExitResult exitResult = msbuildClient.Execute(commandLineString, cancellationToken);
+            MSBuildClient msbuildClient = new MSBuildClient(commandLine, msbuildLocation); 
+            MSBuildClientExitResult exitResult = msbuildClient.Execute(cancellationToken);
 
             if (exitResult.MSBuildClientExitType == MSBuildClientExitType.ServerBusy ||
                 exitResult.MSBuildClientExitType == MSBuildClientExitType.ConnectionError)

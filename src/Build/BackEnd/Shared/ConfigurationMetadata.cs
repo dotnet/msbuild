@@ -164,10 +164,9 @@ namespace Microsoft.Build.BackEnd
             {
                 return true;
             }
-
             return ProjectFullPath.Equals(other.ProjectFullPath, StringComparison.OrdinalIgnoreCase) &&
-                   ToolsVersion.Equals(other.ToolsVersion, StringComparison.OrdinalIgnoreCase) &&
-                   GlobalProperties.Equals(other.GlobalProperties);
+                ToolsVersion.Equals(other.ToolsVersion, StringComparison.OrdinalIgnoreCase) &&
+                GlobalProperties.Equals(other.GlobalProperties);
         }
 
         private string DebugString()

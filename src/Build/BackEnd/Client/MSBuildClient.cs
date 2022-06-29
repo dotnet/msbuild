@@ -39,6 +39,16 @@ namespace Microsoft.Build.Experimental
         private readonly string _msbuildLocation;
 
         /// <summary>
+        /// The command line to process.
+        /// The first argument on the command line is assumed to be the name/path of the executable, and is ignored.
+        /// </summary>
+#if FEATURE_GET_COMMANDLINE
+        private readonly string _commandLine;
+#else
+        private readonly string[] _commandLine;
+#endif
+
+        /// <summary>
         /// The MSBuild client execution result.
         /// </summary>
         private readonly MSBuildClientExitResult _exitResult;
@@ -87,14 +97,23 @@ namespace Microsoft.Build.Experimental
         /// <summary>
         /// Public constructor with parameters.
         /// </summary>
+        /// <param name="commandLine">The command line to process. The first argument
+        /// on the command line is assumed to be the name/path of the executable, and is ignored</param>
         /// <param name="msbuildLocation"> Full path to current MSBuild.exe if executable is MSBuild.exe,
         /// or to version of MSBuild.dll found to be associated with the current process.</param>
-        public MSBuildClient(string msbuildLocation)
+        public MSBuildClient(
+#if FEATURE_GET_COMMANDLINE
+            string commandLine,
+#else
+            string[] commandLine,
+#endif
+            string msbuildLocation)
         {
             _serverEnvironmentVariables = new();
             _exitResult = new();
 
             // dll & exe locations
+            _commandLine = commandLine;
             _msbuildLocation = msbuildLocation;
 
             // Client <-> Server communication stream
@@ -114,15 +133,20 @@ namespace Microsoft.Build.Experimental
         /// Orchestrates the execution of the build on the server,
         /// responsible for client-server communication.
         /// </summary>
-        /// <param name="commandLine">The command line to process. The first argument
-        /// on the command line is assumed to be the name/path of the executable, and
-        /// is ignored.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A value of type <see cref="MSBuildClientExitResult"/> that indicates whether the build succeeded,
         /// or the manner in which it failed.</returns>
-        public MSBuildClientExitResult Execute(string commandLine, CancellationToken cancellationToken)
+        public MSBuildClientExitResult Execute(CancellationToken cancellationToken)
         {
-            CommunicationsUtilities.Trace("Executing build with command line '{0}'", commandLine);
+            // Command line in one string used only in human readable content.
+            string descriptiveCommandLine =
+#if FEATURE_GET_COMMANDLINE
+                _commandLine;
+#else
+                string.Join(" ", _commandLine);
+#endif
+
+            CommunicationsUtilities.Trace("Executing build with command line '{0}'", descriptiveCommandLine);
             string serverRunningMutexName = OutOfProcServerNode.GetRunningServerMutexName(_handshake);
             string serverBusyMutexName = OutOfProcServerNode.GetBusyServerMutexName(_handshake);
 
@@ -159,8 +183,8 @@ namespace Microsoft.Build.Experimental
 
             // Send build command.
             // Let's send it outside the packet pump so that we easier and quicker deal with possible issues with connection to server.
-            MSBuildEventSource.Log.MSBuildServerBuildStart(commandLine);
-            if (!TrySendBuildCommand(commandLine))
+            MSBuildEventSource.Log.MSBuildServerBuildStart(descriptiveCommandLine);
+            if (!TrySendBuildCommand())
             {
                 CommunicationsUtilities.Trace("Failure to connect to a server.");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.ConnectionError;
@@ -222,7 +246,7 @@ namespace Microsoft.Build.Experimental
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.Unexpected;
             }
 
-            MSBuildEventSource.Log.MSBuildServerBuildStop(commandLine, _numConsoleWritePackets, _sizeOfConsoleWritePackets, _exitResult.MSBuildClientExitType.ToString(), _exitResult.MSBuildAppExitTypeString);
+            MSBuildEventSource.Log.MSBuildServerBuildStop(descriptiveCommandLine, _numConsoleWritePackets, _sizeOfConsoleWritePackets, _exitResult.MSBuildClientExitType.ToString(), _exitResult.MSBuildAppExitTypeString);
             CommunicationsUtilities.Trace("Build finished.");
             return _exitResult;
         }
@@ -363,12 +387,8 @@ namespace Microsoft.Build.Experimental
                 "/nodemode:8"
             };
 
-            string? useMSBuildServerEnvVarValue = Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName);
             try
             {
-                // Disable MSBuild server for a child process, preventing an infinite recurson.
-                Environment.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, "");
-
                 NodeLauncher nodeLauncher = new NodeLauncher();
                 CommunicationsUtilities.Trace("Starting Server...");
                 Process msbuildProcess = nodeLauncher.Start(_msbuildLocation, string.Join(" ", msBuildServerOptions));
@@ -380,19 +400,15 @@ namespace Microsoft.Build.Experimental
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.LaunchError;
                 return false;
             }
-            finally
-            {
-                Environment.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, useMSBuildServerEnvVarValue);
-            }
 
             return true;
         }
 
-        private bool TrySendBuildCommand(string commandLine) => TrySendPacket(() => GetServerNodeBuildCommand(commandLine));
+        private bool TrySendBuildCommand() => TrySendPacket(() => GetServerNodeBuildCommand());
 
         private bool TrySendCancelCommand() => TrySendPacket(() => new ServerNodeBuildCancel());
 
-        private ServerNodeBuildCommand GetServerNodeBuildCommand(string commandLine)
+        private ServerNodeBuildCommand GetServerNodeBuildCommand()
         {
             Dictionary<string, string> envVars = new();
 
@@ -410,7 +426,7 @@ namespace Microsoft.Build.Experimental
             envVars.Remove(Traits.UseMSBuildServerEnvVarName);
 
             return new ServerNodeBuildCommand(
-                        commandLine,
+                        _commandLine,
                         startupDirectory: Directory.GetCurrentDirectory(),
                         buildProcessEnvironment: envVars,
                         CultureInfo.CurrentCulture,
@@ -458,7 +474,8 @@ namespace Microsoft.Build.Experimental
                 case NodePacketType.ServerNodeBuildResult:
                     HandleServerNodeBuildResult((ServerNodeBuildResult)packet);
                     break;
-                default: throw new InvalidOperationException($"Unexpected packet type {packet.GetType().Name}");
+                default:
+                    throw new InvalidOperationException($"Unexpected packet type {packet.GetType().Name}");
             }
         }
 
