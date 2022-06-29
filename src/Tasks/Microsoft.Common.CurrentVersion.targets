@@ -4355,7 +4355,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_ClickOnceFiles Include="@(ContentWithTargetPath);@(_DeploymentManifestIconFile);@(AppConfigWithTargetPath);@(NetCoreRuntimeJsonFilesForClickOnce);@(_ClickOnceRuntimeCopyLocalItems)"/>
     </ItemGroup>
 
-    <!-- For single file publish, we need to include the SF bundle EXE and files excluded from the bundle EXE in the clickonce manifest -->
+    <!-- For single file publish, we need to include the SF bundle EXE, application icon file and files excluded from the bundle EXE in the clickonce manifest -->
     <ItemGroup Condition="'$(PublishSingleFile)' == 'true'">
       <_ClickOnceFiles Include="$(PublishedSingleFilePath);@(_DeploymentManifestIconFile)"/>
       <_ClickOnceFiles Include="@(_FilesExcludedFromBundle)"/>
