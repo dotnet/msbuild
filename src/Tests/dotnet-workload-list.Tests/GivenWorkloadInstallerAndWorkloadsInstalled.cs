@@ -10,6 +10,7 @@ using FluentAssertions;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Workload.Install.Tests;
+using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.DotNet.Workloads.Workload.List;
@@ -97,7 +98,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
 
             ParseResult listParseResult = Parser.Instance.Parse(new[]
             {
-                "dotnet", "workload", "list", "--machine-readable", WorkloadInstallCommandParser.VersionOption.Aliases.First(), "7.0.100"
+                "dotnet", "workload", "list", "--machine-readable", InstallingWorkloadCommandParser.VersionOption.Aliases.First(), "7.0.100"
             });
 
             _workloadListCommand = new WorkloadListCommand(
@@ -139,7 +140,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             _workloadListCommand = new WorkloadListCommand(
                 Parser.Instance.Parse(new[]
                 {
-                    "dotnet", "workload", "list", "--machine-readable", WorkloadInstallCommandParser.VersionOption.Aliases.First(), "5.0.306"
+                    "dotnet", "workload", "list", "--machine-readable", InstallingWorkloadCommandParser.VersionOption.Aliases.First(), "5.0.306"
                 }),
                 _reporter,
                 nugetPackageDownloader: _nugetDownloader,
@@ -159,7 +160,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             _workloadListCommand = new WorkloadListCommand(
                 Parser.Instance.Parse(new[]
                 {
-                    "dotnet", "workload", "list", "--machine-readable", WorkloadInstallCommandParser.VersionOption.Aliases.First(), "6.0.100"
+                    "dotnet", "workload", "list", "--machine-readable", InstallingWorkloadCommandParser.VersionOption.Aliases.First(), "6.0.100"
                 }),
                 _reporter,
                 nugetPackageDownloader: _nugetDownloader,

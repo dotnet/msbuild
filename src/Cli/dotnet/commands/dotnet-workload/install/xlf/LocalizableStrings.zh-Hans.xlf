@@ -47,6 +47,11 @@
         <target state="translated">正在将包 {0} 版本 {1} 下载到脱机缓存 {2}...</target>
         <note />
       </trans-unit>
+      <trans-unit id="ExpectedSingleManifest">
+        <source>Expected single manifest feature band and manifest folder in MSI from package {0}</source>
+        <target state="new">Expected single manifest feature band and manifest folder in MSI from package {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="FailedAdManifestUpdate">
         <source>Failed to update the advertising manifest {0}: {1}.</source>
         <target state="translated">未能更新广告清单 {0}: {1}。</target>
@@ -55,6 +60,11 @@
       <trans-unit id="FailedToDownloadPackageManifest">
         <source>Failed to download manifest package {0}.</source>
         <target state="translated">未能下载清单程序包 {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToExtractMsi">
+        <source>Failed to extract information from MSI: {0}</source>
+        <target state="new">Failed to extract information from MSI: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToGetPackageManifestUrl">
@@ -150,6 +160,11 @@
       <trans-unit id="ManifestDoesNotExist">
         <source>No manifest with ID {0} exists.</source>
         <target state="translated">不存在 ID 为 {0} 的清单。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestMsiNotFoundInNuGetPackage">
+        <source>Manifest MSI not found in NuGet package {0}</source>
+        <target state="new">Manifest MSI not found in NuGet package {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">
