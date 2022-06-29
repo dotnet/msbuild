@@ -274,9 +274,9 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
-        [InlineData("net6.0", true)]
-        [InlineData("net7.0", false)]
-        public void ILLink_respects_IsTrimmable_attribute(string targetFramework, bool keepNonTrimmable)
+        [InlineData("net6.0")]
+        [InlineData("net7.0")]
+        public void ILLink_respects_IsTrimmable_attribute(string targetFramework)
         {
             string projectName = "HelloWorld";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -293,12 +293,14 @@ namespace Microsoft.NET.Publish.Tests
 
             // Only unused non-trimmable assemblies are kept
             File.Exists(unusedTrimmableDll).Should().BeFalse();
-            if (keepNonTrimmable)
+            if (targetFramework == "net6.0")
             {
+                // In net6.0 the default is to keep assemblies not marked trimmable
                 DoesImageHaveMethod(unusedNonTrimmableDll, "UnusedMethod").Should().BeTrue();
             }
             else
             {
+                // In net7.0+ the default is to keep assemblies not marked trimmable
                 File.Exists(unusedNonTrimmableDll).Should().BeFalse();
             }
         }
@@ -387,10 +389,14 @@ namespace Microsoft.NET.Publish.Tests
                 DoesImageHaveMethod(nonTrimmableDll, "UnusedMethod").Should().BeFalse();
                 File.Exists(unusedNonTrimmableDll).Should().BeFalse();
             }
-            else
+            else if (trimMode is "partial")
             {
                 DoesImageHaveMethod(nonTrimmableDll, "UnusedMethod").Should().BeTrue();
                 DoesImageHaveMethod(unusedNonTrimmableDll, "UnusedMethod").Should().BeTrue();
+            }
+            else
+            {
+                Assert.True(false, "unexpected value");
             }
         }
 
