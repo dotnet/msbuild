@@ -148,17 +148,6 @@ namespace Microsoft.Build.Internal
         {
         }
 
-        /// <summary>
-        /// Compute stable hash as integer
-        /// </summary>
-        private static int ComputeHandshakeHash(string fromString)
-        {
-            using var sha = SHA256.Create();
-            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(fromString));
-
-            return BitConverter.ToInt32(bytes, 0);
-        }
-
         public override int[] RetrieveHandshakeComponents()
         {
             return new int[]

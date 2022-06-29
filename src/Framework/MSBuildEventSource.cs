@@ -53,6 +53,12 @@ namespace Microsoft.Build.Eventing
             WriteEvent(1, itemType);
         }
 
+        [Event(1, Keywords = Keywords.All)]
+        public void ApplyLazyItemOperationsStart2(string itemType)
+        {
+            WriteEvent(1, itemType);
+        }
+
         /// <param name="itemType">The type of the item being mutated.</param>
         [Event(2, Keywords = Keywords.All)]
         public void ApplyLazyItemOperationsStop(string itemType)

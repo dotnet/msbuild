@@ -2697,8 +2697,8 @@ namespace Microsoft.Build.CommandLine
                                     QuotingUtilities.SplitUnquoted(commandLine).ToArray()
 #endif
                                 );
-                            exitCode = exitType == ExitType.Success ? 0 : 1;
                         }
+
                         exitCode = exitType == ExitType.Success ? 0 : 1;
 
                         return (exitCode, exitType.ToString());

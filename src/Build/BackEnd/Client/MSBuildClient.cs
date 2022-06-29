@@ -133,6 +133,7 @@ namespace Microsoft.Build.Experimental
                 CommunicationsUtilities.Trace("Server was not running. Starting server now.");
                 if (!TryLaunchServer())
                 {
+                    _exitResult.MSBuildClientExitType = MSBuildClientExitType.LaunchError;
                     return _exitResult;
                 }
             }
@@ -371,11 +372,11 @@ namespace Microsoft.Build.Experimental
                 NodeLauncher nodeLauncher = new NodeLauncher();
                 CommunicationsUtilities.Trace("Starting Server...");
                 Process msbuildProcess = nodeLauncher.Start(_msbuildLocation, string.Join(" ", msBuildServerOptions));
-                CommunicationsUtilities.Trace("Server started with PID: {0}", msbuildProcess?.Id);
+                CommunicationsUtilities.Trace($"Server started with PID: {msbuildProcess?.Id}");
             }
             catch (Exception ex)
             {
-                CommunicationsUtilities.Trace("Failed to launch the msbuild server: {0}", ex);
+                CommunicationsUtilities.Trace($"Failed to launch the msbuild server: {ex}");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.LaunchError;
                 return false;
             }
@@ -406,7 +407,7 @@ namespace Microsoft.Build.Experimental
             }
 
             // We remove env variable used to invoke MSBuild server as that might be equal to 1, so we do not get an infinite recursion here. 
-            envVars[Traits.UseMSBuildServerEnvVarName] = "0";
+            envVars.Remove(Traits.UseMSBuildServerEnvVarName);
 
             return new ServerNodeBuildCommand(
                         commandLine,
@@ -437,8 +438,8 @@ namespace Microsoft.Build.Experimental
         /// </summary>
         private void HandlePacketPumpError(MSBuildClientPacketPump packetPump)
         {
-            CommunicationsUtilities.Trace("MSBuild client error: packet pump unexpectedly shut down: {0}", packetPump.PacketPumpException);
-            throw packetPump.PacketPumpException ?? new Exception("Packet pump unexpectedly shut down");
+            CommunicationsUtilities.Trace($"MSBuild client error: packet pump unexpectedly shut down: {packetPump.PacketPumpException}");
+            throw packetPump.PacketPumpException ?? new InternalErrorException("Packet pump unexpectedly shut down");
         }
 
         /// <summary>
@@ -478,7 +479,7 @@ namespace Microsoft.Build.Experimental
 
         private void HandleServerNodeBuildResult(ServerNodeBuildResult response)
         {
-            CommunicationsUtilities.Trace("Build response received: exit code {0}, exit type '{1}'", response.ExitCode, response.ExitType);
+            CommunicationsUtilities.Trace($"Build response received: exit code {response.ExitCode}, exit type '{response.ExitType}'");
             _exitResult.MSBuildClientExitType = MSBuildClientExitType.Success;
             _exitResult.MSBuildAppExitTypeString = response.ExitType;
             _buildFinished = true;
@@ -497,14 +498,14 @@ namespace Microsoft.Build.Experimental
                 int[] handshakeComponents = _handshake.RetrieveHandshakeComponents();
                 for (int i = 0; i < handshakeComponents.Length; i++)
                 {
-                    CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", i, handshakeComponents[i], _pipeName);
+                    CommunicationsUtilities.Trace($"Writing handshake part {i} ({handshakeComponents[i]}) to pipe {_pipeName}");
                     _nodeStream.WriteIntForHandshake(handshakeComponents[i]);
                 }
 
                 // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
                 _nodeStream.WriteEndOfHandshakeSignal();
 
-                CommunicationsUtilities.Trace("Reading handshake from pipe {0}", _pipeName);
+                CommunicationsUtilities.Trace($"Reading handshake from pipe {_pipeName}");
 
 #if NETCOREAPP2_1_OR_GREATER || MONO
                 _nodeStream.ReadEndOfHandshakeSignal(false, 1000);
@@ -512,11 +513,11 @@ namespace Microsoft.Build.Experimental
                 _nodeStream.ReadEndOfHandshakeSignal(false);
 #endif
 
-                CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", _pipeName);
+                CommunicationsUtilities.Trace($"Successfully connected to pipe {_pipeName}...!");
             }
             catch (Exception ex)
             {
-                CommunicationsUtilities.Trace("Failed to connect to server: {0}", ex);
+                CommunicationsUtilities.Trace($"Failed to connect to server: {ex}");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.ConnectionError;
                 return false;
             }
