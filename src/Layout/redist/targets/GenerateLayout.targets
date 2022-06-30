@@ -299,10 +299,6 @@
       Targets="Publish"
       Projects="$(RepoRoot)/src/RazorSdk/Tool/Microsoft.NET.Sdk.Razor.Tool.csproj"
       Properties="Configuration=$(Configuration)" />
-    <MSBuild
-      Targets="Publish"
-      Projects="$(RepoRoot)/src/RazorSdk/SourceGenerators/Microsoft.NET.Sdk.Razor.SourceGenerators.csproj"
-      Properties="Configuration=$(Configuration)" />
   </Target>
 
   <Target Name="MoveRazorSdkTools" AfterTargets="PublishRazorSdkTools">
