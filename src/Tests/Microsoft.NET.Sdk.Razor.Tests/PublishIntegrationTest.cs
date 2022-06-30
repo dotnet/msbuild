@@ -45,10 +45,12 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             // Verify assets get published
             new FileInfo(Path.Combine(publishOutputPath, "wwwroot", "js", "SimpleMvc.js")).Should().Exist();
             new FileInfo(Path.Combine(publishOutputPath, "wwwroot", "css", "site.css")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputPath, "wwwroot", ".well-known", "security.txt")).Should().Exist();
 
             // By default refs and .cshtml files will not be copied on publish
             new DirectoryInfo(Path.Combine(publishOutputPath, "refs")).Should().NotExist();
             new DirectoryInfo(Path.Combine(publishOutputPath, "Views")).Should().NotExist();
+            new FileInfo(Path.Combine(publishOutputPath, "wwwroot", ".not-copied", "test.txt")).Should().NotExist();
         }
 
         [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/28781")]
