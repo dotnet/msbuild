@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
@@ -67,18 +66,11 @@ namespace Microsoft.Build.Experimental
         /// </summary>
         private Exception? _shutdownException = null;
 
-        /// <summary>
-        /// Flag indicating if we should debug communications or not.
-        /// </summary>
-        private readonly bool _debugCommunications;
-
         private string _serverBusyMutexName = default!;
 
         public OutOfProcServerNode(BuildCallback buildFunction)
         {
             _buildFunction = buildFunction;
-            new Dictionary<string, string>();
-            _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
 
             _receivedPackets = new ConcurrentQueue<INodePacket>();
             _packetReceivedEvent = new AutoResetEvent(false);
@@ -251,12 +243,6 @@ namespace Microsoft.Build.Experimental
                 case LinkStatus.Failed:
                     _shutdownReason = NodeEngineShutdownReason.ConnectionFailed;
                     _shutdownEvent.Set();
-                    break;
-
-                case LinkStatus.Inactive:
-                    break;
-
-                case LinkStatus.Active:
                     break;
 
                 default:

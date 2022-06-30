@@ -2692,8 +2692,8 @@ namespace Microsoft.Build.CommandLine
                         else
                         {
                             exitType = Execute(commandLine);
-                            exitCode = exitType == ExitType.Success ? 0 : 1;
                         }
+
                         exitCode = exitType == ExitType.Success ? 0 : 1;
 
                         return (exitCode, exitType.ToString());
