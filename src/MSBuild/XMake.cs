@@ -567,6 +567,7 @@ namespace Microsoft.Build.CommandLine
                 CommandLineSwitches.SwitchesFromResponseFiles ??= new();
 
                 GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile);
+
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
                                             switchesFromAutoResponseFile,
                                             switchesNotFromAutoResponseFile,

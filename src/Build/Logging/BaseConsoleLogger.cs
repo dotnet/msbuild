@@ -940,7 +940,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         public virtual void Shutdown()
         {
-            Traits.LogAllEnvironmentVariables = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES")) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4);
+            // do nothing
         }
 
         internal abstract void ResetConsoleLoggerState();
@@ -1050,7 +1050,6 @@ namespace Microsoft.Build.BackEnd.Logging
                     return true;
                 case "SHOWENVIRONMENT":
                     showEnvironment = true;
-                    Traits.LogAllEnvironmentVariables = true;
                     return true;
                 case "SHOWPROJECTFILE":
                     if (parameterValue == null)

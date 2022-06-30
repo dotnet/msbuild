@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using ObjectModel = System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -24,15 +25,13 @@ using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using static Microsoft.Build.Execution.ProjectPropertyInstance;
+using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Constants = Microsoft.Build.Internal.Constants;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using ObjectModel = System.Collections.ObjectModel;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using SdkReferencePropertyExpansionMode = Microsoft.Build.Framework.EscapeHatches.SdkReferencePropertyExpansionMode;
-using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 #nullable disable
 
@@ -812,28 +811,11 @@ namespace Microsoft.Build.Evaluation
             if (this._evaluationLoggingContext.LoggingService.IncludeEvaluationPropertiesAndItems)
             {
                 globalProperties = _data.GlobalPropertiesDictionary;
-                properties = Traits.LogAllEnvironmentVariables ? _data.Properties : FilterOutEnvironmentDerivedProperties(_data.Properties);
+                properties = _data.Properties;
                 items = _data.Items;
             }
 
             _evaluationLoggingContext.LogProjectEvaluationFinished(globalProperties, properties, items, _evaluationProfiler.ProfiledResult);
-        }
-
-        private IEnumerable FilterOutEnvironmentDerivedProperties(PropertyDictionary<P> dictionary)
-        {
-            List<P> list = new(dictionary.Count);
-            foreach (P p in dictionary)
-            {
-                if (p is EnvironmentDerivedProjectPropertyInstance ||
-                    (p is ProjectProperty pp && pp.IsEnvironmentProperty))
-                {
-                    continue;
-                }
-
-                list.Add(p);
-            }
-
-            return list;
         }
 
         private void CollectProjectCachePlugins()
@@ -1069,8 +1051,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void AddBeforeAndAfterTargetMappings(ProjectTargetElement targetElement, Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets, Dictionary<string, List<TargetSpecification>> targetsWhichRunBeforeByTarget, Dictionary<string, List<TargetSpecification>> targetsWhichRunAfterByTarget)
         {
-            var beforeTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.BeforeTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.BeforeTargetsLocation, _evaluationLoggingContext);
-            var afterTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.AfterTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.AfterTargetsLocation, _evaluationLoggingContext);
+            var beforeTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.BeforeTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.BeforeTargetsLocation);
+            var afterTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.AfterTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.AfterTargetsLocation);
 
             foreach (string beforeTarget in beforeTargets)
             {
@@ -1215,7 +1197,7 @@ namespace Microsoft.Build.Evaluation
         {
             foreach (ProjectPropertyInstance environmentProperty in _environmentProperties)
             {
-                _data.SetProperty(environmentProperty.Name, ((IProperty)environmentProperty).EvaluatedValueEscaped, isGlobalProperty: false, mayBeReserved: false, isEnvironmentVariable: true, loggingContext: _evaluationLoggingContext);
+                _data.SetProperty(environmentProperty.Name, ((IProperty)environmentProperty).EvaluatedValueEscaped, isGlobalProperty: false, mayBeReserved: false, isEnvironmentVariable: true);
             }
         }
 
@@ -1316,7 +1298,7 @@ namespace Microsoft.Build.Evaluation
                 // it is the same as what we are setting the value on. Note: This needs to be set before we expand the property we are currently setting.
                 _expander.UsedUninitializedProperties.CurrentlyEvaluatingPropertyElementName = propertyElement.Name;
 
-                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(propertyElement.Value, ExpanderOptions.ExpandProperties, propertyElement.Location, _evaluationLoggingContext);
+                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(propertyElement.Value, ExpanderOptions.ExpandProperties, propertyElement.Location);
 
                 // If we are going to set a property to a value other than null or empty we need to check to see if it has been used
                 // during evaluation.
@@ -2021,7 +2003,7 @@ namespace Microsoft.Build.Evaluation
         {
             imports = null;
 
-            string importExpressionEscaped = _expander.ExpandIntoStringLeaveEscaped(unescapedExpression, ExpanderOptions.ExpandProperties, importElement.ProjectLocation, _evaluationLoggingContext);
+            string importExpressionEscaped = _expander.ExpandIntoStringLeaveEscaped(unescapedExpression, ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
             ElementLocation importLocationInProject = importElement.Location;
 
             if (String.IsNullOrWhiteSpace(importExpressionEscaped))
@@ -2446,8 +2428,7 @@ namespace Microsoft.Build.Evaluation
                     element.ConditionLocation,
                     _evaluationLoggingContext.LoggingService,
                     _evaluationLoggingContext.BuildEventContext,
-                    _evaluationContext.FileSystem,
-                    loggingContext: _evaluationLoggingContext
+                    _evaluationContext.FileSystem
                     );
 
                 return result;

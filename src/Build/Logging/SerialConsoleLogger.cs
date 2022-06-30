@@ -108,10 +108,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 WriteLinePrettyFromResource("BuildStartedWithTime", e.Timestamp);
             }
 
-            if (Traits.LogAllEnvironmentVariables)
-            {
-                WriteEnvironment(e.BuildEnvironment);
-            }
+            WriteEnvironment(e.BuildEnvironment);
         }
 
         /// <summary>
@@ -514,14 +511,17 @@ namespace Microsoft.Build.BackEnd.Logging
                     setColor(ConsoleColor.DarkGray);
                 }
 
-                string nonNullMessage = e is EnvironmentVariableReadEventArgs environmentDerivedProperty ?
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EnvironmentDerivedPropertyRead", environmentDerivedProperty.EnvironmentVariableName, e.Message)
-                    : e.Message ?? String.Empty;
+                string nonNullMessage;
 
                 // Include file information if present.
                 if (e.File != null)
                 {
                     nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile);
+                }
+                else
+                {
+                    // null messages are ok -- treat as blank line
+                    nonNullMessage = e.Message ?? String.Empty;
                 }
 
                 WriteLinePretty(nonNullMessage);

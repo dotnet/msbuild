@@ -231,10 +231,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 WriteLinePrettyFromResource("BuildStartedWithTime", e.Timestamp);
             }
 
-            if (Traits.LogAllEnvironmentVariables)
-            {
-                WriteEnvironment(e.BuildEnvironment);
-            }
+            WriteEnvironment(e.BuildEnvironment);
         }
 
         /// <summary>
@@ -1207,21 +1204,16 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private void PrintMessage(BuildMessageEventArgs e, bool lightenText)
         {
-            string nonNullMessage = null;
-
-            if (e is EnvironmentVariableReadEventArgs environmentPropertyReadEventArgs)
-            {
-                nonNullMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EnvironmentDerivedPropertyRead", environmentPropertyReadEventArgs.EnvironmentVariableName, e.Message);
-            }
+            string nonNullMessage;
 
             // Include file information if present.
             if (e.File != null)
             {
-                nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile, FindLogOutputProperties(e), nonNullMessage);
+                nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile, FindLogOutputProperties(e));
             }
             else
             {
-                nonNullMessage ??= e.Message ?? string.Empty;
+                nonNullMessage = e.Message ?? string.Empty;
             }
 
             int prefixAdjustment = 0;

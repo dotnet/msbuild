@@ -388,9 +388,14 @@ namespace Microsoft.Build.BackEnd.Logging
                 message = ResourceUtilities.GetResourceString("BuildStarted");
             }
 
-            IDictionary<string, string> environmentProperties = _componentHost?.BuildParameters?.BuildProcessEnvironment;
+            IDictionary<string, string> environmentProperties = null;
 
-            BuildStartedEventArgs buildEvent = new(message, helpKeyword: null, environmentProperties);
+            if (_componentHost?.BuildParameters != null)
+            {
+                environmentProperties = _componentHost.BuildParameters.BuildProcessEnvironment;
+            }
+
+            BuildStartedEventArgs buildEvent = new BuildStartedEventArgs(message, null /* no help keyword */, environmentProperties);
 
             // Raise the event with the filters
             ProcessLoggingEvent(buildEvent);
