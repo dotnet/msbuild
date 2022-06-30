@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -90,15 +91,6 @@ namespace Microsoft.Build.Framework
         /// Log statistics about property functions which require reflection
         /// </summary>
         public readonly bool LogPropertyFunctionsRequiringReflection = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection"));
-
-        /// <summary>
-        /// Log all environment variables whether or not they are used in a build in the binary log.
-        /// </summary>
-        public readonly bool LogAllEnvironmentVariables = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES"))
-#if !TASKHOST
-            && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4)
-#endif
-            ;
 
         /// <summary>
         /// Log property tracking information.
