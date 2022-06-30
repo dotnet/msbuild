@@ -1,0 +1,4 @@
+Microsoft.Build.Tasks.Delete.Retries.get -> int
+Microsoft.Build.Tasks.Delete.Retries.set -> void
+Microsoft.Build.Tasks.Delete.RetryDelayMilliseconds.get -> int
+Microsoft.Build.Tasks.Delete.RetryDelayMilliseconds.set -> void

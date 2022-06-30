@@ -296,6 +296,11 @@
         <target state="translated">MSB3061: No se puede eliminar el archivo "{0}". {1}</target>
         <note>{StrBegin="MSB3061: "}</note>
       </trans-unit>
+      <trans-unit id="Delete.Retrying">
+        <source>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3}</source>
+        <target state="new">MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3}</target>
+        <note>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message.</note>
+      </trans-unit>
       <trans-unit id="Delete.SkippingNonexistentFile">
         <source>File "{0}" doesn't exist. Skipping.</source>
         <target state="translated">El archivo"{0}" no existe. Se omitirá.</target>

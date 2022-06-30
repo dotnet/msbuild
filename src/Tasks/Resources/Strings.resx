@@ -362,6 +362,10 @@
     <value>MSB3061: Unable to delete file "{0}". {1}</value>
     <comment>{StrBegin="MSB3061: "}</comment>
   </data>
+  <data name="Delete.Retrying">
+    <value>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3}</value>
+    <comment>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message.</comment>
+  </data>
   <data name="Delete.SkippingNonexistentFile">
     <value>File "{0}" doesn't exist. Skipping.</value>
   </data>

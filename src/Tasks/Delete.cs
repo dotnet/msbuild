@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -43,6 +44,10 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] DeletedFiles { get; set; }
 
+        public int Retries { get; set; } = 10;
+
+        public int RetryDelayMilliseconds { get; set; } = 1000;
+
         #endregion
 
         /// <summary>
@@ -62,45 +67,57 @@ namespace Microsoft.Build.Tasks
         {
             var deletedFilesList = new List<ITaskItem>();
             var deletedFilesSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            int retries = 1;
 
             foreach (ITaskItem file in Files)
             {
-                if (_canceling)
+                while (!_canceling)
                 {
-                    return false;
-                }
-
-                try
-                {
-                    // For speed, eliminate duplicates caused by poor targets authoring
-                    if (!deletedFilesSet.Contains(file.ItemSpec))
+                    try
                     {
-                        if (FileSystems.Default.FileExists(file.ItemSpec))
+                        // For speed, eliminate duplicates caused by poor targets authoring
+                        if (!deletedFilesSet.Contains(file.ItemSpec))
                         {
-                            // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                            Log.LogMessageFromResources(MessageImportance.Normal, "Delete.DeletingFile", file.ItemSpec);
+                            if (FileSystems.Default.FileExists(file.ItemSpec))
+                            {
+                                // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
+                                Log.LogMessageFromResources(MessageImportance.Normal, "Delete.DeletingFile", file.ItemSpec);
 
-                            File.Delete(file.ItemSpec);
+                                File.Delete(file.ItemSpec);
+                            }
+                            else
+                            {
+                                Log.LogMessageFromResources(MessageImportance.Low, "Delete.SkippingNonexistentFile", file.ItemSpec);
+                            }
+
+                            // keep a running list of the files that were actually deleted
+                            // note that we include in this list files that did not exist
+                            ITaskItem deletedFile = new TaskItem(file);
+                            deletedFilesList.Add(deletedFile);
+                        }
+                    }
+                    catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+                    {
+                        if (Retries <= retries)
+                        {
+                            LogError(file, e);
+                            break;
                         }
                         else
                         {
-                            Log.LogMessageFromResources(MessageImportance.Low, "Delete.SkippingNonexistentFile", file.ItemSpec);
+                            Log.LogWarningWithCodeFromResources("Delete.Retrying", file.ToString(), retries, RetryDelayMilliseconds, e.Message);
+                            retries++;
+
+                            Thread.Sleep(RetryDelayMilliseconds);
+                            continue;
                         }
-
-                        // keep a running list of the files that were actually deleted
-                        // note that we include in this list files that did not exist
-                        ITaskItem deletedFile = new TaskItem(file);
-                        deletedFilesList.Add(deletedFile);
                     }
-                }
-                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-                {
-                    LogError(file, e);
-                }
 
-                // Add even on failure to avoid reattempting
-                deletedFilesSet.Add(file.ItemSpec);
+                    // Add even on failure to avoid reattempting
+                    deletedFilesSet.Add(file.ItemSpec);
+                }
             }
+
             // convert the list of deleted files into an array of ITaskItems
             DeletedFiles = deletedFilesList.ToArray();
             return !Log.HasLoggedErrors;
