@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             PackageSourceLocation packageSourceLocation = null,
             bool includePreview = false)
         {
-            return Task.FromResult("mock-url-" + packageId.ToString());
+            return Task.FromResult($"http://mock-url/{packageId}.{packageVersion}.nupkg");
         }
     }
 }
