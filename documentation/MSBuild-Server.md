@@ -17,8 +17,8 @@ The server node uses same IPC approach as current worker nodes - named pipes. Th
 2. Initiate handshake
 2. Issue build command with `ServerNodeBuildCommand` packet
 3. Read packets from pipe
-   - When `ServerNodeConsoleWrite` packet type is recieved, write content to appropriate output stream with respected coloring
-   - When `ServerNodeBuildResult` packet type is recieved, build is done and client writes trace message with exit code
+   - Write content to the appropriate output stream (respecting coloring) with the `ServerNodeConsoleWrite` packet
+   - After the build completes, the `ServerNodeBuildResult` packet indicates the exit code
 
 ### Pipe name convention & handshake
 
