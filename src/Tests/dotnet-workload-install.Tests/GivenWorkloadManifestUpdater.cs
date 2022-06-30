@@ -674,49 +674,6 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             File.GetLastAccessTime(sentinelPath2).Should().BeCloseTo(updateTime2);
         }
 
-        /**
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void GivenUpdateAvailablePrintDownloadLinkWorksWithPriorSdkVersions(bool useOfflineCache)
-        {
-            // user has 6.0.100 installed
-            // updater offers 6.0.201 update
-            // 6.0.201 is not currently installed
-            // user executes "dotnet workload update --print-download-link-only --sdk-version 6.0.201"
-            // link to download 6.0.201 is given
-
-
-            //  Arrange
-            string sdkFeatureBand = "6.0.300";
-            var testDir = _testAssetsManager.CreateTestDirectory(identifier: useOfflineCache.ToString()).Path;
-            var dotnetRoot = Path.Combine(testDir, "dotnet");
-            var installedManifestDir6_0_300 = Path.Combine(dotnetRoot, "sdk-manifests", "6.0.200");
-            Directory.CreateDirectory(installedManifestDir6_0_300);
-            var adManifestDir = Path.Combine(testDir, ".dotnet", "sdk-advertising", sdkFeatureBand);
-            Directory.CreateDirectory(adManifestDir);
-
-            //  Write installed test-manifest with feature band 6.0.300
-            string testManifestName = "test-manifest";
-            Directory.CreateDirectory(Path.Combine(installedManifestDir6_0_300, testManifestName));
-            File.WriteAllText(Path.Combine(installedManifestDir6_0_300, testManifestName, _manifestFileName), GetManifestContent(new ManifestVersion("1.0.0")));
-
-
-            var workloadManifestProvider = new MockManifestProvider(Path.Combine(installedManifestDir6_0_300, testManifestName, _manifestFileName))
-            {
-                SdkFeatureBand = new SdkFeatureBand(sdkFeatureBand)
-            };
-
-            var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, dotnetRoot);
-            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot, manifestDownload: true);
-            nugetDownloader.PackageIdsToNotFind.Add($"{testManifestName}.Manifest-6.0.300");
-            var installationRepo = new MockInstallationRecordRepository();
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, Path.Combine(testDir, ".dotnet"), testDir, installationRepo);
-        }
-        **/
-
-
-
         private List<(PackageId, NuGetVersion, DirectoryPath?, PackageSourceLocation)> GetExpectedDownloadedPackages(string sdkFeatureBand = "6.0.100")
         {
             var expectedDownloadedPackages = _installedManifests

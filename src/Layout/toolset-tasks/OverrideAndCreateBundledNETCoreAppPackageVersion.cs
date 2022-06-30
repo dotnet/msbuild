@@ -62,8 +62,6 @@ namespace Microsoft.DotNet.Build.Tasks
 
             var isSDKServicing = IsSDKServicing(propertyGroup.Element(ns + "NETCoreSdkVersion").Value);
 
-            isSDKServicing = true;
-
             propertyGroup.Element(ns + "NETCoreSdkVersion").Value = newSDKVersion;
 
             var originalBundledNETCoreAppPackageVersion =

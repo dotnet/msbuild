@@ -60,12 +60,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public string NuGetPackageVersion { get; }
 
-        /***public WorkloadDownload(string id, string nuGetPackageId, string nuGetPackageVersion)
-        {
-            Id = id;
-            NuGetPackageId = nuGetPackageId;
-            NuGetPackageVersion = nuGetPackageVersion;
-        }****/
         public WorkloadDownload(string id, string nuGetPackageId, string nuGetPackageVersion)
         {
             Id = id;

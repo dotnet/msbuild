@@ -427,7 +427,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                     .SelectMany(result => result.foundPackages.Select(package => (result.source, package)));
 
             if (!accumulativeSearchResults.Any())
-            {   // this is the error that's thrown
+            {  
                 throw new NuGetPackageNotFoundException(
                     string.Format(
                         LocalizableStrings.IsNotFoundInNuGetFeeds,

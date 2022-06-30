@@ -55,11 +55,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             
             _sdkRootPath = sdkRootPath;
             _sdkVersionBand = sdkVersionBand;
-            //sdkVersion = "6.0.301";
-            //_sdkVersionBand = "6.0.300";
-            //var sdkVersionFilePath = sdkVersion + "-dev";
             
-            var knownManifestIdsFilePath = Path.Combine(_sdkRootPath, "sdk", "6.0.400-dev", "IncludedWorkloadManifests.txt");
+            //var knownManifestIdsFilePath = Path.Combine(_sdkRootPath, "sdk", "6.0.400-dev", "IncludedWorkloadManifests.txt");
+
+            var knownManifestIdsFilePath = Path.Combine(_sdkRootPath, "sdk", sdkVersion, "IncludedWorkloadManifests.txt");
             if (File.Exists(knownManifestIdsFilePath))
             {
                 _knownManifestIds = File.ReadAllLines(knownManifestIdsFilePath).Where(l => !string.IsNullOrEmpty(l)).ToHashSet();

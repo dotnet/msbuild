@@ -36,7 +36,8 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
             if (NewFeatureBandAvailable())
             {
                 _reporter.WriteLine();
-                _reporter.WriteLine(string.Format(LocalizableStrings.NewFeatureBandMessage, NewestFeatureBandAvailable()));         // this is where a new feature band is advertised
+                // advertise newest feature band
+                _reporter.WriteLine(string.Format(LocalizableStrings.NewFeatureBandMessage, NewestFeatureBandAvailable()));
             }
         }
 

@@ -76,7 +76,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             else if (_printDownloadLinkOnly)
             {
                 var packageUrls = GetUpdatablePackageUrlsAsync(_includePreviews).GetAwaiter().GetResult();      
-
                 Reporter.WriteLine("==allPackageLinksJsonOutputStart==");
                 Reporter.WriteLine(JsonSerializer.Serialize(packageUrls, new JsonSerializerOptions() { WriteIndented = true }));
                 Reporter.WriteLine("==allPackageLinksJsonOutputEnd==");

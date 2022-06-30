@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
-using System.Security.AccessControl;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli;
@@ -295,9 +294,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             var manifestId = new ManifestId(manifest.Id);
             string currentFeatureBand = _sdkFeatureBand.ToString();
 
-
-            // TODO: abstract the fallback logic so it can be used in the get manifest package downloads async
-                    // could update the fallback logic to get the latest package version and then update after
             try
             {
                 var adManifestPath = GetAdvertisingManifestPath(_sdkFeatureBand, manifestId);
