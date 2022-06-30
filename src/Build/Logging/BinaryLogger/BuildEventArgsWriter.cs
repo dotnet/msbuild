@@ -247,7 +247,7 @@ Build
         {
             Write(BinaryLogRecordKind.BuildStarted);
             WriteBuildEventArgsFields(e);
-            if (Traits.LogAllEnvironmentVariables)
+            if (Traits.Instance.LogAllEnvironmentVariables)
             {
                 Write(e.BuildEnvironment);
             }

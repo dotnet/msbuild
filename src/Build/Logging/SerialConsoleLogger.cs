@@ -108,10 +108,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 WriteLinePrettyFromResource("BuildStartedWithTime", e.Timestamp);
             }
 
-            if (Traits.LogAllEnvironmentVariables)
-            {
-                WriteEnvironment(e.BuildEnvironment);
-            }
+            WriteEnvironment(e.BuildEnvironment);
         }
 
         /// <summary>
