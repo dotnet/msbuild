@@ -1,1 +1,0 @@
-Microsoft.Build.Execution.HostServices.RegisterHostObject(string projectFile, string targetName, string taskName, string monikerName) -> void
