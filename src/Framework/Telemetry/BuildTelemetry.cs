@@ -11,7 +11,7 @@ namespace Microsoft.Build.Framework.Telemetry
     /// </summary>
     internal class BuildTelemetry : TelemetryBase
     {
-        public override string EventName => "msbuild/build";
+        public override string EventName => "build";
 
         /// <summary>
         /// Time at which build have started.
@@ -86,49 +86,59 @@ namespace Microsoft.Build.Framework.Telemetry
 
         public override void UpdateEventProperties()
         {
-            if (StartAt.HasValue && FinishedAt.HasValue)
-            {
-                Properties["BuildDurationInMilliseconds"] = (FinishedAt.Value - StartAt.Value).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
-            }
-            if (InnerStartAt.HasValue && FinishedAt.HasValue)
-            {
-                Properties["InnerBuildDurationInMilliseconds"] = (FinishedAt.Value - InnerStartAt.Value).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
-            }
-            if (Success.HasValue)
-            {
-                Properties["BuildSuccess"] = Success.HasValue.ToString(CultureInfo.InvariantCulture);
-            }
-            if (Target != null)
-            {
-                Properties["BuildTarget"] = Target;
-            }
-            if (ServerFallbackReason != null)
-            {
-                Properties["ServerFallbackReason"] = ServerFallbackReason;
-            }
-            if (Version != null)
-            {
-                Properties["BuildEngineVersion"] = Version.ToString();
-            }
             if (DisplayVersion != null)
             {
                 Properties["BuildEngineDisplayVersion"] = DisplayVersion;
             }
-            if (Project != null)
+
+            if (StartAt.HasValue && FinishedAt.HasValue)
             {
-                Properties["ProjectPath"] = Project;
+                Properties["BuildDurationInMilliseconds"] = (FinishedAt.Value - StartAt.Value).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
             }
+
+            if (InnerStartAt.HasValue && FinishedAt.HasValue)
+            {
+                Properties["InnerBuildDurationInMilliseconds"] = (FinishedAt.Value - InnerStartAt.Value).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
+            }
+
+            if (FrameworkName != null)
+            {
+                Properties["BuildEngineFrameworkName"] = FrameworkName;
+            }
+
             if (Host != null)
             {
                 Properties["BuildEngineHost"] = Host;
             }
+
             if (InitialServerState != null)
             {
                 Properties["InitialMSBuildServerState"] = InitialServerState;
             }
-            if (FrameworkName != null)
+
+            if (Project != null)
             {
-                Properties["BuildEngineFrameworkName"] = FrameworkName;
+                Properties["ProjectPath"] = Project;
+            }
+
+            if (ServerFallbackReason != null)
+            {
+                Properties["ServerFallbackReason"] = ServerFallbackReason;
+            }
+
+            if (Success.HasValue)
+            {
+                Properties["BuildSuccess"] = Success.HasValue.ToString(CultureInfo.InvariantCulture);
+            }
+
+            if (Target != null)
+            {
+                Properties["BuildTarget"] = Target;
+            }
+
+            if (Version != null)
+            {
+                Properties["BuildEngineVersion"] = Version.ToString();
             }
         }
     }
