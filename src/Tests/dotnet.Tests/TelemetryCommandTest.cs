@@ -346,7 +346,7 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void DotnetRunCleanTestCommandOpinionsShouldBeSentToTelemetryWhenThereIsMultipleOption()
         {
-            string[] args = { "clean", "--configuration", "Debug", "--framework", "netcoreapp1.0" };
+            string[] args = { "clean", "--configuration", "Debug", "--framework", ToolsetInfo.CurrentTargetFramework };
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry
                 .LogEntries.Should()
@@ -358,7 +358,7 @@ namespace Microsoft.DotNet.Tests
             _fakeTelemetry
                 .LogEntries.Should()
                 .Contain(e => e.EventName == "sublevelparser/command" && e.Properties.ContainsKey("framework") &&
-                              e.Properties["framework"] == Sha256Hasher.Hash("NETCOREAPP1.0") &&
+                              e.Properties["framework"] == Sha256Hasher.Hash(ToolsetInfo.CurrentTargetFramework.ToUpper()) &&
                               e.Properties.ContainsKey("verb") &&
                               e.Properties["verb"] == Sha256Hasher.Hash("CLEAN"));
         }
