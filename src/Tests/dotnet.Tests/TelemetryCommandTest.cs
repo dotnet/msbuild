@@ -326,7 +326,7 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void DotnetBuildAndPublishCommandOpinionsShouldBeSentToTelemetryWhenThereIsMultipleOption()
         {
-            string[] args = { "build", "--configuration", "Debug", "--runtime", "osx.10.11-x64" };
+            string[] args = { "build", "--configuration", "Debug", "--runtime", $"{ToolsetInfo.LatestMacRuntimeIdentifier}-x64" };
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry
                 .LogEntries.Should()
@@ -338,7 +338,7 @@ namespace Microsoft.DotNet.Tests
             _fakeTelemetry
                 .LogEntries.Should()
                 .Contain(e => e.EventName == "sublevelparser/command" && e.Properties.ContainsKey("runtime") &&
-                              e.Properties["runtime"] == Sha256Hasher.Hash("OSX.10.11-X64") &&
+                              e.Properties["runtime"] == Sha256Hasher.Hash($"{ToolsetInfo.LatestMacRuntimeIdentifier.ToUpper()}-X64") &&
                               e.Properties.ContainsKey("verb") &&
                               e.Properties["verb"] == Sha256Hasher.Hash("BUILD"));
         }
