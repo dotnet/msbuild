@@ -17,7 +17,9 @@ namespace Microsoft.Build.Tasks
     ///  Gathers the list of installed SDKS in the registry and on disk and outputs them into the project
     ///  so they can be used during SDK reference resolution and RAR for single files.
     /// </summary>
+#pragma warning disable RS0022 // Constructor make noninheritable base class inheritable: Longstanding API design that we shouldn't change now
     public class GetInstalledSDKLocations : TaskExtension
+#pragma warning restore RS0022 // Constructor make noninheritable base class inheritable
     {
         /// <summary>
         /// Metadata name for directory roots on installed SDK items
@@ -122,6 +124,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override bool Execute()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(GetInstalledSDKLocations));
+                return false;
+            }
+
             // TargetPlatformVersion and TargetPlatformIdentifier are requried to correctly look for SDKs.
             if (String.IsNullOrEmpty(TargetPlatformVersion) || String.IsNullOrEmpty(TargetPlatformIdentifier))
             {

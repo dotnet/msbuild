@@ -447,7 +447,11 @@ namespace Microsoft.Build.Shared
                     currentArchitecture = MSBuildArchitectureValues.arm64;
                     break;
                 default:
-                    throw new PlatformNotSupportedException(string.Format("{0} is not a supported architecture.", RuntimeInformation.ProcessArchitecture));
+                    // We're not sure what the architecture is, default to original 32/64bit logic.
+                    // This allows architectures like s390x to continue working.
+                    // https://github.com/dotnet/msbuild/issues/7729
+                    currentArchitecture = (IntPtr.Size == sizeof(Int64)) ? MSBuildArchitectureValues.x64 : MSBuildArchitectureValues.x86;
+                    break;
             }
 #else
             string currentArchitecture = (IntPtr.Size == sizeof(Int64)) ? MSBuildArchitectureValues.x64 : MSBuildArchitectureValues.x86;

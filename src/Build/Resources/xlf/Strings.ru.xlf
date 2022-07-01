@@ -102,11 +102,6 @@
         <target state="translated">MSB4257: указанный выходной файл кэша результатов пустой.</target>
         <note />
       </trans-unit>
-      <trans-unit id="EnvironmentDerivedPropertyRead">
-        <source>Property '{0}' with value '{1}' expanded from the environment.</source>
-        <target state="new">Property '{0}' with value '{1}' expanded from the environment.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
         <source>Read environment variable "{0}"</source>
         <target state="translated">Чтение переменной среды "{0}"</target>

@@ -4522,7 +4522,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void VerifyPropertyTrackingLoggingDefault()
         {
-            // Having just environment variables defined should default to nothing being logged except one environment variable read.
+            // Having nothing defined should default to nothing being logged.
             this.VerifyPropertyTrackingLoggingScenario(
                 null,
                 logger =>
@@ -4535,9 +4535,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldHaveSingleItem()
-                        .EnvironmentVariableName
-                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
+                        .ShouldBeEmpty();
 
                     logger
                         .AllBuildEvents
@@ -4566,9 +4564,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldHaveSingleItem()
-                        .EnvironmentVariableName
-                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
+                        .ShouldBeEmpty();
 
                     logger
                         .AllBuildEvents
@@ -4597,9 +4593,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldHaveSingleItem()
-                        .EnvironmentVariableName
-                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
+                        .ShouldBeEmpty();
 
                     logger
                         .AllBuildEvents
@@ -4628,9 +4622,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldHaveSingleItem()
-                        .EnvironmentVariableName
-                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
+                        .ShouldBeEmpty();
 
                     logger
                         .AllBuildEvents
@@ -4714,9 +4706,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldHaveSingleItem()
-                        .EnvironmentVariableName
-                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
+                        .ShouldBeEmpty();
 
                     logger
                         .AllBuildEvents
