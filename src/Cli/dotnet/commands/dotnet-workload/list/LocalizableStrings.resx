@@ -132,4 +132,7 @@
   <data name="WorkloadSourceColumn" xml:space="preserve">
     <value>Installation Source</value>
   </data>
+  <data name="WorkloadManfiestVersionColumn" xml:space="preserve">
+    <value>Manifest Version</value>
+  </data>
 </root>

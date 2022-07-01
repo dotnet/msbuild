@@ -4,6 +4,7 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.DotNet.Workloads.Workload.List;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.List.LocalizableStrings;
 
@@ -14,7 +15,7 @@ namespace Microsoft.DotNet.Cli
         // arguments are a list of workload to be detected
         public static readonly Option<bool> MachineReadableOption = new Option<bool>("--machine-readable") {IsHidden = true};
 
-        public static readonly Option<string> VersionOption = WorkloadUpdateCommandParser.VersionOption;
+        public static readonly Option<string> VersionOption = InstallingWorkloadCommandParser.VersionOption;
 
         public static readonly Option<string> TempDirOption = 
             new Option<string>("--temp-dir", Microsoft.DotNet.Workloads.Workload.Install.LocalizableStrings.TempDirOptionDescription).Hide();

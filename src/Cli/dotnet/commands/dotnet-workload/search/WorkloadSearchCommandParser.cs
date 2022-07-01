@@ -4,6 +4,7 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.DotNet.Workloads.Workload.Search;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.Search.LocalizableStrings;
 
@@ -18,7 +19,7 @@ namespace Microsoft.DotNet.Cli
                 Description = LocalizableStrings.WorkloadIdStubArgumentDescription
             };
 
-        public static readonly Option<string> VersionOption = WorkloadInstallCommandParser.VersionOption;
+        public static readonly Option<string> VersionOption = InstallingWorkloadCommandParser.VersionOption;
 
         private static readonly Command Command = ConstructCommand();
 
