@@ -24,6 +24,7 @@ namespace Microsoft.Build.BackEnd
         private CultureInfo _culture = default!;
         private CultureInfo _uiCulture = default!;
         private TargetConsoleConfiguration _consoleConfiguration = default!;
+        private PartialBuildTelemetry? _partialBuildTelemetry = default;
 
         /// <summary>
         /// Retrieves the packet type.
@@ -65,6 +66,12 @@ namespace Microsoft.Build.BackEnd
         public TargetConsoleConfiguration ConsoleConfiguration => _consoleConfiguration;
 
         /// <summary>
+        /// Part of BuildTelemetry which is collected on client and needs to be sent to server,
+        /// so server can log BuildTelemetry once it is finished.
+        /// </summary>
+        public PartialBuildTelemetry? PartialBuildTelemetry => _partialBuildTelemetry;
+
+        /// <summary>
         /// Private constructor for deserialization
         /// </summary>
         private ServerNodeBuildCommand()
@@ -80,7 +87,8 @@ namespace Microsoft.Build.BackEnd
             string startupDirectory,
             Dictionary<string, string> buildProcessEnvironment,
             CultureInfo culture, CultureInfo uiCulture,
-            TargetConsoleConfiguration consoleConfiguration)
+            TargetConsoleConfiguration consoleConfiguration,
+            PartialBuildTelemetry? partialBuildTelemetry)
         {
             ErrorUtilities.VerifyThrowInternalNull(consoleConfiguration, nameof(consoleConfiguration));
 
@@ -90,6 +98,7 @@ namespace Microsoft.Build.BackEnd
             _culture = culture;
             _uiCulture = uiCulture;
             _consoleConfiguration = consoleConfiguration;
+            _partialBuildTelemetry = partialBuildTelemetry;
         }
 
         /// <summary>
@@ -104,6 +113,7 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateCulture(ref _culture);
             translator.TranslateCulture(ref _uiCulture);
             translator.Translate(ref _consoleConfiguration, TargetConsoleConfiguration.FactoryForDeserialization);
+            translator.Translate(ref _partialBuildTelemetry, PartialBuildTelemetry.FactoryForDeserialization);
         }
 
         /// <summary>

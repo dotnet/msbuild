@@ -15,6 +15,7 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
@@ -152,6 +153,10 @@ namespace Microsoft.Build.Experimental
 
             // Start server it if is not running.
             bool serverIsAlreadyRunning = ServerNamedMutex.WasOpen(serverRunningMutexName);
+            if (KnownTelemetry.BuildTelemetry != null)
+            {
+                KnownTelemetry.BuildTelemetry.InitialServerState = serverIsAlreadyRunning ? "hot" : "cold";
+            }
             if (!serverIsAlreadyRunning)
             {
                 CommunicationsUtilities.Trace("Server was not running. Starting server now.");
@@ -432,13 +437,23 @@ namespace Microsoft.Build.Experimental
             // We remove env variable used to invoke MSBuild server as that might be equal to 1, so we do not get an infinite recursion here. 
             envVars[Traits.UseMSBuildServerEnvVarName] = "0";
 
+            Debug.Assert(KnownTelemetry.BuildTelemetry == null || KnownTelemetry.BuildTelemetry.StartAt.HasValue, "BuildTelemetry.StartAt was not initialized!");
+
+            PartialBuildTelemetry? partialBuildTelemetry = KnownTelemetry.BuildTelemetry == null
+                ? null
+                : new PartialBuildTelemetry(
+                    startedAt: KnownTelemetry.BuildTelemetry.StartAt.GetValueOrDefault(),
+                    initialServerState: KnownTelemetry.BuildTelemetry.InitialServerState,
+                    serverFallbackReason: KnownTelemetry.BuildTelemetry.ServerFallbackReason);
+
             return new ServerNodeBuildCommand(
                         _commandLine,
                         startupDirectory: Directory.GetCurrentDirectory(),
                         buildProcessEnvironment: envVars,
                         CultureInfo.CurrentCulture,
                         CultureInfo.CurrentUICulture,
-                        _consoleConfiguration!);
+                        _consoleConfiguration!,
+                        partialBuildTelemetry);
         }
 
         private ServerNodeHandshake GetHandshake()
