@@ -28,7 +28,7 @@ namespace Microsoft.NET.Restore.Tests
         {
             var testProject = new TestProject()
             {
-                TargetFrameworks = "netcoreapp3.1",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsSdkProject = true
             };
             testProject.PackageReferences.Add(new TestPackageReference("Humanizer.Core", "2.8.26"));
