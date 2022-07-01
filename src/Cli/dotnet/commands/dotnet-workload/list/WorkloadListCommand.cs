@@ -53,12 +53,8 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             _includePreviews = result.GetValueForOption(WorkloadListCommandParser.IncludePreviewsOption);
             string userProfileDir1 = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
 
-            var installer = WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _workloadListHelper._currentSdkFeatureBand, _workloadListHelper.WorkloadResolver,
-                Verbosity, userProfileDir1, VerifySignatures, elevationRequired: false);
-            _workloadListHelper.WorkloadRecordRepo = workloadRecordRepo ?? installer.GetWorkloadInstallationRecordRepository();
-
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(Reporter,
-                _workloadListHelper.WorkloadResolver, PackageDownloader, userProfileDir1, TempDirectoryPath, _workloadListHelper.WorkloadRecordRepo);
+                _workloadListHelper.WorkloadResolver, PackageDownloader, userProfileDir1, TempDirectoryPath, _workloadListHelper.WorkloadRecordRepo, _workloadListHelper.Installer);
         }
 
         public override int Execute()
