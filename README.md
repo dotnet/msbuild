@@ -16,6 +16,10 @@ We have forked for MSBuild 17.3 in the branch [`vs17.3`](https://github.com/Micr
 
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs17.3)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=vs17.3)
 
+17.2 builds from the branch [`vs17.2`](https://github.com/Microsoft/msbuild/tree/vs17.2). Only high-priority bugfixes will be considered for servicing 17.2.
+
+[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs17.2)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=vs17.2)
+
 17.0 builds from the branch [`vs17.0`](https://github.com/Microsoft/msbuild/tree/vs17.0). Only high-priority bugfixes will be considered for servicing 17.0.
 
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs17.0)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=vs17.0)
