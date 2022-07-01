@@ -106,89 +106,26 @@
       "disabled": false
     },
     {
-      "taskType": "scheduled",
-      "capabilityId": "ScheduledSearch",
-      "subCapability": "ScheduledSearch",
-      "version": "1.1",
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
       "config": {
-        "frequency": [
-          {
-            "weekDay": 0,
-            "hours": [
-              16
-            ],
-            "timezoneOffset": -7
-          },
-          {
-            "weekDay": 1,
-            "hours": [
-              16
-            ],
-            "timezoneOffset": -7
-          },
-          {
-            "weekDay": 2,
-            "hours": [
-              16
-            ],
-            "timezoneOffset": -7
-          },
-          {
-            "weekDay": 3,
-            "hours": [
-              16
-            ],
-            "timezoneOffset": -7
-          },
-          {
-            "weekDay": 4,
-            "hours": [
-              16
-            ],
-            "timezoneOffset": -7
-          },
-          {
-            "weekDay": 5,
-            "hours": [
-              16
-            ],
-            "timezoneOffset": -7
-          },
-          {
-            "weekDay": 6,
-            "hours": [
-              16
-            ],
-            "timezoneOffset": -7
-          }
-        ],
-        "searchTerms": [
-          {
-            "name": "isIssue",
-            "parameters": {}
-          },
-          {
-            "name": "isOpen",
-            "parameters": {}
-          },
-          {
-            "name": "hasLabel",
-            "parameters": {
-              "label": "Area-Compatibility"
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "labelAdded",
+              "parameters": {
+                "label": "Area-Compatibility"
+              }
             }
-          },
-          {
-            "name": "hasLabel",
-            "parameters": {
-              "label": "untriaged"
-            }
-          },
-          {
-            "name": "noActivitySince",
-            "parameters": {
-              "days": 3
-            }
-          }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
         ],
         "taskName": "Notify compatibility of new untriaged bugs",
         "actions": [
@@ -199,8 +136,7 @@
             }
           }
         ]
-      },
-      "disabled": false
+      }
     }
   ],
   "userGroups": []
