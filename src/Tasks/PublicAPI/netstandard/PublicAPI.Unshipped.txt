@@ -99,3 +99,7 @@ Microsoft.Build.Tasks.ResolveSDKReference.WarnOnMissingPlatformVersion.set -> vo
 override Microsoft.Build.Tasks.GetInstalledSDKLocations.Execute() -> bool
 override Microsoft.Build.Tasks.GetSDKReferenceFiles.Execute() -> bool
 override Microsoft.Build.Tasks.ResolveSDKReference.Execute() -> bool
+Microsoft.Build.Tasks.Delete.Retries.get -> int
+Microsoft.Build.Tasks.Delete.Retries.set -> void
+Microsoft.Build.Tasks.Delete.RetryDelayMilliseconds.get -> int
+Microsoft.Build.Tasks.Delete.RetryDelayMilliseconds.set -> void
