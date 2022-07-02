@@ -27,7 +27,7 @@ namespace Microsoft.NET.Publish.Tests
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData("netcoreapp3.0")]
         [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_only_runs_readytorun_compiler_when_switch_is_enabled(string targetFramework)
         {
             var projectName = "CrossgenTest1";
@@ -56,7 +56,7 @@ namespace Microsoft.NET.Publish.Tests
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData("netcoreapp3.0")]
         [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_creates_readytorun_images_for_all_assemblies_except_excluded_ones(string targetFramework)
         {
             var projectName = "CrossgenTest2";
@@ -101,7 +101,7 @@ namespace Microsoft.NET.Publish.Tests
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData("netcoreapp3.0")]
         [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_creates_readytorun_symbols_when_switch_is_used(string targetFramework)
         {
             TestProjectPublishing_Internal("CrossgenTest3", targetFramework, emitNativeSymbols: true, composite: false, identifier: targetFramework);
@@ -110,7 +110,7 @@ namespace Microsoft.NET.Publish.Tests
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData("netcoreapp3.0")]
         [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_supports_framework_dependent_publishing(string targetFramework)
         {
             TestProjectPublishing_Internal("FrameworkDependent", targetFramework, isSelfContained: false, composite: false, emitNativeSymbols:true, identifier: targetFramework);
@@ -119,7 +119,7 @@ namespace Microsoft.NET.Publish.Tests
         [Theory]
         [InlineData("netcoreapp3.0")]
         [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_does_not_support_cross_platform_readytorun_compilation(string targetFramework)
         {
             var ridToUse = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -197,7 +197,7 @@ namespace Microsoft.NET.Publish.Tests
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData("netcoreapp3.0")]
         [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_can_publish_readytorun_for_library_projects(string targetFramework)
         {
             TestProjectPublishing_Internal("LibraryProject1", targetFramework, isSelfContained: false, composite: false, makeExeProject: false, identifier: targetFramework);
@@ -206,7 +206,7 @@ namespace Microsoft.NET.Publish.Tests
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData("netcoreapp3.0")]
         [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_can_publish_readytorun_for_selfcontained_library_projects(string targetFramework)
         {
             TestProjectPublishing_Internal("LibraryProject2", targetFramework, isSelfContained:true, composite: true, makeExeProject: false, identifier: targetFramework);
@@ -214,7 +214,7 @@ namespace Microsoft.NET.Publish.Tests
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         void It_can_publish_readytorun_using_crossgen2(string targetFramework)
         {
             // In .NET 5 Crossgen2 supported Linux/Windows x64 only
@@ -227,7 +227,7 @@ namespace Microsoft.NET.Publish.Tests
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         void It_can_publish_readytorun_using_crossgen2_composite_mode(string targetFramework)
         {
             // In .NET 5 Crossgen2 supported Linux/Windows x64 only
@@ -240,7 +240,7 @@ namespace Microsoft.NET.Publish.Tests
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_supports_libraries_when_using_crossgen2(string targetFramework)
         {
             // In .NET 5 Crossgen2 supported Linux/Windows x64 only
@@ -266,13 +266,13 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
-        [InlineData("net6.0", "linux-x64", "windows,linux,osx", "X64,Arm64", "_", "_")]
-        [InlineData("net6.0", "linux-x64", "windows,linux,osx", "X64,Arm64", "composite", "selfcontained")] // Composite in .NET 6.0 is only supported for self-contained builds
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "linux-x64", "windows,linux,osx", "X64,Arm64", "_", "_")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "linux-x64", "windows,linux,osx", "X64,Arm64", "composite", "selfcontained")] // Composite in .NET 6.0 is only supported for self-contained builds
         // In .NET 6.0 building targetting Windows on linux or osx doesn't support emitting native symbols.
-        [InlineData("net6.0", "win-x64", "windows", "X64,Arm64", "composite", "selfcontained")] // Composite in .NET 6.0 is only supported for self-contained builds
-        [InlineData("net6.0", "osx-arm64", "windows,linux,osx", "X64,Arm64", "_", "_")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "win-x64", "windows", "X64,Arm64", "composite", "selfcontained")] // Composite in .NET 6.0 is only supported for self-contained builds
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "osx-arm64", "windows,linux,osx", "X64,Arm64", "_", "_")]
         // In .NET 6.0 building targetting Windows on linux or osx doesn't support emitting native symbols.
-        [InlineData("net6.0", "win-x86", "windows", "X86,X64,Arm64,Arm", "_", "_")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "win-x86", "windows", "X86,X64,Arm64,Arm", "_", "_")]
         public void It_supports_crossos_arch_compilation(string targetFramework, string runtimeIdentifier, string sdkSupportedOs, string sdkSupportedArch, string composite, string selfcontained)
         {
             var projectName = $"CrossArchOs{targetFramework}{runtimeIdentifier.Replace("-",".")}{composite}{selfcontained}";

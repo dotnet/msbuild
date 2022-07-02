@@ -20,7 +20,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [CoreMSBuildOnlyTheory]
-        [InlineData("net5.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_collects_empty_Trimmer_SingleFile_ReadyToRun_publishing_properties(string targetFramework)
         {
             Type loggerType = typeof(LogTelemetryToStdOutForTest);
@@ -37,7 +37,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [CoreMSBuildOnlyTheory]
-        [InlineData("net5.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_collects_Trimmer_SingleFile_ReadyToRun_publishing_properties(string targetFramework)
         {
             Type loggerType = typeof(LogTelemetryToStdOutForTest);
@@ -53,7 +53,9 @@ namespace Microsoft.NET.Publish.Tests
             s.Should().Contain(
                 "{\"EventName\":\"PublishProperties\",\"Properties\":{\"PublishReadyToRun\":\"True\",\"PublishTrimmed\":\"True\",\"PublishSingleFile\":\"True\"}");
             s.Should().Contain(
-                "{\"EventName\":\"ReadyToRun\",\"Properties\":{\"PublishReadyToRunUseCrossgen2\":\"null\",\"Crossgen2PackVersion\":\"null\"");
+                "{\"EventName\":\"ReadyToRun\",\"Properties\":{\"PublishReadyToRunUseCrossgen2\":\"true\",")
+                .And.MatchRegex(
+                    "\"Crossgen2PackVersion\":\"[5-9]\\..+\"");
             s.Should().Contain(
                 "\"FailedCount\":\"0\"");
             s.Should().MatchRegex(
@@ -61,7 +63,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [CoreMSBuildOnlyTheory]
-        [InlineData("net5.0")] 
+        [InlineData(ToolsetInfo.CurrentTargetFramework)] 
         void It_collects_crossgen2_publishing_properties(string targetFramework)
         {
             // Crossgen2 only supported for Linux/Windows x64 scenarios for now
@@ -83,7 +85,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Contain(
                     "{\"EventName\":\"PublishProperties\",\"Properties\":{\"PublishReadyToRun\":\"True\",\"PublishTrimmed\":\"null\",\"PublishSingleFile\":\"null\"}")
                 .And.Contain(
-                    "{\"EventName\":\"ReadyToRun\",\"Properties\":{\"PublishReadyToRunUseCrossgen2\":\"True\",")
+                    "{\"EventName\":\"ReadyToRun\",\"Properties\":{\"PublishReadyToRunUseCrossgen2\":\"true\",")
                 .And.MatchRegex(
                     "\"Crossgen2PackVersion\":\"[5-9]\\..+\"")
                 .And.Contain(
