@@ -52,7 +52,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = $"EolOnlyNetCore",
-                TargetFrameworks = "netcoreapp1.0;netcoreapp3.1;net472",
+                TargetFrameworks = $"netcoreapp1.0;{ToolsetInfo.CurrentTargetFramework};net472",
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -65,7 +65,7 @@ namespace Microsoft.NET.Build.Tests
             var lines = (result.StdOut.Split(Environment.NewLine)).Where(line => line.Contains("NETSDK1138"));
 
             Assert.NotNull(lines.FirstOrDefault(line => line.IndexOf("netcoreapp1.0") >= 0));
-            Assert.All(lines, line => Assert.DoesNotContain("netcoreapp3.1", line));
+            Assert.All(lines, line => Assert.DoesNotContain(ToolsetInfo.CurrentTargetFramework, line));
             Assert.All(lines, line => Assert.DoesNotContain("net472", line));
         }
 

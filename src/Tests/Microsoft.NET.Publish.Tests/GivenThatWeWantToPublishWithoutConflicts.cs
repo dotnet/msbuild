@@ -60,7 +60,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(false)]
         public void It_has_consistent_behavior_when_publishing_single_file(bool shouldPublishSingleFile)
         {
-            var targetFramework = "netcoreapp3.1";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
             var testProject = new TestProject()
             {
                 Name = "DuplicateFiles",

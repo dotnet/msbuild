@@ -48,8 +48,6 @@ Commands:
 
         const string FrameworkNet451Arg = "-f net451";
         const string ConditionFrameworkNet451 = "== 'net451'";
-        const string FrameworkNetCoreApp10Arg = "-f netcoreapp1.0";
-        const string ConditionFrameworkNetCoreApp10 = "== 'netcoreapp1.0'";
 
         public GivenDotnetListReference(ITestOutputHelper log) : base(log)
         {
