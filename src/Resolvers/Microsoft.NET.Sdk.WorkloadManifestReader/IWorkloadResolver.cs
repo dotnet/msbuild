@@ -16,6 +16,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         IEnumerable<WorkloadManifestInfo> GetInstalledManifests();
         string GetSdkFeatureBand();
         IEnumerable<WorkloadId> GetUpdatedWorkloads(WorkloadResolver advertisingManifestResolver, IEnumerable<WorkloadId> installedWorkloads);
+        WorkloadManifest GetManifestFromWorkload(WorkloadId workloadId);
 
         /// <summary>
         /// Resolve the pack for this resolver's SDK band.

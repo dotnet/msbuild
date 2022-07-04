@@ -38,7 +38,7 @@ namespace Microsoft.NET.Build.Tests
             MainProject = new TestProject()
             {
                 Name = "MainProject",
-                TargetFrameworks = "net5.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsSdkProject = true,
                 IsExe = true
             };
@@ -57,7 +57,7 @@ namespace Microsoft.NET.Build.Tests
             ReferencedProject = new TestProject()
             {
                 Name = "ReferencedProject",
-                TargetFrameworks = "net5.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsSdkProject = true,
                 IsExe = true,
             };
@@ -190,13 +190,13 @@ namespace Microsoft.NET.Build.Tests
             CreateProjects();
 
             //  Reference project which is self-contained for net5.0, not self-contained for net5.0-windows.
-            ReferencedProject.TargetFrameworks = "net5.0;net5.0-windows";
+            ReferencedProject.TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework};{ToolsetInfo.CurrentTargetFramework}-windows";
             ReferencedProject.ProjectChanges.Add(project =>
             {
                 var ns = project.Root.Name.Namespace;
 
                 project.Root.Element(ns + "PropertyGroup")
-                    .Add(XElement.Parse(@"<RuntimeIdentifier Condition=""'$(TargetFramework)' == 'net5.0'"">" + EnvironmentInfo.GetCompatibleRid() + "</RuntimeIdentifier>"));
+                    .Add(XElement.Parse($@"<RuntimeIdentifier Condition=""'$(TargetFramework)' == '{ToolsetInfo.CurrentTargetFramework}'"">" + EnvironmentInfo.GetCompatibleRid() + "</RuntimeIdentifier>"));
             });
 
             RunTest();
@@ -211,13 +211,13 @@ namespace Microsoft.NET.Build.Tests
             CreateProjects();
 
             //  Reference project which is self-contained for net5.0-windows, not self-contained for net5.0.
-            ReferencedProject.TargetFrameworks = "net5.0;net5.0-windows";
+            ReferencedProject.TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework};{ToolsetInfo.CurrentTargetFramework}-windows";
             ReferencedProject.ProjectChanges.Add(project =>
             {
                 var ns = project.Root.Name.Namespace;
 
                 project.Root.Element(ns + "PropertyGroup")
-                    .Add(XElement.Parse(@"<RuntimeIdentifier Condition=""'$(TargetFramework)' == 'net5.0-windows'"">" + EnvironmentInfo.GetCompatibleRid() + "</RuntimeIdentifier>"));
+                    .Add(XElement.Parse($@"<RuntimeIdentifier Condition=""'$(TargetFramework)' == '{ToolsetInfo.CurrentTargetFramework}-windows'"">" + EnvironmentInfo.GetCompatibleRid() + "</RuntimeIdentifier>"));
             });
 
             RunTest("NETSDK1150");
@@ -268,7 +268,7 @@ namespace Microsoft.NET.Build.Tests
             var testConsoleProject = new TestProject("ConsoleApp")
             {
                 IsExe = true,
-                TargetFrameworks = "net5.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
             };
 

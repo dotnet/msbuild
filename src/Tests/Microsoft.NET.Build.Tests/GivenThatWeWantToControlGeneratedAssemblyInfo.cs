@@ -702,7 +702,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "RepoUrlProject",
-                TargetFrameworks = "netcoreapp3.1"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
 
             if (privateRepo)
@@ -720,7 +720,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
-            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netcoreapp3.1").FullName, testProject.Name + ".dll");
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(testProject.TargetFrameworks).FullName, testProject.Name + ".dll");
 
             AssemblyInfo.Get(assemblyPath)["AssemblyMetadataAttribute"].Should().Be("RepositoryUrl:" + fakeUrl);
         }

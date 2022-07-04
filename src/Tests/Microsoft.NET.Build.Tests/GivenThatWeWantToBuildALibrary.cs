@@ -573,9 +573,9 @@ class Program
         }
 
         [WindowsOnlyRequiresMSBuildVersionTheory("16.7.0-preview-20310-07")]
-        [InlineData("net5.0", "", false)]
-        [InlineData("net5.0", "UseWPF", true)]
-        [InlineData("net5.0", "UseWindowsForms", true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "", false)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "UseWPF", true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "UseWindowsForms", true)]
         [InlineData("netcoreapp3.1", "", true)]
         public void It_defines_target_platform_defaults_correctly(string targetFramework, string propertyName, bool defaultsDefined)
         {
@@ -609,7 +609,7 @@ class Program
         }
 
         [Theory]
-        [InlineData("net5.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         [InlineData("netcoreapp3.1")]
         public void It_defines_windows_version_default_correctly(string targetFramework)
         {
@@ -1025,7 +1025,7 @@ namespace ProjectNameWithSpaces
             var testProjectA = new TestProject()
             {
                 Name = "ProjA",
-                TargetFrameworks = "net5.0-windows10.0.19041"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-windows10.0.19041"
             };
             //  Use a previous version of the Microsoft.Windows.SDK.NET.Ref package, to
             //  simulate the scenario where a project is compiling against a library from NuGet
@@ -1042,7 +1042,7 @@ namespace ProjectNameWithSpaces
             var testProjectB = new TestProject()
             {
                 Name = "ProjB",
-                TargetFrameworks = "net5.0-windows10.0.19041",
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-windows10.0.19041",
             };
             testProjectB.SourceFiles.Add("ProjB.cs", @"namespace ProjB
 {

@@ -20,6 +20,7 @@ namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToReferenceAProject : SdkTest
     {
+        const string tfm = ToolsetInfo.CurrentTargetFramework;
         public GivenThatWeWantToReferenceAProject(ITestOutputHelper log) : base(log)
         {
         }
@@ -170,7 +171,6 @@ namespace Microsoft.NET.Build.Tests
         [InlineData(false, false)]
         public void It_disables_copying_conflicting_transitive_content(bool copyConflictingTransitiveContent, bool explicitlySet)
         {
-            var tfm = "netcoreapp3.1";
             var contentName = "script.sh";
             var childProject = new TestProject()
             {
@@ -326,7 +326,7 @@ class Program
             {
                 Name = "ProjectC",
                 IsExe = true,
-                TargetFrameworks = "netstandard2.1;netcoreapp3.1"
+                TargetFrameworks = $"netstandard2.1;{tfm}"
             };
             testProjectC.ReferencedProjects.Add(testProjectB);
             testProjectC.SourceFiles.Add("Program.cs", source);
@@ -337,7 +337,7 @@ class Program
                 {
                     var ns = p.Root.Name.Namespace;
                     var itemGroup = new XElement(ns + "ItemGroup",
-                        new XAttribute("Condition", @"'$(TargetFramework)' == 'netcoreapp3.1'"));
+                        new XAttribute("Condition", $@"'$(TargetFramework)' == '{tfm}'"));
                     var projRef = new XElement(ns + "ProjectReference",
                         new XAttribute("Include", Path.Combine(path, "..", "..", testProjectA.Name, $"{testProjectA.Name}.csproj")));
                     itemGroup.Add(projRef);

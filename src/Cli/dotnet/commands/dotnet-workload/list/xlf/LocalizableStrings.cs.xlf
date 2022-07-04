@@ -17,6 +17,11 @@
         <target state="translated">Pokud chcete najít další úlohy, které se mají nainstalovat, použijte vyhledávání úloh dotnet.</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadManfiestVersionColumn">
+        <source>Manifest Version</source>
+        <target state="new">Manifest Version</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WorkloadSourceColumn">
         <source>Installation Source</source>
         <target state="translated">Zdroj instalace</target>

@@ -22,6 +22,7 @@ namespace Microsoft.NET.TestFramework
 
         public const string LatestWinRuntimeIdentifier = "win10";
         public const string LatestLinuxRuntimeIdentifier = "ubuntu.20.04";
+        public const string LatestMacRuntimeIdentifier = "osx.10.15";
 
         public string DotNetRoot { get; }
         public string DotNetHostPath { get; }
