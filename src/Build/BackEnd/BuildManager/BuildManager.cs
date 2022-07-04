@@ -836,7 +836,7 @@ namespace Microsoft.Build.Execution
 
                 if (KnownTelemetry.BuildTelemetry != null)
                 {
-                    KnownTelemetry.BuildTelemetry.Project ??= requestData.ProjectGraphEntryPoints.FirstOrDefault().ProjectFile;
+                    KnownTelemetry.BuildTelemetry.Project ??= requestData.ProjectGraphEntryPoints?.FirstOrDefault().ProjectFile;
                     KnownTelemetry.BuildTelemetry.Target ??= string.Join(",", requestData.TargetNames);
                 }
 
