@@ -225,16 +225,18 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         {
             var cachePath = Path.Combine(_testAssetsManager.CreateTestDirectory(identifier: AppendForUserLocal("mockCache_", userLocal) + sdkVersion).Path, "mockCachePath");
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android", "--download-to-cache", cachePath });
-            (_, var installManager, var installer, _, var manifestUpdater, _) = GetTestInstallers(parseResult, userLocal, sdkVersion, tempDirManifestPath: _manifestPath);
+            (_, var installManager, var installer, _, var manifestUpdater, var packageDownloader) = GetTestInstallers(parseResult, userLocal, sdkVersion, tempDirManifestPath: _manifestPath);
 
             installManager.Execute();
 
             // Manifest packages should have been 'downloaded' and used for pack resolution
-            manifestUpdater.DownloadManifestPackagesCallCount.Should().Be(1);
-            manifestUpdater.ExtractManifestPackagesToTempDirCallCount.Should().Be(1);
-            // 8 android pack packages
-            installer.CachedPacks.Count.Should().Be(8);
-            installer.CachePath.Should().Be(cachePath);
+            manifestUpdater.GetManifestPackageDownloadsCallCount.Should().Be(1);
+            // 8 android pack packages, plus 1 manifest
+            packageDownloader.DownloadCallParams.Count.Should().Be(9);
+            foreach (var downloadParams in packageDownloader.DownloadCallParams)
+            {
+                downloadParams.downloadFolder.Value.Value.Should().Be(cachePath);
+            }
         }
 
         [Theory]
@@ -272,8 +274,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             installManager.Execute();
 
             _reporter.Lines.Should().Contain("==allPackageLinksJsonOutputStart==");
-            string.Join(" ", _reporter.Lines).Should().Contain("mock-url-xamarin.android.sdk");
-            string.Join(" ", _reporter.Lines).Should().Contain("mock-manifest-url");
+            string.Join(" ", _reporter.Lines).Should().Contain("http://mock-url/xamarin.android.sdk.8.4.7.nupkg");
+            string.Join(" ", _reporter.Lines).Should().Contain("http://mock-url/mock-manifest-package.1.0.5.nupkg");
         }
 
         [Fact]
@@ -354,8 +356,12 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var testDirectory = _testAssetsManager.CreateTestDirectory(testName: testName, identifier: (userLocal ? "userlocal" : "default") + sdkVersion).Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
             var userProfileDir = Path.Combine(testDirectory, "user-profile");
-            var installer = new MockPackWorkloadInstaller(failingWorkload);
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot);
+            var installer = new MockPackWorkloadInstaller(failingWorkload)
+            {
+                WorkloadResolver = workloadResolver
+            };
+            
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var manifestUpdater = new MockWorkloadManifestUpdater(manifestUpdates, tempDirManifestPath);
             if (userLocal)
@@ -436,7 +442,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             Directory.GetFiles(installRecordPath).Count().Should().Be(2);
         }
 
-        [Fact(Skip="Disable tests that might be updating workload manifest")]
+        [Fact(Skip="https://github.com/dotnet/sdk/issues/25175")]
         public void HideManifestUpdateCheckWhenVerbosityIsQuiet()
         {
             var command = new DotnetCommand(Log);
@@ -451,7 +457,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
 
-        [Theory(Skip="Disable tests that might be updating workload manifest")]
+        [Theory(Skip="https://github.com/dotnet/sdk/issues/25175")]
         [InlineData("--verbosity:minimal")]
         [InlineData("--verbosity:normal")]
         public void HideManifestUpdatesWhenVerbosityIsMinimalOrNormal(string verbosityFlag)
@@ -467,7 +473,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 .NotHaveStdOutContaining(Workloads.Workload.Install.LocalizableStrings.AdManifestUpdated);
         }
 
-        [Theory(Skip="Disable tests that might be updating workload manifest")]
+        [Theory(Skip="https://github.com/dotnet/sdk/issues/25175")]
         [InlineData("--verbosity:detailed")]
         [InlineData("--verbosity:diagnostic")]
         public void ShowManifestUpdatesWhenVerbosityIsDetailedOrDiagnostic(string verbosityFlag)

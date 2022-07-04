@@ -63,13 +63,12 @@ namespace Microsoft.DotNet.Workloads.Workload.List
 
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, currentSdkReleaseVersion.ToString(), _userProfileDir);
 
-            _workloadRecordRepo = workloadRecordRepo ??
-                WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand, _workloadResolver, Verbosity, _userProfileDir,
-                VerifySignatures,
-                elevationRequired: false).GetWorkloadInstallationRecordRepository();
+            var installer = WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand, _workloadResolver,
+                Verbosity, _userProfileDir, VerifySignatures, elevationRequired: false);
+            _workloadRecordRepo = workloadRecordRepo ?? installer.GetWorkloadInstallationRecordRepository();
 
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(Reporter,
-                _workloadResolver, PackageDownloader, _userProfileDir, TempDirectoryPath, _workloadRecordRepo);
+                _workloadResolver, PackageDownloader, _userProfileDir, TempDirectoryPath, _workloadRecordRepo, installer);
         }
 
         public override int Execute()
@@ -106,9 +105,13 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                 }
 
                 Reporter.WriteLine();
-
                 PrintableTable<KeyValuePair<string, string>> table = new();
                 table.AddColumn(LocalizableStrings.WorkloadIdColumn, workload => workload.Key);
+                table.AddColumn(LocalizableStrings.WorkloadManfiestVersionColumn, workload => {
+                    var m = _workloadResolver.GetManifestFromWorkload(new WorkloadId(workload.Key));
+                    return m.Version + "/" +
+                    new WorkloadManifestInfo(m.Id, m.Version, Path.GetDirectoryName(m.ManifestPath)!).ManifestFeatureBand;
+                });
                 table.AddColumn(LocalizableStrings.WorkloadSourceColumn, workload => workload.Value);
 
                 table.PrintRows(installedWorkloads.AsEnumerable(), l => Reporter.WriteLine(l));

@@ -333,4 +333,13 @@
   <data name="InvalidVersionForWorkload" xml:space="preserve">
     <value>Error parsing version '{1}' for workload manifest ID '{0}'</value>
   </data>
+  <data name="ExpectedSingleManifest" xml:space="preserve">
+    <value>Expected single manifest feature band and manifest folder in MSI from package {0}</value>
+  </data>
+  <data name="FailedToExtractMsi" xml:space="preserve">
+    <value>Failed to extract information from MSI: {0}</value>
+  </data>
+  <data name="ManifestMsiNotFoundInNuGetPackage" xml:space="preserve">
+    <value>Manifest MSI not found in NuGet package {0}</value>
+  </data>
 </root>

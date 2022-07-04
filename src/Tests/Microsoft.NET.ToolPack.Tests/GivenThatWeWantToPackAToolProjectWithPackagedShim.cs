@@ -67,7 +67,7 @@ namespace Microsoft.NET.ToolPack.Tests
                 {
                     XNamespace ns = project.Root.Name.Namespace;
                     XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                    propertyGroup.Add(new XElement(ns + "PackAsToolShimRuntimeIdentifiers", "win-x64;osx.10.12-x64"));
+                    propertyGroup.Add(new XElement(ns + "PackAsToolShimRuntimeIdentifiers", $"win-x64;{ToolsetInfo.LatestMacRuntimeIdentifier}-x64"));
                     propertyGroup.Add(new XElement(ns + "ToolCommandName", _customToolCommandName));
 
                     if (additionalProperty != null)
@@ -136,7 +136,7 @@ namespace Microsoft.NET.ToolPack.Tests
                     var allItems = nupkgReader.GetToolItems().SelectMany(i => i.Items).ToList();
                     allItems.Should().Contain($"tools/{framework.GetShortFolderName()}/any/shims/win-x64/{NupkgOfPackWithShimsFixture._customToolCommandName}.exe",
                         "Name should be the same as the command name even customized");
-                    allItems.Should().Contain($"tools/{framework.GetShortFolderName()}/any/shims/osx.10.12-x64/{NupkgOfPackWithShimsFixture._customToolCommandName}",
+                    allItems.Should().Contain($"tools/{framework.GetShortFolderName()}/any/shims/{ToolsetInfo.LatestMacRuntimeIdentifier}-x64/{NupkgOfPackWithShimsFixture._customToolCommandName}",
                         "RID should be the exact match of the RID in the property, even Apphost only has version of win, osx and linux");
                 }
             }
@@ -157,7 +157,7 @@ namespace Microsoft.NET.ToolPack.Tests
                 {
                     XNamespace ns = project.Root.Name.Namespace;
                     XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                    propertyGroup.Add(new XElement(ns + "PackAsToolShimRuntimeIdentifiers", "win-x64;osx.10.12-x64"));
+                    propertyGroup.Add(new XElement(ns + "PackAsToolShimRuntimeIdentifiers", $"win-x64;{ToolsetInfo.LatestMacRuntimeIdentifier}-x64"));
                     propertyGroup.Add(new XElement(ns + "ToolCommandName", _customToolCommandName));
                     propertyGroup.Add(new XElement(ns + "PackagedShimOutputRootDirectory", shimoutputPath));
                 })
@@ -171,7 +171,7 @@ namespace Microsoft.NET.ToolPack.Tests
 
             string windowShimPath = Path.Combine(shimoutputPath, $"shims/{targetFramework}/win-x64/{_customToolCommandName}.exe");
             File.Exists(windowShimPath).Should().BeTrue($"Shim {windowShimPath} should exist");
-            string osxShimPath = Path.Combine(shimoutputPath, $"shims/{targetFramework}/osx.10.12-x64/{_customToolCommandName}");
+            string osxShimPath = Path.Combine(shimoutputPath, $"shims/{targetFramework}/{ToolsetInfo.LatestMacRuntimeIdentifier}-x64/{_customToolCommandName}");
             File.Exists(osxShimPath).Should().BeTrue($"Shim {osxShimPath} should exist");
         }
 
@@ -197,7 +197,7 @@ namespace Microsoft.NET.ToolPack.Tests
 
             string windowShimPath = Path.Combine(outputDirectory.FullName, $"shims/{targetFramework}/win-x64/{_customToolCommandName}.exe");
             File.Exists(windowShimPath).Should().BeTrue($"Shim {windowShimPath} should exist");
-            string osxShimPath = Path.Combine(outputDirectory.FullName, $"shims/{targetFramework}/osx.10.12-x64/{_customToolCommandName}");
+            string osxShimPath = Path.Combine(outputDirectory.FullName, $"shims/{targetFramework}/{ToolsetInfo.LatestMacRuntimeIdentifier}-x64/{_customToolCommandName}");
             File.Exists(osxShimPath).Should().BeTrue($"Shim {osxShimPath} should exist");
         }
 
@@ -226,7 +226,7 @@ namespace Microsoft.NET.ToolPack.Tests
             var outputDirectory = packCommand.GetOutputDirectory("netcoreapp2.1");
             string windowShimPath = Path.Combine(outputDirectory.FullName, $"shims/netcoreapp2.1/win-x64/{_customToolCommandName}.exe");
             File.Exists(windowShimPath).Should().BeFalse($"Shim {windowShimPath} should not exists");
-            string osxShimPath = Path.Combine(outputDirectory.FullName, $"shims/netcoreapp2.1/osx.10.12-x64/{_customToolCommandName}");
+            string osxShimPath = Path.Combine(outputDirectory.FullName, $"shims/netcoreapp2.1/{ToolsetInfo.LatestMacRuntimeIdentifier}-x64/{_customToolCommandName}");
             File.Exists(osxShimPath).Should().BeFalse($"Shim {osxShimPath} should not exists");
         }
 
@@ -288,7 +288,7 @@ namespace Microsoft.NET.ToolPack.Tests
                     var allItems = nupkgReader.GetToolItems().SelectMany(i => i.Items).ToList();
                     allItems.Should().Contain($"tools/{framework.GetShortFolderName()}/any/shims/win-x64/{_customToolCommandName}.exe",
                         "Name should be the same as the command name even customized");
-                    allItems.Should().Contain($"tools/{framework.GetShortFolderName()}/any/shims/osx.10.12-x64/{_customToolCommandName}",
+                    allItems.Should().Contain($"tools/{framework.GetShortFolderName()}/any/shims/{ToolsetInfo.LatestMacRuntimeIdentifier}-x64/{_customToolCommandName}",
                         "RID should be the exact match of the RID in the property, even Apphost only has version of win, osx and linux");
                 }
             }
@@ -408,7 +408,7 @@ namespace Microsoft.NET.ToolPack.Tests
             };
 
             testProject.AdditionalProperties.Add("UseWPF", "true");
-            testProject.AdditionalProperties.Add("PackAsToolShimRuntimeIdentifiers", "win-x64;osx.10.12-x64");
+            testProject.AdditionalProperties.Add("PackAsToolShimRuntimeIdentifiers", $"win-x64;{ToolsetInfo.LatestMacRuntimeIdentifier}-x64");
             testProject.AdditionalProperties.Add("ToolCommandName", _customToolCommandName);
             testProject.AdditionalProperties.Add("PackAsTool", "true");
 
