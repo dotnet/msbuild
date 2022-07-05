@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="WorkloadManfiestVersionColumn">
         <source>Manifest Version</source>
-        <target state="new">Manifest Version</target>
+        <target state="translated">Versão do Manifesto</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadSourceColumn">

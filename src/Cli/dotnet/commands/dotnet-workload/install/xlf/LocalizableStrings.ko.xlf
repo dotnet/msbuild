@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="ExpectedSingleManifest">
         <source>Expected single manifest feature band and manifest folder in MSI from package {0}</source>
-        <target state="new">Expected single manifest feature band and manifest folder in MSI from package {0}</target>
+        <target state="translated">패키지 {0}의 MSI에 단일 매니페스트 기능 밴드 및 매니페스트 폴더가 필요합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedAdManifestUpdate">
@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="FailedToExtractMsi">
         <source>Failed to extract information from MSI: {0}</source>
-        <target state="new">Failed to extract information from MSI: {0}</target>
+        <target state="translated">MSI에서 정보를 추출하지 못했습니다. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToGetPackageManifestUrl">
@@ -164,7 +164,7 @@
       </trans-unit>
       <trans-unit id="ManifestMsiNotFoundInNuGetPackage">
         <source>Manifest MSI not found in NuGet package {0}</source>
-        <target state="new">Manifest MSI not found in NuGet package {0}</target>
+        <target state="translated">NuGet 패키지 {0}에서 매니페스트 MSI를 찾을 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">
