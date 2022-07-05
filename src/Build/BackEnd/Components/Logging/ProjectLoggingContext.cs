@@ -72,17 +72,6 @@ namespace Microsoft.Build.BackEnd.Logging
         {
         }
 
-        private IEnumerable<DictionaryEntry> FilterEnvironmentDerivedProperties(PropertyDictionary<ProjectPropertyInstance> properties)
-        {
-            foreach (ProjectPropertyInstance property in properties)
-            {
-                if (property is not EnvironmentDerivedProjectPropertyInstance)
-                {
-                    yield return new DictionaryEntry(property.Name, property.EvaluatedValue);
-                }
-            }
-        }
-
         /// <summary>
         /// Constructs a project logging contexts.
         /// </summary>
@@ -122,7 +111,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
                 else
                 {
-                    properties = FilterEnvironmentDerivedProperties(projectProperties);
+                    properties = projectProperties.Filter(p => p is not EnvironmentDerivedProjectPropertyInstance, p => new DictionaryEntry(p.Name, p.EvaluatedValue));
                 }
 
                 items = projectItems?.GetCopyOnReadEnumerable(item => new DictionaryEntry(item.ItemType, new TaskItem(item))) ?? Enumerable.Empty<DictionaryEntry>();
