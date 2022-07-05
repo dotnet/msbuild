@@ -1101,6 +1101,7 @@ Microsoft.Build.Execution.HostServices.GetNodeAffinity(string projectFile) -> Mi
 Microsoft.Build.Execution.HostServices.HostServices() -> void
 Microsoft.Build.Execution.HostServices.OnRenameProject(string oldFullPath, string newFullPath) -> void
 Microsoft.Build.Execution.HostServices.RegisterHostObject(string projectFile, string targetName, string taskName, Microsoft.Build.Framework.ITaskHost hostObject) -> void
+Microsoft.Build.Execution.HostServices.RegisterHostObject(string projectFile, string targetName, string taskName, string monikerName) -> void
 Microsoft.Build.Execution.HostServices.SetNodeAffinity(string projectFile, Microsoft.Build.Execution.NodeAffinity nodeAffinity) -> void
 Microsoft.Build.Execution.HostServices.UnregisterProject(string projectFullPath) -> void
 Microsoft.Build.Execution.ITargetResult
