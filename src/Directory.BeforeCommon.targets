@@ -92,7 +92,7 @@
     <DefineConstants>$(DefineConstants);WORKAROUND_COREFX_19110</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' or '$(TargetFramework)' == 'net6.0'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' or '$(TargetFramework)' == 'net7.0'">
     <DefineConstants>$(DefineConstants);FEATURE_PIPEOPTIONS_CURRENTUSERONLY</DefineConstants>
     <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_NODE_REUSE</DefineConstants>
   </PropertyGroup>
