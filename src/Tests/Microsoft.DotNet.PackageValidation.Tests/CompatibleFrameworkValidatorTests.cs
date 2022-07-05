@@ -98,7 +98,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
         {
             string[] filePaths = new[]
             {
-                @"ref/netcoreapp3.0/TestPackage.dll",
+                $@"ref/{ToolsetInfo.CurrentTargetFramework}/TestPackage.dll",
                 @"lib/netstandard2.0/TestPackage.dll",
                 @"lib/netcoreapp3.1/TestPackage.dll"
             };
@@ -114,14 +114,14 @@ namespace Microsoft.DotNet.PackageValidation.Tests
         {
             string[] filePaths = new[]
             {
-                @"ref/netcoreapp3.0/TestPackage.dll",
-                @"runtimes/win/lib/netcoreapp3.0/TestPackage.dll"
+                $@"ref/{ToolsetInfo.CurrentTargetFramework}/TestPackage.dll",
+                $@"runtimes/win/lib/{ToolsetInfo.CurrentTargetFramework}/TestPackage.dll"
             };
 
             Package package = new("TestPackage", "1.0.0", filePaths, null, null);
             new CompatibleTfmValidator(string.Empty, null, false, false, _log, null).Validate(package);
             Assert.NotEmpty(_log.errors);
-            Assert.Contains(DiagnosticIds.CompatibleRuntimeRidLessAsset +  " " + string.Format(Resources.NoCompatibleRuntimeAsset, ".NETCoreApp,Version=v3.0"), _log.errors);
+            Assert.Contains(DiagnosticIds.CompatibleRuntimeRidLessAsset +  " " + string.Format(Resources.NoCompatibleRuntimeAsset, ToolsetInfo.CurrentTargetFramework), _log.errors);
         }
 
         [Fact]
@@ -130,9 +130,9 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             string[] filePaths = new[]
             {
                 @"lib/netstandard2.0/TestPackage.dll",
-                @"lib/netcoreapp3.0/TestPackage.dll",
-                @"runtimes/win/lib/netcoreapp3.0/TestPackage.dll",
-                @"runtimes/unix/lib/netcoreapp3.0/TestPackage.dll"
+                $@"lib/{ToolsetInfo.CurrentTargetFramework}/TestPackage.dll",
+                $@"runtimes/win/lib/{ToolsetInfo.CurrentTargetFramework}/TestPackage.dll",
+                $@"runtimes/unix/lib/{ToolsetInfo.CurrentTargetFramework}/TestPackage.dll"
             };
 
             Package package = new("TestPackage", "1.0.0", filePaths, null, null);
@@ -161,8 +161,8 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             string[] filePaths = new[]
             {
                 @"lib/netcoreapp2.0/TestPackage.dll",
-                @"lib/netcoreapp3.0/TestPackage.dll",
-                @"runtimes/win/lib/netcoreapp3.0/TestPackage.dll"
+                $@"lib/{ToolsetInfo.CurrentTargetFramework}/TestPackage.dll",
+                $@"runtimes/win/lib/{ToolsetInfo.CurrentTargetFramework}/TestPackage.dll"
             };
 
             Package package = new("TestPackage", "1.0.0", filePaths, null, null);
@@ -178,7 +178,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
                 @"ref/netstandard2.0/TestPackage.dll",
                 @"ref/netcoreapp3.1/TestPackage.dll",
                 @"lib/netstandard2.0/TestPackage.dll",
-                @"lib/net5.0/TestPackage.dll"
+                $@"lib/{ToolsetInfo.CurrentTargetFramework}/TestPackage.dll"
             };
 
             Package package = new("TestPackage", "1.0.0", filePaths, null, null);
