@@ -32,7 +32,8 @@ variables:
     - group: DotNetBuilds storage account read tokens
     - name: _InternalRuntimeDownloadArgs
       value: /p:DotNetRuntimeSourceFeed=https://dotnetbuilds.blob.core.windows.net/internal 
-        /p:DotNetRuntimeSourceFeedKey=$(dotnetbuilds-internal-container-read-token-base64)
+        /p:DotNetRuntimeSourceFeedKey=$(dotnetbuilds-internal-container-read-token-base64) 
+        /p:OfficialBuild=true
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - group: DotNet-CLI-SDLValidation-Params
 
