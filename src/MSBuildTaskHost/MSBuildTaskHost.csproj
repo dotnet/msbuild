@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <!-- The .NET Core version of MSBuild doesn't support targeting .NET Framework 3.5.  So in that case, we import
        a .props file that prevents building the project from doing much of anything. -->
@@ -38,6 +38,10 @@
     <!-- Source Files -->
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>BuildEnvironmentHelper.cs</Link>
+    </Compile>
+    <!-- EnvironmentVariableReadEventArgs shouldn't be used in TaskHosts, but it means we need fewer ifdefs. -->
+    <Compile Include="..\Framework\EnvironmentVariableReadEventArgs.cs">
+      <Link>EnvironmentVariableReadEventArgs.cs</Link>
     </Compile>
     <Compile Include="..\Framework\BuildEnvironmentState.cs">
       <Link>BuildEnvironmentState.cs</Link>
