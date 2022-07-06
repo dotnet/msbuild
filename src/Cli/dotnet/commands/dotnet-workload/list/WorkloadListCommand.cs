@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         private readonly bool _includePreviews;
         private readonly bool _machineReadableOption;
         private readonly IWorkloadManifestUpdater _workloadManifestUpdater;
-        private readonly IWorkloadListHelper _workloadListHelper;
+        private readonly IWorkloadInfoHelper _workloadListHelper;
 
         public WorkloadListCommand(
             ParseResult result,
@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             IWorkloadResolver workloadResolver = null
         ) : base(result, CommonOptions.HiddenVerbosityOption, reporter, tempDirPath, nugetPackageDownloader)
         {
-            _workloadListHelper = new WorkloadListHelper(
+            _workloadListHelper = new WorkloadInfoHelper(
                 Verbosity,
                 result?.GetValueForOption(WorkloadListCommandParser.VersionOption) ?? null,
                 VerifySignatures,

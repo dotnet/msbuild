@@ -13,13 +13,13 @@ using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Product = Microsoft.DotNet.Cli.Utils.Product;
 
 namespace Microsoft.DotNet.Workloads.Workload.List
-{ 
-    internal class WorkloadListHelper : IWorkloadListHelper
+{
+    internal class WorkloadInfoHelper : IWorkloadInfoHelper
     {
         public readonly SdkFeatureBand _currentSdkFeatureBand;
         private readonly string _targetSdkVersion;
 
-        public WorkloadListHelper(
+        public WorkloadInfoHelper(
             VerbosityOptions verbosity = VerbosityOptions.normal,
             string targetSdkVersion = null,
             bool? verifySignatures = null,

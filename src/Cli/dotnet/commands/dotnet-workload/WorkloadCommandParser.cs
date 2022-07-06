@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli
 
         private static void ShowWorkloadsInfo()
         {
-            IWorkloadListHelper workloadListHelper = new WorkloadListHelper();
+            IWorkloadInfoHelper workloadListHelper = new WorkloadInfoHelper();
             IEnumerable<WorkloadId> installedList = workloadListHelper.InstalledSdkWorkloadIds;
             InstalledWorkloadsCollection installedWorkloads = workloadListHelper.AddInstalledVsWorkloads(installedList);
 
