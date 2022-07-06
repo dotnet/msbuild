@@ -6,6 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NewtonSoft.Json" Version="9.0.1" />
+    <PackageReference Include="NewtonSoft.Json" Version="13.0.1" />
   </ItemGroup>
 </Project>

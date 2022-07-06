@@ -17,6 +17,11 @@
         <target state="translated">`dotnet ワークロード検索` を使用して追加ワークロードを検出し、インストールします。</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadManfiestVersionColumn">
+        <source>Manifest Version</source>
+        <target state="new">Manifest Version</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WorkloadSourceColumn">
         <source>Installation Source</source>
         <target state="translated">インストール ソース</target>

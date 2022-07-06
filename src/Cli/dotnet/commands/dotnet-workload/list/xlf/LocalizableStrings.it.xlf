@@ -17,6 +17,11 @@
         <target state="translated">Utilizzare la 'ricerca del carico di lavoro DotNet' per trovare i carichi di lavoro aggiuntivi da installare.</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadManfiestVersionColumn">
+        <source>Manifest Version</source>
+        <target state="new">Manifest Version</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WorkloadSourceColumn">
         <source>Installation Source</source>
         <target state="translated">Origine dell'installazione</target>

@@ -16,8 +16,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
     {
         public int UpdateAdvertisingManifestsCallCount = 0;
         public int CalculateManifestUpdatesCallCount = 0;
-        public int DownloadManifestPackagesCallCount = 0;
-        public int ExtractManifestPackagesToTempDirCallCount = 0;
+        public int GetManifestPackageDownloadsCallCount = 0;
         private IEnumerable<(ManifestVersionUpdate manifestUpdate,
             Dictionary<WorkloadId, WorkloadDefinition> Workloads)> _manifestUpdates;
         private string _tempDirManifestPath;
@@ -44,26 +43,13 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             return _manifestUpdates;
         }
 
-        public Task<IEnumerable<string>> DownloadManifestPackagesAsync(bool includePreviews, DirectoryPath downloadPath)
+        public Task<IEnumerable<WorkloadDownload>> GetManifestPackageDownloadsAsync(bool includePreviews)
         {
-            DownloadManifestPackagesCallCount++;
-            return Task.FromResult(new List<string>() { "fake pack path" } as IEnumerable<string>);
-        }
-
-        public Task ExtractManifestPackagesToTempDirAsync(IEnumerable<string> manifestPackages, DirectoryPath tempDir)
-        {
-            ExtractManifestPackagesToTempDirCallCount++;
-            if (!string.IsNullOrEmpty(_tempDirManifestPath))
+            GetManifestPackageDownloadsCallCount++;
+            return Task.FromResult<IEnumerable<WorkloadDownload>>(new List<WorkloadDownload>()
             {
-                Directory.CreateDirectory(Path.Combine(tempDir.Value, "SampleManifest"));
-                File.Copy(_tempDirManifestPath, Path.Combine(tempDir.Value, "SampleManifest", "WorkloadManifest.json"));
-            }
-            return Task.CompletedTask;
-        }
-
-        public IEnumerable<string> GetManifestPackageUrls(bool includePreviews)
-        {
-            return new string[] { "mock-manifest-url" };
+                new WorkloadDownload("mock-manifest", "mock-manifest-package", "1.0.5")
+            });
         }
 
         public IEnumerable<ManifestVersionUpdate> CalculateManifestRollbacks(string rollbackDefinitionFilePath)

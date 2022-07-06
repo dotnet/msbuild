@@ -1,4 +1,6 @@
-[
+{
+  "version": "1.0",
+  "tasks": [
     {
       "taskType": "trigger",
       "capabilityId": "AutoMerge",
@@ -102,5 +104,40 @@
         ]
       },
       "disabled": false
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "labelAdded",
+              "parameters": {
+                "label": "Area-Compatibility"
+              }
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "Notify compatibility of new untriaged bugs",
+        "actions": [
+          {
+            "name": "addReply",
+            "parameters": {
+              "comment": "@dotnet/area-infrastructure-libraries a new issue has been filed in the Compatibility area, please triage"
+            }
+          }
+        ]
+      }
     }
-  ]
+  ],
+  "userGroups": []
+}
