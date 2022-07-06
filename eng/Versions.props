@@ -43,13 +43,13 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/runtime -->
-    <MicrosoftNETCoreAppRefPackageVersion>6.0.7</MicrosoftNETCoreAppRefPackageVersion>
-    <VSRedistCommonNetCoreSharedFrameworkx6460PackageVersion>6.0.7-servicing.22322.2</VSRedistCommonNetCoreSharedFrameworkx6460PackageVersion>
-    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>6.0.7</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
+    <MicrosoftNETCoreAppRefPackageVersion>6.0.8</MicrosoftNETCoreAppRefPackageVersion>
+    <VSRedistCommonNetCoreSharedFrameworkx6460PackageVersion>6.0.8-servicing.22356.4</VSRedistCommonNetCoreSharedFrameworkx6460PackageVersion>
+    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>6.0.8</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
     <MicrosoftNETCoreAppRuntimePackageVersion>$(MicrosoftNETCoreAppRuntimewinx64PackageVersion)</MicrosoftNETCoreAppRuntimePackageVersion>
     <MicrosoftExtensionsDependencyModelPackageVersion>6.0.0</MicrosoftExtensionsDependencyModelPackageVersion>
-    <MicrosoftNETCoreDotNetHostResolverPackageVersion>6.0.7</MicrosoftNETCoreDotNetHostResolverPackageVersion>
-    <MicrosoftNETHostModelVersion>6.0.7-servicing.22322.2</MicrosoftNETHostModelVersion>
+    <MicrosoftNETCoreDotNetHostResolverPackageVersion>6.0.8</MicrosoftNETCoreDotNetHostResolverPackageVersion>
+    <MicrosoftNETHostModelVersion>6.0.8-servicing.22356.4</MicrosoftNETHostModelVersion>
     <MicrosoftExtensionsFileSystemGlobbingPackageVersion>6.0.0-preview.7.21363.9</MicrosoftExtensionsFileSystemGlobbingPackageVersion>
     <SystemServiceProcessServiceControllerVersion>6.0.0</SystemServiceProcessServiceControllerVersion>
   </PropertyGroup>
