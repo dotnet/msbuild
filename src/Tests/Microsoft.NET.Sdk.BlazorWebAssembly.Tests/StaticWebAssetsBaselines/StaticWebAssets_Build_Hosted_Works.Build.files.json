@@ -221,6 +221,8 @@
   "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Private.CoreLib.dll.gz",
   "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Private.DataContractSerialization.dll",
   "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Private.DataContractSerialization.dll.gz",
+  "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Runtime.InteropServices.JavaScript.dll",
+  "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Runtime.InteropServices.JavaScript.dll.gz",
   "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Private.Runtime.InteropServices.JavaScript.dll",
   "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Private.Runtime.InteropServices.JavaScript.dll.gz",
   "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Private.Uri.dll",
