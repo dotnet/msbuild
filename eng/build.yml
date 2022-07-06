@@ -15,7 +15,7 @@ parameters:
   timeoutInMinutes: 180
 
 jobs:
-- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/release/6.0.4xx')) }}:
+- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/main')) }}:
   - template: /eng/common/templates/job/onelocbuild.yml
     parameters:
       CreatePr: true
