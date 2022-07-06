@@ -5,7 +5,11 @@ using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using Reporter = Microsoft.DotNet.Cli.Utils.Reporter;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.LocalizableStrings;
+using System.Collections.Generic;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
+using System.IO;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -15,9 +19,39 @@ namespace Microsoft.DotNet.Cli
 
         private static readonly Command Command = ConstructCommand();
 
+        private static readonly IWorkloadResolver workloadResolver;
+
+        public static readonly Option<bool> InfoOption = new Option<bool>("--info");
+
         public static Command GetCommand()
         {
             return Command;
+        }
+
+        private static int ProcessArgs(ParseResult parseResult)
+        {
+            if (parseResult.HasOption(Parser.InfoOption) && parseResult.RootSubCommandResult() == "workload")
+            {
+                _workloadResolver = new WorkloadResolver();
+
+                PrintableTable<KeyValuePair<string, string>> table = new();
+                table.AddColumn(LocalizableStrings.WorkloadIdColumn, workload => workload.Key);
+                table.AddColumn(LocalizableStrings.WorkloadManfiestVersionColumn, workload =>
+                {
+                    var m = _workloadResolver.GetManifestFromWorkload(new WorkloadId(workload.Key));
+                    return m.Version + "/" +
+                    new WorkloadManifestInfo(m.Id, m.Version, Path.GetDirectoryName(m.ManifestPath)!).ManifestFeatureBand;
+                });
+                table.AddColumn(LocalizableStrings.WorkloadSourceColumn, workload => workload.Value);
+                table.AddColumn("Install Type", workload => workload);
+                table.AddColumn("Workload Path", workload => workload);
+
+                table.PrintRows(installedWorkloads.AsEnumerable(), l => Reporter.Output.WriteLine(l));
+
+                Reporter.Output.WriteLine("Test");
+                return 0;
+            }
+            return parseResult.HandleMissingCommand();
         }
 
         private static Command ConstructCommand()
@@ -33,7 +67,7 @@ namespace Microsoft.DotNet.Cli
             command.AddCommand(WorkloadRestoreCommandParser.GetCommand());
             command.AddCommand(WorkloadElevateCommandParser.GetCommand());
 
-            command.SetHandler((parseResult) => parseResult.HandleMissingCommand());
+            command.SetHandler((parseResult) => ProcessArgs(parseResult));
 
             return command;
         }
