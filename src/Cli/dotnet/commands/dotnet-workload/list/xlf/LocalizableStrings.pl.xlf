@@ -7,24 +7,9 @@
         <target state="translated">Wyświetl listę dostępnych obciążeń.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WorkloadIdColumn">
-        <source>Installed Workload Ids</source>
-        <target state="translated">Zainstalowane identyfikatory obciążenia</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WorkloadListFooter">
         <source>Use `dotnet workload search` to find additional workloads to install.</source>
         <target state="translated">Użyj polecenia „dotnet workload search”, aby znaleźć dodatkowe obciążenia do zainstalowania.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadManfiestVersionColumn">
-        <source>Manifest Version</source>
-        <target state="new">Manifest Version</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadSourceColumn">
-        <source>Installation Source</source>
-        <target state="translated">Źródło instalacji</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">

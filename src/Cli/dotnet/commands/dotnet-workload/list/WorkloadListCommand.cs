@@ -13,6 +13,7 @@ using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
+using InformationStrings = Microsoft.DotNet.Workloads.Workload.LocalizableStrings;
 
 namespace Microsoft.DotNet.Workloads.Workload.List
 {
@@ -80,13 +81,14 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                 InstalledWorkloadsCollection installedWorkloads = _workloadListHelper.AddInstalledVsWorkloads(installedList);
                 Reporter.WriteLine();
                 PrintableTable<KeyValuePair<string, string>> table = new();
-                table.AddColumn(LocalizableStrings.WorkloadIdColumn, workload => workload.Key);
-                table.AddColumn(LocalizableStrings.WorkloadManfiestVersionColumn, workload => {
+                table.AddColumn(InformationStrings.WorkloadIdColumn, workload => workload.Key);
+                table.AddColumn(InformationStrings.WorkloadManfiestVersionColumn, workload =>
+                {
                     var m = _workloadListHelper.WorkloadResolver.GetManifestFromWorkload(new WorkloadId(workload.Key));
                     return m.Version + "/" +
                     new WorkloadManifestInfo(m.Id, m.Version, Path.GetDirectoryName(m.ManifestPath)!).ManifestFeatureBand;
                 });
-                table.AddColumn(LocalizableStrings.WorkloadSourceColumn, workload => workload.Value);
+                table.AddColumn(InformationStrings.WorkloadSourceColumn, workload => workload.Value);
 
                 table.PrintRows(installedWorkloads.AsEnumerable(), l => Reporter.WriteLine(l));
 

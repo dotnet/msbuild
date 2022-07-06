@@ -120,19 +120,10 @@
   <data name="CommandDescription" xml:space="preserve">
     <value>List workloads available.</value>
   </data>
-  <data name="WorkloadIdColumn" xml:space="preserve">
-    <value>Installed Workload Ids</value>
-  </data>
   <data name="WorkloadUpdatesAvailable" xml:space="preserve">
     <value>Updates are available for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</value>
   </data>
   <data name="WorkloadListFooter" xml:space="preserve">
     <value>Use `dotnet workload search` to find additional workloads to install.</value>
-  </data>
-  <data name="WorkloadSourceColumn" xml:space="preserve">
-    <value>Installation Source</value>
-  </data>
-  <data name="WorkloadManfiestVersionColumn" xml:space="preserve">
-    <value>Manifest Version</value>
   </data>
 </root>

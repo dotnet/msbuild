@@ -7,24 +7,9 @@
         <target state="translated">Kullanılabilir iş yüklerini listeleyin.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WorkloadIdColumn">
-        <source>Installed Workload Ids</source>
-        <target state="translated">Yüklü İş Yükü Kimlikleri</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WorkloadListFooter">
         <source>Use `dotnet workload search` to find additional workloads to install.</source>
         <target state="translated">Yüklenecek ek iş yüklerini bulmak için `dotnet workload search` kullanın.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadManfiestVersionColumn">
-        <source>Manifest Version</source>
-        <target state="new">Manifest Version</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadSourceColumn">
-        <source>Installation Source</source>
-        <target state="translated">Yükleme Kaynağı</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">

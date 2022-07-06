@@ -14,6 +14,7 @@ using System.IO;
 using Microsoft.DotNet.Configurer;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Workloads.Workload.List;
+using Microsoft.DotNet.Workloads.Workload.Install;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -31,29 +32,44 @@ namespace Microsoft.DotNet.Cli
             return Command;
         }
 
+        private static void ShowWorkloadsInfo()
+        {
+            IWorkloadListHelper workloadListHelper = new WorkloadListHelper();
+            IEnumerable<WorkloadId> installedList = workloadListHelper.InstalledSdkWorkloadIds;
+            InstalledWorkloadsCollection installedWorkloads = workloadListHelper.AddInstalledVsWorkloads(installedList);
+
+            foreach (var workload in installedWorkloads.AsEnumerable())
+            {
+                Reporter.Output.WriteLine("\n");
+                Reporter.Output.WriteLine(LocalizableStrings.WorkloadIdColumn + " : [" + workload.Key + "]");
+
+                Reporter.Output.Write(LocalizableStrings.WorkloadSourceColumn + ":");
+                Reporter.Output.WriteLine("\t" + workload.Value);
+
+                var workloadManifest = workloadListHelper.WorkloadResolver.GetManifestFromWorkload(new WorkloadId(workload.Key));
+                var workloadFeatureBand = new WorkloadManifestInfo(
+                    workloadManifest.Id,
+                    workloadManifest.Version,
+                    Path.GetDirectoryName(workloadManifest.ManifestPath)!).ManifestFeatureBand;
+
+                Reporter.Output.Write(LocalizableStrings.WorkloadManfiestVersionColumn + ":");
+                Reporter.Output.WriteLine("\t" + workloadManifest.Version + "/" + workloadFeatureBand);
+
+                Reporter.Output.Write(LocalizableStrings.WorkloadManifestPathColumn + ":");
+                Reporter.Output.WriteLine("\t\t" + workloadManifest.ManifestPath);
+
+                Reporter.Output.Write(LocalizableStrings.WorkloadInstallTypeColumn + ":");
+                Reporter.Output.WriteLine("\t\t" + WorkloadInstallerFactory.GetWorkloadInstallType(
+                    new SdkFeatureBand(workloadFeatureBand), workloadManifest.ManifestPath).ToString()
+                );
+            }
+        }
+
         private static int ProcessArgs(ParseResult parseResult)
         {
             if (parseResult.HasOption(InfoOption) && parseResult.RootSubCommandResult() == "workload")
             {
-                IWorkloadListHelper workloadListHelper = new WorkloadListHelper();
-                IEnumerable<WorkloadId> installedList = workloadListHelper.InstalledSdkWorkloadIds;
-                InstalledWorkloadsCollection installedWorkloads = workloadListHelper.AddInstalledVsWorkloads(installedList);
-
-                PrintableTable<KeyValuePair<string, string>> table = new();
-                table.AddColumn(LocalizableStrings.WorkloadIdColumn, workload => workload.Key);
-                table.AddColumn(LocalizableStrings.WorkloadManfiestVersionColumn, workload =>
-                {
-                    var m = workloadListHelper.WorkloadResolver.GetManifestFromWorkload(new WorkloadId(workload.Key));
-                    return m.Version + "/" +
-                    new WorkloadManifestInfo(m.Id, m.Version, Path.GetDirectoryName(m.ManifestPath)!).ManifestFeatureBand;
-                });
-                table.AddColumn(LocalizableStrings.WorkloadSourceColumn, workload => workload.Value);
-                table.AddColumn("Install Type", workload => workload);
-                table.AddColumn("Workload Path", workload => workload);
-
-                table.PrintRows(installedWorkloads.AsEnumerable(), l => Reporter.Output.WriteLine(l));
-
-                Reporter.Output.WriteLine("Test");
+                ShowWorkloadsInfo();
                 return 0;
             }
             return parseResult.HandleMissingCommand();

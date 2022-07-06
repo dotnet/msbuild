@@ -27,6 +27,31 @@
         <target state="translated">Ferramentas de build do .NET WebAssembly</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadIdColumn">
+        <source>Installed Workload Id</source>
+        <target state="new">Installed Workload Id</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadInstallTypeColumn">
+        <source>Install Type</source>
+        <target state="new">Install Type</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadManfiestVersionColumn">
+        <source>Manifest Version</source>
+        <target state="new">Manifest Version</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadManifestPathColumn">
+        <source>Manifest Path</source>
+        <target state="new">Manifest Path</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadSourceColumn">
+        <source>Installation Source</source>
+        <target state="new">Installation Source</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

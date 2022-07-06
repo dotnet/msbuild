@@ -7,24 +7,9 @@
         <target state="translated">사용 가능한 워크로드를 나열합니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WorkloadIdColumn">
-        <source>Installed Workload Ids</source>
-        <target state="translated">설치된 워크로드 ID</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WorkloadListFooter">
         <source>Use `dotnet workload search` to find additional workloads to install.</source>
         <target state="translated">'dotnet 워크로드 검색'을 사용하여 설치할 추가 워크로드를 찾습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadManfiestVersionColumn">
-        <source>Manifest Version</source>
-        <target state="new">Manifest Version</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadSourceColumn">
-        <source>Installation Source</source>
-        <target state="translated">설치 원본</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
