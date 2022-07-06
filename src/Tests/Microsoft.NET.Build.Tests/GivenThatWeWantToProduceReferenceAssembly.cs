@@ -20,7 +20,7 @@ namespace Microsoft.NET.Build.Tests
 
         [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("netcoreapp3.1", false)]
-        [InlineData("net5.0", true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, true)]
         public void It_produces_ref_assembly_for_appropriate_frameworks(string targetFramework, bool expectedExists)
         {
             TestProject testProject = new TestProject()

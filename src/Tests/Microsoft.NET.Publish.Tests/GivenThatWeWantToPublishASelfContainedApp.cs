@@ -253,7 +253,7 @@ namespace Microsoft.NET.Publish.Tests
                 .WithSource();
 
             var publishCommand = new PublishCommand(testAsset);
-            var tfm = PublishTestUtils.LatestTfm;
+            var tfm = ToolsetInfo.CurrentTargetFramework;
             var rid = RuntimeInformation.RuntimeIdentifier;
             publishCommand
                 .Execute(
