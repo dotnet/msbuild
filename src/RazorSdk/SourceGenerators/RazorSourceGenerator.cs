@@ -19,13 +19,16 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-            // determine if we should suppress this run and set all the inputs to cached if so
-            var isGeneratorSuppressed = context.AnalyzerConfigOptionsProvider.Select(GetSuppressionStatus);
+            var analyzerConfigOptions = context.AnalyzerConfigOptionsProvider;
+            var parseOptions = context.ParseOptionsProvider;
+            var compilation = context.CompilationProvider;
 
-            var analyzerConfigOptions = context.AnalyzerConfigOptionsProvider.AsCachedIfSuppressed(isGeneratorSuppressed);
-            var additionalTexts = context.AdditionalTextsProvider.AsCachedIfSuppressed(isGeneratorSuppressed);
-            var parseOptions = context.ParseOptionsProvider.AsCachedIfSuppressed(isGeneratorSuppressed);
-            var compilation = context.CompilationProvider.AsCachedIfSuppressed(isGeneratorSuppressed);
+            // determine if we should suppress this run and filter out all the additional files if so
+            var isGeneratorSuppressed = context.AnalyzerConfigOptionsProvider.Select(GetSuppressionStatus);
+            var additionalTexts = context.AdditionalTextsProvider
+                 .Combine(isGeneratorSuppressed)
+                 .Where(pair => !pair.Right)
+                 .Select((pair, _) => pair.Left);
 
             var razorSourceGeneratorOptions = analyzerConfigOptions
                 .Combine(parseOptions)
