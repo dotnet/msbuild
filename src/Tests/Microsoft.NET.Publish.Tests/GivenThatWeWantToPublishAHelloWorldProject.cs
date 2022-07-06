@@ -26,7 +26,7 @@ namespace Microsoft.NET.Publish.Tests
         [Theory]
         [InlineData("netcoreapp1.1")]
         [InlineData("netcoreapp2.0")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_publishes_portable_apps_to_the_publish_folder_and_the_app_should_run(string targetFramework)
         {
             if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
@@ -68,7 +68,7 @@ namespace Microsoft.NET.Publish.Tests
         [Theory]
         [InlineData("netcoreapp1.1")]
         [InlineData("netcoreapp2.0")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_publishes_self_contained_apps_to_the_publish_folder_and_the_app_should_run(string targetFramework)
         {
             if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
@@ -439,7 +439,7 @@ public static class Program
 
         [Theory]
         [InlineData("netcoreapp2.1")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_preserves_newest_files_on_publish(string tfm)
         {
             var testProject = new TestProject()
@@ -474,7 +474,7 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "InvokeBuildOnPublish",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -654,7 +654,7 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "ExeWithPublishProfile",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
             };
 
@@ -677,10 +677,10 @@ public static class Program
             var publishProfilePath = Path.Combine(publishProfilesDirectory, "test.pubxml");
 
             Directory.CreateDirectory(publishProfilesDirectory);
-            File.WriteAllText(publishProfilePath, @"
+            File.WriteAllText(publishProfilePath, $@"
 <Project>
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>{ToolsetInfo.CurrentTargetFramework}</TargetFramework>
   </PropertyGroup>
 </Project>
 ");

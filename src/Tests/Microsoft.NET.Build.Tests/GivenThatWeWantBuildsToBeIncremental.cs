@@ -21,7 +21,7 @@ namespace Microsoft.NET.Build.Tests
 
         [Theory]
         [InlineData("netcoreapp1.1")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void GenerateBuildRuntimeConfigurationFiles_runs_incrementally(string targetFramework)
         {
             var testAsset = _testAssetsManager
@@ -44,7 +44,7 @@ namespace Microsoft.NET.Build.Tests
 
         [Theory]
         [InlineData("netcoreapp1.1")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void ResolvePackageAssets_runs_incrementally(string targetFramework)
         { 
             var testAsset = _testAssetsManager
