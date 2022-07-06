@@ -6,35 +6,54 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using Reporter = Microsoft.DotNet.Cli.Utils.Reporter;
+using Product = Microsoft.DotNet.Cli.Utils.Product;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.LocalizableStrings;
 using System.Collections.Generic;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using System.IO;
+using Microsoft.DotNet.Configurer;
+using Microsoft.Deployment.DotNet.Releases;
 
 namespace Microsoft.DotNet.Cli
 {
-    internal static class WorkloadCommandParser
+    internal class WorkloadCommandParser
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-workload";
 
         private static readonly Command Command = ConstructCommand();
 
-        private static readonly IWorkloadResolver workloadResolver;
-
         public static readonly Option<bool> InfoOption = new Option<bool>("--info");
 
         public static Command GetCommand()
         {
+            Command.AddOption(InfoOption);
             return Command;
+        }
+
+        private static IWorkloadResolver GetStandardWorkloadResolver()
+        {
+            string dotnetPath = Path.GetDirectoryName(Environment.ProcessPath);
+            ReleaseVersion sdkReleaseVersion = new(Product.Version);
+            SdkFeatureBand band = new(sdkReleaseVersion);
+            string userProfileDir = CliFolderPathCalculator.DotnetUserProfileFolderPath;
+
+            SdkDirectoryWorkloadManifestProvider workloadManifestProvider =
+                new(dotnetPath, sdkReleaseVersion.ToString(), userProfileDir);
+
+            IWorkloadResolver workloadResolver = NET.Sdk.WorkloadManifestReader.WorkloadResolver.Create(
+                workloadManifestProvider, dotnetPath,
+                sdkReleaseVersion.ToString(), userProfileDir);
+
+            return workloadResolver;
         }
 
         private static int ProcessArgs(ParseResult parseResult)
         {
-            if (parseResult.HasOption(Parser.InfoOption) && parseResult.RootSubCommandResult() == "workload")
+            if (parseResult.HasOption(InfoOption) && parseResult.RootSubCommandResult() == "workload")
             {
-                _workloadResolver = new WorkloadResolver();
+                IWorkloadResolver workloadResolver = GetStandardWorkloadResolver();
 
-                PrintableTable<KeyValuePair<string, string>> table = new();
+                /*PrintableTable<KeyValuePair<string, string>> table = new();
                 table.AddColumn(LocalizableStrings.WorkloadIdColumn, workload => workload.Key);
                 table.AddColumn(LocalizableStrings.WorkloadManfiestVersionColumn, workload =>
                 {
@@ -47,7 +66,7 @@ namespace Microsoft.DotNet.Cli
                 table.AddColumn("Workload Path", workload => workload);
 
                 table.PrintRows(installedWorkloads.AsEnumerable(), l => Reporter.Output.WriteLine(l));
-
+                */
                 Reporter.Output.WriteLine("Test");
                 return 0;
             }
