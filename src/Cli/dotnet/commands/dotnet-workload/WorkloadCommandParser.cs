@@ -13,10 +13,11 @@ using Microsoft.NET.Sdk.WorkloadManifestReader;
 using System.IO;
 using Microsoft.DotNet.Configurer;
 using Microsoft.Deployment.DotNet.Releases;
+using Microsoft.DotNet.Workloads.Workload.List;
 
 namespace Microsoft.DotNet.Cli
 {
-    internal class WorkloadCommandParser
+    internal static class WorkloadCommandParser
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-workload";
 
@@ -30,34 +31,19 @@ namespace Microsoft.DotNet.Cli
             return Command;
         }
 
-        private static IWorkloadResolver GetStandardWorkloadResolver()
-        {
-            string dotnetPath = Path.GetDirectoryName(Environment.ProcessPath);
-            ReleaseVersion sdkReleaseVersion = new(Product.Version);
-            SdkFeatureBand band = new(sdkReleaseVersion);
-            string userProfileDir = CliFolderPathCalculator.DotnetUserProfileFolderPath;
-
-            SdkDirectoryWorkloadManifestProvider workloadManifestProvider =
-                new(dotnetPath, sdkReleaseVersion.ToString(), userProfileDir);
-
-            IWorkloadResolver workloadResolver = NET.Sdk.WorkloadManifestReader.WorkloadResolver.Create(
-                workloadManifestProvider, dotnetPath,
-                sdkReleaseVersion.ToString(), userProfileDir);
-
-            return workloadResolver;
-        }
-
         private static int ProcessArgs(ParseResult parseResult)
         {
             if (parseResult.HasOption(InfoOption) && parseResult.RootSubCommandResult() == "workload")
             {
-                IWorkloadResolver workloadResolver = GetStandardWorkloadResolver();
+                IWorkloadListHelper workloadListHelper = new WorkloadListHelper();
+                IEnumerable<WorkloadId> installedList = workloadListHelper.InstalledSdkWorkloadIds;
+                InstalledWorkloadsCollection installedWorkloads = workloadListHelper.AddInstalledVsWorkloads(installedList);
 
-                /*PrintableTable<KeyValuePair<string, string>> table = new();
+                PrintableTable<KeyValuePair<string, string>> table = new();
                 table.AddColumn(LocalizableStrings.WorkloadIdColumn, workload => workload.Key);
                 table.AddColumn(LocalizableStrings.WorkloadManfiestVersionColumn, workload =>
                 {
-                    var m = _workloadResolver.GetManifestFromWorkload(new WorkloadId(workload.Key));
+                    var m = workloadListHelper.WorkloadResolver.GetManifestFromWorkload(new WorkloadId(workload.Key));
                     return m.Version + "/" +
                     new WorkloadManifestInfo(m.Id, m.Version, Path.GetDirectoryName(m.ManifestPath)!).ManifestFeatureBand;
                 });
@@ -66,7 +52,7 @@ namespace Microsoft.DotNet.Cli
                 table.AddColumn("Workload Path", workload => workload);
 
                 table.PrintRows(installedWorkloads.AsEnumerable(), l => Reporter.Output.WriteLine(l));
-                */
+
                 Reporter.Output.WriteLine("Test");
                 return 0;
             }
