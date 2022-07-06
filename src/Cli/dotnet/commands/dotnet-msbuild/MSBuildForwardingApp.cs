@@ -63,8 +63,6 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
         public ProcessStartInfo GetProcessStartInfo()
         {
-            EnvironmentVariable(TelemetrySessionIdEnvironmentVariableName, Telemetry.CurrentSessionId);
-
             return _forwardingAppWithoutLogging.GetProcessStartInfo();
         }
 
@@ -84,6 +82,10 @@ namespace Microsoft.DotNet.Tools.MSBuild
             Console.CancelKeyPress += (sender, e) => { e.Cancel = true; };
 
             int exitCode;
+
+            // Config needed for telemetry logger
+            EnvironmentVariable(TelemetrySessionIdEnvironmentVariableName, Telemetry.CurrentSessionId);
+
             if (_forwardingAppWithoutLogging.ExecuteMSBuildOutOfProc)
             {
                 ProcessStartInfo startInfo = GetProcessStartInfo();
