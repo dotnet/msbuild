@@ -17,6 +17,11 @@
         <target state="translated">Commande d'installation .NET</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoWorkloadsInstalledInfoWarning">
+        <source>There are no installed workloads to display.</source>
+        <target state="new">There are no installed workloads to display.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkipSignCheckInvalidOption">
         <source>Unable to bypass signature verification. The specified option conflicts with a global policy.</source>
         <target state="new">Unable to bypass signature verification. The specified option conflicts with a global policy.</target>

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
+using System.Linq;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.List;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
@@ -32,6 +33,12 @@ namespace Microsoft.DotNet.Cli
             IWorkloadInfoHelper workloadListHelper = new WorkloadInfoHelper();
             IEnumerable<WorkloadId> installedList = workloadListHelper.InstalledSdkWorkloadIds;
             InstalledWorkloadsCollection installedWorkloads = workloadListHelper.AddInstalledVsWorkloads(installedList);
+
+            if(!installedList.Any())
+            {
+                Reporter.Output.WriteLine(CommonStrings.NoWorkloadsInstalledInfoWarning);
+                return;
+            }
 
             foreach (var workload in installedWorkloads.AsEnumerable())
             {

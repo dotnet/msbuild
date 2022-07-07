@@ -72,7 +72,6 @@ namespace Microsoft.DotNet.Tests
 
                 FirstDotnetNonVerbUseCommandResult = command.Execute("--info");
                 FirstDotnetVerbUseCommandResult = command.Execute("new", "--debug:ephemeral-hive");
-                FirstDotnetWorkloadInfoResult = command.Execute("workload --info");
 
                 TestDirectory = dotnetFirstTime.TestDirectory;
                 NugetFallbackFolder = dotnetFirstTime.NugetFallbackFolder;
@@ -82,7 +81,7 @@ namespace Microsoft.DotNet.Tests
 
         public void Dispose()
         {
-
+            
         }
     }
 
@@ -160,15 +159,6 @@ namespace Microsoft.DotNet.Tests
 
             var homeFolder = dotnetFirstTime.NugetFallbackFolder.Parent;
             homeFolder.Should().NotExist();
-        }
-
-        [Fact]
-        public void ItAcceptsInfoOptionOnWorkloadsAndProvidesWorkloadInfo()
-        {
-            var dotnetFirstTime = new DotNetFirstTime();
-            _fixture.FirstDotnetWorkloadInfoResult
-                .Should()
-                .HaveStdOutContaining("");
         }
 
         [WindowsOnlyFact]

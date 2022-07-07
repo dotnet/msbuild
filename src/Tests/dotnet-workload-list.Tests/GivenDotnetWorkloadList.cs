@@ -76,22 +76,6 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
         }
 
         [Fact]
-        public void GivenInfoOptionIsProvidedWeDeliverWorkloadInfo()
-        {
-            _reporter.Clear();
-            var expectedWorkloads = new List<WorkloadId>() { new WorkloadId("mock-workload-1"), new WorkloadId("mock-workload-2"), new WorkloadId("mock-workload-3") };
-            var workloadInstaller = new MockWorkloadRecordRepo(expectedWorkloads);
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), Directory.GetCurrentDirectory());
-            //var command = new WorkloadCommandParser(_parseResult, _reporter, workloadInstaller, "6.0.100", workloadResolver: workloadResolver);
-            //command.Execute();
-
-            foreach (var workload in expectedWorkloads)
-            {
-                _reporter.Lines.Select(line => line.Trim()).Should().Contain($"{workload}            5.0.0/TestProjects      SDK 6.0.100");
-            }
-        }
-
-        [Fact]
         public void GivenWorkloadsAreInstalledMachineReadableListIsNotEmpty()
         {
             _reporter.Clear();
