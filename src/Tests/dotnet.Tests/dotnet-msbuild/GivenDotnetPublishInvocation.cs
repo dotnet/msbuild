@@ -23,6 +23,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         }
 
         const string ExpectedPrefix = "-maxcpucount -verbosity:m";
+        const string ExpectedProperties = "-property:_IsPublishing=true";
 
         [Theory]
         [InlineData(new string[] { }, "")]
@@ -57,7 +58,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
                 command.GetArgumentsToMSBuild()
                     .Should()
-                    .Be($"{ExpectedPrefix} -restore -target:Publish{expectedAdditionalArgs}");
+                    .Be($"{ExpectedPrefix} -restore -target:Publish {ExpectedProperties}{expectedAdditionalArgs}");
             });
         }
 
@@ -74,11 +75,11 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             command.SeparateRestoreCommand
                    .GetArgumentsToMSBuild()
                    .Should()
-                   .Be($"{ExpectedPrefix} -target:Restore");
+                   .Be($"{ExpectedPrefix} -target:Restore {ExpectedProperties}");
 
             command.GetArgumentsToMSBuild()
                    .Should()
-                   .Be($"{ExpectedPrefix} -nologo -target:Publish{expectedAdditionalArgs}");
+                   .Be($"{ExpectedPrefix} -nologo -target:Publish {ExpectedProperties}{expectedAdditionalArgs}");
         }
 
         [Fact]
@@ -94,7 +95,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             // NOTE --no-build implies no-restore hence no -restore argument to msbuild below.
             command.GetArgumentsToMSBuild()
                    .Should()
-                   .Be($"{ExpectedPrefix} -target:Publish -property:NoBuild=true");
+                   .Be($"{ExpectedPrefix} -target:Publish {ExpectedProperties} -property:NoBuild=true");
         }
 
         [Fact]
@@ -105,7 +106,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
             command.GetArgumentsToMSBuild()
                .Should()
-               .Be($"{ExpectedPrefix} -restore -target:Publish -property:Prop1=prop1 -property:Prop2=prop2");
+               .Be($"{ExpectedPrefix} -restore -target:Publish {ExpectedProperties} -property:Prop1=prop1 -property:Prop2=prop2");
         }
     }
 }

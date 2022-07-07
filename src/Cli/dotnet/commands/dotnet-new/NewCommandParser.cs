@@ -17,6 +17,12 @@ using Microsoft.TemplateEngine.Edge;
 using System.Linq;
 using Microsoft.DotNet.Workloads.Workload.List;
 using Microsoft.TemplateEngine.Abstractions.Components;
+using Microsoft.DotNet.Tools.Add.PackageReference;
+using Microsoft.DotNet.Tools.Add.ProjectToProjectReference;
+using Microsoft.DotNet.Tools.Sln.Add;
+using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Tools.Common;
+using LocalizableStrings = Microsoft.DotNet.Tools.New.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -26,7 +32,7 @@ namespace Microsoft.DotNet.Cli
         public const string CommandName = "new";
         private const string HostIdentifier = "dotnetcli";
 
-        private static readonly Option<bool> _disableSdkTemplates = new Option<bool>("--debug:disable-sdk-templates", () => false, "If present, prevents templates bundled in the SDK from being presented").Hide();
+        private static readonly Option<bool> _disableSdkTemplates = new Option<bool>("--debug:disable-sdk-templates", () => false, LocalizableStrings.DisableSdkTemplates_OptionDescription).Hide();
 
         internal static readonly System.CommandLine.Command Command = GetCommand();
 
@@ -59,7 +65,10 @@ namespace Microsoft.DotNet.Cli
 
             var callbacks = new Microsoft.TemplateEngine.Cli.NewCommandCallbacks()
             {
-                RestoreProject = RestoreProject
+                RestoreProject = RestoreProject,
+                AddPackageReference = AddPackageReference,
+                AddProjectReference = AddProjectReference,
+                AddProjectsToSolution = AddProjectsToSolution
             };
 
             var getEngineHost = (ParseResult parseResult) => {
@@ -105,7 +114,74 @@ namespace Microsoft.DotNet.Cli
 
         private static bool RestoreProject(string pathToRestore)
         {
-            return RestoreCommand.Run(new string[] { pathToRestore }) == 0;
+            try
+            {
+                PathUtility.EnsureAllPathsExist(new[] { pathToRestore }, CommonLocalizableStrings.FileNotFound, allowDirectories: true);
+                return RestoreCommand.Run(new string[] { pathToRestore }) == 0;
+            }
+            catch (Exception e)
+            {
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.RestoreCallback_Failed, e.Message));
+                return false;
+            }
+        }
+
+        private static bool AddPackageReference(string projectPath, string packageName, string version)
+        {
+            try
+            {
+                PathUtility.EnsureAllPathsExist(new[] { projectPath }, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
+                IEnumerable<string> commandArgs = new [] { "add", projectPath, "package", packageName };
+                if (!string.IsNullOrWhiteSpace(version))
+                {
+                    commandArgs = commandArgs.Append(AddPackageParser.VersionOption.Aliases.First()).Append(version);
+                }
+                var addPackageReferenceCommand = new AddPackageReferenceCommand(AddCommandParser.GetCommand().Parse(commandArgs.ToArray()));
+                return addPackageReferenceCommand.Execute() == 0;
+            }
+            catch (Exception e)
+            {
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.AddPackageReferenceCallback_Failed, e.Message));
+                return false;
+            }
+        }
+
+        private static bool AddProjectReference(string projectPath, IReadOnlyList<string> projectsToAdd)
+        {
+            try
+            {
+                PathUtility.EnsureAllPathsExist(new[] { projectPath }, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
+                PathUtility.EnsureAllPathsExist(projectsToAdd, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
+                IEnumerable<string> commandArgs = new[] { "add", projectPath, "reference", }.Concat(projectsToAdd);
+                var addProjectReferenceCommand = new AddProjectToProjectReferenceCommand(AddCommandParser.GetCommand().Parse(commandArgs.ToArray()));
+                return addProjectReferenceCommand.Execute() == 0;
+            }
+            catch (Exception e)
+            {
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.AddProjectReferenceCallback_Failed, e.Message));
+                return false;
+            }
+        }
+
+        private static bool AddProjectsToSolution(string solutionPath, IReadOnlyList<string> projectsToAdd, string solutionFolder)
+        {
+            try
+            {
+                PathUtility.EnsureAllPathsExist(new[] { solutionPath }, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
+                PathUtility.EnsureAllPathsExist(projectsToAdd, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
+                IEnumerable<string> commandArgs = new[] { "sln", solutionPath, "add" }.Concat(projectsToAdd);
+                if (!string.IsNullOrWhiteSpace(solutionFolder))
+                {
+                    commandArgs = commandArgs.Append(SlnAddParser.SolutionFolderOption.Aliases.First()).Append(solutionFolder);
+                }
+                var addProjectToSolutionCommand = new AddProjectToSolutionCommand(SlnCommandParser.GetCommand().Parse(commandArgs.ToArray()));
+                return addProjectToSolutionCommand.Execute() == 0;
+            }
+            catch (Exception e)
+            {
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.AddProjectsToSolutionCallback_Failed, e.Message));
+                return false;
+            }
         }
     }
 }

@@ -25,7 +25,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("UseWPF")]
         public void It_errors_when_missing_windows_target_platform(string propertyName)
         {
-            var targetFramework = "net5.0";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
             TestProject testProject = new TestProject()
             {
                 Name = "MissingTargetPlatform",
@@ -60,14 +60,14 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProjectB = new TestProject()
             {
                 Name = "B",
-                TargetFrameworks = "net5.0"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
             testProjectB.ReferencedProjects.Add(testProjectA);
 
             TestProject testProjectC = new TestProject()
             {
                 Name = "C",
-                TargetFrameworks = "net5.0"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
             testProjectC.ReferencedProjects.Add(testProjectB);
 
@@ -84,7 +84,7 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_warns_when_specifying_windows_desktop_sdk()
         {
-            var targetFramework = "net5.0-windows";
+            var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "windowsDesktopSdk",
@@ -105,7 +105,7 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyFact]
         public void It_does_not_warn_when_multitargeting()
         {
-            var targetFramework = "net5.0;net472;netcoreapp3.1";
+            var targetFramework = $"{ToolsetInfo.CurrentTargetFramework};net472;netcoreapp3.1";
             TestProject testProject = new TestProject()
             {
                 Name = "windowsDesktopSdk",
@@ -180,7 +180,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "InvalidWindowsVersion",
-                TargetFrameworks = "net5.0-windows1.0"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-windows1.0"
             };
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -200,7 +200,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "ValidWindowsVersion",
-                TargetFrameworks = setInTargetframework ? "net5.0-windows10.0.18362" : "net5.0"
+                TargetFrameworks = setInTargetframework ? $"{ToolsetInfo.CurrentTargetFramework}-windows10.0.18362" : ToolsetInfo.CurrentTargetFramework
             };
             if (!setInTargetframework)
             {
@@ -227,7 +227,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "InvalidTargetPlatform",
-                TargetFrameworks = "net5.0-custom1.0"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-custom1.0"
             };
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -284,7 +284,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testProject = new TestProject()
             {
-                TargetFrameworks = "net5.0-windows"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-windows"
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -316,7 +316,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testProject = new TestProject()
             {
-                TargetFrameworks = "net5.0-windows10.0.19041.0"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-windows10.0.19041.0"
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -345,8 +345,8 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [WindowsOnlyTheory]
-        [InlineData("net5.0", true)]
-        [InlineData("net5.0-windows10.0.19041.0", true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, true)]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework}-windows10.0.19041.0", true)]
         [InlineData("netcoreapp3.1", false)]
         [InlineData("net472", false)]
         public void WindowsWorkloadIsInstalledForNet5AndUp(string targetFramework, bool supportsWindowsTargetPlatformIdentifier)
@@ -378,14 +378,14 @@ namespace Microsoft.NET.Build.Tests
 
         [WindowsOnlyTheory]
         //  Basic Windows TargetFramework
-        [InlineData("net5.0-windows10.0.19041.0", false, null, "10.0.19041.*")]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework}-windows10.0.19041.0", false, null, "10.0.19041.*")]
         //  Basic UseWindowsSdkPreview usage
-        [InlineData("net5.0-windows10.0.99999.0", true, null, "10.0.99999-preview")]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework}-windows10.0.99999.0", true, null, "10.0.99999-preview")]
         //  Basic WindowsSdkPackageVersion usage
-        [InlineData("net5.0-windows10.0.19041.0", null, "10.0.99999-abc", "10.0.99999-abc")]
-        [InlineData("net5.0-windows10.0.19041.0", null, "10.0.99999.0", "10.0.99999.0")]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework}-windows10.0.19041.0", null, "10.0.99999-abc", "10.0.99999-abc")]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework}-windows10.0.19041.0", null, "10.0.99999.0", "10.0.99999.0")]
         //  WindowsSdkPackageVersion should supercede UseWindowsSDKPreview property
-        [InlineData("net5.0-windows10.0.19041.0", true, "10.0.99999-abc", "10.0.99999-abc")]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework}-windows10.0.19041.0", true, "10.0.99999-abc", "10.0.99999-abc")]
         public void ItUsesCorrectWindowsSdkPackVersion(string targetFramework, bool? useWindowsSDKPreview, string windowsSdkPackageVersion, string expectedWindowsSdkPackageVersion)
         {
             var testProject = new TestProject()

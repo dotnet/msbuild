@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             string userProfileDir1 = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
 
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(Reporter,
-                _workloadListHelper.WorkloadResolver, PackageDownloader, userProfileDir1, TempDirectoryPath, _workloadListHelper.WorkloadRecordRepo);
+                _workloadListHelper.WorkloadResolver, PackageDownloader, userProfileDir1, TempDirectoryPath, _workloadListHelper.WorkloadRecordRepo, _workloadListHelper.Installer);
         }
 
         public override int Execute()
@@ -79,9 +79,13 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             {
                 InstalledWorkloadsCollection installedWorkloads = _workloadListHelper.AddInstalledVsWorkloads(installedList);
                 Reporter.WriteLine();
-
                 PrintableTable<KeyValuePair<string, string>> table = new();
                 table.AddColumn(LocalizableStrings.WorkloadIdColumn, workload => workload.Key);
+                table.AddColumn(LocalizableStrings.WorkloadManfiestVersionColumn, workload => {
+                    var m = _workloadListHelper.WorkloadResolver.GetManifestFromWorkload(new WorkloadId(workload.Key));
+                    return m.Version + "/" +
+                    new WorkloadManifestInfo(m.Id, m.Version, Path.GetDirectoryName(m.ManifestPath)!).ManifestFeatureBand;
+                });
                 table.AddColumn(LocalizableStrings.WorkloadSourceColumn, workload => workload.Value);
 
                 table.PrintRows(installedWorkloads.AsEnumerable(), l => Reporter.WriteLine(l));

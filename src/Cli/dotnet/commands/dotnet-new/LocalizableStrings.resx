@@ -117,6 +117,25 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AddPackageReferenceCallback_Failed" xml:space="preserve">
+    <value>Failed to add package reference: {0}</value>
+    <comment>{0} - the reason why operation failed, normally ends with period</comment>
+  </data>
+  <data name="AddProjectReferenceCallback_Failed" xml:space="preserve">
+    <value>Failed to add project reference: {0}</value>
+    <comment>{0} - the reason why operation failed, normally ends with period</comment>
+  </data>
+  <data name="AddProjectsToSolutionCallback_Failed" xml:space="preserve">
+    <value>Failed to add project(s) to the solution: {0}</value>
+    <comment>{0} - the reason why operation failed, normally ends with period</comment>
+  </data>
+  <data name="DisableSdkTemplates_OptionDescription" xml:space="preserve">
+    <value>If present, prevents templates bundled in the SDK from being presented.</value>
+  </data>
+  <data name="RestoreCallback_Failed" xml:space="preserve">
+    <value>Failed to perform restore: {0}</value>
+    <comment>{0} - the reason why operation failed, normally ends with period</comment>
+  </data>
   <data name="SdkInfoProvider_Message_InstallSdk" xml:space="preserve">
     <value>Go to aka.ms/get-dotnet and install any of the supported SDK versions: '{0}'.</value>
     <comment>{0} is the list of supported versions.</comment>

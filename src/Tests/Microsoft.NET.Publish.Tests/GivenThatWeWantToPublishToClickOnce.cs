@@ -28,7 +28,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(true)]
         public void PublishClickOnceWithPublishProfile(bool? publishSingleFile)
         {
-            var tfm = "netcoreapp3.1";
+            var tfm = ToolsetInfo.CurrentTargetFramework;
             var rid = EnvironmentInfo.GetCompatibleRid(tfm);
 
             var testProject = new TestProject()

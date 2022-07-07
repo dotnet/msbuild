@@ -508,7 +508,7 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1173: "}</note>
       </trans-unit>
       <trans-unit id="InvalidTypeLibraryId">
-        <source>NETSDK1170: The provided type library ID '{0}' for type libary '{1}' is invalid. The ID must be a positive integer less than 65536.</source>
+        <source>NETSDK1170: The provided type library ID '{0}' for type library '{1}' is invalid. The ID must be a positive integer less than 65536.</source>
         <target state="translated">NETSDK1170: l'ID '{0}' per la libreria dei tipi specificato '{1}' non è valido. L'ID deve essere un numero positivo intero inferiore a 65536.</target>
         <note>{StrBegin="NETSDK1170: "}</note>
       </trans-unit>

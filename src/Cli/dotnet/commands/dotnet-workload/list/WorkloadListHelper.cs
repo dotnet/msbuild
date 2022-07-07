@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
 { 
     internal class WorkloadListHelper : IWorkloadListHelper
     {
-        private readonly SdkFeatureBand _currentSdkFeatureBand;
+        public readonly SdkFeatureBand _currentSdkFeatureBand;
         private readonly string _targetSdkVersion;
 
         public WorkloadListHelper(
@@ -47,13 +47,15 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                 workloadManifestProvider, dotnetPath,
                 currentSdkReleaseVersion.ToString(), userProfileDir);
 
-            WorkloadRecordRepo = workloadRecordRepo ??
-                                 WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand,
+            Installer = WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand,
                                      WorkloadResolver, verbosity, userProfileDir,
                                      verifySignatures ?? !SignCheck.IsDotNetSigned(),
-                                     elevationRequired: false).GetWorkloadInstallationRecordRepository();
+                                     elevationRequired: false);
+
+            WorkloadRecordRepo = workloadRecordRepo ?? Installer.GetWorkloadInstallationRecordRepository();
         }
 
+        public IInstaller Installer { get; private init; }
         public IWorkloadInstallationRecordRepository WorkloadRecordRepo { get; private init; }
         public IWorkloadResolver WorkloadResolver { get; private init; }
 

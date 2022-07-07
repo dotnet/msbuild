@@ -58,8 +58,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>The configuration to use for building the package. The default for most projects is 'Debug'.</source>
-        <target state="translated">Die für die Paketerstellung zu verwendende Konfiguration. Standard für die meisten Projekte ist "Debug".</target>
+        <source>The configuration to use for building the package. The default is 'Debug'. Use the `PackRelease` property to make 'Release' the default for this command.</source>
+        <target state="needs-review-translation">Die für die Paketerstellung zu verwendende Konfiguration. Standard für die meisten Projekte ist "Debug".</target>
         <note />
       </trans-unit>
     </body>

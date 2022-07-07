@@ -219,17 +219,19 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android") };
             var cachePath = Path.Combine(_testAssetsManager.CreateTestDirectory(identifier: "cachePath").Path, "mockCachePath");
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--download-to-cache", cachePath });
-            (_, var command, var installer, _, var manifestUpdater, _) = GetTestInstallers(parseResult, installedWorkloads: mockWorkloadIds, includeInstalledPacks: true);
+            (_, var command, var installer, _, var manifestUpdater, var packageDownloader) = GetTestInstallers(parseResult, installedWorkloads: mockWorkloadIds, includeInstalledPacks: true);
 
             command.Execute();
 
             // Manifest packages should have been 'downloaded' and used for pack resolution
-            manifestUpdater.DownloadManifestPackagesCallCount.Should().Be(1);
-            manifestUpdater.ExtractManifestPackagesToTempDirCallCount.Should().Be(1);
-            // 6 android pack packages need to be updated
-            installer.CachedPacks.Count.Should().Be(6);
-            installer.CachedPacks.Select(pack => pack.Id).Should().NotContain("Xamarin.Android.Sdk"); // This pack is up to date, doesn't need to be cached
-            installer.CachePath.Should().Be(cachePath);
+            manifestUpdater.GetManifestPackageDownloadsCallCount.Should().Be(1);
+            // 7 android pack packages need to be updated, plus one manifest
+            packageDownloader.DownloadCallParams.Count.Should().Be(8);
+            foreach (var downloadParams in packageDownloader.DownloadCallParams)
+            {
+                downloadParams.downloadFolder.Value.Value.Should().Be(cachePath);
+                downloadParams.id.ToString().Should().NotBe("xamarin.android.sdk");  // This pack is up to date, doesn't need to be cached
+            }
         }
 
         [Fact]
@@ -259,10 +261,9 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             command.Execute();
 
             _reporter.Lines.Should().Contain("==allPackageLinksJsonOutputStart==");
-            string.Join(" ", _reporter.Lines).Should().Contain("mock-url-xamarin.android.templates", "New pack urls should be included in output");
-            string.Join(" ", _reporter.Lines).Should().Contain("mock-url-xamarin.android.framework", "Urls for packs with updated versions should be included in output");
-            string.Join(" ", _reporter.Lines).Should().NotContain("mock-url-xamarin.android.sdk", "Urls for packs with the same version should not be included in output");
-            string.Join(" ", _reporter.Lines).Should().Contain("mock-manifest-url");
+            string.Join(" ", _reporter.Lines).Should().Contain("http://mock-url/xamarin.android.templates.1.0.3.nupkg", "New pack urls should be included in output");
+            string.Join(" ", _reporter.Lines).Should().Contain("http://mock-url/xamarin.android.framework.8.4.0.nupkg", "Urls for packs with updated versions should be included in output");
+            string.Join(" ", _reporter.Lines).Should().NotContain("xamarin.android.sdk", "Urls for packs with the same version should not be included in output");
         }
 
         [Theory]
@@ -450,6 +451,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                 new MockPackWorkloadInstaller(failingWorkload, failingPack, installedWorkloads: installedWorkloads, installedPacks: installedPacks) :
                 new MockPackWorkloadInstaller(failingWorkload, failingPack, installedWorkloads: installedWorkloads);
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot);
+            installer.WorkloadResolver = workloadResolver;
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var manifestUpdater = new MockWorkloadManifestUpdater(manifestUpdates, _manifestPath);
             var installManager = new WorkloadUpdateCommand(

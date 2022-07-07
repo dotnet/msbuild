@@ -135,7 +135,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, dotnetRoot);
             var installationRepo = new MockInstallationRecordRepository();
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, userProfileDir: Path.Combine(testDir, ".dotnet"), testDir, installationRepo);
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, userProfileDir: Path.Combine(testDir, ".dotnet"), testDir, installationRepo, new MockPackWorkloadInstaller());
 
             var manifestUpdates = manifestUpdater.CalculateManifestUpdates().Select( m => m.manifestUpdate);
             manifestUpdates.Should().BeEquivalentTo(expectedManifestUpdates);
@@ -199,7 +199,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, dotnetRoot);
             var installationRepo = new MockInstallationRecordRepository();
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, userProfileDir: Path.Combine(testDir, ".dotnet"), testDir, installationRepo);
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, userProfileDir: Path.Combine(testDir, ".dotnet"), testDir, installationRepo, new MockPackWorkloadInstaller());
 
             var manifestUpdates = manifestUpdater.CalculateManifestUpdates().Select(m => m.manifestUpdate);
             manifestUpdates.Should().BeEquivalentTo(expectedManifestUpdates);
@@ -236,10 +236,10 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             };
 
             var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, dotnetRoot);
-            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot, manifestDownload: true);
+            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             nugetDownloader.PackageIdsToNotFind.Add($"{testManifestName}.Manifest-6.0.300");
             var installationRepo = new MockInstallationRecordRepository();
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, Path.Combine(testDir, ".dotnet"), testDir, installationRepo);
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, Path.Combine(testDir, ".dotnet"), testDir, installationRepo, new MockPackWorkloadInstaller());
 
             var offlineCacheDir = "";
             if (useOfflineCache)
@@ -314,9 +314,9 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             };        
 
             var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, dotnetRoot);
-            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot, manifestDownload: true);
+            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var installationRepo = new MockInstallationRecordRepository();
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, Path.Combine(testDir, ".dotnet"), testDir, installationRepo);
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, Path.Combine(testDir, ".dotnet"), testDir, installationRepo, new MockPackWorkloadInstaller());
 
             var offlineCacheDir = "";
             if (useOfflineCache)
@@ -381,9 +381,9 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             };
 
             var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, dotnetRoot);
-            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot, manifestDownload: true);
+            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var installationRepo = new MockInstallationRecordRepository();
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, Path.Combine(testDir, ".dotnet"), testDir, installationRepo);
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, Path.Combine(testDir, ".dotnet"), testDir, installationRepo, new MockPackWorkloadInstaller());
 
             var offlineCacheDir = "";
             if (useOfflineCache)
@@ -446,7 +446,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, dotnetRoot);
             var installationRepo = new MockInstallationRecordRepository();
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, testDir, testDir, installationRepo);
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, testDir, testDir, installationRepo, new MockPackWorkloadInstaller());
 
             var manifestUpdates = manifestUpdater.CalculateManifestRollbacks(rollbackDefPath);
             manifestUpdates.Should().BeEquivalentTo(expectedManifestUpdates);
@@ -489,7 +489,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(Array.Empty<string>()), dotnetRoot);
             var installationRepo = new MockInstallationRecordRepository();
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, testDir, testDir, installationRepo);
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, testDir, testDir, installationRepo, new MockPackWorkloadInstaller());
 
             manifestUpdater.CalculateManifestRollbacks(rollbackDefPath);
             string.Join(" ", _reporter.Lines).Should().Contain(rollbackDefPath);
@@ -531,7 +531,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(Array.Empty<string>()), dotnetRoot);
             var installationRepo = new MockInstallationRecordRepository();
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, testDir, testDir, installationRepo);
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, testDir, testDir, installationRepo, new MockPackWorkloadInstaller());
 
             manifestUpdater.CalculateManifestRollbacks(rollbackDefPath);
             string.Join(" ", _reporter.Lines).Should().Contain(rollbackDefPath);
@@ -562,12 +562,13 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, dotnetRoot);
             var installationRepo = new MockInstallationRecordRepository();
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, testDir, testDir, installationRepo);
+            var installer = new MockPackWorkloadInstaller();
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, testDir, testDir, installationRepo, installer);
             manifestUpdater.UpdateAdvertisingManifestsAsync(false, new DirectoryPath(offlineCache)).Wait();
 
             // We should have chosen the higher version manifest package to install/ extract
-            nugetDownloader.ExtractCallParams.Count().Should().Be(1);
-            nugetDownloader.ExtractCallParams[0].Item1.Should().Be(Path.Combine(offlineCache, $"{manifestId}.manifest-{featureBand}.3.0.0.nupkg"));
+            installer.ExtractCallParams.Count().Should().Be(1);
+            installer.ExtractCallParams[0].Item1.Should().Be(Path.Combine(offlineCache, $"{manifestId}.manifest-{featureBand}.3.0.0.nupkg"));
         }
 
         [Theory]
@@ -714,9 +715,9 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 SdkFeatureBand = new SdkFeatureBand(featureBand),
             };
             var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, dotnetRoot);
-            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot, manifestDownload: true);
+            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var installationRepo = new MockInstallationRecordRepository();
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, testDir, testDir, installationRepo, getEnvironmentVariable: getEnvironmentVariable);
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, testDir, testDir, installationRepo, new MockPackWorkloadInstaller(), getEnvironmentVariable: getEnvironmentVariable);
 
             var sentinelPath = Path.Combine(testDir, _manifestSentinelFileName + featureBand);
             return (manifestUpdater, nugetDownloader, sentinelPath);

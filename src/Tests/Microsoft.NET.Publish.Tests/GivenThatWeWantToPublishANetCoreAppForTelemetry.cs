@@ -20,7 +20,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [CoreMSBuildOnlyTheory]
-        [InlineData("net5.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_collects_empty_Trimmer_SingleFile_ReadyToRun_Aot_publishing_properties(string targetFramework)
         {
             Type loggerType = typeof(LogTelemetryToStdOutForTest);
@@ -33,11 +33,11 @@ namespace Microsoft.NET.Publish.Tests
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
             var publishCommand = new PublishCommand(testProjectInstance);
             publishCommand.Execute(TelemetryTestLogger).StdOut.Should().Contain(
-                "{\"EventName\":\"PublishProperties\",\"Properties\":{\"PublishReadyToRun\":\"null\",\"PublishTrimmed\":\"null\",\"PublishSingleFile\":\"null\",\"PublishAot\":\"null\"}");
+                "{\"EventName\":\"PublishProperties\",\"Properties\":{\"PublishReadyToRun\":\"null\",\"PublishTrimmed\":\"null\",\"PublishSingleFile\":\"null\",\"PublishAot\":\"null\",\"PublishProtocol\":\"null\"}");
         }
 
         [CoreMSBuildOnlyTheory]
-        [InlineData("net5.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_collects_Trimmer_SingleFile_ReadyToRun_publishing_properties(string targetFramework)
         {
             Type loggerType = typeof(LogTelemetryToStdOutForTest);
@@ -51,9 +51,11 @@ namespace Microsoft.NET.Publish.Tests
             var publishCommand = new PublishCommand(testProjectInstance);
             string s = publishCommand.Execute(TelemetryTestLogger).StdOut;//.Should()
             s.Should().Contain(
-                "{\"EventName\":\"PublishProperties\",\"Properties\":{\"PublishReadyToRun\":\"True\",\"PublishTrimmed\":\"True\",\"PublishSingleFile\":\"True\",\"PublishAot\":\"null\"}");
+                "{\"EventName\":\"PublishProperties\",\"Properties\":{\"PublishReadyToRun\":\"True\",\"PublishTrimmed\":\"True\",\"PublishSingleFile\":\"True\",\"PublishAot\":\"null\",\"PublishProtocol\":\"null\"}");
             s.Should().Contain(
-                "{\"EventName\":\"ReadyToRun\",\"Properties\":{\"PublishReadyToRunUseCrossgen2\":\"null\",\"Crossgen2PackVersion\":\"null\"");
+                "{\"EventName\":\"ReadyToRun\",\"Properties\":{\"PublishReadyToRunUseCrossgen2\":\"true\",")
+                .And.MatchRegex(
+                    "\"Crossgen2PackVersion\":\"[5-9]\\..+\"");
             s.Should().Contain(
                 "\"FailedCount\":\"0\"");
             s.Should().MatchRegex(
@@ -61,7 +63,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [CoreMSBuildOnlyTheory]
-        [InlineData("net5.0")] 
+        [InlineData(ToolsetInfo.CurrentTargetFramework)] 
         void It_collects_crossgen2_publishing_properties(string targetFramework)
         {
             // Crossgen2 only supported for Linux/Windows x64 scenarios for now
@@ -81,9 +83,9 @@ namespace Microsoft.NET.Publish.Tests
             var publishCommand = new PublishCommand(testProjectInstance);
             publishCommand.Execute(TelemetryTestLogger).StdOut.Should()
                 .Contain(
-                    "{\"EventName\":\"PublishProperties\",\"Properties\":{\"PublishReadyToRun\":\"True\",\"PublishTrimmed\":\"null\",\"PublishSingleFile\":\"null\",\"PublishAot\":\"null\"}")
+                    "{\"EventName\":\"PublishProperties\",\"Properties\":{\"PublishReadyToRun\":\"True\",\"PublishTrimmed\":\"null\",\"PublishSingleFile\":\"null\",\"PublishAot\":\"null\",\"PublishProtocol\":\"null\"}")
                 .And.Contain(
-                    "{\"EventName\":\"ReadyToRun\",\"Properties\":{\"PublishReadyToRunUseCrossgen2\":\"True\",")
+                    "{\"EventName\":\"ReadyToRun\",\"Properties\":{\"PublishReadyToRunUseCrossgen2\":\"true\",")
                 .And.MatchRegex(
                     "\"Crossgen2PackVersion\":\"[5-9]\\..+\"")
                 .And.Contain(
@@ -112,7 +114,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
             var publishCommand = new PublishCommand(testProjectInstance);
             publishCommand.Execute(TelemetryTestLogger).StdOut.Should().Contain(
-                "{\"EventName\":\"PublishProperties\",\"Properties\":{\"PublishReadyToRun\":\"null\",\"PublishTrimmed\":\"true\",\"PublishSingleFile\":\"null\",\"PublishAot\":\"True\"}");
+                "{\"EventName\":\"PublishProperties\",\"Properties\":{\"PublishReadyToRun\":\"null\",\"PublishTrimmed\":\"true\",\"PublishSingleFile\":\"null\",\"PublishAot\":\"True\",\"PublishProtocol\":\"null\"}");
         }
 
 

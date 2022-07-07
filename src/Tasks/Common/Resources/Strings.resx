@@ -787,7 +787,7 @@ To install these workloads, run the following command: dotnet workload restore</
     <comment>{StrBegin="NETSDK1169: "}</comment>
   </data>
   <data name="InvalidTypeLibraryId" xml:space="preserve">
-    <value>NETSDK1170: The provided type library ID '{0}' for type libary '{1}' is invalid. The ID must be a positive integer less than 65536.</value>
+    <value>NETSDK1170: The provided type library ID '{0}' for type library '{1}' is invalid. The ID must be a positive integer less than 65536.</value>
     <comment>{StrBegin="NETSDK1170: "}</comment>
   </data>
   <data name="MissingTypeLibraryId" xml:space="preserve">
