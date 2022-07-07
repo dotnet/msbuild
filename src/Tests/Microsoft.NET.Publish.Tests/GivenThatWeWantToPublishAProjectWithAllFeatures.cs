@@ -106,7 +106,7 @@ namespace Microsoft.NET.Publish.Tests
 }");
             baselineConfigJsonObject["runtimeOptions"]["tfm"] = targetFramework;
             baselineConfigJsonObject["runtimeOptions"]["framework"]["version"] =
-                targetFramework == ToolsetInfo.CurrentTargetFramework ? "7.0.0-preview.6.22329.5" : "1.1.2";
+                targetFramework == ToolsetInfo.CurrentTargetFramework ? "7.0.0-preview.6.22356.1" : "1.1.2";
             
             runtimeConfigJsonObject
                 .Should()
