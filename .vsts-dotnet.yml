@@ -147,7 +147,8 @@ stages:
         channelName: $(VisualStudio.ChannelName)
         manifests: $(VisualStudio.SetupManifestList)
         outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
-        bootstrapperCoreVersion: 
+        bootstrapperCoreVersion: 3.4.4-g4cae2ef8
+        bootstrapperExternalVersion: 3.4.4-g4cae2ef8
       displayName: 'OptProf - Build VS bootstrapper'
       condition: succeeded()
 
