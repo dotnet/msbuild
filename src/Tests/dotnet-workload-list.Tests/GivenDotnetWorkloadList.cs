@@ -14,7 +14,8 @@ using Microsoft.NET.Sdk.WorkloadManifestReader;
 using ManifestReaderTests;
 using System.IO;
 using System.Linq;
-using System;
+using ListStrings = Microsoft.DotNet.Workloads.Workload.List.LocalizableStrings;
+using Microsoft.DotNet.Workloads.Workload;
 
 namespace Microsoft.DotNet.Cli.Workload.List.Tests
 {
@@ -70,7 +71,23 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
 
             foreach (var workload in expectedWorkloads)
             {
-                _reporter.Lines.Select(line => line.Trim()).Should().Contain($"{workload}             5.0.0/TestProjects      SDK 6.0.100");
+                _reporter.Lines.Select(line => line.Trim()).Should().Contain($"{workload}            5.0.0/TestProjects      SDK 6.0.100");
+            }
+        }
+
+        [Fact]
+        public void GivenInfoOptionIsProvidedWeDeliverWorkloadInfo()
+        {
+            _reporter.Clear();
+            var expectedWorkloads = new List<WorkloadId>() { new WorkloadId("mock-workload-1"), new WorkloadId("mock-workload-2"), new WorkloadId("mock-workload-3") };
+            var workloadInstaller = new MockWorkloadRecordRepo(expectedWorkloads);
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), Directory.GetCurrentDirectory());
+            //var command = new WorkloadCommandParser(_parseResult, _reporter, workloadInstaller, "6.0.100", workloadResolver: workloadResolver);
+            //command.Execute();
+
+            foreach (var workload in expectedWorkloads)
+            {
+                _reporter.Lines.Select(line => line.Trim()).Should().Contain($"{workload}            5.0.0/TestProjects      SDK 6.0.100");
             }
         }
 
@@ -105,7 +122,7 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
             command.Execute();
 
             // Workloads 1 and 3 should have updates
-            _reporter.Lines.Should().Contain(string.Format(LocalizableStrings.WorkloadUpdatesAvailable, "mock-workload-1 mock-workload-3"));
+            _reporter.Lines.Should().Contain(string.Format(ListStrings.WorkloadUpdatesAvailable, "mock-workload-1 mock-workload-3"));
         }
     }
 }

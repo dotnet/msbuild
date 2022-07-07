@@ -1,20 +1,15 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
-using Reporter = Microsoft.DotNet.Cli.Utils.Reporter;
-using Product = Microsoft.DotNet.Cli.Utils.Product;
-using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.LocalizableStrings;
 using System.Collections.Generic;
-using Microsoft.NET.Sdk.WorkloadManifestReader;
+using System.CommandLine;
+using System.CommandLine.Parsing;
 using System.IO;
-using Microsoft.DotNet.Configurer;
-using Microsoft.Deployment.DotNet.Releases;
-using Microsoft.DotNet.Workloads.Workload.List;
 using Microsoft.DotNet.Workloads.Workload.Install;
+using Microsoft.DotNet.Workloads.Workload.List;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
+using CommonStrings = Microsoft.DotNet.Workloads.Workload.LocalizableStrings;
+using Reporter = Microsoft.DotNet.Cli.Utils.Reporter;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -41,9 +36,9 @@ namespace Microsoft.DotNet.Cli
             foreach (var workload in installedWorkloads.AsEnumerable())
             {
                 Reporter.Output.WriteLine("\n");
-                Reporter.Output.WriteLine(LocalizableStrings.WorkloadIdColumn + " : [" + workload.Key + "]");
+                Reporter.Output.WriteLine(CommonStrings.WorkloadIdColumn + " : [" + workload.Key + "]");
 
-                Reporter.Output.Write(LocalizableStrings.WorkloadSourceColumn + ":");
+                Reporter.Output.Write(CommonStrings.WorkloadSourceColumn + ":");
                 Reporter.Output.WriteLine("\t" + workload.Value);
 
                 var workloadManifest = workloadListHelper.WorkloadResolver.GetManifestFromWorkload(new WorkloadId(workload.Key));
@@ -52,13 +47,13 @@ namespace Microsoft.DotNet.Cli
                     workloadManifest.Version,
                     Path.GetDirectoryName(workloadManifest.ManifestPath)!).ManifestFeatureBand;
 
-                Reporter.Output.Write(LocalizableStrings.WorkloadManfiestVersionColumn + ":");
+                Reporter.Output.Write(CommonStrings.WorkloadManfiestVersionColumn + ":");
                 Reporter.Output.WriteLine("\t" + workloadManifest.Version + "/" + workloadFeatureBand);
 
-                Reporter.Output.Write(LocalizableStrings.WorkloadManifestPathColumn + ":");
+                Reporter.Output.Write(CommonStrings.WorkloadManifestPathColumn + ":");
                 Reporter.Output.WriteLine("\t\t" + workloadManifest.ManifestPath);
 
-                Reporter.Output.Write(LocalizableStrings.WorkloadInstallTypeColumn + ":");
+                Reporter.Output.Write(CommonStrings.WorkloadInstallTypeColumn + ":");
                 Reporter.Output.WriteLine("\t\t" + WorkloadInstallerFactory.GetWorkloadInstallType(
                     new SdkFeatureBand(workloadFeatureBand), workloadManifest.ManifestPath).ToString()
                 );
@@ -77,7 +72,7 @@ namespace Microsoft.DotNet.Cli
 
         private static Command ConstructCommand()
         {
-            var command = new DocumentedCommand("workload", DocsLink, LocalizableStrings.CommandDescription);
+            var command = new DocumentedCommand("workload", DocsLink, CommonStrings.CommandDescription);
 
             command.AddCommand(WorkloadInstallCommandParser.GetCommand());
             command.AddCommand(WorkloadUpdateCommandParser.GetCommand());
