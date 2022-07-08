@@ -1,23 +1,5 @@
 <Project>
 
-  <ItemGroup Condition="'$(DotNetBuildFromSource)' == 'true'">
-    <PackageReference Update="BenchmarkDotNet" Version="$(BenchmarkDotNetVersion)" />
-    <PackageReference Update="LargeAddressAware" Version="$(LargeAddressAwareVersion)" />
-    <PackageReference Update="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="$(MicrosoftCodeAnalysisPublicApiAnalyzersVersion)" />
-    <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="$(MicrosoftVisualStudioSDKEmbedInteropTypesVersion)" />
-    <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="$(MicrosoftVisualStudioSetupConfigurationInteropVersion)" PrivateAssets="All" />
-    <PackageReference Update="Microsoft.Win32.Registry" Version="$(MicrosoftWin32RegistryVersion)" />
-    <PackageReference Update="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
-    <PackageReference Update="PdbGit" Version="$(PdbGitVersion)" />
-    <PackageReference Update="Shouldly" Version="$(ShouldlyVersion)" />
-    <PackageReference Update="System.CodeDom" Version="$(SystemCodeDomVersion)" />
-    <PackageReference Update="System.Private.Uri" Version="$(SystemPrivateUriVersion)" />
-    <PackageReference Update="System.Runtime" Version="$(SystemRuntimeVersion)" />
-    <PackageReference Update="System.Security.Cryptography.Pkcs" Version="$(SystemSecurityCryptographyPkcsVersion)" />
-    <PackageReference Update="System.Security.Cryptography.Xml" Version="$(SystemSecurityCryptographyXmlVersion)" />
-    <PackageReference Update="System.Security.Cryptography.X509Certificates" Version="$(SystemSecurityCryptographyX509CertificatesVersion)" />
-  </ItemGroup>
-
   <!-- Packages in this file have versions updated periodically by Dependabot.
        Versions managed by Darc/Maestro should be in ..\Packages.props. -->
 
@@ -26,21 +8,50 @@
     the list of assemblies redistributed by MSBuild (non-MSBuild assemblies in the .vsix package).
      -->
   <ItemGroup>
-    <PackageReference Update="BenchmarkDotNet" Condition="'$(BenchmarkDotNetVersion)' == ''" Version="0.13.1" />
-    <PackageReference Update="LargeAddressAware" Condition="'$(LargeAddressAwareVersion)' == ''" Version="1.0.5" />
-    <PackageReference Update="Microsoft.CodeAnalysis.PublicApiAnalyzers" Condition="'$(MicrosoftCodeAnalysisPublicApiAnalyzersVersion)' == ''" Version="3.3.3" />
-    <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Condition="'$(MicrosoftVisualStudioSDKEmbedInteropTypesVersion)' == ''" Version="15.0.36" />
-    <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Condition="'$(MicrosoftVisualStudioSetupConfigurationInteropVersion)' == ''" Version="3.2.2146" PrivateAssets="All" />
-    <PackageReference Update="Microsoft.Win32.Registry" Condition="'$(MicrosoftWin32RegistryVersion)' == ''" Version="5.0.0" />
-    <PackageReference Update="Newtonsoft.Json" Condition="'$(NewtonsoftJsonVersion)' == ''" Version="13.0.1" />
-    <PackageReference Update="PdbGit" Condition="'$(PdbGitVersion)' == ''" Version="3.0.41" />
-    <PackageReference Update="Shouldly" Condition="'$(ShouldlyVersion)' == ''" Version="3.0.0" />
-    <PackageReference Update="System.CodeDom" Condition="'$(SystemCodeDomVersion)' == ''" Version="6.0.0" />
-    <PackageReference Update="System.Private.Uri" Condition="'$(SystemPrivateUriVersion)' == ''" Version="4.3.2" />
-    <PackageReference Update="System.Runtime" Condition="'$(SystemRuntimeVersion)' == ''" Version="4.3.1" />
-    <PackageReference Update="System.Security.Cryptography.Pkcs" Condition="'$(SystemSecurityCryptographyPkcsVersion)' == ''" Version="6.0.1" />
-    <PackageReference Update="System.Security.Cryptography.Xml" Condition="'$(SystemSecurityCryptographyXmlVersion)' == ''" Version="6.0.0" />
-    <PackageReference Update="System.Security.Cryptography.X509Certificates" Condition="'$(SystemSecurityCryptographyX509CertificatesVersion)' == ''" Version="4.3.2" />
+    <PackageReference Update="BenchmarkDotNet" Version="0.13.1" />
+    <PackageReference Update="BenchmarkDotNet" Condition="'$(BenchmarkDotNetVersion)' != ''" Version="$(BenchmarkDotNetVersion)" />
+
+    <PackageReference Update="LargeAddressAware" Version="1.0.5" />
+    <PackageReference Update="LargeAddressAware" Condition="'$(LargeAddressAwareVersion)' != ''" Version="$(LargeAddressAwareVersion)" />
+
+    <PackageReference Update="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.3" />
+    <PackageReference Update="Microsoft.CodeAnalysis.PublicApiAnalyzers" Condition="'$(MicrosoftCodeAnalysisPublicApiAnalyzersVersion)' != ''" Version="$(MicrosoftCodeAnalysisPublicApiAnalyzersVersion)" />
+
+    <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.36" />
+    <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Condition="'$(MicrosoftVisualStudioSDKEmbedInteropTypesVersion)' != ''" Version="$(MicrosoftVisualStudioSDKEmbedInteropTypesVersion)" />
+
+    <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="3.2.2146" PrivateAssets="All" />
+    <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Condition="'$(MicrosoftVisualStudioSetupConfigurationInteropVersion)' != ''" Version="$(MicrosoftVisualStudioSetupConfigurationInteropVersion)" PrivateAssets="All" />
+
+    <PackageReference Update="Microsoft.Win32.Registry" Version="5.0.0" />
+    <PackageReference Update="Microsoft.Win32.Registry" Condition="'$(MicrosoftWin32RegistryVersion)' != ''" Version="$(MicrosoftWin32RegistryVersion)" />
+
+    <PackageReference Update="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Update="Newtonsoft.Json" Condition="'$(NewtonsoftJsonVersion)' != ''" Version="$(NewtonsoftJsonVersion)" />
+
+    <PackageReference Update="PdbGit" Version="3.0.41" />
+    <PackageReference Update="PdbGit" Condition="'$(PdbGitVersion)' != ''" Version="$(PdbGitVersion)" />
+
+    <PackageReference Update="Shouldly" Version="3.0.0" />
+    <PackageReference Update="Shouldly" Condition="'$(ShouldlyVersion)' != ''" Version="$(ShouldlyVersion)" />
+
+    <PackageReference Update="System.CodeDom" Version="6.0.0" />
+    <PackageReference Update="System.CodeDom" Condition="'$(SystemCodeDomVersion)' != ''" Version="$(SystemCodeDomVersion)" />
+
+    <PackageReference Update="System.Private.Uri" Version="4.3.2" />
+    <PackageReference Update="System.Private.Uri" Condition="'$(SystemPrivateUriVersion)' != ''" Version="$(SystemPrivateUriVersion)" />
+
+    <PackageReference Update="System.Runtime" Version="4.3.1" />
+    <PackageReference Update="System.Runtime" Condition="'$(SystemRuntimeVersion)' != ''" Version="$(SystemRuntimeVersion)" />
+
+    <PackageReference Update="System.Security.Cryptography.Pkcs" Version="6.0.1" />
+    <PackageReference Update="System.Security.Cryptography.Pkcs" Condition="'$(SystemSecurityCryptographyPkcsVersion)' != ''" Version="$(SystemSecurityCryptographyPkcsVersion)" />
+
+    <PackageReference Update="System.Security.Cryptography.Xml" Version="6.0.0" />
+    <PackageReference Update="System.Security.Cryptography.Xml" Condition="'$(SystemSecurityCryptographyXmlVersion)' != ''" Version="$(SystemSecurityCryptographyXmlVersion)" />
+
+    <PackageReference Update="System.Security.Cryptography.X509Certificates" Version="4.3.2" />
+    <PackageReference Update="System.Security.Cryptography.X509Certificates" Condition="'$(SystemSecurityCryptographyX509CertificatesVersion)' != ''" Version="$(SystemSecurityCryptographyX509CertificatesVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true' AND $(ProjectIsDeprecated) != 'true'">
