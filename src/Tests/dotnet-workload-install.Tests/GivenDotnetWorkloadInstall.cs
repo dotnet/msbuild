@@ -23,6 +23,7 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.DotNet.Cli.Utils;
 using System.Text.Json;
+using Microsoft.DotNet.Workloads.Workload.List;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -159,18 +160,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         [Fact]
-        public void GivenInfoOptionWorkloadDisplaysInformation()
+        public void GivenInfoOptionWorkloadBaseCommandAcceptsThatOption()
         {
-            _reporter.Clear();
-            var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android"), new WorkloadId("xamarin-android-build") };
-            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
-            var dotnetRoot = Path.Combine(testDirectory, "dotnet");
-            var installer = new MockPackWorkloadInstaller();
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot);
-            var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android"});
-            var installManager = new WorkloadInstallCommand(parseResult, reporter: _reporter, workloadResolver: workloadResolver, workloadInstaller: installer, version: "6.0.100");
-
-            installManager.InstallWorkloads(mockWorkloadIds, true);
             var command = new DotnetCommand(Log);
             var commandResult = command
                 .WithEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", string.Empty)
@@ -178,22 +169,31 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 .Execute("workload", "--info");
 
             commandResult.Should().Pass();
-            commandResult.StdOut.Should().BeVisuallyEquivalentTo("Hello");
+        }
+
+        [Fact]
+        public void GivenNoWorkloadsInstalledInfoOptionRemarksOnThat()
+        {
+            // We can't easily mock the end to end process of installing a workload and testing --info on it so we are adding that to the manual testing document.
+            // However, we can test a setup where no workloads are installed and --info is provided. 
+
+            _reporter.Clear();
+            var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android"), new WorkloadId("xamarin-android-build") };
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            var installer = new MockPackWorkloadInstaller();
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot);
+            var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android"});
+
+            IWorkloadInfoHelper workloadInfoHelper = new WorkloadInfoHelper(workloadResolver: workloadResolver);
+            WorkloadCommandParser.ShowWorkloadsInfo(workloadInfoHelper: workloadInfoHelper, reporter:_reporter);
+            _reporter.Lines.Should().Contain("There are no installed workloads to display.");
         }
 
         [Fact]
         public void GivenBadOptionWorkloadBaseInformsRequiredCommandWasNotProvided()
         {
             _reporter.Clear();
-            var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android"), new WorkloadId("xamarin-android-build") };
-            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
-            var dotnetRoot = Path.Combine(testDirectory, "dotnet");
-            var installer = new MockPackWorkloadInstaller(failingGarbageCollection: true);
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot);
-            var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android", "xamarin-android-build", "--skip-manifest-update" });
-            var installManager = new WorkloadInstallCommand(parseResult, reporter: _reporter, workloadResolver: workloadResolver, workloadInstaller: installer, version: "6.0.100");
-
-            installManager.InstallWorkloads(mockWorkloadIds, true);
             var command = new DotnetCommand(Log);
             command
                 .WithEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", string.Empty)
