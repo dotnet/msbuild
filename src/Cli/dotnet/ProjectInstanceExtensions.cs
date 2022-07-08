@@ -37,7 +37,13 @@ namespace Microsoft.DotNet.Tools.Common
 
         public static IEnumerable<string> GetConfigurations(this ProjectInstance projectInstance)
         {
-            return (projectInstance.GetPropertyValue("Configurations") ?? "Debug;Release")
+            string foundConfig = projectInstance.GetPropertyValue("Configurations") ?? "Debug;Release";
+            if (string.IsNullOrWhiteSpace(foundConfig))
+            {
+                foundConfig = "Debug;Release";
+            }
+
+            return foundConfig
                 .Split(
                     new char[] { ';' },
                     StringSplitOptions.RemoveEmptyEntries)
