@@ -29,6 +29,10 @@ namespace Microsoft.NET.Build.Tests
 
         private bool TestWithPublish { get; set; } = false;
 
+        private bool PublishTrimmed = false;
+
+        private bool ReferenceExeInCode = false;
+
         private TestProject MainProject { get; set; }
 
         private TestProject ReferencedProject { get; set; }
@@ -44,10 +48,31 @@ namespace Microsoft.NET.Build.Tests
             };
 
             MainProject.PackageReferences.Add(new TestPackageReference("Humanizer", "2.8.26"));
-            MainProject.SourceFiles["Program.cs"] = @"using Humanizer; System.Console.WriteLine(""MainProject"".Humanize());";
+            var mainProjectSrc = @"
+using System;
+using Humanizer;
+Console.WriteLine(""MainProject"".Humanize());";
 
-            //  By default we don't create the app host on Mac for FDD.  For these tests, we want to create it everywhere
-            MainProject.AdditionalProperties["UseAppHost"] = "true";
+            if (PublishTrimmed)
+            {
+                MainProject.AdditionalProperties["PublishTrimmed"] = "true";
+
+                // If we're fully trimming, unless the trimmed project contains an explicit reference in code
+                // to the referenced project, it will get trimmed away
+                if (ReferenceExeInCode)
+                {
+                    mainProjectSrc += @"
+// Always false, but the trimmer doesn't know that
+if (string.Empty.Length > 0)
+{
+    ReferencedExeProgram.Main();
+}";
+
+                }
+            }
+
+
+            MainProject.SourceFiles["Program.cs"] = mainProjectSrc;
 
             if (MainSelfContained)
             {
@@ -62,8 +87,6 @@ namespace Microsoft.NET.Build.Tests
                 IsExe = true,
             };
 
-            ReferencedProject.AdditionalProperties["UseAppHost"] = "true";
-
             if (ReferencedSelfContained)
             {
                 ReferencedProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid();
@@ -71,7 +94,15 @@ namespace Microsoft.NET.Build.Tests
 
             //  Use a lower version of a library in the referenced project
             ReferencedProject.PackageReferences.Add(new TestPackageReference("Humanizer", "2.7.9"));
-            ReferencedProject.SourceFiles["Program.cs"] = @"using Humanizer; System.Console.WriteLine(""ReferencedProject"".Humanize());";
+            ReferencedProject.SourceFiles["Program.cs"] = @"
+using Humanizer;
+public class ReferencedExeProgram
+{
+    public static void Main()
+    {
+        System.Console.WriteLine(""ReferencedProject"".Humanize());
+    }
+}";
 
             MainProject.ReferencedProjects.Add(ReferencedProject);
         }
@@ -122,11 +153,23 @@ namespace Microsoft.NET.Build.Tests
                 var referencedExeResult = new RunExeCommand(Log, referencedExePath)
                     .Execute();
 
-                referencedExeResult
-                    .Should()
-                    .Pass()
-                    .And
-                    .HaveStdOut("Referenced project");
+                // If we're trimming and didn't reference the exe in source we would expect it to be trimmed from the output
+                if (PublishTrimmed && !ReferenceExeInCode)
+                {
+                    referencedExeResult
+                        .Should()
+                        .Fail()
+                        .And
+                        .HaveStdErrContaining("The application to execute does not exist");
+                }
+                else
+                {
+                    referencedExeResult
+                        .Should()
+                        .Pass()
+                        .And
+                        .HaveStdOut("Referenced project");
+                }
             }
             else
             {
@@ -238,24 +281,19 @@ namespace Microsoft.NET.Build.Tests
             RunTest();
         }
 
-        [Fact]
-        public void ReferencedExeCanRunWhenPublishedWithTrimming()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ReferencedExeCanRunWhenPublishedWithTrimming(bool referenceExeInCode)
         {
             MainSelfContained = true;
             ReferencedSelfContained = true;
 
             TestWithPublish = true;
+            PublishTrimmed = true;
+            ReferenceExeInCode = referenceExeInCode;
 
             CreateProjects();
-
-            if (MainSelfContained)
-            {
-                MainProject.AdditionalProperties["PublishTrimmed"] = "True";
-            }
-            if (ReferencedSelfContained)
-            {
-                ReferencedProject.AdditionalProperties["PublishTrimmed"] = "True";
-            }
 
             RunTest();
         }
