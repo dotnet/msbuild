@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
                 Dictionary<string, string> properties = new Dictionary<string, string>(args.Properties);
                 Dictionary<string, double> measurements = new Dictionary<string, double>();
 
-                string[] toBeHashed = new[] { "ProjectPath" };
+                string[] toBeHashed = new[] { "ProjectPath", "BuildTarget" };
                 foreach (var propertyToBeHashed in toBeHashed)
                 {
                     if (properties.TryGetValue(propertyToBeHashed, out string value))
