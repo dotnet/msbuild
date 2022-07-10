@@ -29,6 +29,10 @@ namespace Microsoft.NET.Build.Tests
 
         private bool TestWithPublish { get; set; } = false;
 
+        private bool PublishTrimmed = false;
+
+        private bool ReferenceExeInCode = false;
+
         private TestProject MainProject { get; set; }
 
         private TestProject ReferencedProject { get; set; }
@@ -38,16 +42,37 @@ namespace Microsoft.NET.Build.Tests
             MainProject = new TestProject()
             {
                 Name = "MainProject",
-                TargetFrameworks = "net5.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsSdkProject = true,
                 IsExe = true
             };
 
             MainProject.PackageReferences.Add(new TestPackageReference("Humanizer", "2.8.26"));
-            MainProject.SourceFiles["Program.cs"] = @"using Humanizer; System.Console.WriteLine(""MainProject"".Humanize());";
+            var mainProjectSrc = @"
+using System;
+using Humanizer;
+Console.WriteLine(""MainProject"".Humanize());";
 
-            //  By default we don't create the app host on Mac for FDD.  For these tests, we want to create it everywhere
-            MainProject.AdditionalProperties["UseAppHost"] = "true";
+            if (PublishTrimmed)
+            {
+                MainProject.AdditionalProperties["PublishTrimmed"] = "true";
+
+                // If we're fully trimming, unless the trimmed project contains an explicit reference in code
+                // to the referenced project, it will get trimmed away
+                if (ReferenceExeInCode)
+                {
+                    mainProjectSrc += @"
+// Always false, but the trimmer doesn't know that
+if (string.Empty.Length > 0)
+{
+    ReferencedExeProgram.Main();
+}";
+
+                }
+            }
+
+
+            MainProject.SourceFiles["Program.cs"] = mainProjectSrc;
 
             if (MainSelfContained)
             {
@@ -57,12 +82,10 @@ namespace Microsoft.NET.Build.Tests
             ReferencedProject = new TestProject()
             {
                 Name = "ReferencedProject",
-                TargetFrameworks = "net5.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsSdkProject = true,
                 IsExe = true,
             };
-
-            ReferencedProject.AdditionalProperties["UseAppHost"] = "true";
 
             if (ReferencedSelfContained)
             {
@@ -71,7 +94,15 @@ namespace Microsoft.NET.Build.Tests
 
             //  Use a lower version of a library in the referenced project
             ReferencedProject.PackageReferences.Add(new TestPackageReference("Humanizer", "2.7.9"));
-            ReferencedProject.SourceFiles["Program.cs"] = @"using Humanizer; System.Console.WriteLine(""ReferencedProject"".Humanize());";
+            ReferencedProject.SourceFiles["Program.cs"] = @"
+using Humanizer;
+public class ReferencedExeProgram
+{
+    public static void Main()
+    {
+        System.Console.WriteLine(""ReferencedProject"".Humanize());
+    }
+}";
 
             MainProject.ReferencedProjects.Add(ReferencedProject);
         }
@@ -122,11 +153,23 @@ namespace Microsoft.NET.Build.Tests
                 var referencedExeResult = new RunExeCommand(Log, referencedExePath)
                     .Execute();
 
-                referencedExeResult
-                    .Should()
-                    .Pass()
-                    .And
-                    .HaveStdOut("Referenced project");
+                // If we're trimming and didn't reference the exe in source we would expect it to be trimmed from the output
+                if (PublishTrimmed && !ReferenceExeInCode)
+                {
+                    referencedExeResult
+                        .Should()
+                        .Fail()
+                        .And
+                        .HaveStdErrContaining("The application to execute does not exist");
+                }
+                else
+                {
+                    referencedExeResult
+                        .Should()
+                        .Pass()
+                        .And
+                        .HaveStdOut("Referenced project");
+                }
             }
             else
             {
@@ -190,13 +233,13 @@ namespace Microsoft.NET.Build.Tests
             CreateProjects();
 
             //  Reference project which is self-contained for net5.0, not self-contained for net5.0-windows.
-            ReferencedProject.TargetFrameworks = "net5.0;net5.0-windows";
+            ReferencedProject.TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework};{ToolsetInfo.CurrentTargetFramework}-windows";
             ReferencedProject.ProjectChanges.Add(project =>
             {
                 var ns = project.Root.Name.Namespace;
 
                 project.Root.Element(ns + "PropertyGroup")
-                    .Add(XElement.Parse(@"<RuntimeIdentifier Condition=""'$(TargetFramework)' == 'net5.0'"">" + EnvironmentInfo.GetCompatibleRid() + "</RuntimeIdentifier>"));
+                    .Add(XElement.Parse($@"<RuntimeIdentifier Condition=""'$(TargetFramework)' == '{ToolsetInfo.CurrentTargetFramework}'"">" + EnvironmentInfo.GetCompatibleRid() + "</RuntimeIdentifier>"));
             });
 
             RunTest();
@@ -211,13 +254,13 @@ namespace Microsoft.NET.Build.Tests
             CreateProjects();
 
             //  Reference project which is self-contained for net5.0-windows, not self-contained for net5.0.
-            ReferencedProject.TargetFrameworks = "net5.0;net5.0-windows";
+            ReferencedProject.TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework};{ToolsetInfo.CurrentTargetFramework}-windows";
             ReferencedProject.ProjectChanges.Add(project =>
             {
                 var ns = project.Root.Name.Namespace;
 
                 project.Root.Element(ns + "PropertyGroup")
-                    .Add(XElement.Parse(@"<RuntimeIdentifier Condition=""'$(TargetFramework)' == 'net5.0-windows'"">" + EnvironmentInfo.GetCompatibleRid() + "</RuntimeIdentifier>"));
+                    .Add(XElement.Parse($@"<RuntimeIdentifier Condition=""'$(TargetFramework)' == '{ToolsetInfo.CurrentTargetFramework}-windows'"">" + EnvironmentInfo.GetCompatibleRid() + "</RuntimeIdentifier>"));
             });
 
             RunTest("NETSDK1150");
@@ -238,24 +281,19 @@ namespace Microsoft.NET.Build.Tests
             RunTest();
         }
 
-        [Fact]
-        public void ReferencedExeCanRunWhenPublishedWithTrimming()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ReferencedExeCanRunWhenPublishedWithTrimming(bool referenceExeInCode)
         {
             MainSelfContained = true;
             ReferencedSelfContained = true;
 
             TestWithPublish = true;
+            PublishTrimmed = true;
+            ReferenceExeInCode = referenceExeInCode;
 
             CreateProjects();
-
-            if (MainSelfContained)
-            {
-                MainProject.AdditionalProperties["PublishTrimmed"] = "True";
-            }
-            if (ReferencedSelfContained)
-            {
-                ReferencedProject.AdditionalProperties["PublishTrimmed"] = "True";
-            }
 
             RunTest();
         }
@@ -268,7 +306,7 @@ namespace Microsoft.NET.Build.Tests
             var testConsoleProject = new TestProject("ConsoleApp")
             {
                 IsExe = true,
-                TargetFrameworks = "net5.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
             };
 
