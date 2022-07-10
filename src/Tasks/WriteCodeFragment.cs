@@ -54,10 +54,10 @@ namespace Microsoft.Build.Tasks
         /// When it is set to "enable" then do not add the usings that
         /// this normally writes to the output file.
         /// This leverages the full power of what was added in .NET 6+
-        /// called global usings of C# 10 which is specific to C# (I think).
+        /// called global usings of C# 10. Also it leverages the feature
+        /// that existed for a long time in Visual Basic as well.
         /// </summary>
-        [Required]
-        public string ImplicitUsings { get; set; }
+        public string ImplicitUsings { get; set; } = "disable";
 
         /// <summary>
         /// Description of attributes to write.
@@ -188,7 +188,7 @@ namespace Microsoft.Build.Tasks
             // This will be skipped for only a single situation:
             // - When Language is "C#" and sets ImplicitUsings to "enable".
             // Checking only ImplicitUsings is unknown if it works for Visual Basic.
-            if (ImplicitUsings is not "enable")
+            if (ImplicitUsings is "disable" or "false")
             {
                 foreach (string name in NamespaceImports)
                 {
