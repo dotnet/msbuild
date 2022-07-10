@@ -1821,6 +1821,8 @@ Microsoft.Build.Tasks.WriteCodeFragment.AssemblyAttributes.get -> Microsoft.Buil
 Microsoft.Build.Tasks.WriteCodeFragment.AssemblyAttributes.set -> void
 Microsoft.Build.Tasks.WriteCodeFragment.Language.get -> string
 Microsoft.Build.Tasks.WriteCodeFragment.Language.set -> void
+Microsoft.Build.Tasks.WriteCodeFragment.ImplicitUsings.get -> string
+Microsoft.Build.Tasks.WriteCodeFragment.ImplicitUsings.set -> void
 Microsoft.Build.Tasks.WriteCodeFragment.OutputDirectory.get -> Microsoft.Build.Framework.ITaskItem
 Microsoft.Build.Tasks.WriteCodeFragment.OutputDirectory.set -> void
 Microsoft.Build.Tasks.WriteCodeFragment.OutputFile.get -> Microsoft.Build.Framework.ITaskItem
