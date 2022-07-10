@@ -3572,12 +3572,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           Inputs="$(MSBuildAllProjects)"
           Outputs="$(AssemblyAttributesPath)"
           Condition="'@(AssemblyAttributes)' != '' and '$(GenerateAdditionalSources)' == 'true'">
-    <!-- Pass on the implicit usings set by the project on to WriteCodeFragment. -->
+    <!-- A project can opt into implcit usings by setting AssemblyAttributesImplicitUsings to 'enable' or 'true'. -->
     <WriteCodeFragment
           AssemblyAttributes="@(AssemblyAttributes)"
           OutputFile="$(AssemblyAttributesPath)"
           Language="$(Language)"
-          ImplicitUsings="$(ImplicitUsings)">
+          ImplicitUsings="$(AssemblyAttributesImplicitUsings)">
       <Output TaskParameter="OutputFile" ItemName="Compile"/>
       <Output TaskParameter="OutputFile" ItemName="FileWrites"/>
     </WriteCodeFragment>
