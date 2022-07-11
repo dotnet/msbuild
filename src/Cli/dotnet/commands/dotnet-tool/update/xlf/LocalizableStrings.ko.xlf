@@ -52,6 +52,16 @@
         <target state="translated">'{0}' 도구가 '{1}' 버전에서 '{2}' 버전(매니페스트 파일 {3})으로 업데이트되었습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="UpdateSucceededPreVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</source>
+        <target state="new">Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceededStableVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
+        <target state="new">Tool '{0}' was reinstalled with the latest stable version (version '{1}').</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UpdateToLowerVersion">
         <source>The requested version {0} is lower than existing version {1}.</source>
         <target state="translated">요청된 버전 {0}이(가) 기존 버전 {1}보다 낮습니다.</target>
@@ -130,11 +140,6 @@ and the corresponding package Ids for installed tools using the command
 도구가 업데이트되었습니다. 'dotnet tool list' 명령을 사용하여 설치된 도구의 
 도구 이름 및 해당 패키지 ID를
 확인할 수 있습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateSucceededVersionNoChange">
-        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
-        <target state="translated">'{0}' 도구가 안정적인 최신 버전('{1}' 버전)으로 다시 설치되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolFailed">

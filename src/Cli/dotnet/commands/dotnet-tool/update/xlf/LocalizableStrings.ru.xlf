@@ -52,6 +52,16 @@
         <target state="translated">Средство "{0}" обновлено с версии "{1}" до версии "{2}" (файл манифеста {3}).</target>
         <note />
       </trans-unit>
+      <trans-unit id="UpdateSucceededPreVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</source>
+        <target state="new">Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceededStableVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
+        <target state="new">Tool '{0}' was reinstalled with the latest stable version (version '{1}').</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UpdateToLowerVersion">
         <source>The requested version {0} is lower than existing version {1}.</source>
         <target state="translated">Запрошенная версия {0} ниже существующей версии {1}.</target>
@@ -130,11 +140,6 @@ and the corresponding package Ids for installed tools using the command
 от имени средства, используемого при его вызове. Имена средств 
 и соответствующие идентификаторы пакетов для установленных средств можно найти с помощью команды
 "dotnet tool list".</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateSucceededVersionNoChange">
-        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
-        <target state="translated">Инструмент "{0}" был переустановлен с последней стабильной версией (версией "{1}").</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolFailed">

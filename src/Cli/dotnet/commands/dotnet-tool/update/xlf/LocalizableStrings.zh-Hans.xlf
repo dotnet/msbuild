@@ -52,6 +52,16 @@
         <target state="translated">工具“{0}”已成功从版本“{1}”更新到版本“{2}”(清单文件 {3})。</target>
         <note />
       </trans-unit>
+      <trans-unit id="UpdateSucceededPreVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</source>
+        <target state="new">Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceededStableVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
+        <target state="new">Tool '{0}' was reinstalled with the latest stable version (version '{1}').</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UpdateToLowerVersion">
         <source>The requested version {0} is lower than existing version {1}.</source>
         <target state="translated">请求的版本 {0} 低于现有版本 {1}。</target>
@@ -130,11 +140,6 @@ and the corresponding package Ids for installed tools using the command
 与调用工具时使用的工具名称不同。可使用 "dotnet tool list" 命令查找
 已安装工具的工具名称和
 对应的包 ID。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateSucceededVersionNoChange">
-        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
-        <target state="translated">工具“{0}”已重新安装最新稳定版本(版本“{1}”)。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolFailed">
