@@ -13,6 +13,7 @@ using System.Runtime.Loader;
 #endif
 using System.Threading;
 using Microsoft.Build.Eventing;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -354,7 +355,7 @@ namespace Microsoft.Build.Shared
                     return null;
                 });
 
-                return type != null ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly ?? type.Assembly, loadedViaMetadataLoadContext: false) : null;
+                return type != null ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly ?? type.Assembly, typeof(ITaskItem), loadedViaMetadataLoadContext: false) : null;
             }
 
             private LoadedType GetLoadedTypeFromTypeNameUsingMetadataLoadContext(string typeName)
@@ -370,7 +371,7 @@ namespace Microsoft.Build.Shared
                         if (_isDesiredType(publicType, null) && (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(publicType.FullName, typeName)))
                         {
                             MSBuildEventSource.Log.CreateLoadedTypeStart(loadedAssembly.FullName);
-                            LoadedType loadedType = new(publicType, _assemblyLoadInfo, loadedAssembly, loadedViaMetadataLoadContext: true);
+                            LoadedType loadedType = new(publicType, _assemblyLoadInfo, loadedAssembly, _context.LoadFromAssemblyName("Microsoft.Build.Framework").GetType(typeof(ITaskItem).FullName), loadedViaMetadataLoadContext: true);
                             _context?.Dispose();
                             _context = null;
                             MSBuildEventSource.Log.CreateLoadedTypeStop(loadedAssembly.FullName);
