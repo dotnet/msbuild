@@ -1,12 +1,14 @@
 <Project>
 
   <!-- Packages in this file have versions updated periodically by Dependabot.
-       Versions managed by Darc/Maestro should be in ..\Packages.props. -->
+  Versions managed by Darc/Maestro should be in ..\Packages.props.
 
-  <!--
-    Make sure to update the binding redirects (in src\MSBuild\app.config and src\MSBuild\app.amd64.config) for any changes to
-    the list of assemblies redistributed by MSBuild (non-MSBuild assemblies in the .vsix package).
-     -->
+  Make sure to update the binding redirects (in src\MSBuild\app.config and src\MSBuild\app.amd64.config) for any changes to
+  the list of assemblies redistributed by MSBuild (non-MSBuild assemblies in the .vsix package).
+
+  Packages must be set to their package version property if it exists (ex. BenchmarkDotNetVersion) since source-build uses
+  these properties to override package versions if necessary. -->
+
   <ItemGroup>
     <PackageReference Update="BenchmarkDotNet" Version="0.13.1" />
     <PackageReference Update="BenchmarkDotNet" Condition="'$(BenchmarkDotNetVersion)' != ''" Version="$(BenchmarkDotNetVersion)" />
