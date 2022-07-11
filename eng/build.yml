@@ -82,7 +82,7 @@ jobs:
               -prepareMachine
               -ci
               -restore
-              -test
+              $(_Test)
               -projects $(Build.SourcesDirectory)\src\Tests\UnitTests.proj
               /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\TestInHelix.binlog
               /p:_CustomHelixTargetQueue=${{ parameters.helixTargetQueue }}
