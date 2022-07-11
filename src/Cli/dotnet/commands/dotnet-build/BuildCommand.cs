@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System;
 
