@@ -29,13 +29,6 @@ namespace Microsoft.Build.Execution
 
         internal static ServerNamedMutex OpenOrCreateMutex(string name, out bool createdNew)
         {
-            // TODO: verify it is not needed anymore
-            // if (PlatformInformation.IsRunningOnMono)
-            // {
-            //     return new ServerFileMutexPair(name, initiallyOwned: true, out createdNew);
-            // }
-            // else
-
             return new ServerNamedMutex(name, out createdNew);
         }
 
