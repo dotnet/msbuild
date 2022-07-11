@@ -31,7 +31,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = "net5.0-workloadtestplatform"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-workloadtestplatform"
             };
 
             var testAsset = _testAssetsManager
@@ -49,7 +49,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = "net5.0-missingworkloadtestplatform"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-missingworkloadtestplatform"
             };
 
             var testAsset = _testAssetsManager
@@ -69,7 +69,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = "net5.0-missingworkloadtestplatform"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-missingworkloadtestplatform"
             };
 
             var testAsset = _testAssetsManager
@@ -100,7 +100,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = "net5.0-android;net5.0-ios"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-android;{ToolsetInfo.CurrentTargetFramework}-ios"
             };
 
             var testAsset = _testAssetsManager
@@ -127,7 +127,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = "net5.0-android;net5.0-ios"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-android;{ToolsetInfo.CurrentTargetFramework}-ios"
             };
 
             var testAsset = _testAssetsManager
@@ -149,7 +149,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = "net5.0-foo;net5.0-bar"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-foo;{ToolsetInfo.CurrentTargetFramework}-bar"
             };
 
             var testAsset = _testAssetsManager
@@ -170,7 +170,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = "net5.0-workloadtestplatform"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-workloadtestplatform"
             };
 
             var testAsset = _testAssetsManager
@@ -192,7 +192,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = "net5.0"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -218,7 +218,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = "net5.0-workloadtestplatform"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-workloadtestplatform"
             };
 
             var testAsset = _testAssetsManager
@@ -247,7 +247,7 @@ namespace Microsoft.NET.Build.Tests
             var mainProject = new TestProject()
             {
                 Name = "MainProject",
-                TargetFrameworks = "net6.0-android",
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-android",
                 IsSdkProject = true,
                 IsExe = true
             };
@@ -270,10 +270,10 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory(Skip = "https://github.com/dotnet/installer/issues/13361")]
-        [InlineData("net6.0-android;net6.0-ios", "net6.0-android;net6.0-ios", "android;android-aot")]
-        [InlineData("net6.0", "net6.0;net6.0-android;net6.0-ios", "macos;android-aot")]
-        [InlineData("net6.0;net6.0-ios", "net6.0;net6.0-android", "macos;android-aot")]
-        [InlineData("net6.0", "net6.0", "macos")]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework}-android;{ToolsetInfo.CurrentTargetFramework}-ios", $"{ToolsetInfo.CurrentTargetFramework}-android;{ToolsetInfo.CurrentTargetFramework}-ios", "android;android-aot")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, $"{ToolsetInfo.CurrentTargetFramework};{ToolsetInfo.CurrentTargetFramework}-android;{ToolsetInfo.CurrentTargetFramework}-ios", "macos;android-aot")]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework};{ToolsetInfo.CurrentTargetFramework}-ios", $"{ToolsetInfo.CurrentTargetFramework};{ToolsetInfo.CurrentTargetFramework}-android", "macos;android-aot")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, ToolsetInfo.CurrentTargetFramework, "macos")]
         public void Given_multi_target_It_should_get_suggested_workload_by_GetRequiredWorkloads_target(string mainTfm, string referencingTfm, string expected)
         {
             var mainProject = new TestProject()
