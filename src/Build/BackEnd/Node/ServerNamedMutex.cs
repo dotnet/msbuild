@@ -40,21 +40,6 @@ namespace Microsoft.Build.Execution
             return result;
         }
 
-        public bool TryLock(int timeoutMs)
-        {
-            if (IsDisposed)
-            {
-                throw new ObjectDisposedException(nameof(ServerNamedMutex));
-            }
-
-            if (IsLocked)
-            {
-                throw new InvalidOperationException("Lock already held");
-            }
-
-            return IsLocked = _serverMutex.WaitOne(timeoutMs);
-        }
-
         public void Dispose()
         {
             if (IsDisposed)
