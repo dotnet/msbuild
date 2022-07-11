@@ -7,11 +7,6 @@
         <target state="translated"> Roslyn için gereken minimum sürüm “{1}” ve siz Roslyn'in “{0}“ sürümünü kullanıyorsunuz. En son sürümü almak için sdk'yi güncelleyebilirsiniz.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WroteSuppressions">
-        <source>Successfully wrote compatibility suppressions to '{0}'.</source>
-        <target state="translated">Yinelenen uyumluluk uyarıları engellemeleri “{0}” konumuna başarıyla yazıldı.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

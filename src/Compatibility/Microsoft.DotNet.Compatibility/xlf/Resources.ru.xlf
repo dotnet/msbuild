@@ -7,11 +7,6 @@
         <target state="translated"> Минимальная требуемая версия Roslyn — "{1}", а используется "{0}". Обновите пакет SDK, чтобы получить последнюю версию.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WroteSuppressions">
-        <source>Successfully wrote compatibility suppressions to '{0}'.</source>
-        <target state="translated">Подавления совместимости успешно записаны в "{0}".</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

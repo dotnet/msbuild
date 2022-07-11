@@ -1164,9 +1164,14 @@ Hata ayrıntıları:</target>
         <note />
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_FailedDeploy">
-        <source>The attempt to publish the ZIP file through {0} failed with HTTP status code {1}.</source>
-        <target state="translated">ZIP dosyasını {0} aracılığıyla yayımlama girişimi {1} HTTP durum koduyla başarısız oldu.</target>
+        <source>The attempt to publish the ZIP file through '{0}' failed with HTTP status code '{1}'.</source>
+        <target state="new">The attempt to publish the ZIP file through '{0}' failed with HTTP status code '{1}'.</target>
         <note>{0} - URL to deploy zip, {1} - HTTP response code</note>
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_FailedDeployWithLogs">
+        <source>The attempt to publish the ZIP file through '{0}' failed with HTTP status code '{1}'. See the logs at '{2}'.</source>
+        <target state="new">The attempt to publish the ZIP file through '{0}' failed with HTTP status code '{1}'. See the logs at '{2}'.</target>
+        <note>{0} - URL to deploy zip, {1} - HTTP response code, {2} - Logs URL</note>
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_FailedToRetrieveCred">
         <source>Failed to retrieve credentials.</source>

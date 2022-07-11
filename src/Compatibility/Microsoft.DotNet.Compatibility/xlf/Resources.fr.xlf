@@ -7,11 +7,6 @@
         <target state="translated"> La version minimale requise de Roslyn est « {1} » et vous utilisez la version « {0} » du Roslyn. Vous pouvez mettre à jour le kit de développement logiciel (SDK) pour obtenir la version la plus récente.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WroteSuppressions">
-        <source>Successfully wrote compatibility suppressions to '{0}'.</source>
-        <target state="translated">Les suppressions de compatibilité ont été écrites avec succès sur '{0} '.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>
