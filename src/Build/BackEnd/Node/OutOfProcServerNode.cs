@@ -153,10 +153,10 @@ namespace Microsoft.Build.Experimental
             => NamedPipeUtil.GetPlatformSpecificPipeName($"MSBuildServer-{handshake.ComputeHash()}");
 
         internal static string GetRunningServerMutexName(ServerNodeHandshake handshake)
-            => $@"Global\server-running-{handshake.ComputeHash()}";
+            => $@"Global\msbuild-server-running-{handshake.ComputeHash()}";
 
         internal static string GetBusyServerMutexName(ServerNodeHandshake handshake)
-            => $@"Global\server-busy-{handshake.ComputeHash()}";
+            => $@"Global\msbuild-server-busy-{handshake.ComputeHash()}";
 
         #region INodePacketFactory Members
 

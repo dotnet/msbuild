@@ -371,7 +371,7 @@ namespace Microsoft.Build.Experimental
         /// <returns> Whether MSBuild server was started successfully.</returns>
         private bool TryLaunchServer()
         {
-            string serverLaunchMutexName = $@"Global\server-launch-{_handshake.ComputeHash()}";
+            string serverLaunchMutexName = $@"Global\msbuild-server-launch-{_handshake.ComputeHash()}";
             using var serverLaunchMutex = ServerNamedMutex.OpenOrCreateMutex(serverLaunchMutexName, out bool mutexCreatedNew);
             if (!mutexCreatedNew)
             {
