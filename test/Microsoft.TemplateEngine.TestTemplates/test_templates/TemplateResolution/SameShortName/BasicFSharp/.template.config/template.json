@@ -1,0 +1,15 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "Basic FSharp",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.Group1",
+  "precedence": "100",
+  "identity": "TestAssets.DifferentLanguagesGroup.BasicFSharp",
+  "shortName": "basic",
+  "sourceName": "bar",
+  "tags": {
+    "language": "F#",
+    "type": "item"
+  }
+}

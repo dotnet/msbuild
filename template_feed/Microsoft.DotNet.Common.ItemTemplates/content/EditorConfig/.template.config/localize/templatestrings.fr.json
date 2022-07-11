@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "Fichier .editorconfig",
+  "description": "Crée un fichier .editorconfig pour la configuration des préférences de style de code.",
+  "symbols/Empty/displayName": "Vide",
+  "symbols/Empty/description": "Crée un fichier .editorconfig vide au lieu des valeurs par défaut pour .NET."
+}

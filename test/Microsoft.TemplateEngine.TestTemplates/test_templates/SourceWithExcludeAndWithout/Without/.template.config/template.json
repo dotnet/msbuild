@@ -1,0 +1,11 @@
+{
+    "$schema": "http://json.schemastore.org/template",
+    "name": "Basic Template Without Exclude",
+    "identity": "TestAssets.BasicTemplateWithoutExclude",
+    "shortName": "withoutexclude",
+    "author": "",
+    "classifications": [],
+    "tags": {
+        "type": "project"
+    }
+}

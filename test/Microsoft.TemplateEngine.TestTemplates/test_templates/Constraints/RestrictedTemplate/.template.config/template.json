@@ -1,0 +1,22 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "Constraints - Restricted Template",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "Constraints.RestrictedTemplate",
+  "precedence": "100",
+  "identity": "Constraints.RestrictedTemplate",
+  "shortName": "Constraints.RestrictedTemplate",
+  "sourceName": "bar",
+  "constraints": {
+    "host-restriction": {
+      "type": "host",
+      "args": [
+        {
+          "hostname": "do-not-exist",
+          "version": "(1.0, )"
+        }
+      ]
+    }
+  }
+}

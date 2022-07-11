@@ -1,0 +1,36 @@
+{
+    "author": "Test Asset",
+    "classifications": [ "Test Asset" ],
+    "name": "TestAssets.PostActions.RestoreNuGet.TwoProjectsFiles",
+    "generatorVersions": "[1.0.0.0-*)",
+    "groupIdentity": "TestAssets.PostActions.RestoreNuGet.TwoProjectsFiles",
+    "precedence": "100",
+    "identity": "TestAssets.PostActions.RestoreNuGet.TwoProjectsFiles",
+    "shortName": "TestAssets.PostActions.RestoreNuGet.TwoProjectsFiles",
+    "sourceName": "MyTestProject",
+    "sources": [
+        {
+            "source": "./Custom/MyTestProject/",
+            "target": "./src/MyTestProject/"
+        },
+        {
+            "source": "./Custom/MyTestProject.Tests/",
+            "target": "./test/MyTestProject.Tests/"
+        }
+    ],
+    "primaryOutputs": [
+        {
+            "path": "./src/MyTestProject/MyTestProject.csproj"
+        }
+    ],
+    "postActions": [
+        {
+            "description": "Restore NuGet packages required by this project.",
+            "manualInstructions": [
+                { "text": "Run 'dotnet restore'" }
+            ],
+            "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+            "continueOnError": true
+        }
+    ]
+}

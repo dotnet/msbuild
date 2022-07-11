@@ -1,0 +1,19 @@
+﻿#include "stdafx.h"
+#include <string>
+#include <iostream>
+
+class DefaultTrueIncluded { }
+
+#if defaultTrue
+class InsideUnknownDirectiveNoEmit { }
+#endif
+
+class DefaultFalseIncluded { }
+
+// Without noEmit the following line will be emitted
+//-:cnd
+#if defaultFalse
+class InsideUnknownDirectiveEmit { }
+#endif
+//+:cnd
+

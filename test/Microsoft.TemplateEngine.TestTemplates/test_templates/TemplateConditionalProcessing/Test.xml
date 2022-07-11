@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dependencies>
+    <!--#if defaultTrue-->
+    <Dependency Name="DefaultTrueIncluded" label="CommentLine"></Dependency>
+    <!--#else-->
+    <Dependency Name="DefaultTrueExcluded" label="CommentLine"></Dependency>
+    <!--#endif-->
+    <!--#if defaultFalse-->
+    <Dependency Name="DefaultFalseExcluded" label="CommentLine"></Dependency>
+    <!--#else-->
+    <Dependency Name="DefaultFalseIncluded" label="CommentLine"></Dependency>
+    <!--#endif-->
+    <!--#if defaultTrue
+    <Dependency Name="DefaultTrueIncluded" label="commentBlock"></Dependency>
+    #else
+    <Dependency Name="DefaultTrueExcluded" label="commentBlock"></Dependency>
+    #endif-->
+    <!--#if defaultFalse
+    <Dependency Name="DefaultFalseExcluded" label="commentBlock"></Dependency>
+    #else
+    <Dependency Name="DefaultFalseIncluded" label="commentBlock"></Dependency>
+    #endif-->
+</Dependencies>

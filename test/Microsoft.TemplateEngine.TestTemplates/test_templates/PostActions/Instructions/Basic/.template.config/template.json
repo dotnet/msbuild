@@ -1,0 +1,27 @@
+{
+    "author": "Test Asset",
+    "classifications": [ "Test Asset" ],
+    "name": "TestAssets.PostActions.Instructions.Basic",
+    "generatorVersions": "[1.0.0.0-*)",
+    "groupIdentity": "TestAssets.PostActions.Instructions.Basic",
+    "precedence": "100",
+    "identity": "TestAssets.PostActions.Instructions.Basic",
+    "shortName": "TestAssets.PostActions.Instructions.Basic",
+    "sourceName": "Basic",
+    "postActions": [
+        {
+            "description": "Manual actions needed",
+            "manualInstructions": [
+                {
+                    "text": "Run the following command:"
+                }
+            ],
+            "actionId": "AC1156F7-BB77-4DB8-B28F-24EEBCCA1E5C",
+            "args": {
+                "executable": "setup.cmd",
+                "args": "<your project name>"
+            },
+            "continueOnError": true
+        }
+    ]
+}

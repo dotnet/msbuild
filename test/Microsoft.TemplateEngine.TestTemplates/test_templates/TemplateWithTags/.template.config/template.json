@@ -1,0 +1,15 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithTags",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithTags",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithTags",
+  "shortName": "TestAssets.TemplateWithTags",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "bar"
+}

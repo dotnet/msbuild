@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "EditorConfig ファイル",
+  "description": "コード スタイルの基本設定を構成するための .editorconfig ファイルを作成します。",
+  "symbols/Empty/displayName": "なし",
+  "symbols/Empty/description": ".NET の既定値の代わりに、空の .editorconfig を作成します。"
+}
