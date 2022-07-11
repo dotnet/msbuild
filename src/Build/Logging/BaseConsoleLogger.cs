@@ -123,6 +123,10 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <remarks>Uses CurrentCulture for display purposes</remarks>
         internal class DictionaryEntryKeyComparer : IComparer<DictionaryEntry>
         {
+            public static DictionaryEntryKeyComparer Instance { get; } = new();
+
+            private DictionaryEntryKeyComparer() { }
+
             public int Compare(DictionaryEntry a, DictionaryEntry b)
             {
                 return string.Compare((string) a.Key, (string) b.Key, StringComparison.CurrentCultureIgnoreCase);
@@ -561,7 +565,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             Internal.Utilities.EnumerateProperties(properties, kvp => list.Add(new DictionaryEntry(kvp.Key, kvp.Value)));
 
-            list.Sort(new DictionaryEntryKeyComparer());
+            list.Sort(DictionaryEntryKeyComparer.Instance);
             return list;
         }
 
