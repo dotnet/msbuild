@@ -516,27 +516,7 @@ namespace Microsoft.Build.Experimental
         {
             try
             {
-                _nodeStream.Connect(timeout);
-
-                int[] handshakeComponents = _handshake.RetrieveHandshakeComponents();
-                for (int i = 0; i < handshakeComponents.Length; i++)
-                {
-                    CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", i, handshakeComponents[i], _pipeName);
-                    _nodeStream.WriteIntForHandshake(handshakeComponents[i]);
-                }
-
-                // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
-                _nodeStream.WriteEndOfHandshakeSignal();
-
-                CommunicationsUtilities.Trace("Reading handshake from pipe {0}", _pipeName);
-
-#if NETCOREAPP2_1_OR_GREATER || MONO
-                _nodeStream.ReadEndOfHandshakeSignal(false, 1000);
-#else
-                _nodeStream.ReadEndOfHandshakeSignal(false);
-#endif
-
-                CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", _pipeName);
+                NodeProviderOutOfProcBase.ConnectToPipeStream(_nodeStream, _pipeName, _handshake, timeout);
             }
             catch (Exception ex)
             {
