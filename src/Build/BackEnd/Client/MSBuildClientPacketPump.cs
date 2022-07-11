@@ -68,6 +68,8 @@ namespace Microsoft.Build.BackEnd.Client
 
         public MSBuildClientPacketPump(Stream stream)
         {
+            ErrorUtilities.VerifyThrowArgumentNull(stream, nameof(stream));
+
             _stream = stream;
             _packetFactory = new NodePacketFactory();
 
