@@ -18,4 +18,4 @@ Microsoft.Build.Experimental.OutOfProcServerNode
 Microsoft.Build.Experimental.OutOfProcServerNode.BuildCallback
 Microsoft.Build.Experimental.OutOfProcServerNode.OutOfProcServerNode(Microsoft.Build.Experimental.OutOfProcServerNode.BuildCallback buildFunction) -> void
 Microsoft.Build.Experimental.OutOfProcServerNode.Run(out System.Exception shutdownException) -> Microsoft.Build.Execution.NodeEngineShutdownReason
-Microsoft.Build.Execution.HostServices.RegisterHostObject(string projectFile, string targetName, string taskName, string monikerName) -> void
+
