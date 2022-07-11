@@ -90,7 +90,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Clean up static web assets from existing item groups -->
 
     <ReadStaticWebAssetsManifestFile
-      Condition="'$(StaticWebAssetBuildManifestPath)' != ''"
+      Condition="'$(StaticWebAssetBuildManifestPath)' != '' and Exists('$(StaticWebAssetBuildManifestPath)')"
       ManifestPath="$(StaticWebAssetBuildManifestPath)">
       <Output TaskParameter="Assets" ItemName="_CachedBuildStaticWebAssets" />
     </ReadStaticWebAssetsManifestFile>
@@ -103,7 +103,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Add assets as content items to be packed -->
     
     <StaticWebAssetsReadPackManifest
-      Condition="'$(StaticWebAssetPackManifestPath)' != ''"
+      Condition="'$(StaticWebAssetPackManifestPath)' != '' and Exists('$(StaticWebAssetPackManifestPath)')"
       ManifestPath="$(StaticWebAssetPackManifestPath)"
     >
       <Output TaskParameter="Files" ItemName="_StaticWebAssetsFilesToPack" />
