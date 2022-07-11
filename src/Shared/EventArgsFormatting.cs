@@ -53,11 +53,10 @@ namespace Microsoft.Build.Shared
         /// <param name="e">Message to format</param>
         /// <param name="showProjectFile"><code>true</code> to show the project file which issued the event, otherwise <code>false</code>.</param>
         /// <param name="projectConfigurationDescription">Properties to Print along with message</param>
-        /// <param name="nonNullMessage">The complete message (including property name) for an environment-derived property</param>
         /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildMessageEventArgs e, bool showProjectFile, string projectConfigurationDescription, string nonNullMessage = null)
+        internal static string FormatEventMessage(BuildMessageEventArgs e, bool showProjectFile, string projectConfigurationDescription)
         {
-            return FormatEventMessage("message", e.Subcategory, nonNullMessage ?? e.Message,
+            return FormatEventMessage("message", e.Subcategory, e.Message,
                             e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
                             e.ColumnNumber, e.EndColumnNumber, e.ThreadId, projectConfigurationDescription);
         }
@@ -145,14 +144,13 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="e">Message to format</param>
         /// <param name="showProjectFile">Show project file or not</param>
-        /// <param name="nonNullMessage">For an EnvironmentVariableReadEventArgs, adds an explanatory note and the name of the variable.</param>
         /// <returns>The formatted message string.</returns>
-        internal static string FormatEventMessage(BuildMessageEventArgs e, bool showProjectFile, string nonNullMessage = null)
+        internal static string FormatEventMessage(BuildMessageEventArgs e, bool showProjectFile)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
             // "message" should not be localized
-            return FormatEventMessage("message", e.Subcategory, nonNullMessage ?? e.Message,
+            return FormatEventMessage("message", e.Subcategory, e.Message,
                 e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber, e.ColumnNumber, e.EndColumnNumber, e.ThreadId, null);
         }
 

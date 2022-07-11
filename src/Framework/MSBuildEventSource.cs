@@ -624,15 +624,39 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(85, Keywords = Keywords.All)]
-        public void MSBuildServerBuildStart(string commandLine)
+        public void CreateLoadedTypeStart(string assemblyName)
         {
-            WriteEvent(85, commandLine);
+            WriteEvent(85, assemblyName);
         }
 
         [Event(86, Keywords = Keywords.All)]
+        public void CreateLoadedTypeStop(string assemblyName)
+        {
+            WriteEvent(86, assemblyName);
+        }
+
+        [Event(87, Keywords = Keywords.All)]
+        public void LoadAssemblyAndFindTypeStart()
+        {
+            WriteEvent(87);
+        }
+
+        [Event(88, Keywords = Keywords.All)]
+        public void LoadAssemblyAndFindTypeStop(string assemblyPath, int numberOfPublicTypesSearched)
+        {
+            WriteEvent(88, assemblyPath, numberOfPublicTypesSearched);
+        }
+        
+        [Event(89, Keywords = Keywords.All)]
+        public void MSBuildServerBuildStart(string commandLine)
+        {
+            WriteEvent(89, commandLine);
+        }
+
+        [Event(90, Keywords = Keywords.All)]
         public void MSBuildServerBuildStop(string commandLine, int countOfConsoleMessages, long sumSizeOfConsoleMessages, string clientExitType, string serverExitType)
         {
-            WriteEvent(86, commandLine, countOfConsoleMessages, sumSizeOfConsoleMessages, clientExitType, serverExitType);
+            WriteEvent(90, commandLine, countOfConsoleMessages, sumSizeOfConsoleMessages, clientExitType, serverExitType);
         }
         #endregion
     }

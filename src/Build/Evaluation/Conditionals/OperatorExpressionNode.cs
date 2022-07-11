@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Microsoft.Build.BackEnd.Logging;
 
 #nullable disable
 
@@ -13,21 +12,21 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal abstract class OperatorExpressionNode : GenericExpressionNode
     {
-        internal override bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result, LoggingContext loggingContext = null)
+        internal override bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result)
         {
-            result = BoolEvaluate(state, loggingContext);
+            result = BoolEvaluate(state);
             return true;
         }
 
-        internal abstract bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null);
+        internal abstract bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state);
 
-        internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result, LoggingContext loggingContext = null)
+        internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result)
         {
             result = default;
             return false;
         }
 
-        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result, LoggingContext loggingContext = null)
+        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result)
         {
             result = default;
             return false;
@@ -37,7 +36,7 @@ namespace Microsoft.Build.Evaluation
         /// Value after any item and property expressions are expanded
         /// </summary>
         /// <returns></returns>
-        internal override string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
+        internal override string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state)
         {
             return null;
         }
