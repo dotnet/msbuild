@@ -1975,7 +1975,7 @@ namespace Microsoft.Build.Execution
             var finishedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes.Count);
             var buildingNodes = new Dictionary<BuildSubmission, ProjectGraphNode>();
             var resultsPerNode = new Dictionary<ProjectGraphNode, BuildResult>(projectGraph.ProjectNodes.Count);
-            Exception submissionException = null;
+            ExceptionDispatchInfo submissionException = null;
 
             while (blockedNodes.Count > 0 || buildingNodes.Count > 0)
             {
@@ -1985,7 +1985,7 @@ namespace Microsoft.Build.Execution
                 // Observe them here to keep the same exception flow with the case when there's no plugins and ExecuteSubmission(BuildSubmission) does not run on a separate thread.
                 if (submissionException != null)
                 {
-                    throw submissionException;
+                    submissionException.Throw();
                 }
 
                 lock (graphBuildStateLock)
@@ -2026,7 +2026,8 @@ namespace Microsoft.Build.Execution
                             {
                                 if (submissionException == null && finishedBuildSubmission.BuildResult.Exception != null)
                                 {
-                                    submissionException = finishedBuildSubmission.BuildResult.Exception;
+                                    // Preserve the original stack.
+                                    submissionException = ExceptionDispatchInfo.Capture(finishedBuildSubmission.BuildResult.Exception);
                                 }
 
                                 ProjectGraphNode finishedNode = buildingNodes[finishedBuildSubmission];

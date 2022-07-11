@@ -131,7 +131,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Returns a default invalid BuildEventContext
         /// </summary>
-        public static BuildEventContext Invalid => new BuildEventContext(InvalidNodeId, InvalidTargetId, InvalidProjectContextId, InvalidTaskId);
+        public static BuildEventContext Invalid { get; } = new BuildEventContext(InvalidNodeId, InvalidTargetId, InvalidProjectContextId, InvalidTaskId);
 
         /// <summary>
         /// Retrieves the Evaluation id.
