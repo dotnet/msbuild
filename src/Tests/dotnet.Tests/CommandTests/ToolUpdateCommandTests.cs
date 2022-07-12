@@ -8,6 +8,7 @@ using Microsoft.DotNet.Tools.Tool.Update;
 using Xunit;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Update.LocalizableStrings;
 using Microsoft.NET.TestFramework.Utilities;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using Parser = Microsoft.DotNet.Cli.Parser;
 

@@ -7,6 +7,7 @@ using System.IO;
 using System.Collections.Generic;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Cli.Telemetry;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 
 namespace Microsoft.DotNet.Cli

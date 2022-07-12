@@ -6,6 +6,7 @@ using FluentAssertions;
 using Microsoft.DotNet.NugetSearch;
 using Xunit;
 using Microsoft.DotNet.Cli.Utils;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using Parser = Microsoft.DotNet.Cli.Parser;
 

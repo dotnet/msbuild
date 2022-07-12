@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli;
