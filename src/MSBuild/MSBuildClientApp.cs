@@ -74,7 +74,8 @@ namespace Microsoft.Build.CommandLine
             MSBuildClientExitResult exitResult = msbuildClient.Execute(cancellationToken);
 
             if (exitResult.MSBuildClientExitType == MSBuildClientExitType.ServerBusy ||
-                exitResult.MSBuildClientExitType == MSBuildClientExitType.ConnectionError)
+                exitResult.MSBuildClientExitType == MSBuildClientExitType.UnableToConnect ||
+                exitResult.MSBuildClientExitType == MSBuildClientExitType.LaunchError)
             {
                 // Server is busy, fallback to old behavior.
                 return MSBuildApp.Execute(commandLine);

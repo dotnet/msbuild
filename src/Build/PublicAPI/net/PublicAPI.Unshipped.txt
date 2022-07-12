@@ -9,10 +9,10 @@ Microsoft.Build.Experimental.MSBuildClientExitResult.MSBuildClientExitResult() -
 Microsoft.Build.Experimental.MSBuildClientExitResult.MSBuildClientExitType.get -> Microsoft.Build.Experimental.MSBuildClientExitType
 Microsoft.Build.Experimental.MSBuildClientExitResult.MSBuildClientExitType.set -> void
 Microsoft.Build.Experimental.MSBuildClientExitType
-Microsoft.Build.Experimental.MSBuildClientExitType.ConnectionError = 2 -> Microsoft.Build.Experimental.MSBuildClientExitType
 Microsoft.Build.Experimental.MSBuildClientExitType.LaunchError = 3 -> Microsoft.Build.Experimental.MSBuildClientExitType
 Microsoft.Build.Experimental.MSBuildClientExitType.ServerBusy = 1 -> Microsoft.Build.Experimental.MSBuildClientExitType
 Microsoft.Build.Experimental.MSBuildClientExitType.Success = 0 -> Microsoft.Build.Experimental.MSBuildClientExitType
+Microsoft.Build.Experimental.MSBuildClientExitType.UnableToConnect = 2 -> Microsoft.Build.Experimental.MSBuildClientExitType
 Microsoft.Build.Experimental.MSBuildClientExitType.Unexpected = 4 -> Microsoft.Build.Experimental.MSBuildClientExitType
 Microsoft.Build.Experimental.OutOfProcServerNode
 Microsoft.Build.Experimental.OutOfProcServerNode.BuildCallback

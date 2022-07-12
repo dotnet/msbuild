@@ -9,15 +9,15 @@ namespace Microsoft.Build.Experimental
         /// </summary>
         Success,
         /// <summary>
-        /// Server is busy.
+        /// Server is busy. This would invoke a fallback behavior.
         /// </summary>
         ServerBusy,
         /// <summary>
-        /// Client was unable to connect to the server.
+        /// Client was unable to connect to the server. This would invoke a fallback behavior.
         /// </summary>
-        ConnectionError,
+        UnableToConnect,
         /// <summary>
-        /// Client was unable to launch the server.
+        /// Client was unable to launch the server. This would invoke a fallback behavior.
         /// </summary>
         LaunchError,
         /// <summary>
