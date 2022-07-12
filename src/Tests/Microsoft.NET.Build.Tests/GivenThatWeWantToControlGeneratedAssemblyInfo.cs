@@ -97,7 +97,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ProjectWithSourceRevisionId",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -114,7 +114,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ProjectWithSourceRevisionId",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -145,7 +145,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ProjectWithSourceRevisionId",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -177,7 +177,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ProjectWithSourceRevisionId",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -213,7 +213,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ProjectWithSourceRevisionId",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -245,7 +245,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [WindowsOnlyTheory]
-        [InlineData("netcoreapp2.1")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         [InlineData("net45")]
         public void It_respects_version_prefix(string targetFramework)
         {
@@ -273,7 +273,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [WindowsOnlyTheory]
-        [InlineData("netcoreapp2.1")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         [InlineData("net45")]
         public void It_respects_version_changes_on_incremental_build(string targetFramework)
         {
@@ -661,14 +661,14 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WebApp",
-                TargetFrameworks = "netcoreapp3.0"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
             testProject.FrameworkReferences.Add("Microsoft.AspNetCore.App");
 
             var testTestProject = new TestProject()
             {
                 Name = "WebAppTests",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 ReferencedProjects = { testProject }
             };
 
@@ -702,7 +702,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "RepoUrlProject",
-                TargetFrameworks = "netcoreapp3.1"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
 
             if (privateRepo)
@@ -720,7 +720,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
-            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netcoreapp3.1").FullName, testProject.Name + ".dll");
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(testProject.TargetFrameworks).FullName, testProject.Name + ".dll");
 
             AssemblyInfo.Get(assemblyPath)["AssemblyMetadataAttribute"].Should().Be("RepositoryUrl:" + fakeUrl);
         }
@@ -728,7 +728,7 @@ namespace Microsoft.NET.Build.Tests
         [Theory]
         [InlineData("net40", false)]
         [InlineData("net45", true)]
-        [InlineData("netcoreapp2.1", true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, true)]
         public void It_does_not_write_to_undefined_assembly_metadata_attribute(string targetFramework, bool containsAttribute)
         {
             var fakeUrl = "fakeUrl";

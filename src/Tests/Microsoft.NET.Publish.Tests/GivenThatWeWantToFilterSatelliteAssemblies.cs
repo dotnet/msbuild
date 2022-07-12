@@ -22,7 +22,7 @@ namespace Microsoft.NET.Publish.Tests
 
         [Theory]
         [InlineData("netcoreapp2.0")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
 
         public void It_only_publishes_selected_ResourceLanguages(string tfm)
         {
@@ -55,7 +55,7 @@ namespace Microsoft.NET.Publish.Tests
                 $"{testProject.Name}.runtimeconfig.json"
             };
 
-            if (tfm == "netcoreapp3.0")
+            if (tfm == ToolsetInfo.CurrentTargetFramework)
             {
                 files.Add($"{testProject.Name}{Constants.ExeSuffix}");
             }
@@ -68,7 +68,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "PublishSatelliteAssemblies",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
             };
 
@@ -97,7 +97,8 @@ namespace Microsoft.NET.Publish.Tests
                 $"{testProject.Name}.dll",
                 $"{testProject.Name}.pdb",
                 $"{testProject.Name}.deps.json",
-                $"{testProject.Name}.runtimeconfig.json"
+                $"{testProject.Name}.runtimeconfig.json",
+                $"{testProject.Name}{EnvironmentInfo.ExecutableExtension}"
             });
         }
     }

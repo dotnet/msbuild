@@ -52,9 +52,9 @@ Options:
 
         readonly string[] FrameworkNet451Args = new[] { "-f", "net451" };
         const string ConditionFrameworkNet451 = "== 'net451'";
-        readonly string[] FrameworkNetCoreApp10Args = new[] { "-f", "netcoreapp1.0" };
-        const string ConditionFrameworkNetCoreApp10 = "== 'netcoreapp1.0'";
-        static readonly string[] DefaultFrameworks = new string[] { "netcoreapp1.0", "net451" };
+        readonly string[] CurrentFramework = new[] { "-f", ToolsetInfo.CurrentTargetFramework };
+        const string ConditionCurrentFramework = $"== '{ToolsetInfo.CurrentTargetFramework}'";
+        static readonly string[] DefaultFrameworks = new string[] { ToolsetInfo.CurrentTargetFramework, "net451" };
 
         public GivenDotnetRemoveReference(ITestOutputHelper log) : base(log)
         {
@@ -199,10 +199,10 @@ Options:
             string brokenFolder = Path.Combine(setup.TestRoot, "Broken");
             Directory.CreateDirectory(brokenFolder);
             string brokenProjectPath = Path.Combine(brokenFolder, "Broken.csproj");
-            File.WriteAllText(brokenProjectPath, @"<Project Sdk=""Microsoft.NET.Sdk"" ToolsVersion=""15.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+            File.WriteAllText(brokenProjectPath, $@"<Project Sdk=""Microsoft.NET.Sdk"" ToolsVersion=""15.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
     <PropertyGroup>
         <OutputType>Library</OutputType>
-        <TargetFrameworks>net451;netcoreapp2.1</TargetFrameworks>
+        <TargetFrameworks>net451;{ToolsetInfo.CurrentTargetFramework}</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
@@ -394,11 +394,11 @@ Options:
             var setup = Setup();
             var lib = NewLibWithFrameworks(setup.TestRoot);
             var librefCondNet451 = AddLibRef(setup, lib, FrameworkNet451Args);
-            var librefCondNetCoreApp10 = AddLibRef(setup, lib, FrameworkNetCoreApp10Args);
+            var librefCondNetCoreApp10 = AddLibRef(setup, lib, CurrentFramework);
 
             var csprojBefore = lib.CsProj();
             int condNet451Before = csprojBefore.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
-            int condNetCoreApp10Before = csprojBefore.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNetCoreApp10);
+            int condNetCoreApp10Before = csprojBefore.NumberOfItemGroupsWithConditionContaining(ConditionCurrentFramework);
             var cmd = new RemoveReferenceCommand(Log)
                 .WithProject(lib.CsProjPath)
                 .WithWorkingDirectory(setup.TestRoot)
@@ -409,8 +409,8 @@ Options:
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condNet451Before - 1);
             csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(librefCondNet451.Name, ConditionFrameworkNet451).Should().Be(0);
 
-            csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNetCoreApp10).Should().Be(condNetCoreApp10Before);
-            csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(librefCondNetCoreApp10.Name, ConditionFrameworkNetCoreApp10).Should().Be(1);
+            csproj.NumberOfItemGroupsWithConditionContaining(ConditionCurrentFramework).Should().Be(condNetCoreApp10Before);
+            csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(librefCondNetCoreApp10.Name, ConditionCurrentFramework).Should().Be(1);
         }
 
         [Fact]

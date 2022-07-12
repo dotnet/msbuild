@@ -57,6 +57,11 @@
         <target state="translated">Dokument předčasně ukončen</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidManifestVersion">
+        <source>Invalid version: {0}</source>
+        <target state="translated">Neplatná verze: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
         <target state="translated">Nebyla nalezena závislost manifestu úlohy {0} požadovaná manifestem {1} [{2}].</target>

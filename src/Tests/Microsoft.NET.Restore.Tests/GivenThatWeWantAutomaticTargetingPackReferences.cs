@@ -70,7 +70,7 @@ namespace Microsoft.NET.Restore.Tests
             var testProject = new TestProject()
             {
                 Name = "ProjectWithoutTargetingPackRef",
-                TargetFrameworks = "net471;net472;netcoreapp3.0",
+                TargetFrameworks = $"net471;net472;{ToolsetInfo.CurrentTargetFramework}",
             };
 
             TestAsset testAsset = null;

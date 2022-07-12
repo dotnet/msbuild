@@ -4,6 +4,7 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.DotNet.Workloads.Workload.Repair;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.Repair.LocalizableStrings;
 
@@ -11,11 +12,11 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class WorkloadRepairCommandParser
     {
-        public static readonly Option<string> ConfigOption = WorkloadInstallCommandParser.ConfigOption;
+        public static readonly Option<string> ConfigOption = InstallingWorkloadCommandParser.ConfigOption;
 
-        public static readonly Option<string[]> SourceOption = WorkloadInstallCommandParser.SourceOption;
+        public static readonly Option<string[]> SourceOption = InstallingWorkloadCommandParser.SourceOption;
 
-        public static readonly Option<string> VersionOption = WorkloadInstallCommandParser.VersionOption;
+        public static readonly Option<string> VersionOption = InstallingWorkloadCommandParser.VersionOption;
 
         private static readonly Command Command = ConstructCommand();
 
@@ -33,6 +34,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(SourceOption);
             command.AddOption(CommonOptions.VerbosityOption);
             command.AddWorkloadCommandNuGetRestoreActionConfigOptions();
+            command.AddOption(WorkloadInstallCommandParser.SkipSignCheckOption);
 
             command.SetHandler((parseResult) => new WorkloadRepairCommand(parseResult).Execute());
 

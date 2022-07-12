@@ -54,11 +54,9 @@ Commands:
 
         const string FrameworkNet451 = "net451";
         const string ConditionFrameworkNet451 = "== 'net451'";
-        const string FrameworkNetCoreApp10 = "netcoreapp1.0";
-        const string ConditionFrameworkNetCoreApp10 = "== 'netcoreapp1.0'";
         static readonly string ProjectNotCompatibleErrorMessageRegEx = string.Format(CommonLocalizableStrings.ProjectNotCompatibleWithFrameworks, "[^`]*");
         static readonly string ProjectDoesNotTargetFrameworkErrorMessageRegEx = string.Format(CommonLocalizableStrings.ProjectDoesNotTargetFramework, "[^`]*", "[^`]*");
-        static readonly string[] DefaultFrameworks = new string[] { "netcoreapp1.0", "net451" };
+        static readonly string[] DefaultFrameworks = new string[] { ToolsetInfo.CurrentTargetFramework, "net451" };
 
         public GivenDotnetAddReference(ITestOutputHelper log) : base(log)
         {
@@ -166,10 +164,10 @@ Commands:
             string brokenFolder = Path.Combine(setup.TestRoot, "Broken");
             Directory.CreateDirectory(brokenFolder);
             string brokenProjectPath = Path.Combine(brokenFolder, "Broken.csproj");
-            File.WriteAllText(brokenProjectPath, @"<Project Sdk=""Microsoft.NET.Sdk"" ToolsVersion=""15.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+            File.WriteAllText(brokenProjectPath, $@"<Project Sdk=""Microsoft.NET.Sdk"" ToolsVersion=""15.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
     <PropertyGroup>
         <OutputType>Library</OutputType>
-        <TargetFrameworks>net451;netcoreapp2.1</TargetFrameworks>
+        <TargetFrameworks>net451;{ToolsetInfo.CurrentTargetFramework}</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
@@ -323,7 +321,7 @@ Commands:
 
             new DotnetCommand(Log, "add", lib.CsProjPath, "reference")
                 .WithWorkingDirectory(setup.TestRoot)
-                .Execute("-f", FrameworkNetCoreApp10, setup.ValidRefCsprojPath)
+                .Execute("-f", ToolsetInfo.CurrentTargetFramework, setup.ValidRefCsprojPath)
                 .Should().Pass();
 
             int condBefore = lib.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
@@ -676,7 +674,7 @@ Commands:
         [Theory]
         [InlineData("net45")]
         [InlineData("net40")]
-        [InlineData("netcoreapp1.1")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         [InlineData("nonexistingframeworkname")]
         public void WhenFrameworkSwitchIsNotMatchingAnyOfTargetedFrameworksItPrintsError(string framework)
         {

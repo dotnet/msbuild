@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AdManifestPackageDoesNotExist">
-        <source>Failed to update advertising manifest. Manifest package {0} doesn't exist.</source>
-        <target state="translated">広告マニフェストを更新できませんでした。{0} 向けマニフェスト パッケージが存在しません。</target>
+        <source>Advertising manifest not updated. Manifest package for {0} doesn't exist.</source>
+        <target state="translated">広告マニフェストが更新されません。{0} 向けマニフェスト パッケージが存在しません。</target>
         <note />
       </trans-unit>
       <trans-unit id="AdManifestUpdated">
@@ -47,6 +47,11 @@
         <target state="translated">パック {0} のバージョン {1} をオフライン キャッシュ {2} にダウンロードしています...</target>
         <note />
       </trans-unit>
+      <trans-unit id="ExpectedSingleManifest">
+        <source>Expected single manifest feature band and manifest folder in MSI from package {0}</source>
+        <target state="translated">パッケージ {0} からの MSI に 1 つのマニフェスト機能バンドとマニフェスト フォルダーが必要です</target>
+        <note />
+      </trans-unit>
       <trans-unit id="FailedAdManifestUpdate">
         <source>Failed to update the advertising manifest {0}: {1}.</source>
         <target state="translated">広告マニフェスト {0} を更新できませんでした: {1}。</target>
@@ -55,6 +60,11 @@
       <trans-unit id="FailedToDownloadPackageManifest">
         <source>Failed to download manifest package {0}.</source>
         <target state="translated">マニフェスト パッケージ {0} をダウンロードできませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToExtractMsi">
+        <source>Failed to extract information from MSI: {0}</source>
+        <target state="translated">MSI から情報を抽出できませんでした: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToGetPackageManifestUrl">
@@ -122,6 +132,11 @@
         <target state="translated">サーバーを起動するための十分な特権がありません。</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">ワークロード マニフェスト ID '{0}' のバージョン '{1}' の解析でエラーが発生しました</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
         <source>The settings file in the workload's NuGet package is invalid: {0}</source>
         <target state="translated">ワークロードの NuGet パッケージ内の設定ファイルが無効です: {0}</target>
@@ -145,6 +160,11 @@
       <trans-unit id="ManifestDoesNotExist">
         <source>No manifest with ID {0} exists.</source>
         <target state="translated">ID を持つ {0} マニフェストが存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestMsiNotFoundInNuGetPackage">
+        <source>Manifest MSI not found in NuGet package {0}</source>
+        <target state="translated">NuGet パッケージ {0} にマニフェスト MSI が見つかりません</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">

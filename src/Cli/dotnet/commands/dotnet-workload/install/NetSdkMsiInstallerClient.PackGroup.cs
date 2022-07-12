@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
@@ -66,10 +67,21 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             return ret;
         }
-
-        List<AcquirableMsi> GetMsisToInstall(IEnumerable<PackInfo> packInfos)
+        List<WorkloadDownload> GetMsisForWorkloads(IEnumerable<WorkloadId> workloads)
         {
-            List<AcquirableMsi> msisToInstall = new();
+            var packs = workloads
+                .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId))
+                .Distinct()
+                .Select(packId => _workloadResolver.TryGetPackInfo(packId))
+                .Where(pack => pack != null);
+
+            return GetMsisForPacks(packs);
+        }
+
+
+        List<WorkloadDownload> GetMsisForPacks(IEnumerable<PackInfo> packInfos)
+        {
+            List<WorkloadDownload> msisToInstall = new();
             HashSet<(string packId, string packVersion)> packsProcessed = new();
 
             var groupsForPacks = GetWorkloadPackGroups();
@@ -84,7 +96,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 if (groupsForPacks.TryGetValue((pack.Id, pack.Version), out var groups))
                 {
                     var group = groups.First();
-                    msisToInstall.Add(new AcquirableMsi($"{group.GroupPackageId}.Msi.{HostArchitecture}", group.GroupPackageVersion));
+                    msisToInstall.Add(new WorkloadDownload(group.GroupPackageId, $"{group.GroupPackageId}.Msi.{HostArchitecture}", group.GroupPackageVersion));
                     foreach (var packFromGroup in group.Packs)
                     {
                         packsProcessed.Add((packFromGroup.PackId, packFromGroup.PackVersion));
@@ -92,7 +104,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 }
                 else
                 {
-                    msisToInstall.Add(AcquirableMsi.FromPackInfo(pack));
+                    msisToInstall.Add(GetWorkloadDownloadForPack(pack));
                     packsProcessed.Add((pack.Id, pack.Version));
                 }
             }
@@ -100,25 +112,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return msisToInstall;
         }
 
-        class AcquirableMsi
+        WorkloadDownload GetWorkloadDownloadForPack(PackInfo packInfo)
         {
-            /// <summary>
-            /// The ID of the NuGet package containing the MSI to install
-            /// </summary>
-            public string NuGetPackageId { get; }
-
-            public string NuGetPackageVersion { get; }
-
-            public AcquirableMsi(string nuGetPackageId, string nuGetPackageVersion)
-            {
-                NuGetPackageId = nuGetPackageId;
-                NuGetPackageVersion = nuGetPackageVersion;
-            }
-
-            public static AcquirableMsi FromPackInfo(PackInfo packInfo)
-            {
-                return new(GetMsiPackageId(packInfo), packInfo.Version);
-            }
+            return new WorkloadDownload(packInfo.ResolvedPackageId, GetMsiPackageId(packInfo), packInfo.Version);
         }
     }
 }

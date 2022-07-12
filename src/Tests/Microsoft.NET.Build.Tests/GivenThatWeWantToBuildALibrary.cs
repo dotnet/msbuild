@@ -29,7 +29,7 @@ namespace Microsoft.NET.Build.Tests
         [Theory]
         [InlineData("netstandard1.5")]
         [InlineData("netcoreapp2.1")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_builds_the_library_successfully(string targetFramework)
         {
             var testAsset = _testAssetsManager
@@ -320,6 +320,8 @@ namespace Microsoft.NET.Build.Tests
             "NET451_OR_GREATER", "NET452_OR_GREATER", "NET46_OR_GREATER", "NET461_OR_GREATER" })]
         [InlineData("net48", new[] { "NETFRAMEWORK", "NET48", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER",
             "NET451_OR_GREATER", "NET452_OR_GREATER", "NET46_OR_GREATER", "NET461_OR_GREATER", "NET462_OR_GREATER", "NET47_OR_GREATER", "NET471_OR_GREATER", "NET472_OR_GREATER", "NET48_OR_GREATER" })]
+        [InlineData("net481", new[] { "NETFRAMEWORK", "NET481", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER",
+            "NET451_OR_GREATER", "NET452_OR_GREATER", "NET46_OR_GREATER", "NET461_OR_GREATER", "NET462_OR_GREATER", "NET47_OR_GREATER", "NET471_OR_GREATER", "NET472_OR_GREATER", "NET48_OR_GREATER", "NET481_OR_GREATER" })]
         [InlineData("netcoreapp1.0", new[] { "NETCOREAPP", "NETCOREAPP1_0", "NETCOREAPP1_0_OR_GREATER" })]
         [InlineData("netcoreapp3.0", new[] { "NETCOREAPP", "NETCOREAPP3_0", "NETCOREAPP1_0_OR_GREATER", "NETCOREAPP1_1_OR_GREATER", "NETCOREAPP2_0_OR_GREATER",
             "NETCOREAPP2_1_OR_GREATER", "NETCOREAPP2_2_OR_GREATER", "NETCOREAPP3_0_OR_GREATER" })]
@@ -565,15 +567,15 @@ class Program
         [InlineData(true)]
         public void It_fails_gracefully_if_targetframework_should_be_targetframeworks(bool useSolution)
         {
-            string targetFramework = "netcoreapp2.0;net461";
+            string targetFramework = $"{ToolsetInfo.CurrentTargetFramework};net461";
             TestInvalidTargetFramework("InvalidTargetFramework", targetFramework, useSolution,
                 $"The TargetFramework value '{targetFramework}' is not valid. To multi-target, use the 'TargetFrameworks' property instead");
         }
 
         [WindowsOnlyRequiresMSBuildVersionTheory("16.7.0-preview-20310-07")]
-        [InlineData("net5.0", "", false)]
-        [InlineData("net5.0", "UseWPF", true)]
-        [InlineData("net5.0", "UseWindowsForms", true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "", false)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "UseWPF", true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "UseWindowsForms", true)]
         [InlineData("netcoreapp3.1", "", true)]
         public void It_defines_target_platform_defaults_correctly(string targetFramework, string propertyName, bool defaultsDefined)
         {
@@ -607,7 +609,7 @@ class Program
         }
 
         [Theory]
-        [InlineData("net5.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         [InlineData("netcoreapp3.1")]
         public void It_defines_windows_version_default_correctly(string targetFramework)
         {
@@ -735,12 +737,12 @@ class Program
         [Fact]
         public void It_passes_ridless_target_to_compiler()
         {
-            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid("netcoreapp2.0");
+            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(ToolsetInfo.CurrentTargetFramework);
 
             var testProject = new TestProject()
             {
                 Name = "CompileDoesntUseRid",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 RuntimeIdentifier = runtimeIdentifier,
             };
 
@@ -896,10 +898,10 @@ class Program
 
         [Theory]
         [InlineData("netcoreapp2.2", null, false, null, false)]
-        [InlineData("netcoreapp3.0", null, true, null, true)]
-        [InlineData("netcoreapp3.0", "LatestMajor", true, null, true)]
-        [InlineData("netcoreapp3.0", null, true, false, false)]
-        [InlineData("netcoreapp3.0", "LatestMajor", true, false, false)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, null, true, null, true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "LatestMajor", true, null, true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, null, true, false, false)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "LatestMajor", true, false, false)]
         public void It_can_build_with_dynamic_loading_enabled(string targetFramework, string rollForwardValue, bool shouldSetRollForward, bool? copyLocal, bool shouldCopyLocal)
         {
             var testProject = new TestProject()
@@ -934,7 +936,7 @@ class Program
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
             outputDirectory.Should().HaveFiles(new[] {
                 runtimeConfigName,
-                $"{testProject.Name}.runtimeconfig.dev.json"
+                $"{testProject.Name}.runtimeconfig.json"
             });
 
             if (shouldCopyLocal)
@@ -1023,7 +1025,7 @@ namespace ProjectNameWithSpaces
             var testProjectA = new TestProject()
             {
                 Name = "ProjA",
-                TargetFrameworks = "net5.0-windows10.0.19041"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-windows10.0.19041"
             };
             //  Use a previous version of the Microsoft.Windows.SDK.NET.Ref package, to
             //  simulate the scenario where a project is compiling against a library from NuGet
@@ -1040,7 +1042,7 @@ namespace ProjectNameWithSpaces
             var testProjectB = new TestProject()
             {
                 Name = "ProjB",
-                TargetFrameworks = "net5.0-windows10.0.19041",
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-windows10.0.19041",
             };
             testProjectB.SourceFiles.Add("ProjB.cs", @"namespace ProjB
 {

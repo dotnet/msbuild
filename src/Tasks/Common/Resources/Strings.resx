@@ -503,7 +503,7 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1099: "}</comment>
   </data>
   <data name="WindowsDesktopFrameworkRequiresWindows" xml:space="preserve">
-    <value>NETSDK1100: Windows is required to build Windows desktop applications.</value>
+    <value>NETSDK1100: To build a project targeting Windows on this operating system, set the EnableWindowsTargeting property to true.</value>
     <comment>{StrBegin="NETSDK1100: "}</comment>
   </data>
   <data name="ILLink_Info" xml:space="preserve">
@@ -831,5 +831,17 @@ You may need to build the project on another operating system or architecture, o
   <data name="Net6NotCompatibleWithDev16" xml:space="preserve">
     <value>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</value>
     <comment>{StrBegin="NETSDK1182: "}</comment>
+  </data>
+  <data name="TargetingPackNotRestored_TransitiveDisabled" xml:space="preserve">
+    <value>NETSDK1183: The Targeting Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</value>
+    <comment>{StrBegin="NETSDK1183: "}</comment>
+  </data>
+  <data name="RuntimePackNotRestored_TransitiveDisabled" xml:space="preserve">
+    <value>NETSDK1184: The Runtime Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</value>
+    <comment>{StrBegin="NETSDK1184: "}</comment>
+  </data>
+  <data name="UnknownFrameworkReference_MauiEssentials" xml:space="preserve">
+    <value>NETSDK1185: This project depends on Maui Essentials through a project or NuGet package reference, but doesn't declare that dependency explicitly. To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</value>
+    <comment>{StrBegin="NETSDK1185: "}</comment>
   </data>
 </root>

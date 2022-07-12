@@ -23,7 +23,7 @@ namespace Microsoft.NET.Build.Tests
 
         [Theory]
         [InlineData("netcoreapp1.1")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_has_target_path_and_final_outputput_path_metadata(string targetFramework)
         {
             var testAsset = _testAssetsManager
@@ -59,9 +59,9 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "RuntimeConfigPartialBuild",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
-                RuntimeIdentifier = "win-x86"
+                RuntimeIdentifier = $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86"
             };
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
@@ -104,9 +104,9 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "UpdateRuntimeConfigPartialBuild",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
-                RuntimeIdentifier = "win-x86"
+                RuntimeIdentifier = $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86"
             };
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 

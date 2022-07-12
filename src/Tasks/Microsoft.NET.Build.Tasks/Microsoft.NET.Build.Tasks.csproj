@@ -61,8 +61,13 @@
 
   <!-- Packages that are in-box for .NET Core, so we only need to reference them for .NET Framework -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
-    
+    <!--
+        MSBuild depends on a new version of SRM/SCI; HostModel a very old one.
+        In order to keep working with MSBuild 17.2, which had binding redirects
+        for SCI 0-5.0.0.0 but not 6, this task must compile against 5, even
+        though that's not the very latest. -->
+    <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+    <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
   </ItemGroup>
 
   <!-- These are loaded from the CLI's copy on .NET Core, we don't need to duplicate them on disk -->

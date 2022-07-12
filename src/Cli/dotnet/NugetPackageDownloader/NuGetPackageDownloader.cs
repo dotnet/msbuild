@@ -1,5 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System;
 using System.Collections.Generic;
@@ -97,7 +98,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             if (resource == null)
             {
                 throw new NuGetPackageNotFoundException(
-                    string.Format(LocalizableStrings.FailedToLoadNuGetSource, source.Source));
+                    string.Format(LocalizableStrings.IsNotFoundInNuGetFeeds, packageId, source.Source));
             }
 
             string nupkgPath = downloadFolder == null || !downloadFolder.HasValue
@@ -413,8 +414,8 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             if (!foundPackagesBySource.Any())
             {
-                throw new NuGetPackageInstallerException(string.Format(LocalizableStrings.FailedToLoadNuGetSource,
-                    string.Join(" ", packageSources.Select(s => s.Source))));
+                throw new NuGetPackageNotFoundException(
+                    string.Format(LocalizableStrings.IsNotFoundInNuGetFeeds, packageIdentifier, packageSources.Select(s => s.Source)));
             }
 
             IEnumerable<(PackageSource source, IPackageSearchMetadata package)> accumulativeSearchResults =
@@ -423,7 +424,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             if (!accumulativeSearchResults.Any())
             {
-                throw new NuGetPackageInstallerException(
+                throw new NuGetPackageNotFoundException(
                     string.Format(
                         LocalizableStrings.IsNotFoundInNuGetFeeds,
                         packageIdentifier,
@@ -524,7 +525,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                     string.Join(";", sources.Select(s => s.Source))));
             }
 
-            throw new NuGetPackageInstallerException(string.Format(LocalizableStrings.IsNotFoundInNuGetFeeds,
+            throw new NuGetPackageNotFoundException(string.Format(LocalizableStrings.IsNotFoundInNuGetFeeds,
                 $"{packageIdentifier}::{packageVersion}", string.Join(";", sources.Select(s => s.Source))));
         }
 

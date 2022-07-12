@@ -39,11 +39,11 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [Fact]
         public void It_generates_supported_net_framework_target_framework_alias_items()
         {
-            var targetFrameworkMoniker = ".NETFramework,Version=v4.8";
+            var targetFrameworkMoniker = ".NETFramework,Version=v4.8.1";
             RunTask(targetFrameworkMoniker, targetPlatformMoniker: string.Empty, UseWpf: false, UseWindowsForms: false, expectedResult: new List<(string, string)>
                 {
                     ("net471", ".NET Framework 4.7.1"),
-                    ("net48", ".NET Framework 4.8")
+                    ("net48", ".NET Framework 4.8.1")
                 });
         }
 

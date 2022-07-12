@@ -3,23 +3,23 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.NET.Sdk.WorkloadManifestReader;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.Cli.NuGetPackageDownloader;
-using Microsoft.DotNet.ToolPackage;
+using System.Net.Http;
+using System.Runtime.InteropServices;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.NuGetPackageDownloader;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Configurer;
+using Microsoft.DotNet.MSBuildSdkResolver;
+using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using NuGet.Versioning;
-using Microsoft.DotNet.Configurer;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 using NuGet.Common;
-using System.Text.Json;
-using System.Runtime.InteropServices;
-using Microsoft.DotNet.Cli;
-using System.Net;
-using System.Net.Http;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -34,6 +34,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly PackageSourceLocation _packageSourceLocation;
         Func<string, string> _getEnvironmentVariable;
         private readonly IWorkloadInstallationRecordRepository _workloadRecordRepo;
+        private readonly IWorkloadManifestInstaller _workloadManifestInstaller;
         private readonly bool _displayManifestUpdates;
 
         public WorkloadManifestUpdater(IReporter reporter,
@@ -42,6 +43,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             string userProfileDir,
             string tempDirPath,
             IWorkloadInstallationRecordRepository workloadRecordRepo,
+            IWorkloadManifestInstaller workloadManifestInstaller,
             PackageSourceLocation packageSourceLocation = null,
             Func<string, string> getEnvironmentVariable = null,
             bool displayManifestUpdates = true)
@@ -55,6 +57,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _packageSourceLocation = packageSourceLocation;
             _getEnvironmentVariable = getEnvironmentVariable ?? Environment.GetEnvironmentVariable;
             _workloadRecordRepo = workloadRecordRepo;
+            _workloadManifestInstaller = workloadManifestInstaller;
             _displayManifestUpdates = displayManifestUpdates;
         }
 
@@ -72,16 +75,17 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                           new NullLogger(),
                                           reporter,
                                           verifySignatures: SignCheck.IsDotNetSigned());
-            var workloadRecordRepo = WorkloadInstallerFactory.GetWorkloadInstaller(reporter, new SdkFeatureBand(sdkVersion),
-                workloadResolver, Cli.VerbosityOptions.normal, userProfileDir, verifySignatures: false)
-                .GetWorkloadInstallationRecordRepository();
+            var installer = WorkloadInstallerFactory.GetWorkloadInstaller(reporter, new SdkFeatureBand(sdkVersion),
+                workloadResolver, Cli.VerbosityOptions.normal, userProfileDir, verifySignatures: false);
+            var workloadRecordRepo = installer.GetWorkloadInstallationRecordRepository();
 
-            return new WorkloadManifestUpdater(reporter, workloadResolver, nugetPackageDownloader, userProfileDir, tempPackagesDir.Value, workloadRecordRepo);
+            return new WorkloadManifestUpdater(reporter, workloadResolver, nugetPackageDownloader, userProfileDir, tempPackagesDir.Value, workloadRecordRepo, installer);
         }
 
         public async Task UpdateAdvertisingManifestsAsync(bool includePreviews, DirectoryPath? offlineCache = null)
         {
-            var manifests = GetInstalledManifestIds();
+            // this updates all the manifests 
+            var manifests = _workloadResolver.GetInstalledManifests();
             await Task.WhenAll(manifests.Select(manifest => UpdateAdvertisingManifestAsync(manifest, includePreviews, offlineCache)))
                 .ConfigureAwait(false);
             WriteUpdatableWorkloadsFile();
@@ -184,7 +188,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 }
 
                 if (advertisingManifestVersionAndWorkloads != null &&
-                    advertisingManifestVersionAndWorkloads.Value.ManifestVersion.CompareTo(currentManifestVersion.Item1) > 0)
+                    ((advertisingManifestVersionAndWorkloads.Value.ManifestVersion.CompareTo(currentManifestVersion.manifestVersion) > 0 
+                        && advertisingManifestVersionAndWorkloads.Value.ManifestFeatureBand.Equals(currentManifestVersion.sdkFeatureBand)) ||
+                    advertisingManifestVersionAndWorkloads.Value.ManifestFeatureBand.CompareTo(currentManifestVersion.sdkFeatureBand) > 0)) 
                 {
                     manifestUpdates.Add((new ManifestVersionUpdate(manifestId, currentManifestVersion.manifestVersion, currentManifestVersion.sdkFeatureBand.ToString(),
                         advertisingManifestVersionAndWorkloads.Value.ManifestVersion, advertisingManifestVersionAndWorkloads.Value.ManifestFeatureBand.ToString()),
@@ -232,59 +238,27 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return manifestUpdates;
         }
 
-        public async Task<IEnumerable<string>> DownloadManifestPackagesAsync(bool includePreviews, DirectoryPath downloadPath)
-        {
-            var manifests = GetInstalledManifestIds();
-            var packagePaths = new List<string>();
-            foreach (var manifest in manifests)
-            {
-                try
-                {
-                    var packagePath = await _nugetPackageDownloader.DownloadPackageAsync(
-                        GetManifestPackageId(_sdkFeatureBand, manifest),
-                        packageSourceLocation: _packageSourceLocation,
-                        includePreview: includePreviews, downloadFolder: downloadPath);
-                    packagePaths.Add(packagePath);
-                }
-                catch (Exception)
-                {
-                    _reporter.WriteLine(string.Format(LocalizableStrings.FailedToDownloadPackageManifest, manifest));
-                }
-            }
-            return packagePaths;
-        }
 
-        public async Task ExtractManifestPackagesToTempDirAsync(IEnumerable<string> manifestPackages, DirectoryPath tempDir)
-        {
-            Directory.CreateDirectory(tempDir.Value);
-            foreach (var manifestPackagePath in manifestPackages)
-            {
-                var manifestId = Path.GetFileNameWithoutExtension(manifestPackagePath);
-                var extractionDir = Path.Combine(tempDir.Value, manifestId);
-                Directory.CreateDirectory(extractionDir);
-                await _nugetPackageDownloader.ExtractPackageAsync(manifestPackagePath, new DirectoryPath(extractionDir));
-                File.Copy(Path.Combine(extractionDir, "data", "WorkloadManifest.json"), Path.Combine(tempDir.Value, manifestId, "WorkloadManifest.json"));
-            }
-        }
-
-        public IEnumerable<string> GetManifestPackageUrls(bool includePreviews)
+        public async Task<IEnumerable<WorkloadDownload>> GetManifestPackageDownloadsAsync(bool includePreviews)
         {
             var packageIds = GetInstalledManifestIds()
-                .Select(manifestId => GetManifestPackageId(_sdkFeatureBand, manifestId));
+                .Select(manifestId => _workloadManifestInstaller.GetManifestPackageId(manifestId, _sdkFeatureBand));
 
-            var packageUrls = new List<string>();
-            foreach (var packageId in packageIds)
+            var downloads = new List<WorkloadDownload>();
+            foreach (var manifest in _workloadResolver.GetInstalledManifests())
             {
                 try
                 {
-                    packageUrls.Add(_nugetPackageDownloader.GetPackageUrl(packageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreviews).GetAwaiter().GetResult());
+                    var packageId = _workloadManifestInstaller.GetManifestPackageId(new ManifestId(manifest.Id), _sdkFeatureBand);
+                    var latestVersion = await _nugetPackageDownloader.GetLatestPackageVerion(packageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreviews);
+                    downloads.Add(new WorkloadDownload(manifest.Id, packageId.ToString(), latestVersion.ToString()));
                 }
                 catch
                 {
-                    _reporter.WriteLine(string.Format(LocalizableStrings.FailedToGetPackageManifestUrl, packageId));
+                    _reporter.WriteLine(string.Format(LocalizableStrings.FailedToGetPackageManifestUrl, manifest.Id));
                 }
             }
-            return packageUrls;
+            return downloads;
         }
 
         private IEnumerable<ManifestId> GetInstalledManifestIds()
@@ -292,50 +266,36 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return _workloadResolver.GetInstalledManifests().Select(manifest => new ManifestId(manifest.Id));
         }
 
-        private async Task UpdateAdvertisingManifestAsync(ManifestId manifestId, bool includePreviews, DirectoryPath? offlineCache = null)
+        private async Task UpdateAdvertisingManifestAsync(WorkloadManifestInfo manifest, bool includePreviews, DirectoryPath? offlineCache = null)
         {
             string packagePath = null;
-            string extractionPath = null;
+            var manifestId = new ManifestId(manifest.Id);
+            string currentFeatureBand = _sdkFeatureBand.ToString();
 
             try
             {
                 var adManifestPath = GetAdvertisingManifestPath(_sdkFeatureBand, manifestId);
-                if (offlineCache == null || !offlineCache.HasValue)
+                
+                bool success;
+                (success, packagePath) = await GetManifestPackageUpdate(_sdkFeatureBand, manifestId, includePreviews, offlineCache);
+                if (!success)
                 {
-                    try
+                    if (!(manifest.ManifestFeatureBand).Equals(_sdkFeatureBand))
                     {
-                        packagePath = await _nugetPackageDownloader.DownloadPackageAsync(
-                            GetManifestPackageId(_sdkFeatureBand, manifestId),
-                            packageSourceLocation: _packageSourceLocation,
-                            includePreview: includePreviews);
-                    }
-                    catch (NuGetPackageNotFoundException)
-                    {
-                        _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestPackageDoesNotExist, manifestId));
+                        (success, packagePath) = await GetManifestPackageUpdate(new SdkFeatureBand(manifest.ManifestFeatureBand), manifestId, includePreviews, offlineCache);
+                        currentFeatureBand = manifest.ManifestFeatureBand.ToString();
                     }
                 }
-                else
+                if (!success)
                 {
-                    packagePath = Directory.GetFiles(offlineCache.Value.Value)
-                        .Where(path => path.EndsWith(".nupkg"))
-                        .Where(path => Path.GetFileName(path).StartsWith(GetManifestPackageId(_sdkFeatureBand, manifestId).ToString()))
-                        .Max();
-                    if (!File.Exists(packagePath))
-                    {
-                        throw new Exception(string.Format(LocalizableStrings.CacheMissingPackage, GetManifestPackageId(_sdkFeatureBand, manifestId), "*", offlineCache));
-                    }
+                    _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestPackageDoesNotExist, manifestId));
+                    return;
                 }
+                
+                await _workloadManifestInstaller.ExtractManifestAsync(packagePath, adManifestPath);
 
-                extractionPath = Path.Combine(_tempDirPath, "dotnet-sdk-advertising-temp", $"{manifestId}-extracted");
-                Directory.CreateDirectory(extractionPath);
-                var resultingFiles = await _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(extractionPath));
-
-                if (Directory.Exists(adManifestPath))
-                {
-                    Directory.Delete(adManifestPath, true);
-                }
-                Directory.CreateDirectory(Path.GetDirectoryName(adManifestPath));
-                FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(Path.Combine(extractionPath, "data"), adManifestPath));
+                // add file that contains the advertisted manifest feature band so GetAdvertisingManifestVersionAndWorkloads will use correct feature band, regardless of if rollback occurred or not
+                File.WriteAllText(Path.Combine(adManifestPath, "AdvertisedManifestFeatureBand.txt"), currentFeatureBand);
 
                 if (_displayManifestUpdates)
                 {
@@ -349,24 +309,22 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
             finally
             {
-                if (!string.IsNullOrEmpty(extractionPath) && Directory.Exists(extractionPath))
-                {
-                    Directory.Delete(extractionPath, true);
-                }
-
                 if (!string.IsNullOrEmpty(packagePath) && File.Exists(packagePath) && (offlineCache == null || !offlineCache.HasValue))
                 {
                     File.Delete(packagePath);
                 }
-
-                var versionDir = Path.GetDirectoryName(packagePath);
-                if (Directory.Exists(versionDir) && !Directory.GetFileSystemEntries(versionDir).Any())
+                if (!string.IsNullOrEmpty(packagePath) && (offlineCache == null || !offlineCache.HasValue))
                 {
-                    Directory.Delete(versionDir);
-                    var idDir = Path.GetDirectoryName(versionDir);
-                    if (Directory.Exists(idDir) && !Directory.GetFileSystemEntries(idDir).Any())
+                    var versionDir = Path.GetDirectoryName(packagePath);
+
+                    if (Directory.Exists(versionDir) && !Directory.GetFileSystemEntries(versionDir).Any())
                     {
-                        Directory.Delete(idDir);
+                        Directory.Delete(versionDir);
+                        var idDir = Path.GetDirectoryName(versionDir);
+                        if (Directory.Exists(idDir) && !Directory.GetFileSystemEntries(idDir).Any())
+                        {
+                            Directory.Delete(idDir);
+                        }
                     }
                 }
             }
@@ -385,10 +343,18 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             using (FileStream fsSource = new FileStream(manifestPath, FileMode.Open, FileAccess.Read))
             {
                 var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId.ToString(), fsSource, manifestPath);
+                // we need to know the feature band of the advertised manifest (read it from the AdvertisedManifestFeatureBand.txt file)
+                // if we don't find the file then use the current feature band
+                var adManifestFeatureBandPath = Path.Combine(GetAdvertisingManifestPath(_sdkFeatureBand, manifestId), "AdvertisedManifestFeatureBand.txt");
 
-                //  TODO: figure out how to differentiate between the feature band an advertising manifest is branded as and the feature band of the SDK
-                //  it's advertised to
-                return (new ManifestVersion(manifest.Version), _sdkFeatureBand, manifest.Workloads.Values.OfType<WorkloadDefinition>().ToDictionary(w => w.Id));
+                SdkFeatureBand adManifestFeatureBand = _sdkFeatureBand;
+                if (File.Exists(adManifestFeatureBandPath))
+                {
+                    adManifestFeatureBand = new SdkFeatureBand(File.ReadAllText(adManifestFeatureBandPath));
+                }
+                              
+
+                return (new ManifestVersion(manifest.Version), adManifestFeatureBand, manifest.Workloads.Values.OfType<WorkloadDefinition>().ToDictionary(w => w.Id));
             }
         }
 
@@ -438,7 +404,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             try
             {
                 var currentVersion = NuGetVersion.Parse(_workloadResolver.GetManifestVersion(manifest.ToString()));
-                var latestVersion = await _nugetPackageDownloader.GetLatestPackageVerion(GetManifestPackageId(_sdkFeatureBand, manifest));
+                var latestVersion = await _nugetPackageDownloader.GetLatestPackageVerion(_workloadManifestInstaller.GetManifestPackageId(manifest, _sdkFeatureBand));
                 return latestVersion > currentVersion;
             }
             catch (Exception)
@@ -464,7 +430,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 else
                 {
                     throw new ArgumentException(string.Format(LocalizableStrings.RollbackDefinitionFileDoesNotExist, rollbackDefinitionFilePath));
-                }           
+                }
             }
             return JsonSerializer.Deserialize<IDictionary<string, string>>(fileContent)
                 .Select(manifest =>
@@ -472,6 +438,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     ManifestVersion manifestVersion;
                     SdkFeatureBand manifestFeatureBand;
                     var parts = manifest.Value.Split('/');
+                    
+                    string manifestVersionString = (parts[0]);
+                    if (!FXVersion.TryParse(manifestVersionString, out FXVersion version))
+                    {
+                        throw new FormatException(String.Format(LocalizableStrings.InvalidVersionForWorkload, manifest.Key, manifestVersionString));
+                    } 
+
                     manifestVersion = new ManifestVersion(parts[0]);
                     if (parts.Length == 1)
                     {
@@ -494,18 +467,52 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         private static string GetAdvertisingWorkloadsFilePath(string userProfileDir, SdkFeatureBand featureBand) => Path.Combine(userProfileDir, $".workloadAdvertisingUpdates{featureBand}");
 
+        private async Task<String> GetOnlinePackagePath(SdkFeatureBand sdkFeatureBand, ManifestId manifestId, bool includePreviews) 
+            {
+                string packagePath = await _nugetPackageDownloader.DownloadPackageAsync(
+                    _workloadManifestInstaller.GetManifestPackageId(manifestId, sdkFeatureBand),
+                    packageSourceLocation: _packageSourceLocation,
+                    includePreview: includePreviews);
+                
+                return packagePath;
+            }
+
+        private string GetOfflinePackagePath(SdkFeatureBand sdkFeatureBand, ManifestId manifestId, DirectoryPath? offlineCache = null)
+        {
+            string packagePath = Directory.GetFiles(offlineCache.Value.Value)
+                .Where(path => path.EndsWith(".nupkg"))
+                .Where(path =>
+                {
+                    var manifestPackageId = _workloadManifestInstaller.GetManifestPackageId(manifestId, sdkFeatureBand).ToString();
+                    return Path.GetFileName(path).StartsWith(manifestPackageId, StringComparison.OrdinalIgnoreCase);
+                })
+                .Max();
+
+            return packagePath;
+        }
+
+        private async Task<(bool, string)> GetManifestPackageUpdate(SdkFeatureBand sdkFeatureBand, ManifestId manifestId, bool includePreviews, DirectoryPath? offlineCache = null)
+        {
+            if (offlineCache == null || !offlineCache.HasValue)
+            {
+                try 
+                {
+                    string packagePath = await GetOnlinePackagePath(sdkFeatureBand, manifestId, includePreviews);
+                    return (true, packagePath);
+                }
+                catch (NuGetPackageNotFoundException)
+                {
+                    return (false, null);
+                }
+            }
+            else
+            {
+                string packagePath = GetOfflinePackagePath(sdkFeatureBand, manifestId, offlineCache);
+                return (packagePath != null, packagePath);
+            }
+        }
+
         private string GetAdvertisingManifestPath(SdkFeatureBand featureBand, ManifestId manifestId) =>
             Path.Combine(_userProfileDir, "sdk-advertising", featureBand.ToString(), manifestId.ToString());
-
-        internal static PackageId GetManifestPackageId(SdkFeatureBand featureBand, ManifestId manifestId) =>
-            GetManifestPackageId(featureBand, manifestId, InstallType.FileBased);
-
-        internal static PackageId GetManifestPackageId(SdkFeatureBand featureBand, ManifestId manifestId, InstallType installType) =>
-            installType switch
-            {
-                InstallType.FileBased => new PackageId($"{manifestId}.Manifest-{featureBand}"),
-                InstallType.Msi => new PackageId($"{manifestId}.Manifest-{featureBand}.Msi.{RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant()}"),
-                _ => throw new ArgumentException(String.Format(LocalizableStrings.UnknownInstallType, (int)installType)),
-            };
     }
 }

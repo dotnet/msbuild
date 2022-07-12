@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="pl" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AdManifestPackageDoesNotExist">
-        <source>Failed to update advertising manifest. Manifest package {0} doesn't exist.</source>
-        <target state="translated">Nie można zaktualizować manifestu treści reklamowych. Pakiet manifestu {0} nie istnieje.</target>
+        <source>Advertising manifest not updated. Manifest package for {0} doesn't exist.</source>
+        <target state="translated">Manifest treści reklamowych nie został zaktualizowany. Pakiet manifestu dla {0} nie istnieje.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdManifestUpdated">
@@ -47,6 +47,11 @@
         <target state="translated">Pobieranie pakietu {0} w wersji {1} do pamięci podręcznej trybu offline {2}…</target>
         <note />
       </trans-unit>
+      <trans-unit id="ExpectedSingleManifest">
+        <source>Expected single manifest feature band and manifest folder in MSI from package {0}</source>
+        <target state="translated">Oczekiwano pasma funkcji pojedynczego manifestu i folderu manifestu w pliku MSI z pakietu {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="FailedAdManifestUpdate">
         <source>Failed to update the advertising manifest {0}: {1}.</source>
         <target state="translated">Nie można zaktualizować manifestu anonsowania {0}: {1}.</target>
@@ -55,6 +60,11 @@
       <trans-unit id="FailedToDownloadPackageManifest">
         <source>Failed to download manifest package {0}.</source>
         <target state="translated">Pobranie pakietu manifestu {0} nie powiodło się.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToExtractMsi">
+        <source>Failed to extract information from MSI: {0}</source>
+        <target state="translated">Nie można wyodrębnić informacji z pliku MSI: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToGetPackageManifestUrl">
@@ -122,6 +132,11 @@
         <target state="translated">Niewystarczające uprawnienia do uruchomienia serwera.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">Wystąpił błąd podczas analizowania wersji „{1}” dla identyfikatora manifestu obciążenia „{0}”</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
         <source>The settings file in the workload's NuGet package is invalid: {0}</source>
         <target state="translated">Plik ustawień w pakiecie NuGet obciążenia jest nieprawidłowy: {0}</target>
@@ -145,6 +160,11 @@
       <trans-unit id="ManifestDoesNotExist">
         <source>No manifest with ID {0} exists.</source>
         <target state="translated">Nie istnieje żaden manifest o identyfikatorze {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestMsiNotFoundInNuGetPackage">
+        <source>Manifest MSI not found in NuGet package {0}</source>
+        <target state="translated">Nie znaleziono pliku MSI manifestu w pakiecie NuGet {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">

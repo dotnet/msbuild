@@ -21,11 +21,11 @@ namespace Microsoft.NET.Build.Tests
 
         [WindowsOnlyRequiresMSBuildVersionTheory("16.8.0.41402")]
         [InlineData("netcoreapp3.1", ".NETCoreApp", "v3.1", "Windows", "7.0")] // Default values pre-5.0
-        [InlineData("net5.0", ".NETCoreApp", "v5.0", "", "")]
-        [InlineData("net5.0-Windows7.0", ".NETCoreApp", "v5.0", "Windows", "7.0")]
-        [InlineData("net5.0-WINDOWS7.0", ".NETCoreApp", "v5.0", "Windows", "7.0")]
-        [InlineData("net5.0-windows", ".NETCoreApp", "v5.0", "Windows", "7.0")]
-        [InlineData("net5.0-windows10.0.19041.0", ".NETCoreApp", "v5.0", "Windows", "10.0.19041.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, ".NETCoreApp", $"v{ToolsetInfo.CurrentTargetFrameworkVersion}", "", "")]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework}-Windows7.0", ".NETCoreApp", $"v{ToolsetInfo.CurrentTargetFrameworkVersion}", "Windows", "7.0")]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework}-WINDOWS7.0", ".NETCoreApp", $"v{ToolsetInfo.CurrentTargetFrameworkVersion}", "Windows", "7.0")]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework}-windows", ".NETCoreApp", $"v{ToolsetInfo.CurrentTargetFrameworkVersion}", "Windows", "7.0")]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework}-windows10.0.19041.0", ".NETCoreApp", $"v{ToolsetInfo.CurrentTargetFrameworkVersion}", "Windows", "10.0.19041.0")]
         public void It_defines_target_platform_from_target_framework(string targetFramework, string expectedTargetFrameworkIdentifier, string expectedTargetFrameworkVersion, string expectedTargetPlatformIdentifier, string expectedTargetPlatformVersion)
         {
             var testProj = new TestProject()
@@ -66,7 +66,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_defines_target_platform_from_target_framework_with_explicit_version()
         {
             var targetPlatformVersion = "10.0.19041.0";
-            var targetFramework = "net5.0-windows";
+            var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
             var testProj = new TestProject()
             {
                 Name = "TargetPlatformTests",
@@ -89,7 +89,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "UnsupportedOS",
-                TargetFrameworks = "net5.0-unsupported"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-unsupported"
             };
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 

@@ -20,7 +20,7 @@ namespace Microsoft.NET.Build.Tests
         [CoreMSBuildOnlyFact]
         public void It_collects_TargetFramework_version_and_other_properties()
         {
-            string targetFramework = "netcoreapp1.0";
+            string targetFramework = ToolsetInfo.CurrentTargetFramework;
             var testProject = new TestProject()
             {
                 Name = "FrameworkTargetTelemetryTest",
@@ -38,13 +38,13 @@ namespace Microsoft.NET.Build.Tests
             buildCommand
                 .Execute(TelemetryTestLogger)
                 .StdOut.Should()
-                .Contain("{\"EventName\":\"targetframeworkeval\",\"Properties\":{\"TargetFrameworkVersion\":\".NETCoreApp,Version=v1.0\",\"RuntimeIdentifier\":\"null\",\"SelfContained\":\"null\",\"UseApphost\":\"null\",\"OutputType\":\"Library\"}");
+                .Contain($"{{\"EventName\":\"targetframeworkeval\",\"Properties\":{{\"TargetFrameworkVersion\":\".NETCoreApp,Version=v{ToolsetInfo.CurrentTargetFrameworkVersion}\",\"RuntimeIdentifier\":\"null\",\"SelfContained\":\"null\",\"UseApphost\":\"null\",\"OutputType\":\"Library\"}}");
         }
 
         [CoreMSBuildOnlyFact]
         public void It_collects_multi_TargetFramework_version_and_other_properties()
         {
-            string targetFramework = "net46;netcoreapp1.1";
+            string targetFramework = $"net46;{ToolsetInfo.CurrentTargetFramework}";
 
             var testProject = new TestProject()
             {
@@ -67,7 +67,7 @@ namespace Microsoft.NET.Build.Tests
                     "{\"EventName\":\"targetframeworkeval\",\"Properties\":{\"TargetFrameworkVersion\":\".NETFramework,Version=v4.6\",\"RuntimeIdentifier\":\"null\",\"SelfContained\":\"null\",\"UseApphost\":\"null\",\"OutputType\":\"Library\"}")
                 .And
                 .Contain(
-                    "{\"EventName\":\"targetframeworkeval\",\"Properties\":{\"TargetFrameworkVersion\":\".NETCoreApp,Version=v1.1\",\"RuntimeIdentifier\":\"null\",\"SelfContained\":\"null\",\"UseApphost\":\"null\",\"OutputType\":\"Library\"}");
+                    $"{{\"EventName\":\"targetframeworkeval\",\"Properties\":{{\"TargetFrameworkVersion\":\".NETCoreApp,Version=v{ToolsetInfo.CurrentTargetFrameworkVersion}\",\"RuntimeIdentifier\":\"null\",\"SelfContained\":\"null\",\"UseApphost\":\"null\",\"OutputType\":\"Library\"}}");
         }
     }
 }

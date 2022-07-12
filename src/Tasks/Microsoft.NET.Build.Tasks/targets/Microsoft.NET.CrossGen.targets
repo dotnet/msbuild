@@ -311,7 +311,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ResolveRuntimePackAssets Condition="'$(_TargetFrameworkVersionWithoutV)' >= '3.0'"
                               FrameworkReferences="@(FrameworkReference)"
-                              ResolvedRuntimePacks="@(_CrossgenRuntimePack)">
+                              ResolvedRuntimePacks="@(_CrossgenRuntimePack)"
+                              DisableTransitiveFrameworkReferenceDownloads="$(DisableTransitiveFrameworkReferenceDownloads)">
       <Output TaskParameter="RuntimePackAssets" ItemName="CrossgenResolvedAssembliesToPublish" />
     </ResolveRuntimePackAssets>
 
@@ -457,7 +458,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <UsingTask Condition="'$(Crossgen2TasksOverriden)' != 'true'" TaskName="RunReadyToRunCompiler" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="_CreateR2RImages"
-          Inputs="@(_ReadyToRunCompileList);@(_ReadyToRunCompositeBuildInput);@(_ReadyToRunPgoFiles)"
+          Inputs="$(MSBuildAllProjects);@(_ReadyToRunCompileList);@(_ReadyToRunCompositeBuildInput);@(_ReadyToRunPgoFiles)"
           Outputs="%(_ReadyToRunCompileList.OutputR2RImage);%(_ReadyToRunCompileList.OutputPDBImage)">
 
     <RunReadyToRunCompiler CrossgenTool="@(CrossgenTool)"
@@ -494,7 +495,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="_CreateR2RSymbols"
-          Inputs="@(_ReadyToRunSymbolsCompileList)"
+          Inputs="$(MSBuildAllProjects);@(_ReadyToRunSymbolsCompileList)"
           Outputs="%(_ReadyToRunSymbolsCompileList.OutputPDBImage)"
           Condition="'$(PublishReadyToRunUseCrossgen2)' != 'true' or '@(Crossgen2Tool -> '%(IsVersion5)')' == 'true'">
     <RunReadyToRunCompiler CrossgenTool="@(CrossgenTool)"

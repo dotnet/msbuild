@@ -272,7 +272,7 @@ namespace Microsoft.NET.Build.Tests
         [Theory]
         [InlineData("netcoreapp2.0")]
         [InlineData("netcoreapp2.1")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_runs_the_app_from_the_output_folder(string targetFramework)
         {
             RunAppFromOutputFolder("RunFromOutputFolder_" + targetFramework, false, false, targetFramework);
@@ -280,7 +280,7 @@ namespace Microsoft.NET.Build.Tests
 
         [Theory]
         [InlineData("netcoreapp2.1")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_runs_a_rid_specific_app_from_the_output_folder(string targetFramework)
         {
             RunAppFromOutputFolder("RunFromOutputFolderWithRID_" + targetFramework, true, false, targetFramework);
@@ -288,7 +288,7 @@ namespace Microsoft.NET.Build.Tests
 
         [Theory]
         [InlineData("netcoreapp2.0")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_runs_the_app_with_conflicts_from_the_output_folder(string targetFramework)
         {
             if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
@@ -301,7 +301,7 @@ namespace Microsoft.NET.Build.Tests
 
         [Theory]
         [InlineData("netcoreapp2.0")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_runs_a_rid_specific_app_with_conflicts_from_the_output_folder(string targetFramework)
         {
             if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
@@ -440,7 +440,7 @@ public static class Program
 
         [Theory]
         [InlineData("netcoreapp2.0")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_trims_conflicts_from_the_deps_file(string targetFramework)
         {
             TestProject project = new TestProject()
@@ -506,7 +506,7 @@ public static class Program
         [InlineData(false)]
         public void It_generates_rid_fallback_graph(bool isSelfContained)
         {
-            var targetFramework = "netcoreapp3.0";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
             var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             TestProject project = new TestProject()
@@ -575,7 +575,7 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "AppUsingPackageWithSatellites",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -622,7 +622,7 @@ public static class Program
                 IsExe = true
             };
 
-            string[] extraArgs = new[] { "/p:TargetFramework=NETCOREAPP1.1" };
+            string[] extraArgs = new[] { $"/p:TargetFramework={ToolsetInfo.CurrentTargetFramework.ToUpper()}" };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
@@ -638,14 +638,14 @@ public static class Program
             Directory.GetDirectories(outputFolderWithConfiguration)
                 .Select(Path.GetFileName)
                 .Should()
-                .BeEquivalentTo("netcoreapp1.1");
+                .BeEquivalentTo(ToolsetInfo.CurrentTargetFramework);
 
             string intermediateFolderWithConfiguration = Path.Combine(buildCommand.GetBaseIntermediateDirectory().FullName, "Debug");
 
             Directory.GetDirectories(intermediateFolderWithConfiguration)
                 .Select(Path.GetFileName)
                 .Should()
-                .BeEquivalentTo("netcoreapp1.1");
+                .BeEquivalentTo(ToolsetInfo.CurrentTargetFramework);
         }
 
         [Fact]
@@ -654,7 +654,7 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "NetCoreAppPackageReference",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -735,9 +735,9 @@ class Program
             var testProject = new TestProject()
             {
                 Name = "ReferencesLegacyContracts",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
-                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid("netcoreapp3.0")
+                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(ToolsetInfo.CurrentTargetFramework)
             };
 
             //  Dependencies on contracts from different 1.x "bands" can cause downgrades when building
@@ -762,7 +762,7 @@ class Program
             var testProject = new TestProject()
             {
                 Name = "NoPackageReferences",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -792,7 +792,7 @@ class Program
             var testProject = new TestProject()
             {
                 Name = "Prj_すおヸょー",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
             };
 
@@ -810,7 +810,7 @@ class Program
         [Fact]
         public void It_regenerates_files_if_self_contained_changes()
         {
-            const string TFM = "netcoreapp3.0";
+            const string TFM = ToolsetInfo.CurrentTargetFramework;
 
             var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(TFM);
 

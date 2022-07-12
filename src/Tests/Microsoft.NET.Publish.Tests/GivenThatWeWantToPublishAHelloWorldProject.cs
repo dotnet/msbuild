@@ -26,7 +26,7 @@ namespace Microsoft.NET.Publish.Tests
         [Theory]
         [InlineData("netcoreapp1.1")]
         [InlineData("netcoreapp2.0")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_publishes_portable_apps_to_the_publish_folder_and_the_app_should_run(string targetFramework)
         {
             if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
@@ -68,7 +68,7 @@ namespace Microsoft.NET.Publish.Tests
         [Theory]
         [InlineData("netcoreapp1.1")]
         [InlineData("netcoreapp2.0")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_publishes_self_contained_apps_to_the_publish_folder_and_the_app_should_run(string targetFramework)
         {
             if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
@@ -129,7 +129,7 @@ namespace Microsoft.NET.Publish.Tests
         [Fact]
         public void Publish_self_contained_app_with_dot_in_the_name()
         {
-            var targetFramework = "netcoreapp2.1";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             TestProject testProject = new TestProject()
@@ -141,15 +141,15 @@ namespace Microsoft.NET.Publish.Tests
             };
             
             testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = "true";
-            testProject.SourceFiles["Program.cs"] = @"
+            testProject.SourceFiles["Program.cs"] = $@"
 using System;
 public static class Program
-{
+{{
     public static void Main()
-    {
-        Console.WriteLine(""Hello from a netcoreapp2.1!"");
-    }
-}
+    {{
+        Console.WriteLine(""Hello from a {ToolsetInfo.CurrentTargetFramework}!"");
+    }}
+}}
 ";
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
@@ -167,8 +167,8 @@ public static class Program
         [InlineData("win-arm")]
         [InlineData("win8-arm")]
         [InlineData("win81-arm")]
-        [InlineData("win10-arm")]
-        [InlineData("win10-arm64")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-arm")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-arm64")]
         public void Publish_standalone_post_netcoreapp2_arm_app(string runtimeIdentifier)
         {
             // Tests for existence of expected files when publishing an ARM project
@@ -439,7 +439,7 @@ public static class Program
 
         [Theory]
         [InlineData("netcoreapp2.1")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_preserves_newest_files_on_publish(string tfm)
         {
             var testProject = new TestProject()
@@ -474,7 +474,7 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "InvokeBuildOnPublish",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -574,7 +574,7 @@ public static class Program
         [InlineData(true, true)]
         public void It_publishes_with_a_publish_profile(bool? selfContained, bool? useAppHost)
         {
-            var tfm = "netcoreapp2.2";
+            var tfm = ToolsetInfo.CurrentTargetFramework;
             var rid = EnvironmentInfo.GetCompatibleRid(tfm);
 
             var testProject = new TestProject()
@@ -654,7 +654,7 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "ExeWithPublishProfile",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
             };
 
@@ -677,10 +677,10 @@ public static class Program
             var publishProfilePath = Path.Combine(publishProfilesDirectory, "test.pubxml");
 
             Directory.CreateDirectory(publishProfilesDirectory);
-            File.WriteAllText(publishProfilePath, @"
+            File.WriteAllText(publishProfilePath, $@"
 <Project>
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>{ToolsetInfo.CurrentTargetFramework}</TargetFramework>
   </PropertyGroup>
 </Project>
 ");

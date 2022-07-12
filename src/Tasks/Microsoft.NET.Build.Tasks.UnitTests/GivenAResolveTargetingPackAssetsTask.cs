@@ -337,6 +337,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 runtimeFrameworks: new[] {new MockTaskItem("RuntimeFramework1", new Dictionary<string, string>()) },
                 generateErrorForMissingTargetingPacks: true,
                 nuGetRestoreSupported: true,
+                disableTransitiveFrameworkReferences: false,
             netCoreTargetingPackRoot: "netCoreTargetingPackRoot",
             projectLanguage: "C#");
 

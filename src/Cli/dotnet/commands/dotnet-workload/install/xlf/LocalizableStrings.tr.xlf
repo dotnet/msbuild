@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AdManifestPackageDoesNotExist">
-        <source>Failed to update advertising manifest. Manifest package {0} doesn't exist.</source>
-        <target state="translated">Reklam bildirimi güncelleştirilemedi. {0} bildirim paketi yok.</target>
+        <source>Advertising manifest not updated. Manifest package for {0} doesn't exist.</source>
+        <target state="translated">Reklam bildirimi güncelleştirilmedi. {0} için bildirim paketi yok.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdManifestUpdated">
@@ -47,6 +47,11 @@
         <target state="translated">{0} paketi sürüm{1}, çevrimdışı {2} önbelleğine indiriliyor...</target>
         <note />
       </trans-unit>
+      <trans-unit id="ExpectedSingleManifest">
+        <source>Expected single manifest feature band and manifest folder in MSI from package {0}</source>
+        <target state="translated">MSI'da {0} paketinden tek bildirim özellik bandı ve bildirim klasörü bekleniyor</target>
+        <note />
+      </trans-unit>
       <trans-unit id="FailedAdManifestUpdate">
         <source>Failed to update the advertising manifest {0}: {1}.</source>
         <target state="translated">Reklam bildirimi {0} güncelleştirilemedi: {1}.</target>
@@ -55,6 +60,11 @@
       <trans-unit id="FailedToDownloadPackageManifest">
         <source>Failed to download manifest package {0}.</source>
         <target state="translated">Bildirim paketi {0} indirilemedi.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToExtractMsi">
+        <source>Failed to extract information from MSI: {0}</source>
+        <target state="translated">MSI'dan bilgi ayıklanamadı: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToGetPackageManifestUrl">
@@ -122,6 +132,11 @@
         <target state="translated">Sunucuyu başlatmak için yeterli ayrıcalığa sahip değilsiniz.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">İş yükü bildirim kimliği '{0}' için hata ayrıştırma sürümü '{1}'</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
         <source>The settings file in the workload's NuGet package is invalid: {0}</source>
         <target state="translated">İş yükünün NuGet paketindeki ayar dosyası geçersiz: {0}</target>
@@ -145,6 +160,11 @@
       <trans-unit id="ManifestDoesNotExist">
         <source>No manifest with ID {0} exists.</source>
         <target state="translated">{0} kimliğine sahip bildirim yok.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestMsiNotFoundInNuGetPackage">
+        <source>Manifest MSI not found in NuGet package {0}</source>
+        <target state="translated">{0} NuGet paketinde bildirim MSI'sı bulunamadı</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">
