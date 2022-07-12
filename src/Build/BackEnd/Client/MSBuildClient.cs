@@ -185,7 +185,7 @@ namespace Microsoft.Build.Experimental
             {
                 CommunicationsUtilities.Trace("Failure to connect to a server.");
                 // Overwrite the client exit type from unexpected to connection error, since that would trigger the fallback to old build behavior.
-                _exitResult.MSBuildClientExitType = MSBuildClientExitType.ConnectionError;
+                _exitResult.MSBuildClientExitType = MSBuildClientExitType.CanNotConnect;
                 return _exitResult;
             }
 
@@ -533,7 +533,7 @@ namespace Microsoft.Build.Experimental
             catch (Exception ex)
             {
                 CommunicationsUtilities.Trace("Failed to connect to server: {0}", ex);
-                _exitResult.MSBuildClientExitType = MSBuildClientExitType.ConnectionError;
+                _exitResult.MSBuildClientExitType = MSBuildClientExitType.CanNotConnect;
                 return false;
             }
 
