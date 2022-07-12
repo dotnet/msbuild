@@ -93,7 +93,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [CoreMSBuildOnlyTheory]
-        [InlineData("net7.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_collects_Aot_publishing_properties(string targetFramework)
         {
             // NativeAOT is only supported on Linux/Windows x64 scenarios for now

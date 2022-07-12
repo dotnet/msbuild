@@ -275,7 +275,7 @@ namespace Microsoft.NET.Publish.Tests
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData("net6.0")]
-        [InlineData("net7.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void ILLink_respects_IsTrimmable_attribute(string targetFramework)
         {
             string projectName = "HelloWorld";
