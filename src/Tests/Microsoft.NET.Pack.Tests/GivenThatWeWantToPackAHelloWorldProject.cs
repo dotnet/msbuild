@@ -116,7 +116,7 @@ namespace Microsoft.NET.Pack.Tests
             var helloWorldAsset = _testAssetsManager
                .CopyTestAsset("HelloWorld", "PackPropertiesHelloWorld")
                .WithSource()
-               .WithTargetFramework("net7.0");
+               .WithTargetFramework(ToolsetInfo.CurrentTargetFramework);
 
             System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PackRelease>true</PackRelease></PropertyGroup></Project>");
 
@@ -133,7 +133,7 @@ namespace Microsoft.NET.Pack.Tests
                 .Should()
                 .Pass();
 
-            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", "net7.0", "HelloWorld.dll");
+            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
             Assert.False(File.Exists(expectedAssetPath));
         }
     }

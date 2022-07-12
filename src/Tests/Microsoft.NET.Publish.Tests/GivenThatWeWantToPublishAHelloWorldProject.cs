@@ -429,7 +429,7 @@ public static class Program
             var helloWorldAsset = _testAssetsManager
                .CopyTestAsset("HelloWorld", "PublishReleaseHelloWorld")
                .WithSource()
-               .WithTargetFramework("net7.0");
+               .WithTargetFramework(ToolsetInfo.CurrentTargetFramework);
 
             System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PublishRelease>true</PublishRelease></PropertyGroup></Project>");
 
@@ -445,7 +445,7 @@ public static class Program
             .Should()
             .Pass();
 
-            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", "net7.0", "HelloWorld.dll");
+            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
             Assert.True(File.Exists(expectedAssetPath));
         }
 
