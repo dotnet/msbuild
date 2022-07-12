@@ -358,7 +358,7 @@ namespace Microsoft.Build.Experimental
             }
             catch (Exception ex)
             {
-                CommunicationsUtilities.Trace("Failed to send command packet of type '{0}' to server: {1}", ex, packet?.Type.ToString() ?? "Unknown");
+                CommunicationsUtilities.Trace("Failed to send command packet of type '{0}' to server: {1}", packet?.Type.ToString() ?? "Unknown", ex);
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.ConnectionError;
                 return false;
             }
