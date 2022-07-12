@@ -89,9 +89,9 @@ namespace Microsoft.Build.FileSystem
             };
 
 #if !FEATURE_MSIOREDIST && NETFRAMEWORK && MONO
-            FindTransform<string> transform = (ref ReadOnlySpan<char> fileName) => path + '/' + fileName.ToString());
+            FindTransform<string> transform = (ref ReadOnlySpan<char> fileName) => path + '/' + fileName.ToString();
 #elif !FEATURE_MSIOREDIST && NETFRAMEWORK
-            FindTransform<string> transform = (ref ReadOnlySpan<char> fileName) => path + '\\' + fileName.ToString());
+            FindTransform<string> transform = (ref ReadOnlySpan<char> fileName) => path + '\\' + fileName.ToString();
 #else
             FindTransform<string> transform = (ref ReadOnlySpan<char> fileName) => Path.Join(path.AsSpan(), fileName);
 #endif
