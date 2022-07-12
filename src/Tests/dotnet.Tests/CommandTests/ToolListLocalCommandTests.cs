@@ -12,6 +12,7 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Versioning;
 using Xunit;
 using Microsoft.NET.TestFramework.Utilities;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using Parser = Microsoft.DotNet.Cli.Parser;
 

@@ -16,12 +16,12 @@ namespace Microsoft.DotNet.PackageValidation.Validators
         public Package Package { get; }
 
         /// <summary>
-        /// If true, comparision is performed in strict mode
+        /// If true, comparison is performed in strict mode
         /// </summary>
         public bool EnableStrictMode { get; }
 
         /// <summary>
-        /// If true, ApiCompat comparision is performed in addition to other package checks
+        /// If true, ApiCompat comparison is performed in addition to other package checks
         /// </summary>
         public bool RunApiCompat { get; }
 

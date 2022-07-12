@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli;
 using Parser = Microsoft.DotNet.Cli.Parser;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System;
 

@@ -4,10 +4,10 @@
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Utils;
 using System.Globalization;
-using System.CommandLine;
 
 namespace Microsoft.DotNet.Cli.Telemetry
 {

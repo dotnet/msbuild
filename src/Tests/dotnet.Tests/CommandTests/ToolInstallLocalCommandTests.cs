@@ -19,6 +19,7 @@ using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Install.LocalizableString
 using Microsoft.DotNet.ToolManifest;
 using NuGet.Frameworks;
 using Microsoft.NET.TestFramework.Utilities;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
