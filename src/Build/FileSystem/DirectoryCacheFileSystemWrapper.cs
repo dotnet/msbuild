@@ -89,7 +89,7 @@ namespace Microsoft.Build.FileSystem
             };
 
 #if !FEATURE_MSIOREDIST && NETFRAMEWORK
-            FindTransform<string> transform = (ref string fileName) => Path.Join(path, fileName);
+            FindTransform<string> transform = (ref ReadOnlySpan<char> fileName) => Path.Join(path, fileName.ToString());
 #else
             FindTransform<string> transform = (ref ReadOnlySpan<char> fileName) => Path.Join(path.AsSpan(), fileName);
 #endif
