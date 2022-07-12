@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Cli
             InstalledWorkloadsCollection installedWorkloads = workloadInfoHelper.AddInstalledVsWorkloads(installedList);
             reporter ??= Cli.Utils.Reporter.Output;
 
-            if(!installedList.Any())
+            if (!installedList.Any())
             {
                 reporter.WriteLine(CommonStrings.NoWorkloadsInstalledInfoWarning);
                 return;
@@ -44,28 +44,30 @@ namespace Microsoft.DotNet.Cli
 
             foreach (var workload in installedWorkloads.AsEnumerable())
             {
-                reporter.WriteLine("\n");
-                reporter.WriteLine(CommonStrings.WorkloadIdColumn + " : [" + workload.Key + "]");
-
-                reporter.Write(CommonStrings.WorkloadSourceColumn + ":");
-                reporter.WriteLine("\t" + workload.Value);
-
                 var workloadManifest = workloadInfoHelper.WorkloadResolver.GetManifestFromWorkload(new WorkloadId(workload.Key));
                 var workloadFeatureBand = new WorkloadManifestInfo(
                     workloadManifest.Id,
                     workloadManifest.Version,
                     Path.GetDirectoryName(workloadManifest.ManifestPath)!).ManifestFeatureBand;
 
-                reporter.Write(CommonStrings.WorkloadManfiestVersionColumn + ":");
-                reporter.WriteLine("\t" + workloadManifest.Version + "/" + workloadFeatureBand);
+                const int align = 10;
+                const string separator = "   ";
 
-                reporter.Write(CommonStrings.WorkloadManifestPathColumn + ":");
-                reporter.WriteLine("\t\t" + workloadManifest.ManifestPath);
+                reporter.WriteLine($" {'[' + workload.Key + ']'}");
 
-                reporter.Write(CommonStrings.WorkloadInstallTypeColumn + ":");
-                reporter.WriteLine("\t\t" + WorkloadInstallerFactory.GetWorkloadInstallType(
-                    new SdkFeatureBand(workloadFeatureBand), workloadManifest.ManifestPath).ToString()
+                reporter.Write($"{separator}{CommonStrings.WorkloadSourceColumn}:");
+                reporter.WriteLine($" {workload.Value,align}");
+
+                reporter.Write($"{separator}{CommonStrings.WorkloadManfiestVersionColumn}:");
+                reporter.WriteLine($"    {workloadManifest.Version + '/' + workloadFeatureBand,align}");
+
+                reporter.Write($"{separator}{CommonStrings.WorkloadManifestPathColumn}:");
+                reporter.WriteLine($"       {workloadManifest.ManifestPath,align}");
+
+                reporter.Write($"{separator}{CommonStrings.WorkloadInstallTypeColumn}:");
+                reporter.WriteLine($"       {WorkloadInstallerFactory.GetWorkloadInstallType(new SdkFeatureBand(workloadFeatureBand), workloadManifest.ManifestPath).ToString(),align}"
                 );
+                reporter.WriteLine("");
             }
         }
 
