@@ -3,8 +3,6 @@
 
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli;
-using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Collections.Generic;
