@@ -1,34 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="6.0.400-preview.22330.1">
+    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="6.0.400-preview.22358.2">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>4fba13f8c6414d685e7a30efd41a4af05fb099c5</Sha>
+      <Sha>d8d193bf161de2a50a251035e4f9df2e2e85d7e7</Sha>
       <SourceBuild RepoName="templating" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="6.0.400-preview.22330.1">
+    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="6.0.400-preview.22358.2">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>4fba13f8c6414d685e7a30efd41a4af05fb099c5</Sha>
+      <Sha>d8d193bf161de2a50a251035e4f9df2e2e85d7e7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="6.0.400-preview.22330.1">
+    <Dependency Name="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="6.0.400-preview.22358.2">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>4fba13f8c6414d685e7a30efd41a4af05fb099c5</Sha>
+      <Sha>d8d193bf161de2a50a251035e4f9df2e2e85d7e7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Utils" Version="6.0.400-preview.22330.1">
+    <Dependency Name="Microsoft.TemplateEngine.Utils" Version="6.0.400-preview.22358.2">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>4fba13f8c6414d685e7a30efd41a4af05fb099c5</Sha>
+      <Sha>d8d193bf161de2a50a251035e4f9df2e2e85d7e7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateSearch.Common" Version="6.0.400-preview.22330.1">
+    <Dependency Name="Microsoft.TemplateSearch.Common" Version="6.0.400-preview.22358.2">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>4fba13f8c6414d685e7a30efd41a4af05fb099c5</Sha>
+      <Sha>d8d193bf161de2a50a251035e4f9df2e2e85d7e7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="6.0.400-preview.22330.1">
+    <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="6.0.400-preview.22358.2">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>4fba13f8c6414d685e7a30efd41a4af05fb099c5</Sha>
+      <Sha>d8d193bf161de2a50a251035e4f9df2e2e85d7e7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Common.ProjectTemplates.6.0" Version="6.0.400-preview.22330.1">
+    <Dependency Name="Microsoft.DotNet.Common.ProjectTemplates.6.0" Version="6.0.400-preview.22358.2">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>4fba13f8c6414d685e7a30efd41a4af05fb099c5</Sha>
+      <Sha>d8d193bf161de2a50a251035e4f9df2e2e85d7e7</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Ref" Version="6.0.6">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
@@ -121,13 +121,13 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-aspnetcore</Uri>
       <Sha>68bb6fb08f8f85bb3cf08953a0d2f4a254eaccff</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.3.0-rc.114">
+    <Dependency Name="NuGet.Build.Tasks" Version="6.3.0-rc.123">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>3dd86e0c670862f76351c87ca7dc3454d0faf8d6</Sha>
+      <Sha>3f9d36bb147ad6a7833772c148d0ac7a11f6c2aa</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build.NuGetSdkResolver" Version="6.3.0-rc.114">
+    <Dependency Name="Microsoft.Build.NuGetSdkResolver" Version="6.3.0-rc.123">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>3dd86e0c670862f76351c87ca7dc3454d0faf8d6</Sha>
+      <Sha>3f9d36bb147ad6a7833772c148d0ac7a11f6c2aa</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Test.Sdk" Version="17.3.0-release-20220708-01">
       <Uri>https://github.com/microsoft/vstest</Uri>
@@ -271,13 +271,13 @@
       <Sha>c750b5a665adb75b528a93d844f238bd1360a91a</Sha>
       <SourceBuild RepoName="roslyn-analyzers" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="System.CommandLine" Version="2.0.0-beta4.22326.1">
+    <Dependency Name="System.CommandLine" Version="2.0.0-beta4.22351.1">
       <Uri>https://github.com/dotnet/command-line-api</Uri>
-      <Sha>58b77e47bb0bb771b33768ff46736bf6cf0e5eef</Sha>
+      <Sha>a1958c04615bc9def16f855009adf7f33bd067fd</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.command-line-api" Version="0.1.332601">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.command-line-api" Version="0.1.335101">
       <Uri>https://github.com/dotnet/command-line-api</Uri>
-      <Sha>58b77e47bb0bb771b33768ff46736bf6cf0e5eef</Sha>
+      <Sha>a1958c04615bc9def16f855009adf7f33bd067fd</Sha>
       <SourceBuild RepoName="command-line-api" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build" Version="0.1.0-alpha.1.21519.2">

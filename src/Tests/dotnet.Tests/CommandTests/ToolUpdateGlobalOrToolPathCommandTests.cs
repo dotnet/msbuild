@@ -17,6 +17,7 @@ using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Update.LocalizableStrings
 using Microsoft.DotNet.ShellShim;
 using System.IO;
 using Microsoft.NET.TestFramework.Utilities;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Runtime.InteropServices;
 using Parser = Microsoft.DotNet.Cli.Parser;

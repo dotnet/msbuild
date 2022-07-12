@@ -7,6 +7,7 @@ using Xunit;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.DotNet.Workloads.Workload.Search;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using Microsoft.NET.TestFramework.Utilities;
 using System.Collections.Generic;

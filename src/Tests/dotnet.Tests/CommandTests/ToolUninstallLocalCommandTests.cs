@@ -15,6 +15,7 @@ using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Uninstall.LocalizableStri
 using Microsoft.DotNet.ToolManifest;
 using Microsoft.NET.TestFramework.Utilities;
 using Microsoft.DotNet.Cli;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
