@@ -47,6 +47,11 @@
         <target state="translated">'{0}' arabirim üyesi {2} üzerinde bulunmadığından {1} konumuna eklenemiyor</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotAddVirtualToMember">
+        <source>Cannot add virtual keyword to member '{0}'.</source>
+        <target state="new">Cannot add virtual keyword to member '{0}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
         <source>Type '{0}' does not implement interface '{1}' on {2} but it does on {3}</source>
         <target state="translated">'{0}' türü, {2} üzerinde '{1}' arabirimini uygulamıyor ancak bu {3} üzerinde uyguluyor</target>
@@ -57,6 +62,11 @@
         <target state="translated">'{0}' türü {2} üzerinde '{1}' temel türünden devralmıyor ancak {3} üzerinde devralıyor</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotRemoveVirtualFromMember">
+        <source>Cannot remove virtual keyword from member '{0}'.</source>
+        <target state="new">Cannot remove virtual keyword from member '{0}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotResolveReference">
         <source>Could not resolve reference '{0}' in any of the provided search directories.</source>
         <target state="translated">Sağlanan arama dizinlerinin hiçbirinde '{0}' başvurusu çözümlenemedi.</target>
@@ -65,6 +75,16 @@
       <trans-unit id="ElementShouldNotBeNullAtIndex">
         <source>Element should not be null. Found null at index: {0}.</source>
         <target state="translated">Öğe null olmamalıdır. Dizinde null bulundu: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnumTypesMustMatch">
+        <source>Underlying type of enum '{0}' changed from '{1}' to '{2}'.</source>
+        <target state="new">Underlying type of enum '{0}' changed from '{1}' to '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnumValuesMustMatch">
+        <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
+        <target state="new">Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileDoesNotExist">
@@ -127,6 +147,11 @@
         <target state="translated">Akış konumu, akış uzunluğundan büyük olduğundan okunabilecek içerik yok.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SuppressionsFileNotSpecified">
+        <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
+        <target state="new">A file path must be passed in to successfully generate a compatibility suppression file.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TypeExistsOnLeft">
         <source>Type '{0}' exists on {1} but not on {2}</source>
         <target state="translated">'{0}' türü {1} üzerinde var ancak {2} üzerinde yok</target>
@@ -150,6 +175,11 @@
       <trans-unit id="VisitorRightCountShouldMatchMappersSetSize">
         <source>The provided right count when creating the visitor should match the right set size specified for the mappers.</source>
         <target state="translated">Ziyaretçiyi oluştururken sağlanan doğru sayı, eşleyiciler için belirtilen doğru küme boyutuyla eşleşmelidir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WroteSuppressions">
+        <source>Successfully wrote compatibility suppressions to '{0}'.</source>
+        <target state="new">Successfully wrote compatibility suppressions to '{0}'.</target>
         <note />
       </trans-unit>
     </body>

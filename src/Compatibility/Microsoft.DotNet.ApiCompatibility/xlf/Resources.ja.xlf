@@ -47,6 +47,11 @@
         <target state="translated">インターフェイス メンバーが {2} に存在しないため、インターフェイス メンバー '{0}' を {1} に追加できません</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotAddVirtualToMember">
+        <source>Cannot add virtual keyword to member '{0}'.</source>
+        <target state="new">Cannot add virtual keyword to member '{0}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
         <source>Type '{0}' does not implement interface '{1}' on {2} but it does on {3}</source>
         <target state="translated">型 '{0}' は、{2} でインターフェイス '{1}' を実装していませんが、{3} で実装します</target>
@@ -57,6 +62,11 @@
         <target state="translated">型 '{0}' は {2} では基本データ型 '{1}' から継承していませんが、{3} では継承しています</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotRemoveVirtualFromMember">
+        <source>Cannot remove virtual keyword from member '{0}'.</source>
+        <target state="new">Cannot remove virtual keyword from member '{0}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotResolveReference">
         <source>Could not resolve reference '{0}' in any of the provided search directories.</source>
         <target state="translated">指定された検索ディレクトリ内の参照 '{0}' を解決できませんでした。</target>
@@ -65,6 +75,16 @@
       <trans-unit id="ElementShouldNotBeNullAtIndex">
         <source>Element should not be null. Found null at index: {0}.</source>
         <target state="translated">要素を null にすることはできません。インデックスに null が見つかりました: {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnumTypesMustMatch">
+        <source>Underlying type of enum '{0}' changed from '{1}' to '{2}'.</source>
+        <target state="new">Underlying type of enum '{0}' changed from '{1}' to '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnumValuesMustMatch">
+        <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
+        <target state="new">Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileDoesNotExist">
@@ -127,6 +147,11 @@
         <target state="translated">ストリームの位置が長さより大きいため、読み取り可能なコンテンツがありません。</target>
         <note />
       </trans-unit>
+      <trans-unit id="SuppressionsFileNotSpecified">
+        <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
+        <target state="new">A file path must be passed in to successfully generate a compatibility suppression file.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TypeExistsOnLeft">
         <source>Type '{0}' exists on {1} but not on {2}</source>
         <target state="translated">タイプ '{0}' は {1} に存在していますが、{2} には存在しません</target>
@@ -150,6 +175,11 @@
       <trans-unit id="VisitorRightCountShouldMatchMappersSetSize">
         <source>The provided right count when creating the visitor should match the right set size specified for the mappers.</source>
         <target state="translated">ビジターの作成時に指定された適切なカウントは、マッパーに指定された適切なセット サイズと一致する必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WroteSuppressions">
+        <source>Successfully wrote compatibility suppressions to '{0}'.</source>
+        <target state="new">Successfully wrote compatibility suppressions to '{0}'.</target>
         <note />
       </trans-unit>
     </body>

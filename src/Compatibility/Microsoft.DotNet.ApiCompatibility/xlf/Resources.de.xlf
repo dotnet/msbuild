@@ -47,6 +47,11 @@
         <target state="translated">Der Schnittstellenelement „{0}“ kann {1} nicht hinzugefügt werden, da es in {2} nicht vorhanden ist.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotAddVirtualToMember">
+        <source>Cannot add virtual keyword to member '{0}'.</source>
+        <target state="new">Cannot add virtual keyword to member '{0}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
         <source>Type '{0}' does not implement interface '{1}' on {2} but it does on {3}</source>
         <target state="translated">Der Typ „{0}“ implementiert die Schnittstelle „{1}“ nicht auf {2}, aber auf {3}</target>
@@ -57,6 +62,11 @@
         <target state="translated">Der Typ „{0}“ erbt nicht vom Basistyp „{1}“ auf {2}, auf {3} aber schon.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotRemoveVirtualFromMember">
+        <source>Cannot remove virtual keyword from member '{0}'.</source>
+        <target state="new">Cannot remove virtual keyword from member '{0}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotResolveReference">
         <source>Could not resolve reference '{0}' in any of the provided search directories.</source>
         <target state="translated">Der Verweis "{0}" konnte in keinem der angegebenen Suchverzeichnisse aufgelöst werden.</target>
@@ -65,6 +75,16 @@
       <trans-unit id="ElementShouldNotBeNullAtIndex">
         <source>Element should not be null. Found null at index: {0}.</source>
         <target state="translated">Das Element darf nicht NULL sein. NULL gefunden bei Index: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnumTypesMustMatch">
+        <source>Underlying type of enum '{0}' changed from '{1}' to '{2}'.</source>
+        <target state="new">Underlying type of enum '{0}' changed from '{1}' to '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnumValuesMustMatch">
+        <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
+        <target state="new">Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileDoesNotExist">
@@ -127,6 +147,11 @@
         <target state="translated">Die Datenstromposition ist größer als die Länge, daher sind keine Inhalte zum Lesen verfügbar.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SuppressionsFileNotSpecified">
+        <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
+        <target state="new">A file path must be passed in to successfully generate a compatibility suppression file.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TypeExistsOnLeft">
         <source>Type '{0}' exists on {1} but not on {2}</source>
         <target state="translated">Der Typ „{0}“ ist auf {1} vorhanden, aber nicht auf {2}</target>
@@ -150,6 +175,11 @@
       <trans-unit id="VisitorRightCountShouldMatchMappersSetSize">
         <source>The provided right count when creating the visitor should match the right set size specified for the mappers.</source>
         <target state="translated">Die beim Erstellen des Besuchers angegebene Rechteanzahl muss mit der für die Mapper angegebenen Rechtesatzgröße übereinstimmen.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WroteSuppressions">
+        <source>Successfully wrote compatibility suppressions to '{0}'.</source>
+        <target state="new">Successfully wrote compatibility suppressions to '{0}'.</target>
         <note />
       </trans-unit>
     </body>
