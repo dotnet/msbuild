@@ -52,6 +52,11 @@
         <target state="translated">Das Tool "{0}" wurde erfolgreich von Version {1} auf Version {2} aktualisiert (Manifestdatei "{3}").</target>
         <note />
       </trans-unit>
+      <trans-unit id="UpdateSucceededVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
+        <target state="new">Tool '{0}' was reinstalled with the latest stable version (version '{1}').</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UpdateToLowerVersion">
         <source>The requested version {0} is lower than existing version {1}.</source>
         <target state="translated">Die angeforderte Version {0} ist niedriger als die vorhandene Version {1}.</target>
@@ -130,11 +135,6 @@ Tools werden unter Verwendung der zugehörigen Paket-ID aktualisiert. Diese unte
 vom Toolnamen, den Sie zum Aufrufen des Tools verwenden. Sie können die Toolnamen 
 und die zugehörigen Paket-IDs für installierte Tools über den Befehl
 "dotnet tool list" abrufen.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateSucceededVersionNoChange">
-        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
-        <target state="translated">Das Tool "{0}" wurde in der neuesten stabilen Version neu installiert (Version {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolFailed">

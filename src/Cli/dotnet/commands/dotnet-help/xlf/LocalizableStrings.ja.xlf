@@ -17,6 +17,11 @@
         <target state="translated">.NET SDK のインストールを管理します。</target>
         <note />
       </trans-unit>
+      <trans-unit id="SqlCacheDefinition">
+        <source>SQL Server cache command-line tools.</source>
+        <target state="new">SQL Server cache command-line tools.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Usage">
         <source>Usage</source>
         <target state="translated">使用法</target>
@@ -265,11 +270,6 @@
       <trans-unit id="DevCertsDefinition">
         <source>Create and manage development certificates.</source>
         <target state="translated">開発証明書を作成し、管理します。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">SQL Server キャッシュ コマンドライン ツール。</target>
         <note />
       </trans-unit>
       <trans-unit id="UserSecretsDefinition">

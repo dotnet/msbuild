@@ -17,6 +17,11 @@
         <target state="translated">管理 .NET SDK 安装。</target>
         <note />
       </trans-unit>
+      <trans-unit id="SqlCacheDefinition">
+        <source>SQL Server cache command-line tools.</source>
+        <target state="new">SQL Server cache command-line tools.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Usage">
         <source>Usage</source>
         <target state="translated">使用情况</target>
@@ -265,11 +270,6 @@
       <trans-unit id="DevCertsDefinition">
         <source>Create and manage development certificates.</source>
         <target state="translated">创建和管理开发证书。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">SQL Server 缓存命令行工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="UserSecretsDefinition">

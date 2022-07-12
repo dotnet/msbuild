@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="UnableToLocateNETCoreSdk">
         <source>Unable to locate the .NET SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.</source>
-        <target state="translated">找不到 .NET SDK。請檢查是否已安裝該項目，且在 global.json 中指定的版本 (如果有的話) 是否與安裝的版本相符。</target>
+        <target state="new">Unable to locate the .NET SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.</target>
         <note />
       </trans-unit>
     </body>

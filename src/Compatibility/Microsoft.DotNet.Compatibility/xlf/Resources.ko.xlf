@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="WroteSuppressions">
         <source>Successfully wrote compatibility suppressions to '{0}'.</source>
-        <target state="translated">‘{0}’에 호환성 억제를 성공적으로 작성했습니다.</target>
+        <target state="new">Successfully wrote compatibility suppressions to '{0}'.</target>
         <note />
       </trans-unit>
     </body>

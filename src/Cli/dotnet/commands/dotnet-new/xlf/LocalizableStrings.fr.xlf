@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="fr" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AddPackageReferenceCallback_Failed">
+        <source>Failed to add package reference: {0}</source>
+        <target state="new">Failed to add package reference: {0}</target>
+        <note>{0} - the reason why operation failed, normally ends with period</note>
+      </trans-unit>
+      <trans-unit id="AddProjectReferenceCallback_Failed">
+        <source>Failed to add project reference: {0}</source>
+        <target state="new">Failed to add project reference: {0}</target>
+        <note>{0} - the reason why operation failed, normally ends with period</note>
+      </trans-unit>
+      <trans-unit id="AddProjectsToSolutionCallback_Failed">
+        <source>Failed to add project(s) to the solution: {0}</source>
+        <target state="new">Failed to add project(s) to the solution: {0}</target>
+        <note>{0} - the reason why operation failed, normally ends with period</note>
+      </trans-unit>
+      <trans-unit id="DisableSdkTemplates_OptionDescription">
+        <source>If present, prevents templates bundled in the SDK from being presented.</source>
+        <target state="new">If present, prevents templates bundled in the SDK from being presented.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RestoreCallback_Failed">
+        <source>Failed to perform restore: {0}</source>
+        <target state="new">Failed to perform restore: {0}</target>
+        <note>{0} - the reason why operation failed, normally ends with period</note>
+      </trans-unit>
+      <trans-unit id="SdkInfoProvider_Message_InstallSdk">
+        <source>Go to aka.ms/get-dotnet and install any of the supported SDK versions: '{0}'.</source>
+        <target state="new">Go to aka.ms/get-dotnet and install any of the supported SDK versions: '{0}'.</target>
+        <note>{0} is the list of supported versions.</note>
+      </trans-unit>
+      <trans-unit id="SdkInfoProvider_Message_SwitchSdk">
+        <source>You have other SDK version(s) installed that can be used to run this template. Switch to any of the following SDK(s) on your system to run this template: '{0}'. Details on selecting SDK version to run: https://docs.microsoft.com/dotnet/core/tools/global-json.</source>
+        <target state="new">You have other SDK version(s) installed that can be used to run this template. Switch to any of the following SDK(s) on your system to run this template: '{0}'. Details on selecting SDK version to run: https://docs.microsoft.com/dotnet/core/tools/global-json.</target>
+        <note>{0} is the list of installed and supported versions.</note>
+      </trans-unit>
+      <trans-unit id="WorkloadInfoProvider_Message_AddWorkloads">
+        <source>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</source>
+        <target state="new">Run 'dotnet workload search' to search workloads available to be installed on your SDK.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -56,7 +56,7 @@ El valor predeterminado es publicar una aplicación dependiente del marco.</targ
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
-        <target state="translated">La configuración para la que se publica. El valor predeterminado para la mayoría de los proyectos es "Debug".</target>
+        <target state="new">The configuration to publish for. The default for most projects is 'Debug'.</target>
         <note />
       </trans-unit>
     </body>

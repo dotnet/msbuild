@@ -17,6 +17,11 @@
         <target state="translated">Gérer l'installation du kit SDK .NET.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SqlCacheDefinition">
+        <source>SQL Server cache command-line tools.</source>
+        <target state="new">SQL Server cache command-line tools.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Usage">
         <source>Usage</source>
         <target state="translated">Utilisation</target>
@@ -265,11 +270,6 @@
       <trans-unit id="DevCertsDefinition">
         <source>Create and manage development certificates.</source>
         <target state="translated">Créez et gérez des certificats de développement.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="translated">Outils en ligne de commande du cache SQL Server.</target>
         <note />
       </trans-unit>
       <trans-unit id="UserSecretsDefinition">

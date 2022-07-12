@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="WroteSuppressions">
         <source>Successfully wrote compatibility suppressions to '{0}'.</source>
-        <target state="translated">Kompatibilitätsunterdrückungen wurden erfolgreich in „{0}“ geschrieben.</target>
+        <target state="new">Successfully wrote compatibility suppressions to '{0}'.</target>
         <note />
       </trans-unit>
     </body>

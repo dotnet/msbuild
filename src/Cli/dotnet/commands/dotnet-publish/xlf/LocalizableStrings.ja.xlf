@@ -56,7 +56,7 @@ The default is to publish a framework-dependent application.</source>
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
-        <target state="translated">公開する対象の構成。大部分のプロジェクトで、既定値は 'Debug' です。</target>
+        <target state="new">The configuration to publish for. The default for most projects is 'Debug'.</target>
         <note />
       </trans-unit>
     </body>
