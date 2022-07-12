@@ -389,7 +389,7 @@ namespace Microsoft.Build.Experimental
             {
                 _writeCallback = writeCallback;
                 _syncWriter = Synchronized(this);
-                _timer = new Timer(TimerCallback, null, 0, 200);
+                _timer = new Timer(TimerCallback, null, 0, 40);
             }
 
             public static TextWriter Create(Action<string> writeCallback)
