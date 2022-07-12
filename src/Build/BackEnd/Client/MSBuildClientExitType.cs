@@ -15,7 +15,7 @@ namespace Microsoft.Build.Experimental
         /// <summary>
         /// Client was unable to connect to the server. This would invoke a fallback behavior.
         /// </summary>
-        CanNotConnect,
+        UnableToConnect,
         /// <summary>
         /// Client was unable to launch the server. This would invoke a fallback behavior.
         /// </summary>
