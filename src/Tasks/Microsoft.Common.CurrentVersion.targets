@@ -1892,7 +1892,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <Platforms>$(Platforms)</Platforms>
         <!-- .vcxproj and .nativeproj contain a `ProjectConfiguration` item that have `Platform` metadata within.
              Build the `Platforms` property from that. -->
-        <Platforms Condition="'@(ProjectConfiguration)' != '' and ('$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj')">$(Platforms);@(ProjectConfiguration->'%(Platform)'->Distinct())</Platforms>
+        <Platforms Condition="'$(ImportProjectConfigurationPlatforms)' != 'false' and '@(ProjectConfiguration)' != '' and ('$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj')">$(Platforms);@(ProjectConfiguration->'%(Platform)'->Distinct())</Platforms>
       </_ThisProjectBuildMetadata>
     </ItemGroup>
 
