@@ -996,7 +996,6 @@ namespace Microsoft.Build.Execution
                             KnownTelemetry.BuildTelemetry.Version = ProjectCollection.Version;
                             KnownTelemetry.BuildTelemetry.DisplayVersion = ProjectCollection.DisplayVersion;
                             KnownTelemetry.BuildTelemetry.FrameworkName = NativeMethodsShared.FrameworkName;
-                            NativeMethodsShared.GetOSNameForExtensionsPath();
 
                             string host = null;
                             if (BuildEnvironmentState.s_runningInVisualStudio)
