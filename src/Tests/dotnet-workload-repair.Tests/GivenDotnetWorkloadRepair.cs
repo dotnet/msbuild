@@ -6,6 +6,7 @@ using Microsoft.NET.TestFramework;
 using Xunit;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.Assertions;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using Microsoft.NET.TestFramework.Utilities;
 using Microsoft.NET.Sdk.WorkloadManifestReader;

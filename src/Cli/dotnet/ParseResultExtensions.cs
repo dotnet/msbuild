@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Diagnostics;
 using System.Linq;
@@ -65,7 +66,7 @@ namespace Microsoft.DotNet.Cli
 
         public static bool IsTopLevelDotnetCommand(this ParseResult parseResult)
         {
-            return parseResult.CommandResult.Command.Equals(RootCommand) && string.IsNullOrEmpty(parseResult.RootSubCommandResult());
+            return parseResult.CommandResult.Command.Equals(Parser.RootCommand) && string.IsNullOrEmpty(parseResult.RootSubCommandResult());
         }
 
         public static bool CanBeInvoked(this ParseResult parseResult)
