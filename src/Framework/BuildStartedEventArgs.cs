@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Generic;
 
-#nullable disable
-
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -20,7 +18,7 @@ namespace Microsoft.Build.Framework
     [Serializable]
     public class BuildStartedEventArgs : BuildStatusEventArgs
     {
-        private IDictionary<string, string> environmentOnBuildStart;
+        private IDictionary<string, string>? environmentOnBuildStart;
 
         /// <summary>
         /// Default constructor
@@ -56,8 +54,8 @@ namespace Microsoft.Build.Framework
         /// <param name="environmentOfBuild">A dictionary which lists the environment of the build when the build is started.</param>
         public BuildStartedEventArgs
         (
-            string message,
-            string helpKeyword,
+            string? message,
+            string? helpKeyword,
             IDictionary<string, string> environmentOfBuild
         )
             : this(message, helpKeyword, DateTime.UtcNow)
@@ -73,8 +71,8 @@ namespace Microsoft.Build.Framework
         /// <param name="eventTimestamp">Timestamp when the event was created</param>
         public BuildStartedEventArgs
         (
-            string message,
-            string helpKeyword,
+            string? message,
+            string? helpKeyword,
             DateTime eventTimestamp
         )
             : this(message, helpKeyword, eventTimestamp, null)
@@ -91,10 +89,10 @@ namespace Microsoft.Build.Framework
         /// <param name="messageArgs">message args</param>
         public BuildStartedEventArgs
         (
-            string message,
-            string helpKeyword,
+            string? message,
+            string? helpKeyword,
             DateTime eventTimestamp,
-            params object[] messageArgs
+            params object[]? messageArgs
         )
             : base(message, helpKeyword, "MSBuild", eventTimestamp, messageArgs)
         {
@@ -104,7 +102,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// The environment which is used at the start of the build
         /// </summary>
-        public IDictionary<string, string> BuildEnvironment
+        public IDictionary<string, string>? BuildEnvironment
         {
             get { return environmentOnBuildStart; }
         }
