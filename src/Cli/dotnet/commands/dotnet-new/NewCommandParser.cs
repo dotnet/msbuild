@@ -23,6 +23,8 @@ using Microsoft.DotNet.Tools.Sln.Add;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Common;
 using LocalizableStrings = Microsoft.DotNet.Tools.New.LocalizableStrings;
+using Microsoft.TemplateEngine.MSBuildEvaluation;
+using Microsoft.TemplateEngine.Abstractions.Constraints;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -33,6 +35,8 @@ namespace Microsoft.DotNet.Cli
         private const string HostIdentifier = "dotnetcli";
 
         private static readonly Option<bool> _disableSdkTemplates = new Option<bool>("--debug:disable-sdk-templates", () => false, LocalizableStrings.DisableSdkTemplates_OptionDescription).Hide();
+
+        private static readonly Option<bool> _enableProjectContextEvaluation = new Option<bool>("--debug:enable-project-context", () => false, "Enables evaluating project context using MSBuild.").Hide();
 
         internal static readonly System.CommandLine.Command Command = GetCommand();
 
@@ -73,17 +77,21 @@ namespace Microsoft.DotNet.Cli
 
             var getEngineHost = (ParseResult parseResult) => {
                 var disableSdkTemplates = parseResult.GetValueForOption(_disableSdkTemplates);
-                return CreateHost(disableSdkTemplates);
+                var enableProjectContext = parseResult.GetValueForOption(_enableProjectContextEvaluation);
+
+                //TODO: read and pass output directory
+                return CreateHost(disableSdkTemplates, enableProjectContext);
             };
 
             var command = Microsoft.TemplateEngine.Cli.NewCommandFactory.Create(CommandName, getEngineHost, getLogger, callbacks);
 
             // adding this option lets us look for its bound value during binding in a typed way
             command.AddGlobalOption(_disableSdkTemplates);
+            command.AddGlobalOption(_enableProjectContextEvaluation);
             return command;
         }
 
-        private static ITemplateEngineHost CreateHost(bool disableSdkTemplates)
+        private static ITemplateEngineHost CreateHost(bool disableSdkTemplates, bool enableProjectContext)
         {
             var builtIns = new List<(Type InterfaceType, IIdentifiedComponent Instance)>();
             builtIns.AddRange(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Components.AllComponents);
@@ -94,6 +102,12 @@ namespace Microsoft.DotNet.Cli
             {
                 builtIns.Add((typeof(ITemplatePackageProviderFactory), new BuiltInTemplatePackageProviderFactory()));
                 builtIns.Add((typeof(ITemplatePackageProviderFactory), new OptionalWorkloadProviderFactory()));
+            }
+            if (enableProjectContext)
+            {
+                builtIns.Add((typeof(IBindSymbolSource), new ProjectContextSymbolSource()));
+                builtIns.Add((typeof(ITemplateConstraintFactory), new ProjectCapabilityConstraintFactory()));
+                builtIns.Add((typeof(MSBuildEvaluator), new MSBuildEvaluator()));
             }
             builtIns.Add((typeof(IWorkloadsInfoProvider), new WorkloadsInfoProvider(new WorkloadInfoHelper())));
             builtIns.Add((typeof(ISdkInfoProvider), new SdkInfoProvider()));
