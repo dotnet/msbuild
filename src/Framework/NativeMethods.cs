@@ -759,6 +759,24 @@ internal static class NativeMethods
     }
 
     /// <summary>
+    /// Framework named as presented to users (for example in version info).
+    /// </summary>
+    internal static string FrameworkName
+    {
+        get
+        {
+#if RUNTIME_TYPE_NETCORE
+            const string frameworkName = ".NET";
+#elif MONO
+            const string frameworkName = "Mono";
+#else
+            const string frameworkName = ".NET Framework";
+#endif
+            return frameworkName;
+        }
+    }
+
+    /// <summary>
     /// OS name that can be used for the msbuildExtensionsPathSearchPaths element
     /// for a toolset
     /// </summary>

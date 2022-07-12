@@ -36,6 +36,7 @@ using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Experimental;
+using Microsoft.Build.Framework.Telemetry;
 
 #nullable disable
 
@@ -215,6 +216,9 @@ namespace Microsoft.Build.CommandLine
 #endif
             )
         {
+            // Initialize new build telemetry and record start of this build.
+            KnownTelemetry.BuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow };
+
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
             if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
@@ -525,6 +529,9 @@ namespace Microsoft.Build.CommandLine
 #endif
             )
         {
+            // Initialize new build telemetry and record start of this build, if not initialized already
+            KnownTelemetry.BuildTelemetry ??= new BuildTelemetry { StartAt = DateTime.UtcNow };
+
             // Indicate to the engine that it can toss extraneous file content
             // when it loads microsoft.*.targets. We can't do this in the general case,
             // because tasks in the build can (and occasionally do) load MSBuild format files
@@ -3757,15 +3764,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static void DisplayVersionMessage()
         {
-#if RUNTIME_TYPE_NETCORE
-            const string frameworkName = ".NET";
-#elif MONO
-            const string frameworkName = "Mono";
-#else
-            const string frameworkName = ".NET Framework";
-#endif
-
-            Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildVersionMessage", ProjectCollection.DisplayVersion, frameworkName));
+            Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildVersionMessage", ProjectCollection.DisplayVersion, NativeMethods.FrameworkName));
         }
 
         /// <summary>

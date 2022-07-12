@@ -5,6 +5,7 @@ using System;
 using Microsoft.Build.Shared;
 using System.Threading;
 using Microsoft.Build.Experimental;
+using Microsoft.Build.Framework.Telemetry;
 
 #if RUNTIME_TYPE_NETCORE || MONO
 using System.IO;
@@ -77,6 +78,11 @@ namespace Microsoft.Build.CommandLine
                 exitResult.MSBuildClientExitType == MSBuildClientExitType.UnableToConnect ||
                 exitResult.MSBuildClientExitType == MSBuildClientExitType.LaunchError)
             {
+                if (KnownTelemetry.BuildTelemetry != null)
+                {
+                    KnownTelemetry.BuildTelemetry.ServerFallbackReason = exitResult.MSBuildClientExitType.ToString();
+                }
+
                 // Server is busy, fallback to old behavior.
                 return MSBuildApp.Execute(commandLine);
             }
