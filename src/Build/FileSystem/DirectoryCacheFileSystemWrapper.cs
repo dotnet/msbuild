@@ -88,8 +88,10 @@ namespace Microsoft.Build.FileSystem
                 return FileMatcher.IsAllFilesWildcard(searchPattern) || FileMatcher.IsMatch(fileName, searchPattern);
             };
 
-#if !FEATURE_MSIOREDIST && NETFRAMEWORK
-            FindTransform<string> transform = (ref ReadOnlySpan<char> fileName) => Path.Join(path, fileName.ToString());
+#if !FEATURE_MSIOREDIST && NETFRAMEWORK && MONO
+            FindTransform<string> transform = (ref ReadOnlySpan<char> fileName) => path + '/' + fileName.ToString());
+#elif !FEATURE_MSIOREDIST && NETFRAMEWORK
+            FindTransform<string> transform = (ref ReadOnlySpan<char> fileName) => path + '\\' + fileName.ToString());
 #else
             FindTransform<string> transform = (ref ReadOnlySpan<char> fileName) => Path.Join(path.AsSpan(), fileName);
 #endif
