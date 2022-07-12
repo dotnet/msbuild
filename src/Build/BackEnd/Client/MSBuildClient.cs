@@ -354,11 +354,11 @@ namespace Microsoft.Build.Experimental
             {
                 packet = packetResolver();
                 WritePacket(_nodeStream, packet);
-                CommunicationsUtilities.Trace($"Command packet of type '{packet.Type}' sent...");
+                CommunicationsUtilities.Trace("Command packet of type '{0}' sent...", packet.Type);
             }
             catch (Exception ex)
             {
-                CommunicationsUtilities.Trace($"Failed to send command packet of type '{packet?.Type.ToString() ?? "Unknown"}' to server: {0}", ex);
+                CommunicationsUtilities.Trace("Failed to send command packet of type '{0}' to server: {1}", packet?.Type.ToString() ?? "Unknown", ex);
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.ConnectionError;
                 return false;
             }
@@ -392,11 +392,11 @@ namespace Microsoft.Build.Experimental
                 NodeLauncher nodeLauncher = new NodeLauncher();
                 CommunicationsUtilities.Trace("Starting Server...");
                 Process msbuildProcess = nodeLauncher.Start(_msbuildLocation, string.Join(" ", msBuildServerOptions));
-                CommunicationsUtilities.Trace($"Server started with PID: {msbuildProcess?.Id}");
+                CommunicationsUtilities.Trace("Server started with PID: {0}", msbuildProcess?.Id);
             }
             catch (Exception ex)
             {
-                CommunicationsUtilities.Trace($"Failed to launch the msbuild server: {ex}");
+                CommunicationsUtilities.Trace("Failed to launch the msbuild server: {0}", ex);
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.LaunchError;
                 return false;
             }
@@ -454,7 +454,7 @@ namespace Microsoft.Build.Experimental
         /// </summary>
         private void HandlePacketPumpError(MSBuildClientPacketPump packetPump)
         {
-            CommunicationsUtilities.Trace($"MSBuild client error: packet pump unexpectedly shut down: {packetPump.PacketPumpException}");
+            CommunicationsUtilities.Trace("MSBuild client error: packet pump unexpectedly shut down: {0}", packetPump.PacketPumpException);
             throw packetPump.PacketPumpException ?? new InternalErrorException("Packet pump unexpectedly shut down");
         }
 
@@ -496,7 +496,7 @@ namespace Microsoft.Build.Experimental
 
         private void HandleServerNodeBuildResult(ServerNodeBuildResult response)
         {
-            CommunicationsUtilities.Trace($"Build response received: exit code {response.ExitCode}, exit type '{response.ExitType}'");
+            CommunicationsUtilities.Trace("Build response received: exit code '{0}', exit type '{1}'", response.ExitCode, response.ExitType);
             _exitResult.MSBuildClientExitType = MSBuildClientExitType.Success;
             _exitResult.MSBuildAppExitTypeString = response.ExitType;
             _buildFinished = true;
@@ -514,7 +514,7 @@ namespace Microsoft.Build.Experimental
             }
             catch (Exception ex)
             {
-                CommunicationsUtilities.Trace($"Failed to connect to server: {ex}");
+                CommunicationsUtilities.Trace("Failed to connect to server: {0}", ex);
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.ConnectionError;
                 return false;
             }
