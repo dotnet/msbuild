@@ -3,6 +3,7 @@
 
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.PostActionProcessors;
+using Microsoft.TemplateEngine.Mocks;
 using Microsoft.TemplateEngine.TestHelper;
 using Xunit;
 
@@ -147,6 +148,80 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             AddReferencePostActionProcessor actionProcessor = new AddReferencePostActionProcessor();
             IReadOnlyList<string> projFilesFound = actionProcessor.FindProjFileAtOrAbovePath(_engineEnvironmentSettings.Host.FileSystem, outputBasePath, new HashSet<string>());
             Assert.Equal(2, projFilesFound.Count);
+        }
+
+        [Fact(DisplayName = nameof(AddRefCanHandleProjectFileRenames))]
+        public void AddRefCanHandleProjectFileRenames()
+        {
+            AddReferencePostActionProcessor actionProcessor = new AddReferencePostActionProcessor();
+
+            string targetBasePath = _engineEnvironmentSettings.GetNewVirtualizedPath();
+            string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
+            string referencedProjFileFullPath = Path.Combine(targetBasePath, "NewName.csproj");
+            
+            var args = new Dictionary<string, string>() { { "targetFiles", "[\"MyApp.csproj\"]" }, { "referenceType", "project" }, { "reference", "./OldName.csproj" } };
+            var postAction = new MockPostAction { ActionId = AddReferencePostActionProcessor.ActionProcessorId, Args = args };
+
+            var creationEffects = new MockCreationEffects()
+                .WithFileChange(new MockFileChange("./OldName.csproj", "./NewName.csproj", ChangeKind.Create))
+                .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));
+
+            var callback = new MockAddProjectReferenceCallback();
+            actionProcessor.Callbacks = new NewCommandCallbacks { AddProjectReference = callback.AddProjectReference };
+
+            actionProcessor.Process(
+                _engineEnvironmentSettings,
+                postAction,
+                creationEffects,
+                new MockCreationResult(),
+                targetBasePath);
+
+            Assert.Equal(projFileFullPath, callback.Target);
+            Assert.Equal(new [] { referencedProjFileFullPath }, callback.References);
+        }
+
+        [Fact(DisplayName = nameof(AddRefCanHandleProjectFilesWithoutRenames))]
+        public void AddRefCanHandleProjectFilesWithoutRenames()
+        {
+            AddReferencePostActionProcessor actionProcessor = new AddReferencePostActionProcessor();
+
+            string targetBasePath = _engineEnvironmentSettings.GetNewVirtualizedPath();
+            string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
+            string referencedProjFileFullPath = Path.Combine(targetBasePath, "Reference.csproj");
+
+            var args = new Dictionary<string, string>() { { "targetFiles", "[\"MyApp.csproj\"]" }, { "referenceType", "project" }, { "reference", "./Reference.csproj" } };
+            var postAction = new MockPostAction { ActionId = AddReferencePostActionProcessor.ActionProcessorId, Args = args };
+
+            var creationEffects = new MockCreationEffects()
+                .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));
+
+            var callback = new MockAddProjectReferenceCallback();
+            actionProcessor.Callbacks = new NewCommandCallbacks { AddProjectReference = callback.AddProjectReference };
+
+            actionProcessor.Process(
+                _engineEnvironmentSettings,
+                postAction,
+                creationEffects,
+                new MockCreationResult(),
+                targetBasePath);
+
+            Assert.Equal(projFileFullPath, callback.Target);
+            Assert.Equal(new[] { referencedProjFileFullPath }, callback.References);
+        }
+
+        private class MockAddProjectReferenceCallback
+        {
+            public string? Target { get; private set; }
+
+            public IReadOnlyList<string>? References { get; private set; }
+
+            public bool AddProjectReference(string target, IReadOnlyList<string> references)
+            {
+                this.Target = target;
+                this.References = references;
+
+                return true;
+            }
         }
     }
 }
