@@ -1,23 +1,30 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
 using VerifyTests;
 using VerifyXunit;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Dotnet_new3.IntegrationTests
+namespace Microsoft.DotNet.New.Tests
 {
     [UsesVerify]
-    public class DotnetNew3CompleteTests : IClassFixture<VerifySettingsFixture>
+    public class DotnetNew3CompleteTests : SdkTest, IClassFixture<VerifySettingsFixture>
     {
         private readonly VerifySettings _verifySettings;
         private readonly ITestOutputHelper _log;
 
-        public DotnetNew3CompleteTests(VerifySettingsFixture verifySettings, ITestOutputHelper log)
+        public DotnetNew3CompleteTests(VerifySettingsFixture verifySettings, ITestOutputHelper log) : base(log)
         {
             _verifySettings = verifySettings.Settings;
             _log = log;
@@ -27,9 +34,17 @@ namespace Dotnet_new3.IntegrationTests
         public Task CanDoTabCompletion()
         {
             string homeDir = TestUtils.CreateTemporaryFolder();
-            var commandResult = new DotnetNewCommand(_log, "complete", $"new3 --debug:custom-hive {homeDir} ")
-                .WithoutCustomHive()
-                .Execute();
+            var command = new DotnetNewCommand(_log, "complete", $"new3 --debug:custom-hive {homeDir} ");
+            // Replace command "new" with "dotnet-new3.dll new3"
+			string dotnetNew3AssemblyPath = typeof(Dotnet_new3.Program).Assembly.Location;
+            command.Arguments.RemoveAt(0);
+            command.Arguments.InsertRange(0, new List<string> { dotnetNew3AssemblyPath, "new3" });
+            string dotnetRoot = TestContext.Current.ToolsetUnderTest.DotNetRoot;
+            string templatesLocation = Path.Combine(dotnetRoot, "templates");
+            var packagePaths = Directory.EnumerateFiles(templatesLocation, "microsoft.dotnet.common.itemtemplates.*.nupkg", SearchOption.AllDirectories);
+            string packageLocation = packagePaths.FirstOrDefault();
+            Environment.SetEnvironmentVariable("DN3", Path.GetDirectoryName(packageLocation));
+            var commandResult = command.WithoutCustomHive().Execute();
 
             commandResult
                 .Should()

@@ -1,23 +1,26 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
 using VerifyTests;
 using VerifyXunit;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Dotnet_new3.IntegrationTests
+namespace Microsoft.DotNet.New.Tests
 {
     [UsesVerify]
-    public partial class DotnetNewList : IClassFixture<SharedHomeDirectory>, IClassFixture<VerifySettingsFixture>
+    public partial class DotnetNewList : SdkTest, IClassFixture<SharedHomeDirectory>, IClassFixture<VerifySettingsFixture>
     {
         private readonly VerifySettings _verifySettings;
         private readonly SharedHomeDirectory _sharedHome;
         private readonly ITestOutputHelper _log;
 
-        public DotnetNewList(SharedHomeDirectory sharedHome, VerifySettingsFixture verifySettings, ITestOutputHelper log)
+        public DotnetNewList(SharedHomeDirectory sharedHome, VerifySettingsFixture verifySettings, ITestOutputHelper log) : base(log)
         {
             _sharedHome = sharedHome;
             _log = log;
@@ -126,29 +129,46 @@ namespace Dotnet_new3.IntegrationTests
         public void CanSortByName(string command)
         {
             const string expectedOutput =
-@"Template Name                                 Short Name     Language    Tags                  
---------------------------------------------  -------------  ----------  ----------------------
-ASP.NET Core Empty                            web            [C#],F#     Web/Empty             
-ASP.NET Core gRPC Service                     grpc           [C#]        Web/gRPC              
-ASP.NET Core Web API                          webapi         [C#],F#     Web/WebAPI            
-ASP.NET Core Web App                          webapp,razor   [C#]        Web/MVC/Razor Pages   
-ASP.NET Core Web App (Model-View-Controller)  mvc            [C#],F#     Web/MVC               
-Blazor Server App                             blazorserver   [C#]        Web/Blazor            
-Blazor WebAssembly App                        blazorwasm     [C#]        Web/Blazor/WebAssembly
-Class Library                                 classlib       [C#],F#,VB  Common/Library        
-Console App                                   console        [C#],F#,VB  Common/Console        
-dotnet gitignore file                         gitignore                  Config                
-Dotnet local tool manifest file               tool-manifest              Config                
-EditorConfig file                             editorconfig               Config                
-global.json file                              globaljson                 Config                
-NuGet Config                                  nugetconfig                Config                
-Razor Class Library                           razorclasslib  [C#]        Web/Razor/Library     
-Solution File                                 sln                        Solution              
-Web Config                                    webconfig                  Config                
-Worker Service                                worker         [C#],F#     Common/Worker/Web     ";
+@"Template Name                                 Short Name           Language    Tags                      
+--------------------------------------------  -------------------  ----------  --------------------------
+ASP.NET Core Empty                            web                  [C#],F#     Web/Empty                 
+ASP.NET Core gRPC Service                     grpc                 [C#]        Web/gRPC                  
+ASP.NET Core Web API                          webapi               [C#],F#     Web/WebAPI                
+ASP.NET Core Web App                          webapp,razor         [C#]        Web/MVC/Razor Pages       
+ASP.NET Core Web App (Model-View-Controller)  mvc                  [C#],F#     Web/MVC                   
+ASP.NET Core with Angular                     angular              [C#]        Web/MVC/SPA               
+ASP.NET Core with React.js                    react                [C#]        Web/MVC/SPA               
+Blazor Server App                             blazorserver         [C#]        Web/Blazor                
+Blazor WebAssembly App                        blazorwasm           [C#]        Web/Blazor/WebAssembly/PWA
+Class Library                                 classlib             [C#],F#,VB  Common/Library            
+Console App                                   console              [C#],F#,VB  Common/Console            
+dotnet gitignore file                         gitignore                        Config                    
+Dotnet local tool manifest file               tool-manifest                    Config                    
+EditorConfig file                             editorconfig                     Config                    
+global.json file                              globaljson                       Config                    
+MSTest Test Project                           mstest               [C#],F#,VB  Test/MSTest               
+MVC ViewImports                               viewimports          [C#]        Web/ASP.NET               
+MVC ViewStart                                 viewstart            [C#]        Web/ASP.NET               
+NuGet Config                                  nugetconfig                      Config                    
+NUnit 3 Test Item                             nunit-test           [C#],F#,VB  Test/NUnit                
+NUnit 3 Test Project                          nunit                [C#],F#,VB  Test/NUnit                
+Protocol Buffer File                          proto                            Web/gRPC                  
+Razor Class Library                           razorclasslib        [C#]        Web/Razor/Library         
+Razor Component                               razorcomponent       [C#]        Web/ASP.NET               
+Razor Page                                    page                 [C#]        Web/ASP.NET               
+Solution File                                 sln                              Solution                  
+Web Config                                    webconfig                        Config                    
+Windows Forms App                             winforms             [C#],VB     Common/WinForms           
+Windows Forms Class Library                   winformslib          [C#],VB     Common/WinForms           
+Windows Forms Control Library                 winformscontrollib   [C#],VB     Common/WinForms           
+Worker Service                                worker               [C#],F#     Common/Worker/Web         
+WPF Application                               wpf                  [C#],VB     Common/WPF                
+WPF Class Library                             wpflib               [C#],VB     Common/WPF                
+WPF Custom Control Library                    wpfcustomcontrollib  [C#],VB     Common/WPF                
+WPF User Control Library                      wpfusercontrollib    [C#],VB     Common/WPF                
+xUnit Test Project                            xunit                [C#],F#,VB  Test/xUnit                ";
 
             string home = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallNuGetTemplate("Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0", _log, home, null);
 
             new DotnetNewCommand(_log, command)
                 .WithCustomHive(home)
@@ -498,7 +518,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .Should().Fail()
                 .And.HaveStdErrContaining("No templates found matching: --unknown.")
                 .And.HaveStdErrContaining("9 template(s) partially matched, but failed on --unknown.")
-                .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 <TEMPLATE_NAME> --search");
+                .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new <TEMPLATE_NAME> --search");
 
             new DotnetNewCommand(_log, "c", "--list", "--unknown")
                 .WithCustomHive(_sharedHome.HomeDirectory)
@@ -506,7 +526,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .Should().Fail()
                 .And.HaveStdErrContaining("No templates found matching: 'c', --unknown.")
                 .And.HaveStdErrContaining("6 template(s) partially matched, but failed on --unknown.")
-                .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 c --search");
+                .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new c --search");
 
             new DotnetNewCommand(_log, "c", "--list", "--unknown", "--language", "C#")
               .WithCustomHive(_sharedHome.HomeDirectory)
@@ -514,7 +534,7 @@ Worker Service                                worker         [C#],F#     Common/
               .Should().Fail()
               .And.HaveStdErrContaining("No templates found matching: 'c', language='C#', --unknown.")
               .And.HaveStdErrContaining("6 template(s) partially matched, but failed on language='C#', --unknown.")
-              .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 c --search");
+              .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new c --search");
         }
 
 #pragma warning disable xUnit1004 // Test methods should not be skipped
@@ -540,7 +560,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .Should().Fail()
                 .And.HaveStdErrContaining("No templates found matching: --framework='unknown'.")
                 .And.HaveStdErrContaining("9 template(s) partially matched, but failed on --framework='unknown'.")
-                .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 <TEMPLATE_NAME> --search");
+                .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new <TEMPLATE_NAME> --search");
 
             new DotnetNewCommand(_log, "c", "--list", "--framework", "unknown")
                 .WithCustomHive(_sharedHome.HomeDirectory)
@@ -548,7 +568,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .Should().Fail()
                 .And.HaveStdErrContaining("No templates found matching: 'c', --framework='unknown'.")
                 .And.HaveStdErrContaining("6 template(s) partially matched, but failed on --framework='unknown'.")
-                .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 c --search");
+                .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new c --search");
         }
 
 #pragma warning disable xUnit1004 // Test methods should not be skipped
@@ -574,7 +594,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .Should().Fail()
                 .And.HaveStdErrContaining("No templates found matching: language='unknown'.")
                 .And.HaveStdErrContaining("9 template(s) partially matched, but failed on language='unknown'.")
-                .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 <TEMPLATE_NAME> --search");
+                .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new <TEMPLATE_NAME> --search");
 
             new DotnetNewCommand(_log, "c", "--list", "--language", "unknown", "--framework", "unknown")
                 .WithCustomHive(_sharedHome.HomeDirectory)
@@ -582,7 +602,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .Should().Fail()
                 .And.HaveStdErrContaining("No templates found matching: 'c', language='unknown'.")
                 .And.HaveStdErrContaining("6 template(s) partially matched, but failed on language='unknown'.")
-                .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 c --search");
+                .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new c --search");
         }
 
         [Fact]

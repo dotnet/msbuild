@@ -3,24 +3,28 @@
 
 #nullable enable
 
+using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
 using VerifyTests;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.Sdk;
+using DiagnosticMessage = Xunit.Sdk.DiagnosticMessage;
 
-namespace Dotnet_new3.IntegrationTests
+namespace Microsoft.DotNet.New.Tests
 {
-    public partial class DotnetNewInstallTests : IClassFixture<DiagnosticFixture>, IClassFixture<VerifySettingsFixture>
+    public partial class DotnetNewInstallTests : SdkTest, IClassFixture<DiagnosticFixture>, IClassFixture<VerifySettingsFixture>
     {
         private readonly VerifySettings _verifySettings;
         private readonly ITestOutputHelper _log;
         private readonly IMessageSink _messageSink;
 
-        public DotnetNewInstallTests(DiagnosticFixture diagnosisFixture, VerifySettingsFixture verifySettings, ITestOutputHelper log)
+        public DotnetNewInstallTests(DiagnosticFixture diagnosisFixture, VerifySettingsFixture verifySettings, ITestOutputHelper log) : base(log)
         {
             _verifySettings = verifySettings.Settings;
             _log = log;
@@ -34,7 +38,7 @@ namespace Dotnet_new3.IntegrationTests
         public void CanInstallRemoteNuGetPackage(string commandName)
         {
             new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Web.ProjectTemplates.5.0")
-                .WithCustomHive()
+                .WithCustomHive(TestUtils.CreateTemporaryFolder())
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
                 .Should()
@@ -54,17 +58,17 @@ namespace Dotnet_new3.IntegrationTests
         public void CanInstallRemoteNuGetPackage_LatestVariations(string commandName)
         {
             var command1 = new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Common.ProjectTemplates.5.0")
-                .WithCustomHive()
+                .WithCustomHive(TestUtils.CreateTemporaryFolder())
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute();
 
             var command2 = new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Common.ProjectTemplates.5.0::")
-                .WithCustomHive()
+                .WithCustomHive(TestUtils.CreateTemporaryFolder())
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute();
 
             var command3 = new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Common.ProjectTemplates.5.0::*")
-                .WithCustomHive()
+                .WithCustomHive(TestUtils.CreateTemporaryFolder())
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute();
 
@@ -97,7 +101,7 @@ namespace Dotnet_new3.IntegrationTests
         public void CanInstallRemoteNuGetPackageWithVersion(string commandName)
         {
             new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0")
-                .WithCustomHive()
+                .WithCustomHive(TestUtils.CreateTemporaryFolder())
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
                 .Should()
@@ -118,12 +122,12 @@ namespace Dotnet_new3.IntegrationTests
         public void CanInstallRemoteNuGetPackageWithVersionWildcard(string commandName)
         {
             var command1 = new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.*")
-                .WithCustomHive()
+                .WithCustomHive(TestUtils.CreateTemporaryFolder())
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute();
 
             var command2 = new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.*")
-                .WithCustomHive()
+                .WithCustomHive(TestUtils.CreateTemporaryFolder())
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute();
 
@@ -157,7 +161,7 @@ namespace Dotnet_new3.IntegrationTests
         public void CanInstallRemoteNuGetPackageWithPrereleaseVersion()
         {
             new DotnetNewCommand(_log, "-i", "Microsoft.Azure.WebJobs.ProjectTemplates::4.0.1844-preview1", "--nuget-source", "https://api.nuget.org/v3/index.json")
-                .WithCustomHive()
+                .WithCustomHive(TestUtils.CreateTemporaryFolder())
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
                 .Should()
@@ -207,10 +211,10 @@ namespace Dotnet_new3.IntegrationTests
         public void CanInstallLocalNuGetPackage(string commandName)
         {
             using var packageManager = new PackageManager();
-            string packageLocation = packageManager.PackTestTemplatesNuGetPackage();
+            string packageLocation = packageManager.PackTestTemplatesNuGetPackage(new DotnetPackCommand(_log));
 
             new DotnetNewCommand(_log, commandName, packageLocation)
-                .WithCustomHive()
+                .WithCustomHive(TestUtils.CreateTemporaryFolder())
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
                 .Should().ExitWith(0)
@@ -227,7 +231,7 @@ namespace Dotnet_new3.IntegrationTests
         public void CanPrintDebugOutputWhenInstalling(string commandName)
         {
             new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Web.ProjectTemplates.5.0")
-                .WithCustomHive().WithDebug()
+                .WithCustomHive(TestUtils.CreateTemporaryFolder()).WithDebug()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
                 .Should()
@@ -251,7 +255,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             string basicFSharp = TestUtils.GetTestTemplateLocation("TemplateResolution/DifferentLanguagesGroup/BasicFSharp");
             new DotnetNewCommand(_log, commandName, basicFSharp)
-                .WithCustomHive()
+                .WithCustomHive(TestUtils.CreateTemporaryFolder())
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
                 .Should()
@@ -498,7 +502,7 @@ namespace Dotnet_new3.IntegrationTests
         public void CanExpandWhenInstall(string commandName)
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
-            string testTemplateLocation = Path.Combine("..", "..", "..", "..", "..", "test", "Microsoft.TemplateEngine.TestTemplates", "test_templates");
+            string testTemplateLocation = TestUtils.GetTestTemplateLocation(string.Empty);
             string testTemplateLocationAbsolute = Path.GetFullPath(testTemplateLocation);
             string pattern = testTemplateLocation + Path.DirectorySeparatorChar + "*";
 
@@ -538,10 +542,10 @@ namespace Dotnet_new3.IntegrationTests
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
             using var packageManager = new PackageManager();
-            string packageLocation = packageManager.PackTestTemplatesNuGetPackage();
+            string packageLocation = packageManager.PackTestTemplatesNuGetPackage(new DotnetPackCommand(_log));
 
             new DotnetNewCommand(_log, "-i", packageLocation)
-                .WithCustomHive()
+                .WithCustomHive(TestUtils.CreateTemporaryFolder())
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
                 .Should().ExitWith(0)
@@ -552,7 +556,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("TestAssets.ConfigurationKitchenSink");
 
             new DotnetNewCommand(_log, "-i", packageLocation)
-                .WithCustomHive()
+                .WithCustomHive(TestUtils.CreateTemporaryFolder())
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
                 .Should().ExitWith(0)

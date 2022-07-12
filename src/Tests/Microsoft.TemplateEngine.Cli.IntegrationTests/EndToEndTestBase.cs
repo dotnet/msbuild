@@ -4,6 +4,7 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
+using Microsoft.NET.TestFramework;
 using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests
@@ -22,9 +23,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 #else
             string configuration = "Release";
 #endif
-            // dir.Name is name of folder, which for ".NET 5" is "net5.0"
-            string frameworkFolderName = dir.Name;
-            string harnessPath = Path.Combine(dir.FullName, "..", "..", "..", "Microsoft.TemplateEngine.EndToEndTestHarness", configuration, frameworkFolderName);
+            string harnessPath = Path.Combine(dir.FullName, "..", "..", "Microsoft.TemplateEngine.EndToEndTestHarness", configuration);
             int scriptCount = scripts.Length;
             StringBuilder builder = new StringBuilder();
             builder.Append(scriptCount);
@@ -38,6 +37,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             string outputPath = Path.Combine(Directory.GetCurrentDirectory(), "temp");
 
+            string testAssetsRoot = Path.Combine(TestContext.Current.TestAssetsDirectory, @"TestPackages\dotnet-new");
+
             Process p = Process.Start(new ProcessStartInfo
             {
                 RedirectStandardError = true,
@@ -46,7 +47,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 CreateNoWindow = false,
                 WorkingDirectory = harnessPath,
                 FileName = "dotnet",
-                Arguments = $"Microsoft.TemplateEngine.EndToEndTestHarness.dll {builder} \"{outputPath}\" {args} -o \"{outputPath}\""
+                Arguments = $"Microsoft.TemplateEngine.EndToEndTestHarness.dll {builder} \"{outputPath}\" \"{testAssetsRoot}\" {args} -o \"{outputPath}\""
             });
 
             StringBuilder errorData = new StringBuilder();

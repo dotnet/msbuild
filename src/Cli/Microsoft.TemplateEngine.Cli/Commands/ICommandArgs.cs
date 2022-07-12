@@ -20,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal Command Command { get; }
 
         /// <summary>
-        /// Gets the <see cref="System.CommandLine.ParseResult"/> for the command to be executed.
+        /// Gets the <see cref="System.CommandLine.Parsing.ParseResult"/> for the command to be executed.
         /// </summary>
         internal ParseResult ParseResult { get; }
     }

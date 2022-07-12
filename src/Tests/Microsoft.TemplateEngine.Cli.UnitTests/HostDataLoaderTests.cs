@@ -202,7 +202,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var serialized = JObject.FromObject(data);
 
             Assert.NotNull(serialized);
-            Assert.Equal(1, serialized.Children().Count());
+            Assert.Single(serialized.Children());
 
             Assert.Single<JProperty>(serialized.Properties(), p => p.Name == "SymbolInfo");
 
@@ -212,7 +212,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Equal(3, ((JObject)symbolInfoArray!["param1"]!).Properties().Count());
             Assert.Equal("", symbolInfoArray!["param2"]!["longName"]);
             Assert.Equal(3, ((JObject)symbolInfoArray!["param2"]!).Properties().Count());
-            Assert.Equal(1, ((JObject)symbolInfoArray!["param3"]!).Properties().Count());
+            Assert.Single(((JObject)symbolInfoArray!["param3"]!).Properties());
 
             Assert.DoesNotContain(serialized.Properties(), p => p.Name == "IsHidden");
             Assert.DoesNotContain(serialized.Properties(), p => p.Name == "UsageExamples");

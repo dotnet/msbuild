@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>$(NETCoreTargetFramework)</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <PackageType>Template</PackageType>
     <PackageId>Microsoft.TemplateEngine.TestTemplates</PackageId>
     <Authors>Microsoft</Authors>

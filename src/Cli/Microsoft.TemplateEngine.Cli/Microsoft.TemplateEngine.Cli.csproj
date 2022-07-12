@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>$(NETCoreTargetFramework)</TargetFrameworks>
+    <TargetFrameworks>$(SdkTargetFramework)</TargetFrameworks>
     <Description>Template creation for the dotnet CLI</Description>
     <IsPackable>true</IsPackable>
     <IsShippingPackage>false</IsShippingPackage>
@@ -9,26 +9,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <DefineConstants>$(DefineConstants);WCWIDTH_VISIBILITY_INTERNAL</DefineConstants>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="..\Shared\JExtensions.cs" Link="JExtensions.cs" />
-  </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Edge\Microsoft.TemplateEngine.Edge.csproj" />
-    <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Abstractions\Microsoft.TemplateEngine.Abstractions.csproj" />
-    <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Utils\Microsoft.TemplateEngine.Utils.csproj" />
-    <ProjectReference Include="$(SrcDir)Microsoft.TemplateSearch.Common\Microsoft.TemplateSearch.Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="NuGet.Credentials" />
-    <PackageReference Include="System.Diagnostics.Process" />
-    <PackageReference Include="Newtonsoft.Json" />
-    <PackageReference Include="Microsoft.Extensions.Logging" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" />
-    <PackageReference Include="Wcwidth.Sources" ExcludeAssets="all" GeneratePathProperty="true" />
-    <PackageReference Include="System.CommandLine" />
+    <PackageReference Include="Microsoft.TemplateEngine.Edge" Version="$(MicrosoftTemplateEngineEdgePackageVersion)" />
+    <PackageReference Include="Microsoft.TemplateSearch.Common" Version="$(MicrosoftTemplateSearchCommonPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
+    <PackageReference Include="Wcwidth.Sources" Version="0.6.0" ExcludeAssets="all" GeneratePathProperty="true" />
+    <PackageReference Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
   </ItemGroup>
   
   <ItemGroup>

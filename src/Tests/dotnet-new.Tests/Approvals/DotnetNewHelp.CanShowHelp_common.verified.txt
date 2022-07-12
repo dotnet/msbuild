@@ -2,15 +2,15 @@
   Template Instantiation Commands for .NET CLI.
 
 Usage:
-  dotnet-new3 new3 [<template-short-name> [<template-args>...]] [options]
-  dotnet-new3 new3 [command] [options]
+  dotnet new [<template-short-name> [<template-args>...]] [options]
+  dotnet new [command] [options]
 
 Arguments:
   <template-short-name>  A short name of the template to create.
   <template-args>        Template specific options to use.
 
 Options:
-  -?, -h, --help  Show help and usage information
+  -?, -h, --help  Show command line help.
 
 Commands:
   install <package>       Installs a template package.

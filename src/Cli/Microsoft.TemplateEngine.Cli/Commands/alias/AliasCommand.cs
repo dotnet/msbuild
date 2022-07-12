@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Parsing;
 using System.CommandLine.Invocation;
 using Microsoft.TemplateEngine.Abstractions;
 

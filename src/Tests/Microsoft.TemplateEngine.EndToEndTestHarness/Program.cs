@@ -35,10 +35,12 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             string outputPath = args[batteryCount + 1];
 
             List<string> passThroughArgs = new List<string>();
-            passThroughArgs.AddRange(args.Skip(2 + batteryCount));
+            passThroughArgs.AddRange(args.Skip(3 + batteryCount));
             passThroughArgs.Add("--debug:ephemeral-hive");
 
-            ITemplateEngineHost host = CreateHost();
+            string testAssetsRoot = args[batteryCount + 2];
+
+            ITemplateEngineHost host = CreateHost(testAssetsRoot);
             host.VirtualizeDirectory(outputPath);
 
             var command = NewCommandFactory.Create(CommandName, _ => host, _ => new TelemetryLogger(null), new NewCommandCallbacks());
@@ -173,7 +175,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             return success;
         }
 
-        private static ITemplateEngineHost CreateHost()
+        private static ITemplateEngineHost CreateHost(string testAssetsRoot)
         {
             var preferences = new Dictionary<string, string>
             {
@@ -195,7 +197,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             builtIns.AddRange(Edge.Components.AllComponents);
             builtIns.AddRange(Orchestrator.RunnableProjects.Components.AllComponents);
             builtIns.AddRange(Cli.Components.AllComponents);
-            builtIns.Add((typeof(ITemplatePackageProviderFactory), new BuiltInTemplatePackagesProviderFactory()));
+            builtIns.Add((typeof(ITemplatePackageProviderFactory), new BuiltInTemplatePackagesProviderFactory(testAssetsRoot)));
 
             return new Edge.DefaultTemplateEngineHost(HostIdentifier, HostVersion, preferences, builtIns, new[] { "dotnetcli" });
         }

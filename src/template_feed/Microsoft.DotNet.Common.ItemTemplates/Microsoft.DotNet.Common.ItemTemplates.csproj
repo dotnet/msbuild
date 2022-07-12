@@ -4,7 +4,7 @@
         <IncludeBuildOutput>False</IncludeBuildOutput>
         <IncludeSource>False</IncludeSource>
         <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
-        <OutputPath>$(TemplatesDir)</OutputPath>
+        <OutputPath>$(ArtifactsTmpDir)</OutputPath>
         <EnableDefaultItems>False</EnableDefaultItems>
         <UsingToolTemplateLocalizer>true</UsingToolTemplateLocalizer>
         <IsPackable>true</IsPackable>

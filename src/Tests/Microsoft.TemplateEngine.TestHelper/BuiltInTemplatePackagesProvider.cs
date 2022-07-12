@@ -63,24 +63,20 @@ namespace Microsoft.TemplateEngine.TestHelper
                 List<ITemplatePackage> templatePackages = new List<ITemplatePackage>();
 
                 List<ITemplatePackage> toInstallList = new List<ITemplatePackage>();
-                var repoRoot = Path.GetDirectoryName(typeof(BuiltInTemplatePackagesProviderFactory).Assembly.Location);
-                while (repoRoot != null && !File.Exists(Path.Combine(repoRoot, "Microsoft.TemplateEngine.sln")))
+                string repoRoot = TestUtils.RepoRoot;
+                if (!Directory.Exists(repoRoot))
                 {
-                    repoRoot = Path.GetDirectoryName(repoRoot);
-                }
-                if (repoRoot == null)
-                {
-                    _settings.Host.Logger.LogDebug("Couldn't the setup package location, because \"Microsoft.TemplateEngine.sln\" is not in any of parent directories.");
+                    _settings.Host.Logger.LogDebug($"Couldn't setup the package location, because Repo Root {repoRoot!} doesn't exist.");
                     return Task.FromResult((IReadOnlyList<ITemplatePackage>)templatePackages);
                 }
                 List<string> locations = new List<string>()
                 {
-                    Path.Combine(repoRoot, "template_feed"),
+                    Path.Combine(repoRoot, @"src\template_feed"),
                 };
 
                 if (_includeTestTemplates)
                 {
-                    locations.Add(Path.Combine(repoRoot, "test", "Microsoft.TemplateEngine.TestTemplates", "test_templates"));
+                    locations.Add(TestUtils.GetTestTemplateLocation(string.Empty));
                 }
 
                 foreach (string location in locations)

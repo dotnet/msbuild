@@ -1,25 +1,31 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
 using VerifyTests;
 using VerifyXunit;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Dotnet_new3.IntegrationTests
+namespace Microsoft.DotNet.New.Tests
 {
     [UsesVerify]
-    public class DotnetNewDebugOptions : IClassFixture<VerifySettingsFixture>
+    public class DotnetNewDebugOptions : SdkTest, IClassFixture<VerifySettingsFixture>
     {
         private readonly VerifySettings _verifySettings;
         private readonly ITestOutputHelper _log;
 
-        public DotnetNewDebugOptions(VerifySettingsFixture verifySettings, ITestOutputHelper log)
+        public DotnetNewDebugOptions(VerifySettingsFixture verifySettings, ITestOutputHelper log) : base(log)
         {
             _verifySettings = verifySettings.Settings;
             _log = log;
@@ -29,7 +35,7 @@ namespace Dotnet_new3.IntegrationTests
         public void CanShowBasicInfoWithDebugReinit()
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
-            string cacheFilePath = Path.Combine(home, "dotnetcli-preview", "v2.0.0", "templatecache.json");
+            string cacheFilePath = Path.Combine(home, "dotnetcli", TestUtils.Version, "templatecache.json");
 
             var commandResult = new DotnetNewCommand(_log)
                 .WithCustomHive(home)
@@ -53,7 +59,7 @@ namespace Dotnet_new3.IntegrationTests
         public void CanShowBasicInfoWithDebugRebuildCache()
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
-            string cacheFilePath = Path.Combine(home, "dotnetcli-preview", "v2.0.0", "templatecache.json");
+            string cacheFilePath = Path.Combine(home, "dotnetcli", TestUtils.Version, "templatecache.json");
 
             var commandResult = new DotnetNewCommand(_log)
                 .WithCustomHive(home)
@@ -127,7 +133,7 @@ namespace Dotnet_new3.IntegrationTests
 
             Assert.Equal(2, createdCacheEntries.Count());
             Assert.Contains(Path.Combine(home, "packages"), createdCacheEntries);
-            Assert.True(File.Exists(Path.Combine(home, "dotnetcli-preview", "v2.0.0", "templatecache.json")));
+            Assert.True(File.Exists(Path.Combine(home, "dotnetcli", TestUtils.Version, "templatecache.json")));
         }
     }
 }

@@ -2,7 +2,7 @@
   Lists templates containing the specified template name. If no name is specified, lists all templates.
 
 Usage:
-  dotnet-new3 new3 list [<template-name>] [options]
+  dotnet new list [<template-name>] [options]
 
 Arguments:
   <template-name>  If specified, only the templates matching the name will be shown.
@@ -15,4 +15,4 @@ Options:
   --ignore-constraints                   Disables checking if the template meets the constraints to be run.
   --columns-all                          Display all columns in the output.
   --columns <author|language|tags|type>  Specifies the columns to display in the output.
-  -?, -h, --help                         Show help and usage information
+  -?, -h, --help                         Show command line help.

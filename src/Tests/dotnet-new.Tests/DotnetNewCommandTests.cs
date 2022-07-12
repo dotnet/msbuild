@@ -1,23 +1,26 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
 using VerifyTests;
 using VerifyXunit;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Dotnet_new3.IntegrationTests
+namespace Microsoft.DotNet.New.Tests
 {
     [UsesVerify]
-    public class DotnetNewCommandTests : IClassFixture<VerifySettingsFixture>
+    public class DotnetNewCommandTests : SdkTest, IClassFixture<VerifySettingsFixture>
     {
         private readonly VerifySettings _verifySettings;
         private readonly ITestOutputHelper _log;
 
-        public DotnetNewCommandTests(VerifySettingsFixture verifySettings, ITestOutputHelper log)
+        public DotnetNewCommandTests(VerifySettingsFixture verifySettings, ITestOutputHelper log) : base(log)
         {
             _verifySettings = verifySettings.Settings;
             _log = log;
@@ -45,10 +48,6 @@ namespace Dotnet_new3.IntegrationTests
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-
-            Helpers.InstallNuGetTemplate("microsoft.dotnet.wpf.projecttemplates", _log, home, workingDirectory);
-            Helpers.InstallNuGetTemplate("microsoft.dotnet.winforms.projecttemplates", _log, home, workingDirectory);
-            Helpers.InstallNuGetTemplate("microsoft.dotnet.web.projecttemplates.6.0", _log, home, workingDirectory);
 
             new DotnetNewCommand(_log)
                 .WithCustomHive(home)

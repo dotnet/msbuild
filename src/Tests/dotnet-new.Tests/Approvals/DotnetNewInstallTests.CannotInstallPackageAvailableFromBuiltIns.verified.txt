@@ -3,6 +3,6 @@ The following template package(s) are already available:
    Microsoft.DotNet.Common.ItemTemplates::%VERSION%
 
 To install the template package(s) anyway, apply '--force' option:
-   dotnet-new3 new3 install Microsoft.DotNet.Common.ItemTemplates::6.0.100 --force
+   dotnet new install Microsoft.DotNet.Common.ItemTemplates::6.0.100 --force
 
 For details on the exit code, refer to https://aka.ms/templating-exit-codes#106

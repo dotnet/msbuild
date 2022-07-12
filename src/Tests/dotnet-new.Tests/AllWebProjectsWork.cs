@@ -1,6 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.IO;
+using System.Threading.Tasks;
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
@@ -9,16 +12,16 @@ using VerifyXunit;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Dotnet_new3.IntegrationTests
+namespace Microsoft.DotNet.New.Tests
 {
     [UsesVerify]
-    public class AllWebProjectsWork : IClassFixture<WebProjectsFixture>, IClassFixture<VerifySettingsFixture>
+    public class AllWebProjectsWork : SdkTest, IClassFixture<WebProjectsFixture>, IClassFixture<VerifySettingsFixture>
     {
         private readonly WebProjectsFixture _fixture;
         private readonly ITestOutputHelper _log;
         private readonly VerifySettings _verifySettings;
 
-        public AllWebProjectsWork(WebProjectsFixture fixture, VerifySettingsFixture verifySettings, ITestOutputHelper log)
+        public AllWebProjectsWork(WebProjectsFixture fixture, VerifySettingsFixture verifySettings, ITestOutputHelper log) : base(log)
         {
             _fixture = fixture;
             _log = log;
@@ -98,7 +101,8 @@ namespace Dotnet_new3.IntegrationTests
                .And
                .NotHaveStdErr();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+                .AddScrubber(output => output.ScrubByRegex("[A-Za-z0-9\\.]+-third-party-notices", "%version%-third-party-notices"));
         }
 
         [Theory]
@@ -119,7 +123,8 @@ namespace Dotnet_new3.IntegrationTests
 
             return Verifier.Verify(commandResult.StdOut, _verifySettings)
                 .UseTextForParameters("common")
-                .DisableRequireUniquePrefix();
+                .DisableRequireUniquePrefix()
+                .AddScrubber(output => output.ScrubByRegex("[A-Za-z0-9\\.]+-third-party-notices", "%version%-third-party-notices"));
         }
     }
 

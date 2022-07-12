@@ -13,7 +13,6 @@ namespace Microsoft.TemplateEngine.TestHelper
     public class AssemblyComponentCatalog : IReadOnlyList<(Type, IIdentifiedComponent)>
     {
         private readonly IReadOnlyList<Assembly> _assemblies;
-        private IReadOnlyList<(Type, IIdentifiedComponent)>? _lookup;
 
         public AssemblyComponentCatalog(IReadOnlyList<Assembly> assemblies)
         {
@@ -45,11 +44,6 @@ namespace Microsoft.TemplateEngine.TestHelper
 
         private IReadOnlyList<(Type, IIdentifiedComponent)> EnsureLookupLoaded()
         {
-            if (_lookup != null)
-            {
-                return _lookup;
-            }
-
             var builder = new List<(Type, IIdentifiedComponent)>();
 
             foreach (Assembly asm in _assemblies)
@@ -67,7 +61,7 @@ namespace Microsoft.TemplateEngine.TestHelper
                         continue;
                     }
 
-                    IIdentifiedComponent instance = (IIdentifiedComponent)Activator.CreateInstance(type);
+                    IIdentifiedComponent instance = (IIdentifiedComponent)Activator.CreateInstance(type)!;
                     foreach (var interfaceType in registerFor)
                     {
                         builder.Add((interfaceType, instance));

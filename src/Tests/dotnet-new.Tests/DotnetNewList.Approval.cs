@@ -7,12 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
 using VerifyXunit;
 using Xunit;
 
-namespace Dotnet_new3.IntegrationTests
+namespace Microsoft.DotNet.New.Tests
 {
     public partial class DotnetNewList
     {
@@ -22,7 +24,7 @@ namespace Dotnet_new3.IntegrationTests
         public Task CanShowDeprecationMessage_WhenLegacyCommandIsUsed(string commandName)
         {
             var commandResult = new DotnetNewCommand(_log, commandName)
-                .WithCustomHive()
+                .WithCustomHive(TestUtils.CreateTemporaryFolder())
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute();
 
@@ -39,7 +41,7 @@ namespace Dotnet_new3.IntegrationTests
         public Task DoNotShowDeprecationMessage_WhenNewCommandIsUsed()
         {
             var commandResult = new DotnetNewCommand(_log, "list")
-                .WithCustomHive()
+                .WithCustomHive(TestUtils.CreateTemporaryFolder())
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute();
 

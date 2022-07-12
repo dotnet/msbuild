@@ -616,7 +616,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse($"new {shortName}");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
-            Assert.Equal(1, templateCommands.Count);
+            Assert.Single(templateCommands);
             Assert.Equal("MultiName.Test.High.CSharp", templateCommands.Single().Template.Identity);
         }
 
@@ -645,7 +645,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse(command);
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
-            Assert.Equal(1, templateCommands.Count);
+            Assert.Single(templateCommands);
             Assert.Equal("Multiname.Test.Only.FSharp", templateCommands.Single().Template.Identity);
 
         }
@@ -676,7 +676,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse($" new {command}");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
-            Assert.Equal(1, templateCommands.Count);
+            Assert.Single(templateCommands);
             Assert.Equal(expectedIdentity, templateCommands.Single().Template.Identity);
         }
 
@@ -706,7 +706,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse($" new {command}");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
-            Assert.Equal(1, templateCommands.Count);
+            Assert.Single(templateCommands);
             Assert.Equal(expectedIdentity, templateCommands.Single().Template.Identity);
         }
         #endregion

@@ -40,7 +40,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse($" new console2");
             var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
-            Assert.Equal(1, matchingTemplates.Count());
+            Assert.Single(matchingTemplates);
             StringWriter output = new StringWriter();
             Reporter reporter = new Reporter(new AnsiConsole(output));
             Assert.True(InstantiateCommand.VerifyMatchingTemplates(settings, matchingTemplates, reporter, out _));
@@ -119,7 +119,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse($"new console --language L2");
             var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
-            Assert.Equal(1, matchingTemplates.Count());
+            Assert.Single(matchingTemplates);
             StringWriter output = new StringWriter();
             Reporter reporter = new Reporter(new AnsiConsole(output));
             Assert.True(InstantiateCommand.VerifyMatchingTemplates(settings, matchingTemplates, reporter, out IEnumerable<TemplateCommand>? filtered));
@@ -171,7 +171,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse($"new console --language L2");
             var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
-            Assert.Equal(0, matchingTemplates.Count());
+            Assert.Empty(matchingTemplates);
         }
 
         [Fact]
@@ -194,7 +194,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse($"new console --type item");
             var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
-            Assert.Equal(0, matchingTemplates.Count());
+            Assert.Empty(matchingTemplates);
         }
 
         [Fact]
@@ -216,7 +216,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse($"new console --baseline core");
             var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
-            Assert.Equal(0, matchingTemplates.Count());
+            Assert.Empty(matchingTemplates);
         }
 
         [Fact]
@@ -239,7 +239,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse($"new console --language L2 --type item --baseline core");
             var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
-            Assert.Equal(0, matchingTemplates.Count());
+            Assert.Empty(matchingTemplates);
         }
 
         [Fact]
@@ -268,7 +268,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse($"new console --language L2 --type item");
             var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
-            Assert.Equal(0, matchingTemplates.Count());
+            Assert.Empty(matchingTemplates);
         }
 
         [Fact]
@@ -305,7 +305,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse($"new console --langVersion ver");
             var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
-            Assert.Equal(1, matchingTemplates.Count());
+            Assert.Single(matchingTemplates);
         }
 
         [Fact]
@@ -342,7 +342,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse($"new console --framework netcoreapp1.0");
             var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
-            Assert.Equal(1, matchingTemplates.Count());
+            Assert.Single(matchingTemplates);
 
         }
 
@@ -380,7 +380,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse($"new console --do-not-exist");
             var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
-            Assert.Equal(0, matchingTemplates.Count());
+            Assert.Empty(matchingTemplates);
         }
     }
 }

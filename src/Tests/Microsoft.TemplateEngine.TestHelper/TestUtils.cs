@@ -2,20 +2,25 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using Xunit.Abstractions;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.NET.TestFramework;
 
 namespace Microsoft.TemplateEngine.TestHelper
 {
     public class TestUtils
     {
+        public static string TestAssetsRoot { get; } = Path.Combine(TestContext.Current.TestAssetsDirectory, @"TestPackages\dotnet-new");
+
+        public static string RepoRoot { get; } = Path.Combine(TestContext.Current.TestAssetsDirectory, @"..\..");
+
+        public static string TestExecutionRoot { get; } = TestContext.Current.TestExecutionDirectory;
+
+        public static string Version { get; } = $"v{Product.Version}";
+
         public static string CreateTemporaryFolder(string name = "")
         {
-            string workingDir = Path.Combine(Path.GetTempPath(), "TemplateEngine.Tests", Guid.NewGuid().ToString(), name);
+            string workingDir = Path.Combine(TestExecutionRoot, "TemplateEngine.Tests", Guid.NewGuid().ToString(), name);
             Directory.CreateDirectory(workingDir);
             return workingDir;
         }
@@ -38,61 +43,15 @@ namespace Microsoft.TemplateEngine.TestHelper
             return Path.GetFullPath(nupkgPath);
         }
 
-        public static string CodeBaseRoot
-        {
-            get
-            {
-                string codebase = typeof(TestUtils).GetTypeInfo().Assembly.Location;
-                string codeBaseRoot = new FileInfo(codebase).Directory.Parent.Parent.Parent.Parent.Parent.FullName;
-                return codeBaseRoot;
-            }
-        }   
-
         private static string GetTestArtifactLocation(string artifactLocation)
         {
-            string templateLocation = Path.Combine(CodeBaseRoot, "test", "Microsoft.TemplateEngine.TestTemplates", artifactLocation);
+            string templateLocation = Path.Combine(TestAssetsRoot, artifactLocation);
 
             if (!Directory.Exists(templateLocation))
             {
                 throw new Exception($"{templateLocation} does not exist");
             }
             return Path.GetFullPath(templateLocation);
-        }
-
-        public static string GetPackagesLocation()
-        {
-#if DEBUG
-            string configuration = "Debug";
-#elif RELEASE
-            string configuration = "Release";
-#else
-            throw new NotSupportedException("The configuration is not supported");
-#endif
-
-            string packagesLocation = Path.Combine(CodeBaseRoot, "artifacts", "packages", configuration, "Shipping");
-
-            if (!Directory.Exists(packagesLocation))
-            {
-                throw new Exception($"{packagesLocation} does not exist");
-            }
-            return Path.GetFullPath(packagesLocation);
-        }
-
-        public static void SetupNuGetConfigForPackagesLocation(string projectDirectory)
-        {
-            string nugetConfigShim =
-$@"<?xml version=""1.0"" encoding=""utf-8""?>
-<configuration>
-  <config>
-    <add key=""globalPackagesFolder"" value=""{CreateTemporaryFolder("Packages")}"" />
-  </config>
-  <packageSources>
-    <clear />
-    <add key=""testPackages"" value=""{GetPackagesLocation()}"" />
-  </packageSources>
-</configuration>";
-
-            File.WriteAllText(Path.Combine(projectDirectory, "nuget.config"), nugetConfigShim);
         }
 
         public static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
@@ -149,42 +108,6 @@ $@"<?xml version=""1.0"" encoding=""utf-8""?>
             }
             while ((file1byte == file2byte) && (file1byte != -1));
             return ((file1byte - file2byte) == 0);
-        }
-
-        public static async Task<T> AttemptSearch<T, E>(int count, TimeSpan interval, Func<Task<T>> execute) where E : Exception
-        {
-            T? result = default;
-            int attempt = 0;
-            while (attempt < count)
-            {
-                try
-                {
-                    result = await execute();
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    if (attempt + 1 == count)
-                    {
-                        throw ex;
-                    }
-
-                    if (ex is AggregateException agEx)
-                    {
-                        if (!agEx.InnerExceptions.Any(e => e is E))
-                        {
-                            throw ex;
-                        }
-                    }
-                    else if (ex is not E)
-                    {
-                        throw ex;
-                    }
-                }
-                await Task.Delay(interval);
-                attempt++;
-            }
-            return result!;
         }
     }
 }

@@ -6,7 +6,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Dotnet_new3.IntegrationTests
+namespace Microsoft.DotNet.New.Tests
 {
     internal static class VerifyScrubbers
     {

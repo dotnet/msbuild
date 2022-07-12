@@ -1,15 +1,20 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
 using VerifyTests;
 using VerifyXunit;
 using Xunit;
 
-namespace Dotnet_new3.IntegrationTests
+namespace Microsoft.DotNet.New.Tests
 {
     [UsesVerify]
     public partial class DotnetNewInstantiate
@@ -17,7 +22,7 @@ namespace Dotnet_new3.IntegrationTests
         [Fact]
         public Task CannotInstantiateUnknownTemplate()
         {
-            var commandResult = new DotnetNewCommand(_log, "webapp")
+            var commandResult = new DotnetNewCommand(_log, "unknownapp")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute();
@@ -516,7 +521,11 @@ namespace Dotnet_new3.IntegrationTests
                 .Fail();
 
             return Verifier.Verify(commandResult.StdErr, _verifySettings)
-                .AddScrubber(output => output.ScrubByRegex("\\-\\-debug\\:custom\\-hive [A-Za-z0-9\\-\\.\\\\\\/\\{\\}\\:_]+", "--debug:custom-hive %SETTINGS DIRECTORY%"));
+                .AddScrubber(output =>
+                {
+                    output.ScrubByRegex("\\-\\-debug\\:custom\\-hive [A-Za-z0-9\\-\\.\\\\\\/\\{\\}\\:_]+", "--debug:custom-hive %SETTINGS DIRECTORY%");
+                    output.ScrubByRegex("dotnetcli \\(version: v[A-Za-z0-9.-]+\\)", "dotnetcli (version: v%VERSION%)");
+                });
         }
 
         [Fact]
@@ -533,7 +542,11 @@ namespace Dotnet_new3.IntegrationTests
                 .Should()
                 .Pass();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+                .AddScrubber(output =>
+                {
+                    output.ScrubByRegex("dotnetcli \\(version: v[A-Za-z0-9.-]+\\)", "dotnetcli (version: v%VERSION%)");
+                });
         }
 
     }

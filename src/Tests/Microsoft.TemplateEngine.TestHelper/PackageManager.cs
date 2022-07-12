@@ -7,9 +7,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.NET.TestFramework.Commands;
 using NuGet.Common;
 using NuGet.Configuration;
 using NuGet.Protocol;
@@ -25,10 +25,10 @@ namespace Microsoft.TemplateEngine.TestHelper
         private string _packageLocation = TestUtils.CreateTemporaryFolder("packages");
         private ConcurrentDictionary<string, string> _installedPackages = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-        public string PackTestTemplatesNuGetPackage()
+        public string PackTestTemplatesNuGetPackage(DotnetPackCommand packCommand)
         {
-            string projectToPack = Path.Combine(TestUtils.CodeBaseRoot, "test", "Microsoft.TemplateEngine.TestTemplates", "Microsoft.TemplateEngine.TestTemplates.csproj");
-            return PackNuGetPackage(projectToPack);
+            string projectToPack = Path.Combine(TestUtils.TestAssetsRoot, "Microsoft.TemplateEngine.TestTemplates.csproj");
+            return PackNuGetPackage(projectToPack, packCommand);
         }
 
         public async Task<string> GetNuGetPackage(string templatePackName, string? version = null, NuGetVersion? minimumVersion = null, ILogger? logger = null)
@@ -79,7 +79,7 @@ namespace Microsoft.TemplateEngine.TestHelper
             }
         }
 
-        public string PackNuGetPackage(string projectPath)
+        public string PackNuGetPackage(string projectPath, DotnetPackCommand packCommand)
         {
             if (string.IsNullOrWhiteSpace(projectPath))
             {
@@ -97,32 +97,12 @@ namespace Microsoft.TemplateEngine.TestHelper
                     return packagePath;
                 }
 
-                var info = new ProcessStartInfo("dotnet", $"pack {absolutePath} -o {_packageLocation}")
+                var commandResult = packCommand.Execute(absolutePath, "-o", _packageLocation);
+                if (commandResult.ExitCode != 0)
                 {
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    RedirectStandardError = true,
-                    RedirectStandardOutput = true
-                };
-                Process p = Process.Start(info) ?? throw new Exception("Failed to start dotnet process.");
-                p.WaitForExit();
-                if (p.ExitCode != 0)
-                {
-                    string? stdOut = null;
-                    string? stdErr = null;
-                    try
-                    {
-                        stdOut = p.StandardOutput.ReadToEnd();
-                        stdErr = p.StandardError.ReadToEnd();
-                    }
-                    catch
-                    {
-                        //do nothing in case streams cannot be read
-                    }
-
                     throw new Exception($"Failed to pack the project {projectPath}: " +
-                        $"{Environment.NewLine}StdOut: {stdOut}." +
-                        $"{Environment.NewLine}StdErr: {stdErr}.");
+                        $"{Environment.NewLine}StdOut: {commandResult.StdOut}." +
+                        $"{Environment.NewLine}StdErr: {commandResult.StdErr}.");
                 }
 
                 string createdPackagePath = Directory.GetFiles(_packageLocation).Aggregate(

@@ -2,21 +2,23 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
 using VerifyTests;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Dotnet_new3.IntegrationTests
+namespace Microsoft.DotNet.New.Tests
 {
-    public partial class DotnetNewHelp : IClassFixture<SharedHomeDirectory>, IClassFixture<VerifySettingsFixture>
+    public partial class DotnetNewHelp : SdkTest, IClassFixture<SharedHomeDirectory>, IClassFixture<VerifySettingsFixture>
     {
         private readonly ITestOutputHelper _log;
         private readonly SharedHomeDirectory _fixture;
         private readonly VerifySettings _verifySettings;
 
-        public DotnetNewHelp(SharedHomeDirectory fixture, VerifySettingsFixture verifySettings, ITestOutputHelper log)
+        public DotnetNewHelp(SharedHomeDirectory fixture, VerifySettingsFixture verifySettings, ITestOutputHelper log) : base(log)
         {
             _log = log;
             _fixture = fixture;

@@ -1,6 +1,6 @@
-﻿Warning: use of 'dotnet-new3 new3 --install' is deprecated. Use 'dotnet-new3 new3 install' instead.
+﻿Warning: use of 'dotnet new --install' is deprecated. Use 'dotnet new install' instead.
 For more information, run: 
-   dotnet-new3 new3 install -h
+   dotnet new install -h
 
 The following template packages will be installed:
    Microsoft.DotNet.Web.ItemTemplates::5.0.0

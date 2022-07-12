@@ -2,18 +2,20 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Dotnet_new3.IntegrationTests
+namespace Microsoft.DotNet.New.Tests
 {
-    public class DotnetNew3Tests
+    public class DotnetNewTests : SdkTest
     {
         private readonly ITestOutputHelper _log;
 
-        public DotnetNew3Tests(ITestOutputHelper log)
+        public DotnetNewTests(ITestOutputHelper log) : base(log)
         {
             _log = log;
         }
@@ -21,9 +23,8 @@ namespace Dotnet_new3.IntegrationTests
         [Fact]
         public void CanDisableBuiltInTemplates_List()
         {
-            string homeDir = TestUtils.CreateTemporaryFolder();
             var commandResult = new DotnetNewCommand(_log, "list", "--debug:disable-sdk-templates")
-                .WithCustomHive()
+                .WithCustomHive(TestUtils.CreateTemporaryFolder())
                 .Execute();
 
             commandResult
@@ -36,9 +37,8 @@ namespace Dotnet_new3.IntegrationTests
         [Fact]
         public void CanDisableBuiltInTemplates_Template()
         {
-            string homeDir = TestUtils.CreateTemporaryFolder();
             var commandResult = new DotnetNewCommand(_log, "console", "--debug:disable-sdk-templates")
-                .WithCustomHive()
+                .WithCustomHive(TestUtils.CreateTemporaryFolder())
                 .Execute();
 
             commandResult

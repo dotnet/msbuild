@@ -3,7 +3,7 @@ Author: Microsoft
 Description: A project template for creating an ASP.NET Core application with an example Controller for a RESTful HTTP service. This template can also be used for ASP.NET Core MVC Views and Controllers.
 
 Usage:
-  dotnet-new3 new3 webapi [options] [template options]
+  dotnet new webapi [options] [template options]
 
 Options:
   -n, --name <name>       The name for the output being created. If no name is specified, the name of the output directory is used.
@@ -24,9 +24,10 @@ Template options:
                                                       Default: None
   --aad-b2c-instance <aad-b2c-instance>               The Azure Active Directory B2C instance to connect to (use with IndividualB2C auth).
                                                       Type: string
-                                                      Default: https://login.microsoftonline.com/tfp/
+                                                      Default: https://qualified.domain.name.b2clogin.com/
   -ssp, --susi-policy-id <susi-policy-id>             The sign-in and sign-up policy ID for this project (use with IndividualB2C auth).
                                                       Type: string
+                                                      Default: b2c_1_susi
   --aad-instance <aad-instance>                       The Azure Active Directory instance to connect to (use with SingleOrg auth).
                                                       Type: string
                                                       Default: https://login.microsoftonline.com/
@@ -54,11 +55,15 @@ Template options:
   -uld, --use-local-db                                Whether to use LocalDB instead of SQLite. This option only applies if --auth Individual or --auth IndividualB2C is specified.
                                                       Type: bool
                                                       Default: false
-  -f, --framework <net5.0|netcoreapp3.1>              The target framework for the project.
+  -minimal, --use-minimal-apis                        Whether to use minimal APIs instead of controllers.
+                                                      Type: bool
+                                                      Default: false
+  -f, --framework <net5.0|net7.0|netcoreapp3.1>       The target framework for the project.
                                                       Type: choice
+                                                        net7.0         Target net7.0
                                                         net5.0         Target net5.0
                                                         netcoreapp3.1  Target netcoreapp3.1
-                                                      Default: net5.0
+                                                      Default: net7.0
   --no-restore                                        If specified, skips the automatic restore of the project on create.
                                                       Type: bool
                                                       Default: false
@@ -76,4 +81,4 @@ Template options:
                                                       Default: false
 
 To see help for other template languages (F#), use --language option:
-   dotnet-new3 new3 webapi -h --language F#
+   dotnet new webapi -h --language F#

@@ -2,20 +2,23 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Globalization;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Dotnet_new3.IntegrationTests
+namespace Microsoft.DotNet.New.Tests
 {
-    public class DotnetNewLocaleTests
+    public class DotnetNewLocaleTests : SdkTest
     {
         private readonly ITestOutputHelper _log;
 
-        public DotnetNewLocaleTests(ITestOutputHelper log)
+        public DotnetNewLocaleTests(ITestOutputHelper log) : base(log)
         {
             _log = log;
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -28,17 +31,7 @@ namespace Dotnet_new3.IntegrationTests
 
             var home = TestUtils.CreateTemporaryFolder("Home");
             var thisDir = Path.GetDirectoryName(typeof(DotnetNewLocaleTests).Assembly.Location);
-            var testTemplatesFolder = Path.Combine(
-                thisDir ?? string.Empty,
-                "..",
-                "..",
-                "..",
-                "..",
-                "..",
-                "test",
-                "Microsoft.TemplateEngine.TestTemplates",
-                "test_templates",
-                "TemplateWithLocalization");
+            var testTemplatesFolder = TestUtils.GetTestTemplateLocation("TemplateWithLocalization");
 
             var commandResult = new DotnetNewCommand(_log, "-i", testTemplatesFolder)
                 .WithCustomHive(home)
@@ -62,17 +55,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
             var thisDir = Path.GetDirectoryName(typeof(DotnetNewLocaleTests).Assembly.Location);
-            var testTemplatesFolder = Path.Combine(
-                thisDir ?? string.Empty,
-                "..",
-                "..",
-                "..",
-                "..",
-                "..",
-                "test",
-                "Microsoft.TemplateEngine.TestTemplates",
-                "test_templates",
-                "TemplateWithLocalization");
+            var testTemplatesFolder = TestUtils.GetTestTemplateLocation("TemplateWithLocalization");
 
             var commandResult = new DotnetNewCommand(_log, "-i", testTemplatesFolder)
                 .WithCustomHive(home)

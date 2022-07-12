@@ -1,23 +1,29 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.IO;
 using System.IO.Compression;
+using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
 using VerifyTests;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Dotnet_new3.IntegrationTests
+namespace Microsoft.DotNet.New.Tests
 {
-    public partial class DotnetNewInstantiate : IClassFixture<SharedHomeDirectory>, IClassFixture<VerifySettingsFixture>
+    public partial class DotnetNewInstantiate : SdkTest, IClassFixture<SharedHomeDirectory>, IClassFixture<VerifySettingsFixture>
     {
         private readonly SharedHomeDirectory _fixture;
         private readonly VerifySettings _verifySettings;
         private readonly ITestOutputHelper _log;
 
-        public DotnetNewInstantiate(SharedHomeDirectory fixture, VerifySettingsFixture verifySettings, ITestOutputHelper log)
+        public DotnetNewInstantiate(SharedHomeDirectory fixture, VerifySettingsFixture verifySettings, ITestOutputHelper log) : base(log)
         {
             _fixture = fixture;
             _verifySettings = verifySettings.Settings;
@@ -74,7 +80,7 @@ namespace Dotnet_new3.IntegrationTests
                .And.NotHaveStdErr()
                .And.HaveStdOutContaining("The template \"Console App\" was created successfully.")
                .And.HaveStdOutContaining("After expanding aliases, the command is:")
-               .And.HaveStdOutContaining("dotnet new3 console -n MyConsole -o alias");
+               .And.HaveStdOutContaining("dotnet new console -n MyConsole -o alias");
 
             Assert.Equal(
                 new DirectoryInfo(Path.Combine(workingDirectory, "no-alias")).EnumerateFileSystemInfos().Select(fi => fi.Name),
@@ -187,7 +193,7 @@ namespace Dotnet_new3.IntegrationTests
             string home = TestUtils.CreateTemporaryFolder("Home");
 
             using var packageManager = new PackageManager();
-            string packageLocation = packageManager.PackTestTemplatesNuGetPackage();
+            string packageLocation = packageManager.PackTestTemplatesNuGetPackage(new DotnetPackCommand(_log));
             Helpers.InstallNuGetTemplate(packageLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, "TestAssets.TemplateWithBinaryFile")
@@ -208,13 +214,14 @@ namespace Dotnet_new3.IntegrationTests
         }
 
         [Fact]
-        public async Task CanInstantiateTemplate_Angular_CanReplaceTextInLargeFile()
+        public void CanInstantiateTemplate_Angular_CanReplaceTextInLargeFile()
         {
             string workingDirectory = TestUtils.CreateTemporaryFolder();
             string home = TestUtils.CreateTemporaryFolder("Home");
-            using var packageManager = new PackageManager();
-            string packageLocation = await packageManager.GetNuGetPackage("Microsoft.DotNet.Web.Spa.ProjectTemplates.6.0", version: "6.0.0-preview.6.21355.2").ConfigureAwait(false);
-            Helpers.InstallNuGetTemplate(packageLocation, _log, home, workingDirectory);
+            string dotnetRoot = TestContext.Current.ToolsetUnderTest.DotNetRoot;
+            string templatesLocation = Path.Combine(dotnetRoot, "templates");
+            var packagePaths = Directory.EnumerateFiles(templatesLocation, "Microsoft.DotNet.Web.Spa.ProjectTemplates.*.nupkg", SearchOption.AllDirectories);
+            string packageLocation = packagePaths.FirstOrDefault();
 
             new DotnetNewCommand(_log, "angular", "-o", "angular")
                .WithCustomHive(home)
@@ -227,7 +234,7 @@ namespace Dotnet_new3.IntegrationTests
 
             using (ZipArchive archive = ZipFile.OpenRead(packageLocation))
             {
-                var reactPackageLockJsonEntry = archive.GetEntry("Angular-CSharp/ClientApp/package-lock.json");
+                var reactPackageLockJsonEntry = archive.GetEntry("content/Angular-CSharp/ClientApp/package-lock.json");
                 Assert.NotNull(reactPackageLockJsonEntry);
                 using var sourceStream = new StreamReader(reactPackageLockJsonEntry!.Open());
                 var sourceText = sourceStream.ReadToEnd();

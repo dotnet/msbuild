@@ -3,17 +3,19 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
 using VerifyXunit;
 using Xunit;
 
-namespace Dotnet_new3.IntegrationTests
+namespace Microsoft.DotNet.New.Tests
 {
     [UsesVerify]
     public partial class PostActionTests
@@ -40,9 +42,7 @@ namespace Dotnet_new3.IntegrationTests
                 .ScrubInlineGuids()
                 .AddScrubber(output =>
                 {
-                    //for OSX Verify.NET is not replacing temporary path correctly.
-                    output.Replace("/private{TempPath}", "{TempPath}");
-                    output.ScrubByRegex("(?<=Restoring {TempPath}TemplateEngine\\.Tests(\\\\|\\/)Guid_1(\\\\|\\/)MyProject.csproj:\\n)(.*?)(?=\\nRestore succeeded)", "%RESTORE CALLBACK OUTPUT%", System.Text.RegularExpressions.RegexOptions.Singleline);
+                    output.ScrubByRegex("(?<=Restoring {SolutionDirectory}artifacts(\\\\|\\/)tmp(\\\\|\\/)Debug(\\\\|\\/)TemplateEngine\\.Tests(\\\\|\\/)Guid_1(\\\\|\\/)MyProject.csproj:\\n)(.*?)(?=\\nRestore succeeded)", "%RESTORE CALLBACK OUTPUT%", System.Text.RegularExpressions.RegexOptions.Singleline);
                 });
         }
 
@@ -92,9 +92,7 @@ namespace Dotnet_new3.IntegrationTests
                 .ScrubInlineGuids()
                 .AddScrubber(output =>
                 {
-                    //for OSX Verify.NET is not replacing temporary path correctly.
-                    output.Replace("/private{TempPath}", "{TempPath}");
-                    output.ScrubByRegex("(?<=Adding a package reference Newtonsoft.Json \\(version: 13.0.1\\) to project file {TempPath}TemplateEngine\\.Tests(\\\\|\\/)Guid_1(\\\\|\\/)MyProject.csproj:\\n)(.*?)(?=\\nSuccessfully added a reference to the project file.)", "%CALLBACK OUTPUT%", System.Text.RegularExpressions.RegexOptions.Singleline);
+                    output.ScrubByRegex("(?<=Adding a package reference Newtonsoft.Json \\(version: 13.0.1\\) to project file {SolutionDirectory}artifacts(\\\\|\\/)tmp(\\\\|\\/)Debug(\\\\|\\/)TemplateEngine\\.Tests(\\\\|\\/)Guid_1(\\\\|\\/)MyProject.csproj:\\n)(.*?)(?=\\nSuccessfully added a reference to the project file.)", "%CALLBACK OUTPUT%", System.Text.RegularExpressions.RegexOptions.Singleline);
                 });
         }
 
@@ -121,9 +119,7 @@ namespace Dotnet_new3.IntegrationTests
                 .ScrubInlineGuids()
                 .AddScrubber(output =>
                 {
-                    //for OSX Verify.NET is not replacing temporary path correctly.
-                    output.Replace("/private{TempPath}", "{TempPath}");
-                    output.ScrubByRegex("(?<=Adding a project reference {TempPath}TemplateEngine.Tests(\\\\|\\/)Guid_1(\\\\|\\/)Project2(\\\\|\\/)Project2.csproj to project file {TempPath}TemplateEngine.Tests(\\\\|\\/)Guid_1(\\\\|\\/)Project1(\\\\|\\/)Project1.csproj:\\n)(.*?)(?=\\nSuccessfully added a reference to the project file.)", "%CALLBACK OUTPUT%", System.Text.RegularExpressions.RegexOptions.Singleline);
+                    output.ScrubByRegex("(?<=Adding a project reference {SolutionDirectory}artifacts(\\\\|\\/)tmp(\\\\|\\/)Debug(\\\\|\\/)TemplateEngine.Tests(\\\\|\\/)Guid_1(\\\\|\\/)Project2(\\\\|\\/)Project2.csproj to project file {SolutionDirectory}artifacts(\\\\|\\/)tmp(\\\\|\\/)Debug(\\\\|\\/)TemplateEngine.Tests(\\\\|\\/)Guid_1(\\\\|\\/)Project1(\\\\|\\/)Project1.csproj:\\n)(.*?)(?=\\nSuccessfully added a reference to the project file.)", "%CALLBACK OUTPUT%", System.Text.RegularExpressions.RegexOptions.Singleline);
                 });
         }
 
@@ -159,8 +155,6 @@ namespace Dotnet_new3.IntegrationTests
                 .ScrubInlineGuids()
                 .AddScrubber(output =>
                 {
-                    //for OSX Verify.NET is not replacing temporary path correctly.
-                    output.Replace("/private{TempPath}", "{TempPath}");
                     output.ScrubByRegex("(?<=solution folder: src\\n)(.*?)(?=\\nSuccessfully added project\\(s\\) to a solution file.)", "%CALLBACK OUTPUT%", System.Text.RegularExpressions.RegexOptions.Singleline);
                 });
         }

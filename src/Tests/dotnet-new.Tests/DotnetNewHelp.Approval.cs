@@ -1,13 +1,16 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
 using VerifyXunit;
 using Xunit;
 
-namespace Dotnet_new3.IntegrationTests
+namespace Microsoft.DotNet.New.Tests
 {
     [UsesVerify]
     public partial class DotnetNewHelp
@@ -154,7 +157,7 @@ namespace Dotnet_new3.IntegrationTests
                 .Should()
                 .ExitWith(0)
                 .And.NotHaveStdErr()
-                .And.NotHaveStdOutContaining("Usage: new3 [options]");
+                .And.NotHaveStdOutContaining("Usage: new [options]");
 
             return Verifier.Verify(commandResult.StdOut, _verifySettings)
                 .UseTextForParameters(setName)
@@ -236,7 +239,7 @@ namespace Dotnet_new3.IntegrationTests
             commandResult
                 .Should().Pass()
                 .And.NotHaveStdErr()
-                .And.NotHaveStdOutContaining("Usage: new3 [options]");
+                .And.NotHaveStdOutContaining("Usage: new [options]");
 
             return Verifier.Verify(commandResult.StdOut, _verifySettings);
         }
@@ -282,7 +285,7 @@ namespace Dotnet_new3.IntegrationTests
                     .Execute();
 
             //help command cannot fail, therefore the output is written to stdout
-            commandResult.Should().Pass().And.NotHaveStdErr().And.NotHaveStdOutContaining("Usage: new3 [options]");
+            commandResult.Should().Pass().And.NotHaveStdErr().And.NotHaveStdOutContaining("Usage: new [options]");
             return Verifier.Verify(commandResult.StdOut, _verifySettings);
         }
 
@@ -299,7 +302,7 @@ namespace Dotnet_new3.IntegrationTests
             commandResult
                     .Should().Pass()
                     .And.NotHaveStdErr()
-                    .And.NotHaveStdOutContaining("Usage: new3 [options]");
+                    .And.NotHaveStdOutContaining("Usage: new [options]");
 
             return Verifier.Verify(commandResult.StdOut, _verifySettings);
         }

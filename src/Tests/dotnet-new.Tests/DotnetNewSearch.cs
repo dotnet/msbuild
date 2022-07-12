@@ -1,23 +1,32 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Microsoft.TemplateEngine.TestHelper;
 using VerifyTests;
 using VerifyXunit;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Dotnet_new3.IntegrationTests
+namespace Microsoft.DotNet.New.Tests
 {
     [UsesVerify]
-    public class DotnetNewSearch : IClassFixture<SharedHomeDirectory>, IClassFixture<VerifySettingsFixture>
+    public class DotnetNewSearch : SdkTest, IClassFixture<SharedHomeDirectory>, IClassFixture<VerifySettingsFixture>
     {
         private readonly SharedHomeDirectory _sharedHome;
         private readonly VerifySettings _verifySettings;
         private readonly ITestOutputHelper _log;
 
-        public DotnetNewSearch(SharedHomeDirectory sharedHome, VerifySettingsFixture verifySettings, ITestOutputHelper log)
+        public DotnetNewSearch(SharedHomeDirectory sharedHome, VerifySettingsFixture verifySettings, ITestOutputHelper log) : base(log)
         {
             _sharedHome = sharedHome;
             _verifySettings = verifySettings.Settings;
@@ -42,7 +51,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("These templates matched your input: 'console'")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "console"), "'Template Name' or 'Short Name' columns do not contain the criteria");
@@ -113,13 +122,13 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "azure"), "'Template Name' or 'Short Name' columns do not contain the criteria");
 
             var microsoftPackages = tableOutput.Where(row => row[2] == "Microsoft" && row[4].StartsWith("Microsoft", StringComparison.OrdinalIgnoreCase));
-            var installationCommands = microsoftPackages.Select(package => $"new3 install {package[4]}");
+            var installationCommands = microsoftPackages.Select(package => $"new install {package[4]}");
 
             Func<string, bool> containsOneOfInstallationCommands = (output) => installationCommands.Any(command => output.Contains(command));
             commandResult.Should().HaveStdOutContaining(containsOneOfInstallationCommands, "Checks if the output contains one of the expected installation commands");
@@ -141,7 +150,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Type", "Tags", "Package", "Downloads" });
 
@@ -170,7 +179,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("These templates matched your input: 'console', --tag='Common'")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Tags\\s+Package\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Tags", "Package", "Downloads" });
 
@@ -201,7 +210,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("These templates matched your input: --tag='Common'")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Tags\\s+Package\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Tags", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Tags" }, "Common"), "'Tags' column does not contain the criteria");
@@ -231,7 +240,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("These templates matched your input: 'func', --author='micro'")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Package\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Package", "Downloads" });
 
@@ -262,7 +271,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Package\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Author" }, "micro"), "'Author' column does not contain the criteria");
@@ -292,7 +301,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Package\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package", "Downloads" });
 
@@ -325,7 +334,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Package\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Language" }, "Q#"), "'Language' column does not contain criteria");
@@ -355,7 +364,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Type\\s+Package\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Type", "Package", "Downloads" });
 
@@ -386,7 +395,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Type\\s+Package\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Type", "Package", "Downloads" });
             Assert.True(AllRowsEqual(tableOutput, new[] { "Type" }, "item"), "'Type' column does not contain criteria");
@@ -416,7 +425,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
 
@@ -446,7 +455,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Package" }, "core"), "'Package' column does not contain criteria");
@@ -513,7 +522,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("These templates matched your input: 'con', --framework")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "con"), "'Template Name' or 'Short Name' columns do not contain the criteria");
@@ -533,7 +542,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("These templates matched your input: 'con', -f")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "con"), "'Template Name' or 'Short Name' columns do not contain the criteria");
@@ -553,7 +562,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("These templates matched your input: -f")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
@@ -579,7 +588,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("These templates matched your input: 'con', --langVersion")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "con"), "'Template Name' or 'Short Name' columns do not contain the criteria");
@@ -600,7 +609,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("These templates matched your input: --langVersion")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
@@ -626,7 +635,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("These templates matched your input: 'con', --langVersion")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "con"), "'Template Name' or 'Short Name' columns do not contain the criteria");
@@ -647,7 +656,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("These templates matched your input: --langVersion")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
@@ -673,7 +682,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("These templates matched your input: 'con', -f='netcoreapp3.1'")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "con"), "'Template Name' or 'Short Name' columns do not contain the criteria");
@@ -694,7 +703,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("These templates matched your input: -f='net5.0'")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install [<package>...]");
+                .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
             tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
@@ -778,9 +787,9 @@ namespace Dotnet_new3.IntegrationTests
         public void CanShowDeprecationMessage_WhenLegacyCommandIsUsed()
         {
             const string deprecationMessage =
-@"Warning: use of 'dotnet-new3 new3 --search' is deprecated. Use 'dotnet-new3 new3 search' instead.
+@"Warning: use of 'dotnet new --search' is deprecated. Use 'dotnet new search' instead.
 For more information, run: 
-   dotnet-new3 new3 search -h";
+   dotnet new search -h";
 
             var commandResult = new DotnetNewCommand(_log, "--search", "console")
                 .WithCustomHive(_sharedHome.HomeDirectory)

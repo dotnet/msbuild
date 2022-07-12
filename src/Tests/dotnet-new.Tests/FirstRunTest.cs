@@ -2,18 +2,20 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Dotnet_new3.IntegrationTests
+namespace Microsoft.DotNet.New.Tests
 {
-    public class FirstRunTest
+    public class FirstRunTest : SdkTest
     {
         private readonly ITestOutputHelper _log;
 
-        public FirstRunTest(ITestOutputHelper log)
+        public FirstRunTest(ITestOutputHelper log) : base(log)
         {
             _log = log;
         }

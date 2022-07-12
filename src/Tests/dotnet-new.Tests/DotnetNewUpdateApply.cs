@@ -2,18 +2,20 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Dotnet_new3.IntegrationTests
+namespace Microsoft.DotNet.New.Tests
 {
-    public class DotnetNewUpdateApply
+    public class DotnetNewUpdateApply : SdkTest
     {
         private readonly ITestOutputHelper _log;
 
-        public DotnetNewUpdateApply(ITestOutputHelper log)
+        public DotnetNewUpdateApply(ITestOutputHelper log) : base(log)
         {
             _log = log;
         }
@@ -48,8 +50,8 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutMatching("Package\\s+Current\\s+Latest")
                 .And.HaveStdOutMatching("Microsoft.DotNet.Common.ProjectTemplates.5.0\\s+5.0.0\\s+([\\d\\.a-z-])+")
                 .And.HaveStdOutContaining("To update the package use:")
-                .And.HaveStdOutContaining("   dotnet-new3 new3 install <package>::<version>")
-                .And.HaveStdOutMatching("   dotnet-new3 new3 install Microsoft\\.DotNet\\.Common\\.ProjectTemplates\\.5\\.0::([\\d\\.a-z-])+");
+                .And.HaveStdOutContaining("   dotnet new install <package>::<version>")
+                .And.HaveStdOutMatching("   dotnet new install Microsoft\\.DotNet\\.Common\\.ProjectTemplates\\.5\\.0::([\\d\\.a-z-])+");
 
             new DotnetNewCommand(_log, testCase)
                 .WithCustomHive(home).WithoutBuiltInTemplates()
@@ -102,9 +104,9 @@ namespace Dotnet_new3.IntegrationTests
         public void CanShowDeprecationMessage_WhenLegacyCommandIsUsed()
         {
             const string deprecationMessage =
-@"Warning: use of 'dotnet-new3 new3 --update-apply' is deprecated. Use 'dotnet-new3 new3 update' instead.
+@"Warning: use of 'dotnet new --update-apply' is deprecated. Use 'dotnet new update' instead.
 For more information, run: 
-   dotnet-new3 new3 update -h";
+   dotnet new update -h";
 
             var home = TestUtils.CreateTemporaryFolder("Home");
             var commandResult = new DotnetNewCommand(_log, "--update-apply")

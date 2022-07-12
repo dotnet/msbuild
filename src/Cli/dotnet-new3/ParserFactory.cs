@@ -4,6 +4,7 @@
 #nullable enable
 
 using System.CommandLine;
+using System.CommandLine.Builder;
 using System.CommandLine.Help;
 using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Cli.Commands;

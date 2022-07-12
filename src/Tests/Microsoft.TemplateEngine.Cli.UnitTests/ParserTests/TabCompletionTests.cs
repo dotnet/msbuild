@@ -87,7 +87,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var parseResult = myCommand.Parse("new install --nuget-source me");
             var result = parseResult.GetCompletions().Select(l => l.Label).ToArray();
 
-            Assert.Equal(1, result.Length);
+            Assert.Single(result);
             Assert.Contains("--interactive", result);
         }
 

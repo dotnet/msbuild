@@ -2,7 +2,7 @@
   Searches for the templates on NuGet.org.
 
 Usage:
-  dotnet-new3 new3 search [<template-name>] [options]
+  dotnet new search [<template-name>] [options]
 
 Arguments:
   <template-name>  If specified, only the templates matching the name will be shown.
@@ -15,4 +15,4 @@ Options:
   --package <package>                    Filters the templates based on NuGet package ID.
   --columns-all                          Display all columns in the output.
   --columns <author|language|tags|type>  Specifies the columns to display in the output.
-  -?, -h, --help                         Show help and usage information
+  -?, -h, --help                         Show command line help.
