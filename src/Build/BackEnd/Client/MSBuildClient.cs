@@ -173,8 +173,6 @@ namespace Microsoft.Build.Experimental
             // Connect to server.
             if (!TryConnectToServer(serverIsAlreadyRunning ? 1_000 : 20_000))
             {
-                CommunicationsUtilities.Trace("Failure to connect to a server.");
-                _exitResult.MSBuildClientExitType = MSBuildClientExitType.ConnectionError;
                 return _exitResult;
             }
 
@@ -186,6 +184,7 @@ namespace Microsoft.Build.Experimental
             if (!TrySendBuildCommand())
             {
                 CommunicationsUtilities.Trace("Failure to connect to a server.");
+                // Overwrite the client exit type from unexpected to connection error, since that would trigger the fallback to old build behavior.
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.ConnectionError;
                 return _exitResult;
             }
@@ -358,7 +357,7 @@ namespace Microsoft.Build.Experimental
             catch (Exception ex)
             {
                 CommunicationsUtilities.Trace($"Failed to send command packet of type '{packet?.Type.ToString() ?? "Unknown"}' to server: {0}", ex);
-                _exitResult.MSBuildClientExitType = MSBuildClientExitType.ConnectionError;
+                _exitResult.MSBuildClientExitType = MSBuildClientExitType.Unexpected;
                 return false;
             }
 
