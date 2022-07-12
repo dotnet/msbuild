@@ -10,8 +10,6 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.BackEnd;
 
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
-using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -86,21 +84,8 @@ namespace Microsoft.Build.Execution
         /// Setter assumes caller has protected global properties, if necessary.
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        string IProperty.EvaluatedValueEscaped
-        {
-            get
-            {
-                if (this is EnvironmentDerivedProjectPropertyInstance envProperty && envProperty.loggingContext?.IsValid == true && !envProperty._loggedEnvProperty)
-                {
-                    EnvironmentVariableReadEventArgs args = new(Name, _escapedValue);
-                    args.BuildEventContext = envProperty.loggingContext.BuildEventContext;
-                    envProperty.loggingContext.LogBuildEvent(args);
-                    envProperty._loggedEnvProperty = true;
-                }
+        string IProperty.EvaluatedValueEscaped => _escapedValue;
 
-                return _escapedValue;
-            }
-        }
         /// <summary>
         /// Implementation of IKeyed exposing the property name
         /// </summary>
@@ -197,9 +182,9 @@ namespace Microsoft.Build.Execution
         /// This flags should ONLY be set by the evaluator or by cloning; after the ProjectInstance is created, they must be illegal.
         /// If name is invalid or reserved, throws ArgumentException.
         /// </summary>
-        internal static ProjectPropertyInstance Create(string name, string escapedValue, bool mayBeReserved, bool isImmutable, bool isEnvironmentProperty = false, LoggingContext loggingContext = null)
+        internal static ProjectPropertyInstance Create(string name, string escapedValue, bool mayBeReserved, bool isImmutable)
         {
-            return Create(name, escapedValue, mayBeReserved, null, isImmutable, isEnvironmentProperty, loggingContext);
+            return Create(name, escapedValue, mayBeReserved, null, isImmutable);
         }
 
         /// <summary>
@@ -227,7 +212,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal static ProjectPropertyInstance Create(ProjectPropertyInstance that)
         {
-            return Create(that._name, that._escapedValue, mayBeReserved: true /* already validated */, isImmutable: that.IsImmutable, that is EnvironmentDerivedProjectPropertyInstance);
+            return Create(that._name, that._escapedValue, mayBeReserved: true /* already validated */, isImmutable: that.IsImmutable);
         }
 
         /// <summary>
@@ -236,7 +221,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal static ProjectPropertyInstance Create(ProjectPropertyInstance that, bool isImmutable)
         {
-            return Create(that._name, that._escapedValue, mayBeReserved: true /* already validated */, isImmutable: isImmutable, that is EnvironmentDerivedProjectPropertyInstance);
+            return Create(that._name, that._escapedValue, mayBeReserved: true /* already validated */, isImmutable: isImmutable);
         }
 
         /// <summary>
@@ -293,7 +278,7 @@ namespace Microsoft.Build.Execution
         /// as it should never be needed for any subsequent messages, and is just extra bulk.
         /// Inherits mutability from project if any.
         /// </summary>
-        private static ProjectPropertyInstance Create(string name, string escapedValue, bool mayBeReserved, ElementLocation location, bool isImmutable, bool isEnvironmentProperty = false, LoggingContext loggingContext = null)
+        private static ProjectPropertyInstance Create(string name, string escapedValue, bool mayBeReserved, ElementLocation location, bool isImmutable)
         {
             // Does not check immutability as this is only called during build (which is already protected) or evaluation
             ErrorUtilities.VerifyThrowArgumentNull(escapedValue, nameof(escapedValue));
@@ -310,10 +295,11 @@ namespace Microsoft.Build.Execution
                 XmlUtilities.VerifyThrowProjectValidElementName(name, location);
             }
 
-            ProjectPropertyInstance instance = isEnvironmentProperty ? new EnvironmentDerivedProjectPropertyInstance(name, escapedValue, loggingContext) :
-                isImmutable ? new ProjectPropertyInstanceImmutable(name, escapedValue) :
-                new ProjectPropertyInstance(name, escapedValue);
-            return instance;
+            if (isImmutable)
+            {
+                return new ProjectPropertyInstanceImmutable(name, escapedValue);
+            }
+            return new ProjectPropertyInstance(name, escapedValue);
         }
 
         /// <summary>
@@ -340,28 +326,6 @@ namespace Microsoft.Build.Execution
             /// Usually gotten from the parent ProjectInstance.
             /// </remarks>
             public override bool IsImmutable => true;
-        }
-
-        internal class EnvironmentDerivedProjectPropertyInstance : ProjectPropertyInstance
-        {
-            internal EnvironmentDerivedProjectPropertyInstance(string name, string escapedValue, LoggingContext loggingContext)
-                : base(name, escapedValue)
-            {
-                this.loggingContext = loggingContext;
-            }
-
-            /// <summary>
-            /// Whether this object can be changed. An immutable object cannot be made mutable.
-            /// </summary>
-            /// <remarks>
-            /// The environment is captured at the start of the build, so environment-derived
-            /// properties can't change.
-            /// </remarks>
-            public override bool IsImmutable => true;
-
-            internal bool _loggedEnvProperty = false;
-
-            internal LoggingContext loggingContext;
         }
     }
 }

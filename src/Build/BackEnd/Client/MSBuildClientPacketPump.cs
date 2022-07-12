@@ -68,6 +68,8 @@ namespace Microsoft.Build.BackEnd.Client
 
         public MSBuildClientPacketPump(Stream stream)
         {
+            ErrorUtilities.VerifyThrowArgumentNull(stream, nameof(stream));
+
             _stream = stream;
             _packetFactory = new NodePacketFactory();
 
@@ -273,7 +275,7 @@ namespace Microsoft.Build.BackEnd.Client
 #if FEATURE_APM
                                     result = localStream.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #else
-                                readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length);
+                                    readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length);
 #endif
                                 }
                             }

@@ -416,7 +416,7 @@ namespace Microsoft.Build.BackEnd
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
         // This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
         //  on non-Windows operating systems
-        private void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
+        private static void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
         {
             SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
 #if FEATURE_PIPE_SECURITY
@@ -451,40 +451,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                nodeStream.Connect(timeout);
-
-#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                if (NativeMethodsShared.IsWindows && !NativeMethodsShared.IsMono)
-                {
-                    // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
-                    // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to
-                    // us, potentially causing us to execute builds that do harmful or unexpected things.  The pipe owner can
-                    // only be set to the user's own SID by a normal, unprivileged process.  The conditions where a faked up
-                    // remote node could set the owner to something else would also let it change owners on other objects, so
-                    // this would be a security flaw upstream of us.
-                    ValidateRemotePipeSecurityOnWindows(nodeStream);
-                }
-#endif
-
-                int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
-                for (int i = 0; i < handshakeComponents.Length; i++)
-                {
-                    CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", i, handshakeComponents[i], pipeName);
-                    nodeStream.WriteIntForHandshake(handshakeComponents[i]);
-                }
-
-                // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
-                nodeStream.WriteEndOfHandshakeSignal();
-
-                CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
-
-#if NETCOREAPP2_1_OR_GREATER || MONO
-                nodeStream.ReadEndOfHandshakeSignal(true, timeout);
-#else
-                nodeStream.ReadEndOfHandshakeSignal(true);
-#endif
-                // We got a connection.
-                CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
+                ConnectToPipeStream(nodeStream, pipeName, handshake, timeout);
                 return nodeStream;
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
@@ -501,6 +468,50 @@ namespace Microsoft.Build.BackEnd
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Connect to named pipe stream and ensure validate handshake and security.
+        /// </summary>
+        /// <remarks>
+        /// Reused by MSBuild server client <see cref="Microsoft.Build.Experimental.MSBuildClient"/>.
+        /// </remarks>
+        internal static void ConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, Handshake handshake, int timeout)
+        {
+            nodeStream.Connect(timeout);
+
+#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+            if (NativeMethodsShared.IsWindows && !NativeMethodsShared.IsMono)
+            {
+                // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
+                // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to
+                // us, potentially causing us to execute builds that do harmful or unexpected things.  The pipe owner can
+                // only be set to the user's own SID by a normal, unprivileged process.  The conditions where a faked up
+                // remote node could set the owner to something else would also let it change owners on other objects, so
+                // this would be a security flaw upstream of us.
+                ValidateRemotePipeSecurityOnWindows(nodeStream);
+            }
+#endif
+
+            int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
+            for (int i = 0; i < handshakeComponents.Length; i++)
+            {
+                CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", i, handshakeComponents[i], pipeName);
+                nodeStream.WriteIntForHandshake(handshakeComponents[i]);
+            }
+
+            // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
+            nodeStream.WriteEndOfHandshakeSignal();
+
+            CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
+
+#if NETCOREAPP2_1_OR_GREATER || MONO
+            nodeStream.ReadEndOfHandshakeSignal(true, timeout);
+#else
+            nodeStream.ReadEndOfHandshakeSignal(true);
+#endif
+            // We got a connection.
+            CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
         }
 
         /// <summary>

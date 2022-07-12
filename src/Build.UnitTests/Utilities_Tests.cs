@@ -22,7 +22,6 @@ using Xunit;
 using System.Collections.Generic;
 using System.IO;
 using Xunit.Abstractions;
-using Shouldly;
 
 #nullable disable
 
@@ -81,41 +80,55 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CommentsInPreprocessing()
         {
-            using TestEnvironment env = TestEnvironment.Create();
-            XmlDocumentWithLocation.ClearReadOnlyFlags_UnitTestsOnly();
+            Microsoft.Build.Construction.XmlDocumentWithLocation.ClearReadOnlyFlags_UnitTestsOnly();
 
-            TransientTestFile inputFile = env.CreateFile("tempInput.tmp", ObjectModelHelpers.CleanupFileContents(@"
-<Project DefaultTargets='Build'>
-<Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets'/>
-</Project>"));
-            TransientTestFile outputFile = env.CreateFile("tempOutput.tmp");
+            string input = FileUtilities.GetTemporaryFile();
+            string output = FileUtilities.GetTemporaryFile();
 
-            env.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", "1");
+            string _initialLoadFilesWriteable = Environment.GetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE");
+            try
+            {
+                Environment.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", "1");
+
+                string content = ObjectModelHelpers.CleanupFileContents(@"
+<Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+  <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets'/>
+</Project>");
+                File.WriteAllText(input, content);
 
 #if FEATURE_GET_COMMANDLINE
-            MSBuildApp.Execute(@"c:\bin\msbuild.exe """ + inputFile.Path +
-                (NativeMethodsShared.IsUnixLike ? @""" -pp:""" : @""" /pp:""") + outputFile.Path + @"""")
-                .ShouldBe(MSBuildApp.ExitType.Success);
+                Assert.Equal(MSBuildApp.ExitType.Success, MSBuildApp.Execute(@"c:\bin\msbuild.exe """ + input +
+                    (NativeMethodsShared.IsUnixLike ? @""" -pp:""" : @""" /pp:""") + output + @""""));
 #else
-            Assert.Equal(
-                MSBuildApp.ExitType.Success,
-                MSBuildApp.Execute(
-                    new[] { @"c:\bin\msbuild.exe", '"' + inputFile.Path + '"',
-                '"' + (NativeMethodsShared.IsUnixLike ? "-pp:" : "/pp:") + outputFile.Path + '"'}));
+                Assert.Equal(
+                    MSBuildApp.ExitType.Success,
+                    MSBuildApp.Execute(
+                        new[] { @"c:\bin\msbuild.exe", '"' + input + '"',
+                    '"' + (NativeMethodsShared.IsUnixLike ? "-pp:" : "/pp:") + output + '"'}));
 #endif
 
-            bool foundDoNotModify = false;
-            foreach (string line in File.ReadLines(outputFile.Path))
-            {
-                line.ShouldNotContain("<!---->", "This is what it will look like if we're loading read/only");
-
-                if (line.Contains("DO NOT MODIFY")) // this is in a comment in our targets
+                bool foundDoNotModify = false;
+                foreach (string line in File.ReadLines(output))
                 {
-                    foundDoNotModify = true;
-                }
-            }
+                    if (line.Contains("<!---->")) // This is what it will look like if we're loading read/only
+                    {
+                        Assert.True(false);
+                    }
 
-            foundDoNotModify.ShouldBeTrue();
+                    if (line.Contains("DO NOT MODIFY")) // this is in a comment in our targets
+                    {
+                        foundDoNotModify = true;
+                    }
+                }
+
+                Assert.True(foundDoNotModify);
+            }
+            finally
+            {
+                File.Delete(input);
+                File.Delete(output);
+                Environment.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", _initialLoadFilesWriteable);
+            }
         }
 
         [Fact]

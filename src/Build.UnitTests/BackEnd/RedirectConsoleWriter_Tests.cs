@@ -1,11 +1,12 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-//
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.Experimental;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
@@ -16,14 +17,15 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         public async Task EmitConsoleMessages()
         {
             StringBuilder sb = new StringBuilder();
-            var writer = OutOfProcServerNode.RedirectConsoleWriter.Create(text => sb.Append(text));
 
-            writer.WriteLine("Line 1");
-            await Task.Delay(300);
-            writer.Write("Line 2");
-            writer.Dispose();
+            using (TextWriter writer = OutOfProcServerNode.RedirectConsoleWriter.Create(text => sb.Append(text)))
+            {
+                writer.WriteLine("Line 1");
+                await Task.Delay(300);
+                writer.Write("Line 2");
+            }
 
-            Assert.Equal($"Line 1{Environment.NewLine}Line 2", sb.ToString());
+            sb.ToString().ShouldBe($"Line 1{Environment.NewLine}Line 2");
         }
     }
 }

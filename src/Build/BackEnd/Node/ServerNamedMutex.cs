@@ -1,5 +1,5 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.Threading;
@@ -29,13 +29,6 @@ namespace Microsoft.Build.Execution
 
         internal static ServerNamedMutex OpenOrCreateMutex(string name, out bool createdNew)
         {
-            // TODO: verify it is not needed anymore
-            // if (PlatformInformation.IsRunningOnMono)
-            // {
-            //     return new ServerFileMutexPair(name, initiallyOwned: true, out createdNew);
-            // }
-            // else
-
             return new ServerNamedMutex(name, out createdNew);
         }
 
@@ -45,21 +38,6 @@ namespace Microsoft.Build.Execution
             mutex?.Dispose();
 
             return result;
-        }
-
-        public bool TryLock(int timeoutMs)
-        {
-            if (IsDisposed)
-            {
-                throw new ObjectDisposedException(nameof(ServerNamedMutex));
-            }
-
-            if (IsLocked)
-            {
-                throw new InvalidOperationException("Lock already held");
-            }
-
-            return IsLocked = _serverMutex.WaitOne(timeoutMs);
         }
 
         public void Dispose()

@@ -47,28 +47,28 @@ folder InstallDir:\MSBuild\Current\Bin\arm64\MSBuild
   file source=$(Arm64BinPath)\MSBuild\Microsoft.Build.CommonTypes.xsd
 
 folder InstallDir:\MSBuild\Current\Bin\arm64\cs
-  file source=$(Arm64BinPath)cs\MSBuild.resources.dll vs.file.ngenArchitecture=all
+  file source=$(Arm64BinPath)cs\MSBuild.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\de
-  file source=$(Arm64BinPath)de\MSBuild.resources.dll vs.file.ngenArchitecture=all
+  file source=$(Arm64BinPath)de\MSBuild.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\es
-  file source=$(Arm64BinPath)es\MSBuild.resources.dll vs.file.ngenArchitecture=all
+  file source=$(Arm64BinPath)es\MSBuild.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\fr
-  file source=$(Arm64BinPath)fr\MSBuild.resources.dll vs.file.ngenArchitecture=all
+  file source=$(Arm64BinPath)fr\MSBuild.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\it
-  file source=$(Arm64BinPath)it\MSBuild.resources.dll vs.file.ngenArchitecture=all
+  file source=$(Arm64BinPath)it\MSBuild.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\ja
-  file source=$(Arm64BinPath)ja\MSBuild.resources.dll vs.file.ngenArchitecture=all
+  file source=$(Arm64BinPath)ja\MSBuild.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\ko
-  file source=$(Arm64BinPath)ko\MSBuild.resources.dll vs.file.ngenArchitecture=all
+  file source=$(Arm64BinPath)ko\MSBuild.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\pl
-  file source=$(Arm64BinPath)pl\MSBuild.resources.dll vs.file.ngenArchitecture=all
+  file source=$(Arm64BinPath)pl\MSBuild.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\pt-BR
-  file source=$(Arm64BinPath)pt-BR\MSBuild.resources.dll vs.file.ngenArchitecture=all
+  file source=$(Arm64BinPath)pt-BR\MSBuild.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\ru
-  file source=$(Arm64BinPath)ru\MSBuild.resources.dll vs.file.ngenArchitecture=all
+  file source=$(Arm64BinPath)ru\MSBuild.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\tr
-  file source=$(Arm64BinPath)tr\MSBuild.resources.dll vs.file.ngenArchitecture=all
+  file source=$(Arm64BinPath)tr\MSBuild.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\zh-Hans
-  file source=$(Arm64BinPath)zh-Hans\MSBuild.resources.dll vs.file.ngenArchitecture=all
+  file source=$(Arm64BinPath)zh-Hans\MSBuild.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\zh-Hant
-  file source=$(Arm64BinPath)zh-Hant\MSBuild.resources.dll vs.file.ngenArchitecture=all
+  file source=$(Arm64BinPath)zh-Hant\MSBuild.resources.dll

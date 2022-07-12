@@ -9,7 +9,6 @@ using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Execution;
-using Microsoft.Build.BackEnd.Logging;
 
 #nullable disable
 
@@ -308,9 +307,9 @@ namespace Microsoft.Build.Evaluation
                 return _wrappedData.SetProperty(propertyElement, evaluatedValueEscaped);
             }
 
-            public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false, LoggingContext loggingContext = null)
+            public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false)
             {
-                return _wrappedData.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, loggingContext: loggingContext);
+                return _wrappedData.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved);
             }
         }
     }

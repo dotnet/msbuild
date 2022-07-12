@@ -1,8 +1,7 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
@@ -67,18 +66,11 @@ namespace Microsoft.Build.Experimental
         /// </summary>
         private Exception? _shutdownException = null;
 
-        /// <summary>
-        /// Flag indicating if we should debug communications or not.
-        /// </summary>
-        private readonly bool _debugCommunications;
-
         private string _serverBusyMutexName = default!;
 
         public OutOfProcServerNode(BuildCallback buildFunction)
         {
             _buildFunction = buildFunction;
-            new Dictionary<string, string>();
-            _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
 
             _receivedPackets = new ConcurrentQueue<INodePacket>();
             _packetReceivedEvent = new AutoResetEvent(false);
@@ -153,10 +145,10 @@ namespace Microsoft.Build.Experimental
             => NamedPipeUtil.GetPlatformSpecificPipeName($"MSBuildServer-{handshake.ComputeHash()}");
 
         internal static string GetRunningServerMutexName(ServerNodeHandshake handshake)
-            => $@"Global\server-running-{handshake.ComputeHash()}";
+            => $@"Global\msbuild-server-running-{handshake.ComputeHash()}";
 
         internal static string GetBusyServerMutexName(ServerNodeHandshake handshake)
-            => $@"Global\server-busy-{handshake.ComputeHash()}";
+            => $@"Global\msbuild-server-busy-{handshake.ComputeHash()}";
 
         #region INodePacketFactory Members
 
@@ -251,12 +243,6 @@ namespace Microsoft.Build.Experimental
                 case LinkStatus.Failed:
                     _shutdownReason = NodeEngineShutdownReason.ConnectionFailed;
                     _shutdownEvent.Set();
-                    break;
-
-                case LinkStatus.Inactive:
-                    break;
-
-                case LinkStatus.Active:
                     break;
 
                 default:
