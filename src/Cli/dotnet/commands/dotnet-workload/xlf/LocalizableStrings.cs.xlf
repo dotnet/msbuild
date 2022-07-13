@@ -17,6 +17,11 @@
         <target state="translated">Příkaz Instalovat rozhraní .NET</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoWorkloadsInstalledInfoWarning">
+        <source>There are no installed workloads to display.</source>
+        <target state="new">There are no installed workloads to display.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkipSignCheckInvalidOption">
         <source>Unable to bypass signature verification. The specified option conflicts with a global policy.</source>
         <target state="new">Unable to bypass signature verification. The specified option conflicts with a global policy.</target>
@@ -25,6 +30,31 @@
       <trans-unit id="WasmToolsDescription">
         <source>.NET WebAssembly build tools</source>
         <target state="translated">Nástroje pro sestavení .NET WebAssembly</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadIdColumn">
+        <source>Installed Workload Id</source>
+        <target state="new">Installed Workload Id</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadInstallTypeColumn">
+        <source>Install Type</source>
+        <target state="new">Install Type</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadManfiestVersionColumn">
+        <source>Manifest Version</source>
+        <target state="new">Manifest Version</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadManifestPathColumn">
+        <source>Manifest Path</source>
+        <target state="new">Manifest Path</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadSourceColumn">
+        <source>Installation Source</source>
+        <target state="new">Installation Source</target>
         <note />
       </trans-unit>
     </body>
