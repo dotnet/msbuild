@@ -55,7 +55,8 @@ namespace Microsoft.DotNet.Workloads.Workload
             string dotnetDir,
             string userProfileDir,
             string tempDirPath,
-            string version)
+            string version,
+            string installedFeatureBand = null)
             : base(parseResult, reporter: reporter, tempDirPath: tempDirPath, nugetPackageDownloader: nugetPackageDownloader)
         {
             _printDownloadLinkOnly = parseResult.GetValueForOption(InstallingWorkloadCommandParser.PrintDownloadLinkOnlyOption);
@@ -66,17 +67,8 @@ namespace Microsoft.DotNet.Workloads.Workload
             _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
             _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(InstallingWorkloadCommandParser.VersionOption), version, _dotnetPath, _userProfileDir, false);
             _sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
-            //  wrap in a try catch block
-                // throw an excpetion in the catch block
-            try
-            {
-                DotnetVersionFile versionFile = DotnetFiles.VersionFileObject;
-                _installedFeatureBand = new SdkFeatureBand(versionFile.BuildNumber);
-            }
-            catch 
-            {
-                throw new FormatException("failed to parse version file");
-            }
+
+            _installedFeatureBand = installedFeatureBand == null ? new SdkFeatureBand(DotnetFiles.VersionFileObject.BuildNumber) : new SdkFeatureBand(installedFeatureBand);
 
             _fromRollbackDefinition = parseResult.GetValueForOption(InstallingWorkloadCommandParser.FromRollbackFileOption);
             var configOption = parseResult.GetValueForOption(InstallingWorkloadCommandParser.ConfigOption);

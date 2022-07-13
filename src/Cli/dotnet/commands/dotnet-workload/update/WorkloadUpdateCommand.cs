@@ -39,10 +39,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             string dotnetDir = null,
             string userProfileDir = null,
             string tempDirPath = null,
-            string version = null)
+            string version = null,
+            string installedFeatureBand = null)
             : base(parseResult, reporter: reporter, workloadResolver: workloadResolver, workloadInstaller: workloadInstaller,
                   nugetPackageDownloader: nugetPackageDownloader, workloadManifestUpdater: workloadManifestUpdater,
-                  dotnetDir: dotnetDir, userProfileDir: userProfileDir, tempDirPath: tempDirPath, version: version)
+                  dotnetDir: dotnetDir, userProfileDir: userProfileDir, tempDirPath: tempDirPath, version: version, installedFeatureBand: installedFeatureBand)
 
         {
             _fromPreviousSdk = parseResult.GetValueForOption(WorkloadUpdateCommandParser.FromPreviousSdkOption);
