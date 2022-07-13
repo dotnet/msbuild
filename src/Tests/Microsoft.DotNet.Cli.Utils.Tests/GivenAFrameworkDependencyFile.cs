@@ -124,7 +124,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             FrameworkDependencyFile.TryGetMostFitRuntimeIdentifier(
                     currentRuntimeIdentifier: "win-vnext",
-                    alternativeCurrentRuntimeIdentifier: "win8",
+                    alternativeCurrentRuntimeIdentifier: ToolsetInfo.LatestWinRuntimeIdentifier,
                     runtimeGraph: _testRuntimeGraph,
                     candidateRuntimeIdentifiers: new[] { "win", "any" },
                     mostFitRuntimeIdentifier: out string mostFitRid)
@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         public void WhenCurrentRuntimeIdentifierIsNotSupportedSoIsTheAlternativeItReturnsFalse()
         {
             FrameworkDependencyFile.TryGetMostFitRuntimeIdentifier(
-                    currentRuntimeIdentifier: "osx10.13-x64",
+                    currentRuntimeIdentifier: $"{ToolsetInfo.LatestMacRuntimeIdentifier}-x64",
                     alternativeCurrentRuntimeIdentifier: "osx-x64",
                     runtimeGraph: _testRuntimeGraph,
                     candidateRuntimeIdentifiers: new[] { "win", "any" },
