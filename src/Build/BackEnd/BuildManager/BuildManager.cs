@@ -836,6 +836,8 @@ namespace Microsoft.Build.Execution
 
                 if (KnownTelemetry.BuildTelemetry != null)
                 {
+                    // Project graph can have multiple entry points, for purposes of identifying event for same build project,
+                    // we believe that including only one entry point will provide enough precision.
                     KnownTelemetry.BuildTelemetry.Project ??= requestData.ProjectGraphEntryPoints?.FirstOrDefault().ProjectFile;
                     KnownTelemetry.BuildTelemetry.Target ??= string.Join(",", requestData.TargetNames);
                 }
