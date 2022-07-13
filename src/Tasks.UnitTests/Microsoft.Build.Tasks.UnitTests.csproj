@@ -57,6 +57,7 @@
     <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
       <Link>TestEnvironment.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\ProcessExtensions.cs" />
     <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
 
     <EmbeddedResource Include="SampleResx" />

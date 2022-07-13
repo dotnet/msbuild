@@ -646,7 +646,18 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(88, assemblyPath, numberOfPublicTypesSearched);
         }
+        
+        [Event(89, Keywords = Keywords.All)]
+        public void MSBuildServerBuildStart(string commandLine)
+        {
+            WriteEvent(89, commandLine);
+        }
 
+        [Event(90, Keywords = Keywords.All)]
+        public void MSBuildServerBuildStop(string commandLine, int countOfConsoleMessages, long sumSizeOfConsoleMessages, string clientExitType, string serverExitType)
+        {
+            WriteEvent(90, commandLine, countOfConsoleMessages, sumSizeOfConsoleMessages, clientExitType, serverExitType);
+        }
         #endregion
     }
 }
