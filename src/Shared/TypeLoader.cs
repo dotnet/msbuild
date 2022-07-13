@@ -48,7 +48,23 @@ namespace Microsoft.Build.Shared
 
         private static MetadataLoadContext _context;
 
-        private static string[] runtimeAssemblies = Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll");
+        private static string[] runtimeAssemblies = findRuntimeAssembliesWithMicrosoftBuildFramework();
+        private static string microsoftBuildFrameworkPath;
+
+        // We need to append Microsoft.Build.Framework from next to the executing assembly first to make sure it's loaded before the runtime variant.
+        private static string[] findRuntimeAssembliesWithMicrosoftBuildFramework()
+        {
+            string[] runtimeAssemblies = Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll");
+            string[] allAssemblies = new string[runtimeAssemblies.Length + 1];
+            microsoftBuildFrameworkPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Microsoft.Build.Framework.dll");
+            allAssemblies[0] = microsoftBuildFrameworkPath;
+            for (int i = 0; i < runtimeAssemblies.Length; i++)
+            {
+                allAssemblies[i + 1] = runtimeAssemblies[i];
+            }
+
+            return allAssemblies;
+        }
 
         /// <summary>
         /// Constructor.
@@ -371,7 +387,7 @@ namespace Microsoft.Build.Shared
                         if (_isDesiredType(publicType, null) && (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(publicType.FullName, typeName)))
                         {
                             MSBuildEventSource.Log.CreateLoadedTypeStart(loadedAssembly.FullName);
-                            LoadedType loadedType = new(publicType, _assemblyLoadInfo, loadedAssembly, _context.LoadFromAssemblyName("Microsoft.Build.Framework").GetType(typeof(ITaskItem).FullName), loadedViaMetadataLoadContext: true);
+                            LoadedType loadedType = new(publicType, _assemblyLoadInfo, loadedAssembly, _context.LoadFromAssemblyPath(microsoftBuildFrameworkPath).GetType(typeof(ITaskItem).FullName), loadedViaMetadataLoadContext: true);
                             _context?.Dispose();
                             _context = null;
                             MSBuildEventSource.Log.CreateLoadedTypeStop(loadedAssembly.FullName);
