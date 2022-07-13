@@ -1016,7 +1016,7 @@ namespace Microsoft.Build.Execution
 
                             KnownTelemetry.BuildTelemetry.UpdateEventProperties();
                             loggingService.LogTelemetry(buildEventContext: null, KnownTelemetry.BuildTelemetry.EventName, KnownTelemetry.BuildTelemetry.Properties);
-                            // Clean telemetry which makes it ready for next build submission.
+                            // Clean telemetry to make it ready for next build submission.
                             KnownTelemetry.BuildTelemetry = null;
                         }
                     }
