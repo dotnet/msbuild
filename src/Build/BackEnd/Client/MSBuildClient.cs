@@ -189,9 +189,6 @@ namespace Microsoft.Build.Experimental
             MSBuildEventSource.Log.MSBuildServerBuildStart(descriptiveCommandLine);
             if (!TrySendBuildCommand())
             {
-                CommunicationsUtilities.Trace("Failure to connect to a server.");
-                // Overwrite the client exit type from unexpected to connection error, since that would trigger the fallback to old build behavior.
-                _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnableToConnect;
                 return _exitResult;
             }
 
