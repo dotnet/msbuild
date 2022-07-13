@@ -167,6 +167,10 @@
     <Compile Include="BackEnd\Node\ServerNodeConsoleWrite.cs" />
     <Compile Include="BackEnd\Node\ServerNodeBuildResult.cs" />
     <Compile Include="BackEnd\Node\OutOfProcServerNode.cs" />
+    <Compile Include="Logging\ConsoleConfiguration.cs" />
+    <Compile Include="Logging\IConsoleConfiguration.cs" />
+    <Compile Include="Logging\InProcessConsoleConfiguration.cs" />
+    <Compile Include="Logging\TargetConsoleConfiguration.cs" />
     <Compile Include="Utilities\ImmutableCollectionsExtensions.cs" />
     <Compile Include="Utilities\NuGetFrameworkWrapper.cs" />
     <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectUsingTaskParameterElementLink.cs" />
