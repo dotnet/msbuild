@@ -52,12 +52,7 @@
         <target state="translated">A ferramenta '{0}' foi atualizada com êxito da versão '{1}' para a versão '{2}' (arquivo de manifesto {3}).</target>
         <note />
       </trans-unit>
-      <trans-unit id="UpdateSucceededPreVersionNoChange">
-        <source>Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</source>
-        <target state="new">Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateSucceededStableVersionNoChange">
+      <trans-unit id="UpdateSucceededVersionNoChange">
         <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
         <target state="new">Tool '{0}' was reinstalled with the latest stable version (version '{1}').</target>
         <note />

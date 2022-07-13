@@ -52,12 +52,7 @@
         <target state="translated">'{0}' 도구가 '{1}' 버전에서 '{2}' 버전(매니페스트 파일 {3})으로 업데이트되었습니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="UpdateSucceededPreVersionNoChange">
-        <source>Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</source>
-        <target state="new">Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateSucceededStableVersionNoChange">
+      <trans-unit id="UpdateSucceededVersionNoChange">
         <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
         <target state="new">Tool '{0}' was reinstalled with the latest stable version (version '{1}').</target>
         <note />

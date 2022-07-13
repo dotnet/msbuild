@@ -52,12 +52,7 @@
         <target state="translated">ツール '{0}' がバージョン '{1}' からバージョン '{2}' (マニフェストファイル {3}) に正常に更新されました。</target>
         <note />
       </trans-unit>
-      <trans-unit id="UpdateSucceededPreVersionNoChange">
-        <source>Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</source>
-        <target state="new">Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateSucceededStableVersionNoChange">
+      <trans-unit id="UpdateSucceededVersionNoChange">
         <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
         <target state="new">Tool '{0}' was reinstalled with the latest stable version (version '{1}').</target>
         <note />
