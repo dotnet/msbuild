@@ -119,6 +119,7 @@ namespace Microsoft.Build.Framework
                 {
                     // Arguments may be ints, etc, so explicitly convert
                     // Convert.ToString returns String.Empty when it cannot convert, rather than throwing
+                    // It returns null if the input is null.
                     writer.Write(Convert.ToString(argument, CultureInfo.CurrentCulture) ?? "");
                 }
             }
