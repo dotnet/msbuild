@@ -5,7 +5,6 @@
     <OutputType>exe</OutputType>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <NoWarn>NU1505</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

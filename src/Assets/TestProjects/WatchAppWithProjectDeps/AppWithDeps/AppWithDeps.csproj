@@ -4,7 +4,6 @@
     <TargetFramework>net5.0</TargetFramework>
     <OutputType>exe</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <NoWarn>NU1505</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

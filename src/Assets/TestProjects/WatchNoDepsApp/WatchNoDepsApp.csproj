@@ -4,7 +4,6 @@
     <TargetFramework>$(CurrentTargetFramework)</TargetFramework>
     <OutputType>exe</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <NoWarn>NU1505</NoWarn>
   </PropertyGroup>
 
 </Project>

@@ -397,7 +397,6 @@ namespace Microsoft.NET.Build.Tests
 
             // enable generating apphost even on macOS
             testProject.AdditionalProperties.Add("UseApphost", "true");
-            testProject.AdditionalProperties.Add("NoWarn", "NU1505");
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
