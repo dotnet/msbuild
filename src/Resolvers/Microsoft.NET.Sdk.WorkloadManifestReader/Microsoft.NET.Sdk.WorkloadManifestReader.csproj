@@ -5,7 +5,7 @@
     <TargetFrameworks Condition=" '$([MSBuild]::IsOSPlatform(`Windows`))' == 'false' ">$(SdkTargetFramework)</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <RuntimeIdentifiers Condition="$([MSBuild]::IsOSPlatform(`Windows`))">win-x86;win-x64</RuntimeIdentifiers>
-    <WarningsAsErrors>true</WarningsAsErrors>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
 
     <Nullable>Enable</Nullable>
