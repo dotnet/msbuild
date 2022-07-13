@@ -6,7 +6,7 @@
 
     <PlatformTarget>AnyCPU</PlatformTarget>
     <RuntimeIdentifiers Condition="$([MSBuild]::IsOSPlatform(`Windows`))">win-x86;win-x64</RuntimeIdentifiers>
-    <WarningsAsErrors>true</WarningsAsErrors>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Nullable>Enable</Nullable>
   </PropertyGroup>
 
