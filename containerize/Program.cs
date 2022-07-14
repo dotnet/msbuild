@@ -1,71 +1,72 @@
 ﻿using System.CommandLine;
 using System.Containers;
 
-RootCommand rootCommand = new("Containerize an application without Docker.");
-
-Option<DirectoryInfo> fileOption = new(
-    name: "--folder",
-    description: "The folder to pack.");
-
-rootCommand.AddOption(fileOption);
-
-Option<string> containerPath = new(
-    name: "--containerPath",
-    description: "Location of the packed folder in the final image.");
-
-rootCommand.AddOption(containerPath);
+var fileOption = new Argument<DirectoryInfo>(
+    name: "folder",
+    description: "The folder to pack.")
+    .LegalFilePathsOnly().ExistingOnly();
 
 Option<string> registryUri = new(
     name: "--registry",
-    description: "Location of the registry to push to.");
-
-rootCommand.AddOption(registryUri);
+    description: "Location of the registry to push to.",
+    getDefaultValue: () => "localhost:5010");
 
 Option<string> baseImageName = new(
     name: "--base",
-    description: "Base image name.");
-
-rootCommand.AddOption(baseImageName);
+    description: "Base image name.",
+    getDefaultValue: () => "mcr.microsoft.com/dotnet/runtime");
 
 Option<string> baseImageTag = new(
     name: "--baseTag",
-    description: "Base image tag.");
-
-rootCommand.AddOption(baseImageTag);
+    description: "Base image tag.",
+    getDefaultValue: () => $"{System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription[5]}.0");
 
 Option<string> entrypoint = new(
     name: "--entrypoint",
     description: "Entrypoint application.");
 
-rootCommand.AddOption(entrypoint);
-
 Option<string> imageName = new(
     name: "--name",
     description: "Name of the new image.");
 
-rootCommand.AddOption(imageName);
+var imageTag = new Option<string>("--tag", description: "Tag of the new image.", getDefaultValue: () => "latest");
 
-rootCommand.SetHandler(async (folder, cp, uri, baseImageName, baseTag, entrypoint, imageName) =>
+var workingDir = new Option<string>("--working-dir", description: "The working directory of the application", getDefaultValue: () => "/app");
+
+RootCommand rootCommand = new("Containerize an application without Docker."){
+    fileOption,
+    registryUri,
+    baseImageName,
+    baseImageTag,
+    entrypoint,
+    imageName,
+    imageTag
+};
+rootCommand.SetHandler(async (folder, containerWorkingDir, uri, baseImageName, baseTag, entrypoint, imageName, imageTag) =>
 {
-    await Containerize(folder.FullName, cp, uri, baseImageName, baseTag, entrypoint, imageName);
+    await Containerize(folder, containerWorkingDir, uri, baseImageName, baseTag, entrypoint, imageName, imageTag);
 },
     fileOption,
-    containerPath,
+    workingDir,
     registryUri,
     baseImageName,
     baseImageTag, 
     entrypoint,
-    imageName);
+    imageName,
+    imageTag
+    );
 
 return await rootCommand.InvokeAsync(args);
 
-async Task Containerize(string folder, string containerPath, string registryName, string baseName, string baseTag, string entrypoint, string imageName)
+async Task Containerize(DirectoryInfo folder, string workingDir, string registryName, string baseName, string baseTag, string entrypoint, string imageName, string imageTag)
 {
     Registry registry = new Registry(new Uri($"http://{registryName}"));
 
+    Console.WriteLine($"Reading from {registry.BaseUri}");
+
     Image x = await registry.GetImageManifest(baseName, baseTag);
 
-    Layer l = Layer.FromDirectory(folder, "/app");
+    Layer l = Layer.FromDirectory(folder.FullName, workingDir);
 
     x.AddLayer(l);
 
