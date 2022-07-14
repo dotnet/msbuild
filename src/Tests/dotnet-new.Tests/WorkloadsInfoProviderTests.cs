@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.New.Tests
                 .Returns((IEnumerable<WorkloadId> workloadIds) => workloadIds.Select(w =>
                     new WorkloadResolver.WorkloadInfo(w, $"Description: {w.ToString()}")));
 
-            IWorkloadsRepositoryEnumerator workloadsEnumerator = new WorkloadListHelper(
+            IWorkloadsRepositoryEnumerator workloadsEnumerator = new WorkloadInfoHelper(
                 currentSdkVersion: "1.2.3",
                 workloadRecordRepo: repoMock.Object,
                 workloadResolver: resolverMock.Object);

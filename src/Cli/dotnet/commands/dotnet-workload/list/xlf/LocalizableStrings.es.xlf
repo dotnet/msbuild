@@ -7,24 +7,9 @@
         <target state="translated">Enumera las cargas de trabajo disponibles.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WorkloadIdColumn">
-        <source>Installed Workload Ids</source>
-        <target state="translated">Los id. de carga de trabajo instalados</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WorkloadListFooter">
         <source>Use `dotnet workload search` to find additional workloads to install.</source>
         <target state="translated">Use "dotnet workload search" para buscar cargas de trabajo adicionales para instalar.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadManfiestVersionColumn">
-        <source>Manifest Version</source>
-        <target state="new">Manifest Version</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadSourceColumn">
-        <source>Installation Source</source>
-        <target state="translated">Origen de la instalación</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">

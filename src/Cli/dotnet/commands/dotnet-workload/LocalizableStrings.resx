@@ -132,4 +132,22 @@
   <data name="SkipSignCheckInvalidOption" xml:space="preserve">
     <value>Unable to bypass signature verification. The specified option conflicts with a global policy.</value>
   </data>
+  <data name="WorkloadIdColumn" xml:space="preserve">
+    <value>Installed Workload Id</value>
+  </data>
+  <data name="WorkloadInstallTypeColumn" xml:space="preserve">
+    <value>Install Type</value>
+  </data>
+  <data name="WorkloadManfiestVersionColumn" xml:space="preserve">
+    <value>Manifest Version</value>
+  </data>
+  <data name="WorkloadManifestPathColumn" xml:space="preserve">
+    <value>Manifest Path</value>
+  </data>
+  <data name="WorkloadSourceColumn" xml:space="preserve">
+    <value>Installation Source</value>
+  </data>
+  <data name="NoWorkloadsInstalledInfoWarning" xml:space="preserve">
+    <value>There are no installed workloads to display.</value>
+  </data>
 </root>

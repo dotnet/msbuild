@@ -30,25 +30,14 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         {
             int rightLength = mapper.Right.Length;
             List<CompatDifference>[] result = new List<CompatDifference>[rightLength];
-
-            if (rightLength == 1)
-            {
-                RunOnMapper(0);
-            }
-            else
-            {
-                for (int j = 0; j < rightLength; j++)
-                {
-                    RunOnMapper(j);
-                }
-            }
-
-            void RunOnMapper(int rightIndex)
+            
+            for (int rightIndex = 0; rightIndex < rightLength; rightIndex++)
             {
                 string leftName = _leftName;
                 string rightName = rightIndex < _rightNames.Length ? _rightNames[rightIndex] : DEFAULT_RIGHT_NAME;
                 List<CompatDifference> differences = new();
                 T right = mapper.Right[rightIndex];
+
                 if (mapper is AssemblyMapper am)
                 {
                     _context.RunOnAssemblySymbolActions(am.Left, (IAssemblySymbol)right, leftName, rightName, differences);
@@ -70,6 +59,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                             rightName,
                             differences);
                 }
+
                 result[rightIndex] = differences;
             }
 
@@ -85,7 +75,6 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                     ((Rule)Activator.CreateInstance(type)).Setup(_context, _settings);
                 }
             }
-
         }
     }
 }

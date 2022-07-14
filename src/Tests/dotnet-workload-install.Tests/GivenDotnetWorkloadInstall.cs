@@ -24,6 +24,7 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.DotNet.Cli.Utils;
 using System.Text.Json;
+using Microsoft.DotNet.Workloads.Workload.List;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -157,6 +158,52 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             installManager.InstallWorkloads(mockWorkloadIds, true);
             string.Join(" ", _reporter.Lines).Should().Contain("Failing garbage collection");
+        }
+
+        [Fact]
+        public void GivenInfoOptionWorkloadBaseCommandAcceptsThatOption()
+        {
+            var command = new DotnetCommand(Log);
+            var commandResult = command
+                .WithEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", string.Empty)
+                .WithEnvironmentVariable("PATH", "fake")
+                .Execute("workload", "--info");
+
+            commandResult.Should().Pass();
+        }
+
+        [Fact]
+        public void GivenNoWorkloadsInstalledInfoOptionRemarksOnThat()
+        {
+            // We can't easily mock the end to end process of installing a workload and testing --info on it so we are adding that to the manual testing document.
+            // However, we can test a setup where no workloads are installed and --info is provided. 
+
+            _reporter.Clear();
+            var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android"), new WorkloadId("xamarin-android-build") };
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            var installer = new MockPackWorkloadInstaller();
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot);
+            var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android"});
+
+            IWorkloadInfoHelper workloadInfoHelper = new WorkloadInfoHelper(workloadResolver: workloadResolver);
+            WorkloadCommandParser.ShowWorkloadsInfo(workloadInfoHelper: workloadInfoHelper, reporter:_reporter);
+            _reporter.Lines.Should().Contain("There are no installed workloads to display.");
+        }
+
+        [Fact]
+        public void GivenBadOptionWorkloadBaseInformsRequiredCommandWasNotProvided()
+        {
+            _reporter.Clear();
+            var command = new DotnetCommand(Log);
+            command
+                .WithEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", string.Empty)
+                .WithEnvironmentVariable("PATH", "fake")
+                .Execute("workload", "--infoz")
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining("Required command was not provided.");
         }
 
         [Theory]
