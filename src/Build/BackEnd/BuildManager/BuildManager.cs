@@ -25,6 +25,7 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
@@ -456,7 +457,7 @@ namespace Microsoft.Build.Execution
                         _nodeManager?.ShutdownAllNodes();
                         _taskHostNodeManager?.ShutdownAllNodes();
                     }
-               }
+                }
             }
 
             _previousLowPriority = parameters.LowPriority;
@@ -469,6 +470,14 @@ namespace Microsoft.Build.Execution
                 RequireState(BuildManagerState.Idle, "BuildInProgress");
 
                 MSBuildEventSource.Log.BuildStart();
+
+                // Initiate build telemetry data
+                DateTime now = DateTime.UtcNow;
+                KnownTelemetry.BuildTelemetry ??= new()
+                {
+                    StartAt = now,
+                };
+                KnownTelemetry.BuildTelemetry.InnerStartAt = now;
 
                 if (BuildParameters.DumpOpportunisticInternStats)
                 {
@@ -796,6 +805,13 @@ namespace Microsoft.Build.Execution
                 VerifyStateInternal(BuildManagerState.Building);
 
                 var newSubmission = new BuildSubmission(this, GetNextSubmissionId(), requestData, _buildParameters.LegacyThreadingSemantics);
+
+                if (KnownTelemetry.BuildTelemetry != null)
+                {
+                    KnownTelemetry.BuildTelemetry.Project ??= requestData.ProjectFullPath;
+                    KnownTelemetry.BuildTelemetry.Target ??= string.Join(",", requestData.TargetNames);
+                }
+
                 _buildSubmissions.Add(newSubmission.SubmissionId, newSubmission);
                 _noActiveSubmissionsEvent.Reset();
                 return newSubmission;
@@ -817,6 +833,15 @@ namespace Microsoft.Build.Execution
                 VerifyStateInternal(BuildManagerState.Building);
 
                 var newSubmission = new GraphBuildSubmission(this, GetNextSubmissionId(), requestData);
+
+                if (KnownTelemetry.BuildTelemetry != null)
+                {
+                    // Project graph can have multiple entry points, for purposes of identifying event for same build project,
+                    // we believe that including only one entry point will provide enough precision.
+                    KnownTelemetry.BuildTelemetry.Project ??= requestData.ProjectGraphEntryPoints?.FirstOrDefault().ProjectFile;
+                    KnownTelemetry.BuildTelemetry.Target ??= string.Join(",", requestData.TargetNames);
+                }
+
                 _graphBuildSubmissions.Add(newSubmission.SubmissionId, newSubmission);
                 _noActiveSubmissionsEvent.Reset();
                 return newSubmission;
@@ -965,6 +990,35 @@ namespace Microsoft.Build.Execution
                         }
 
                         loggingService.LogBuildFinished(_overallBuildSuccess);
+
+                        if (KnownTelemetry.BuildTelemetry != null)
+                        {
+                            KnownTelemetry.BuildTelemetry.FinishedAt = DateTime.UtcNow;
+                            KnownTelemetry.BuildTelemetry.Success = _overallBuildSuccess;
+                            KnownTelemetry.BuildTelemetry.Version = ProjectCollection.Version;
+                            KnownTelemetry.BuildTelemetry.DisplayVersion = ProjectCollection.DisplayVersion;
+                            KnownTelemetry.BuildTelemetry.FrameworkName = NativeMethodsShared.FrameworkName;
+
+                            string host = null;
+                            if (BuildEnvironmentState.s_runningInVisualStudio)
+                            {
+                                host = "VS";
+                            }
+                            else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME")))
+                            {
+                                host = Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME");
+                            }
+                            else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSCODE_CWD")) || Environment.GetEnvironmentVariable("TERM_PROGRAM") == "vscode")
+                            {
+                                host = "VSCode";
+                            }
+                            KnownTelemetry.BuildTelemetry.Host = host;
+
+                            KnownTelemetry.BuildTelemetry.UpdateEventProperties();
+                            loggingService.LogTelemetry(buildEventContext: null, KnownTelemetry.BuildTelemetry.EventName, KnownTelemetry.BuildTelemetry.Properties);
+                            // Clean telemetry to make it ready for next build submission.
+                            KnownTelemetry.BuildTelemetry = null;
+                        }
                     }
 
                     ShutdownLoggingService(loggingService);
