@@ -12,9 +12,19 @@
         <target state="translated">使用“dotnet 工作负载搜索”查找要安装的其他工作负载。</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadManfiestVersionColumn">
+        <source>Manifest Version</source>
+        <target state="translated">清单版本</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadSourceColumn">
+        <source>Installation Source</source>
+        <target state="translated">安装源文件</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
         <source>Updates are available for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
-        <target state="translated">以下工作负载: {0} 可用更新。运行“dotnet 工作负载更新”以获取最新版本。</target>
+        <target state="new">Updates are available for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</target>
         <note />
       </trans-unit>
     </body>

@@ -659,14 +659,14 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WebApp",
-                TargetFrameworks = "netcoreapp3.0"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
             testProject.FrameworkReferences.Add("Microsoft.AspNetCore.App");
 
             var testTestProject = new TestProject()
             {
                 Name = "WebAppTests",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 ReferencedProjects = { testProject }
             };
 

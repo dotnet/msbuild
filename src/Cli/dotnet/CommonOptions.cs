@@ -17,7 +17,8 @@ namespace Microsoft.DotNet.Cli
     internal static class CommonOptions
     {
         public static Option<string[]> PropertiesOption =
-            new ForwardedOption<string[]>(new string[] { "-property", "/p" })
+            // these are all of the forms that the property switch can be understood by in MSBuild
+            new ForwardedOption<string[]>(new string[] { "--property", "-property", "/property", "/p", "-p", "--p" })
             {
                 IsHidden = true
             }.ForwardAsProperty()

@@ -109,6 +109,39 @@ namespace Microsoft.DotNet.Cli
                 .FirstOrDefault(c => c.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
         }
 
+        /// <summary>
+        /// Implements token-per-line response file handling for the CLI. We use this instead of the built-in S.CL handling
+        /// to ensure backwards-compatibility with MSBuild.
+        /// </summary>
+        public static bool TokenPerLine(string tokenToReplace, out IReadOnlyList<string> replacementTokens, out string errorMessage) {
+            var filePath = Path.GetFullPath(tokenToReplace);
+            if (File.Exists(filePath)) {
+                var lines = File.ReadAllLines(filePath);
+                var trimmedLines =
+                    lines
+                        // Remove content in the lines that contain #, starting from the point of the #
+                        .Select(line => {
+                            var hashPos = line.IndexOf('#');
+                            if (hashPos == -1) {
+                                return line;
+                            } else if (hashPos == 0) {
+                                return "";
+                            } else {
+                                return line.Substring(0, hashPos).Trim();
+                            }
+                        })
+                        // Remove empty lines
+                        .Where(line => line.Length > 0);
+                replacementTokens = trimmedLines.ToArray();
+                errorMessage = null;
+                return true;
+            } else {
+                replacementTokens = null;
+                errorMessage = string.Format(CommonLocalizableStrings.ResponseFileNotFound, tokenToReplace);
+                return false;
+            }
+        }
+
         public static System.CommandLine.Parsing.Parser Instance { get; } = new CommandLineBuilder(ConfigureCommandLine(RootCommand))
             .UseExceptionHandler(ExceptionHandler)
             // TODO:CH - we want this for dotnet-new argument reporting, but 
@@ -124,6 +157,7 @@ namespace Microsoft.DotNet.Cli
             .UseSuggestDirective()
             .DisablePosixBinding()
             .EnableLegacyDoubleDashBehavior()
+            .UseTokenReplacer(TokenPerLine)
             .Build();
 
         private static CommandLineBuilder UseParseErrorReporting(this CommandLineBuilder builder, string commandName)

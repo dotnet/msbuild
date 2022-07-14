@@ -12,9 +12,19 @@
         <target state="translated">`dotnet ワークロード検索` を使用して追加ワークロードを検出し、インストールします。</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadManfiestVersionColumn">
+        <source>Manifest Version</source>
+        <target state="translated">マニフェストのバージョン</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadSourceColumn">
+        <source>Installation Source</source>
+        <target state="translated">インストール ソース</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
         <source>Updates are available for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
-        <target state="translated">次のワークロードの更新プログラムが利用可能です: {0}。`dotnet ワークロードの更新' を実行して最新版を取得します。</target>
+        <target state="new">Updates are available for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</target>
         <note />
       </trans-unit>
     </body>

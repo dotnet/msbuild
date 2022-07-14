@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
             command.GetArgumentsToMSBuild()
                .Should()
-               .Be($"{ExpectedPrefix} -restore -target:Publish {ExpectedProperties} -property:Prop1=prop1 -property:Prop2=prop2");
+               .Be($"{ExpectedPrefix} -restore -target:Publish {ExpectedProperties} --property:Prop1=prop1 --property:Prop2=prop2");
         }
     }
 }

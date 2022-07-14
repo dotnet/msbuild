@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="ExpectedSingleManifest">
         <source>Expected single manifest feature band and manifest folder in MSI from package {0}</source>
-        <target state="new">Expected single manifest feature band and manifest folder in MSI from package {0}</target>
+        <target state="translated">Einzelnes Manifestfeatureband und Manifestordner in MSI aus Paket {0} erwartet</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedAdManifestUpdate">
@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="FailedToExtractMsi">
         <source>Failed to extract information from MSI: {0}</source>
-        <target state="new">Failed to extract information from MSI: {0}</target>
+        <target state="translated">Fehler beim Extrahieren von Informationen aus MSI: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToGetPackageManifestUrl">
@@ -164,7 +164,7 @@
       </trans-unit>
       <trans-unit id="ManifestMsiNotFoundInNuGetPackage">
         <source>Manifest MSI not found in NuGet package {0}</source>
-        <target state="new">Manifest MSI not found in NuGet package {0}</target>
+        <target state="translated">Manifest-MSI wurde im NuGet-Paket {0} nicht gefunden.</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">

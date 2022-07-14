@@ -62,7 +62,7 @@ namespace Microsoft.NET.Pack.Tests
             var testProject = new TestProject()
             {
                 Name = "InvokeBuildOnPack",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 

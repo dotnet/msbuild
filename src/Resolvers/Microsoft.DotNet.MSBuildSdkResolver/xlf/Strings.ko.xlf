@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="UnableToLocateNETCoreSdk">
         <source>Unable to locate the .NET SDK. Check that it is installed, your PATH is configured for the correct architecture, and that the version specified in global.json (if any) matches the installed version.</source>
-        <target state="needs-review-translation">.NET SDK를 찾을 수 없습니다. 이 SDK가 설치되어 있고 global.json에 지정된 버전(있는 경우)이 설치된 버전과 일치하는지 확인하세요.</target>
+        <target state="new">Unable to locate the .NET SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.</target>
         <note />
       </trans-unit>
     </body>
