@@ -14,7 +14,7 @@ Option<string> registryUri = new(
 Option<string> baseImageName = new(
     name: "--base",
     description: "Base image name.",
-    getDefaultValue: () => "mcr.microsoft.com/dotnet/runtime");
+    getDefaultValue: () => "dotnet/runtime");
 
 Option<string> baseImageTag = new(
     name: "--baseTag",
@@ -40,7 +40,8 @@ RootCommand rootCommand = new("Containerize an application without Docker."){
     baseImageTag,
     entrypoint,
     imageName,
-    imageTag
+    imageTag,
+    workingDir
 };
 rootCommand.SetHandler(async (folder, containerWorkingDir, uri, baseImageName, baseTag, entrypoint, imageName, imageTag) =>
 {
@@ -66,6 +67,7 @@ async Task Containerize(DirectoryInfo folder, string workingDir, string registry
 
     Image x = await registry.GetImageManifest(baseName, baseTag);
 
+    Console.WriteLine($"Copying from {folder.FullName} to {workingDir}");
     Layer l = Layer.FromDirectory(folder.FullName, workingDir);
 
     x.AddLayer(l);
@@ -77,4 +79,10 @@ async Task Containerize(DirectoryInfo folder, string workingDir, string registry
     await registry.Push(x, imageName, baseName);
 
     Console.WriteLine($"Pushed {registryName}/{imageName}:latest");
+
+    var pullBase = System.Diagnostics.Process.Start("docker", $"pull {registryName}/{imageName}:latest");
+    await pullBase.WaitForExitAsync();
+
+    Console.WriteLine($"Loaded image into local Docker daemon. Use 'docker run -rm -it --name {imageName} {registryName}/{imageName}:latest' to run the application.");
+
 }
