@@ -233,6 +233,10 @@
       <Uri>https://github.com/dotnet/razor-compiler</Uri>
       <Sha>55e950892723d077c2707450ae8a8218bf4abc9c</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.NET.Sdk.Razor.SourceGenerators.Transport" Version="7.0.0-preview.5.22357.2">
+      <Uri>https://github.com/dotnet/razor-compiler</Uri>
+      <Sha>55e950892723d077c2707450ae8a8218bf4abc9c</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="7.0.0-rc.1.22364.1">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>ac67d32b92520edb35139645074c704cc2605fbd</Sha>
