@@ -133,16 +133,7 @@ namespace Microsoft.DotNet.New.Tests
         public WebProjectsFixture(IMessageSink messageSink) : base(messageSink)
         {
             BaseWorkingDirectory = TestUtils.CreateTemporaryFolder(nameof(AllWebProjectsWork));
-            // create nuget.config file with nuget.org listed
-            new DotnetNewCommand(Log, "nugetconfig")
-                .WithCustomHive(HomeDirectory)
-                .WithWorkingDirectory(BaseWorkingDirectory)
-                .Execute()
-                .Should()
-                .ExitWith(0)
-                .And
-                .NotHaveStdErr();
-
+ 
             InstallPackage(TemplatePackagesPaths.MicrosoftDotNetWebProjectTemplates31Path, BaseWorkingDirectory);
             InstallPackage(TemplatePackagesPaths.MicrosoftDotNetWebProjectTemplates50Path, BaseWorkingDirectory);
         }

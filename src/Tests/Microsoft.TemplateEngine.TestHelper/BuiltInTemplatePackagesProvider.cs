@@ -71,7 +71,7 @@ namespace Microsoft.TemplateEngine.TestHelper
                 }
                 List<string> locations = new List<string>()
                 {
-                    Path.Combine(repoRoot, @"src\template_feed"),
+                    Path.Combine(repoRoot, "template_feed"),
                 };
 
                 if (_includeTestTemplates)
