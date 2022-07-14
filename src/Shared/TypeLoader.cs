@@ -54,16 +54,15 @@ namespace Microsoft.Build.Shared
         // We need to append Microsoft.Build.Framework from next to the executing assembly first to make sure it's loaded before the runtime variant.
         private static string[] findRuntimeAssembliesWithMicrosoftBuildFramework()
         {
+            string msbuildDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            microsoftBuildFrameworkPath = Path.Combine(msbuildDirectory, "Microsoft.Build.Framework.dll");
+            string[] msbuildAssemblies = Directory.GetFiles(msbuildDirectory, "*.dll");
             string[] runtimeAssemblies = Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll");
-            string[] allAssemblies = new string[runtimeAssemblies.Length + 1];
-            microsoftBuildFrameworkPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Microsoft.Build.Framework.dll");
-            allAssemblies[0] = microsoftBuildFrameworkPath;
-            for (int i = 0; i < runtimeAssemblies.Length; i++)
-            {
-                allAssemblies[i + 1] = runtimeAssemblies[i];
-            }
 
-            return allAssemblies;
+            List<string> msbuildAssembliesList = new(msbuildAssemblies);
+            msbuildAssembliesList.AddRange(runtimeAssemblies);
+
+            return msbuildAssembliesList.ToArray();
         }
 
         /// <summary>
