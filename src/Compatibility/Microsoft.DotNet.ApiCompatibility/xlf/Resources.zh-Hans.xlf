@@ -47,6 +47,11 @@
         <target state="translated">无法将接口成员“{0}”添加到 {1}，因为它在 {2} 上不存在</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotAddVirtualToMember">
+        <source>Cannot add virtual keyword to member '{0}'.</source>
+        <target state="new">Cannot add virtual keyword to member '{0}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
         <source>Type '{0}' does not implement interface '{1}' on {2} but it does on {3}</source>
         <target state="translated">类型“{0}”不在 {1} 上实现接口“{2}”，但它在 {3} 上实现</target>
@@ -57,6 +62,11 @@
         <target state="translated">类型“{0}”不从 {2} 上的基类型“{1}”继承，但在 {3} 上继承</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotRemoveVirtualFromMember">
+        <source>Cannot remove virtual keyword from member '{0}'.</source>
+        <target state="new">Cannot remove virtual keyword from member '{0}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotResolveReference">
         <source>Could not resolve reference '{0}' in any of the provided search directories.</source>
         <target state="translated">无法在任何提供的搜索目录中解析引用“{0}”。</target>
@@ -65,6 +75,16 @@
       <trans-unit id="ElementShouldNotBeNullAtIndex">
         <source>Element should not be null. Found null at index: {0}.</source>
         <target state="translated">元素不应为 null。在索引 {0} 找到 null。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnumTypesMustMatch">
+        <source>Underlying type of enum '{0}' changed from '{1}' to '{2}'.</source>
+        <target state="new">Underlying type of enum '{0}' changed from '{1}' to '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnumValuesMustMatch">
+        <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
+        <target state="new">Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileDoesNotExist">
@@ -127,6 +147,11 @@
         <target state="translated">流位置大于其长度，因此没有可供读取的内容。</target>
         <note />
       </trans-unit>
+      <trans-unit id="SuppressionsFileNotSpecified">
+        <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
+        <target state="new">A file path must be passed in to successfully generate a compatibility suppression file.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TypeExistsOnLeft">
         <source>Type '{0}' exists on {1} but not on {2}</source>
         <target state="translated">类型“{0}”在 {1} 上存在，但在 {2} 上不存在</target>
@@ -150,6 +175,11 @@
       <trans-unit id="VisitorRightCountShouldMatchMappersSetSize">
         <source>The provided right count when creating the visitor should match the right set size specified for the mappers.</source>
         <target state="translated">创建访问者时提供的正确计数应该与为映射器指定的正确集大小相匹配。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WroteSuppressions">
+        <source>Successfully wrote compatibility suppressions to '{0}'.</source>
+        <target state="new">Successfully wrote compatibility suppressions to '{0}'.</target>
         <note />
       </trans-unit>
     </body>
