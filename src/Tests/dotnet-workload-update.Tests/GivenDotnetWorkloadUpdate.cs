@@ -283,7 +283,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                 WorkloadFileBasedInstall.SetUserLocal(dotnetRoot, sdkFeatureVersion);
             }
 
-            var exceptionThrown = Assert.Throws<GracefulException>(() => new WorkloadUpdateCommand(updateParseResult, reporter: _reporter, dotnetDir: dotnetRoot, userProfileDir: userProfileDir, installedFeatureBand: sdkFeatureVersion));
+            var exceptionThrown = Assert.Throws<GracefulException>(() => new WorkloadUpdateCommand(updateParseResult, reporter: _reporter, dotnetDir: dotnetRoot, userProfileDir: userProfileDir, installedFeatureBand: "6.0.400"));
             exceptionThrown.Message.Should().Contain("No manifests exist");
         }
 

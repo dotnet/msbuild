@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Workloads.Workload
             _downloadToCacheOption = parseResult.GetValueForOption(InstallingWorkloadCommandParser.DownloadToCacheOption);
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(InstallingWorkloadCommandParser.VersionOption), version, _dotnetPath, _userProfileDir, false);
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(InstallingWorkloadCommandParser.VersionOption), version, _dotnetPath, _userProfileDir);
             _sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
 
             _installedFeatureBand = installedFeatureBand == null ? new SdkFeatureBand(DotnetFiles.VersionFileObject.BuildNumber) : new SdkFeatureBand(installedFeatureBand);

@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
         {
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(WorkloadRepairCommandParser.VersionOption), version, _dotnetPath, userProfileDir, true);
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(WorkloadRepairCommandParser.VersionOption), version, _dotnetPath, userProfileDir);
 
             var configOption = parseResult.GetValueForOption(WorkloadRepairCommandParser.ConfigOption);
             var sourceOption = parseResult.GetValueForOption(WorkloadRepairCommandParser.SourceOption);
