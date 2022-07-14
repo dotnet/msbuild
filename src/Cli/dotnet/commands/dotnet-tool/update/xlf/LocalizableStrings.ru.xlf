@@ -52,7 +52,12 @@
         <target state="translated">Средство "{0}" обновлено с версии "{1}" до версии "{2}" (файл манифеста {3}).</target>
         <note />
       </trans-unit>
-      <trans-unit id="UpdateSucceededVersionNoChange">
+      <trans-unit id="UpdateSucceededPreVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</source>
+        <target state="new">Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceededStableVersionNoChange">
         <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
         <target state="new">Tool '{0}' was reinstalled with the latest stable version (version '{1}').</target>
         <note />
