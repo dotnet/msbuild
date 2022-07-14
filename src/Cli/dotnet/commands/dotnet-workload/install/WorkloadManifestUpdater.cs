@@ -272,12 +272,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     }
                     if (!success)
                     {
-                        _reporter.WriteLine(string.Format(LocalizableStrings.FailedToGetPackageManifestUrl, packageId));
+                        _reporter.WriteLine(string.Format(LocalizableStrings.ManifestPackageUrlNotResolved, packageId));
                     }
                 }
                 catch
                 {
-                    _reporter.WriteLine(string.Format(LocalizableStrings.FailedToGetPackageManifestUrl, manifest.Id));
+                    _reporter.WriteLine(string.Format(LocalizableStrings.ManifestPackageUrlNotResolved, manifest.Id));
                 }
             }
             return downloads;
