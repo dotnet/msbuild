@@ -941,7 +941,7 @@ Build
                 return;
             }
 
-            Internal.Utilities.EnumerateProperties(properties, kvp => nameValueListBuffer.Add(kvp));
+            Internal.Utilities.EnumerateProperties(properties, nameValueListBuffer, static (list, kvp) => list.Add(kvp));
 
             WriteNameValueList();
 
