@@ -41,10 +41,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             string userProfileDir = null,
             string tempDirPath = null,
             string version = null,
-            IReadOnlyCollection<string> workloadIds = null)
+            IReadOnlyCollection<string> workloadIds = null,
+            string installedFeatureBand = null)
             : base(parseResult, reporter: reporter, workloadResolver: workloadResolver, workloadInstaller: workloadInstaller,
                   nugetPackageDownloader: nugetPackageDownloader, workloadManifestUpdater: workloadManifestUpdater,
-                  dotnetDir: dotnetDir, userProfileDir: userProfileDir, tempDirPath: tempDirPath, version: version)
+                  dotnetDir: dotnetDir, userProfileDir: userProfileDir, tempDirPath: tempDirPath, version: version, installedFeatureBand: installedFeatureBand)
         {
             _skipManifestUpdate = parseResult.GetValueForOption(WorkloadInstallCommandParser.SkipManifestUpdateOption);
             _workloadIds = workloadIds ?? parseResult.GetValueForArgument(WorkloadInstallCommandParser.WorkloadIdArgument).ToList().AsReadOnly();

@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Uninstall
                 .Select(workloadId => new WorkloadId(workloadId)).ToList().AsReadOnly();
             var dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(WorkloadUninstallCommandParser.VersionOption), version, dotnetPath, userProfileDir);
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(WorkloadUninstallCommandParser.VersionOption), version, dotnetPath, userProfileDir, true);
 
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString(), userProfileDir);
             workloadResolver ??= WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString(), userProfileDir);

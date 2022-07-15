@@ -67,11 +67,6 @@
         <target state="translated">MSI から情報を抽出できませんでした: {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToGetPackageManifestUrl">
-        <source>Failed to resolve manifest package URL {0}.</source>
-        <target state="translated">マニフェストパッケージ URL {0} を解決できませんでした。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="FailedToInstallWorkloadManifest">
         <source>Failed to install manifest {0} version {1}: {2}.</source>
         <target state="translated">マニフェスト {0} のバージョン {1} をインストールできませんでした: {2}。</target>
@@ -165,6 +160,11 @@
       <trans-unit id="ManifestMsiNotFoundInNuGetPackage">
         <source>Manifest MSI not found in NuGet package {0}</source>
         <target state="translated">NuGet パッケージ {0} にマニフェスト MSI が見つかりません</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPackageUrlNotResolved">
+        <source>Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</source>
+        <target state="new">Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">

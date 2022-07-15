@@ -43,7 +43,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             {
                 throw new ArgumentException($"'{nameof(sdkVersion)}' should be a version, but get {sdkVersion}");
             }
-
+            
             static int Last2DigitsTo0(int versionBuild)
             {
                 return (versionBuild / 100) * 100;
@@ -51,10 +51,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             var sdkVersionBand =
                 $"{sdkVersionParsed.Major}.{sdkVersionParsed.Minor}.{Last2DigitsTo0(sdkVersionParsed.Build)}";
-
+           
+            
             _sdkRootPath = sdkRootPath;
             _sdkVersionBand = sdkVersionBand;
-
+            
             var knownManifestIdsFilePath = Path.Combine(_sdkRootPath, "sdk", sdkVersion, "IncludedWorkloadManifests.txt");
             if (File.Exists(knownManifestIdsFilePath))
             {

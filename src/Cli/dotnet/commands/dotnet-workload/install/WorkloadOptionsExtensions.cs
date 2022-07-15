@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 {
     internal class WorkloadOptionsExtensions
     {
-        internal static ReleaseVersion GetValidatedSdkVersion(string versionOption, string providedVersion, string dotnetPath, string userProfileDir)
+        internal static ReleaseVersion GetValidatedSdkVersion(string versionOption, string providedVersion, string dotnetPath, string userProfileDir, bool checkIfFeatureBandManifestsExist)
         {
 
             if (string.IsNullOrEmpty(versionOption))
@@ -27,9 +27,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             else
             {
                 var manifests = new SdkDirectoryWorkloadManifestProvider(dotnetPath, versionOption, userProfileDir).GetManifests();
-                if (!manifests.Any())
+                if (!manifests.Any() && checkIfFeatureBandManifestsExist)
                 {
-                    throw new GracefulException(string.Format(LocalizableStrings.NoManifestsExistForFeatureBand, versionOption), isUserError: false);
+                    throw new GracefulException(string.Format(LocalizableStrings.NoManifestsExistForFeatureBand, versionOption), isUserError: false);     
                 }
                 try
                 {
