@@ -767,7 +767,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (BuildEnvironmentHelper.Instance.RunningInVisualStudio)
                     {
-                        // TODO: Remove this when VS gets updated to setup project cache plugins.
+                        // TODO: Figure out a more elegant way to do this. See the comment on BuildManager.ProjectCacheDescriptors for explanation.
                         CollectProjectCachePlugins();
                     }
 
@@ -822,13 +822,17 @@ namespace Microsoft.Build.Evaluation
         {
             foreach (var item in _data.GetItems(ItemTypeNames.ProjectCachePlugin))
             {
-                var metadataDictionary = item.Metadata.ToDictionary(m => m.Key, m => m.EscapedValue);
+                string pluginPath = FileUtilities.NormalizePath(Path.Combine(_data.Directory, item.EvaluatedInclude));
 
-                var pluginPath = Path.Combine(_data.Directory, item.EvaluatedInclude);
+                var pluginSettings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (M metadatum in item.Metadata)
+                {
+                    pluginSettings.Add(metadatum.Key, metadatum.EscapedValue);
+                }
 
-                var projectCacheItem = new ProjectCacheItem(pluginPath, metadataDictionary);
+                var projectCacheItem = ProjectCacheDescriptor.FromAssemblyPath(pluginPath, pluginSettings);
 
-                BuildManager.ProjectCacheItems[pluginPath] = projectCacheItem;
+                BuildManager.ProjectCacheDescriptors.TryAdd(projectCacheItem, projectCacheItem);
             }
         }
 

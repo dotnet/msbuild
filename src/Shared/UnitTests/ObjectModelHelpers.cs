@@ -2059,20 +2059,25 @@ namespace Microsoft.Build.UnitTests
                 return buildTask.Result;
             }
 
-            public async Task<BuildResult> BuildProjectFileAsync(
+            public Task<BuildResult> BuildProjectFileAsync(
                 string projectFile,
                 string[] entryTargets = null,
                 Dictionary<string, string> globalProperties = null)
             {
-                var buildRequestData = new BuildRequestData(projectFile,
+                var buildRequestData = new BuildRequestData(
+                    projectFile,
                     globalProperties ?? new Dictionary<string, string>(),
                     MSBuildConstants.CurrentToolsVersion,
                     entryTargets ?? Array.Empty<string>(),
                     null);
+                return BuildAsync(buildRequestData);
+            }
 
+            public async Task<BuildResult> BuildAsync(BuildRequestData requestData)
+            {
                 var completion = new TaskCompletionSource<BuildResult>();
 
-                _buildManager.PendBuildRequest(buildRequestData).ExecuteAsync(submission =>
+                _buildManager.PendBuildRequest(requestData).ExecuteAsync(submission =>
                 {
                     completion.SetResult(submission.BuildResult);
                 }, null);
