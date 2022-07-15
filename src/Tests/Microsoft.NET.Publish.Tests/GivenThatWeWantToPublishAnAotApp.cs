@@ -42,6 +42,13 @@ namespace Microsoft.NET.Publish.Tests
 
                 var testProject = CreateHelloWorldTestProject(targetFramework, projectName, true);
                 testProject.AdditionalProperties["PublishAot"] = "true";
+                // Linux symbol files are embedded and require additional steps to be stripped to a separate file
+                // assumes /bin (or /usr/bin) are in the PATH
+                if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    testProject.AdditionalProperties["StripSymbols"] = "true";
+                    testProject.AdditionalProperties["ObjCopyName"] = "objcopy";
+                }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
@@ -56,11 +63,14 @@ namespace Microsoft.NET.Publish.Tests
                 var sharedLibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".dll" : ".so";
                 var publishedDll = Path.Combine(publishDirectory, $"{projectName}{sharedLibSuffix}");
                 var publishedExe = Path.Combine(publishDirectory, $"{testProject.Name}{Constants.ExeSuffix}");
+                var symbolSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".pdb" : ".dbg";
+                var publishedDebugFile = Path.Combine(publishDirectory, $"{testProject.Name}{symbolSuffix}");
 
                 // NativeAOT published dir should not contain a non-host stand alone package
                 File.Exists(publishedDll).Should().BeFalse();
                 // The exe exist and should be native
                 File.Exists(publishedExe).Should().BeTrue();
+                File.Exists(publishedDebugFile).Should().BeTrue();
                 IsNativeImage(publishedExe).Should().BeTrue();
 
                 var command = new RunExeCommand(Log, publishedExe)
@@ -71,17 +81,27 @@ namespace Microsoft.NET.Publish.Tests
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
-        public void NativeAot_app_runs_with_no_config_when_PublishAot_is_enabled(string targetFramework)
+        public void NativeAot_app_runs_in_debug_with_no_config_when_PublishAot_is_enabled(string targetFramework)
         {
             // NativeAOT application publish directory should not contain any <App>.deps.json or <App>.runtimeconfig.json
             // The test writes a key-value pair to the runtimeconfig file and checks that the app can access it
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                var projectName = "NativeAotAppForConfigTest";
+                var projectName = "NativeAotAppForConfigTestDbg";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+                var projectConfiguration = "Debug";
 
                 var testProject = CreateAppForConfigCheck(targetFramework, projectName, true);
                 testProject.AdditionalProperties["PublishAot"] = "true";
+                testProject.AdditionalProperties["Configuration"] = projectConfiguration;
+                // Linux symbol files are embedded and require additional steps to be stripped to a separate file
+                // assumes /bin (or /usr/bin) are in the PATH
+                if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    testProject.AdditionalProperties["StripSymbols"] = "true";
+                    testProject.AdditionalProperties["ObjCopyName"] = "objcopy";
+                }
+
                 var testAsset = _testAssetsManager.CreateTestProject(testProject)
                     // populate a runtime config file with a key value pair
                     // <RuntimeHostConfigurationOption Include="key1" Value="value1" />
@@ -92,9 +112,11 @@ namespace Microsoft.NET.Publish.Tests
                     .Execute($"/p:RuntimeIdentifier={rid}")
                     .Should().Pass();
 
-                var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+                var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, configuration: projectConfiguration, runtimeIdentifier: rid).FullName;
                 var sharedLibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".dll" : ".so";
                 var publishedExe = Path.Combine(publishDirectory, $"{testProject.Name}{Constants.ExeSuffix}");
+                var symbolSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".pdb" : ".dbg";
+                var publishedDebugFile = Path.Combine(publishDirectory, $"{testProject.Name}{symbolSuffix}");
                 var publishedRuntimeConfig = Path.Combine(publishDirectory, $"{testProject.Name}.runtimeconfig.json");
                 var publishedDeps = Path.Combine(publishDirectory, $"{testProject.Name}.deps.json");
 
@@ -104,6 +126,65 @@ namespace Microsoft.NET.Publish.Tests
                 File.Exists(publishedDeps).Should().BeFalse();
                 // The exe exist and should be native
                 File.Exists(publishedExe).Should().BeTrue();
+                // There should be a debug file
+                File.Exists(publishedDebugFile).Should().BeTrue();
+                IsNativeImage(publishedExe).Should().BeTrue();
+
+                // The app accesses the runtime config file key-value pair
+                var command = new RunExeCommand(Log, publishedExe)
+                    .Execute().Should().Pass();
+            }
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
+        public void NativeAot_app_runs_in_release_with_no_config_when_PublishAot_is_enabled(string targetFramework)
+        {
+            // NativeAOT application publish directory should not contain any <App>.deps.json or <App>.runtimeconfig.json
+            // The test writes a key-value pair to the runtimeconfig file and checks that the app can access it
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                var projectName = "NativeAotAppForConfigTestRel";
+                var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+                var projectConfiguration = "Release";
+
+                var testProject = CreateAppForConfigCheck(targetFramework, projectName, true);
+                testProject.AdditionalProperties["PublishAot"] = "true";
+                testProject.AdditionalProperties["Configuration"] = projectConfiguration;
+                // Linux symbol files are embedded and require additional steps to be stripped to a separate file
+                // assumes /bin (or /usr/bin) are in the PATH
+                if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    testProject.AdditionalProperties["StripSymbols"] = "true";
+                    testProject.AdditionalProperties["ObjCopyName"] = "objcopy";
+                }
+
+                var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                    // populate a runtime config file with a key value pair
+                    // <RuntimeHostConfigurationOption Include="key1" Value="value1" />
+                    .WithProjectChanges(project => AddRuntimeConfigOption(project));
+
+                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                publishCommand
+                    .Execute($"/p:RuntimeIdentifier={rid}")
+                    .Should().Pass();
+
+                var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, configuration: projectConfiguration, runtimeIdentifier: rid).FullName;
+                var sharedLibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".dll" : ".so";
+                var publishedExe = Path.Combine(publishDirectory, $"{testProject.Name}{Constants.ExeSuffix}");
+                var symbolSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".pdb" : ".dbg";
+                var publishedDebugFile = Path.Combine(publishDirectory, $"{testProject.Name}{symbolSuffix}");
+                var publishedRuntimeConfig = Path.Combine(publishDirectory, $"{testProject.Name}.runtimeconfig.json");
+                var publishedDeps = Path.Combine(publishDirectory, $"{testProject.Name}.deps.json");
+
+                // NativeAOT published dir should not contain a runtime configuration file
+                File.Exists(publishedRuntimeConfig).Should().BeFalse();
+                // NativeAOT published dir should not contain a dependency file
+                File.Exists(publishedDeps).Should().BeFalse();
+                // The exe exist and should be native
+                File.Exists(publishedExe).Should().BeTrue();
+                // There should be a debug file
+                File.Exists(publishedDebugFile).Should().BeTrue();
                 IsNativeImage(publishedExe).Should().BeTrue();
 
                 // The app accesses the runtime config file key-value pair
