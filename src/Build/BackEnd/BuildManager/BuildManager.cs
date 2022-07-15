@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -31,11 +32,9 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
+using Microsoft.NET.StringTools;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
-
-using Microsoft.NET.StringTools;
-using System.ComponentModel;
 
 #nullable disable
 
@@ -1958,10 +1957,15 @@ namespace Microsoft.Build.Execution
                         submission.SubmissionId,
                         new ReadOnlyDictionary<ProjectGraphNode, BuildResult>(resultsPerNode ?? new Dictionary<ProjectGraphNode, BuildResult>())));
             }
+            catch (CircularDependencyException ex)
+            {
+                BuildEventContext projectBuildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(projectBuildEventContext, new InvalidProjectFileException(ex.Message, ex));
+
+                ReportResultsToSubmission(new GraphBuildResult(submission.SubmissionId, circularDependency: true));
+            }
             catch (Exception ex) when (IsInvalidProjectOrIORelatedException(ex))
             {
-                GraphBuildResult result = null;
-
                 // ProjectGraph throws an aggregate exception with InvalidProjectFileException inside when evaluation fails
                 if (ex is AggregateException aggregateException && aggregateException.InnerExceptions.All(innerException => innerException is InvalidProjectFileException))
                 {
@@ -1977,13 +1981,6 @@ namespace Microsoft.Build.Execution
                         }
                     }
                 }
-                else if (ex is CircularDependencyException)
-                {
-                    result = new GraphBuildResult(submission.SubmissionId, true);
-
-                    BuildEventContext projectBuildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-                    ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(projectBuildEventContext, new InvalidProjectFileException(ex.Message, ex));
-                }
                 else
                 {
                     // Arbitrarily just choose the first entry point project's path
@@ -1993,9 +1990,7 @@ namespace Microsoft.Build.Execution
                     ((IBuildComponentHost)this).LoggingService.LogFatalBuildError(buildEventContext, ex, new BuildEventFileInfo(projectFile));
                 }
 
-                result ??= new GraphBuildResult(submission.SubmissionId, ex);
-
-                ReportResultsToSubmission(result);
+                ReportResultsToSubmission(new GraphBuildResult(submission.SubmissionId, ex));
 
                 lock (_syncLock)
                 {
