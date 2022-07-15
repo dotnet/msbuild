@@ -209,6 +209,62 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Equal(new[] { referencedProjFileFullPath }, callback.References);
         }
 
+        [Fact(DisplayName = nameof(AddRefCanTargetASingleProjectWithAJsonArray))]
+        public void AddRefCanTargetASingleProjectWithAJsonArray()
+        {
+            AddReferencePostActionProcessor actionProcessor = new AddReferencePostActionProcessor();
+
+            string targetBasePath = _engineEnvironmentSettings.GetNewVirtualizedPath();
+            string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
+
+            var args = new Dictionary<string, string>() { { "targetFiles", "[\"MyApp.csproj\"]" }, { "referenceType", "package" }, { "reference", "System.Net.Json" } };
+            var postAction = new MockPostAction { ActionId = AddReferencePostActionProcessor.ActionProcessorId, Args = args };
+
+            var creationEffects = new MockCreationEffects()
+                .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));
+
+            var callback = new MockAddProjectReferenceCallback();
+            actionProcessor.Callbacks = new NewCommandCallbacks { AddPackageReference = callback.AddPackageReference };
+
+            actionProcessor.Process(
+                _engineEnvironmentSettings,
+                postAction,
+                creationEffects,
+                new MockCreationResult(),
+                targetBasePath);
+
+            Assert.Equal(projFileFullPath, callback.Target);
+            Assert.Equal(new[] { "System.Net.Json" }, callback.References);
+        }
+
+        [Fact(DisplayName = nameof(AddRefCanTargetASingleProjectWithTheProjectName))]
+        public void AddRefCanTargetASingleProjectWithTheProjectName()
+        {
+            AddReferencePostActionProcessor actionProcessor = new AddReferencePostActionProcessor();
+
+            string targetBasePath = _engineEnvironmentSettings.GetNewVirtualizedPath();
+            string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
+
+            var args = new Dictionary<string, string>() { { "targetFiles", "MyApp.csproj" }, { "referenceType", "package" }, { "reference", "System.Net.Json" } };
+            var postAction = new MockPostAction { ActionId = AddReferencePostActionProcessor.ActionProcessorId, Args = args };
+
+            var creationEffects = new MockCreationEffects()
+                .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));
+
+            var callback = new MockAddProjectReferenceCallback();
+            actionProcessor.Callbacks = new NewCommandCallbacks { AddPackageReference = callback.AddPackageReference };
+
+            actionProcessor.Process(
+                _engineEnvironmentSettings,
+                postAction,
+                creationEffects,
+                new MockCreationResult(),
+                targetBasePath);
+
+            Assert.Equal(projFileFullPath, callback.Target);
+            Assert.Equal(new[] { "System.Net.Json" }, callback.References);
+        }
+
         private class MockAddProjectReferenceCallback
         {
             public string? Target { get; private set; }
@@ -219,6 +275,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             {
                 this.Target = target;
                 this.References = references;
+
+                return true;
+            }
+
+            public bool AddPackageReference(string target, string reference, string? version)
+            {
+                this.Target = target;
+                this.References = new[] { reference };
 
                 return true;
             }

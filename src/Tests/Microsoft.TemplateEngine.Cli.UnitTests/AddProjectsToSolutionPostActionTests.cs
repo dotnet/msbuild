@@ -155,5 +155,82 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Contains(outputFileFullPath0, foundProjectFiles?.ToList());
             Assert.Contains(outputFileFullPath1, foundProjectFiles?.ToList());
         }
+
+        [Fact(DisplayName = nameof(AddProjectToSolutionCanTargetASingleProjectWithAJsonArray))]
+        public void AddProjectToSolutionCanTargetASingleProjectWithAJsonArray()
+        {
+            var actionProcessor = new AddProjectsToSolutionPostAction();
+
+            string targetBasePath = _engineEnvironmentSettings.GetNewVirtualizedPath();
+            string slnFileFullPath = Path.Combine(targetBasePath, "MyApp.sln");
+            string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
+
+            _engineEnvironmentSettings.Host.FileSystem.WriteAllText(slnFileFullPath, "");
+
+            var args = new Dictionary<string, string>() { { "projectFiles", "[\"MyApp.csproj\"]" } };
+            var postAction = new MockPostAction { ActionId = AddProjectsToSolutionPostAction.ActionProcessorId, Args = args };
+
+            var creationEffects = new MockCreationEffects()
+                .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));
+
+            var callback = new MockAddProjectToSolutionCallback();
+            actionProcessor.Callbacks = new NewCommandCallbacks { AddProjectsToSolution = callback.AddProjectToSolution };
+
+            actionProcessor.Process(
+                _engineEnvironmentSettings,
+                postAction,
+                creationEffects,
+                new MockCreationResult(),
+                targetBasePath);
+
+            Assert.Equal(new [] { projFileFullPath }, callback.Projects);
+            Assert.Equal(slnFileFullPath, callback.Solution);
+        }
+
+        [Fact(DisplayName = nameof(AddProjectToSolutionCanTargetASingleProjectWithTheProjectName))]
+        public void AddProjectToSolutionCanTargetASingleProjectWithTheProjectName()
+        {
+            var actionProcessor = new AddProjectsToSolutionPostAction();
+
+            string targetBasePath = _engineEnvironmentSettings.GetNewVirtualizedPath();
+            string slnFileFullPath = Path.Combine(targetBasePath, "MyApp.sln");
+            string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
+
+            _engineEnvironmentSettings.Host.FileSystem.WriteAllText(slnFileFullPath, "");
+
+            var args = new Dictionary<string, string>() { { "projectFiles", "MyApp.csproj" } };
+            var postAction = new MockPostAction { ActionId = AddProjectsToSolutionPostAction.ActionProcessorId, Args = args };
+
+            var creationEffects = new MockCreationEffects()
+                .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));
+
+            var callback = new MockAddProjectToSolutionCallback();
+            actionProcessor.Callbacks = new NewCommandCallbacks { AddProjectsToSolution = callback.AddProjectToSolution };
+
+            actionProcessor.Process(
+                _engineEnvironmentSettings,
+                postAction,
+                creationEffects,
+                new MockCreationResult(),
+                targetBasePath);
+
+            Assert.Equal(new[] { projFileFullPath }, callback.Projects);
+            Assert.Equal(slnFileFullPath, callback.Solution);
+        }
+
+        private class MockAddProjectToSolutionCallback
+        {
+            public string? Solution { get; private set; }
+
+            public IReadOnlyList<string?>? Projects { get; private set; }
+
+            public bool AddProjectToSolution(string solution, IReadOnlyList<string?> projects, string? targetFolder)
+            {
+                this.Solution = solution;
+                this.Projects = projects;
+
+                return true;
+            }
+        }
     }
 }
