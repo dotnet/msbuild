@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.New.Tests
                 .And
                 .NotHaveStdErr();
 
-            new DotnetNewCommand(Log, "--install", TemplatePackagesPaths.MicrosoftDotNetCommonProjectTemplates31Path)
+            new DotnetNewCommand(Log, "--install", "Microsoft.DotNet.Common.ProjectTemplates.3.1::5.0.0")
                 .WithCustomHive(HomeDirectory)
                 .Execute()
                 .Should()
@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.New.Tests
                 .And
                 .NotHaveStdErr();
 
-            new DotnetNewCommand(Log, "--install", TemplatePackagesPaths.MicrosoftDotNetCommonProjectTemplates50Path)
+            new DotnetNewCommand(Log, "--install", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(HomeDirectory)
                 .Execute()
                 .Should()
