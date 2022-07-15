@@ -541,7 +541,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 var latestVersion = await _nugetPackageDownloader.GetLatestPackageVersion(packageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreview);
                 return (true, latestVersion);
             }
-            catch
+            catch (NuGetPackageNotFoundException)
             {
                 return (false, null);
             }
