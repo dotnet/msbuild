@@ -103,5 +103,11 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to be sent.</param>
         void SendData(INodePacket packet);
         #endregion
+
+        /// <summary>
+        /// Called when we are about to send last packet to finalize graceful disconnection with client.
+        /// This is needed to handle race condition when both client and server is gracefully about to close connection.
+        /// </summary>
+        void ClientWillDisconnect();
     }
 }
