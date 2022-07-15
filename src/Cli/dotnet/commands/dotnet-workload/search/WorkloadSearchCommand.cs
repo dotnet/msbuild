@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Search
             _workloadIdStub = result.GetValueForArgument(WorkloadSearchCommandParser.WorkloadIdStubArgument);
             var dotnetPath = Path.GetDirectoryName(Environment.ProcessPath);
             userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(result.GetValueForOption(WorkloadSearchCommandParser.VersionOption), version, dotnetPath, userProfileDir);
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(result.GetValueForOption(WorkloadSearchCommandParser.VersionOption), version, dotnetPath, userProfileDir, true);
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString(), userProfileDir);
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString(), userProfileDir);
         }

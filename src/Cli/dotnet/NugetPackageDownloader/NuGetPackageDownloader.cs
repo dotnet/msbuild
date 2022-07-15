@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         {
             CancellationToken cancellationToken = CancellationToken.None;
 
-            (var source, var resolvedPackageVersion) = await GetPackageSourceAndVerion(packageId, packageVersion,
+            (var source, var resolvedPackageVersion) = await GetPackageSourceAndVersion(packageId, packageVersion,
                 packageSourceLocation, includePreview);
 
             FindPackageByIdResource resource = null;
@@ -162,9 +162,13 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             PackageSourceLocation packageSourceLocation = null,
             bool includePreview = false)
         {
-            (var source, var resolvedPackageVersion) = await GetPackageSourceAndVerion(packageId, packageVersion, packageSourceLocation, includePreview);
-
+            (var source, var resolvedPackageVersion) = await GetPackageSourceAndVersion(packageId, packageVersion, packageSourceLocation, includePreview);
+            
             SourceRepository repository = GetSourceRepository(source);
+            if (repository.PackageSource.IsLocal)
+            {
+                return Path.Combine(repository.PackageSource.Source, $"{packageId}.{resolvedPackageVersion}.nupkg");
+            }
 
             ServiceIndexResourceV3 serviceIndexResource = repository.GetResourceAsync<ServiceIndexResourceV3>().Result;
             IReadOnlyList<Uri> packageBaseAddress =
@@ -214,7 +218,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             return allFilesInPackage;
         }
 
-        private async Task<(PackageSource, NuGetVersion)> GetPackageSourceAndVerion(PackageId packageId,
+        private async Task<(PackageSource, NuGetVersion)> GetPackageSourceAndVersion(PackageId packageId,
              NuGetVersion packageVersion = null,
              PackageSourceLocation packageSourceLocation = null,
              bool includePreview = false)
@@ -423,7 +427,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                     .SelectMany(result => result.foundPackages.Select(package => (result.source, package)));
 
             if (!accumulativeSearchResults.Any())
-            {
+            {  
                 throw new NuGetPackageNotFoundException(
                     string.Format(
                         LocalizableStrings.IsNotFoundInNuGetFeeds,
@@ -566,7 +570,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             return (source, foundPackages);
         }
 
-        public async Task<NuGetVersion> GetLatestPackageVerion(PackageId packageId,
+        public async Task<NuGetVersion> GetLatestPackageVersion(PackageId packageId,
              PackageSourceLocation packageSourceLocation = null,
              bool includePreview = false)
         {
