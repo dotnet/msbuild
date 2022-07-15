@@ -261,7 +261,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
             if (tt.NumExpectedExceptions > 0)
             {
-                Should.Throw<AggregateException>(() => _workSet.WaitForAllWorkAndComplete()).InnerExceptions.ShouldBe(observedExceptions);
+                Should.Throw<AggregateException>(() => _workSet.WaitForAllWorkAndComplete()).InnerExceptions.ShouldBeSetEquivalentTo(observedExceptions);
                 return;
             }
 
