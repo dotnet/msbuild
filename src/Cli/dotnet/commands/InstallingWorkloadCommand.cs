@@ -34,6 +34,7 @@ namespace Microsoft.DotNet.Workloads.Workload
         protected readonly string _downloadToCacheOption;
         protected readonly string _dotnetPath;
         protected readonly string _userProfileDir;
+        protected readonly bool _checkIfManifestExist;
         protected readonly ReleaseVersion _sdkVersion;
         protected readonly SdkFeatureBand _sdkFeatureBand;
         protected readonly SdkFeatureBand _installedFeatureBand;
@@ -65,7 +66,8 @@ namespace Microsoft.DotNet.Workloads.Workload
             _downloadToCacheOption = parseResult.GetValueForOption(InstallingWorkloadCommandParser.DownloadToCacheOption);
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(InstallingWorkloadCommandParser.VersionOption), version, _dotnetPath, _userProfileDir);
+            _checkIfManifestExist = !(_printDownloadLinkOnly);      // don't check for manifest existence when print download link is passed
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(InstallingWorkloadCommandParser.VersionOption), version, _dotnetPath, _userProfileDir, _checkIfManifestExist);
             _sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
 
             _installedFeatureBand = installedFeatureBand == null ? new SdkFeatureBand(DotnetFiles.VersionFileObject.BuildNumber) : new SdkFeatureBand(installedFeatureBand);
@@ -161,11 +163,11 @@ namespace Microsoft.DotNet.Workloads.Workload
 
         protected IEnumerable<WorkloadId> GetInstalledWorkloads(bool fromPreviousSdk)
         {
-            var currentFeatureBand = new SdkFeatureBand(_installedFeatureBand.ToString());
+            //var currentFeatureBand = new SdkFeatureBand(_installedFeatureBand.ToString());
             if (fromPreviousSdk)
             {
                 var priorFeatureBands = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetFeatureBandsWithInstallationRecords()
-                    .Where(featureBand => featureBand.CompareTo(currentFeatureBand) < 0);
+                    .Where(featureBand => featureBand.CompareTo(_installedFeatureBand) < 0);
                 if (priorFeatureBands.Any())
                 {
                     var maxPriorFeatureBand = priorFeatureBands.Max();
@@ -175,7 +177,7 @@ namespace Microsoft.DotNet.Workloads.Workload
             }
             else
             {
-                var workloads = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(currentFeatureBand);
+                var workloads = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(_installedFeatureBand);
 
                 return workloads ?? Enumerable.Empty<WorkloadId>();
             }
