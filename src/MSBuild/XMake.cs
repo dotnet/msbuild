@@ -35,6 +35,8 @@ using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 using Microsoft.Build.Shared.Debugging;
+using Microsoft.Build.Experimental;
+using Microsoft.Build.Framework.Telemetry;
 
 #nullable disable
 
@@ -84,7 +86,12 @@ namespace Microsoft.Build.CommandLine
             /// <summary>
             /// A project cache failed unexpectedly.
             /// </summary>
-            ProjectCacheFailure
+            ProjectCacheFailure,
+            /// <summary>
+            /// The client for MSBuild server failed unexpectedly, for example,
+            /// because the server process died or hung.
+            /// </summary>
+            MSBuildClientFailure
         }
 
         /// <summary>
@@ -209,6 +216,9 @@ namespace Microsoft.Build.CommandLine
 #endif
             )
         {
+            // Initialize new build telemetry and record start of this build.
+            KnownTelemetry.BuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow };
+
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
             if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
@@ -216,14 +226,37 @@ namespace Microsoft.Build.CommandLine
                 DumpCounters(true /* initialize only */);
             }
 
-            // return 0 on success, non-zero on failure
-            int exitCode = ((s_initialized && Execute(
+            int exitCode;
+            if (
+                ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4) &&
+                Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName) == "1" &&
+                !Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
+            {
+                Console.CancelKeyPress += Console_CancelKeyPress;
+
+                DebuggerLaunchCheck();
+
+                // Use the client app to execute build in msbuild server. Opt-in feature.
+                exitCode = ((s_initialized && MSBuildClientApp.Execute(
+#if FEATURE_GET_COMMANDLINE
+                Environment.CommandLine,
+#else
+                ConstructArrayArg(args),
+#endif
+                s_buildCancellationSource.Token
+                ) == ExitType.Success) ? 0 : 1);
+            }
+            else
+            {
+                // return 0 on success, non-zero on failure
+                exitCode = ((s_initialized && Execute(
 #if FEATURE_GET_COMMANDLINE
                 Environment.CommandLine
 #else
                 ConstructArrayArg(args)
 #endif
-            ) == ExitType.Success) ? 0 : 1);
+                ) == ExitType.Success) ? 0 : 1);
+            }
 
             if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
             {
@@ -461,6 +494,26 @@ namespace Microsoft.Build.CommandLine
             }
         }
 #endif
+        /// <summary>
+        /// Launch debugger if it's requested by environment variable "MSBUILDDEBUGONSTART".
+        /// </summary>
+        private static void DebuggerLaunchCheck()
+        {
+            switch (Environment.GetEnvironmentVariable("MSBUILDDEBUGONSTART"))
+            {
+#if FEATURE_DEBUG_LAUNCH
+                case "1":
+                    Debugger.Launch();
+                    break;
+#endif
+                case "2":
+                    // Sometimes easier to attach rather than deal with JIT prompt
+                    Process currentProcess = Process.GetCurrentProcess();
+                    Console.WriteLine($"Waiting for debugger to attach ({currentProcess.MainModule.FileName} PID {currentProcess.Id}).  Press enter to continue...");
+                    Console.ReadLine();
+                    break;
+            }
+        }
 
         /// <summary>
         /// Orchestrates the execution of the application, and is also responsible
@@ -479,26 +532,17 @@ namespace Microsoft.Build.CommandLine
 #endif
             )
         {
+            // Initialize new build telemetry and record start of this build, if not initialized already
+            KnownTelemetry.BuildTelemetry ??= new BuildTelemetry { StartAt = DateTime.UtcNow };
+
             // Indicate to the engine that it can toss extraneous file content
             // when it loads microsoft.*.targets. We can't do this in the general case,
             // because tasks in the build can (and occasionally do) load MSBuild format files
             // with our OM and modify and save them. They'll never do this for Microsoft.*.targets, though,
             // and those form the great majority of our unnecessary memory use.
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", "true");
-            switch (Environment.GetEnvironmentVariable("MSBUILDDEBUGONSTART"))
-            {
-#if FEATURE_DEBUG_LAUNCH
-                case "1":
-                    Debugger.Launch();
-                    break;
-#endif
-                case "2":
-                    // Sometimes easier to attach rather than deal with JIT prompt
-                    Process currentProcess = Process.GetCurrentProcess();
-                    Console.WriteLine($"Waiting for debugger to attach ({currentProcess.MainModule.FileName} PID {currentProcess.Id}).  Press enter to continue...");
-                    Console.ReadLine();
-                    break;
-            }
+
+            DebuggerLaunchCheck();
 
 #if FEATURE_GET_COMMANDLINE
             ErrorUtilities.VerifyThrowArgumentLength(commandLine, nameof(commandLine));
@@ -845,8 +889,7 @@ namespace Microsoft.Build.CommandLine
         {
             if (e.SpecialKey == ConsoleSpecialKey.ControlBreak)
             {
-                e.Cancel = false; // required; the process will now be terminated rudely
-                return;
+                Environment.Exit(1); // the process will now be terminated rudely
             }
 
             e.Cancel = true; // do not terminate rudely
@@ -1061,7 +1104,9 @@ namespace Microsoft.Build.CommandLine
                     toolsetDefinitionLocations,
                     cpuCount,
                     onlyLogCriticalEvents,
-                    loadProjectsReadOnly: !preprocessOnly
+                    loadProjectsReadOnly: !preprocessOnly,
+                    useAsynchronousLogging: true,
+                    reuseProjectRootElementCache: s_isServerNode
                 );
 
                 if (toolsVersion != null && !projectCollection.ContainsToolset(toolsVersion))
@@ -1294,7 +1339,14 @@ namespace Microsoft.Build.CommandLine
                 FileUtilities.ClearCacheDirectory();
                 projectCollection?.Dispose();
 
-                BuildManager.DefaultBuildManager.Dispose();
+                // Build manager shall be reused for all build sessions.
+                // If, for one reason or another, this behavior needs to change in future
+                // please be aware that current code creates and keep running  InProcNode even
+                // when its owning default build manager is disposed resulting in leek of memory and threads.
+                if (!s_isServerNode)
+                {
+                    BuildManager.DefaultBuildManager.Dispose();
+                }
             }
 
             return success;
@@ -1958,6 +2010,11 @@ namespace Microsoft.Build.CommandLine
         /// Whether switches from the auto-response file are being used.
         /// </summary>
         internal static bool usingSwitchesFromAutoResponseFile = false;
+
+        /// <summary>
+        /// Indicates that this process is working as a server.
+        /// </summary>
+        private static bool s_isServerNode;
 
         /// <summary>
         /// Parses the auto-response file (assumes the "/noautoresponse" switch is not specified on the command line), and combines the
@@ -2629,6 +2686,36 @@ namespace Microsoft.Build.CommandLine
                     OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
                     shutdownReason = node.Run(out nodeException);
                 }
+                else if (nodeModeNumber == 8)
+                {
+                    // Since build function has to reuse code from *this* class and OutOfProcServerNode is in different assembly
+                    // we have to pass down xmake build invocation to avoid circular dependency
+                    OutOfProcServerNode.BuildCallback buildFunction = (commandLine) =>
+                    {
+                        int exitCode;
+                        ExitType exitType;
+
+                        if (!s_initialized)
+                        {
+                            exitType = ExitType.InitializationError;
+                        }
+                        else
+                        {
+                            exitType = Execute(commandLine);
+                        }
+
+                        exitCode = exitType == ExitType.Success ? 0 : 1;
+
+                        return (exitCode, exitType.ToString());
+                    };
+
+                    OutOfProcServerNode node = new(buildFunction);
+
+                    s_isServerNode = true;
+                    shutdownReason = node.Run(out nodeException);
+
+                    FileUtilities.ClearCacheDirectory();
+                }
                 else
                 {
                     CommandLineSwitchException.Throw("InvalidNodeNumberValue", nodeModeNumber.ToString());
@@ -3019,6 +3106,12 @@ namespace Microsoft.Build.CommandLine
             // Join the logger parameters into one string separated by semicolons
             string result = anyPrefixingParameter ?? string.Empty;
 
+            // Ensure traling ';' so parametersToAggregate are properly separated
+            if (!string.IsNullOrEmpty(result) && result[result.Length - 1] != ';')
+            {
+                result += ';';
+            }
+
             result += string.Join(";", parametersToAggregate);
 
             return result;
@@ -3122,6 +3215,12 @@ namespace Microsoft.Build.CommandLine
                 if ((consoleLoggerParameters?.Length > 0))
                 {
                     consoleParameters = AggregateParameters(consoleParameters, consoleLoggerParameters);
+                }
+
+                // Always use ANSI escape codes when the build is initiated by server
+                if (s_isServerNode)
+                {
+                    consoleParameters = $"PREFERCONSOLECOLOR;{consoleParameters}";
                 }
 
                 // Check to see if there is a possibility we will be logging from an out-of-proc node.
@@ -3668,15 +3767,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static void DisplayVersionMessage()
         {
-#if RUNTIME_TYPE_NETCORE
-            const string frameworkName = ".NET";
-#elif MONO
-            const string frameworkName = "Mono";
-#else
-            const string frameworkName = ".NET Framework";
-#endif
-
-            Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildVersionMessage", ProjectCollection.DisplayVersion, frameworkName));
+            Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildVersionMessage", ProjectCollection.DisplayVersion, NativeMethods.FrameworkName));
         }
 
         /// <summary>

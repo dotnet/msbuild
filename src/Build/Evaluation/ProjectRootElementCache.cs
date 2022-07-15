@@ -415,6 +415,12 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override void DiscardImplicitReferences()
         {
+            if (_autoReloadFromDisk)
+            {
+                // no need to clear it, as auto reload properly invalidates caches if changed.
+                return;
+            }
+
             lock (_locker)
             {
                 // Make a new Weak cache only with items that have been explicitly loaded, this will be a small number, there will most likely
