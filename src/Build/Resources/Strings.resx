@@ -142,9 +142,6 @@
   <data name="WaitingForEndOfBuild" xml:space="preserve">
     <value>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</value>
   </data>
-  <data name="EnvironmentDerivedPropertyRead">
-    <value>Property '{0}' with value '{1}' expanded from the environment.</value>
-  </data>
   <data name="SubmissionAlreadyComplete" xml:space="preserve">
     <value>The operation cannot be completed because the submission has already been executed.</value>
   </data>

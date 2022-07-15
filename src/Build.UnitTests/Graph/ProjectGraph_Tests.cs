@@ -2007,7 +2007,7 @@ $@"
         {
             using (var env = TestEnvironment.Create())
             {
-                var projectGraph = Helpers.CreateProjectGraph(env, edges, globalProperties, null, entryPoints);
+                var projectGraph = Helpers.CreateProjectGraph(env, edges, globalProperties, entryPoints: entryPoints);
 
                 var dot = projectGraph.ToDot();
 
@@ -2042,7 +2042,6 @@ $@"
             var graph = Helpers.CreateProjectGraph(
                 env: _env,
                 dependencyEdges: edges,
-                extraContentPerProjectNumber: null,
                 extraContentForAllNodes: EnableTransitiveProjectReferencesPropertyGroup
                 );
 

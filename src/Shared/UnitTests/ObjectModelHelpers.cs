@@ -1705,40 +1705,14 @@ namespace Microsoft.Build.UnitTests
 
         internal static ProjectGraph CreateProjectGraph(
             TestEnvironment env,
-            IDictionary<int, int[]> dependencyEdges,
-            IDictionary<int, string> extraContentPerProjectNumber,
-            string extraContentForAllNodes = null)
-        {
-            return CreateProjectGraph(
-                env: env,
-                dependencyEdges: dependencyEdges,
-                globalProperties: null,
-                createProjectFile: (environment, projectNumber, references, projectReferenceTargets, defaultTargets, extraContent) =>
-                {
-                    extraContent = extraContentPerProjectNumber != null && extraContentPerProjectNumber.TryGetValue(projectNumber, out var content)
-                        ? content
-                        : string.Empty;
-
-                    extraContent += extraContentForAllNodes ?? string.Empty;
-
-                    return CreateProjectFile(
-                        environment,
-                        projectNumber,
-                        references,
-                        projectReferenceTargets,
-                        defaultTargets,
-                        extraContent.Cleanup());
-                });
-        }
-
-        internal static ProjectGraph CreateProjectGraph(
-            TestEnvironment env,
             // direct dependencies that the kvp.key node has on the nodes represented by kvp.value
             IDictionary<int, int[]> dependencyEdges,
             IDictionary<string, string> globalProperties = null,
             CreateProjectFileDelegate createProjectFile = null,
             IEnumerable<int> entryPoints = null,
-            ProjectCollection projectCollection = null)
+            ProjectCollection projectCollection = null,
+            IDictionary<int, string> extraContentPerProjectNumber = null,
+            string extraContentForAllNodes = null)
         {
             createProjectFile ??= CreateProjectFile;
 
@@ -1751,7 +1725,13 @@ namespace Microsoft.Build.UnitTests
 
                 if (!nodes.ContainsKey(parent))
                 {
-                    var file = createProjectFile(env, parent, nodeDependencies.Value);
+                    TransientTestFile file = createProjectFile(
+                        env,
+                        parent,
+                        nodeDependencies.Value,
+                        projectReferenceTargets: null,
+                        defaultTargets: null,
+                        extraContent: GetExtraContent(parent));
                     nodes[parent] = (IsRoot(parent), file.Path);
                 }
             }
@@ -1768,7 +1748,12 @@ namespace Microsoft.Build.UnitTests
                 {
                     if (!nodes.ContainsKey(reference))
                     {
-                        var file = createProjectFile(env, reference);
+                        TransientTestFile file = createProjectFile(
+                            env,
+                            reference,
+                            projectReferenceTargets: null,
+                            defaultTargets: null,
+                            extraContent: GetExtraContent(reference));
                         nodes[reference] = (false, file.Path);
                     }
                 }
@@ -1784,6 +1769,17 @@ namespace Microsoft.Build.UnitTests
                 projectCollection ?? env.CreateProjectCollection()
                     .Collection
                 );
+
+            string GetExtraContent(int projectNum)
+            {
+                string extraContent = extraContentPerProjectNumber != null && extraContentPerProjectNumber.TryGetValue(projectNum, out string extraContentForProject)
+                    ? extraContentForProject
+                    : string.Empty;
+
+                extraContent += extraContentForAllNodes ?? string.Empty;
+
+                return extraContent.Cleanup();
+            }
 
             bool IsRoot(int node)
             {
@@ -2084,15 +2080,12 @@ namespace Microsoft.Build.UnitTests
                 return await completion.Task;
             }
 
-            public GraphBuildResult BuildGraphSubmission(GraphBuildRequestData requestData)
-            {
-                return _buildManager.BuildRequest(requestData);
-            }
+            public BuildResult Build(BuildRequestData requestData) => _buildManager.BuildRequest(requestData);
+
+            public GraphBuildResult BuildGraphSubmission(GraphBuildRequestData requestData) => _buildManager.BuildRequest(requestData);
 
             public GraphBuildResult BuildGraph(ProjectGraph graph, string[] entryTargets = null)
-            {
-                return _buildManager.BuildRequest(new GraphBuildRequestData(graph, entryTargets ?? Array.Empty<string>()));
-            }
+                => _buildManager.BuildRequest(new GraphBuildRequestData(graph, entryTargets ?? Array.Empty<string>()));
 
             public void Dispose()
             {

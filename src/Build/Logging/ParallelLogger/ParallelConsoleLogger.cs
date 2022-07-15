@@ -88,7 +88,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     // Get the size of the console buffer so messages can be formatted to the console width
                     try
                     {
-                        _bufferWidth = Console.BufferWidth;
+                        _bufferWidth = ConsoleConfiguration.BufferWidth;
                         _alignMessages = true;
                     }
                     catch (Exception)
@@ -1204,21 +1204,16 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private void PrintMessage(BuildMessageEventArgs e, bool lightenText)
         {
-            string nonNullMessage = null;
-
-            if (e is EnvironmentVariableReadEventArgs environmentPropertyReadEventArgs)
-            {
-                nonNullMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EnvironmentDerivedPropertyRead", environmentPropertyReadEventArgs.EnvironmentVariableName, e.Message);
-            }
+            string nonNullMessage;
 
             // Include file information if present.
             if (e.File != null)
             {
-                nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile, FindLogOutputProperties(e), nonNullMessage);
+                nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile, FindLogOutputProperties(e));
             }
             else
             {
-                nonNullMessage ??= e.Message ?? string.Empty;
+                nonNullMessage = e.Message ?? string.Empty;
             }
 
             int prefixAdjustment = 0;

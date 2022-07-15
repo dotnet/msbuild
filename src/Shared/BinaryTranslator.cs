@@ -455,6 +455,7 @@ namespace Microsoft.Build.BackEnd
             /// Finally, converting the enum to an int assumes that we always want to transport enums as ints.  This
             /// works in all of our current cases, but certainly isn't perfectly generic.</remarks>
             public void TranslateEnum<T>(ref T value, int numericValue)
+                where T : struct, Enum
             {
                 numericValue = _reader.ReadInt32();
                 Type enumType = value.GetType();
@@ -1079,10 +1080,8 @@ namespace Microsoft.Build.BackEnd
             /// Finally, converting the enum to an int assumes that we always want to transport enums as ints.  This
             /// works in all of our current cases, but certainly isn't perfectly generic.</remarks>
             public void TranslateEnum<T>(ref T value, int numericValue)
+                where T : struct, Enum
             {
-                Type enumType = value.GetType();
-                ErrorUtilities.VerifyThrow(enumType.GetTypeInfo().IsEnum, "Must pass an enum type.");
-
                 _writer.Write(numericValue);
             }
 

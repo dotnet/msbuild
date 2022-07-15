@@ -4,14 +4,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -247,14 +251,7 @@ Build
         {
             Write(BinaryLogRecordKind.BuildStarted);
             WriteBuildEventArgsFields(e);
-            if (Traits.Instance.LogAllEnvironmentVariables)
-            {
-                Write(e.BuildEnvironment);
-            }
-            else
-            {
-                Write(0);
-            }
+            Write(e.BuildEnvironment);
         }
 
         private void Write(BuildFinishedEventArgs e)
@@ -944,7 +941,7 @@ Build
                 return;
             }
 
-            Internal.Utilities.EnumerateProperties(properties, kvp => nameValueListBuffer.Add(kvp));
+            Internal.Utilities.EnumerateProperties(properties, nameValueListBuffer, static (list, kvp) => list.Add(kvp));
 
             WriteNameValueList();
 
