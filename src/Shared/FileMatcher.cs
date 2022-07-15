@@ -1655,7 +1655,7 @@ namespace Microsoft.Build.Shared
             // Use a span-based Path.GetFileName if it is available.
 #if FEATURE_MSIOREDIST
             return IsMatch(Microsoft.IO.Path.GetFileName(path.AsSpan()), pattern);
-#elif NETSTANDARD2_0
+#elif NETSTANDARD2_0 || NETFRAMEWORK
             return IsMatch(Path.GetFileName(path), pattern);
 #else
             return IsMatch(Path.GetFileName(path.AsSpan()), pattern);

@@ -505,13 +505,15 @@ Beispiel:
                             mode. This logging style is on by default.
                         ForceConsoleColor--Use ANSI console colors even if
                             console does not support it
-                        Verbosity--overrides the -verbosity setting for this
+                        PreferConsoleColor--Use ANSI console colors only if
+                            target console does support it
+                     Verbosity--overrides the -verbosity setting for this
                             logger.
                      Example:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="translated">  -consoleloggerparameters:&lt;Parameter&gt;
+        <target state="needs-review-translation">  -consoleloggerparameters:&lt;Parameter&gt;
                      Parameter für die Konsolenprotokollierung. (Kurzform: -clp)
                      Folgende Parameter sind verfügbar:
                         PerformanceSummary: Zeigt die in Aufgaben, Zielen und

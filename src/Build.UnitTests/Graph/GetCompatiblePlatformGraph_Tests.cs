@@ -76,6 +76,47 @@ namespace Microsoft.Build.Graph.UnitTests
         }
 
         [Fact]
+        public void ResolvesMultipleReferencesToSameProject()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+
+                TransientTestFile entryProject = CreateProjectFile(env, 1, extraContent: @"<PropertyGroup>
+                                                                                                <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
+                                                                                                <Platform>x64</Platform>
+                                                                                                <PlatformLookupTable>win32=x64</PlatformLookupTable>
+                                                                                            </PropertyGroup>
+                                                                                            <ItemGroup>
+                                                                                                <ProjectReference Include=""$(MSBuildThisFileDirectory)2.proj"" />
+                                                                                                <ProjectReference Include=""$(MSBuildThisFileDirectory)3.proj"" />
+                                                                                            </ItemGroup>");
+                var proj2 = env.CreateFile("2.proj", @"
+                                                    <Project>
+                                                        <PropertyGroup>
+                                                            <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
+                                                            <Platforms>AnyCPU</Platforms>
+                                                        </PropertyGroup>
+                                                        <ItemGroup>
+                                                            <ProjectReference Include=""$(MSBuildThisFileDirectory)3.proj"" />
+                                                        </ItemGroup>
+                                                    </Project>");
+
+                var proj3 = env.CreateFile("3.proj", @"
+                                                    <Project>
+                                                        <PropertyGroup>
+                                                            <Platforms>AnyCPU</Platforms>
+                                                        </PropertyGroup>
+                                                    </Project>");
+
+
+                ProjectGraph graph = new ProjectGraph(entryProject.Path);
+                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GlobalProperties["Platform"].ShouldBe("AnyCPU");
+                GetFirstNodeWithProjectNumber(graph, 3).ProjectInstance.GlobalProperties["Platform"].ShouldBe("AnyCPU");
+                graph.ProjectNodes.Count.ShouldBe(3);
+            }
+        }
+
+        [Fact]
         public void ResolvesViaPlatformLookupTable()
         {
             using (var env = TestEnvironment.Create())

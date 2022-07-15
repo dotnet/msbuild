@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -92,15 +93,6 @@ namespace Microsoft.Build.Framework
         public readonly bool LogPropertyFunctionsRequiringReflection = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection"));
 
         /// <summary>
-        /// Log all environment variables whether or not they are used in a build in the binary log.
-        /// </summary>
-        public readonly bool LogAllEnvironmentVariables = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES"))
-#if !TASKHOST
-            && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4)
-#endif
-            ;
-
-        /// <summary>
         /// Log property tracking information.
         /// </summary>
         public readonly int LogPropertyTracking = ParseIntFromEnvironmentVariableOrDefault("MsBuildLogPropertyTracking", 0); // Default to logging nothing via the property tracker.
@@ -109,6 +101,11 @@ namespace Microsoft.Build.Framework
         /// When evaluating items, this is the minimum number of items on the running list to use a dictionary-based remove optimization.
         /// </summary>
         public readonly int DictionaryBasedItemRemoveThreshold = ParseIntFromEnvironmentVariableOrDefault("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", 100);
+
+        /// <summary>
+        /// Name of environment variables used to enable MSBuild server.
+        /// </summary>
+        public const string UseMSBuildServerEnvVarName = "MSBUILDUSESERVER";
 
         public readonly bool DebugEngine = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine"));
         public readonly bool DebugScheduler;

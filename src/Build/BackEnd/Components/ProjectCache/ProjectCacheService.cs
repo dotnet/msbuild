@@ -345,16 +345,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             async Task LateInitializePluginForVsWorkaround(CacheRequest request)
             {
                 var (_, configuration) = request;
-                var solutionPath = configuration.Project.GetPropertyValue(SolutionProjectGenerator.SolutionPathPropertyName);
                 var solutionConfigurationXml = configuration.Project.GetPropertyValue(SolutionProjectGenerator.CurrentSolutionConfigurationContents);
-
-                ErrorUtilities.VerifyThrow(
-                    solutionPath != null && !string.IsNullOrWhiteSpace(solutionPath) && solutionPath != "*Undefined*",
-                    $"Expected VS to set a valid SolutionPath property but got: {solutionPath}");
-
-                ErrorUtilities.VerifyThrow(
-                    FileSystems.Default.FileExists(solutionPath),
-                    $"Solution file does not exist: {solutionPath}");
 
                 ErrorUtilities.VerifyThrow(
                     string.IsNullOrWhiteSpace(solutionConfigurationXml) is false,
