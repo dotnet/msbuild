@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Cli.Utils
     internal class MSBuildForwardingAppWithoutLogging
     {
         private static readonly bool AlwaysExecuteMSBuildOutOfProc = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_RUN_MSBUILD_OUTOFPROC");
-        private static readonly bool UseMSBuildServer = !Env.GetEnvironmentVariableAsBool("DOTNET_CLI_DO_NOT_USE_MSBUILD_SERVER");
+        private static readonly bool UseMSBuildServer = (Environment.GetEnvironmentVariable("MSBUILDENSURESTDOUTFORTASKPROCESSES") != "1") && !Env.GetEnvironmentVariableAsBool("DOTNET_CLI_DO_NOT_USE_MSBUILD_SERVER");
 
         private const string MSBuildExeName = "MSBuild.dll";
 
@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Cli.Utils
             _argsToForward = argsToForward;
             MSBuildPath = msbuildPath ?? defaultMSBuildPath;
 
-            EnvironmentVariable("MSBUILDUSESERVER", (UseMSBuildServer && ((Environment.GetEnvironmentVariable("MSBUILDENSURESTDOUTFORTASKPROCESSES") != "1"))) ? "1" : "0");
+            EnvironmentVariable("MSBUILDUSESERVER", UseMSBuildServer ? "1" : "0");
 
             // If DOTNET_CLI_RUN_MSBUILD_OUTOFPROC is set or we're asked to execute a non-default binary, call MSBuild out-of-proc.
             if (AlwaysExecuteMSBuildOutOfProc || !string.Equals(MSBuildPath, defaultMSBuildPath, StringComparison.OrdinalIgnoreCase))
