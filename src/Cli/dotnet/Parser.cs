@@ -279,7 +279,8 @@ namespace Microsoft.DotNet.Cli
                 {
                     new DotnetFormatForwardingApp(helpArgs).Execute();
                 }
-                else if (command.Name.Equals(FsiCommandParser.GetCommand().Name)){
+                else if (command.Name.Equals(FsiCommandParser.GetCommand().Name))
+                {
                     new FsiForwardingApp(helpArgs).Execute();
                 }
                 else
