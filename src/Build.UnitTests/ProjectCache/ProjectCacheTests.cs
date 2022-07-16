@@ -588,8 +588,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                                 new Dictionary<string, string>
                                 {
                                     { SolutionProjectGenerator.CurrentSolutionConfigurationContents, solutionConfigurationGlobalProperty },
-                                    { PropertyNames.InnerBuildProperty, "TheInnerBuildProperty"},
-                                    { "TheInnerBuildProperty", "FooBar"},
+                                    { "TargetFramework", "net472"},
                                 });
 
                         if (assertBuildResults)
@@ -613,9 +612,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         logger.FullLog.ShouldContain($"Configuration:{projectName}Debug");
                         logger.FullLog.ShouldContain($"Platform:{projectName}x64");
 
-                        // Ensure MSBuild removes the inner build property if present.
-                        logger.FullLog.ShouldContain($"{PropertyNames.InnerBuildProperty}:TheInnerBuildProperty");
-                        logger.FullLog.ShouldNotContain("TheInnerBuildProperty:FooBar");
+                        // Ensure MSBuild removes the target framework if present.
+                        logger.FullLog.ShouldNotContain("TargetFramework:net472");
                     }
                 }
             }

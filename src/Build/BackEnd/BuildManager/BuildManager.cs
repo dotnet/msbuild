@@ -254,6 +254,8 @@ namespace Microsoft.Build.Execution
 
         private ProjectCacheService _projectCacheService;
 
+        private bool _hasProjectCacheServiceInitializedVsScenario;
+
 #if DEBUG
         /// <summary>
         /// <code>true</code> to wait for a debugger to be attached, otherwise <code>false</code>.
@@ -1226,11 +1228,15 @@ namespace Microsoft.Build.Execution
                     shuttingDown = _shuttingDown;
                     if (!shuttingDown)
                     {
-                        if (BuildEnvironmentHelper.Instance.RunningInVisualStudio && !ProjectCacheDescriptors.IsEmpty)
+                        if (!_hasProjectCacheServiceInitializedVsScenario
+                            && BuildEnvironmentHelper.Instance.RunningInVisualStudio
+                            && !ProjectCacheDescriptors.IsEmpty)
                         {
+                            // Only initialize once as it should be the same for all projects.
+                            _hasProjectCacheServiceInitializedVsScenario = true;
+
                             _projectCacheService.InitializePluginsForVsScenario(
                                 ProjectCacheDescriptors.Values,
-                                submission,
                                 resolvedConfiguration,
                                 _executionCancellationTokenSource.Token);
                         }
@@ -2061,6 +2067,7 @@ namespace Microsoft.Build.Execution
             _scheduler = null;
             _workQueue = null;
             _projectCacheService = null;
+            _hasProjectCacheServiceInitializedVsScenario = false;
             _acquiredProjectRootElementCacheFromProjectInstance = false;
 
             _unnamedProjectInstanceToNames.Clear();

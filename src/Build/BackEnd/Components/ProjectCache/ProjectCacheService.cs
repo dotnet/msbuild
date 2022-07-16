@@ -30,6 +30,8 @@ namespace Microsoft.Build.Experimental.ProjectCache
     {
         private static readonly ParallelOptions s_parallelOptions = new() { MaxDegreeOfParallelism = Environment.ProcessorCount };
 
+        private static HashSet<string> s_projectSpecificPropertyNames = new(StringComparer.OrdinalIgnoreCase) { "TargetFramework", "Configuration", "Platform", "TargetPlatform", "OutputType" };
+
         private readonly BuildManager _buildManager;
         private readonly ILoggingService _loggingService;
 
@@ -81,7 +83,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     foreach (ProjectCacheDescriptor projectCacheDescriptor in GetProjectCacheDescriptors(node.ProjectInstance))
                     {
                         // Intentionally fire-and-forget
-                        _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph, graphEntryPoints: null, cancellationToken)
+                        _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph, buildRequestConfiguration: null, cancellationToken)
                             .ContinueWith(t => { }, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted);
                     }
                 });
@@ -89,7 +91,6 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         public void InitializePluginsForVsScenario(
             IEnumerable<ProjectCacheDescriptor> projectCacheDescriptors,
-            BuildSubmission submission,
             BuildRequestConfiguration buildRequestConfiguration,
             CancellationToken cancellationToken)
         {
@@ -103,17 +104,13 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 return;
             }
 
-            EvaluateProjectIfNecessary(submission, buildRequestConfiguration);
-
-            IReadOnlyCollection<ProjectGraphEntryPoint> graphEntryPoints = GetGraphEntryPoints(buildRequestConfiguration);
-
             Parallel.ForEach(
                 projectCacheDescriptors,
                 s_parallelOptions,
                 projectCacheDescriptor =>
                 {
                     // Intentionally fire-and-forget
-                    _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph: null, graphEntryPoints, cancellationToken)
+                    _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph: null, buildRequestConfiguration, cancellationToken)
                         .ContinueWith(t => { }, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted);
                 });
         }
@@ -121,11 +118,11 @@ namespace Microsoft.Build.Experimental.ProjectCache
         private Task<ProjectCachePlugin> GetProjectCachePluginAsync(
             ProjectCacheDescriptor projectCacheDescriptor,
             ProjectGraph? projectGraph,
-            IReadOnlyCollection<ProjectGraphEntryPoint>? graphEntryPoints,
+            BuildRequestConfiguration? buildRequestConfiguration,
             CancellationToken cancellationToken)
             => _projectCachePlugins.GetOrAdd(
                 projectCacheDescriptor,
-                descriptor => new Lazy<Task<ProjectCachePlugin>>(() => CreateAndInitializePluginAsync(descriptor, projectGraph, graphEntryPoints, cancellationToken))).Value;
+                descriptor => new Lazy<Task<ProjectCachePlugin>>(() => CreateAndInitializePluginAsync(descriptor, projectGraph, buildRequestConfiguration, cancellationToken))).Value;
 
         private IEnumerable<ProjectCacheDescriptor> GetProjectCacheDescriptors(ProjectInstance projectInstance)
         {
@@ -152,7 +149,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         private async Task<ProjectCachePlugin> CreateAndInitializePluginAsync(
             ProjectCacheDescriptor projectCacheDescriptor,
             ProjectGraph? projectGraph,
-            IReadOnlyCollection<ProjectGraphEntryPoint>? graphEntryPoints,
+            BuildRequestConfiguration? buildRequestConfiguration,
             CancellationToken cancellationToken)
         {
             BuildEventContext buildEventContext = BuildEventContext.Invalid;
@@ -194,6 +191,10 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     MSBuildEventSource.Log.ProjectCacheCreatePluginInstanceStop(pluginAssemblyPath, pluginTypeName);
                 }
             }
+
+            IReadOnlyCollection<ProjectGraphEntryPoint>? graphEntryPoints = buildRequestConfiguration != null
+                ? GetGraphEntryPoints(buildRequestConfiguration)
+                : null;
 
             _loggingService.LogComment(buildEventContext, MessageImportance.High, "LoadingProjectCachePlugin", pluginTypeName);
             MSBuildEventSource.Log.ProjectCacheBeginBuildStart(pluginTypeName);
@@ -359,24 +360,24 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
                 return (cacheResult, buildEventContext.ProjectContextId);
             }
-        }
 
-        private void EvaluateProjectIfNecessary(BuildSubmission submission, BuildRequestConfiguration configuration)
-        {
-            lock (configuration)
+            void EvaluateProjectIfNecessary(BuildSubmission submission, BuildRequestConfiguration configuration)
             {
-                if (!configuration.IsLoaded)
+                lock (configuration)
                 {
-                    configuration.LoadProjectIntoConfiguration(
-                        _buildManager,
-                        submission.BuildRequestData.Flags,
-                        submission.SubmissionId,
-                        Scheduler.InProcNodeId
-                    );
+                    if (!configuration.IsLoaded)
+                    {
+                        configuration.LoadProjectIntoConfiguration(
+                            _buildManager,
+                            submission.BuildRequestData.Flags,
+                            submission.SubmissionId,
+                            Scheduler.InProcNodeId
+                        );
 
-                    // If we're taking the time to evaluate, avoid having other nodes to repeat the same evaluation.
-                    // Based on the assumption that ProjectInstance serialization is faster than evaluating from scratch.
-                    configuration.Project.TranslateEntireState = true;
+                        // If we're taking the time to evaluate, avoid having other nodes to repeat the same evaluation.
+                        // Based on the assumption that ProjectInstance serialization is faster than evaluating from scratch.
+                        configuration.Project.TranslateEntireState = true;
+                    }
                 }
             }
         }
@@ -403,8 +404,6 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "ProjectCacheQueryStartedWithTargetNames", buildRequest.ProjectFullPath, targetNames);
             }
 
-            IReadOnlyCollection<ProjectGraphEntryPoint> graphEntryPoints = GetGraphEntryPoints(buildRequestConfiguration);
-
             HashSet<ProjectCacheDescriptor> queriedCaches = new(ProjectCacheDescriptorEqualityComparer.Instance);
             CacheResult? cacheResult = null;
             foreach (ProjectCacheDescriptor projectCacheDescriptor in GetProjectCacheDescriptors(buildRequest.ProjectInstance))
@@ -415,7 +414,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     continue;
                 }
 
-                ProjectCachePlugin plugin = await GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph: null, graphEntryPoints, cancellationToken);
+                ProjectCachePlugin plugin = await GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph: null, buildRequestConfiguration, cancellationToken);
                 try
                 {
                     // Rethrow any initialization exception.
@@ -506,8 +505,18 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         private IReadOnlyCollection<ProjectGraphEntryPoint> GetGraphEntryPoints(BuildRequestConfiguration configuration)
         {
-            string solutionConfigurationXml = configuration.Project.GetPropertyValue(SolutionProjectGenerator.CurrentSolutionConfigurationContents);
-            if (!string.IsNullOrWhiteSpace(solutionConfigurationXml))
+            var globalProperties = new Dictionary<string, string>(configuration.GlobalProperties.Count, StringComparer.OrdinalIgnoreCase);
+            foreach (ProjectPropertyInstance property in configuration.GlobalProperties)
+            {
+                // If any project specific property is set, it will propagate down the project graph and force all nodes to that property's specific side effects, which is incorrect.
+                if (!s_projectSpecificPropertyNames.Contains(property.Name))
+                {
+                    globalProperties.Add(property.Name, property.EvaluatedValue);
+                }
+            }
+
+            if (globalProperties.TryGetValue(SolutionProjectGenerator.CurrentSolutionConfigurationContents, out string? solutionConfigurationXml)
+                && !string.IsNullOrWhiteSpace(solutionConfigurationXml))
             {
                 // A solution supports multiple solution configurations (different values for Configuration and Platform).
                 // Each solution configuration generates a different static graph.
@@ -520,19 +529,17 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 //
                 // So instead of using the solution file as the entry point, we parse this VS property and extract graph entry points from it, for every project
                 // mentioned in the "CurrentSolutionConfigurationContents" global property.
-                //
-                // Ideally, when the VS workaround is removed from MSBuild and moved into VS, VS should create ProjectGraphDescriptors with the solution path as
-                // the graph entrypoint file, and the VS solution configuration as the entry point's global properties.
-                return GenerateGraphEntryPointsFromSolutionConfigurationXml(solutionConfigurationXml, configuration.Project);
+                return GenerateGraphEntryPointsFromSolutionConfigurationXml(solutionConfigurationXml!, configuration.ProjectFullPath, globalProperties);
             }
             else
             {
-                return new[] { new ProjectGraphEntryPoint(configuration.Project.FullPath, configuration.Project.GlobalProperties) };
+                return new[] { new ProjectGraphEntryPoint(configuration.ProjectFullPath, globalProperties) };
             }
 
             static IReadOnlyCollection<ProjectGraphEntryPoint> GenerateGraphEntryPointsFromSolutionConfigurationXml(
                 string solutionConfigurationXml,
-                ProjectInstance project
+                string definingProjectPath,
+                Dictionary<string, string> templateGlobalProperties
             )
             {
                 // TODO: fix code clone for parsing CurrentSolutionConfiguration xml: https://github.com/dotnet/msbuild/issues/6751
@@ -544,11 +551,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
                 ErrorUtilities.VerifyThrow(projectConfigurationNodes.Count > 0, "Expected at least one project in solution");
 
-                var definingProjectPath = project.FullPath;
                 var graphEntryPoints = new List<ProjectGraphEntryPoint>(projectConfigurationNodes.Count);
-
-                var templateGlobalProperties = new Dictionary<string, string>(project.GlobalProperties, StringComparer.OrdinalIgnoreCase);
-                RemoveProjectSpecificGlobalProperties(templateGlobalProperties, project);
 
                 foreach (XmlNode node in projectConfigurationNodes)
                 {
@@ -583,23 +586,6 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 }
 
                 return graphEntryPoints;
-
-                // If any project specific property is set, it will propagate down the project graph and force all nodes to that property's specific side effects, which is incorrect.
-                static void RemoveProjectSpecificGlobalProperties(Dictionary<string, string> globalProperties, ProjectInstance project)
-                {
-                    // InnerBuildPropertyName is TargetFramework for the managed sdk.
-                    var innerBuildPropertyName = ProjectInterpretation.GetInnerBuildPropertyName(project);
-
-                    IEnumerable<string> projectSpecificPropertyNames = new[] { innerBuildPropertyName, "Configuration", "Platform", "TargetPlatform", "OutputType" };
-
-                    foreach (var propertyName in projectSpecificPropertyNames)
-                    {
-                        if (!string.IsNullOrWhiteSpace(propertyName) && globalProperties.ContainsKey(propertyName))
-                        {
-                            globalProperties.Remove(propertyName);
-                        }
-                    }
-                }
             }
         }
 
