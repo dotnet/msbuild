@@ -3,8 +3,6 @@
 
 using System;
 
-#nullable disable
-
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -23,7 +21,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Initializes a new instance of the ProjectEvaluationStartedEventArgs class.
         /// </summary>
-        public ProjectEvaluationStartedEventArgs(string message, params object[] messageArgs)
+        public ProjectEvaluationStartedEventArgs(string? message, params object[]? messageArgs)
             : base(message, helpKeyword: null, senderName: null, DateTime.UtcNow, messageArgs)
         {
         }
@@ -31,6 +29,6 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Gets or sets the full path of the project that started evaluation.
         /// </summary>
-        public string ProjectFile { get; set; }
+        public string? ProjectFile { get; set; }
     }
 }
