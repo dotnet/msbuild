@@ -201,10 +201,13 @@ namespace Microsoft.Build.Graph.UnitTests
             {
                 TransientTestFile entryProject = CreateProjectFile(env, 1);
 
-                Should.Throw<InvalidOperationException>(() => new ProjectGraph(
+                var aggException = Should.Throw<AggregateException>(() => new ProjectGraph(
                     entryProject.Path,
                     ProjectCollection.GlobalProjectCollection,
                     (projectPath, globalProperties, projectCollection) => null));
+                aggException.InnerExceptions.ShouldHaveSingleItem();
+
+                aggException.InnerExceptions[0].ShouldBeOfType<InvalidOperationException>();
             }
         }
 
@@ -554,7 +557,10 @@ namespace Microsoft.Build.Graph.UnitTests
 </Project>");
                 CreateProjectFile(env, 3);
 
-                Should.Throw<InvalidProjectFileException>(() => new ProjectGraph(entryProject.Path));
+                var aggException = Should.Throw<AggregateException>(() => new ProjectGraph(entryProject.Path));
+                aggException.InnerExceptions.ShouldHaveSingleItem();
+
+                aggException.InnerExceptions[0].ShouldBeOfType<InvalidProjectFileException>();
             }
         }
 
@@ -2007,7 +2013,7 @@ $@"
         {
             using (var env = TestEnvironment.Create())
             {
-                var projectGraph = Helpers.CreateProjectGraph(env, edges, globalProperties, null, entryPoints);
+                var projectGraph = Helpers.CreateProjectGraph(env, edges, globalProperties, entryPoints: entryPoints);
 
                 var dot = projectGraph.ToDot();
 
@@ -2042,7 +2048,6 @@ $@"
             var graph = Helpers.CreateProjectGraph(
                 env: _env,
                 dependencyEdges: edges,
-                extraContentPerProjectNumber: null,
                 extraContentForAllNodes: EnableTransitiveProjectReferencesPropertyGroup
                 );
 

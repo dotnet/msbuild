@@ -1296,7 +1296,8 @@ namespace Microsoft.Build.CommandLine
 
                         // InvalidProjectFileExceptions and its aggregates have already been logged.
                         if (exception is not InvalidProjectFileException
-                            && !(exception is AggregateException aggregateException && aggregateException.InnerExceptions.All(innerException => innerException is InvalidProjectFileException)))
+                            && !(exception is AggregateException aggregateException && aggregateException.InnerExceptions.All(innerException => innerException is InvalidProjectFileException))
+                            && exception is not CircularDependencyException)
                         {
                             if (exception is LoggerException or InternalLoggerException or ProjectCacheException)
                             {

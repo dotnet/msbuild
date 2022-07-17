@@ -4,8 +4,6 @@
 using System;
 using System.IO;
 
-#nullable disable
-
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -43,8 +41,8 @@ namespace Microsoft.Build.Framework
         /// <param name="succeeded">True indicates a successful build</param>
         public BuildFinishedEventArgs
         (
-            string message,
-            string helpKeyword,
+            string? message,
+            string? helpKeyword,
             bool succeeded
         )
             : this(message, helpKeyword, succeeded, DateTime.UtcNow)
@@ -60,8 +58,8 @@ namespace Microsoft.Build.Framework
         /// <param name="eventTimestamp">Timestamp when the event was created</param>
         public BuildFinishedEventArgs
         (
-            string message,
-            string helpKeyword,
+            string? message,
+            string? helpKeyword,
             bool succeeded,
             DateTime eventTimestamp
         )
@@ -80,11 +78,11 @@ namespace Microsoft.Build.Framework
         /// <param name="messageArgs">message arguments</param>
         public BuildFinishedEventArgs
         (
-            string message,
-            string helpKeyword,
+            string? message,
+            string? helpKeyword,
             bool succeeded,
             DateTime eventTimestamp,
-            params object[] messageArgs
+            params object[]? messageArgs
         )
             : base(message, helpKeyword, "MSBuild", eventTimestamp, messageArgs)
         {
