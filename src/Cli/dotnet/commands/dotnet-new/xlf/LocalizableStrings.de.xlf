@@ -4,42 +4,42 @@
     <body>
       <trans-unit id="AddPackageReferenceCallback_Failed">
         <source>Failed to add package reference: {0}</source>
-        <target state="new">Failed to add package reference: {0}</target>
+        <target state="translated">Fehler beim Hinzufügen des Paketverweises: {0}</target>
         <note>{0} - the reason why operation failed, normally ends with period</note>
       </trans-unit>
       <trans-unit id="AddProjectReferenceCallback_Failed">
         <source>Failed to add project reference: {0}</source>
-        <target state="new">Failed to add project reference: {0}</target>
+        <target state="translated">Fehler beim Hinzufügen des Projektverweises: {0}</target>
         <note>{0} - the reason why operation failed, normally ends with period</note>
       </trans-unit>
       <trans-unit id="AddProjectsToSolutionCallback_Failed">
         <source>Failed to add project(s) to the solution: {0}</source>
-        <target state="new">Failed to add project(s) to the solution: {0}</target>
+        <target state="translated">Fehler beim Hinzufügen von Projekten zur Lösung: {0}</target>
         <note>{0} - the reason why operation failed, normally ends with period</note>
       </trans-unit>
       <trans-unit id="DisableSdkTemplates_OptionDescription">
         <source>If present, prevents templates bundled in the SDK from being presented.</source>
-        <target state="new">If present, prevents templates bundled in the SDK from being presented.</target>
+        <target state="translated">Falls vorhanden, wird verhindert, dass im SDK gebündelte Vorlagen präsentiert werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreCallback_Failed">
         <source>Failed to perform restore: {0}</source>
-        <target state="new">Failed to perform restore: {0}</target>
+        <target state="translated">Fehler beim Ausführen der Wiederherstellung: {0}</target>
         <note>{0} - the reason why operation failed, normally ends with period</note>
       </trans-unit>
       <trans-unit id="SdkInfoProvider_Message_InstallSdk">
         <source>Go to aka.ms/get-dotnet and install any of the supported SDK versions: '{0}'.</source>
-        <target state="new">Go to aka.ms/get-dotnet and install any of the supported SDK versions: '{0}'.</target>
+        <target state="translated">Wechseln Sie zu aka.ms/get-dotnet, und installieren Sie eine der unterstützten SDK-Versionen: „{0}“.</target>
         <note>{0} is the list of supported versions.</note>
       </trans-unit>
       <trans-unit id="SdkInfoProvider_Message_SwitchSdk">
         <source>You have other SDK version(s) installed that can be used to run this template. Switch to any of the following SDK(s) on your system to run this template: '{0}'. Details on selecting SDK version to run: https://docs.microsoft.com/dotnet/core/tools/global-json.</source>
-        <target state="new">You have other SDK version(s) installed that can be used to run this template. Switch to any of the following SDK(s) on your system to run this template: '{0}'. Details on selecting SDK version to run: https://docs.microsoft.com/dotnet/core/tools/global-json.</target>
+        <target state="translated">Sie haben andere SDK-Versionen installiert, die zum Ausführen dieser Vorlage verwendet werden können. Wechseln Sie zu einem der folgenden SDK(s) auf Ihrem System, um diese Vorlage auszuführen: „{0}“. Details zum Auswählen der auszuführenden SDK-Version: https://docs.microsoft.com/dotnet/core/tools/global-json.</target>
         <note>{0} is the list of installed and supported versions.</note>
       </trans-unit>
       <trans-unit id="WorkloadInfoProvider_Message_AddWorkloads">
         <source>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</source>
-        <target state="new">Run 'dotnet workload search' to search workloads available to be installed on your SDK.</target>
+        <target state="translated">Führen Sie „dotnet workload search“ aus, um Workloads zu suchen, die zur Installation in Ihrem SDK verfügbar sind.</target>
         <note />
       </trans-unit>
     </body>
