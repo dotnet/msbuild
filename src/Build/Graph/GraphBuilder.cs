@@ -643,7 +643,7 @@ namespace Microsoft.Build.Graph
                         newTargetsMetadata = GetEffectiveTargets(newItem, newTargetsMetadata);
 
                         ProjectItemInstance mergedItem = existingItem.DeepClone();
-                        mergedItem.SetMetadata(ItemMetadataNames.ProjectReferenceTargetsMetadataName, existingTargetsMetadata + ";" + newTargetsMetadata);
+                        mergedItem.SetMetadata(ItemMetadataNames.ProjectReferenceTargetsMetadataName, $"{existingTargetsMetadata};{newTargetsMetadata});
                         return mergedItem;
 
                         static string GetEffectiveTargets(ProjectItemInstance item, string targetsMetadata)
