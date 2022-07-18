@@ -2354,6 +2354,88 @@ $@"
             }
         }
 
+        [Fact]
+        public void DuplicateProjectReferences()
+        {
+            var graph = Helpers.CreateProjectGraph(
+                env: _env,
+                dependencyEdges: new Dictionary<int, int[]>()
+                {
+                    {1, new[] {2}},
+                },
+                extraContentPerProjectNumber: new Dictionary<int, string>()
+                {
+                    {
+                        1,
+                        $@"
+<ItemGroup>
+    <ProjectReferenceTmp Include='@(ProjectReference)' />
+    <ProjectReference Include='@(ProjectReferenceTmp)' />
+</ItemGroup>"
+                    },
+                },
+                extraContentForAllNodes: @$"
+<PropertyGroup>
+</PropertyGroup>
+
+<ItemGroup>
+    <ProjectReferenceTargets Include='Build' Targets='{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}' />
+</ItemGroup>
+
+<Target Name='Build' />
+");
+
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(new[] { "Build" });
+
+            ProjectGraphNode project1 = GetFirstNodeWithProjectNumber(graph, 1);
+            ProjectGraphNode project2 = GetFirstNodeWithProjectNumber(graph, 2);
+
+            project1.ProjectReferences.ShouldHaveSingleItem().ShouldBe(project2);
+            targetLists[project1].ShouldBe(new[] { "Build" });
+            targetLists[project2].ShouldBe(new[] { "Build" });
+        }
+
+        [Fact]
+        public void MultipleProjectReferencesSameFileDifferentTargets()
+        {
+            var graph = Helpers.CreateProjectGraph(
+                env: _env,
+                dependencyEdges: new Dictionary<int, int[]>()
+                {
+                    {1, new[] {2}},
+                },
+                extraContentPerProjectNumber: new Dictionary<int, string>()
+                {
+                    {
+                        1,
+                        $@"
+<ItemGroup>
+    <ProjectReferenceTmp Include='@(ProjectReference)' />
+    <ProjectReference Include='@(ProjectReferenceTmp)' Targets='SomeOtherTarget' />
+</ItemGroup>"
+                    },
+                },
+                extraContentForAllNodes: @$"
+<PropertyGroup>
+</PropertyGroup>
+
+<ItemGroup>
+    <ProjectReferenceTargets Include='Build' Targets='{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}' />
+</ItemGroup>
+
+<Target Name='Build' />
+");
+
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(new[] { "Build" });
+
+            ProjectGraphNode project1 = GetFirstNodeWithProjectNumber(graph, 1);
+            ProjectGraphNode project2 = GetFirstNodeWithProjectNumber(graph, 2);
+
+            project1.ProjectReferences.ShouldHaveSingleItem().ShouldBe(project2);
+            targetLists[project1].ShouldBe(new[] { "Build" });
+            targetLists[project2].ShouldBe(new[] { "Build", "SomeOtherTarget" });
+        }
+
         public void Dispose()
         {
             _env.Dispose();

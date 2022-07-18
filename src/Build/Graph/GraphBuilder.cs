@@ -607,7 +607,7 @@ namespace Microsoft.Build.Graph
             return propertyDictionary;
         }
 
-        internal class GraphEdges
+        internal sealed class GraphEdges
         {
             private ConcurrentDictionary<(ProjectGraphNode, ProjectGraphNode), ProjectItemInstance> ReferenceItems =
                 new ConcurrentDictionary<(ProjectGraphNode, ProjectGraphNode), ProjectItemInstance>();
@@ -621,9 +621,42 @@ namespace Microsoft.Build.Graph
                     ErrorUtilities.VerifyThrow(ReferenceItems.TryGetValue(key, out ProjectItemInstance referenceItem), "All requested keys should exist");
                     return referenceItem;
                 }
+            }
 
-                // First edge wins, in accordance with vanilla msbuild behaviour when multiple msbuild tasks call into the same logical project
-                set => ReferenceItems.TryAdd(key, value);
+            public void AddOrUpdateEdge((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstance edge)
+            {
+                ReferenceItems.AddOrUpdate(
+                    key,
+                    addValueFactory: static ((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstance referenceItem) => referenceItem,
+                    updateValueFactory: static ((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstance existingItem, ProjectItemInstance newItem) =>
+                    {
+                        string existingTargetsMetadata = existingItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
+                        string newTargetsMetadata = newItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
+
+                        // Bail out of the targets are the same.
+                        if (existingTargetsMetadata.Equals(newTargetsMetadata, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return existingItem;
+                        }
+
+                        existingTargetsMetadata = GetEffectiveTargets(existingItem, existingTargetsMetadata);
+                        newTargetsMetadata = GetEffectiveTargets(newItem, newTargetsMetadata);
+
+                        ProjectItemInstance mergedItem = existingItem.DeepClone();
+                        mergedItem.SetMetadata(ItemMetadataNames.ProjectReferenceTargetsMetadataName, existingTargetsMetadata + ";" + newTargetsMetadata);
+                        return mergedItem;
+
+                        static string GetEffectiveTargets(ProjectItemInstance item, string targetsMetadata)
+                        {
+                            if (string.IsNullOrWhiteSpace(targetsMetadata))
+                            {
+                                return string.Join(";", item.Project.DefaultTargets);
+                            }
+
+                            return targetsMetadata;
+                        }
+                    },
+                    edge);
             }
 
             public void RemoveEdge((ProjectGraphNode node, ProjectGraphNode reference) key)
@@ -632,7 +665,6 @@ namespace Microsoft.Build.Graph
             }
 
             internal bool HasEdge((ProjectGraphNode node, ProjectGraphNode reference) key) => ReferenceItems.ContainsKey(key);
-            internal bool TryGetEdge((ProjectGraphNode node, ProjectGraphNode reference) key, out ProjectItemInstance edge) => ReferenceItems.TryGetValue(key, out edge);
 
             internal IReadOnlyDictionary<(ConfigurationMetadata, ConfigurationMetadata), ProjectItemInstance> TestOnly_AsConfigurationMetadata()
             {
