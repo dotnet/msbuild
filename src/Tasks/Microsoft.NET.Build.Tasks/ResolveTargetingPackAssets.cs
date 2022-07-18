@@ -621,7 +621,7 @@ namespace Microsoft.NET.Build.Tasks
 
             public string CacheKey()
             {
-                return $"{nameof(RuntimeFramework)}: {Name} ({FrameworkName}) {Item?.GetMetadata(MetadataKeys.Version)}";
+                return $"{nameof(RuntimeFramework)}: {Name} ({FrameworkName} {Item?.GetMetadata(MetadataKeys.Version)})";
             }
         }
 
