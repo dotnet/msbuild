@@ -39,7 +39,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "TestPublishItemsOutputGroupOutputs",
-                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                TargetFrameworks = "net6.0",
                 IsExe = true
             };
 
