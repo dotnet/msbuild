@@ -633,7 +633,7 @@ namespace Microsoft.Build.Graph
                         string existingTargetsMetadata = existingItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
                         string newTargetsMetadata = newItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
 
-                        // Bail out of the targets are the same.
+                        // Bail out if the targets are the same.
                         if (existingTargetsMetadata.Equals(newTargetsMetadata, StringComparison.OrdinalIgnoreCase))
                         {
                             return existingItem;
