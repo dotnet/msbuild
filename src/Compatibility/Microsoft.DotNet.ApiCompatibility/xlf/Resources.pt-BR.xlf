@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="CannotAddVirtualToMember">
         <source>Cannot add virtual keyword to member '{0}'.</source>
-        <target state="new">Cannot add virtual keyword to member '{0}'.</target>
+        <target state="translated">Não é possível adicionar palavra-chave virtual ao membro '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="CannotRemoveVirtualFromMember">
         <source>Cannot remove virtual keyword from member '{0}'.</source>
-        <target state="new">Cannot remove virtual keyword from member '{0}'.</target>
+        <target state="translated">Não é possível remover a palavra-chave virtual do membro '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveReference">
@@ -79,12 +79,12 @@
       </trans-unit>
       <trans-unit id="EnumTypesMustMatch">
         <source>Underlying type of enum '{0}' changed from '{1}' to '{2}'.</source>
-        <target state="new">Underlying type of enum '{0}' changed from '{1}' to '{2}'.</target>
+        <target state="translated">Tipo subjacente de enum '{0}' alterado de '{1}' para '{2}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnumValuesMustMatch">
         <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
-        <target state="new">Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</target>
+        <target state="translated">Valor do campo '{1}' na enumeração '{0}' alterado de '{2}' para '{3}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileDoesNotExist">
@@ -149,7 +149,7 @@
       </trans-unit>
       <trans-unit id="SuppressionsFileNotSpecified">
         <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
-        <target state="new">A file path must be passed in to successfully generate a compatibility suppression file.</target>
+        <target state="translated">Um caminho de arquivo deve ser passado para gerar com êxito um arquivo de supressão de compatibilidade.</target>
         <note />
       </trans-unit>
       <trans-unit id="TypeExistsOnLeft">
@@ -179,7 +179,7 @@
       </trans-unit>
       <trans-unit id="WroteSuppressions">
         <source>Successfully wrote compatibility suppressions to '{0}'.</source>
-        <target state="new">Successfully wrote compatibility suppressions to '{0}'.</target>
+        <target state="translated">Supressões de compatibilidade gravadas com êxito em '{0}'.</target>
         <note />
       </trans-unit>
     </body>

@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="CannotAddVirtualToMember">
         <source>Cannot add virtual keyword to member '{0}'.</source>
-        <target state="new">Cannot add virtual keyword to member '{0}'.</target>
+        <target state="translated">Do člena {0} nelze přidat virtuální klíčové slovo.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="CannotRemoveVirtualFromMember">
         <source>Cannot remove virtual keyword from member '{0}'.</source>
-        <target state="new">Cannot remove virtual keyword from member '{0}'.</target>
+        <target state="translated">Nelze odebrat virtuální klíčové slovo ze člena {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveReference">
@@ -79,12 +79,12 @@
       </trans-unit>
       <trans-unit id="EnumTypesMustMatch">
         <source>Underlying type of enum '{0}' changed from '{1}' to '{2}'.</source>
-        <target state="new">Underlying type of enum '{0}' changed from '{1}' to '{2}'.</target>
+        <target state="translated">Základní typ výčtu{0}se změnil z {1} na {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnumValuesMustMatch">
         <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
-        <target state="new">Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</target>
+        <target state="translated">Hodnota pole {1} ve výčtu {0} se změnila z {2} na {3}.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileDoesNotExist">
@@ -149,7 +149,7 @@
       </trans-unit>
       <trans-unit id="SuppressionsFileNotSpecified">
         <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
-        <target state="new">A file path must be passed in to successfully generate a compatibility suppression file.</target>
+        <target state="translated">Aby bylo možné úspěšně vygenerovat soubor potlačení kompatibility, musí být předána cesta k souboru.</target>
         <note />
       </trans-unit>
       <trans-unit id="TypeExistsOnLeft">
@@ -179,7 +179,7 @@
       </trans-unit>
       <trans-unit id="WroteSuppressions">
         <source>Successfully wrote compatibility suppressions to '{0}'.</source>
-        <target state="new">Successfully wrote compatibility suppressions to '{0}'.</target>
+        <target state="translated">Potlačení kompatibility byla úspěšně zapsána do {0}.</target>
         <note />
       </trans-unit>
     </body>

@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="CannotAddVirtualToMember">
         <source>Cannot add virtual keyword to member '{0}'.</source>
-        <target state="new">Cannot add virtual keyword to member '{0}'.</target>
+        <target state="translated">Не удается добавить виртуальную клавиатуру в элемент "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="CannotRemoveVirtualFromMember">
         <source>Cannot remove virtual keyword from member '{0}'.</source>
-        <target state="new">Cannot remove virtual keyword from member '{0}'.</target>
+        <target state="translated">Не удается удалить виртуальное ключевое слово из элемента "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveReference">
@@ -79,12 +79,12 @@
       </trans-unit>
       <trans-unit id="EnumTypesMustMatch">
         <source>Underlying type of enum '{0}' changed from '{1}' to '{2}'.</source>
-        <target state="new">Underlying type of enum '{0}' changed from '{1}' to '{2}'.</target>
+        <target state="translated">Базовый тип перечисления "{0}" изменен с "{1}" на "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="EnumValuesMustMatch">
         <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
-        <target state="new">Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</target>
+        <target state="translated">Значение поля "{1}" в перечислении "{0}" изменено с "{2}" на "{3}".</target>
         <note />
       </trans-unit>
       <trans-unit id="FileDoesNotExist">
@@ -149,7 +149,7 @@
       </trans-unit>
       <trans-unit id="SuppressionsFileNotSpecified">
         <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
-        <target state="new">A file path must be passed in to successfully generate a compatibility suppression file.</target>
+        <target state="translated">Для успешного создания файла подавления совместимости необходимо передать путь к файлу.</target>
         <note />
       </trans-unit>
       <trans-unit id="TypeExistsOnLeft">
@@ -179,7 +179,7 @@
       </trans-unit>
       <trans-unit id="WroteSuppressions">
         <source>Successfully wrote compatibility suppressions to '{0}'.</source>
-        <target state="new">Successfully wrote compatibility suppressions to '{0}'.</target>
+        <target state="translated">Подавления совместимости успешно записаны в "{0}".</target>
         <note />
       </trans-unit>
     </body>

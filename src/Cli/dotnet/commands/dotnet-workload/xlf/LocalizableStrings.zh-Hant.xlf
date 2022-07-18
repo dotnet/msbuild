@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="NoWorkloadsInstalledInfoWarning">
         <source>There are no installed workloads to display.</source>
-        <target state="new">There are no installed workloads to display.</target>
+        <target state="translated">沒有已安裝的工作負載可顯示。</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipSignCheckInvalidOption">
@@ -34,27 +34,27 @@
       </trans-unit>
       <trans-unit id="WorkloadIdColumn">
         <source>Installed Workload Id</source>
-        <target state="new">Installed Workload Id</target>
+        <target state="translated">已安裝的工作負載識別碼</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadInstallTypeColumn">
         <source>Install Type</source>
-        <target state="new">Install Type</target>
+        <target state="translated">安裝類型</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadManfiestVersionColumn">
         <source>Manifest Version</source>
-        <target state="new">Manifest Version</target>
+        <target state="translated">資訊清單版本</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadManifestPathColumn">
         <source>Manifest Path</source>
-        <target state="new">Manifest Path</target>
+        <target state="translated">資訊清單路徑</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadSourceColumn">
         <source>Installation Source</source>
-        <target state="new">Installation Source</target>
+        <target state="translated">安裝來源</target>
         <note />
       </trans-unit>
     </body>

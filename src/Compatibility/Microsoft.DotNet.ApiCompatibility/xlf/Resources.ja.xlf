@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="CannotAddVirtualToMember">
         <source>Cannot add virtual keyword to member '{0}'.</source>
-        <target state="new">Cannot add virtual keyword to member '{0}'.</target>
+        <target state="translated">メンバー '{0}' に仮想キーワードを追加できません。</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="CannotRemoveVirtualFromMember">
         <source>Cannot remove virtual keyword from member '{0}'.</source>
-        <target state="new">Cannot remove virtual keyword from member '{0}'.</target>
+        <target state="translated">メンバー '{0}' から仮想キーワードを削除できません。</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveReference">
@@ -79,12 +79,12 @@
       </trans-unit>
       <trans-unit id="EnumTypesMustMatch">
         <source>Underlying type of enum '{0}' changed from '{1}' to '{2}'.</source>
-        <target state="new">Underlying type of enum '{0}' changed from '{1}' to '{2}'.</target>
+        <target state="translated">基になる列挙型 '{0}' が '{1}' から '{2}' に変更されました。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnumValuesMustMatch">
         <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
-        <target state="new">Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</target>
+        <target state="translated">列挙型 '{0}' のフィールド '{1}' の値が '{2}' から '{3}' に変更されました。</target>
         <note />
       </trans-unit>
       <trans-unit id="FileDoesNotExist">
@@ -149,7 +149,7 @@
       </trans-unit>
       <trans-unit id="SuppressionsFileNotSpecified">
         <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
-        <target state="new">A file path must be passed in to successfully generate a compatibility suppression file.</target>
+        <target state="translated">互換性抑制ファイルを正常に生成するには、ファイル パスを渡す必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="TypeExistsOnLeft">
@@ -179,7 +179,7 @@
       </trans-unit>
       <trans-unit id="WroteSuppressions">
         <source>Successfully wrote compatibility suppressions to '{0}'.</source>
-        <target state="new">Successfully wrote compatibility suppressions to '{0}'.</target>
+        <target state="translated">互換性抑制を '{0}' に正常に書き込みました。</target>
         <note />
       </trans-unit>
     </body>

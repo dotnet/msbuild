@@ -44,7 +44,7 @@
       </trans-unit>
       <trans-unit id="WorkloadManfiestVersionColumn">
         <source>Manifest Version</source>
-        <target state="new">Manifest Version</target>
+        <target state="translated">매니페스트 버전</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadManifestPathColumn">
@@ -54,7 +54,7 @@
       </trans-unit>
       <trans-unit id="WorkloadSourceColumn">
         <source>Installation Source</source>
-        <target state="new">Installation Source</target>
+        <target state="translated">설치 원본</target>
         <note />
       </trans-unit>
     </body>

@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
         <source>Force the command to ignore any persistent build servers.</source>
-        <target state="new">Force the command to ignore any persistent build servers.</target>
+        <target state="translated">Wymuś polecenie, aby zignorować wszystkie trwałe serwery kompilacji.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXBashManualInstructions">

@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="CannotAddVirtualToMember">
         <source>Cannot add virtual keyword to member '{0}'.</source>
-        <target state="new">Cannot add virtual keyword to member '{0}'.</target>
+        <target state="translated">無法將虛擬關鍵字新增至成員 '{0}'。</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="CannotRemoveVirtualFromMember">
         <source>Cannot remove virtual keyword from member '{0}'.</source>
-        <target state="new">Cannot remove virtual keyword from member '{0}'.</target>
+        <target state="translated">無法從成員 '{0}' 移除虛擬關鍵字。</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveReference">
@@ -79,12 +79,12 @@
       </trans-unit>
       <trans-unit id="EnumTypesMustMatch">
         <source>Underlying type of enum '{0}' changed from '{1}' to '{2}'.</source>
-        <target state="new">Underlying type of enum '{0}' changed from '{1}' to '{2}'.</target>
+        <target state="translated">列舉 '{0}' 的基礎類型已從 '{1}' 變更為 '{2}'。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnumValuesMustMatch">
         <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
-        <target state="new">Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</target>
+        <target state="translated">列舉 '{1}' 中的欄位 '{0}' 值已從 '{2}' 變更為 '{3}'。</target>
         <note />
       </trans-unit>
       <trans-unit id="FileDoesNotExist">
@@ -149,7 +149,7 @@
       </trans-unit>
       <trans-unit id="SuppressionsFileNotSpecified">
         <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
-        <target state="new">A file path must be passed in to successfully generate a compatibility suppression file.</target>
+        <target state="translated">必須傳入檔案路徑，才能成功產生相容性歸併檔案。</target>
         <note />
       </trans-unit>
       <trans-unit id="TypeExistsOnLeft">
@@ -179,7 +179,7 @@
       </trans-unit>
       <trans-unit id="WroteSuppressions">
         <source>Successfully wrote compatibility suppressions to '{0}'.</source>
-        <target state="new">Successfully wrote compatibility suppressions to '{0}'.</target>
+        <target state="translated">已成功將相容性歸併寫入 '{0}'。</target>
         <note />
       </trans-unit>
     </body>
