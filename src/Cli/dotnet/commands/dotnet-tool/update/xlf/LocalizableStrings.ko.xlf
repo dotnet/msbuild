@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="UpdateSucceededStableVersionNoChange">
         <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
-        <target state="new">Tool '{0}' was reinstalled with the latest stable version (version '{1}').</target>
+        <target state="translated">'{0}' 도구가 안정적인 최신 버전('{1}' 버전)으로 다시 설치되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToLowerVersion">
