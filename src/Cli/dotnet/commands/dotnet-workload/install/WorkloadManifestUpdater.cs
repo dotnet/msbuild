@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             var tempPackagesDir = new DirectoryPath(Path.Combine(Path.GetTempPath(), "dotnet-sdk-advertising-temp"));
             var nugetPackageDownloader = new NuGetPackageDownloader(tempPackagesDir,
                                           filePermissionSetter: null,
-                                          new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, new NullLogger()),
+                                          new FirstPartyNuGetPackageSigningVerifier(),
                                           new NullLogger(),
                                           reporter,
                                           verifySignatures: SignCheck.IsDotNetSigned());
