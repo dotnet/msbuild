@@ -398,7 +398,7 @@ namespace Microsoft.Build.CommandLine
         private DetectedParameterizedSwitch[] _parameterizedSwitches;
         // NOTE: the above arrays are instance members because this class is not required to be a singleton
 
-        internal static List<(string path, string contents)> SwitchesFromResponseFiles = new();
+        internal static List<(string path, string contents)> SwitchesFromResponseFiles;
 
         /// <summary>
         /// Default constructor.
