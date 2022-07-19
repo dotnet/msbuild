@@ -134,8 +134,8 @@ namespace Microsoft.DotNet.New.Tests
         {
             BaseWorkingDirectory = TestUtils.CreateTemporaryFolder(nameof(AllWebProjectsWork));
  
-            InstallPackage("Microsoft.DotNet.Web.ProjectTemplates.3.1::3.1.*", BaseWorkingDirectory);
-            InstallPackage("Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.*", BaseWorkingDirectory);
+            InstallPackage(TemplatePackagesPaths.MicrosoftDotNetWebProjectTemplates31Path, BaseWorkingDirectory);
+            InstallPackage(TemplatePackagesPaths.MicrosoftDotNetWebProjectTemplates50Path, BaseWorkingDirectory);
         }
 
         internal string BaseWorkingDirectory { get; private set; }

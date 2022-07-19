@@ -180,12 +180,7 @@ Restore succeeded\.",
                 .Should()
                 .ExitWith(0)
                 .And.NotHaveStdErr()
-                .And.HaveStdOutContaining($@"The template ""{expectedTemplateName}"" was created successfully.")
-                .And.NotHaveStdOutMatching(
-@"Processing post-creation actions\.\.\.
-Restoring .*:
-.*
-Restore succeeded\.", RegexOptions.Singleline);
+                .And.HaveStdOut($@"The template ""{expectedTemplateName}"" was created successfully.");
 
             Directory.Delete(workingDir, true);
         }
@@ -872,7 +867,7 @@ public class Class1
                 .Should()
                 .ExitWith(0)
                 .And.NotHaveStdErr()
-                .And.HaveStdOutContaining($@"The template ""{expectedTemplateName}"" was created successfully.");
+                .And.HaveStdOut($@"The template ""{expectedTemplateName}"" was created successfully.");
 
             string expectedExtension = language switch
             {
@@ -943,7 +938,7 @@ public class Class1
                 .Should()
                 .ExitWith(0)
                 .And.NotHaveStdErr()
-                .And.HaveStdOutContaining($@"The template ""{expectedTemplateName}"" was created successfully.");
+                .And.HaveStdOut($@"The template ""{expectedTemplateName}"" was created successfully.");
 
             string expectedExtension = language switch
             {

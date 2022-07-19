@@ -10,9 +10,9 @@ namespace Microsoft.TemplateEngine.TestHelper
 {
     public class TestUtils
     {
-        public static string TestAssetsRoot { get; } = Path.Combine(TestContext.Current.TestAssetsDirectory, @"TestPackages\dotnet-new");
+        public static string TestAssetsRoot { get; } = Path.Combine(TestContext.Current.TestAssetsDirectory, "TestPackages", "dotnet-new");
 
-        public static string RepoRoot { get; } = Path.Combine(TestContext.Current.TestAssetsDirectory, @"..\..");
+        public static string RepoRoot { get; } = Path.Combine(TestContext.Current.TestAssetsDirectory, "..", "..");
 
         public static string TestExecutionRoot { get; } = TestContext.Current.TestExecutionDirectory;
 

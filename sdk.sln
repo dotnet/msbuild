@@ -393,6 +393,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Common.Ite
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Common.ProjectTemplates.7.0", "template_feed\Microsoft.DotNet.Common.ProjectTemplates.7.0\Microsoft.DotNet.Common.ProjectTemplates.7.0.csproj", "{AB7ADCF8-48AC-4885-9C70-16D752B97168}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-new.IntegrationTests", "src\Tests\dotnet-new.Tests\dotnet-new.IntegrationTests.csproj", "{8868D816-C072-4B66-84D6-7E014EA16D48}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -747,6 +749,10 @@ Global
 		{AB7ADCF8-48AC-4885-9C70-16D752B97168}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB7ADCF8-48AC-4885-9C70-16D752B97168}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB7ADCF8-48AC-4885-9C70-16D752B97168}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8868D816-C072-4B66-84D6-7E014EA16D48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8868D816-C072-4B66-84D6-7E014EA16D48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8868D816-C072-4B66-84D6-7E014EA16D48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8868D816-C072-4B66-84D6-7E014EA16D48}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -882,6 +888,7 @@ Global
 		{628C09B7-BE6B-4AD4-AF41-C8863C809B31} = {9CEF03F6-1A61-431A-8ABD-9095974629AE}
 		{92F4E400-8C28-41B9-9D7D-8E9A4535636B} = {536775E0-ABD9-4E57-AD41-F7BDDF2E7E02}
 		{AB7ADCF8-48AC-4885-9C70-16D752B97168} = {536775E0-ABD9-4E57-AD41-F7BDDF2E7E02}
+		{8868D816-C072-4B66-84D6-7E014EA16D48} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB8F26CE-4DE6-433F-B32A-79183020BBD6}
