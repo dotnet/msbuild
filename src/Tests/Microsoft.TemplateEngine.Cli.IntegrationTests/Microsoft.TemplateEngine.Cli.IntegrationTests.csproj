@@ -3,6 +3,7 @@
     <TargetFramework>$(SdkTargetFramework)</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <OutputType>Exe</OutputType>
+    <IsUnitTestProject>true</IsUnitTestProject>
   </PropertyGroup>
 
   <ItemGroup>

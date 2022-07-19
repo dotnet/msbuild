@@ -3,6 +3,7 @@
     <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <OutputType>Exe</OutputType>
+    <IsUnitTestProject>true</IsUnitTestProject>
   </PropertyGroup>
 
   <ItemGroup>

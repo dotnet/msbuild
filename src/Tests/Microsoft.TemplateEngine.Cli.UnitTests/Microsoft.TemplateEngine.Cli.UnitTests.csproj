@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+    <IsUnitTestProject>true</IsUnitTestProject>
   </PropertyGroup>
 
   <ItemGroup>
