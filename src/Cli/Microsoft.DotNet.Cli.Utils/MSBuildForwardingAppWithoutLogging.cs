@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Cli.Utils
             _argsToForward = argsToForward;
             MSBuildPath = msbuildPath ?? defaultMSBuildPath;
 
-            EnvironmentVariable("MSBUILDUSESERVER", UseMSBuildServer ? "0" : "0");
+            EnvironmentVariable("MSBUILDUSESERVER", UseMSBuildServer ? "1" : "0");
 
             // If DOTNET_CLI_RUN_MSBUILD_OUTOFPROC is set or we're asked to execute a non-default binary, call MSBuild out-of-proc.
             if (AlwaysExecuteMSBuildOutOfProc || !string.Equals(MSBuildPath, defaultMSBuildPath, StringComparison.OrdinalIgnoreCase))
