@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _restoreActionConfig = restoreActionConfig;
             _nugetPackageDownloader = nugetPackageDownloader ??
                                       new NuGetPackageDownloader(_tempPackagesDir, filePermissionSetter: null,
-                                          new FirstPartyNuGetPackageSigningVerifier(_tempPackagesDir), logger,
+                                          new FirstPartyNuGetPackageSigningVerifier(), logger,
                                           restoreActionConfig: _restoreActionConfig);
             bool userLocal = WorkloadFileBasedInstall.IsUserLocal(_dotnetDir, sdkFeatureBand.ToString());
             _workloadMetadataDir = Path.Combine(userLocal ? _userProfileDir : _dotnetDir, "metadata", "workloads");
