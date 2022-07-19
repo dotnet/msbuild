@@ -411,6 +411,8 @@ namespace Microsoft.Build.CommandLine
             Debug.Assert(s_parameterizedSwitchesMap.Length == (int)ParameterizedSwitch.NumberOfParameterizedSwitches,
                 "The map of parameterized switches must have an entry for each switch in the ParameterizedSwitch enumeration.");
 
+            SwitchesFromResponseFiles ??= new();
+
             for (int i = 0; i < s_parameterlessSwitchesMap.Length; i++)
             {
                 Debug.Assert(i == (int)(s_parameterlessSwitchesMap[i].parameterlessSwitch),

@@ -306,6 +306,10 @@ namespace Microsoft.Build.CommandLine
                     ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]) == false)
                 {
                     canRunServer = false;
+                    if (KnownTelemetry.BuildTelemetry != null)
+                    {
+                        KnownTelemetry.BuildTelemetry.ServerFallbackReason = "Arguments";
+                    }
                 }
             }
             catch (Exception ex)
