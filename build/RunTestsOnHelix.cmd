@@ -23,3 +23,6 @@ REM call dotnet new so the first run message doesn't interfere with the first te
 dotnet new
 REM avoid potetial cocurrency issues when nuget is creating nuget.config
 dotnet nuget list source
+REM We downloaded a special zip of files to the .nuget folder so add that as a source
+dotnet nuget add source %DOTNET_ROOT%\.nuget
+dir /B %DOTNET_ROOT%\.nuget
