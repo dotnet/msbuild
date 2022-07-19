@@ -30,8 +30,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <ItemGroup>
-      <_RazorAnalyzer Include="$(_RazorSdkSourceGeneratorDirectoryRoot)Microsoft.AspNetCore.Razor.SourceGenerator.Tooling.Internal.dll" />
-      <_RazorAnalyzer Include="$(_RazorSdkSourceGeneratorDirectoryRoot)Microsoft.NET.Sdk.Razor.SourceGenerators.dll" />
+      <_RazorAnalyzer Include="$(_RazorSdkSourceGeneratorDirectoryRoot)*.dll" />
     </ItemGroup>
 
     <!-- Configure analyzers -->

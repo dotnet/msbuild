@@ -36,6 +36,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.CodeStyle" Version="$(MicrosoftNetCompilersToolsetPackageVersion)" ExcludeAssets="All" GeneratePathProperty="true"/>
     <PackageReference Include="Microsoft.NET.ILLink.Analyzers" Version="$(MicrosoftNETILLinkAnalyzerPackageVersion)" ExcludeAssets="All" GeneratePathProperty="true" />
     <PackageReference Include="Microsoft.FSharp.Compiler" Version="$(MicrosoftFSharpCompilerPackageVersion)" ExcludeAssets="All" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.NET.Sdk.Razor.SourceGenerators.Transport" Version="$(MicrosoftNETSdkRazorSourceGeneratorsTransportPackageVersion)" GeneratePathProperty="true" />
 
     <!-- Lift up dependencies of dependencies to prevent build tasks from getting pinned to older versions -->
     <PackageReference Include="System.CodeDom" Version="$(SystemCodeDomPackageVersion)" />

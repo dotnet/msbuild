@@ -123,17 +123,6 @@ namespace Microsoft.DotNet.Build.Tasks
                 crossgen2Rids.Value += ";osx-x64";
             }
 
-            // Adding ilcompiler details package without waiting for the Stage0MicrosoftNETCoreAppRefPackageVersionPath iteration
-            XElement ilcInfo = new XElement(ns + "KnownILCompilerPack",
-                new XAttribute("Include", "Microsoft.DotNet.ILCompiler"),
-                new XAttribute("TargetFramework", "net7.0"),
-                new XAttribute("ILCompilerPackNamePattern", "runtime.**RID**.Microsoft.DotNet.ILCompiler"),
-                new XAttribute("ILCompilerPackVersion", microsoftNETCoreAppRefPackageVersion),
-                new XAttribute("ILCompilerRuntimeIdentifiers", "linux-musl-x64;linux-x64;win-x64;linux-arm;win-arm64;linux-arm64")
-            );
-            itemGroup.Add(ilcInfo);
-
-
             CheckAndReplaceAttribute(itemGroup
                 .Elements(ns + "KnownRuntimePack").First().Attribute("LatestRuntimeFrameworkVersion"));
 
