@@ -52,14 +52,9 @@
         <target state="translated">L'outil '{0}' a été correctement mis à jour de la version '{1}' à la version '{2}' (fichier manifeste {3}).</target>
         <note />
       </trans-unit>
-      <trans-unit id="UpdateSucceededPreVersionNoChange">
-        <source>Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</source>
-        <target state="translated">L'outil '{0}' a été réinstallé avec la dernière version préliminaire (version '{1}').</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateSucceededStableVersionNoChange">
+      <trans-unit id="UpdateSucceededVersionNoChange">
         <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
-        <target state="translated">L'outil '{0}' a été réinstallé avec la dernière version stable (version '{1}').</target>
+        <target state="new">Tool '{0}' was reinstalled with the latest stable version (version '{1}').</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToLowerVersion">

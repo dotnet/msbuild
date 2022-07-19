@@ -52,14 +52,9 @@
         <target state="translated">工具“{0}”已成功从版本“{1}”更新到版本“{2}”(清单文件 {3})。</target>
         <note />
       </trans-unit>
-      <trans-unit id="UpdateSucceededPreVersionNoChange">
-        <source>Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</source>
-        <target state="translated">工具“{0}”已重新安装最新预发行版本(版本“{1}”)。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateSucceededStableVersionNoChange">
+      <trans-unit id="UpdateSucceededVersionNoChange">
         <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
-        <target state="translated">工具“{0}”已重新安装最新稳定版本(版本“{1}”)。</target>
+        <target state="new">Tool '{0}' was reinstalled with the latest stable version (version '{1}').</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToLowerVersion">
