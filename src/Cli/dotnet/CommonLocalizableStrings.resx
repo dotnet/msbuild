@@ -702,4 +702,7 @@ The default is 'true' if a runtime identifier is specified.</value>
   <data name="DisableBuildServersOptionDescription" xml:space="preserve">
     <value>Force the command to ignore any persistent build servers.</value>
   </data>
+  <data name="ResponseFileNotFound" xml:space="preserve">
+    <value>Response file '{0}' does not exist.</value>
+  </data>
 </root>

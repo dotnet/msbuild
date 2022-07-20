@@ -56,7 +56,7 @@ Per impostazione predefinita, viene generato un pacchetto dipendente dal framewo
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default is 'Debug'. Use the `PublishRelease` property to make 'Release' the default for this command.</source>
-        <target state="needs-review-translation">Configurazione per cui eseguire la pubblicazione. L'impostazione predefinita per la maggior parte dei progetti è 'Debug'.</target>
+        <target state="new">The configuration to publish for. The default for most projects is 'Debug'.</target>
         <note />
       </trans-unit>
     </body>

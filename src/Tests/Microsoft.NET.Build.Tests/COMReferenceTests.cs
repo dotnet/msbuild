@@ -24,7 +24,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData(false)]
         public void COMReferenceBuildsAndRuns(bool embedInteropTypes)
         {
-            var targetFramework = "netcoreapp3.0";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
 
             var testProject = new TestProject
             {
@@ -71,7 +71,7 @@ namespace Microsoft.NET.Build.Tests
         [FullMSBuildOnlyFact]
         public void COMReferenceProperlyPublish()
         {
-            var targetFramework = "netcoreapp3.0";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
 
             var testProject = new TestProject
             {

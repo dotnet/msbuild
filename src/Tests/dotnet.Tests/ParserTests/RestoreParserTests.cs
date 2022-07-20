@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
             var result = Parser.Instance.Parse(@"dotnet restore .\some.csproj --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
 
             result.GetValueForArgument<IEnumerable<string>>(RestoreCommandParser.SlnOrProjectArgument).Should().BeEquivalentTo(@".\some.csproj");
-            result.OptionValuesToBeForwarded(RestoreCommandParser.GetCommand()).Should().Contain(@"-property:SkipInvalidConfigurations=true");
+            result.OptionValuesToBeForwarded(RestoreCommandParser.GetCommand()).Should().Contain(@"--property:SkipInvalidConfigurations=true");
         }
 
         [Fact]
@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
         {
             var result = Parser.Instance.Parse(@"dotnet restore --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
 
-            result.OptionValuesToBeForwarded(RestoreCommandParser.GetCommand()).Should().Contain(@"-property:SkipInvalidConfigurations=true");
+            result.OptionValuesToBeForwarded(RestoreCommandParser.GetCommand()).Should().Contain(@"--property:SkipInvalidConfigurations=true");
         }
 
         [Fact]

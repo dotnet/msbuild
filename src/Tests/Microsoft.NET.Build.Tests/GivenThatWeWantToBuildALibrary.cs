@@ -29,7 +29,7 @@ namespace Microsoft.NET.Build.Tests
         [Theory]
         [InlineData("netstandard1.5")]
         [InlineData("netcoreapp2.1")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_builds_the_library_successfully(string targetFramework)
         {
             var testAsset = _testAssetsManager
@@ -898,10 +898,10 @@ class Program
 
         [Theory]
         [InlineData("netcoreapp2.2", null, false, null, false)]
-        [InlineData("netcoreapp3.0", null, true, null, true)]
-        [InlineData("netcoreapp3.0", "LatestMajor", true, null, true)]
-        [InlineData("netcoreapp3.0", null, true, false, false)]
-        [InlineData("netcoreapp3.0", "LatestMajor", true, false, false)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, null, true, null, true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "LatestMajor", true, null, true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, null, true, false, false)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "LatestMajor", true, false, false)]
         public void It_can_build_with_dynamic_loading_enabled(string targetFramework, string rollForwardValue, bool shouldSetRollForward, bool? copyLocal, bool shouldCopyLocal)
         {
             var testProject = new TestProject()
@@ -936,7 +936,7 @@ class Program
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
             outputDirectory.Should().HaveFiles(new[] {
                 runtimeConfigName,
-                $"{testProject.Name}.runtimeconfig.dev.json"
+                $"{testProject.Name}.runtimeconfig.json"
             });
 
             if (shouldCopyLocal)

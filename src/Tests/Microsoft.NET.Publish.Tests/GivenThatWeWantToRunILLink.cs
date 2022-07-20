@@ -1671,7 +1671,7 @@ namespace Microsoft.NET.Publish.Tests
                 TargetFrameworks = targetFramework,
                 IsExe = isExe
             };
-
+            
             testProject.SourceFiles[$"{projectName}.cs"] = @"
 using System;
 using System.Reflection;
