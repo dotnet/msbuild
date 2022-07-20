@@ -18,6 +18,12 @@ namespace Microsoft.TemplateEngine.TestHelper
 
         public static string Version { get; } = $"v{Product.Version}";
 
+#if DEBUG
+        public static string Configuration { get; } = "Debug";
+#else
+        public static string Configuration { get; } = "Release";
+#endif
+
         public static string CreateTemporaryFolder(string name = "")
         {
             string workingDir = Path.Combine(TestExecutionRoot, "TemplateEngine.Tests", Guid.NewGuid().ToString(), name);

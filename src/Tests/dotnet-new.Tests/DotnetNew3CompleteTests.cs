@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.New.Tests
             command.Arguments.InsertRange(0, new List<string> { dotnetNew3AssemblyPath, "new3" });
             string dotnetRoot = TestContext.Current.ToolsetUnderTest.DotNetRoot;
             string templatesLocation = Path.Combine(dotnetRoot, "templates");
-            var packagePaths = Directory.EnumerateFiles(templatesLocation, "microsoft.dotnet.common.itemtemplates.*.nupkg", SearchOption.AllDirectories);
+            var packagePaths = Directory.EnumerateFiles(templatesLocation, "Microsoft.DotNet.Common.ItemTemplates.*.nupkg", SearchOption.AllDirectories);
             string packageLocation = packagePaths.FirstOrDefault();
             Environment.SetEnvironmentVariable("DN3", Path.GetDirectoryName(packageLocation));
             var commandResult = command.WithoutCustomHive().Execute();

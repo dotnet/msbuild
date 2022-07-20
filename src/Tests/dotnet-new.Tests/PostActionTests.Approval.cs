@@ -20,6 +20,8 @@ namespace Microsoft.DotNet.New.Tests
     [UsesVerify]
     public partial class PostActionTests
     {
+        private string testExecDirPatternForVerify = $"{{SolutionDirectory}}artifacts(\\\\|\\/)tmp(\\\\|\\/){TestUtils.Configuration}";
+
         [Fact]
         public Task Restore_Basic_Approval()
         {
@@ -42,7 +44,10 @@ namespace Microsoft.DotNet.New.Tests
                 .ScrubInlineGuids()
                 .AddScrubber(output =>
                 {
-                    output.ScrubByRegex("(?<=Restoring {SolutionDirectory}artifacts(\\\\|\\/)tmp(\\\\|\\/)Debug(\\\\|\\/)TemplateEngine\\.Tests(\\\\|\\/)Guid_1(\\\\|\\/)MyProject.csproj:\\n)(.*?)(?=\\nRestore succeeded)", "%RESTORE CALLBACK OUTPUT%", System.Text.RegularExpressions.RegexOptions.Singleline);
+                    // for Linux Verify.NET replaces sub path /tmp/ to be {TempPath} wrongly
+                    output.Replace("{TempPath}", "/tmp/");
+                    output.ScrubByRegex(testExecDirPatternForVerify, "%Test Execution Direcotry%", System.Text.RegularExpressions.RegexOptions.Singleline);
+                    output.ScrubByRegex("(?<=Restoring %Test Execution Direcotry%(\\\\|\\/)TemplateEngine\\.Tests(\\\\|\\/)Guid_1(\\\\|\\/)MyProject.csproj:\\n)(.*?)(?=\\nRestore succeeded)", "%RESTORE CALLBACK OUTPUT%", System.Text.RegularExpressions.RegexOptions.Singleline);
                 });
         }
 
@@ -92,7 +97,10 @@ namespace Microsoft.DotNet.New.Tests
                 .ScrubInlineGuids()
                 .AddScrubber(output =>
                 {
-                    output.ScrubByRegex("(?<=Adding a package reference Newtonsoft.Json \\(version: 13.0.1\\) to project file {SolutionDirectory}artifacts(\\\\|\\/)tmp(\\\\|\\/)Debug(\\\\|\\/)TemplateEngine\\.Tests(\\\\|\\/)Guid_1(\\\\|\\/)MyProject.csproj:\\n)(.*?)(?=\\nSuccessfully added a reference to the project file.)", "%CALLBACK OUTPUT%", System.Text.RegularExpressions.RegexOptions.Singleline);
+                    // for Linux Verify.NET replaces sub path /tmp/ to be {TempPath} wrongly
+                    output.Replace("{TempPath}", "/tmp/");
+                    output.ScrubByRegex(testExecDirPatternForVerify, "%Test Execution Direcotry%", System.Text.RegularExpressions.RegexOptions.Singleline);
+                    output.ScrubByRegex("(?<=Adding a package reference Newtonsoft.Json \\(version: 13.0.1\\) to project file %Test Execution Direcotry%(\\\\|\\/)TemplateEngine\\.Tests(\\\\|\\/)Guid_1(\\\\|\\/)MyProject.csproj:\\n)(.*?)(?=\\nSuccessfully added a reference to the project file.)", "%CALLBACK OUTPUT%", System.Text.RegularExpressions.RegexOptions.Singleline);
                 });
         }
 
@@ -119,7 +127,10 @@ namespace Microsoft.DotNet.New.Tests
                 .ScrubInlineGuids()
                 .AddScrubber(output =>
                 {
-                    output.ScrubByRegex("(?<=Adding a project reference {SolutionDirectory}artifacts(\\\\|\\/)tmp(\\\\|\\/)Debug(\\\\|\\/)TemplateEngine.Tests(\\\\|\\/)Guid_1(\\\\|\\/)Project2(\\\\|\\/)Project2.csproj to project file {SolutionDirectory}artifacts(\\\\|\\/)tmp(\\\\|\\/)Debug(\\\\|\\/)TemplateEngine.Tests(\\\\|\\/)Guid_1(\\\\|\\/)Project1(\\\\|\\/)Project1.csproj:\\n)(.*?)(?=\\nSuccessfully added a reference to the project file.)", "%CALLBACK OUTPUT%", System.Text.RegularExpressions.RegexOptions.Singleline);
+                    // for Linux Verify.NET replaces sub path /tmp/ to be {TempPath} wrongly
+                    output.Replace("{TempPath}", "/tmp/");
+                    output.ScrubByRegex(testExecDirPatternForVerify, "%Test Execution Direcotry%", System.Text.RegularExpressions.RegexOptions.Singleline);
+                    output.ScrubByRegex("(?<=Adding a project reference %Test Execution Direcotry%(\\\\|\\/)TemplateEngine.Tests(\\\\|\\/)Guid_1(\\\\|\\/)Project2(\\\\|\\/)Project2.csproj to project file %Test Execution Direcotry%(\\\\|\\/)TemplateEngine.Tests(\\\\|\\/)Guid_1(\\\\|\\/)Project1(\\\\|\\/)Project1.csproj:\\n)(.*?)(?=\\nSuccessfully added a reference to the project file.)", "%CALLBACK OUTPUT%", System.Text.RegularExpressions.RegexOptions.Singleline);
                 });
         }
 
@@ -155,6 +166,9 @@ namespace Microsoft.DotNet.New.Tests
                 .ScrubInlineGuids()
                 .AddScrubber(output =>
                 {
+                    // for Linux Verify.NET replaces sub path /tmp/ to be {TempPath} wrongly
+                    output.Replace("{TempPath}", "/tmp/");
+                    output.ScrubByRegex(testExecDirPatternForVerify, "%Test Execution Direcotry%", System.Text.RegularExpressions.RegexOptions.Singleline);
                     output.ScrubByRegex("(?<=solution folder: src\\n)(.*?)(?=\\nSuccessfully added project\\(s\\) to a solution file.)", "%CALLBACK OUTPUT%", System.Text.RegularExpressions.RegexOptions.Singleline);
                 });
         }

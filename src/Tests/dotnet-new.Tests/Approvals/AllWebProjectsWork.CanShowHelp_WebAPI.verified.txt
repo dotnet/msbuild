@@ -79,6 +79,9 @@ Template options:
   --no-openapi                                        Disable OpenAPI (Swagger) support
                                                       Type: bool
                                                       Default: false
+  --use-program-main                                  Whether to generate an explicit Program class and Main method instead of top-level statements.
+                                                      Type: bool
+                                                      Default: false
 
 To see help for other template languages (F#), use --language option:
    dotnet new webapi -h --language F#

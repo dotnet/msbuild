@@ -37,7 +37,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             string outputPath = Path.Combine(Directory.GetCurrentDirectory(), "temp");
 
-            string testAssetsRoot = Path.Combine(TestContext.Current.TestAssetsDirectory, @"TestPackages\dotnet-new");
+            string testAssetsRoot = Path.Combine(TestContext.Current.TestAssetsDirectory, "TestPackages", "dotnet-new");
 
             Process p = Process.Start(new ProcessStartInfo
             {
