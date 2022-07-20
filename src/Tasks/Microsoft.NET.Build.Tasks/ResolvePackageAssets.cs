@@ -686,10 +686,10 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 else
                 {
-                    _compileTimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, runtimeIdentifier: null); 
+                    _compileTimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, runtimeIdentifier: null);
                     _runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, _task.RuntimeIdentifier);
                 }
-                
+
 
                 _stringTable = new Dictionary<string, int>(InitialStringTableCapacity, StringComparer.Ordinal);
                 _metadataStrings = new List<string>(InitialStringTableCapacity);
@@ -780,7 +780,7 @@ namespace Microsoft.NET.Build.Tasks
                 WriteItemGroup(WriteFrameworkReferences);
                 WriteItemGroup(WriteNativeLibraries);
                 WriteItemGroup(WritePackageDependencies);
-                WriteItemGroup(WritePackageFolders);                
+                WriteItemGroup(WritePackageFolders);
                 WriteItemGroup(WriteResourceAssemblies);
                 WriteItemGroup(WriteRuntimeAssemblies);
                 WriteItemGroup(WriteRuntimeTargets);
@@ -836,7 +836,7 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     return StringComparer.OrdinalIgnoreCase.Equals(l1.Item1, l2.Item1)
                         && l1.Item2.Equals(l2.Item2);
-                    
+
                 }
                 public int GetHashCode((string, NuGetVersion) library)
                 {
@@ -884,12 +884,12 @@ namespace Microsoft.NET.Build.Tasks
             /// "analyzers/dotnet/roslyn3.8/analyzer.dll"
             /// "analyzers/dotnet/roslyn4.0/analyzer.dll"
             ///
-            /// When the <paramref name="compilerApiVersion"/> is 'roslyn3.9', only the assets 
+            /// When the <paramref name="compilerApiVersion"/> is 'roslyn3.9', only the assets
             /// in the folder with the highest applicable compiler version are picked.
             /// In this case,
-            /// 
+            ///
             /// "analyzers/dotnet/roslyn3.8/analyzer.dll"
-            /// 
+            ///
             /// will be picked, and the other analyzer assets will be excluded.
             /// </remarks>
             private class AnalyzerResolver
@@ -915,7 +915,7 @@ namespace Microsoft.NET.Build.Tasks
                         _compilerNameSearchString = string.Concat("/".AsSpan(), compilerName.Span);
 #else
                         _compilerNameSearchString = "/" + compilerName;
-#endif                   
+#endif
                         _compilerVersion = compilerVersion;
                     }
                 }
@@ -1290,7 +1290,7 @@ namespace Microsoft.NET.Build.Tasks
                     return false;
                 }
                 else
-                { 
+                {
                     var targetFramework = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, null).TargetFramework;
 
                     if (targetFramework.Version.Major >= 3
@@ -1334,6 +1334,22 @@ namespace Microsoft.NET.Build.Tasks
                     {
                         WriteMetadata(MetadataKeys.AssetType, "resources");
                         string locale = asset.Properties["locale"];
+                        // Locales from packages can be free-form, so we normalize them to the standard
+                        // forms here. If the locale is mixed-case, that can cause issues on case-sensitive
+                        // file systems when the locale-specific assets are copied.
+                        try
+                        {
+                            var normalizedLocale = System.Globalization.CultureInfo.GetCultureInfo(locale).Name;
+                            _task.Log.LogMessage("Package {0}@{1} has a resource with the locale '{2}'. This locale uses has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.",
+                              package.Name, package.Version.ToNormalizedString(), locale, normalizedLocale);
+                            locale = normalizedLocale;
+                        } catch (System.Globalization.CultureNotFoundException cnf) {
+                            _task.Log.LogMessage("Package {0}@{1} has a resource with the locale '{2}'. This locale is not known by .NET. Consider notifying the package author about this casing issue.",
+                              package.Name, package.Version.ToNormalizedString(), cnf.InvalidCultureName);
+                              // for unknown locales, we do not forward them along at all
+                              // TODO: get verification that we actually want this behavior.
+                              return;
+                        }
                         bool wroteCopyLocalMetadata = WriteCopyLocalMetadataIfNeeded(
                                 package,
                                 Path.GetFileName(asset.Path),
@@ -1394,7 +1410,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 foreach (var library in _runtimeTarget.Libraries)
                 {
-                    if (!library.IsTransitiveProjectReference(_lockFile, ref directProjectDependencies, 
+                    if (!library.IsTransitiveProjectReference(_lockFile, ref directProjectDependencies,
                         _lockFile.GetLockFileTargetAlias(_lockFile.GetTargetAndReturnNullIfNotFound(_targetFramework, null))))
                     {
                         continue;
