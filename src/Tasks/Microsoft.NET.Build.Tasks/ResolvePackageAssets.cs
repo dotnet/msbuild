@@ -1340,12 +1340,15 @@ namespace Microsoft.NET.Build.Tasks
                         try
                         {
                             var normalizedLocale = System.Globalization.CultureInfo.GetCultureInfo(locale).Name;
-                            _task.Log.LogMessage("Package {0}@{1} has a resource with the locale '{2}'. This locale uses has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.",
-                              package.Name, package.Version.ToNormalizedString(), locale, normalizedLocale);
+                            _task.Log.Log(new (MessageLevel.NormalImportance, string.Format("Package {0}@{1} has a resource with the locale '{2}'. This locale uses has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.",
+                              package.Name, package.Version.ToNormalizedString(), locale, normalizedLocale), "NETSDK12345"));
                             locale = normalizedLocale;
-                        } catch (System.Globalization.CultureNotFoundException cnf) {
-                            _task.Log.LogMessage("Package {0}@{1} has a resource with the locale '{2}'. This locale is not known by .NET. Consider notifying the package author about this casing issue.",
-                              package.Name, package.Version.ToNormalizedString(), cnf.InvalidCultureName);
+                        } catch (System.Globalization.CultureNotFoundException cnf)
+                        {
+                            _task.Log.Log(new(MessageLevel.NormalImportance, string.Format(
+                                    "Package {0}@{1} has a resource with the locale '{2}'. This locale is not known by .NET. Consider notifying the package author about this casing issue.",
+                                    package.Name, package.Version.ToNormalizedString(), cnf.InvalidCultureName),
+                                "NETSDK12346"));
                               // for unknown locales, we do not forward them along at all
                               // TODO: get verification that we actually want this behavior.
                               return;
