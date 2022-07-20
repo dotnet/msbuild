@@ -314,7 +314,7 @@ namespace Microsoft.Build.CommandLine
             }
             catch (Exception ex)
             {
-                CommunicationsUtilities.Trace("Unexpected exception during command line parsing. Can not determine if it is allowed to use Server. Fallback to old. Exception: {0}", ex);
+                CommunicationsUtilities.Trace("Unexpected exception during command line parsing. Can not determine if it is allowed to use Server. Fall back to old behavior. Exception: {0}", ex);
                 if (KnownTelemetry.BuildTelemetry != null)
                 {
                     KnownTelemetry.BuildTelemetry.ServerFallbackReason = "ErrorParsingCommandLine";
