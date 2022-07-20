@@ -66,6 +66,7 @@ async Task Containerize(DirectoryInfo folder, string workingDir, string registry
     Console.WriteLine($"Reading from {registry.BaseUri}");
 
     Image x = await registry.GetImageManifest(baseName, baseTag);
+    x.WorkingDirectory = workingDir;
 
     Console.WriteLine($"Copying from {folder.FullName} to {workingDir}");
     Layer l = Layer.FromDirectory(folder.FullName, workingDir);
