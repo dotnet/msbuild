@@ -55,16 +55,10 @@ namespace Microsoft.Build.CommandLine
                 // Check to see if we should enable the event listener.
                 string logDirectory = Environment.GetEnvironmentVariable(PerfLogDirEnvVar);
 
-                if (!string.IsNullOrEmpty(logDirectory))
+                if (!string.IsNullOrEmpty(logDirectory) && Directory.CreateDirectory(logDirectory).Exists)
                 {
-                    if (Directory.CreateDirectory(logDirectory).Exists)
-                    {
-                        eventListener = new PerformanceLogEventListener();
-                        eventListener.Initialize(logDirectory);
-                    }
-
-                    // Delete env var so new starting processes will not duplicate Event listening
-                    Environment.SetEnvironmentVariable(PerfLogDirEnvVar, null);
+                    eventListener = new PerformanceLogEventListener();
+                    eventListener.Initialize(logDirectory);
                 }
             }
             catch
