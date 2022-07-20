@@ -85,13 +85,13 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
 
 
-        public static IDictionary<key, T> ImportDictionary<key, T, RMock>(this ProjectCollectionLinker importer, IDictionary<key, RMock> source)
+        public static IDictionary<Key, T> ImportDictionary<Key, T, RMock>(this ProjectCollectionLinker importer, IDictionary<Key, RMock> source)
             where T : class
             where RMock : MockLinkRemoter<T>, new()
         {
             if (source == null) return null;
             // Just copy ...
-            Dictionary<key, T> result = new Dictionary<key, T>();
+            Dictionary<Key, T> result = new Dictionary<Key, T>();
             foreach (var sRemoter in source)
             {
                 var value = importer.Import<T, RMock>(sRemoter.Value);
@@ -101,13 +101,13 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             return result;
         }
 
-        public static IDictionary<key, RMock> ExportDictionary<key, T, RMock>(this ProjectCollectionLinker exporter, IDictionary<key, T> source)
+        public static IDictionary<Key, RMock> ExportDictionary<Key, T, RMock>(this ProjectCollectionLinker exporter, IDictionary<Key, T> source)
             where T : class
             where RMock : MockLinkRemoter<T>, new()
         {
             if (source == null) return null;
             // Just copy ...
-            Dictionary<key, RMock> result = new Dictionary<key, RMock>();
+            Dictionary<Key, RMock> result = new Dictionary<Key, RMock>();
             foreach (var s in source)
             {
                 var valueRemoter = exporter.Export<T, RMock>(s.Value);

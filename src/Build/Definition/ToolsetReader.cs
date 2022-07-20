@@ -12,7 +12,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared.FileSystem;
-using error = Microsoft.Build.Shared.ErrorUtilities;
+using ErrorUtils = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
@@ -366,7 +366,7 @@ namespace Microsoft.Build.Evaluation
             out string defaultOverrideToolsVersion
             )
         {
-            error.VerifyThrowArgumentNull(toolsets, "Toolsets");
+            ErrorUtils.VerifyThrowArgumentNull(toolsets, "Toolsets");
 
             ReadEachToolset(toolsets, globalProperties, initialProperties, accumulateProperties);
 
