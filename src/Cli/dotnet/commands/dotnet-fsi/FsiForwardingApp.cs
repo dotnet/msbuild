@@ -22,6 +22,10 @@ namespace Microsoft.DotNet.Cli
         {
         }
 
+        public FsiForwardingApp(string[] arguments) : base(GetFsiAppPath(), arguments)
+        {
+        }
+
         private static bool exists(string path)
         {
             try
