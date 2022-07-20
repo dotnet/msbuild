@@ -19,6 +19,10 @@
     <PackageReference Update="System.Collections.Immutable" Version="6.0.0" />
     <PackageReference Update="System.Configuration.ConfigurationManager" Version="6.0.0" />
     <PackageReference Update="System.Net.Http" Version="4.3.4" />
+    <!-- 
+        Modifying the version of System.Memory is very high impact and often causes downstream breaks on repos that depend on us.
+        When updating the version of System.Memory, file a breaking change here: https://github.com/dotnet/docs/issues/new?assignees=gewarren&labels=breaking-change%2CPri1%2Cdoc-idea&template=breaking-change.yml&title=%5BBreaking+change%5D%3A+ 
+    -->
     <PackageReference Update="System.Memory" Version="4.5.5" />
     <PackageReference Update="System.Reflection.Metadata" Version="6.0.0" />
     <PackageReference Update="System.Resources.Extensions" Version="$(SystemResourcesExtensionsPackageVersion)" />
