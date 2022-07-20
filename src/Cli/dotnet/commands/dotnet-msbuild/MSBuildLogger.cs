@@ -8,7 +8,9 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Configurer;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.MSBuild
 {
@@ -17,8 +19,10 @@ namespace Microsoft.DotNet.Tools.MSBuild
         private readonly IFirstTimeUseNoticeSentinel _sentinel =
             new FirstTimeUseNoticeSentinel();
         private readonly ITelemetry _telemetry;
-        private const string NewEventName = "msbuild";
+
         internal const string TargetFrameworkTelemetryEventName = "targetframeworkeval";
+        internal const string BuildTelemetryEventName = "build";
+
         internal const string SdkTaskBaseCatchExceptionTelemetryEventName = "taskBaseCatchException";
         internal const string PublishPropertiesTelemetryEventName = "PublishProperties";
         internal const string ReadyToRunTelemetryEventName = "ReadyToRun";
@@ -107,15 +111,47 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
                 telemetry.TrackEvent(newEventName, maskedProperties, measurements: null);
             }
+            else if (args.EventName == BuildTelemetryEventName)
+            {
+                var newEventName = $"msbuild/{BuildTelemetryEventName}";
+                Dictionary<string, string> properties = new Dictionary<string, string>(args.Properties);
+                Dictionary<string, double> measurements = new Dictionary<string, double>();
 
-            var passthroughEvents = new string[] {
-                    SdkTaskBaseCatchExceptionTelemetryEventName,
+                string[] toBeHashed = new[] { "ProjectPath", "BuildTarget" };
+                foreach (var propertyToBeHashed in toBeHashed)
+                {
+                    if (properties.TryGetValue(propertyToBeHashed, out string value))
+                    {
+                        properties[propertyToBeHashed] = Sha256Hasher.HashWithNormalizedCasing(value);
+                    }
+                }
+
+                string[] toBeMeasured = new[] { "BuildDurationInMilliseconds", "InnerBuildDurationInMilliseconds" };
+                foreach (var propertyToBeMeasured in toBeMeasured)
+                {
+                    if (properties.TryGetValue(propertyToBeMeasured, out string value))
+                    {
+                        properties.Remove(propertyToBeMeasured);
+                        if (double.TryParse(value, CultureInfo.InvariantCulture, out double realValue))
+                        {
+                            measurements[propertyToBeMeasured] = realValue;
+                        }
+                    }
+                }
+
+                telemetry.TrackEvent(newEventName, properties, measurements);
+            }
+            else
+            {
+                var passthroughEvents = new string[] {
+                    SdkTaskBaseCatchExceptionTelemetryEventName, 
                     PublishPropertiesTelemetryEventName,
                     ReadyToRunTelemetryEventName };
 
-            if (passthroughEvents.Contains(args.EventName))
-            {
-                telemetry.TrackEvent(args.EventName, args.Properties, measurements: null);
+                if (passthroughEvents.Contains(args.EventName))
+                {
+                    telemetry.TrackEvent(args.EventName, args.Properties, measurements: null);
+                }
             }
         }
 
