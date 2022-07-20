@@ -38,7 +38,7 @@
         SYSLIB0011: Removing binary formatter will happen as part of a larger .NET-wide effort.
     -->
 
-    <NoWarn>$(NoWarn);NU1603;NU5105;1701;1702;SYSLIB0011</NoWarn>
+    <NoWarn>$(NoWarn);NU1603;NU5105;1701;1702;SYSLIB0011;SYSLIB0037;SYSLIB0044</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">
