@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Evaluation;
+using Microsoft.DotNet.Cli;
 using Microsoft.Extensions.Logging;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Constraints;
@@ -115,7 +116,7 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
                 {
                     string foundProjects = string.Join("; ", (_evaluationResult as MultipleProjectsEvaluationResult)?.ProjectPaths ?? (IReadOnlyList<string?>)new[] { _evaluationResult.ProjectPath });
                     _logger.LogDebug("Multiple projects found: {0}, specify the project to use.", foundProjects);
-                    return TemplateConstraintResult.CreateRestricted(this, $"Multiple projects found: {foundProjects}", "Specify the project to use.");
+                    return TemplateConstraintResult.CreateRestricted(this, $"Multiple projects found: {foundProjects}.", $"Specify the project to use using {NewCommandParser.ProjectPathOption.Aliases.First()} option.");
                 }
                 if (_evaluationResult.Status == MSBuildEvaluationResult.EvalStatus.NoRestore)
                 {

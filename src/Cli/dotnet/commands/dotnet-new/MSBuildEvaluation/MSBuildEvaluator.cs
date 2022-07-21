@@ -23,15 +23,17 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
         private IEngineEnvironmentSettings? _settings;
         private ILogger? _logger;
         private MSBuildEvaluationResult? _cachedEvaluationResult;
-        private string _outputDirectory;
+        private readonly string _outputDirectory;
+        private readonly string? _projectFullPath;
         internal MSBuildEvaluator()
         {
             _outputDirectory = Directory.GetCurrentDirectory();
         }
 
-        internal MSBuildEvaluator(string outputDirectory)
+        internal MSBuildEvaluator(string? outputDirectory = null, string? projectPath = null)
         {
-            _outputDirectory = outputDirectory;
+            _outputDirectory = outputDirectory ?? Directory.GetCurrentDirectory();
+            _projectFullPath = projectPath;
         }
 
         public Guid Id => Guid.Parse("{6C2CB5CA-06C3-460A-8ADB-5F21E113AB24}");
@@ -75,32 +77,42 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
 
         private MSBuildEvaluationResult EvaluateProjectInternal(IEngineEnvironmentSettings engineEnvironmentSettings)
         {
-            _logger?.LogDebug("Output directory is: {0}.", string.Join("; ", _outputDirectory));
-            IReadOnlyList<string> foundFiles = Array.Empty<string>();
-            try
+            _logger?.LogDebug("Output directory is: {0}.", _outputDirectory);
+            _logger?.LogDebug("Project full path is: {0}.", _projectFullPath ?? "<null>");
+
+            string projectPath;
+            if (string.IsNullOrEmpty(_projectFullPath))
             {
-                foundFiles = FileFindHelpers.FindFilesAtOrAbovePath(engineEnvironmentSettings.Host.FileSystem, _outputDirectory, "*.*proj");
-                _logger?.LogDebug("Found project files: {0}.", string.Join("; ", foundFiles));
+                IReadOnlyList<string> foundFiles = Array.Empty<string>();
+                try
+                {
+                    foundFiles = FileFindHelpers.FindFilesAtOrAbovePath(engineEnvironmentSettings.Host.FileSystem, _outputDirectory, "*.*proj");
+                    _logger?.LogDebug("Found project files: {0}.", string.Join("; ", foundFiles));
+                }
+                catch (Exception e)
+                {
+                    //do nothing
+                    //in case of exception, no project found result is used.
+                    _logger?.LogDebug("Exception occurred when searching for the project file: {0}", e.Message);
+                }
+
+                if (foundFiles.Count == 0)
+                {
+                    _logger?.LogDebug("No project found.");
+                    return MSBuildEvaluationResult.CreateNoProjectFound(_outputDirectory);
+                }
+                if (foundFiles.Count > 1)
+                {
+                    _logger?.LogDebug("Multiple projects found.");
+                    return MultipleProjectsEvaluationResult.Create(foundFiles);
+                }
+                projectPath = foundFiles.Single();
             }
-            catch (Exception e)
+            else
             {
-                //do nothing
-                //in case of exception, no project found result is used.
-                _logger?.LogDebug("Exception occurred when searching for the project file: {0}", e.Message);
+                projectPath = _projectFullPath;
             }
 
-            if (foundFiles.Count == 0)
-            {
-                _logger?.LogDebug("No project found.");
-                return MSBuildEvaluationResult.CreateNoProjectFound(_outputDirectory);
-            }
-            if (foundFiles.Count > 1)
-            {
-                _logger?.LogDebug("Multiple projects found.");
-                return MultipleProjectsEvaluationResult.Create(foundFiles);
-            }
-
-            string projectPath = foundFiles.Single();
             try
             {
                 _logger?.LogDebug("Evaluating project: {0}", projectPath);

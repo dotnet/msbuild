@@ -119,6 +119,52 @@ namespace Microsoft.DotNet.New.Tests
             cmd.StdOut.Should().Contain("TestAssets.ClassTemplate").And.NotContain("TestAssets.TestClassTemplate");
         }
 
+        [Fact]
+        public void MultipleProjects_BasicTest()
+        {
+            TestDirectory tempDir = _testAssetsManager.CreateTestDirectory();
+            TestDirectory tempSettingsDir = _testAssetsManager.CreateTestDirectory();
+
+            string templateLocation = GetTestTemplatePath("Item/ClassTemplate");
+            var cmd = new DotnetCommand(Log).Execute("new", "install", templateLocation, "--debug:custom-hive", tempSettingsDir.Path);
+            cmd.Should().Pass();
+
+            cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(tempDir.Path)
+                .Execute("new", "console", "--debug:custom-hive", tempSettingsDir.Path, "--name", "MyProject");
+            cmd.Should().Pass();
+
+            cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(tempDir.Path)
+                .Execute("new", "classlib", "--debug:custom-hive", tempSettingsDir.Path, "--language", "F#", "--name", "MyProject");
+            cmd.Should().Pass();
+
+            string projectPath = Path.Combine(tempDir.Path, "MyProject");
+
+            cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(projectPath)
+                .Execute("new", "TestAssets.ClassTemplate", "--debug:custom-hive", tempSettingsDir.Path, "--debug:enable-project-context", "--name", "MyTestClass");
+            cmd.Should().Fail()
+                .And.HaveStdErrContaining("Failed to instatiate template 'ClassTemplate', the following constraints are not met:")
+                .And.HaveStdErrContaining("Project capabiltities: Multiple projects found:")
+                .And.HaveStdErrContaining("Specify the project to use using --project option.");
+
+            cmd = new DotnetCommand(Log)
+                     .WithWorkingDirectory(projectPath)
+                     .Execute("new", "TestAssets.ClassTemplate", "--debug:custom-hive", tempSettingsDir.Path, "--debug:enable-project-context", "--name", "MyTestClass", "--project", "MyProject.csproj");
+            cmd.Should().Pass();
+
+            cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(projectPath)
+                .Execute("build", "MyProject.csproj");
+            cmd.Should().Pass();
+
+            cmd = new DotnetCommand(Log)
+            .WithWorkingDirectory(projectPath)
+            .Execute("build", "MyProject.fsproj");
+            cmd.Should().Pass();
+        }
+
 
 
         private static string GetTestTemplatePath(string templateName)

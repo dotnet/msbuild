@@ -1,6 +1,8 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
@@ -25,6 +27,7 @@ using Microsoft.DotNet.Tools.Common;
 using LocalizableStrings = Microsoft.DotNet.Tools.New.LocalizableStrings;
 using Microsoft.TemplateEngine.MSBuildEvaluation;
 using Microsoft.TemplateEngine.Abstractions.Constraints;
+using System.IO;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -37,6 +40,8 @@ namespace Microsoft.DotNet.Cli
         private static readonly Option<bool> _disableSdkTemplates = new Option<bool>("--debug:disable-sdk-templates", () => false, LocalizableStrings.DisableSdkTemplates_OptionDescription).Hide();
 
         private static readonly Option<bool> _enableProjectContextEvaluation = new Option<bool>("--debug:enable-project-context", () => false, "Enables evaluating project context using MSBuild.").Hide();
+
+        internal static Option<FileInfo> ProjectPathOption { get; } = new Option<FileInfo>("--project", "The project the item template should be added to.").ExistingOnly().Hide();
 
         internal static readonly System.CommandLine.Command Command = GetCommand();
 
@@ -76,11 +81,12 @@ namespace Microsoft.DotNet.Cli
             };
 
             var getEngineHost = (ParseResult parseResult) => {
-                var disableSdkTemplates = parseResult.GetValueForOption(_disableSdkTemplates);
-                var enableProjectContext = parseResult.GetValueForOption(_enableProjectContextEvaluation);
+                bool disableSdkTemplates = parseResult.GetValueForOption(_disableSdkTemplates);
+                bool enableProjectContext = parseResult.GetValueForOption(_enableProjectContextEvaluation);
+                FileInfo? projectPath = parseResult.GetValueForOption(ProjectPathOption);
 
                 //TODO: read and pass output directory
-                return CreateHost(disableSdkTemplates, enableProjectContext);
+                return CreateHost(disableSdkTemplates, enableProjectContext, projectPath);
             };
 
             var command = Microsoft.TemplateEngine.Cli.NewCommandFactory.Create(CommandName, getEngineHost, getLogger, callbacks);
@@ -88,10 +94,11 @@ namespace Microsoft.DotNet.Cli
             // adding this option lets us look for its bound value during binding in a typed way
             command.AddGlobalOption(_disableSdkTemplates);
             command.AddGlobalOption(_enableProjectContextEvaluation);
+            command.AddGlobalOption(ProjectPathOption);
             return command;
         }
 
-        private static ITemplateEngineHost CreateHost(bool disableSdkTemplates, bool enableProjectContext)
+        private static ITemplateEngineHost CreateHost(bool disableSdkTemplates, bool enableProjectContext, FileInfo? projectPath)
         {
             var builtIns = new List<(Type InterfaceType, IIdentifiedComponent Instance)>();
             builtIns.AddRange(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Components.AllComponents);
@@ -107,12 +114,12 @@ namespace Microsoft.DotNet.Cli
             {
                 builtIns.Add((typeof(IBindSymbolSource), new ProjectContextSymbolSource()));
                 builtIns.Add((typeof(ITemplateConstraintFactory), new ProjectCapabilityConstraintFactory()));
-                builtIns.Add((typeof(MSBuildEvaluator), new MSBuildEvaluator()));
+                builtIns.Add((typeof(MSBuildEvaluator), new MSBuildEvaluator(outputDirectory: null, projectPath: projectPath?.FullName)));
             }
             builtIns.Add((typeof(IWorkloadsInfoProvider), new WorkloadsInfoProvider(new WorkloadInfoHelper())));
             builtIns.Add((typeof(ISdkInfoProvider), new SdkInfoProvider()));
 
-            string preferredLangEnvVar = Environment.GetEnvironmentVariable("DOTNET_NEW_PREFERRED_LANG");
+            string? preferredLangEnvVar = Environment.GetEnvironmentVariable("DOTNET_NEW_PREFERRED_LANG");
             string preferredLang = string.IsNullOrWhiteSpace(preferredLangEnvVar)? "C#" : preferredLangEnvVar;
 
             var preferences = new Dictionary<string, string>
@@ -140,7 +147,7 @@ namespace Microsoft.DotNet.Cli
             }
         }
 
-        private static bool AddPackageReference(string projectPath, string packageName, string version)
+        private static bool AddPackageReference(string projectPath, string packageName, string? version)
         {
             try
             {
@@ -177,7 +184,7 @@ namespace Microsoft.DotNet.Cli
             }
         }
 
-        private static bool AddProjectsToSolution(string solutionPath, IReadOnlyList<string> projectsToAdd, string solutionFolder)
+        private static bool AddProjectsToSolution(string solutionPath, IReadOnlyList<string> projectsToAdd, string? solutionFolder)
         {
             try
             {
