@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.Tools
         private static bool HasArgumentToExcludeFromRestore(IEnumerable<string> arguments)
             => arguments.Any(a => IsExcludedFromRestore(a));
 
-        private static readonly string[] propertyPrefixes = new string[]{ "-", "/" };
+        private static readonly string[] propertyPrefixes = new string[]{ "-", "/", "--" };
 
         private static bool IsExcludedFromRestore(string argument)
             => propertyPrefixes.Any(prefix => argument.StartsWith($"{prefix}property:TargetFramework=", StringComparison.Ordinal)) ||

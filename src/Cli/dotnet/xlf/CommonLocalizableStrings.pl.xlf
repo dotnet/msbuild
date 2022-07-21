@@ -170,6 +170,11 @@ export PATH="$PATH:{0}"
         <target state="translated">Pakiet</target>
         <note />
       </trans-unit>
+      <trans-unit id="ResponseFileNotFound">
+        <source>Response file '{0}' does not exist.</source>
+        <target state="new">Response file '{0}' does not exist.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SelfContainAndNoSelfContainedConflict">
         <source>The '--self-contained' and '--no-self-contained' options cannot be used together.</source>
         <target state="translated">Opcji „--self-contained” i „--no-self-contained” nie można używać razem.</target>

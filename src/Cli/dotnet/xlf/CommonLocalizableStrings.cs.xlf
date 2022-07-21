@@ -170,6 +170,11 @@ export PATH="$PATH:{0}"
         <target state="translated">Balíček</target>
         <note />
       </trans-unit>
+      <trans-unit id="ResponseFileNotFound">
+        <source>Response file '{0}' does not exist.</source>
+        <target state="new">Response file '{0}' does not exist.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SelfContainAndNoSelfContainedConflict">
         <source>The '--self-contained' and '--no-self-contained' options cannot be used together.</source>
         <target state="translated">Možnosti --self-contained a --no-self-contained nelze použít společně.</target>

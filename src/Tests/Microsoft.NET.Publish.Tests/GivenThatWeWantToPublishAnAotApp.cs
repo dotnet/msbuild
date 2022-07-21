@@ -44,10 +44,9 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["PublishAot"] = "true";
                 // Linux symbol files are embedded and require additional steps to be stripped to a separate file
                 // assumes /bin (or /usr/bin) are in the PATH
-                if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     testProject.AdditionalProperties["StripSymbols"] = "true";
-                    testProject.AdditionalProperties["ObjCopyName"] = "objcopy";
                 }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -96,10 +95,9 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["Configuration"] = projectConfiguration;
                 // Linux symbol files are embedded and require additional steps to be stripped to a separate file
                 // assumes /bin (or /usr/bin) are in the PATH
-                if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     testProject.AdditionalProperties["StripSymbols"] = "true";
-                    testProject.AdditionalProperties["ObjCopyName"] = "objcopy";
                 }
 
                 var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -153,10 +151,9 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["Configuration"] = projectConfiguration;
                 // Linux symbol files are embedded and require additional steps to be stripped to a separate file
                 // assumes /bin (or /usr/bin) are in the PATH
-                if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     testProject.AdditionalProperties["StripSymbols"] = "true";
-                    testProject.AdditionalProperties["ObjCopyName"] = "objcopy";
                 }
 
                 var testAsset = _testAssetsManager.CreateTestProject(testProject)

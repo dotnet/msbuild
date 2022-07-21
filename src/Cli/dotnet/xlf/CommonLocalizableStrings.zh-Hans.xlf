@@ -170,6 +170,11 @@ EOF
         <target state="translated">打包</target>
         <note />
       </trans-unit>
+      <trans-unit id="ResponseFileNotFound">
+        <source>Response file '{0}' does not exist.</source>
+        <target state="new">Response file '{0}' does not exist.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SelfContainAndNoSelfContainedConflict">
         <source>The '--self-contained' and '--no-self-contained' options cannot be used together.</source>
         <target state="translated">“--自包含”和“--非自包含”选项不能一起使用。</target>

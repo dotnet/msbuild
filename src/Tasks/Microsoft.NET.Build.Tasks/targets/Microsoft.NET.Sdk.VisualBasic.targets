@@ -126,6 +126,15 @@ Copyright (c) .NET Foundation. All rights reserved.
   </ItemGroup>
 
   <!--
+    BinaryFormatter infrastructure is obsolete as error in 7.0+.
+    When https://github.com/Microsoft/visualfsharp/issues/3207 is fixed,
+    remove the block below and move it into the shared .targets file.
+  -->
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '7.0'))">
+    <WarningsAsErrors Condition="'$(EnableUnsafeBinaryFormatterSerialization)' != 'true'">$(WarningsAsErrors);SYSLIB0011</WarningsAsErrors>
+  </PropertyGroup>
+
+  <!--
     NOTE: We must hook directly to CoreCompile for compatibility with two phase XAML
           build. We also must not pull in a dependency on ResolveAssemblyReferences
           as the generated temporary project for xaml compilation has a hard-coded list

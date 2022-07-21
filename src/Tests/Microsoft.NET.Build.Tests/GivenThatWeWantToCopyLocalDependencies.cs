@@ -35,7 +35,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -59,7 +59,6 @@ namespace Microsoft.NET.Build.Tests
                 $"{ProjectName}.deps.json",
                 $"{ProjectName}.dll",
                 $"{ProjectName}.pdb",
-                $"{ProjectName}.runtimeconfig.dev.json",
                 $"{ProjectName}.runtimeconfig.json",
                 "Newtonsoft.Json.dll",
                 "runtimes/linux-x64/native/libsqlite3.so",
@@ -79,7 +78,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -100,7 +99,6 @@ namespace Microsoft.NET.Build.Tests
                 $"{ProjectName}.deps.json",
                 $"{ProjectName}.dll",
                 $"{ProjectName}.pdb",
-                $"{ProjectName}.runtimeconfig.dev.json",
                 $"{ProjectName}.runtimeconfig.json",
             });
         }
@@ -110,12 +108,12 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "TestProjWithPackageDependencies";
 
-            var rid = EnvironmentInfo.GetCompatibleRid("netcoreapp3.0");
+            var rid = EnvironmentInfo.GetCompatibleRid(ToolsetInfo.CurrentTargetFramework);
 
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -140,7 +138,6 @@ namespace Microsoft.NET.Build.Tests
                 $"{ProjectName}.deps.json",
                 $"{ProjectName}.dll",
                 $"{ProjectName}.pdb",
-                $"{ProjectName}.runtimeconfig.dev.json",
                 $"{ProjectName}.runtimeconfig.json",
                 "Newtonsoft.Json.dll",
                 // NOTE: this may break in the future when the SDK supports platforms that sqlite does not
@@ -156,7 +153,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = false
             };
 
@@ -188,7 +185,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = false
             };
 
@@ -323,12 +320,12 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "TestProjWithPackageDependencies";
 
-            var rid = EnvironmentInfo.GetCompatibleRid("netcoreapp3.0");
+            var rid = EnvironmentInfo.GetCompatibleRid(ToolsetInfo.CurrentTargetFramework);
 
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -352,7 +349,6 @@ namespace Microsoft.NET.Build.Tests
                 $"{ProjectName}.deps.json",
                 $"{ProjectName}.dll",
                 $"{ProjectName}.pdb",
-                $"{ProjectName}.runtimeconfig.dev.json",
                 $"{ProjectName}.runtimeconfig.json",
                 "Newtonsoft.Json.dll",
                 // NOTE: this may break in the future when the SDK supports platforms that sqlite does not

@@ -56,6 +56,8 @@ namespace Microsoft.DotNet.Tools.MSBuild
             }
         }
 
+        public IEnumerable<string> MSBuildArguments { get { return _forwardingAppWithoutLogging.GetAllArguments(); } }
+
         public void EnvironmentVariable(string name, string value)
         {
             _forwardingAppWithoutLogging.EnvironmentVariable(name, value);
@@ -63,9 +65,14 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
         public ProcessStartInfo GetProcessStartInfo()
         {
-            EnvironmentVariable(TelemetrySessionIdEnvironmentVariableName, Telemetry.CurrentSessionId);
+            InitializeRequiredEnvironmentVariables();
 
             return _forwardingAppWithoutLogging.GetProcessStartInfo();
+        }
+
+        private void InitializeRequiredEnvironmentVariables()
+        {
+            EnvironmentVariable(TelemetrySessionIdEnvironmentVariableName, Telemetry.CurrentSessionId);
         }
 
         /// <summary>
@@ -94,6 +101,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
             }
             else
             {
+                InitializeRequiredEnvironmentVariables();
                 string[] arguments = _forwardingAppWithoutLogging.GetAllArguments();
                 if (PerformanceLogEventSource.Log.IsEnabled())
                 {

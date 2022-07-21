@@ -169,7 +169,7 @@ namespace Microsoft.NET.ToolPack.Tests
         public void It_does_not_contain_apphost_exe(bool multiTarget)
         {
             var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : "";
-            _targetFrameworkOrFrameworks = "netcoreapp3.0";
+            _targetFrameworkOrFrameworks = ToolsetInfo.CurrentTargetFramework;
 
             var nugetPackage = SetupNuGetPackage(multiTarget);
             using (var nupkgReader = new PackageArchiveReader(nugetPackage))

@@ -25,7 +25,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "TestRunTargetProject",
                 IsExe = true,
-                TargetFrameworks = "netcoreapp3.0"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
