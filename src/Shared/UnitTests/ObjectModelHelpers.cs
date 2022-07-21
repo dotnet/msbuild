@@ -2059,7 +2059,7 @@ namespace Microsoft.Build.UnitTests
                 return buildTask.Result;
             }
 
-            public Task<BuildResult> BuildProjectFileAsync(
+            public async Task<BuildResult> BuildProjectFileAsync(
                 string projectFile,
                 string[] entryTargets = null,
                 Dictionary<string, string> globalProperties = null)
@@ -2070,7 +2070,7 @@ namespace Microsoft.Build.UnitTests
                     MSBuildConstants.CurrentToolsVersion,
                     entryTargets ?? Array.Empty<string>(),
                     null);
-                return BuildAsync(buildRequestData);
+                return await BuildAsync(buildRequestData);
             }
 
             public async Task<BuildResult> BuildAsync(BuildRequestData requestData)

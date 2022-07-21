@@ -49,11 +49,14 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             if (obj.PluginSettings.Count > 0)
             {
-                foreach (var pluginSetting in obj.PluginSettings.OrderBy(_ => _.Key))
+                int dictHash = 0;
+                foreach (KeyValuePair<string, string> pluginSetting in obj.PluginSettings)
                 {
-                    hashCode = (hashCode * -1521134295) + pluginSetting.Key.GetHashCode();
-                    hashCode = (hashCode * -1521134295) + pluginSetting.Value.GetHashCode();
+                    // XOR is commutative, so this accounts for arbitrary ordering for dictionaries
+                    dictHash ^= (pluginSetting.Key.GetHashCode() * -1521134295) + pluginSetting.Value.GetHashCode();
                 }
+
+                hashCode = (hashCode * -1521134295) + dictHash;
             }
 
             return hashCode;

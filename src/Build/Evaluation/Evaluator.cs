@@ -823,15 +823,8 @@ namespace Microsoft.Build.Evaluation
             foreach (var item in _data.GetItems(ItemTypeNames.ProjectCachePlugin))
             {
                 string pluginPath = FileUtilities.NormalizePath(Path.Combine(_data.Directory, item.EvaluatedInclude));
-
-                var pluginSettings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                foreach (M metadatum in item.Metadata)
-                {
-                    pluginSettings.Add(metadatum.Key, metadatum.EscapedValue);
-                }
-
+                var pluginSettings = item.Metadata.ToDictionary(m => m.Key, m => m.EscapedValue);
                 var projectCacheItem = ProjectCacheDescriptor.FromAssemblyPath(pluginPath, pluginSettings);
-
                 BuildManager.ProjectCacheDescriptors.TryAdd(projectCacheItem, projectCacheItem);
             }
         }
