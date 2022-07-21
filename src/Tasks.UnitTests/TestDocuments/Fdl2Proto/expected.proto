@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+import "SiLAFramework.proto";
+
+package sila2.org.silastandard.examples.greetingprovider.v1;
+
+/* Example implementation of a minimum Feature. Provides a Greeting to the Client and a StartYear property, informing about the year the Server has been started. */
+service GreetingProvider {
+  /* Does what it says: returns "Hello SiLA 2 + [Name]" to the client. */
+  rpc SayHello (sila2.org.silastandard.examples.greetingprovider.v1.SayHello_Parameters) returns (sila2.org.silastandard.examples.greetingprovider.v1.SayHello_Responses) {}
+  /* Returns the year the SiLA Server has been started in. */
+  rpc Get_StartYear (sila2.org.silastandard.examples.greetingprovider.v1.Get_StartYear_Parameters) returns (sila2.org.silastandard.examples.greetingprovider.v1.Get_StartYear_Responses) {}
+}
+
+/* Parameters for SayHello */
+message SayHello_Parameters {
+  sila2.org.silastandard.String Name = 1;  /* The name, SayHello shall use to greet. */
+}
+
+/* Responses of SayHello */
+message SayHello_Responses {
+  sila2.org.silastandard.String Greeting = 1;  /* The greeting string, returned to the SiLA Client. */
+}
+
+/* Parameters for StartYear */
+message Get_StartYear_Parameters {
+}
+
+/* Responses of StartYear */
+message Get_StartYear_Responses {
+  sila2.org.silastandard.Integer StartYear = 1;  /* Returns the year the SiLA Server has been started in. */
+}

@@ -210,6 +210,19 @@ namespace Microsoft.Build.Engine.UnitTests
             t.Wait();
         }
 
+        [Fact]
+        public void ServerShouldNotRunWhenNodeReuseEqualsFalse()
+        {
+            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+
+            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " /nodereuse:false", out bool success, false, _output);
+            success.ShouldBeTrue();
+            int pidOfInitialProcess = ParseNumber(output, "Process ID is ");
+            int pidOfServerProcess = ParseNumber(output, "Server ID is ");
+            pidOfInitialProcess.ShouldBe(pidOfServerProcess, "We started a server node even when nodereuse is false.");
+        }
+
         private int ParseNumber(string searchString, string toFind)
         {
             Regex regex = new(@$"{toFind}(\d+)");

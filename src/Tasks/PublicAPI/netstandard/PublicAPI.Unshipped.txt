@@ -19,4 +19,6 @@ Microsoft.Build.Tasks.BuildUri.UriScheme.get -> string
 Microsoft.Build.Tasks.BuildUri.UriScheme.set -> void
 Microsoft.Build.Tasks.BuildUri.UriUserName.get -> string
 Microsoft.Build.Tasks.BuildUri.UriUserName.set -> void
+Microsoft.Build.Tasks.XslTransformation.PreserveWhitespace.get -> bool
+Microsoft.Build.Tasks.XslTransformation.PreserveWhitespace.set -> void
 override Microsoft.Build.Tasks.BuildUri.Execute() -> bool
