@@ -90,6 +90,7 @@ namespace Microsoft.DotNet.New.Tests
             commandResult.Should().ExitWith(0).And.NotHaveStdErr();
 
             return Verifier.Verify(commandResult.StdOut, _verifySettings)
+                .UniqueForOSPlatform()
                 .AddScrubber(output =>
                 {
                     string finalOutput = output.ToString();

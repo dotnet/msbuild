@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.New.Tests
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+            return Verifier.Verify(commandResult.StdOut, _verifySettings).UniqueForOSPlatform();
         }
 
 #pragma warning disable xUnit1004 // Test methods should not be skipped

@@ -64,11 +64,6 @@ namespace Microsoft.DotNet.New.Tests
                 _ => "csproj"
             };
             string finalProjectName = Regex.Escape(Path.Combine(workingDir, $"{workingDirName}.{extension}"));
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                //on OSX path in restore starts from /private for some reason
-                finalProjectName = "/private" + finalProjectName;
-            }
             Console.WriteLine($"Expected project location: {finalProjectName}");
 
             List<string> args = new List<string>() { templateShortName };

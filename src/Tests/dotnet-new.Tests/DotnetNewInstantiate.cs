@@ -220,7 +220,7 @@ namespace Microsoft.DotNet.New.Tests
             string home = TestUtils.CreateTemporaryFolder("Home");
             string dotnetRoot = TestContext.Current.ToolsetUnderTest.DotNetRoot;
             string templatesLocation = Path.Combine(dotnetRoot, "templates");
-            var packagePaths = Directory.EnumerateFiles(templatesLocation, "Microsoft.DotNet.Web.Spa.ProjectTemplates.*.nupkg", SearchOption.AllDirectories);
+            var packagePaths = Directory.EnumerateFiles(templatesLocation, "microsoft.dotnet.web.spa.projecttemplates.*.nupkg", SearchOption.AllDirectories);
             string packageLocation = packagePaths.FirstOrDefault();
 
             new DotnetNewCommand(_log, "angular", "-o", "angular")
