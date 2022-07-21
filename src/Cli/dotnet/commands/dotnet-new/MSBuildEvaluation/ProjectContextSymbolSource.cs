@@ -8,9 +8,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Evaluation;
+using Microsoft.Extensions.Logging;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Components;
-using NuGet.Configuration;
 
 namespace Microsoft.TemplateEngine.MSBuildEvaluation
 {
@@ -20,11 +20,6 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
     /// </summary>
     internal class ProjectContextSymbolSource : IBindSymbolSource
     {
-        private readonly object LockObj = new object();
-
-        private IEngineEnvironmentSettings? _settings;
-        private MSBuildEvaluationResult? _cachedEvaluationResult;
-
         public string DisplayName => "Project context";
 
         public string? SourcePrefix => "msbuild";
@@ -37,48 +32,44 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
 
         public Task<string?> GetBoundValueAsync(IEngineEnvironmentSettings settings, string bindname, CancellationToken cancellationToken)
         {
-            MSBuildEvaluationResult evaluationResult = GetEvaluationResult(settings);
-            if (evaluationResult.EvaluatedProject == null)
+            try
             {
-                return Task.FromResult((string?)null);
-            }
+                MSBuildEvaluator? evaluator = settings.Components.OfType<MSBuildEvaluator>().FirstOrDefault();
 
-            string? propertyValue = evaluationResult.EvaluatedProject.GetProperty(bindname)?.EvaluatedValue;
-
-            //we check only for null as property may exist with empty value
-            if (propertyValue == null && evaluationResult is MultiTargetEvaluationResult multiTargetResult)
-            {
-                foreach (Project? tfmBasedProject in multiTargetResult.EvaluatedProjects.Values)
+                if (evaluator == null)
                 {
-                    propertyValue = evaluationResult.EvaluatedProject.GetProperty(bindname)?.EvaluatedValue;
-                    if (propertyValue != null)
+                    settings.Host.Logger.LogDebug("{0}: {1} component is not available, exiting.", nameof(ProjectContextSymbolSource), nameof(MSBuildEvaluator));
+                    return Task.FromResult((string?)null);
+                }
+
+                MSBuildEvaluationResult evaluationResult = evaluator.EvaluateProject(settings);
+                if (evaluationResult.EvaluatedProject == null)
+                {
+                    settings.Host.Logger.LogDebug("{0}: evaluation did not succeed, status: {1}, exiting.", nameof(ProjectContextSymbolSource), evaluationResult.Status);
+                    return Task.FromResult((string?)null);
+                }
+
+                string? propertyValue = evaluationResult.EvaluatedProject.GetProperty(bindname)?.EvaluatedValue;
+                //we check only for null as property may exist with empty value
+                if (propertyValue == null && evaluationResult is MultiTargetEvaluationResult multiTargetResult)
+                {
+                    foreach (Project? tfmBasedProject in multiTargetResult.EvaluatedProjects.Values)
                     {
-                        Task.FromResult(propertyValue);
+                        propertyValue = evaluationResult.EvaluatedProject.GetProperty(bindname)?.EvaluatedValue;
+                        if (propertyValue != null)
+                        {
+                            settings.Host.Logger.LogDebug("{0}: value for {1}: {2}.", nameof(ProjectContextSymbolSource), bindname, propertyValue);
+                            Task.FromResult(propertyValue);
+                        }
                     }
                 }
+                settings.Host.Logger.LogDebug("{0}: value for {1}: {2}.", nameof(ProjectContextSymbolSource), bindname, propertyValue ?? "<null>");
+                return Task.FromResult(propertyValue);
             }
-            return Task.FromResult(propertyValue);
-        }
-
-        internal void ResetCache()
-        {
-            lock (LockObj)
+            catch (Exception e)
             {
-                _settings = null;
-                _cachedEvaluationResult = null;
-            }
-        }
-
-        private MSBuildEvaluationResult GetEvaluationResult(IEngineEnvironmentSettings settings)
-        {
-            lock (LockObj)
-            {
-                if (_settings == null || _settings != settings || _cachedEvaluationResult == null)
-                {
-                    _settings = settings;
-                    _cachedEvaluationResult = _settings.Components.OfType<MSBuildEvaluator>().Single().EvaluateProject(_settings);
-                }
-                return _cachedEvaluationResult;
+                settings.Host.Logger.LogDebug("{0}: unexpected error during evaluation: {1}.", nameof(ProjectContextSymbolSource), e.Message);
+                return Task.FromResult((string?)null);
             }
         }
     }
