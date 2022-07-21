@@ -63,7 +63,7 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
                     throw new Exception("Invalid constraint configuration.", e);
                 }
 
-                IEnumerable<string> configuredCapabilties;
+                string configuredCapabiltiesExpression;
 
                 if (token.Type == JTokenType.String)
                 {
@@ -72,23 +72,11 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
                     {
                         throw new Exception("Invalid constraint configuration: arguments should not contain empty values.");
                     }
-                    configuredCapabilties = new[] { configuredCapability };
+                    configuredCapabiltiesExpression = configuredCapability;
                 }
                 else
                 {
-                    if (token is not JArray array)
-                    {
-                        throw new Exception("Invalid constraint configuration: arguments should be either a JSON array or a string.");
-                    }
-
-                    configuredCapabilties = array.Values<string>().Select(value =>
-                    {
-                        if (string.IsNullOrWhiteSpace(value))
-                        {
-                            throw new Exception("Invalid constraint configuration: arguments should not contain empty values.");
-                        }
-                        return value;
-                    });
+                    throw new Exception("Invalid constraint configuration: arguments should be a string.");
                 }
 
                 if (_evaluationResult.Status == MSBuildEvaluationResult.EvalStatus.NoProjectFound)
@@ -108,14 +96,18 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
                     return TemplateConstraintResult.CreateRestricted(this, $"Failed to evaluate project context: {_evaluationResult.ErrorMessage}");
                 }
 
-                foreach (string capability in configuredCapabilties)
+                try
                 {
-                    if (!_projectCapabilities.Contains(capability, StringComparer.OrdinalIgnoreCase))
+                    if (!CapabilityExpressionEvaluator.Evaluate(configuredCapabiltiesExpression, _projectCapabilities))
                     {
-                        return TemplateConstraintResult.CreateRestricted(this, $"The item needs '{capability}' project capability, and current project ({_evaluationResult.ProjectPath}) does not define it.");
+                        return TemplateConstraintResult.CreateRestricted(this, $"The item needs '{configuredCapabiltiesExpression}', and current project ({_evaluationResult.ProjectPath}) does not satisfy it.");
                     }
+                    return TemplateConstraintResult.CreateAllowed(this);
                 }
-                return TemplateConstraintResult.CreateAllowed(this);
+                catch (ArgumentException ae)
+                {
+                    throw new Exception("Invalid constraint configuration: invalid expression.", ae);
+                }
             }
 
             private IReadOnlyList<string> GetProjectCapabilities(MSBuildEvaluationResult result)

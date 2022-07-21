@@ -18,7 +18,7 @@
   "constraints": {
     "csharp-only": {
       "type": "project-capability",
-      "args": [ "CSharp", "TestContainer" ] 
+      "args": "CSharp + TestContainer"
     }
   }
 }
