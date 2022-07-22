@@ -3090,7 +3090,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             //
             MockElementLocation mockElementLocation = new MockElementLocation(Path.Combine(ObjectModelHelpers.TempProjectDir, "one", "two", "three", "four", "five", Path.GetRandomFileName()));
 
-            string fileToFind = FileUtilities.GetTemporaryFile(ObjectModelHelpers.TempProjectDir, ".tmp");
+            string fileToFind = FileUtilities.GetTemporaryFile(ObjectModelHelpers.TempProjectDir, null, ".tmp");
 
             try
             {

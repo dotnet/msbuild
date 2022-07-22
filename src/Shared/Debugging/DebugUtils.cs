@@ -38,7 +38,7 @@ namespace Microsoft.Build.Shared.Debugging
                 }
                 else
                 {
-                    debugDirectory = Path.Combine(Path.GetTempPath(), "MSBuild_Logs");
+                    debugDirectory = Path.Combine(FileUtilities.TempFileDirectory, "MSBuild_Logs");
                 }
 
                 // Out of proc nodes do not know the startup directory so set the environment variable for them.

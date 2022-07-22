@@ -570,14 +570,14 @@ namespace Microsoft.Build.UnitTests
         {
             _createFile = createFile;
             _expectedAsOutput = expectedAsOutput;
-            Path = FileUtilities.GetTemporaryFile(null, extension, createFile);
+            Path = FileUtilities.GetTemporaryFile(null, null, extension, createFile);
         }
 
         public TransientTestFile(string rootPath, string extension, bool createFile, bool expectedAsOutput)
         {
             _createFile = createFile;
             _expectedAsOutput = expectedAsOutput;
-            Path = FileUtilities.GetTemporaryFile(rootPath, extension, createFile);
+            Path = FileUtilities.GetTemporaryFile(rootPath, null, extension, createFile);
         }
 
         public TransientTestFile(string rootPath, string fileName, string contents = null)
