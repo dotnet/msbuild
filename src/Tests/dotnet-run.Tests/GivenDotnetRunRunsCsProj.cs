@@ -303,6 +303,74 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         }
 
         [Fact]
+        public void ItCanPassOptionAndArgumentsToSubjectAppByDoubleDash()
+        {
+            const string testAppName = "MSBuildTestApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var testProjectDirectory = testInstance.Path;
+
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("--", "foo", "-d", "-a")
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("echo args:foo;-d;-a");
+        }
+
+        [Fact]
+        public void ItCanPassArgumentsToSubjectAppWithoutDoubleDash()
+        {
+            const string testAppName = "MSBuildTestApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var testProjectDirectory = testInstance.Path;
+
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("foo", "bar", "baz")
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("echo args:foo;bar;baz");
+        }
+
+        [Fact]
+        public void ItCanPassUnrecognizedOptionArgumentsToSubjectAppWithoutDoubleDash()
+        {
+            const string testAppName = "MSBuildTestApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var testProjectDirectory = testInstance.Path;
+
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("-x", "-y", "-z")
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("echo args:-x;-y;-z");
+        }
+
+        [Fact]
+        public void ItCanPassOptionArgumentsAndArgumentsToSubjectAppWithoutAndByDoubleDash()
+        {
+            const string testAppName = "MSBuildTestApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var testProjectDirectory = testInstance.Path;
+
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("foo", "--", "-z")
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("echo args:foo;-z");
+        }
+
+        [Fact]
         public void ItGivesAnErrorWhenAttemptingToUseALaunchProfileThatDoesNotExistWhenThereIsNoLaunchSettingsFile()
         {
             var testAppName = "MSBuildTestApp";

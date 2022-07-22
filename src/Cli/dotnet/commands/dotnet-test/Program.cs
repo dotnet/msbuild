@@ -120,15 +120,26 @@ namespace Microsoft.DotNet.Tools.Test
 
             msbuildArgs.AddRange(result.OptionValuesToBeForwarded(TestCommandParser.GetCommand()));
 
-            msbuildArgs.AddRange(result.GetValueForArgument(TestCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
-
             if (settings.Any())
             {
+                //workaround for correct -- logic
+                var commandArgument = result.GetValueForArgument(TestCommandParser.SlnOrProjectArgument);
+                if(!string.IsNullOrWhiteSpace(commandArgument) && !settings.Contains(commandArgument))
+                {
+                    msbuildArgs.Add(result.GetValueForArgument(TestCommandParser.SlnOrProjectArgument));
+                }
+
                 // skip '--' and escape every \ to be \\ and every " to be \" to survive the next hop
                 string[] escaped = settings.Skip(1).Select(s => s.Replace("\\", "\\\\").Replace("\"", "\\\"")).ToArray();
 
                 string runSettingsArg = string.Join(";", escaped);
                 msbuildArgs.Add($"-property:VSTestCLIRunSettings=\"{runSettingsArg}\"");
+            }
+            else
+            {
+                var argument = result.GetValueForArgument(TestCommandParser.SlnOrProjectArgument);
+                if(!string.IsNullOrWhiteSpace(argument))
+                    msbuildArgs.Add(argument);
             }
 
             string verbosityArg = result.ForwardedOptionValues<IReadOnlyCollection<string>>(TestCommandParser.GetCommand(), "verbosity")?.SingleOrDefault() ?? null;
