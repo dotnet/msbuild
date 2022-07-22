@@ -27,7 +27,7 @@
       <RoslynDirectory>$(OutputPath)/Roslyn</RoslynDirectory>
     </PropertyGroup>
     <ItemGroup>
-      <RoslynBits Include="$(NuGetPackageRoot)/microsoft.net.compilers.toolset/$(MicrosoftNetCompilersToolsetPackageVersion)/tasks/net6.0/**/*" />
+      <RoslynBits Include="$(NuGetPackageRoot)/microsoft.net.compilers.toolset/$(MicrosoftNetCompilersToolsetPackageVersion)/tasks/net7.0/**/*" />
     </ItemGroup>
     <Error Condition="'@(RoslynBits)' == ''" Text="Something moved around in Roslyn package, adjust code here accordingly. TFM change?" />
     <Copy SourceFiles="@(RoslynBits)" DestinationFiles="@(RoslynBits->'$(RoslynDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
@@ -161,7 +161,7 @@
           BeforeTargets="Build">
     <PropertyGroup>
       <TestCliNuGetDirectoryTargetFramework Condition="'$(DotNetBuildFromSource)' != 'true'" >netcoreapp3.1</TestCliNuGetDirectoryTargetFramework>
-      <TestCliNuGetDirectoryTargetFramework Condition="'$(DotNetBuildFromSource)' == 'true'" >net6.0</TestCliNuGetDirectoryTargetFramework>
+      <TestCliNuGetDirectoryTargetFramework Condition="'$(DotNetBuildFromSource)' == 'true'" >net7.0</TestCliNuGetDirectoryTargetFramework>
       <TestCliNuGetDirectory>$(NuGetPackageRoot)/microsoft.testplatform.cli/$(MicrosoftTestPlatformCLIPackageVersion)/contentFiles/any/$(TestCliNuGetDirectoryTargetFramework)/</TestCliNuGetDirectory>
     </PropertyGroup>
     <ItemGroup>
@@ -196,7 +196,7 @@
     <ItemGroup>
       <DotNetWatchFile Include="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\**" />
       <DotNetWatchFile Include="$(ArtifactsDir)bin\Microsoft.AspNetCore.Watch.BrowserRefresh\$(Configuration)\netcoreapp3.1\*.dll" DeploymentSubpath="middleware" />
-      <DotNetWatchFile Include="$(ArtifactsDir)bin\Microsoft.Extensions.DotNetDeltaApplier\$(Configuration)\net6.0\*.dll" DeploymentSubpath="hotreload" />
+      <DotNetWatchFile Include="$(ArtifactsDir)bin\Microsoft.Extensions.DotNetDeltaApplier\$(Configuration)\net7.0\*.dll" DeploymentSubpath="hotreload" />
       <DotNetWatchFile Include="$(ArtifactsDir)bin\DotNetWatchTasks\$(Configuration)\netstandard2.0\DotNetWatchTasks.dll" />
     </ItemGroup>
 
