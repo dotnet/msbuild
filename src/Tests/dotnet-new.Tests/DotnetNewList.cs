@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -128,55 +131,25 @@ namespace Microsoft.DotNet.New.Tests
         [InlineData("-l")]
         public void CanSortByName(string command)
         {
-            const string expectedOutput =
-@"Template Name                                 Short Name           Language    Tags                      
---------------------------------------------  -------------------  ----------  --------------------------
-ASP.NET Core Empty                            web                  [C#],F#     Web/Empty                 
-ASP.NET Core gRPC Service                     grpc                 [C#]        Web/gRPC                  
-ASP.NET Core Web API                          webapi               [C#],F#     Web/WebAPI                
-ASP.NET Core Web App                          webapp,razor         [C#]        Web/MVC/Razor Pages       
-ASP.NET Core Web App (Model-View-Controller)  mvc                  [C#],F#     Web/MVC                   
-ASP.NET Core with Angular                     angular              [C#]        Web/MVC/SPA               
-ASP.NET Core with React.js                    react                [C#]        Web/MVC/SPA               
-Blazor Server App                             blazorserver         [C#]        Web/Blazor                
-Blazor WebAssembly App                        blazorwasm           [C#]        Web/Blazor/WebAssembly/PWA
-Class Library                                 classlib             [C#],F#,VB  Common/Library            
-Console App                                   console              [C#],F#,VB  Common/Console            
-dotnet gitignore file                         gitignore                        Config                    
-Dotnet local tool manifest file               tool-manifest                    Config                    
-EditorConfig file                             editorconfig                     Config                    
-global.json file                              globaljson                       Config                    
-MSTest Test Project                           mstest               [C#],F#,VB  Test/MSTest               
-MVC ViewImports                               viewimports          [C#]        Web/ASP.NET               
-MVC ViewStart                                 viewstart            [C#]        Web/ASP.NET               
-NuGet Config                                  nugetconfig                      Config                    
-NUnit 3 Test Item                             nunit-test           [C#],F#,VB  Test/NUnit                
-NUnit 3 Test Project                          nunit                [C#],F#,VB  Test/NUnit                
-Protocol Buffer File                          proto                            Web/gRPC                  
-Razor Class Library                           razorclasslib        [C#]        Web/Razor/Library         
-Razor Component                               razorcomponent       [C#]        Web/ASP.NET               
-Razor Page                                    page                 [C#]        Web/ASP.NET               
-Solution File                                 sln                              Solution                  
-Web Config                                    webconfig                        Config                    
-Windows Forms App                             winforms             [C#],VB     Common/WinForms           
-Windows Forms Class Library                   winformslib          [C#],VB     Common/WinForms           
-Windows Forms Control Library                 winformscontrollib   [C#],VB     Common/WinForms           
-Worker Service                                worker               [C#],F#     Common/Worker/Web         
-WPF Application                               wpf                  [C#],VB     Common/WPF                
-WPF Class Library                             wpflib               [C#],VB     Common/WPF                
-WPF Custom Control Library                    wpfcustomcontrollib  [C#],VB     Common/WPF                
-WPF User Control Library                      wpfusercontrollib    [C#],VB     Common/WPF                
-xUnit Test Project                            xunit                [C#],F#,VB  Test/xUnit                ";
-
             string home = TestUtils.CreateTemporaryFolder();
 
-            new DotnetNewCommand(_log, command)
+            var commandResult = new DotnetNewCommand(_log, command)
                 .WithCustomHive(home)
-                .Execute()
+                .Execute();
+            commandResult
                 .Should()
                 .ExitWith(0)
-                .And.HaveStdOutContaining(expectedOutput)
                 .And.NotHaveStdErr();
+
+            var templateDetailList = Regex.Match(commandResult.StdOut, "(?<=(-+  ){3}-+\r\n)[\\s\\S]*").Value;
+            Assert.False(string.IsNullOrEmpty(templateDetailList), "No template was listed.");
+            int firstColumnWidth = Regex.Match(commandResult.StdOut, "(?<=Template Name {2,}Short Name {2,}Language {2,}Tags +\r\n)-+").Value.Length;
+            string pattern = $"^.{{{firstColumnWidth}}}(?= {2}\\w+)";
+            var templateNameMatches = Regex.Matches(templateDetailList, $"^.{{{firstColumnWidth}}}(?= {{2}}\\w+)", RegexOptions.Multiline);
+            var templateNameList = templateNameMatches.Select(x => x.Value).ToList();
+            var sortedNameList = new List<string>(templateNameList);
+            sortedNameList.Sort();
+            Assert.Equal(templateNameList, sortedNameList);
         }
 
         [Fact]
