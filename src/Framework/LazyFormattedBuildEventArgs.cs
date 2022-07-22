@@ -5,8 +5,6 @@ using System;
 using System.Globalization;
 using System.IO;
 
-#nullable disable
-
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -18,12 +16,12 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Stores the message arguments.
         /// </summary>
-        private volatile object argumentsOrFormattedMessage;
+        private volatile object? argumentsOrFormattedMessage;
 
         /// <summary>
         /// Exposes the underlying arguments field to serializers.
         /// </summary>
-        internal object[] RawArguments
+        internal object[]? RawArguments
         {
             get => (argumentsOrFormattedMessage is object[] arguments) ? arguments : null;
         }
@@ -31,7 +29,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Exposes the formatted message string to serializers.
         /// </summary>
-        private protected override string FormattedMessage
+        private protected override string? FormattedMessage
         {
             get => (argumentsOrFormattedMessage is string formattedMessage) ? formattedMessage : base.FormattedMessage;
         }
@@ -44,9 +42,9 @@ namespace Microsoft.Build.Framework
         /// <param name="senderName">name of event sender.</param>
         public LazyFormattedBuildEventArgs
         (
-            string message,
-            string helpKeyword,
-            string senderName
+            string? message,
+            string? helpKeyword,
+            string? senderName
         )
             : this(message, helpKeyword, senderName, DateTime.Now, null)
         {
@@ -62,11 +60,11 @@ namespace Microsoft.Build.Framework
         /// <param name="messageArgs">Message arguments.</param>
         public LazyFormattedBuildEventArgs
         (
-            string message,
-            string helpKeyword,
-            string senderName,
+            string? message,
+            string? helpKeyword,
+            string? senderName,
             DateTime eventTimestamp,
-            params object[] messageArgs
+            params object[]? messageArgs
         )
             : base(message, helpKeyword, senderName, eventTimestamp)
         {
@@ -84,17 +82,17 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Gets the formatted message.
         /// </summary>
-        public override string Message
+        public override string? Message
         {
             get
             {
-                object argsOrMessage = argumentsOrFormattedMessage;
+                object? argsOrMessage = argumentsOrFormattedMessage;
                 if (argsOrMessage is string formattedMessage)
                 {
                     return formattedMessage;
                 }
 
-                if (argsOrMessage is object[] arguments && arguments.Length > 0)
+                if (argsOrMessage is object[] arguments && arguments.Length > 0 && base.Message is not null)
                 {
                     formattedMessage = FormatString(base.Message, arguments);
                     argumentsOrFormattedMessage = formattedMessage;
@@ -111,7 +109,7 @@ namespace Microsoft.Build.Framework
         /// <param name="writer">Binary writer which is attached to the stream the event will be serialized into.</param>
         internal override void WriteToStream(BinaryWriter writer)
         {
-            object argsOrMessage = argumentsOrFormattedMessage;
+            object? argsOrMessage = argumentsOrFormattedMessage;
             if (argsOrMessage is object[] arguments && arguments.Length > 0)
             {
                 base.WriteToStreamWithExplicitMessage(writer, base.Message);
@@ -121,7 +119,8 @@ namespace Microsoft.Build.Framework
                 {
                     // Arguments may be ints, etc, so explicitly convert
                     // Convert.ToString returns String.Empty when it cannot convert, rather than throwing
-                    writer.Write(Convert.ToString(argument, CultureInfo.CurrentCulture));
+                    // It returns null if the input is null.
+                    writer.Write(Convert.ToString(argument, CultureInfo.CurrentCulture) ?? "");
                 }
             }
             else
@@ -142,7 +141,7 @@ namespace Microsoft.Build.Framework
 
             if (version > 20)
             {
-                string[] messageArgs = null;
+                string[]? messageArgs = null;
                 int numArguments = reader.ReadInt32();
 
                 if (numArguments >= 0)

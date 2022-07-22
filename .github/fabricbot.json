@@ -1,0 +1,662 @@
+{
+  "version": "1.0",
+  "tasks": [
+    {
+      "taskType": "trigger",
+      "capabilityId": "AutoMerge",
+      "subCapability": "AutoMerge",
+      "version": "1.0",
+      "id": "_eeVr2w4J",
+      "config": {
+        "taskName": "Automatically squash and  merge PR once CI passes",
+        "label": "auto-merge",
+        "minMinutesOpen": "12",
+        "mergeType": "squash",
+        "deleteBranches": true,
+        "requireAllStatuses": true,
+        "minimumNumberOfCheckRuns": 4,
+        "removeLabelOnPush": true
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "PullRequestResponder",
+      "version": "1.0",
+      "id": "0aePnH83s",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "prTargetsBranch",
+              "parameters": {
+                "branchName": "master"
+              }
+            },
+            {
+              "name": "isAction",
+              "parameters": {
+                "action": "merged"
+              }
+            },
+            {
+              "operator": "not",
+              "operands": [
+                {
+                  "name": "isInMilestone",
+                  "parameters": {}
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "pull_request",
+        "eventNames": [
+          "pull_request",
+          "issues",
+          "project_card"
+        ],
+        "actions": [
+          {
+            "name": "addMilestone",
+            "parameters": {
+              "milestoneName": "current-release"
+            }
+          }
+        ],
+        "taskName": "\"Current\" milestone for merged master PRs"
+      },
+      "disabled": true
+    },
+    {
+      "taskType": "scheduled",
+      "capabilityId": "ScheduledSearch",
+      "subCapability": "ScheduledSearch",
+      "version": "1.1",
+      "id": "Vs-iCm9G2_R4ZwMN511fw",
+      "config": {
+        "frequency": [
+          {
+            "weekDay": 0,
+            "hours": [
+              17
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 1,
+            "hours": [
+              17
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 2,
+            "hours": [
+              17
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 3,
+            "hours": [
+              17
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 4,
+            "hours": [
+              17
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 5,
+            "hours": [
+              17
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 6,
+            "hours": [
+              17
+            ],
+            "timezoneOffset": -7
+          }
+        ],
+        "searchTerms": [
+          {
+            "name": "isOpen",
+            "parameters": {}
+          },
+          {
+            "name": "hasLabel",
+            "parameters": {
+              "label": "needs-more-info"
+            }
+          },
+          {
+            "name": "noLabel",
+            "parameters": {
+              "label": "needs-attention"
+            }
+          },
+          {
+            "name": "notPartOfMilestone",
+            "parameters": {
+              "milestone": "Backlog"
+            }
+          },
+          {
+            "name": "notPartOfMilestone",
+            "parameters": {
+              "milestone": "Discussion"
+            }
+          },
+          {
+            "name": "noLabel",
+            "parameters": {
+              "label": "needs-triage"
+            }
+          },
+          {
+            "name": "isIssue",
+            "parameters": {}
+          },
+          {
+            "name": "noLabel",
+            "parameters": {
+              "label": "stale"
+            }
+          },
+          {
+            "name": "noActivitySince",
+            "parameters": {
+              "days": 30
+            }
+          },
+          {
+            "name": "noLabel",
+            "parameters": {
+              "label": "bot-exclude"
+            }
+          }
+        ],
+        "taskName": "Mark Stale Issues",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "stale"
+            }
+          },
+          {
+            "name": "addReply",
+            "parameters": {
+              "comment": "This issue is marked as stale because feedback has been requested for 30 days with no response. Please respond within 14 days or this issue will be closed due to inactivity."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "scheduled",
+      "capabilityId": "ScheduledSearch",
+      "subCapability": "ScheduledSearch",
+      "version": "1.1",
+      "id": "zyeSRvg_Epub_oXWwaxj3",
+      "config": {
+        "frequency": [
+          {
+            "weekDay": 0,
+            "hours": [
+              12
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 1,
+            "hours": [
+              12
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 2,
+            "hours": [
+              12
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 3,
+            "hours": [
+              12
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 4,
+            "hours": [
+              12
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 5,
+            "hours": [
+              12
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 6,
+            "hours": [
+              12
+            ],
+            "timezoneOffset": -7
+          }
+        ],
+        "searchTerms": [
+          {
+            "name": "isOpen",
+            "parameters": {}
+          },
+          {
+            "name": "hasLabel",
+            "parameters": {
+              "label": "stale"
+            }
+          },
+          {
+            "name": "noLabel",
+            "parameters": {
+              "label": "bot-exclude"
+            }
+          },
+          {
+            "name": "noActivitySince",
+            "parameters": {
+              "days": 14
+            }
+          },
+          {
+            "name": "notPartOfMilestone",
+            "parameters": {
+              "milestone": "Backlog"
+            }
+          },
+          {
+            "name": "notPartOfMilestone",
+            "parameters": {
+              "milestone": "Discussion"
+            }
+          },
+          {
+            "name": "noLabel",
+            "parameters": {
+              "label": "needs-attention"
+            }
+          }
+        ],
+        "taskName": "Close Stale Issues",
+        "actions": [
+          {
+            "name": "closeIssue",
+            "parameters": {}
+          },
+          {
+            "name": "addReply",
+            "parameters": {
+              "comment": "This issue was closed due to inactivity. If you can still reproduce this bug, please comment with the requested information, detailed steps to reproduce the problem, or any other notes that might help in the investigation."
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "closed-by-bot"
+            }
+          }
+        ]
+      },
+      "disabled": false
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssueCommentResponder",
+      "version": "1.0",
+      "id": "WBzbPosGhniXQtQgm8oMm",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isOpen",
+              "parameters": {}
+            },
+            {
+              "name": "hasLabel",
+              "parameters": {
+                "label": "stale"
+              }
+            },
+            {
+              "operator": "not",
+              "operands": [
+                {
+                  "name": "hasLabel",
+                  "parameters": {
+                    "label": "bot-exclude"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issue_comment"
+        ],
+        "taskName": "Unstale Open Issues that get comments",
+        "actions": [
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "stale"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "needs-attention"
+            }
+          }
+        ]
+      },
+      "disabled": false
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssueCommentResponder",
+      "version": "1.0",
+      "id": "GU-AG9bRpCo1aFfE07jUZ",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "operator": "not",
+              "operands": [
+                {
+                  "name": "isOpen",
+                  "parameters": {}
+                }
+              ]
+            },
+            {
+              "name": "hasLabel",
+              "parameters": {
+                "label": "stale"
+              }
+            },
+            {
+              "operator": "not",
+              "operands": [
+                {
+                  "name": "hasLabel",
+                  "parameters": {
+                    "label": "bot-exclude"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issue_comment"
+        ],
+        "taskName": "Apply needs-attention to closed stale issues that get comments",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "needs-attention"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "id": "ny85tm-H4saOfDbOgErD3",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "labelAdded",
+              "parameters": {
+                "label": "needs-more-info"
+              }
+            },
+            {
+              "name": "hasLabel",
+              "parameters": {
+                "label": "needs-triage"
+              }
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "remove needs-triage when needs-more-info is applied",
+        "actions": [
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "needs-triage"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "id": "hpVo319FrpinWBwXVnK8s",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "addedToMilestone",
+              "parameters": {
+                "milestoneName": "Backlog"
+              }
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "When added to backlog, remove `needs-triage`",
+        "actions": [
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "needs-triage"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "scheduled",
+      "capabilityId": "ScheduledSearch",
+      "subCapability": "ScheduledSearch",
+      "version": "1.1",
+      "id": "0JHwKtkOQj0mLYc7iUySl",
+      "config": {
+        "frequency": [
+          {
+            "weekDay": 0,
+            "hours": [
+              11,
+              12,
+              13
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 1,
+            "hours": [
+              11,
+              12,
+              13
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 2,
+            "hours": [
+              11,
+              12,
+              13
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 3,
+            "hours": [
+              11,
+              12,
+              13
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 4,
+            "hours": [
+              11,
+              12,
+              13
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 5,
+            "hours": [
+              11,
+              12,
+              13
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 6,
+            "hours": [
+              11,
+              12,
+              13
+            ],
+            "timezoneOffset": -7
+          }
+        ],
+        "searchTerms": [
+          {
+            "name": "hasLabel",
+            "parameters": {
+              "label": "bot-test"
+            }
+          },
+          {
+            "name": "created",
+            "parameters": {
+              "operator": "<",
+              "days": 1
+            }
+          }
+        ],
+        "taskName": "Post comment to bot-test",
+        "actions": [
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "bot-test"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssueCommentResponder",
+      "version": "1.0",
+      "id": "4T-htFPPX7DIas5-BKvde",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isActivitySender",
+              "parameters": {
+                "user": {
+                  "type": "author"
+                }
+              }
+            },
+            {
+              "name": "hasLabel",
+              "parameters": {
+                "label": "needs-more-info"
+              }
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issue_comment"
+        ],
+        "taskName": "author responds to `needs-more-info` gets `author-responded`",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "needs-attention"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "author-responded"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "needs-more-info"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "userGroups": []
+}

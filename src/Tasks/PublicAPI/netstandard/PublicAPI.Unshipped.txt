@@ -1,20 +1,2 @@
-Microsoft.Build.Tasks.IFixedTypeInfo
-Microsoft.Build.Tasks.IFixedTypeInfo.AddressOfMember(int memid, System.Runtime.InteropServices.ComTypes.INVOKEKIND invKind, out System.IntPtr ppv) -> void
-Microsoft.Build.Tasks.IFixedTypeInfo.CreateInstance(object pUnkOuter, ref System.Guid riid, out object ppvObj) -> void
-Microsoft.Build.Tasks.IFixedTypeInfo.GetContainingTypeLib(out System.Runtime.InteropServices.ComTypes.ITypeLib ppTLB, out int pIndex) -> void
-Microsoft.Build.Tasks.IFixedTypeInfo.GetDllEntry(int memid, System.Runtime.InteropServices.ComTypes.INVOKEKIND invKind, System.IntPtr pBstrDllName, System.IntPtr pBstrName, System.IntPtr pwOrdinal) -> void
-Microsoft.Build.Tasks.IFixedTypeInfo.GetDocumentation(int index, out string strName, out string strDocString, out int dwHelpContext, out string strHelpFile) -> void
-Microsoft.Build.Tasks.IFixedTypeInfo.GetFuncDesc(int index, out System.IntPtr ppFuncDesc) -> void
-Microsoft.Build.Tasks.IFixedTypeInfo.GetIDsOfNames(string[] rgszNames, int cNames, int[] pMemId) -> void
-Microsoft.Build.Tasks.IFixedTypeInfo.GetImplTypeFlags(int index, out System.Runtime.InteropServices.ComTypes.IMPLTYPEFLAGS pImplTypeFlags) -> void
-Microsoft.Build.Tasks.IFixedTypeInfo.GetMops(int memid, out string pBstrMops) -> void
-Microsoft.Build.Tasks.IFixedTypeInfo.GetNames(int memid, string[] rgBstrNames, int cMaxNames, out int pcNames) -> void
-Microsoft.Build.Tasks.IFixedTypeInfo.GetRefTypeInfo(System.IntPtr hRef, out Microsoft.Build.Tasks.IFixedTypeInfo ppTI) -> void
-Microsoft.Build.Tasks.IFixedTypeInfo.GetRefTypeOfImplType(int index, out System.IntPtr href) -> void
-Microsoft.Build.Tasks.IFixedTypeInfo.GetTypeAttr(out System.IntPtr ppTypeAttr) -> void
-Microsoft.Build.Tasks.IFixedTypeInfo.GetTypeComp(out System.Runtime.InteropServices.ComTypes.ITypeComp ppTComp) -> void
-Microsoft.Build.Tasks.IFixedTypeInfo.GetVarDesc(int index, out System.IntPtr ppVarDesc) -> void
-Microsoft.Build.Tasks.IFixedTypeInfo.Invoke(object pvInstance, int memid, short wFlags, ref System.Runtime.InteropServices.ComTypes.DISPPARAMS pDispParams, System.IntPtr pVarResult, System.IntPtr pExcepInfo, out int puArgErr) -> void
-Microsoft.Build.Tasks.IFixedTypeInfo.ReleaseFuncDesc(System.IntPtr pFuncDesc) -> void
-Microsoft.Build.Tasks.IFixedTypeInfo.ReleaseTypeAttr(System.IntPtr pTypeAttr) -> void
-Microsoft.Build.Tasks.IFixedTypeInfo.ReleaseVarDesc(System.IntPtr pVarDesc) -> void
+Microsoft.Build.Tasks.XslTransformation.PreserveWhitespace.get -> bool
+Microsoft.Build.Tasks.XslTransformation.PreserveWhitespace.set -> void

@@ -417,6 +417,8 @@
     <Compile Include="GetAssemblyIdentity.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="GetInstalledSDKLocations.cs" />
+    <Compile Include="GetSDKReferenceFiles.cs" />
     <Compile Include="IAnalyzerHostObject.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -502,6 +504,7 @@
     <Compile Include="ResolveProjectBase.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="ResolveSDKReference.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactory.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryCodeType.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryCompilers.cs" />
@@ -604,8 +607,6 @@
     <Compile Include="GetFrameworkSDKPath.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="GetInstalledSDKLocations.cs" />
-    <Compile Include="GetSDKReferenceFiles.cs" />
     <Compile Include="IComReferenceResolver.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -626,7 +627,6 @@
     <Compile Include="ResolveNativeReference.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="ResolveSDKReference.cs" />
     <Compile Include="RequiresFramework35SP1Assembly.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

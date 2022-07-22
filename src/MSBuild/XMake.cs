@@ -35,6 +35,9 @@ using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 using Microsoft.Build.Shared.Debugging;
+using Microsoft.Build.Experimental;
+using Microsoft.Build.Framework.Telemetry;
+using Microsoft.Build.Internal;
 
 #nullable disable
 
@@ -84,7 +87,12 @@ namespace Microsoft.Build.CommandLine
             /// <summary>
             /// A project cache failed unexpectedly.
             /// </summary>
-            ProjectCacheFailure
+            ProjectCacheFailure,
+            /// <summary>
+            /// The client for MSBuild server failed unexpectedly, for example,
+            /// because the server process died or hung.
+            /// </summary>
+            MSBuildClientFailure
         }
 
         /// <summary>
@@ -209,6 +217,9 @@ namespace Microsoft.Build.CommandLine
 #endif
             )
         {
+            // Initialize new build telemetry and record start of this build.
+            KnownTelemetry.BuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow };
+
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
             if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
@@ -216,14 +227,44 @@ namespace Microsoft.Build.CommandLine
                 DumpCounters(true /* initialize only */);
             }
 
-            // return 0 on success, non-zero on failure
-            int exitCode = ((s_initialized && Execute(
+            int exitCode;
+            if (
+                ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4) &&
+                Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName) == "1" &&
+                !Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout &&
+                CanRunServerBasedOnCommandLineSwitches(
+#if FEATURE_GET_COMMANDLINE
+                    Environment.CommandLine
+#else
+                    ConstructArrayArg(args)
+#endif
+                ))
+            {
+                Console.CancelKeyPress += Console_CancelKeyPress;
+
+                DebuggerLaunchCheck();
+
+                // Use the client app to execute build in msbuild server. Opt-in feature.
+                exitCode = ((s_initialized && MSBuildClientApp.Execute(
+#if FEATURE_GET_COMMANDLINE
+                Environment.CommandLine,
+#else
+                ConstructArrayArg(args),
+#endif
+                s_buildCancellationSource.Token
+                ) == ExitType.Success) ? 0 : 1);
+            }
+            else
+            {
+                // return 0 on success, non-zero on failure
+                exitCode = ((s_initialized && Execute(
 #if FEATURE_GET_COMMANDLINE
                 Environment.CommandLine
 #else
                 ConstructArrayArg(args)
 #endif
-            ) == ExitType.Success) ? 0 : 1);
+                ) == ExitType.Success) ? 0 : 1);
+            }
 
             if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
             {
@@ -231,6 +272,57 @@ namespace Microsoft.Build.CommandLine
             }
 
             return exitCode;
+        }
+
+
+        /// <summary>
+        /// Returns true if arguments allows or make sense to leverage msbuild server.
+        /// </summary>
+        /// <remarks>
+        /// Will not throw. If arguments processing fails, we will not run it on server - no reason as it will not run any build anyway.
+        /// </remarks>
+        private static bool CanRunServerBasedOnCommandLineSwitches(
+#if FEATURE_GET_COMMANDLINE
+            string commandLine
+#else
+            string[] commandLine
+#endif
+            )
+        {
+            bool canRunServer = true;
+            try
+            {
+                GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out string fullCommandLine);
+                CommandLineSwitches commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
+                if (CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, false, fullCommandLine, out string projectFile))
+                {
+                    commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
+                }
+
+                if (commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Help] ||
+                    commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode) ||
+                    commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Version] ||
+                    FileUtilities.IsBinaryLogFilename(projectFile) ||
+                    ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]) == false)
+                {
+                    canRunServer = false;
+                    if (KnownTelemetry.BuildTelemetry != null)
+                    {
+                        KnownTelemetry.BuildTelemetry.ServerFallbackReason = "Arguments";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CommunicationsUtilities.Trace("Unexpected exception during command line parsing. Can not determine if it is allowed to use Server. Fall back to old behavior. Exception: {0}", ex);
+                if (KnownTelemetry.BuildTelemetry != null)
+                {
+                    KnownTelemetry.BuildTelemetry.ServerFallbackReason = "ErrorParsingCommandLine";
+                }
+                canRunServer = false;
+            }
+
+            return canRunServer;
         }
 
 #if !FEATURE_GET_COMMANDLINE
@@ -461,6 +553,26 @@ namespace Microsoft.Build.CommandLine
             }
         }
 #endif
+        /// <summary>
+        /// Launch debugger if it's requested by environment variable "MSBUILDDEBUGONSTART".
+        /// </summary>
+        private static void DebuggerLaunchCheck()
+        {
+            switch (Environment.GetEnvironmentVariable("MSBUILDDEBUGONSTART"))
+            {
+#if FEATURE_DEBUG_LAUNCH
+                case "1":
+                    Debugger.Launch();
+                    break;
+#endif
+                case "2":
+                    // Sometimes easier to attach rather than deal with JIT prompt
+                    Process currentProcess = Process.GetCurrentProcess();
+                    Console.WriteLine($"Waiting for debugger to attach ({currentProcess.MainModule.FileName} PID {currentProcess.Id}).  Press enter to continue...");
+                    Console.ReadLine();
+                    break;
+            }
+        }
 
         /// <summary>
         /// Orchestrates the execution of the application, and is also responsible
@@ -479,26 +591,17 @@ namespace Microsoft.Build.CommandLine
 #endif
             )
         {
+            // Initialize new build telemetry and record start of this build, if not initialized already
+            KnownTelemetry.BuildTelemetry ??= new BuildTelemetry { StartAt = DateTime.UtcNow };
+
             // Indicate to the engine that it can toss extraneous file content
             // when it loads microsoft.*.targets. We can't do this in the general case,
             // because tasks in the build can (and occasionally do) load MSBuild format files
             // with our OM and modify and save them. They'll never do this for Microsoft.*.targets, though,
             // and those form the great majority of our unnecessary memory use.
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", "true");
-            switch (Environment.GetEnvironmentVariable("MSBUILDDEBUGONSTART"))
-            {
-#if FEATURE_DEBUG_LAUNCH
-                case "1":
-                    Debugger.Launch();
-                    break;
-#endif
-                case "2":
-                    // Sometimes easier to attach rather than deal with JIT prompt
-                    Process currentProcess = Process.GetCurrentProcess();
-                    Console.WriteLine($"Waiting for debugger to attach ({currentProcess.MainModule.FileName} PID {currentProcess.Id}).  Press enter to continue...");
-                    Console.ReadLine();
-                    break;
-            }
+
+            DebuggerLaunchCheck();
 
 #if FEATURE_GET_COMMANDLINE
             ErrorUtilities.VerifyThrowArgumentLength(commandLine, nameof(commandLine));
@@ -564,9 +667,8 @@ namespace Microsoft.Build.CommandLine
                 bool lowPriority = false;
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
-                CommandLineSwitches.SwitchesFromResponseFiles ??= new();
 
-                GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile);
+                GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _);
 
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
                                             switchesFromAutoResponseFile,
@@ -845,8 +947,7 @@ namespace Microsoft.Build.CommandLine
         {
             if (e.SpecialKey == ConsoleSpecialKey.ControlBreak)
             {
-                e.Cancel = false; // required; the process will now be terminated rudely
-                return;
+                Environment.Exit(1); // the process will now be terminated rudely
             }
 
             e.Cancel = true; // do not terminate rudely
@@ -905,8 +1006,14 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static void ResetBuildState()
         {
+            ResetGatheringSwitchesState();
+        }
+
+        private static void ResetGatheringSwitchesState()
+        {
             s_includedResponseFiles = new List<string>();
             usingSwitchesFromAutoResponseFile = false;
+            CommandLineSwitches.SwitchesFromResponseFiles = new();
         }
 
         /// <summary>
@@ -1061,7 +1168,9 @@ namespace Microsoft.Build.CommandLine
                     toolsetDefinitionLocations,
                     cpuCount,
                     onlyLogCriticalEvents,
-                    loadProjectsReadOnly: !preprocessOnly
+                    loadProjectsReadOnly: !preprocessOnly,
+                    useAsynchronousLogging: true,
+                    reuseProjectRootElementCache: s_isServerNode
                 );
 
                 if (toolsVersion != null && !projectCollection.ContainsToolset(toolsVersion))
@@ -1251,7 +1360,8 @@ namespace Microsoft.Build.CommandLine
 
                         // InvalidProjectFileExceptions and its aggregates have already been logged.
                         if (exception is not InvalidProjectFileException
-                            && !(exception is AggregateException aggregateException && aggregateException.InnerExceptions.All(innerException => innerException is InvalidProjectFileException)))
+                            && !(exception is AggregateException aggregateException && aggregateException.InnerExceptions.All(innerException => innerException is InvalidProjectFileException))
+                            && exception is not CircularDependencyException)
                         {
                             if (exception is LoggerException or InternalLoggerException or ProjectCacheException)
                             {
@@ -1294,7 +1404,14 @@ namespace Microsoft.Build.CommandLine
                 FileUtilities.ClearCacheDirectory();
                 projectCollection?.Dispose();
 
-                BuildManager.DefaultBuildManager.Dispose();
+                // Build manager shall be reused for all build sessions.
+                // If, for one reason or another, this behavior needs to change in future
+                // please be aware that current code creates and keep running  InProcNode even
+                // when its owning default build manager is disposed resulting in leek of memory and threads.
+                if (!s_isServerNode)
+                {
+                    BuildManager.DefaultBuildManager.Dispose();
+                }
             }
 
             return success;
@@ -1501,6 +1618,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="commandLine"></param>
         /// <param name="switchesFromAutoResponseFile"></param>
         /// <param name="switchesNotFromAutoResponseFile"></param>
+        /// <param name="fullCommandLine"></param>
         /// <returns>Combined bag of switches.</returns>
         private static void GatherAllSwitches(
 #if FEATURE_GET_COMMANDLINE
@@ -1508,8 +1626,10 @@ namespace Microsoft.Build.CommandLine
 #else
             string[] commandLine,
 #endif
-            out CommandLineSwitches switchesFromAutoResponseFile, out CommandLineSwitches switchesNotFromAutoResponseFile)
+            out CommandLineSwitches switchesFromAutoResponseFile, out CommandLineSwitches switchesNotFromAutoResponseFile, out string fullCommandLine)
         {
+            ResetGatheringSwitchesState();
+
 #if FEATURE_GET_COMMANDLINE
             // split the command line on (unquoted) whitespace
             var commandLineArgs = QuotingUtilities.SplitUnquoted(commandLine);
@@ -1535,9 +1655,9 @@ namespace Microsoft.Build.CommandLine
             commandLineArgs.RemoveAt(0);
 
 #if FEATURE_GET_COMMANDLINE
-            string fullCommandLine = $"'{commandLine}'";
+            fullCommandLine = $"'{commandLine}'";
 #else
-            string fullCommandLine = $"'{string.Join(' ', commandLine)}'";
+            fullCommandLine = $"'{string.Join(' ', commandLine)}'";
 #endif
 
             // parse the command line, and flag syntax errors and obvious switch errors
@@ -1960,6 +2080,11 @@ namespace Microsoft.Build.CommandLine
         internal static bool usingSwitchesFromAutoResponseFile = false;
 
         /// <summary>
+        /// Indicates that this process is working as a server.
+        /// </summary>
+        private static bool s_isServerNode;
+
+        /// <summary>
         /// Parses the auto-response file (assumes the "/noautoresponse" switch is not specified on the command line), and combines the
         /// switches from the auto-response file with the switches passed in.
         /// Returns true if the response file was found.
@@ -2044,14 +2169,7 @@ namespace Microsoft.Build.CommandLine
         {
             bool invokeBuild = false;
 
-            // combine the auto-response file switches with the command line switches in a left-to-right manner, where the
-            // auto-response file switches are on the left (default options), and the command line switches are on the
-            // right (overriding options) so that we consume switches in the following sequence of increasing priority:
-            // (1) switches from the msbuild.rsp file/s, including recursively included response files
-            // (2) switches from the command line, including recursively included response file switches inserted at the point they are declared with their "@" symbol
-            CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
-            commandLineSwitches.Append(switchesFromAutoResponseFile, commandLine);    // lowest precedence
-            commandLineSwitches.Append(switchesNotFromAutoResponseFile, commandLine);
+            CommandLineSwitches commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, commandLine);
 
 #if DEBUG
             if (commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.WaitForDebugger])
@@ -2119,69 +2237,50 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
-                    // figure out what project we are building
-                    projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
+                    bool foundProjectAutoResponseFile = CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, recursing, commandLine, out projectFile);
 
-                    if (!recursing && !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
+                    if (foundProjectAutoResponseFile)
                     {
-                        // gather any switches from an msbuild.rsp that is next to the project or solution file itself
-                        string projectDirectory = Path.GetDirectoryName(Path.GetFullPath(projectFile));
-
-                        // gather any switches from the first Directory.Build.rsp found in the project directory or above
-                        string directoryResponseFile = FileUtilities.GetPathOfFileAbove(directoryResponseFileName, projectDirectory);
-
-                        bool found = !string.IsNullOrWhiteSpace(directoryResponseFile) && GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile, commandLine);
-
-                        // Don't look for more response files if it's only in the same place we already looked (next to the exe)
-                        if (!string.Equals(projectDirectory, s_exePath, StringComparison.OrdinalIgnoreCase))
-                        {
-                            // this combines any found, with higher precedence, with the switches from the original auto response file switches
-                            found |= GatherAutoResponseFileSwitches(projectDirectory, switchesFromAutoResponseFile, commandLine);
-                        }
-
-                        if (found)
-                        {
-                            // we presumably read in more switches, so start our switch processing all over again,
-                            // so that we consume switches in the following sequence of increasing priority:
-                            // (1) switches from the msbuild.rsp next to msbuild.exe, including recursively included response files
-                            // (2) switches from this msbuild.rsp next to the project or solution <<--------- these we have just now merged with (1)
-                            // (3) switches from the command line, including recursively included response file switches inserted at the point they are declared with their "@" symbol
-                            return ProcessCommandLineSwitches(
-                                                               switchesFromAutoResponseFile,
-                                                               switchesNotFromAutoResponseFile,
-                                                               ref projectFile,
-                                                               ref targets,
-                                                               ref toolsVersion,
-                                                               ref globalProperties,
-                                                               ref loggers,
-                                                               ref verbosity,
-                                                               ref distributedLoggerRecords,
+                        // we presumably read in more switches, so start our switch processing all over again,
+                        // so that we consume switches in the following sequence of increasing priority:
+                        // (1) switches from the msbuild.rsp next to msbuild.exe, including recursively included response files
+                        // (2) switches from this msbuild.rsp next to the project or solution <<--------- these we have just now merged with (1)
+                        // (3) switches from the command line, including recursively included response file switches inserted at the point they are declared with their "@" symbol
+                        return ProcessCommandLineSwitches(
+                                                           switchesFromAutoResponseFile,
+                                                           switchesNotFromAutoResponseFile,
+                                                           ref projectFile,
+                                                           ref targets,
+                                                           ref toolsVersion,
+                                                           ref globalProperties,
+                                                           ref loggers,
+                                                           ref verbosity,
+                                                           ref distributedLoggerRecords,
 #if FEATURE_XML_SCHEMA_VALIDATION
-                                                               ref needToValidateProject,
-                                                               ref schemaFile,
+                                                           ref needToValidateProject,
+                                                           ref schemaFile,
 #endif
-                                                               ref cpuCount,
-                                                               ref enableNodeReuse,
-                                                               ref preprocessWriter,
-                                                               ref targetsWriter,
-                                                               ref detailedSummary,
-                                                               ref warningsAsErrors,
-                                                               ref warningsNotAsErrors,
-                                                               ref warningsAsMessages,
-                                                               ref enableRestore,
-                                                               ref interactive,
-                                                               ref profilerLogger,
-                                                               ref enableProfiler,
-                                                               ref restoreProperties,
-                                                               ref isolateProjects,
-                                                               ref graphBuild,
-                                                               ref inputResultsCaches,
-                                                               ref outputResultsCache,
-                                                               ref lowPriority,
-                                                               recursing: true,
-                                                               commandLine
-                                                             );
-                        }
+                                                           ref cpuCount,
+                                                           ref enableNodeReuse,
+                                                           ref preprocessWriter,
+                                                           ref targetsWriter,
+                                                           ref detailedSummary,
+                                                           ref warningsAsErrors,
+                                                           ref warningsNotAsErrors,
+                                                           ref warningsAsMessages,
+                                                           ref enableRestore,
+                                                           ref interactive,
+                                                           ref profilerLogger,
+                                                           ref enableProfiler,
+                                                           ref restoreProperties,
+                                                           ref isolateProjects,
+                                                           ref graphBuild,
+                                                           ref inputResultsCaches,
+                                                           ref outputResultsCache,
+                                                           ref lowPriority,
+                                                           recursing: true,
+                                                           commandLine
+                                                         );
                     }
 
                     // figure out which targets we are building
@@ -2314,6 +2413,47 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrow(!invokeBuild || !string.IsNullOrEmpty(projectFile), "We should have a project file if we're going to build.");
 
             return invokeBuild;
+        }
+
+        private static CommandLineSwitches CombineSwitchesRespectingPriority(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches switchesNotFromAutoResponseFile, string commandLine)
+        {
+            // combine the auto-response file switches with the command line switches in a left-to-right manner, where the
+            // auto-response file switches are on the left (default options), and the command line switches are on the
+            // right (overriding options) so that we consume switches in the following sequence of increasing priority:
+            // (1) switches from the msbuild.rsp file/s, including recursively included response files
+            // (2) switches from the command line, including recursively included response file switches inserted at the point they are declared with their "@" symbol
+            CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
+            commandLineSwitches.Append(switchesFromAutoResponseFile, commandLine); // lowest precedence
+            commandLineSwitches.Append(switchesNotFromAutoResponseFile, commandLine);
+            return commandLineSwitches;
+        }
+
+        private static bool CheckAndGatherProjectAutoResponseFile(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches commandLineSwitches, bool recursing, string commandLine, out string projectFile)
+        {
+            bool found = false;
+
+            // figure out what project we are building
+            projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
+
+            if (!recursing && !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
+            {
+                // gather any switches from an msbuild.rsp that is next to the project or solution file itself
+                string projectDirectory = Path.GetDirectoryName(Path.GetFullPath(projectFile));
+
+                // gather any switches from the first Directory.Build.rsp found in the project directory or above
+                string directoryResponseFile = FileUtilities.GetPathOfFileAbove(directoryResponseFileName, projectDirectory);
+
+                found = !string.IsNullOrWhiteSpace(directoryResponseFile) && GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile, commandLine);
+
+                // Don't look for more response files if it's only in the same place we already looked (next to the exe)
+                if (!string.Equals(projectDirectory, s_exePath, StringComparison.OrdinalIgnoreCase))
+                {
+                    // this combines any found, with higher precedence, with the switches from the original auto response file switches
+                    found |= GatherAutoResponseFileSwitches(projectDirectory, switchesFromAutoResponseFile, commandLine);
+                }
+            }
+
+            return found;
         }
 
         private static bool WarningsAsErrorsSwitchIsEmpty(CommandLineSwitches commandLineSwitches)
@@ -2628,6 +2768,36 @@ namespace Microsoft.Build.CommandLine
                     // whatever our priority is is correct.
                     OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
                     shutdownReason = node.Run(out nodeException);
+                }
+                else if (nodeModeNumber == 8)
+                {
+                    // Since build function has to reuse code from *this* class and OutOfProcServerNode is in different assembly
+                    // we have to pass down xmake build invocation to avoid circular dependency
+                    OutOfProcServerNode.BuildCallback buildFunction = (commandLine) =>
+                    {
+                        int exitCode;
+                        ExitType exitType;
+
+                        if (!s_initialized)
+                        {
+                            exitType = ExitType.InitializationError;
+                        }
+                        else
+                        {
+                            exitType = Execute(commandLine);
+                        }
+
+                        exitCode = exitType == ExitType.Success ? 0 : 1;
+
+                        return (exitCode, exitType.ToString());
+                    };
+
+                    OutOfProcServerNode node = new(buildFunction);
+
+                    s_isServerNode = true;
+                    shutdownReason = node.Run(out nodeException);
+
+                    FileUtilities.ClearCacheDirectory();
                 }
                 else
                 {
@@ -3019,6 +3189,12 @@ namespace Microsoft.Build.CommandLine
             // Join the logger parameters into one string separated by semicolons
             string result = anyPrefixingParameter ?? string.Empty;
 
+            // Ensure traling ';' so parametersToAggregate are properly separated
+            if (!string.IsNullOrEmpty(result) && result[result.Length - 1] != ';')
+            {
+                result += ';';
+            }
+
             result += string.Join(";", parametersToAggregate);
 
             return result;
@@ -3122,6 +3298,12 @@ namespace Microsoft.Build.CommandLine
                 if ((consoleLoggerParameters?.Length > 0))
                 {
                     consoleParameters = AggregateParameters(consoleParameters, consoleLoggerParameters);
+                }
+
+                // Always use ANSI escape codes when the build is initiated by server
+                if (s_isServerNode)
+                {
+                    consoleParameters = $"PREFERCONSOLECOLOR;{consoleParameters}";
                 }
 
                 // Check to see if there is a possibility we will be logging from an out-of-proc node.
@@ -3668,15 +3850,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static void DisplayVersionMessage()
         {
-#if RUNTIME_TYPE_NETCORE
-            const string frameworkName = ".NET";
-#elif MONO
-            const string frameworkName = "Mono";
-#else
-            const string frameworkName = ".NET Framework";
-#endif
-
-            Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildVersionMessage", ProjectCollection.DisplayVersion, frameworkName));
+            Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildVersionMessage", ProjectCollection.DisplayVersion, NativeMethods.FrameworkName));
         }
 
         /// <summary>

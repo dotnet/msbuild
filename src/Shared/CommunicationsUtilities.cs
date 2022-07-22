@@ -14,6 +14,8 @@ using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
 
 #if !CLR2COMPATIBILITY
 using Microsoft.Build.Shared.Debugging;
@@ -75,17 +77,17 @@ namespace Microsoft.Build.Internal
         Arm64 = 128,
     }
 
-    internal readonly struct Handshake
+    internal class Handshake
     {
-        readonly int options;
-        readonly int salt;
-        readonly int fileVersionMajor;
-        readonly int fileVersionMinor;
-        readonly int fileVersionBuild;
-        readonly int fileVersionPrivate;
-        readonly int sessionId;
+        protected readonly int options;
+        protected readonly int salt;
+        protected readonly int fileVersionMajor;
+        protected readonly int fileVersionMinor;
+        protected readonly int fileVersionBuild;
+        protected readonly int fileVersionPrivate;
+        private readonly int sessionId;
 
-        internal Handshake(HandshakeOptions nodeType)
+        internal protected Handshake(HandshakeOptions nodeType)
         {
             const int handshakeVersion = (int)CommunicationsUtilities.handshakeVersion;
 
@@ -113,7 +115,7 @@ namespace Microsoft.Build.Internal
             return String.Format("{0} {1} {2} {3} {4} {5} {6}", options, salt, fileVersionMajor, fileVersionMinor, fileVersionBuild, fileVersionPrivate, sessionId);
         }
 
-        internal int[] RetrieveHandshakeComponents()
+        public virtual int[] RetrieveHandshakeComponents()
         {
             return new int[]
             {
@@ -125,6 +127,61 @@ namespace Microsoft.Build.Internal
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionPrivate),
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(sessionId)
             };
+        }
+
+        public virtual string GetKey() => $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate} {sessionId}".ToString(CultureInfo.InvariantCulture);
+
+        public virtual byte? ExpectedVersionInFirstByte => CommunicationsUtilities.handshakeVersion;
+    }
+
+    internal sealed class ServerNodeHandshake : Handshake
+    {
+        /// <summary>
+        /// Caching computed hash.
+        /// </summary>
+        private string _computedHash = null;
+
+        public override byte? ExpectedVersionInFirstByte => null;
+
+        internal ServerNodeHandshake(HandshakeOptions nodeType)
+            : base(nodeType)
+        {
+        }
+
+        public override int[] RetrieveHandshakeComponents()
+        {
+            return new int[]
+            {
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(options),
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(salt),
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMajor),
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMinor),
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionBuild),
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionPrivate),
+            };
+        }
+
+        public override string GetKey()
+        {
+            return $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate}"
+                .ToString(CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>
+        /// Computes Handshake stable hash string representing whole state of handshake.
+        /// </summary>
+        public string ComputeHash()
+        {
+            if (_computedHash == null)
+            {
+                var input = GetKey();
+                using var sha = SHA256.Create();
+                var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
+                _computedHash = Convert.ToBase64String(bytes)
+                    .Replace("/", "_")
+                    .Replace("=", string.Empty);
+            }
+            return _computedHash;
         }
     }
 
