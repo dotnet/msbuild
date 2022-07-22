@@ -54,7 +54,7 @@ namespace Microsoft.Build.Shared
 
             return !string.IsNullOrEmpty(debugPath)
                     ? debugPath
-                    : Path.GetTempPath();
+                    : FileUtilities.TempFileDirectory;
         }
 
         /// <summary>

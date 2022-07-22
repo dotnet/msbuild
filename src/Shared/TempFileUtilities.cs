@@ -45,7 +45,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string GetTemporaryFileName(string extension)
         {
-            return GetTemporaryFile(null, extension, false);
+            return GetTemporaryFile(null, null, extension, false);
         }
 
         /// <summary>
@@ -61,6 +61,17 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Generates a unique temporary file name with a given extension in the temporary folder.
+        /// If no extension is provided, uses ".tmp".
+        /// File is guaranteed to be unique.
+        /// Caller must delete it when finished.
+        /// </summary>
+        internal static string GetTemporaryFile(string fileName, string extension, bool createFile)
+        {
+            return GetTemporaryFile(null, fileName, extension, createFile);
+        }
+
+        /// <summary>
+        /// Generates a unique temporary file name with a given extension in the temporary folder.
         /// File is guaranteed to be unique.
         /// Extension may have an initial period.
         /// Caller must delete it when finished.
@@ -68,7 +79,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string GetTemporaryFile(string extension)
         {
-            return GetTemporaryFile(null, extension);
+            return GetTemporaryFile(null, null, extension);
         }
 
         /// <summary>
@@ -79,21 +90,18 @@ namespace Microsoft.Build.Shared
         /// Caller must delete it when finished.
         /// May throw IOException.
         /// </summary>
-        internal static string GetTemporaryFile(string directory, string extension, bool createFile = true)
+        internal static string GetTemporaryFile(string directory, string fileName, string extension, bool createFile = true)
         {
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(directory, nameof(directory));
-            ErrorUtilities.VerifyThrowArgumentLength(extension, nameof(extension));
-
-            if (extension[0] != '.')
-            {
-                extension = '.' + extension;
-            }
 
             try
             {
                 directory ??= TempFileDirectory;
 
-                string file = Path.Combine(directory, $"tmp{Guid.NewGuid():N}{extension}");
+                // If the fileName is null, use tmp{Guid}; otherwise use fileName. If the extension needs a dot prepended, do so.
+                string file = Path.Combine(directory, fileName is null ? extension.Length > 0 && extension[0] != '.' ?
+                    $"tmp{Guid.NewGuid():N}.{extension}" : $"tmp{Guid.NewGuid():N}{extension}" :
+                    extension.Length > 0 && extension[0] != '.' ? $"{fileName}.{extension}" : $"{fileName}{extension}");
 
                 ErrorUtilities.VerifyThrow(!FileSystems.Default.FileExists(file), "Guid should be unique");
 
@@ -131,7 +139,11 @@ namespace Microsoft.Build.Shared
         {
             public string Path { get; }
 
-            public TempWorkingDirectory(string sourcePath, [CallerMemberName] string name = null)
+            public TempWorkingDirectory(string sourcePath,
+#if !CLR2COMPATIBILITY
+                [CallerMemberName]
+#endif
+            string name = null)
             {
                 Path = name == null
                     ? GetTemporaryDirectory()

@@ -25,7 +25,7 @@ namespace Microsoft.Build.Shared
                 // can be quite long, leaving very little room for the actual pipe name. Fortunately,
                 // '/tmp' is mandated by POSIX to always be a valid temp directory, so we can use that
                 // instead.
-                return Path.Combine("/tmp", pipeName);
+                return FileUtilities.GetTemporaryFile(pipeName, string.Empty, true);
             }
             else
             {
