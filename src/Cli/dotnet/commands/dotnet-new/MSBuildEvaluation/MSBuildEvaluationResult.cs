@@ -5,6 +5,7 @@
 
 using System.IO;
 using Microsoft.Build.Evaluation;
+using LocalizableStrings = Microsoft.DotNet.Tools.New.LocalizableStrings;
 
 namespace Microsoft.TemplateEngine.MSBuildEvaluation
 {
@@ -52,7 +53,7 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
         {
             return new MSBuildEvaluationResult(EvalStatus.NoProjectFound)
             {
-                ErrorMessage = $"No project was found at the path: {path}."
+                ErrorMessage = string.Format(LocalizableStrings.MSBuildEvaluationResult_Error_NoProjectFound, path)
             };
         }
 
@@ -60,7 +61,7 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
         {
             return new MSBuildEvaluationResult(EvalStatus.NoRestore, path)
             {
-                ErrorMessage = $"{path} is not restored. Run 'dotnet restore {Path.GetFullPath(path)}' to restore that project."
+                ErrorMessage = string.Format(LocalizableStrings.MSBuildEvaluationResult_Error_NotRestored, path)
             };
         }
 

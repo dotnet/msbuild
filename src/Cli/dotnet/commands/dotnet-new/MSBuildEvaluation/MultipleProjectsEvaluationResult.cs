@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using LocalizableStrings = Microsoft.DotNet.Tools.New.LocalizableStrings;
 
 namespace Microsoft.TemplateEngine.MSBuildEvaluation
 {
@@ -19,7 +20,7 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
             return new MultipleProjectsEvaluationResult()
             {
                 ProjectPaths = projectPaths,
-                ErrorMessage = $"Multiple projects found: {string.Join(";", projectPaths)}."
+                ErrorMessage = string.Format(LocalizableStrings.MultipleProjectsEvaluationResult_Error, string.Join("; ", projectPaths))
             };
         }
     }

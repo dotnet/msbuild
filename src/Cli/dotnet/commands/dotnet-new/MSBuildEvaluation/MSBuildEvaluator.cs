@@ -11,7 +11,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Extensions.Logging;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Utils;
-using NuGet.Configuration;
+using LocalizableStrings = Microsoft.DotNet.Tools.New.LocalizableStrings;
 
 namespace Microsoft.TemplateEngine.MSBuildEvaluation
 {
@@ -33,7 +33,7 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
         internal MSBuildEvaluator(string? outputDirectory = null, string? projectPath = null)
         {
             _outputDirectory = outputDirectory ?? Directory.GetCurrentDirectory();
-            _projectFullPath = projectPath;
+            _projectFullPath = projectPath != null ? Path.GetFullPath(projectPath) : null;
         }
 
         public Guid Id => Guid.Parse("{6C2CB5CA-06C3-460A-8ADB-5F21E113AB24}");
@@ -106,7 +106,7 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
                     _logger?.LogDebug("Multiple projects found.");
                     return MultipleProjectsEvaluationResult.Create(foundFiles);
                 }
-                projectPath = foundFiles.Single();
+                projectPath = Path.GetFullPath(foundFiles.Single());
             }
             else
             {
@@ -154,7 +154,7 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
                 if (targetFrameworks == null)
                 {
                     _logger?.LogDebug("Project is SDK style, but does not specify the framework.");
-                    return MSBuildEvaluationResult.CreateFailure(projectPath, $"Project '{projectPath}' is a SDK-style project, but does not specify the framework.");
+                    return MSBuildEvaluationResult.CreateFailure(projectPath, string.Format(LocalizableStrings.MSBuildEvaluator_Error_NoTargetFramework, projectPath));
                 }
 
                 //For multi-target project, we need to do additional evaluation for each target framework.

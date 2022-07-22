@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using LocalizableStrings = Microsoft.DotNet.Tools.New.LocalizableStrings;
 
 namespace Microsoft.TemplateEngine.MSBuildEvaluation
 {
@@ -286,7 +287,7 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
             internal Exception CreateInvalidExpressionException(int position)
             {
                 return new ArgumentException(
-                    $"Invalid expression, position: {position}.",
+                    string.Format(LocalizableStrings.CapabilityExpressionEvaluator_Exception_InvalidExpression, position),
                     "expression");
             }
         }

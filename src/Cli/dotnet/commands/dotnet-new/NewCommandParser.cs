@@ -39,9 +39,9 @@ namespace Microsoft.DotNet.Cli
 
         private static readonly Option<bool> _disableSdkTemplates = new Option<bool>("--debug:disable-sdk-templates", () => false, LocalizableStrings.DisableSdkTemplates_OptionDescription).Hide();
 
-        private static readonly Option<bool> _enableProjectContextEvaluation = new Option<bool>("--debug:enable-project-context", () => false, "Enables evaluating project context using MSBuild.").Hide();
+        private static readonly Option<bool> _enableProjectContextEvaluation = new Option<bool>("--debug:enable-project-context", () => false, LocalizableStrings.EnableProjectContextEval_OptionDescription).Hide();
 
-        internal static Option<FileInfo> ProjectPathOption { get; } = new Option<FileInfo>("--project", "The project the item template should be added to.").ExistingOnly().Hide();
+        internal static Option<FileInfo> ProjectPathOption { get; } = new Option<FileInfo>("--project", LocalizableStrings.ProjectPath_OptionDescription).ExistingOnly().Hide();
 
         internal static readonly System.CommandLine.Command Command = GetCommand();
 
