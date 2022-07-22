@@ -650,6 +650,16 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1146: PackAsTool non supporta l'impostazione di TargetPlatformIdentifier. Ad esempio, TargetFramework non può essere essere impostato su net5.0-windows, ma solo su net5.0. PackAsTool non supporta neanche UseWPF o UseWindowsForms quando la destinazione è .NET 5 e versioni successive.</target>
         <note>{StrBegin="NETSDK1146: "}</note>
       </trans-unit>
+      <trans-unit id="PackageContainsIncorrectlyCasedLocale">
+        <source>Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</source>
+        <target state="new">Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</target>
+        <note>Error code is NETSDK1187. 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
+      </trans-unit>
+      <trans-unit id="PackageContainsUnknownLocale">
+        <source>Package {0} {1} has a resource with the locale '{2}'. This locale is not known by .NET. Consider notifying the package author about this casing issue.</source>
+        <target state="new">Package {0} {1} has a resource with the locale '{2}'. This locale is not known by .NET. Consider notifying the package author about this casing issue.</target>
+        <note>Error code is NETSDK1188. 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
+      </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
         <target state="translated">NETSDK1064: il pacchetto {0} versione {1} non è stato trovato. Potrebbe essere stato eliminato dopo il ripristino di NuGet. In caso contrario, il ripristino di NuGet potrebbe essere stato completato solo parzialmente, a causa delle restrizioni relative alla lunghezza massima del percorso.</target>
