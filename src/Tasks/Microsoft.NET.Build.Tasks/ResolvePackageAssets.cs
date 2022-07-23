@@ -686,10 +686,10 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 else
                 {
-                    _compileTimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, runtimeIdentifier: null);
+                    _compileTimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, runtimeIdentifier: null); 
                     _runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, _task.RuntimeIdentifier);
                 }
-
+                
 
                 _stringTable = new Dictionary<string, int>(InitialStringTableCapacity, StringComparer.Ordinal);
                 _metadataStrings = new List<string>(InitialStringTableCapacity);
@@ -780,7 +780,7 @@ namespace Microsoft.NET.Build.Tasks
                 WriteItemGroup(WriteFrameworkReferences);
                 WriteItemGroup(WriteNativeLibraries);
                 WriteItemGroup(WritePackageDependencies);
-                WriteItemGroup(WritePackageFolders);
+                WriteItemGroup(WritePackageFolders);                
                 WriteItemGroup(WriteResourceAssemblies);
                 WriteItemGroup(WriteRuntimeAssemblies);
                 WriteItemGroup(WriteRuntimeTargets);
@@ -836,7 +836,7 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     return StringComparer.OrdinalIgnoreCase.Equals(l1.Item1, l2.Item1)
                         && l1.Item2.Equals(l2.Item2);
-
+                    
                 }
                 public int GetHashCode((string, NuGetVersion) library)
                 {
@@ -884,12 +884,12 @@ namespace Microsoft.NET.Build.Tasks
             /// "analyzers/dotnet/roslyn3.8/analyzer.dll"
             /// "analyzers/dotnet/roslyn4.0/analyzer.dll"
             ///
-            /// When the <paramref name="compilerApiVersion"/> is 'roslyn3.9', only the assets
+            /// When the <paramref name="compilerApiVersion"/> is 'roslyn3.9', only the assets 
             /// in the folder with the highest applicable compiler version are picked.
             /// In this case,
-            ///
+            /// 
             /// "analyzers/dotnet/roslyn3.8/analyzer.dll"
-            ///
+            /// 
             /// will be picked, and the other analyzer assets will be excluded.
             /// </remarks>
             private class AnalyzerResolver
@@ -915,7 +915,7 @@ namespace Microsoft.NET.Build.Tasks
                         _compilerNameSearchString = string.Concat("/".AsSpan(), compilerName.Span);
 #else
                         _compilerNameSearchString = "/" + compilerName;
-#endif
+#endif                   
                         _compilerVersion = compilerVersion;
                     }
                 }
@@ -1290,7 +1290,7 @@ namespace Microsoft.NET.Build.Tasks
                     return false;
                 }
                 else
-                {
+                { 
                     var targetFramework = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, null).TargetFramework;
 
                     if (targetFramework.Version.Major >= 3
@@ -1340,24 +1340,26 @@ namespace Microsoft.NET.Build.Tasks
                         try
                         {
                             var normalizedLocale = System.Globalization.CultureInfo.GetCultureInfo(locale).Name;
-                            _task.Log.Log(new (MessageLevel.HighImportance, 
-                                string.Format(Strings.PackageContainsIncorrectlyCasedLocale,
-                                    package.Name, package.Version.ToNormalizedString(), locale, normalizedLocale
-                                ),
-                                "NETSDK1187"));
+                            if (normalizedLocale != locale)
+                            {
+                                _task.Log.LogWarning(
+                                    string.Format(Strings.PackageContainsIncorrectlyCasedLocale,
+                                        package.Name, package.Version.ToNormalizedString(), locale, normalizedLocale
+                                ));
+                            }
                             locale = normalizedLocale;
                         } catch (System.Globalization.CultureNotFoundException cnf)
                         {
-                            _task.Log.Log(new(MessageLevel.HighImportance, 
+                            _task.Log.LogWarning(
                                 string.Format(
                                     Strings.PackageContainsUnknownLocale,
                                     package.Name, package.Version.ToNormalizedString(), cnf.InvalidCultureName
-                                ),
-                                "NETSDK1188")
+                                )
                             );
-                            // for unknown locales, we do not forward them along at all
-                            // TODO: get verification that we actually want this behavior.
-                            return;
+                            // We could potentially strip this unknown locales at this point, but we do not.
+                            // Locale data can change over time (it's typically an OS database that's kept updated),
+                            // and the data on the system running the build may not be the same data as
+                            // the system executing the built code. So we should be permissive for this case.
                         }
                         bool wroteCopyLocalMetadata = WriteCopyLocalMetadataIfNeeded(
                                 package,
@@ -1419,7 +1421,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 foreach (var library in _runtimeTarget.Libraries)
                 {
-                    if (!library.IsTransitiveProjectReference(_lockFile, ref directProjectDependencies,
+                    if (!library.IsTransitiveProjectReference(_lockFile, ref directProjectDependencies, 
                         _lockFile.GetLockFileTargetAlias(_lockFile.GetTargetAndReturnNullIfNotFound(_targetFramework, null))))
                     {
                         continue;

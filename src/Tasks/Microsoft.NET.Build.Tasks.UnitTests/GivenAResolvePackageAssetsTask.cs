@@ -118,7 +118,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         }
 
         [Fact]
-        public void It_warns_on_incorrectly_cased_culture_codes_of_resources()
+        public void It_warns_on_invalid_culture_codes_of_resources()
         {
             string projectAssetsJsonPath = Path.GetTempFileName();
             var assetsContent = @"
@@ -149,13 +149,13 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             task.TargetFramework = "net7.0";
             var writer = new CacheWriter(task);
             writer.WriteToCacheFile();
-            var logger = (task.BuildEngine as Msbuild.Tests.Utilities.MockEngine).MockLogger;
-            var invalidContextMessages = logger.BuildMessageEvents.Where(msg => msg.Code == "NETSDK12346");
+            var messages = (task.BuildEngine as MockBuildEngine).Warnings;
+            var invalidContextMessages = messages.Where(msg => msg.Code == "NETSDK1188");
             invalidContextMessages.Should().HaveCount(1);
         }
         
         [Fact]
-        public void It_warns_on_invalid_culture_codes_of_resources()
+        public void It_warns_on_incorrectly_cased_culture_codes_of_resources()
         {
             string projectAssetsJsonPath = Path.GetTempFileName();
             var assetsContent = @"
@@ -186,8 +186,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             task.TargetFramework = "net7.0";
             var writer = new CacheWriter(task);
             writer.WriteToCacheFile();
-            var logger = (task.BuildEngine as Msbuild.Tests.Utilities.MockEngine).MockLogger;
-            var invalidContextMessages = logger.BuildMessageEvents.Where(msg => msg.Code == "NETSDK12345");
+            var messages = (task.BuildEngine as MockBuildEngine).Warnings;
+            var invalidContextMessages = messages.Where(msg => msg.Code == "NETSDK1187");
             invalidContextMessages.Should().HaveCount(1);
         }
 
@@ -214,7 +214,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 property.SetValue(task, "_");
             }
             
-            task.BuildEngine = new Msbuild.Tests.Utilities.MockEngine();
+            task.BuildEngine = new MockBuildEngine();
 
             return task;
         }

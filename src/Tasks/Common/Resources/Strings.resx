@@ -852,11 +852,11 @@ You may need to build the project on another operating system or architecture, o
     <comment>{StrBegin="NETSDK1186: "}</comment>
   </data>
   <data name="PackageContainsIncorrectlyCasedLocale" xml:space="preserve">
-    <value>Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</value>
+    <value>NETSDK1187: Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</value>
     <comment>Error code is NETSDK1187. 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</comment>
   </data>
   <data name="PackageContainsUnknownLocale" xml:space="preserve">
-    <value>Package {0} {1} has a resource with the locale '{2}'. This locale is not known by .NET. Consider notifying the package author about this casing issue.</value>
+    <value>NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</value>
     <comment>Error code is NETSDK1188. 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</comment>
   </data>
 </root>
