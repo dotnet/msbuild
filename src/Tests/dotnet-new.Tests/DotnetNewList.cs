@@ -141,9 +141,10 @@ namespace Microsoft.DotNet.New.Tests
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            var templateDetailList = Regex.Match(commandResult.StdOut, "(?<=(-+  ){3}-+\r\n)[\\s\\S]*").Value;
+            var stdOutput = commandResult.StdOut.Replace("\r\n", "\n");
+            var templateDetailList = Regex.Match(stdOutput, "(?<=(-+  ){3}-+\n)[\\s\\S]*").Value;
             Assert.False(string.IsNullOrEmpty(templateDetailList), "No template was listed.");
-            int firstColumnWidth = Regex.Match(commandResult.StdOut, "(?<=Template Name {2,}Short Name {2,}Language {2,}Tags +\r\n)-+").Value.Length;
+            int firstColumnWidth = Regex.Match(stdOutput, "(?<=Template Name {2,}Short Name {2,}Language {2,}Tags +\n)-+").Value.Length;
             string pattern = $"^.{{{firstColumnWidth}}}(?= {2}\\w+)";
             var templateNameMatches = Regex.Matches(templateDetailList, $"^.{{{firstColumnWidth}}}(?= {{2}}\\w+)", RegexOptions.Multiline);
             var templateNameList = templateNameMatches.Select(x => x.Value).ToList();
