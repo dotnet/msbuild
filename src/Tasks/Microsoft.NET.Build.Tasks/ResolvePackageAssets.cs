@@ -1342,20 +1342,13 @@ namespace Microsoft.NET.Build.Tasks
                             var normalizedLocale = System.Globalization.CultureInfo.GetCultureInfo(locale).Name;
                             if (normalizedLocale != locale)
                             {
-                                _task.Log.LogWarning(
-                                    string.Format(Strings.PackageContainsIncorrectlyCasedLocale,
-                                        package.Name, package.Version.ToNormalizedString(), locale, normalizedLocale
-                                ));
+                                _task.Log.LogWarning(Strings.PackageContainsIncorrectlyCasedLocale, package.Name, package.Version.ToNormalizedString(), locale, normalizedLocale);
                             }
                             locale = normalizedLocale;
-                        } catch (System.Globalization.CultureNotFoundException cnf)
+                        }
+                        catch (System.Globalization.CultureNotFoundException cnf)
                         {
-                            _task.Log.LogWarning(
-                                string.Format(
-                                    Strings.PackageContainsUnknownLocale,
-                                    package.Name, package.Version.ToNormalizedString(), cnf.InvalidCultureName
-                                )
-                            );
+                            _task.Log.LogWarning(Strings.PackageContainsUnknownLocale, package.Name, package.Version.ToNormalizedString(), cnf.InvalidCultureName);
                             // We could potentially strip this unknown locales at this point, but we do not.
                             // Locale data can change over time (it's typically an OS database that's kept updated),
                             // and the data on the system running the build may not be the same data as
