@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools.Fsi;
 
@@ -11,6 +10,8 @@ namespace Microsoft.DotNet.Cli
     internal static class FsiCommandParser
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-fsi";
+
+        public static readonly Argument<string[]> Arguments = new Argument<string[]>();
 
         private static readonly Command Command = ConstructCommand();
 
@@ -21,9 +22,9 @@ namespace Microsoft.DotNet.Cli
 
         private static Command ConstructCommand()
         {
-            var command = new DocumentedCommand("fsi", DocsLink);
+            var command = new DocumentedCommand("fsi", DocsLink) { Arguments };
 
-            command.SetHandler(FsiCommand.Run);
+            command.SetHandler((ParseResult parseResult) => FsiCommand.Run(parseResult.GetValueForArgument(Arguments)));
 
             return command;
         }

@@ -17,10 +17,10 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-test";
 
-        public static readonly Argument<IEnumerable<string>> SlnOrProjectArgument = new Argument<IEnumerable<string>>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
+        public static readonly Argument<string> SlnOrProjectArgument = new Argument<string>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
         {
             Description = CommonLocalizableStrings.SolutionOrProjectArgumentDescription,
-            Arity = ArgumentArity.ZeroOrMore,
+            Arity = ArgumentArity.ZeroOrOne
         };
 
         public static readonly Option<string> SettingsOption = new ForwardedOption<string>(new string[] { "-s", "--settings" }, LocalizableStrings.CmdSettingsDescription)
@@ -129,7 +129,7 @@ namespace Microsoft.DotNet.Cli
         private static Command ConstructCommand()
         {
             var command = new DocumentedCommand("test", DocsLink, LocalizableStrings.AppFullName);
-
+            command.TreatUnmatchedTokensAsErrors = false;
             command.AddArgument(SlnOrProjectArgument);
 
             command.AddOption(SettingsOption);
