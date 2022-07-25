@@ -16,6 +16,8 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static partial class FileUtilities
     {
+        internal static string TempFileDirectory = Path.GetTempPath(); // Path.GetDirectoryName(GetTemporaryFile());
+
         /// <summary>
         /// Generates a unique directory name in the temporary folder.
         /// Caller must delete when finished.
@@ -24,7 +26,7 @@ namespace Microsoft.Build.Shared
         /// <param name="subfolder"></param>
         internal static string GetTemporaryDirectory(bool createDirectory = true, string subfolder = null)
         {
-            string temporaryDirectory = Path.Combine(Path.GetTempPath(), "Temporary" + Guid.NewGuid().ToString("N"), subfolder ?? string.Empty);
+            string temporaryDirectory = Path.Combine(Path.Combine(TempFileDirectory, "Temporary" + Guid.NewGuid().ToString("N")), subfolder ?? string.Empty);
 
             if (createDirectory)
             {
@@ -89,9 +91,7 @@ namespace Microsoft.Build.Shared
 
             try
             {
-                directory ??= Path.GetTempPath();
-
-                Directory.CreateDirectory(directory);
+                directory ??= TempFileDirectory;
 
                 string file = Path.Combine(directory, $"tmp{Guid.NewGuid():N}{extension}");
 
