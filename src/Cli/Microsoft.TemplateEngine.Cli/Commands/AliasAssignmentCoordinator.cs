@@ -8,9 +8,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     /// </summary>
     internal class AliasAssignmentCoordinator
     {
-        internal static IReadOnlyList<(CliTemplateParameter Parameter, IReadOnlyList<string> Aliases, IReadOnlyList<string> Errors)> AssignAliasesForParameter(IEnumerable<CliTemplateParameter> parameters, HashSet<string> takenAliases)
+        internal static IReadOnlyList<(CliTemplateParameter Parameter, IReadOnlySet<string> Aliases, IReadOnlyList<string> Errors)> AssignAliasesForParameter(IEnumerable<CliTemplateParameter> parameters, HashSet<string> takenAliases)
         {
-            List<(CliTemplateParameter Parameter, IReadOnlyList<string> Aliases, IReadOnlyList<string> Errors)> result = new();
+            List<(CliTemplateParameter Parameter, IReadOnlySet<string> Aliases, IReadOnlyList<string> Errors)> result = new();
 
             List<string> predefinedLongOverrides = parameters.SelectMany(p => p.LongNameOverrides).Where(n => !string.IsNullOrEmpty(n)).Select(n => $"--{n}").ToList();
             List<string> predefinedShortOverrides = parameters.SelectMany(p => p.ShortNameOverrides).Where(n => !string.IsNullOrEmpty(n)).Select(n => $"-{n}").ToList();
@@ -21,7 +21,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             foreach (var parameter in parameters)
             {
-                List<string> aliases = new List<string>();
+                HashSet<string> aliases = new HashSet<string>(StringComparer.Ordinal);
                 List<string> errors = new List<string>();
                 if (parameter.Name.Contains(':'))
                 {
@@ -49,7 +49,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         private static void HandleShortOverrides(
             HashSet<string> takenAliases,
-            List<string> aliases,
+            HashSet<string> aliases,
             List<string> errors,
             Func<string, bool> isAliasTaken,
             CliTemplateParameter parameter)
@@ -87,7 +87,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         private static void HandleLongOverrides(
             HashSet<string> takenAliases,
-            List<string> aliases,
+            HashSet<string> aliases,
             List<string> errors,
             Func<string, bool> isAliasTaken,
             Func<string, bool> isLongNamePredefined,
@@ -130,7 +130,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         private static void GenerateShortName(
             HashSet<string> takenAliases,
-            List<string> aliases,
+            HashSet<string> aliases,
             List<string> errors,
             Func<string, bool> isAliasTaken,
             Func<string, bool> isShortNamePredefined,

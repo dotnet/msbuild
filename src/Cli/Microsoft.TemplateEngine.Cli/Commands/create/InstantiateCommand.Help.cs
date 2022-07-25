@@ -387,47 +387,35 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         /// </summary>
         private static IEnumerable<TemplateOption> CollectOptionsToShow(IEnumerable<TemplateCommand> templates, HelpContext context)
         {
-            Dictionary<string, (CliTemplateParameter Parameter, IReadOnlyList<string> Aliases)> parametersToShow = new();
-
+            HashSet<TemplateOption> optionsToShow = new();
             //templates are in priority order
             //in case parameters are different in different templates
             //highest priority ones wins
             //except the choice parameter, where we merge possible values
             foreach (TemplateCommand command in templates)
             {
-                foreach (CliTemplateParameter currentParam in command.Template.CliParameters.Values)
+                foreach (TemplateOption currentOption in command.TemplateOptions.Values)
                 {
-                    if (currentParam.IsHidden && !currentParam.AlwaysShow)
+                    if (currentOption.TemplateParameter.IsHidden && !currentOption.TemplateParameter.AlwaysShow)
                     {
                         continue;
                     }
 
-                    if (parametersToShow.TryGetValue(currentParam.Name, out var existingParam))
+                    if (optionsToShow.TryGetValue(currentOption, out TemplateOption? existingOption))
                     {
-                        if (currentParam is ChoiceTemplateParameter currentChoiceParam
-                            && existingParam.Parameter is ChoiceTemplateParameter existingChoiceParam)
+                        if (currentOption.TemplateParameter is ChoiceTemplateParameter currentChoiceParam
+                            && existingOption.TemplateParameter is ChoiceTemplateParameter)
                         {
-                            if (existingChoiceParam is CombinedChoiceTemplateParameter combinedParam)
-                            {
-                                combinedParam.MergeChoices(currentChoiceParam);
-                            }
-                            else
-                            {
-                                var combinedChoice = new CombinedChoiceTemplateParameter(existingChoiceParam);
-                                combinedChoice.MergeChoices(currentChoiceParam);
-                                parametersToShow[currentParam.Name] = (combinedChoice, existingParam.Aliases);
-                            }
+                            existingOption.MergeChoices(currentChoiceParam);
                         }
                     }
                     else
                     {
-                        var aliases = command.TemplateOptions[currentParam.Name].Aliases.OrderByDescending(s => s, StringComparer.OrdinalIgnoreCase).ToArray();
-                        parametersToShow[currentParam.Name] = (currentParam, aliases);
+                        optionsToShow.Add(currentOption);
                     }
                 }
             }
 
-            var optionsToShow = parametersToShow.Values.Select(p => new TemplateOption(p.Parameter, p.Aliases)).ToList();
             foreach (var option in optionsToShow)
             {
                 context.HelpBuilder.CustomizeSymbol(

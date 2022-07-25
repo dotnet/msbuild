@@ -129,7 +129,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// Creates <see cref="Option"/> for template parameter.
         /// </summary>
         /// <param name="aliases">aliases to be used for option.</param>
-        internal Option GetOption(IReadOnlyList<string> aliases)
+        internal Option GetOption(IReadOnlySet<string> aliases)
         {
             Option option = GetBaseOption(aliases);
             option.IsHidden = IsHidden;
@@ -163,7 +163,7 @@ namespace Microsoft.TemplateEngine.Cli
             };
         }
 
-        protected virtual Option GetBaseOption(IReadOnlyList<string> aliases)
+        protected virtual Option GetBaseOption(IReadOnlySet<string> aliases)
         {
             return Type switch
             {

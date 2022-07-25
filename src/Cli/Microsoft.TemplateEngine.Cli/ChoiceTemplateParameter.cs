@@ -70,7 +70,7 @@ namespace Microsoft.TemplateEngine.Cli
             };
         }
 
-        protected override Option GetBaseOption(IReadOnlyList<string> aliases)
+        protected override Option GetBaseOption(IReadOnlySet<string> aliases)
         {
             Option<string> option = new Option<string>(
                 aliases.ToArray(),

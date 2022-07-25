@@ -324,7 +324,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 throw new InvalidTemplateParametersException(templateInfo, errors);
             }
 
-            foreach ((CliTemplateParameter parameter, IReadOnlyList<string> aliases, IReadOnlyList<string> _) in parametersWithAliasAssignments)
+            foreach ((CliTemplateParameter parameter, IReadOnlySet<string> aliases, IReadOnlyList<string> _) in parametersWithAliasAssignments)
             {
                 TemplateOption option = new TemplateOption(parameter, aliases);
                 this.AddOption(option.Option);

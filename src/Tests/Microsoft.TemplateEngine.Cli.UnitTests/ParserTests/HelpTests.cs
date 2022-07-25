@@ -407,5 +407,47 @@ Author: Me
             return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
         }
 
+        [Fact]
+        public Task DoesNotCombineParametersWhenAliasesAreDifferent()
+        {
+            var template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+                .WithChoiceParameter("Choice", new[] { "val1" }, description: "my description", defaultValue: "def-val", defaultIfNoOptionValue: "def-val-no-arg");
+
+            var template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group")
+                .WithChoiceParameter("Choice", new[] { "val2" }, description: "my description", defaultValue: "def-val", defaultIfNoOptionValue: "def-val-no-arg");
+
+            IHostSpecificDataLoader hostDataLoader = A.Fake<IHostSpecificDataLoader>();
+            A.CallTo(() => hostDataLoader.ReadHostSpecificTemplateData(template2))
+                .Returns(new HostSpecificTemplateData(
+                    new Dictionary<string, IReadOnlyDictionary<string, string>>()
+                    {
+                        {
+                            "Choice", new Dictionary<string, string>()
+                            {
+                                { "longName", "choice" },
+                                { "shortName", "C" }
+                            }
+                        }
+                    }));
+
+            TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
+               CliTemplateInfo.FromTemplateInfo(new[] { template1, template2 }, hostDataLoader))
+               .Single();
+
+            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
+            TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
+
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+
+            TemplateCommand templateCommand1 = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[0]);
+            TemplateCommand templateCommand2 = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[1]);
+
+            StringWriter sw = new StringWriter();
+            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance, maxWidth: 50), myCommand, sw);
+
+            InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand1, templateCommand2 }, helpContext);
+            return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
+        }
     }
 }

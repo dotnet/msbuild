@@ -94,7 +94,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             if (_command.TemplateOptions.ContainsKey(canonicalName))
             {
-                alias = _command.TemplateOptions[canonicalName].Aliases[0];
+                alias = _command.TemplateOptions[canonicalName].Aliases.First();
                 return true;
             }
             alias = null;
