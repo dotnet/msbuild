@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading;
 using Microsoft.Build.BackEnd;
@@ -639,18 +640,18 @@ namespace Microsoft.Build.Graph
                             return existingItem;
                         }
 
-                        existingTargetsMetadata = GetEffectiveTargets(existingItem, existingTargetsMetadata);
-                        newTargetsMetadata = GetEffectiveTargets(newItem, newTargetsMetadata);
+                        existingTargetsMetadata = GetEffectiveTargets(key.reference, existingTargetsMetadata);
+                        newTargetsMetadata = GetEffectiveTargets(key.reference, newTargetsMetadata);
 
                         ProjectItemInstance mergedItem = existingItem.DeepClone();
                         mergedItem.SetMetadata(ItemMetadataNames.ProjectReferenceTargetsMetadataName, $"{existingTargetsMetadata};{newTargetsMetadata}");
                         return mergedItem;
 
-                        static string GetEffectiveTargets(ProjectItemInstance item, string targetsMetadata)
+                        static string GetEffectiveTargets(ProjectGraphNode reference, string targetsMetadata)
                         {
                             if (string.IsNullOrWhiteSpace(targetsMetadata))
                             {
-                                return string.Join(";", item.Project.DefaultTargets);
+                                return string.Join(";", reference.ProjectInstance.DefaultTargets);
                             }
 
                             return targetsMetadata;

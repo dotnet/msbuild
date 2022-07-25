@@ -2361,7 +2361,7 @@ $@"
                 env: _env,
                 dependencyEdges: new Dictionary<int, int[]>()
                 {
-                    {1, new[] {2}},
+                    { 1, new[] { 2 } },
                 },
                 extraContentPerProjectNumber: new Dictionary<int, string>()
                 {
@@ -2371,28 +2371,29 @@ $@"
 <ItemGroup>
     <ProjectReferenceTmp Include='@(ProjectReference)' />
     <ProjectReference Include='@(ProjectReferenceTmp)' />
-</ItemGroup>"
-                    },
-                },
-                extraContentForAllNodes: @$"
-<PropertyGroup>
-</PropertyGroup>
-
-<ItemGroup>
-    <ProjectReferenceTargets Include='Build' Targets='{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}' />
 </ItemGroup>
 
-<Target Name='Build' />
-");
+<ItemGroup>
+    <ProjectReferenceTargets Include='SomeDefaultTarget1' Targets='{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}' />
+</ItemGroup>
 
-            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(new[] { "Build" });
+<Target Name='SomeDefaultTarget1' />
+"
+                    },
+                    {
+                        2,
+                        @"<Target Name='SomeDefaultTarget2' />"
+                    }
+                });
+
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(Array.Empty<string>());
 
             ProjectGraphNode project1 = GetFirstNodeWithProjectNumber(graph, 1);
             ProjectGraphNode project2 = GetFirstNodeWithProjectNumber(graph, 2);
 
             project1.ProjectReferences.ShouldHaveSingleItem().ShouldBe(project2);
-            targetLists[project1].ShouldBe(new[] { "Build" });
-            targetLists[project2].ShouldBe(new[] { "Build" });
+            targetLists[project1].ShouldBe(new[] { "SomeDefaultTarget1" });
+            targetLists[project2].ShouldBe(new[] { "SomeDefaultTarget2" });
         }
 
         [Fact]
@@ -2412,28 +2413,29 @@ $@"
 <ItemGroup>
     <ProjectReferenceTmp Include='@(ProjectReference)' />
     <ProjectReference Include='@(ProjectReferenceTmp)' Targets='SomeOtherTarget' />
-</ItemGroup>"
-                    },
-                },
-                extraContentForAllNodes: @$"
-<PropertyGroup>
-</PropertyGroup>
-
-<ItemGroup>
-    <ProjectReferenceTargets Include='Build' Targets='{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}' />
 </ItemGroup>
 
-<Target Name='Build' />
-");
+<ItemGroup>
+    <ProjectReferenceTargets Include='SomeDefaultTarget1' Targets='{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}' />
+</ItemGroup>
 
-            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(new[] { "Build" });
+<Target Name='SomeDefaultTarget1' />
+"
+                    },
+                    {
+                        2,
+                        @"<Target Name='SomeDefaultTarget2' />"
+                    }
+                });
+
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(Array.Empty<string>());
 
             ProjectGraphNode project1 = GetFirstNodeWithProjectNumber(graph, 1);
             ProjectGraphNode project2 = GetFirstNodeWithProjectNumber(graph, 2);
 
             project1.ProjectReferences.ShouldHaveSingleItem().ShouldBe(project2);
-            targetLists[project1].ShouldBe(new[] { "Build" });
-            targetLists[project2].ShouldBe(new[] { "Build", "SomeOtherTarget" });
+            targetLists[project1].ShouldBe(new[] { "SomeDefaultTarget1" });
+            targetLists[project2].ShouldBe(new[] { "SomeDefaultTarget2", "SomeOtherTarget" });
         }
 
         public void Dispose()
