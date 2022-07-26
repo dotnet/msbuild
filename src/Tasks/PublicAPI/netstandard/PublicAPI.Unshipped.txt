@@ -10,3 +10,5 @@ Microsoft.Build.Tasks.IFixedTypeInfo.Invoke(object pvInstance, int memid, short 
 Microsoft.Build.Tasks.IFixedTypeInfo.ReleaseFuncDesc(System.IntPtr pFuncDesc) -> void
 Microsoft.Build.Tasks.IFixedTypeInfo.ReleaseTypeAttr(System.IntPtr pTypeAttr) -> void
 Microsoft.Build.Tasks.IFixedTypeInfo.ReleaseVarDesc(System.IntPtr pVarDesc) -> void
+Microsoft.Build.Tasks.XslTransformation.PreserveWhitespace.get -> bool
+Microsoft.Build.Tasks.XslTransformation.PreserveWhitespace.set -> void

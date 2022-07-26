@@ -1364,7 +1364,7 @@ namespace Microsoft.Build.Utilities
 
         /// <summary>
         /// Logs an error/warning/message from the given line of text. Errors/warnings are only logged for lines that fit a
-        /// particular (canonical) format -- all other lines are treated as messages.
+        /// <see href="https://docs.microsoft.com/visualstudio/msbuild/msbuild-diagnostic-format-for-tasks">particular (canonical) format</see> -- all other lines are treated as messages.
         /// Thread safe.
         /// </summary>
         /// <param name="lineOfText">The line of text to log from.</param>

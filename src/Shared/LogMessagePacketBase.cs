@@ -882,7 +882,7 @@ namespace Microsoft.Build.Shared
             // it is expensive to access a ThreadStatic field every time
             var list = reusablePropertyList;
 
-            Internal.Utilities.EnumerateProperties(properties, kvp => list.Add(kvp));
+            Internal.Utilities.EnumerateProperties(properties, list, static (list, kvp) => list.Add(kvp));
 
             BinaryWriterExtensions.Write7BitEncodedInt(writer, list.Count);
 

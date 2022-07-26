@@ -121,6 +121,7 @@ if ($runtime -eq "Desktop") {
         FileToCopy "$bootstrapBinDirectory\System.Collections.Immutable.dll"
         FileToCopy "$bootstrapBinDirectory\System.Memory.dll"
         FileToCopy "$bootstrapBinDirectory\System.Numerics.Vectors.dll"
+        FileToCopy "$bootstrapBinDirectory\System.Reflection.MetadataLoadContext.dll"
         FileToCopy "$bootstrapBinDirectory\System.Resources.Extensions.dll"
         FileToCopy "$bootstrapBinDirectory\System.Runtime.CompilerServices.Unsafe.dll"
         FileToCopy "$bootstrapBinDirectory\System.Text.Encodings.Web.dll"
