@@ -411,7 +411,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             // Install a workload for preview 7
             var installParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", existingWorkload });
             var installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: new MockNuGetPackageDownloader(tmpDir),
-                workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: prev7SdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
+                workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: prev7SdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory, installedFeatureBand: prev7SdkFeatureVersion);
             installCommand.Execute();
 
             // Install workload for RC1
