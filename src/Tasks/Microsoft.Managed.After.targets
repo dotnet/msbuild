@@ -51,7 +51,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Publish has the same logic as Build for the main reference target except it also takes $(NoBuild) into account. -->
     <_MainReferenceTargetForPublish Condition="'$(NoBuild)' == 'true'">GetTargetPath</_MainReferenceTargetForPublish>
-    <_MainReferenceTargetForPublish Condition="'$(_MainReferenceTargetForPublish)' == ''">$(_MainReferenceTargetForBuild)</_MainReferenceTargetForPublish>
+    <_MainReferenceTargetForPublish Condition="'$(NoBuild)' != 'true'">$(_MainReferenceTargetForBuild)</_MainReferenceTargetForPublish>
     <ProjectReferenceTargetsForPublish>GetTargetFrameworks;$(_MainReferenceTargetForPublish);GetNativeManifest;GetCopyToPublishDirectoryItems;$(ProjectReferenceTargetsForPublish)</ProjectReferenceTargetsForPublish>
 
     <ProjectReferenceTargetsForGetCopyToPublishDirectoryItems>GetCopyToPublishDirectoryItems;$(ProjectReferenceTargetsForGetCopyToPublishDirectoryItems)</ProjectReferenceTargetsForGetCopyToPublishDirectoryItems>
