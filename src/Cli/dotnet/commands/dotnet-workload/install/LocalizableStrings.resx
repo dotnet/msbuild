@@ -255,8 +255,8 @@
   <data name="FailedToDownloadPackageManifest" xml:space="preserve">
     <value>Failed to download manifest package {0}.</value>
   </data>
-  <data name="FailedToGetPackageManifestUrl" xml:space="preserve">
-    <value>Failed to resolve manifest package URL {0}.</value>
+  <data name="ManifestPackageUrlNotResolved" xml:space="preserve">
+    <value>Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</value>
   </data>
   <data name="OSDoesNotSupportMsi" xml:space="preserve">
     <value>MSI installations are only supported on Windows.</value>

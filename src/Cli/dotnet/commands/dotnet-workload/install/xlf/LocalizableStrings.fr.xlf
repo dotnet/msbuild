@@ -67,11 +67,6 @@
         <target state="translated">Échec de l’extraction des informations de MSI : {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToGetPackageManifestUrl">
-        <source>Failed to resolve manifest package URL {0}.</source>
-        <target state="translated">Échec de la résolution de l’URL du package de manifeste {0}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="FailedToInstallWorkloadManifest">
         <source>Failed to install manifest {0} version {1}: {2}.</source>
         <target state="translated">Impossible d'installer la {0} version de manifeste {1}: {2}</target>
@@ -165,6 +160,11 @@
       <trans-unit id="ManifestMsiNotFoundInNuGetPackage">
         <source>Manifest MSI not found in NuGet package {0}</source>
         <target state="translated">MSI de manifeste introuvable dans le package NuGet {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPackageUrlNotResolved">
+        <source>Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</source>
+        <target state="new">Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">

@@ -674,8 +674,6 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             File.GetLastAccessTime(sentinelPath2).Should().BeCloseTo(updateTime2);
         }
 
-       
-
         private List<(PackageId, NuGetVersion, DirectoryPath?, PackageSourceLocation)> GetExpectedDownloadedPackages(string sdkFeatureBand = "6.0.100")
         {
             var expectedDownloadedPackages = _installedManifests

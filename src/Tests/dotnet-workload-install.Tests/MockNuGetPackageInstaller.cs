@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             return Task.FromResult(new List<string>() as IEnumerable<string>);
         }
 
-        public Task<NuGetVersion> GetLatestPackageVerion(PackageId packageId, PackageSourceLocation packageSourceLocation = null, bool includePreview = false)
+        public Task<NuGetVersion> GetLatestPackageVersion(PackageId packageId, PackageSourceLocation packageSourceLocation = null, bool includePreview = false)
         {
             return Task.FromResult(new NuGetVersion("10.0.0"));
         }
