@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
@@ -19,7 +18,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
             internal Dictionary<string, string> ExpectedCompletedWork =
                 new Dictionary<string, string>(StringComparer.Ordinal);
-            internal bool ShouldExpectException { get; set; }
+            internal int NumExpectedExceptions { get; set; }
         }
 
         private struct WorkItem
@@ -55,7 +54,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         WorkFunc = () => throw new Exception()
                     }
                 },
-                ShouldExpectException = true
+                NumExpectedExceptions = 3
             });
         }
 
@@ -83,7 +82,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         WorkFunc = () => throw new Exception()
                     }
                 },
-                ShouldExpectException = true
+                NumExpectedExceptions = 3
             });
         }
 
@@ -236,15 +235,33 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             _workSet = new ParallelWorkSet<string, string>(tt.DegreeOfParallelism, StringComparer.Ordinal, CancellationToken.None);
 
+            List<Exception> observedExceptions = new();
+
             foreach (WorkItem workItem in tt.WorkItemsToAdd)
             {
-                _workSet.AddWork(workItem.Key, workItem.WorkFunc);
+                _workSet.AddWork(
+                    workItem.Key,
+                    () =>
+                    {
+                        try
+                        {
+                            return workItem.WorkFunc();
+                        }
+                        catch (Exception ex)
+                        {
+                            lock (observedExceptions)
+                            {
+                                observedExceptions.Add(ex);
+                            }
+
+                            throw;
+                        }
+                    });
             }
 
-            if (tt.ShouldExpectException)
+            if (tt.NumExpectedExceptions > 0)
             {
-                Should.Throw<Exception>(() => _workSet.WaitForAllWorkAndComplete());
-
+                Should.Throw<AggregateException>(() => _workSet.WaitForAllWorkAndComplete()).InnerExceptions.ShouldBeSetEquivalentTo(observedExceptions);
                 return;
             }
 

@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -25,16 +26,15 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
+using Microsoft.NET.StringTools;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
-
-using Microsoft.NET.StringTools;
-using System.ComponentModel;
 
 #nullable disable
 
@@ -456,7 +456,7 @@ namespace Microsoft.Build.Execution
                         _nodeManager?.ShutdownAllNodes();
                         _taskHostNodeManager?.ShutdownAllNodes();
                     }
-               }
+                }
             }
 
             _previousLowPriority = parameters.LowPriority;
@@ -469,6 +469,14 @@ namespace Microsoft.Build.Execution
                 RequireState(BuildManagerState.Idle, "BuildInProgress");
 
                 MSBuildEventSource.Log.BuildStart();
+
+                // Initiate build telemetry data
+                DateTime now = DateTime.UtcNow;
+                KnownTelemetry.BuildTelemetry ??= new()
+                {
+                    StartAt = now,
+                };
+                KnownTelemetry.BuildTelemetry.InnerStartAt = now;
 
                 if (BuildParameters.DumpOpportunisticInternStats)
                 {
@@ -796,6 +804,13 @@ namespace Microsoft.Build.Execution
                 VerifyStateInternal(BuildManagerState.Building);
 
                 var newSubmission = new BuildSubmission(this, GetNextSubmissionId(), requestData, _buildParameters.LegacyThreadingSemantics);
+
+                if (KnownTelemetry.BuildTelemetry != null)
+                {
+                    KnownTelemetry.BuildTelemetry.Project ??= requestData.ProjectFullPath;
+                    KnownTelemetry.BuildTelemetry.Target ??= string.Join(",", requestData.TargetNames);
+                }
+
                 _buildSubmissions.Add(newSubmission.SubmissionId, newSubmission);
                 _noActiveSubmissionsEvent.Reset();
                 return newSubmission;
@@ -817,6 +832,15 @@ namespace Microsoft.Build.Execution
                 VerifyStateInternal(BuildManagerState.Building);
 
                 var newSubmission = new GraphBuildSubmission(this, GetNextSubmissionId(), requestData);
+
+                if (KnownTelemetry.BuildTelemetry != null)
+                {
+                    // Project graph can have multiple entry points, for purposes of identifying event for same build project,
+                    // we believe that including only one entry point will provide enough precision.
+                    KnownTelemetry.BuildTelemetry.Project ??= requestData.ProjectGraphEntryPoints?.FirstOrDefault().ProjectFile;
+                    KnownTelemetry.BuildTelemetry.Target ??= string.Join(",", requestData.TargetNames);
+                }
+
                 _graphBuildSubmissions.Add(newSubmission.SubmissionId, newSubmission);
                 _noActiveSubmissionsEvent.Reset();
                 return newSubmission;
@@ -965,6 +989,35 @@ namespace Microsoft.Build.Execution
                         }
 
                         loggingService.LogBuildFinished(_overallBuildSuccess);
+
+                        if (KnownTelemetry.BuildTelemetry != null)
+                        {
+                            KnownTelemetry.BuildTelemetry.FinishedAt = DateTime.UtcNow;
+                            KnownTelemetry.BuildTelemetry.Success = _overallBuildSuccess;
+                            KnownTelemetry.BuildTelemetry.Version = ProjectCollection.Version;
+                            KnownTelemetry.BuildTelemetry.DisplayVersion = ProjectCollection.DisplayVersion;
+                            KnownTelemetry.BuildTelemetry.FrameworkName = NativeMethodsShared.FrameworkName;
+
+                            string host = null;
+                            if (BuildEnvironmentState.s_runningInVisualStudio)
+                            {
+                                host = "VS";
+                            }
+                            else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME")))
+                            {
+                                host = Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME");
+                            }
+                            else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSCODE_CWD")) || Environment.GetEnvironmentVariable("TERM_PROGRAM") == "vscode")
+                            {
+                                host = "VSCode";
+                            }
+                            KnownTelemetry.BuildTelemetry.Host = host;
+
+                            KnownTelemetry.BuildTelemetry.UpdateEventProperties();
+                            loggingService.LogTelemetry(buildEventContext: null, KnownTelemetry.BuildTelemetry.EventName, KnownTelemetry.BuildTelemetry.Properties);
+                            // Clean telemetry to make it ready for next build submission.
+                            KnownTelemetry.BuildTelemetry = null;
+                        }
                     }
 
                     ShutdownLoggingService(loggingService);
@@ -1670,19 +1723,35 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void HandleSubmissionException(GraphBuildSubmission submission, Exception ex)
         {
-            if (ex is InvalidProjectFileException projectException)
+            if (ex is AggregateException ae)
             {
-                if (!projectException.HasBeenLogged)
+                // If there's exactly 1, just flatten it
+                if (ae.InnerExceptions.Count == 1)
                 {
-                    BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-                    ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(buildEventContext, projectException);
-                    projectException.HasBeenLogged = true;
+                    ex = ae.InnerExceptions[0];
+                }
+                else
+                {
+                    // Log each InvalidProjectFileException encountered during ProjectGraph creation
+                    foreach (Exception innerException in ae.InnerExceptions)
+                    {
+                        if (innerException is InvalidProjectFileException innerProjectException)
+                        {
+                            LogInvalidProjectFileError(innerProjectException);
+                        }
+                    }
                 }
             }
 
-            ex = ex is AggregateException ae && ae.InnerExceptions.Count == 1
-                ? ae.InnerExceptions.First()
-                : ex;
+            if (ex is InvalidProjectFileException projectException)
+            {
+                LogInvalidProjectFileError(projectException);
+            }
+
+            if (ex is CircularDependencyException)
+            {
+                LogInvalidProjectFileError(new InvalidProjectFileException(ex.Message, ex));
+            }
 
             lock (_syncLock)
             {
@@ -1693,6 +1762,16 @@ namespace Microsoft.Build.Execution
 
                 _overallBuildSuccess = false;
                 CheckSubmissionCompletenessAndRemove(submission);
+            }
+
+            void LogInvalidProjectFileError(InvalidProjectFileException projectException)
+            {
+                if (!projectException.HasBeenLogged)
+                {
+                    BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                    ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(buildEventContext, projectException);
+                    projectException.HasBeenLogged = true;
+                }
             }
         }
 
@@ -1823,131 +1902,84 @@ namespace Microsoft.Build.Execution
 
         private void ExecuteGraphBuildScheduler(GraphBuildSubmission submission)
         {
-            try
+            if (_shuttingDown)
             {
-                if (_shuttingDown)
-                {
-                    throw new BuildAbortedException();
-                }
-
-                var projectGraph = submission.BuildRequestData.ProjectGraph;
-                if (projectGraph == null)
-                {
-                    projectGraph = new ProjectGraph(
-                        submission.BuildRequestData.ProjectGraphEntryPoints,
-                        ProjectCollection.GlobalProjectCollection,
-                        (path, properties, collection) =>
-                        {
-                            ProjectLoadSettings projectLoadSettings = _buildParameters.ProjectLoadSettings;
-                            if (submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports))
-                            {
-                                projectLoadSettings |= ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreInvalidImports | ProjectLoadSettings.IgnoreEmptyImports;
-                            }
-
-                            if (submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.FailOnUnresolvedSdk))
-                            {
-                                projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
-                            }
-
-                            return new ProjectInstance(
-                                path,
-                                properties,
-                                null,
-                                _buildParameters,
-                                ((IBuildComponentHost)this).LoggingService,
-                                new BuildEventContext(
-                                    submission.SubmissionId,
-                                    _buildParameters.NodeId,
-                                    BuildEventContext.InvalidEvaluationId,
-                                    BuildEventContext.InvalidProjectInstanceId,
-                                    BuildEventContext.InvalidProjectContextId,
-                                    BuildEventContext.InvalidTargetId,
-                                    BuildEventContext.InvalidTaskId),
-                                SdkResolverService,
-                                submission.SubmissionId,
-                                projectLoadSettings);
-                        });
-                }
-
-                LogMessage(
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                        "StaticGraphConstructionMetrics",
-                        Math.Round(projectGraph.ConstructionMetrics.ConstructionTime.TotalSeconds, 3),
-                        projectGraph.ConstructionMetrics.NodeCount,
-                        projectGraph.ConstructionMetrics.EdgeCount));
-
-                Dictionary<ProjectGraphNode, BuildResult> resultsPerNode = null;
-
-                if (submission.BuildRequestData.GraphBuildOptions.Build)
-                {
-                    var cacheServiceTask = Task.Run(() => SearchAndInitializeProjectCachePluginFromGraph(projectGraph));
-                    var targetListTask = projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames);
-
-                    DumpGraph(projectGraph, targetListTask);
-
-                    using DisposablePluginService cacheService = cacheServiceTask.Result;
-
-                    resultsPerNode = BuildGraph(projectGraph, targetListTask, submission.BuildRequestData);
-                }
-                else
-                {
-                    DumpGraph(projectGraph);
-                }
-
-                ErrorUtilities.VerifyThrow(
-                    submission.BuildResult?.Exception == null,
-                    "Exceptions only get set when the graph submission gets completed with an exception in OnThreadException. That should not happen during graph builds.");
-
-                // The overall submission is complete, so report it as complete
-                ReportResultsToSubmission(
-                    new GraphBuildResult(
-                        submission.SubmissionId,
-                        new ReadOnlyDictionary<ProjectGraphNode, BuildResult>(resultsPerNode ?? new Dictionary<ProjectGraphNode, BuildResult>())));
+                throw new BuildAbortedException();
             }
-            catch (Exception ex) when (IsInvalidProjectOrIORelatedException(ex))
-            {
-                GraphBuildResult result = null;
 
-                // ProjectGraph throws an aggregate exception with InvalidProjectFileException inside when evaluation fails
-                if (ex is AggregateException aggregateException && aggregateException.InnerExceptions.All(innerException => innerException is InvalidProjectFileException))
-                {
-                    // Log each InvalidProjectFileException encountered during ProjectGraph creation
-                    foreach (Exception innerException in aggregateException.InnerExceptions)
+            var projectGraph = submission.BuildRequestData.ProjectGraph;
+            if (projectGraph == null)
+            {
+                projectGraph = new ProjectGraph(
+                    submission.BuildRequestData.ProjectGraphEntryPoints,
+                    ProjectCollection.GlobalProjectCollection,
+                    (path, properties, collection) =>
                     {
-                        var projectException = (InvalidProjectFileException) innerException;
-                        if (!projectException.HasBeenLogged)
+                        ProjectLoadSettings projectLoadSettings = _buildParameters.ProjectLoadSettings;
+                        if (submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports))
                         {
-                            BuildEventContext projectBuildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-                            ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(projectBuildEventContext, projectException);
-                            projectException.HasBeenLogged = true;
+                            projectLoadSettings |= ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreInvalidImports | ProjectLoadSettings.IgnoreEmptyImports;
                         }
-                    }
-                }
-                else if (ex is CircularDependencyException)
-                {
-                    result = new GraphBuildResult(submission.SubmissionId, true);
 
-                    BuildEventContext projectBuildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-                    ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(projectBuildEventContext, new InvalidProjectFileException(ex.Message, ex));
-                }
-                else
-                {
-                    // Arbitrarily just choose the first entry point project's path
-                    string projectFile = submission.BuildRequestData.ProjectGraph?.EntryPointNodes.First().ProjectInstance.FullPath
-                        ?? submission.BuildRequestData.ProjectGraphEntryPoints?.First().ProjectFile;
-                    BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-                    ((IBuildComponentHost)this).LoggingService.LogFatalBuildError(buildEventContext, ex, new BuildEventFileInfo(projectFile));
-                }
+                        if (submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.FailOnUnresolvedSdk))
+                        {
+                            projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
+                        }
 
-                result ??= new GraphBuildResult(submission.SubmissionId, ex);
-
-                ReportResultsToSubmission(result);
-
-                lock (_syncLock)
-                {
-                    _overallBuildSuccess = false;
-                }
+                        return new ProjectInstance(
+                            path,
+                            properties,
+                            null,
+                            _buildParameters,
+                            ((IBuildComponentHost)this).LoggingService,
+                            new BuildEventContext(
+                                submission.SubmissionId,
+                                _buildParameters.NodeId,
+                                BuildEventContext.InvalidEvaluationId,
+                                BuildEventContext.InvalidProjectInstanceId,
+                                BuildEventContext.InvalidProjectContextId,
+                                BuildEventContext.InvalidTargetId,
+                                BuildEventContext.InvalidTaskId),
+                            SdkResolverService,
+                            submission.SubmissionId,
+                            projectLoadSettings);
+                    });
             }
+
+            LogMessage(
+                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                    "StaticGraphConstructionMetrics",
+                    Math.Round(projectGraph.ConstructionMetrics.ConstructionTime.TotalSeconds, 3),
+                    projectGraph.ConstructionMetrics.NodeCount,
+                    projectGraph.ConstructionMetrics.EdgeCount));
+
+            Dictionary<ProjectGraphNode, BuildResult> resultsPerNode = null;
+
+            if (submission.BuildRequestData.GraphBuildOptions.Build)
+            {
+                var cacheServiceTask = Task.Run(() => SearchAndInitializeProjectCachePluginFromGraph(projectGraph));
+                var targetListTask = projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames);
+
+                DumpGraph(projectGraph, targetListTask);
+
+                using DisposablePluginService cacheService = cacheServiceTask.Result;
+
+                resultsPerNode = BuildGraph(projectGraph, targetListTask, submission.BuildRequestData);
+            }
+            else
+            {
+                DumpGraph(projectGraph);
+            }
+
+            ErrorUtilities.VerifyThrow(
+                submission.BuildResult?.Exception == null,
+                "Exceptions only get set when the graph submission gets completed with an exception in OnThreadException. That should not happen during graph builds.");
+
+            // The overall submission is complete, so report it as complete
+            ReportResultsToSubmission(
+                new GraphBuildResult(
+                    submission.SubmissionId,
+                    new ReadOnlyDictionary<ProjectGraphNode, BuildResult>(resultsPerNode ?? new Dictionary<ProjectGraphNode, BuildResult>())));
 
             static void DumpGraph(ProjectGraph graph, IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetList = null)
             {
@@ -1975,7 +2007,7 @@ namespace Microsoft.Build.Execution
             var finishedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes.Count);
             var buildingNodes = new Dictionary<BuildSubmission, ProjectGraphNode>();
             var resultsPerNode = new Dictionary<ProjectGraphNode, BuildResult>(projectGraph.ProjectNodes.Count);
-            Exception submissionException = null;
+            ExceptionDispatchInfo submissionException = null;
 
             while (blockedNodes.Count > 0 || buildingNodes.Count > 0)
             {
@@ -1985,7 +2017,7 @@ namespace Microsoft.Build.Execution
                 // Observe them here to keep the same exception flow with the case when there's no plugins and ExecuteSubmission(BuildSubmission) does not run on a separate thread.
                 if (submissionException != null)
                 {
-                    throw submissionException;
+                    submissionException.Throw();
                 }
 
                 lock (graphBuildStateLock)
@@ -2026,7 +2058,8 @@ namespace Microsoft.Build.Execution
                             {
                                 if (submissionException == null && finishedBuildSubmission.BuildResult.Exception != null)
                                 {
-                                    submissionException = finishedBuildSubmission.BuildResult.Exception;
+                                    // Preserve the original stack.
+                                    submissionException = ExceptionDispatchInfo.Capture(finishedBuildSubmission.BuildResult.Exception);
                                 }
 
                                 ProjectGraphNode finishedNode = buildingNodes[finishedBuildSubmission];

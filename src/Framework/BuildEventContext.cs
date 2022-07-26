@@ -3,8 +3,6 @@
 
 using System;
 
-#nullable disable
-
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -131,7 +129,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Returns a default invalid BuildEventContext
         /// </summary>
-        public static BuildEventContext Invalid => new BuildEventContext(InvalidNodeId, InvalidTargetId, InvalidProjectContextId, InvalidTaskId);
+        public static BuildEventContext Invalid { get; } = new BuildEventContext(InvalidNodeId, InvalidTargetId, InvalidProjectContextId, InvalidTaskId);
 
         /// <summary>
         /// Retrieves the Evaluation id.
@@ -237,7 +235,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             // If the references are the same no need to do any more comparing
             if (ReferenceEquals(this, obj))
@@ -265,7 +263,7 @@ namespace Microsoft.Build.Framework
         /// <param name="left">Left hand side operand</param>
         /// <param name="right">Right hand side operand</param>
         /// <returns>True if the object values are identical, false if they are not identical</returns>
-        public static bool operator ==(BuildEventContext left, BuildEventContext right)
+        public static bool operator ==(BuildEventContext? left, BuildEventContext? right)
         {
             if (ReferenceEquals(left, right))
             {
@@ -287,7 +285,7 @@ namespace Microsoft.Build.Framework
         /// <param name="left">Left hand side operand</param>
         /// <param name="right">Right hand side operand</param>
         /// <returns>True if the object values are not identical, false if they are identical</returns>
-        public static bool operator !=(BuildEventContext left, BuildEventContext right)
+        public static bool operator !=(BuildEventContext? left, BuildEventContext? right)
         {
             return !(left == right);
         }

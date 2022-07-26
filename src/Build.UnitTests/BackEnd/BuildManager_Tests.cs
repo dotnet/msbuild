@@ -4211,15 +4211,17 @@ $@"<Project InitialTargets=`Sleep`>
         {
             string project1 = _env.CreateFile(".proj").Path;
             string project2 = _env.CreateFile(".proj").Path;
+            string project3 = _env.CreateFile(".proj").Path;
 
             File.WriteAllText(project1, CleanupFileContents($@"
 <Project>
   <ItemGroup>
     <ProjectReferenceTargets Include='Build' Targets='Build' />
     <ProjectReference Include='{project2}' />
+    <ProjectReference Include='{project3}' />
   </ItemGroup>
   <Target Name='Build'>
-    <MsBuild Projects='{project2}' Targets='Build' />
+    <MsBuild Projects='@(ProjectReference)' Targets='Build' />
   </Target>
 </Project>
 "));
@@ -4228,13 +4230,21 @@ $@"<Project InitialTargets=`Sleep`>
   <WellThisIsntValid>
 </Project>
 "));
+            File.WriteAllText(project3, CleanupFileContents(@"
+<Project>
+  <WellThisIsntValid>
+</Project>
+"));
 
             var data = new GraphBuildRequestData(new ProjectGraphEntryPoint(project1), Array.Empty<string>());
 
             GraphBuildResult result = _buildManager.Build(_parameters, data);
-            result.OverallResult.ShouldBe(BuildResultCode.Failure);
-            result.Exception.ShouldBeOfType<InvalidProjectFileException>()
-                .ProjectFile.ShouldBe(project2);
+            result.ShouldHaveFailed();
+
+            AggregateException aggException = result.Exception.ShouldBeOfType<AggregateException>();
+            aggException.InnerExceptions.Count.ShouldBe(2);
+            aggException.InnerExceptions[0].ShouldBeOfType<InvalidProjectFileException>().ProjectFile.ShouldBeOneOf(project2, project3);
+            aggException.InnerExceptions[1].ShouldBeOfType<InvalidProjectFileException>().ProjectFile.ShouldBeOneOf(project2, project3);
         }
 
         [Fact]

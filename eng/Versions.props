@@ -25,17 +25,27 @@
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
+    <SystemCollectionsImmutableVersion>6.0.0</SystemCollectionsImmutableVersion>
+    <SystemConfigurationConfigurationManagerVersion>6.0.0</SystemConfigurationConfigurationManagerVersion>
+    <SystemMemoryVersion>4.5.5</SystemMemoryVersion>
+    <SystemNetHttpVersion>4.3.4</SystemNetHttpVersion>
+    <SystemReflectionMetadataLoadContextVersion>6.0.0</SystemReflectionMetadataLoadContextVersion>
+    <SystemReflectionMetadataVersion>6.0.0</SystemReflectionMetadataVersion>
     <SystemResourcesExtensionsPackageVersion>6.0.0</SystemResourcesExtensionsPackageVersion>
+    <SystemSecurityPermissionsVersion>6.0.0</SystemSecurityPermissionsVersion>
+    <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
+    <SystemTextEncodingCodePagesVersion>6.0.0</SystemTextEncodingCodePagesVersion>
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
     <!-- DotNetCliVersion MUST match the dotnet version in global.json.
          Otherwise, this version of dotnet will not be installed and the build will error out. -->
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>6.0.0-beta.22314.7</MicrosoftDotNetXUnitExtensionsVersion>
+    <MicrosoftCodeAnalysisCollectionsVersion>4.2.0-1.22102.8</MicrosoftCodeAnalysisCollectionsVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>6.0.0-beta.22362.2</MicrosoftDotNetXUnitExtensionsVersion>
     <MicrosoftExtensionsDependencyModelVersion>6.0.0-preview.2.21154.6</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftIORedistVersion>6.0.0</MicrosoftIORedistVersion>
-    <MicrosoftNetCompilersToolsetVersion>4.2.0-4.22314.14</MicrosoftNetCompilersToolsetVersion>
+    <MicrosoftNetCompilersToolsetVersion>4.3.0-3.22329.30</MicrosoftNetCompilersToolsetVersion>
     <NuGetBuildTasksVersion>6.2.0-rc.146</NuGetBuildTasksVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
     <SystemTextJsonVersion>6.0.0</SystemTextJsonVersion>
