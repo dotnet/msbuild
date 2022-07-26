@@ -18,13 +18,7 @@
     <PackageReference Update="NuGet.Frameworks" Version="$(NuGetBuildTasksVersion)" />
     <PackageReference Update="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
     <PackageReference Update="System.Configuration.ConfigurationManager" Version="$(SystemConfigurationConfigurationManagerVersion)" />
-
-    <!-- 
-        Modifying the version of System.Memory is very high impact and often causes downstream breaks on repos that depend on us.
-        When updating the version of System.Memory, file a breaking change here: https://github.com/dotnet/docs/issues/new?assignees=gewarren&labels=breaking-change%2CPri1%2Cdoc-idea&template=breaking-change.yml&title=%5BBreaking+change%5D%3A+ 
-    -->
     <PackageReference Update="System.Memory" Version="$(SystemMemoryVersion)" />
-
     <PackageReference Update="System.Net.Http" Version="$(SystemNetHttpVersion)" />
     <PackageReference Update="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
     <PackageReference Update="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" />
