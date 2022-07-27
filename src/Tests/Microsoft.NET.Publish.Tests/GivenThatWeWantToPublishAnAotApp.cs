@@ -41,8 +41,7 @@ namespace Microsoft.NET.Publish.Tests
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
                 var testProject = CreateHelloWorldTestProject(targetFramework, projectName, true);
-                // set the property here - https://github.com/dotnet/sdk/issues/26791
-                // testProject.AdditionalProperties["PublishAot"] = "true";
+                testProject.AdditionalProperties["PublishAot"] = "true";
                 // Linux symbol files are embedded and require additional steps to be stripped to a separate file
                 // assumes /bin (or /usr/bin) are in the PATH
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -53,7 +52,7 @@ namespace Microsoft.NET.Publish.Tests
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
                 publishCommand
-                    .Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishAot=true")
+                    .Execute($"/p:RuntimeIdentifier={rid}")
                     .Should().Pass()
                     .And.NotHaveStdOutContaining("IL2026")
                     .And.NotHaveStdErrContaining("NETSDK1179")
@@ -92,8 +91,7 @@ namespace Microsoft.NET.Publish.Tests
                 var projectConfiguration = "Debug";
 
                 var testProject = CreateAppForConfigCheck(targetFramework, projectName, true);
-                // set the property here - https://github.com/dotnet/sdk/issues/26791
-                // testProject.AdditionalProperties["PublishAot"] = "true";
+                testProject.AdditionalProperties["PublishAot"] = "true";
                 testProject.AdditionalProperties["Configuration"] = projectConfiguration;
                 // Linux symbol files are embedded and require additional steps to be stripped to a separate file
                 // assumes /bin (or /usr/bin) are in the PATH
@@ -109,7 +107,7 @@ namespace Microsoft.NET.Publish.Tests
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
                 publishCommand
-                    .Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishAot=true")
+                    .Execute($"/p:RuntimeIdentifier={rid}")
                     .Should().Pass();
 
                 var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, configuration: projectConfiguration, runtimeIdentifier: rid).FullName;
@@ -149,8 +147,7 @@ namespace Microsoft.NET.Publish.Tests
                 var projectConfiguration = "Release";
 
                 var testProject = CreateAppForConfigCheck(targetFramework, projectName, true);
-                // set the property here - https://github.com/dotnet/sdk/issues/26791
-                // testProject.AdditionalProperties["PublishAot"] = "true";
+                testProject.AdditionalProperties["PublishAot"] = "true";
                 testProject.AdditionalProperties["Configuration"] = projectConfiguration;
                 // Linux symbol files are embedded and require additional steps to be stripped to a separate file
                 // assumes /bin (or /usr/bin) are in the PATH
@@ -166,7 +163,7 @@ namespace Microsoft.NET.Publish.Tests
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
                 publishCommand
-                    .Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishAot=true")
+                    .Execute($"/p:RuntimeIdentifier={rid}")
                     .Should().Pass();
 
                 var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, configuration: projectConfiguration, runtimeIdentifier: rid).FullName;
@@ -205,15 +202,14 @@ namespace Microsoft.NET.Publish.Tests
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
                 var testProject = CreateAppForConfigCheck(targetFramework, projectName, true);
-                // set the property here - https://github.com/dotnet/sdk/issues/26791
-                // testProject.AdditionalProperties["PublishAot"] = "true";
+                testProject.AdditionalProperties["PublishAot"] = "true";
                 var testAsset = _testAssetsManager.CreateTestProject(testProject)
                     // populate a runtime config file with a key value pair
                     // <RuntimeHostConfigurationOption Include="key1" Value="value1" />
                     .WithProjectChanges(project => AddRuntimeConfigOption(project));
 
                 var buildCommand = new BuildCommand(testAsset);
-                buildCommand.Execute("/p:PublishAot=true")
+                buildCommand.Execute()
                     .Should().Pass();
 
                 var outputDirectory = buildCommand.GetOutputDirectory(targetFramework).FullName;
@@ -239,12 +235,10 @@ namespace Microsoft.NET.Publish.Tests
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
                 var testProject = CreateHelloWorldTestProject(targetFramework, projectName, true);
-                // set the property here - https://github.com/dotnet/sdk/issues/26791
-                // testProject.AdditionalProperties["PublishAot"] = "true";
+                testProject.AdditionalProperties["PublishAot"] = "true";
 
                 // This will add a reference to a package that will also be automatically imported by the SDK
-                //                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", "7.0.0-*"));
-                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", "7.0.0-rc.1.22375.2"));
+                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", "7.0.0-*"));
 
                 // Linux symbol files are embedded and require additional steps to be stripped to a separate file
                 // assumes /bin (or /usr/bin) are in the PATH
@@ -257,7 +251,7 @@ namespace Microsoft.NET.Publish.Tests
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
                 publishCommand
-                    .Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishAot=true")
+                    .Execute($"/p:RuntimeIdentifier={rid}")
                     .Should().Pass();
 
                 var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
@@ -343,15 +337,14 @@ namespace Microsoft.NET.Publish.Tests
 
                 // PublishAot should enable the EnableAotAnalyzer, EnableTrimAnalyzer and EnableSingleFileAnalyzer
                 var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName, true);
-                // set the property here - https://github.com/dotnet/sdk/issues/26791
-                // testProject.AdditionalProperties["PublishAot"] = "true";
+                testProject.AdditionalProperties["PublishAot"] = "true";
                 testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";
                 testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
                 publishCommand
-                    .Execute("/p:PublishAot=true")
+                    .Execute()
                     .Should().Pass()
                     .And.HaveStdOutContaining("warning IL3050")
                     .And.HaveStdOutContaining("warning IL3056")
@@ -384,8 +377,7 @@ namespace Microsoft.NET.Publish.Tests
                 // PublishAot enables the EnableAotAnalyzer, EnableTrimAnalyzer and EnableSingleFileAnalyzer
                 // only if they don't have a predefined value
                 var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName, true);
-                // set the property here - https://github.com/dotnet/sdk/issues/26791
-                // testProject.AdditionalProperties["PublishAot"] = "true";
+                testProject.AdditionalProperties["PublishAot"] = "true";
                 testProject.AdditionalProperties["EnableAotAnalyzer"] = "false";
                 testProject.AdditionalProperties["EnableTrimAnalyzer"] = "false";
                 testProject.AdditionalProperties["EnableSingleFileAnalyzer"] = "false";
@@ -395,7 +387,7 @@ namespace Microsoft.NET.Publish.Tests
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
                 publishCommand
-                    .Execute("/p:PublishAot=true")
+                    .Execute()
                     .Should().Pass()
                     .And.HaveStdOutContaining("warning IL3050")
                     .And.HaveStdOutContaining("warning IL2026");
@@ -424,8 +416,7 @@ namespace Microsoft.NET.Publish.Tests
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
                 var testProject = CreateTestProjectWithAotLibrary(targetFramework, projectName);
-                // set the property here - https://github.com/dotnet/sdk/issues/26791
-                // testProject.AdditionalProperties["PublishAot"] = "true";
+                testProject.AdditionalProperties["PublishAot"] = "true";
                 testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
                 testProject.AdditionalProperties["NativeLib"] = "Static";
                 testProject.AdditionalProperties["SelfContained"] = "true";
@@ -433,7 +424,7 @@ namespace Microsoft.NET.Publish.Tests
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
                 publishCommand
-                    .Execute("/p:PublishAot=true")
+                    .Execute()
                     .Should().Pass();
 
                 var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
@@ -456,8 +447,7 @@ namespace Microsoft.NET.Publish.Tests
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
                 var testProject = CreateTestProjectWithAotLibrary(targetFramework, projectName);
-                // set the property here - https://github.com/dotnet/sdk/issues/26791
-                // testProject.AdditionalProperties["PublishAot"] = "true";
+                testProject.AdditionalProperties["PublishAot"] = "true";
                 testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
                 testProject.AdditionalProperties["NativeLib"] = "Shared";
                 testProject.AdditionalProperties["SelfContained"] = "true";
@@ -465,7 +455,7 @@ namespace Microsoft.NET.Publish.Tests
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
                 publishCommand
-                    .Execute("/p:PublishAot=true")
+                    .Execute()
                     .Should().Pass();
 
                 var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;

@@ -101,11 +101,9 @@ namespace Microsoft.NET.Publish.Tests
                 return;
 
             Type loggerType = typeof(LogTelemetryToStdOutForTest);
-            // Remove the PublishAot property from here - https://github.com/dotnet/sdk/issues/26791
             var TelemetryTestLogger = new[]
                 {
-                    $"/Logger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location}",
-                    "/p:PublishAot=true"
+                    $"/Logger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location}"
                 };
 
             // NativeAOT compilation requires PublishTrimmed and will be set to true if not set by the user
@@ -116,7 +114,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
             var publishCommand = new PublishCommand(testProjectInstance);
             publishCommand.Execute(TelemetryTestLogger).StdOut.Should().Contain(
-                "{\"EventName\":\"PublishProperties\",\"Properties\":{\"PublishReadyToRun\":\"null\",\"PublishTrimmed\":\"true\",\"PublishSingleFile\":\"null\",\"PublishAot\":\"true\",\"PublishProtocol\":\"null\"}");
+                "{\"EventName\":\"PublishProperties\",\"Properties\":{\"PublishReadyToRun\":\"null\",\"PublishTrimmed\":\"true\",\"PublishSingleFile\":\"null\",\"PublishAot\":\"True\",\"PublishProtocol\":\"null\"}");
         }
 
 
