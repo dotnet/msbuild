@@ -128,14 +128,18 @@ namespace Microsoft.DotNet.Cli.Telemetry
             string topLevelCommandName,
             Dictionary<string, double> measurements = null)
         {
-            if (parseResult.IsDotnetBuiltInCommand() && parseResult.HasOption(CommonOptions.VerbosityOption))
+            if (parseResult.IsDotnetBuiltInCommand() && 
+                parseResult.HasOption(CommonOptions.VerbosityOption) && 
+                parseResult.FindResultFor(CommonOptions.VerbosityOption) is OptionResult verbosityResult &&
+                !String.IsNullOrEmpty(verbosityResult.ErrorMessage)
+                )
             {
                 result.Add(new ApplicationInsightsEntryFormat(
                     "sublevelparser/command",
                     new Dictionary<string, string>()
                     {
                         { "verb", topLevelCommandName},
-                        {"verbosity", Enum.GetName(parseResult.GetValueForOption(CommonOptions.VerbosityOption))}
+                        { "verbosity", Enum.GetName(verbosityResult.GetValueForOption(CommonOptions.VerbosityOption))}
                     },
                     measurements));
             }
