@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -24,6 +25,8 @@ namespace Microsoft.Build.Tasks
         static HashSet<string> InitializeValidCultureNames()
         {
 #if !FEATURE_CULTUREINFO_GETCULTURES
+            // If we get here, we're in a pre-netstandard2.0 scenario.
+            // https://github.com/dotnet/msbuild/issues/2349#issuecomment-318161879
             if (!AssemblyUtilities.CultureInfoHasGetCultures())
             {
                 return HardcodedCultureNames;
@@ -33,6 +36,11 @@ namespace Microsoft.Build.Tasks
             foreach (CultureInfo cultureName in AssemblyUtilities.GetAllCultures())
             {
                 validCultureNames.Add(cultureName.Name);
+            }
+
+            if (Traits.Instance.EnableHardcodedCultureNames)
+            {
+                validCultureNames.UnionWith(HardcodedCultureNames);
             }
 
             // https://docs.microsoft.com/en-gb/windows/desktop/Intl/using-pseudo-locales-for-localization-testing

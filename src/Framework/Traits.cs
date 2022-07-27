@@ -35,6 +35,11 @@ namespace Microsoft.Build.Framework
 
         public EscapeHatches EscapeHatches { get; }
 
+        /// <summary>
+        /// https://github.com/dotnet/msbuild/issues/3897
+        /// </summary>
+        public readonly bool EnableHardcodedCultureNames = Environment.GetEnvironmentVariable("MSBUILDENABLEHARDCODEDCULTURENAMES") == "1";
+
         internal readonly string MSBuildDisableFeaturesFromVersion = Environment.GetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION");
 
         /// <summary>
