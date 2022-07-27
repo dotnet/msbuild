@@ -5,11 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using System.IO;
 using System.Linq;
 using Microsoft.Build.Execution;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Parser = Microsoft.DotNet.Cli.Parser;
+using Microsoft.VisualBasic.CompilerServices;
+using System.Collections;
 
 namespace Microsoft.DotNet.Tools.Publish
 {
@@ -38,46 +41,19 @@ namespace Microsoft.DotNet.Tools.Publish
             var msbuildArgs = new List<string>()
             {
                 "-target:Publish",
+                "-property:_IsPublishing=true"
             };
 
-            // TODO: Move this code to function ProcessPublishConfigurationProperties(ref msbuildArgs) 
-
-            IEnumerable<string> args = parseResult.GetValueForArgument(PublishCommandParser.SlnOrProjectArgument);
-            string releaseMode = null;
-            bool projectIdentified = false;
-            foreach (string potentialProject in args)
-            {
-                // Get project
-                if (!string.IsNullOrEmpty(potentialProject) && potentialProject.Contains("proj")) // Could be bad if test dir has proj in it, need to eval
-                {
-                    var project = new ProjectInstance(potentialProject);
-                    projectIdentified = true;
-
-                    string publishRelease = project.GetPropertyValue("PublishRelease");
-                    if (!string.IsNullOrEmpty(publishRelease))
-                    {
-                        releaseMode = publishRelease == "true" ? "Release" : "Debug";
-                    }
-                }
-            }
-
-            // Get project
-            if(!projectIdentified)
-            {
-                ; // Call XMake::ProcessProjectSwitch to get the targeting project. This code needs to be imported to the SDK. 
-            }
-
-            if (!string.IsNullOrEmpty(releaseMode))
-                msbuildArgs.Add($"-property:configuration={releaseMode}");
-
-            // -----------
+            IEnumerable<string> slnOrProjectArgs = parseResult.GetValueForArgument(PublishCommandParser.SlnOrProjectArgument);
+            
 
             CommonOptions.ValidateSelfContainedOptions(parseResult.HasOption(PublishCommandParser.SelfContainedOption),
                 parseResult.HasOption(PublishCommandParser.NoSelfContainedOption));
 
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PublishCommandParser.GetCommand()));
-
-            msbuildArgs.AddRange(parseResult.GetValueForArgument(PublishCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
+            msbuildArgs.Add(GetAutomaticConfigurationIfSpecified(parseResult, PublishCommandParser.customDefaultConfigurationProperty,
+                    slnOrProjectArgs, PublishCommandParser.ConfigurationOption) ?? String.Empty);
+            msbuildArgs.AddRange(slnOrProjectArgs ?? Array.Empty<string>());
 
             bool noRestore = parseResult.HasOption(PublishCommandParser.NoRestoreOption)
                           || parseResult.HasOption(PublishCommandParser.NoBuildOption);
@@ -86,6 +62,57 @@ namespace Microsoft.DotNet.Tools.Publish
                 msbuildArgs,
                 noRestore,
                 msbuildPath);
+        }
+
+        public static string GetAutomaticConfigurationIfSpecified(
+            ParseResult parseResult,
+            string defaultedConfigurationProperty,
+            IEnumerable<string> slnOrProjectArgs,
+            Option<string> configOption)
+        {
+            ProjectInstance project = GetTargetedProject(parseResult, slnOrProjectArgs);
+            string releaseMode = "";
+
+            string releasePropertyFlag = project.GetPropertyValue(defaultedConfigurationProperty);
+            if (!string.IsNullOrEmpty(releasePropertyFlag))
+                releaseMode = releasePropertyFlag == "true" ? "Release" : "Debug";
+        
+            if (
+                !ConfigurationAlreadySpecified(parseResult, ref project, configOption) &&
+                !string.IsNullOrEmpty(releaseMode) &&
+                !slnOrProjectArgs.Any(arg => arg.Contains(defaultedConfigurationProperty))
+               )
+                return $"-property:configuration={releaseMode}";
+            else
+                return String.Empty;
+        }
+
+        private static ProjectInstance GetTargetedProject(ParseResult parseResult, IEnumerable<string> slnOrProjectArgs)
+        {
+            string potentialProject = slnOrProjectArgs
+                    .Where(arg => File.Exists(arg) &&
+                        LikeOperator.LikeString(arg, "*.*proj", VisualBasic.CompareMethod.Text))
+                    .ToList()
+                    .FirstOrDefault();
+
+            if (string.IsNullOrWhiteSpace(potentialProject))
+            {
+                try
+                {
+                    potentialProject = MsbuildProject.GetProjectFileFromDirectory(Directory.GetCurrentDirectory()).Name;
+                }
+                catch (GracefulException)
+                {
+                    ; // MSBuild XMake::ProcessProjectSwitch will handle errors if projects for publish/build weren't discoverable.
+                }
+            }
+
+            return new ProjectInstance(potentialProject);
+        }
+
+        private static bool ConfigurationAlreadySpecified(ParseResult parseResult, ref ProjectInstance project, Option<string> configurationOption)
+        {
+            return parseResult.HasOption(configurationOption) || (project.GlobalProperties.ContainsKey("Configuration"));
         }
 
         public static int Run(ParseResult parseResult)
