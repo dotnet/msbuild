@@ -128,10 +128,10 @@ namespace Microsoft.DotNet.Cli.Telemetry
             string topLevelCommandName,
             Dictionary<string, double> measurements = null)
         {
-            if (parseResult.IsDotnetBuiltInCommand() && 
-                parseResult.HasOption(CommonOptions.VerbosityOption) && 
+            if (parseResult.IsDotnetBuiltInCommand() &&
+                parseResult.HasOption(CommonOptions.VerbosityOption) &&
                 parseResult.FindResultFor(CommonOptions.VerbosityOption) is OptionResult verbosityResult &&
-                !String.IsNullOrEmpty(verbosityResult.ErrorMessage)
+                !parseResult.Errors.Any(e => e.SymbolResult == verbosityResult)
                 )
             {
                 result.Add(new ApplicationInsightsEntryFormat(
