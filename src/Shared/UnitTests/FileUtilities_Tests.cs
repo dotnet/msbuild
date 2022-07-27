@@ -901,18 +901,7 @@ namespace Microsoft.Build.UnitTests
             }
            );
         }
-        /// <summary>
-        /// No extension is given
-        /// </summary>
-        [Fact]
-        public void GenerateTempBatchFileWithEmptyExtension()
-        {
-            Assert.Throws<ArgumentException>(() =>
-            {
-                FileUtilities.GetTemporaryFile(String.Empty);
-            }
-           );
-        }
+
         /// <summary>
         /// Directory is invalid
         /// </summary>
