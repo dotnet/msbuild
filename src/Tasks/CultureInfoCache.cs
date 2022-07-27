@@ -59,7 +59,6 @@ namespace Microsoft.Build.Tasks
             return ValidCultureNames.Contains(name);
         }
 
-#if !FEATURE_CULTUREINFO_GETCULTURES
         // Copied from https://github.com/aspnet/Localization/blob/5e1fb16071affd15f15b9c732833f3ae2ac46e10/src/Microsoft.Framework.Globalization.CultureInfoCache/CultureInfoList.cs
         // Regenerated using the tool (removed by https://github.com/aspnet/Localization/pull/130)
         //   * Removed the empty string from the list
@@ -918,6 +917,5 @@ namespace Microsoft.Build.Tasks
             "zh-CHS",
             "zh-CHT"
         };
-#endif
     }
 }
