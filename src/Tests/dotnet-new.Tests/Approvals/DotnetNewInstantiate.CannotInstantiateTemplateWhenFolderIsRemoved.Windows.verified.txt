@@ -1,0 +1,14 @@
+﻿StdErr:
+Unable to locate the specified template content, the template package might be removed or corrupted.
+
+
+For details on the exit code, refer to https://aka.ms/templating-exit-codes#103
+StdOut:
+To rescan installed template packages, run:
+   dotnet-new3 new3 --debug:rebuild-cache
+
+To uninstall the template package, run:
+   dotnet-new3 new3 uninstall {TempPath}TemplateEngine.Tests\Guid_1\template
+
+To install the template package, run:
+   dotnet-new3 new3 install {TempPath}TemplateEngine.Tests\Guid_1\template

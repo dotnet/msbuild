@@ -5,7 +5,9 @@ using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
+using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.Commands;
+using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
 using CreationResultStatus = Microsoft.TemplateEngine.Edge.Template.CreationResultStatus;
 using ITemplateCreationResult = Microsoft.TemplateEngine.Edge.Template.ITemplateCreationResult;
@@ -232,7 +234,31 @@ namespace Microsoft.TemplateEngine.Cli
                     }
                     return NewCommandStatus.MissingRequiredOption;
                 case CreationResultStatus.NotFound:
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, templateArgs).Bold().Red());
+                    Reporter.Error.WriteLine(LocalizableStrings.TemplateCreator_Error_TemplateNotFound.Bold().Red());
+                    Reporter.Error.WriteLine();
+                    Reporter.Output.WriteLine(LocalizableStrings.TemplateCreator_Hint_RebuildCache);
+                    Reporter.Output.WriteCommand(Example.For<NewCommand>(templateArgs.ParseResult).WithOption(NewCommand.DebugRebuildCacheOption));
+                    Reporter.Output.WriteLine();
+                    IManagedTemplatePackage? templatePackage = null;
+                    try
+                    {
+                        using TemplatePackageManager templatePackageManager = new TemplatePackageManager(_environmentSettings);
+                        templatePackage = await templateArgs.Template.GetManagedTemplatePackageAsync(templatePackageManager, cancellationToken).ConfigureAwait(false);
+
+                    }
+                    catch
+                    {
+                        //do nothing
+                    }
+                    if (templatePackage != null)
+                    {
+                        Reporter.Output.WriteLine(LocalizableStrings.TemplateCreator_Hint_Uninstall);
+                        Reporter.Output.WriteCommand(Example.For<UninstallCommand>(templateArgs.ParseResult).WithArgument(UninstallCommand.NameArgument, templatePackage.DisplayName));
+                        Reporter.Output.WriteLine();
+                        Reporter.Output.WriteLine(LocalizableStrings.TemplateCreator_Hint_Install);
+                        Reporter.Output.WriteCommand(Example.For<InstallCommand>(templateArgs.ParseResult).WithArgument(InstallCommand.NameArgument, templatePackage.DisplayName));
+                        Reporter.Output.WriteLine();
+                    }
                     return NewCommandStatus.NotFound;
                 //this is unlikely case as these errors are caught on parse level now, so rely on proper error message from core.
                 //TODO: discuss if we need better handling here, then enhance core to return canonical names as array and not parse them from error message

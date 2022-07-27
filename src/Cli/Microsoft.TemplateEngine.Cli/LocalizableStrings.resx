@@ -413,8 +413,8 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="FileActionsWouldHaveBeenTaken" xml:space="preserve">
     <value>File actions would have been taken:</value>
   </data>
-  <data name="MissingTemplateContentDetected" xml:space="preserve">
-    <value>Unable to locate the specified template content, the template cache may be corrupted. Try running 'dotnet {0} --debug:reinit' to fix the issue.</value>
+  <data name="TemplateCreator_Error_TemplateNotFound" xml:space="preserve">
+    <value>Unable to locate the specified template content, the template package might be removed or corrupted.</value>
   </data>
   <data name="InvalidNameParameter" xml:space="preserve">
     <value>Name cannot contain any of the following characters {0} or character codes {1}</value>
@@ -833,5 +833,17 @@ The header is followed by the list of parameters and their errors (might be seve
   </data>
   <data name="PostAction_AddReference_AddPackageReference_WithVersion" xml:space="preserve">
     <value>Adding a package reference {0} (version: {1}) to project file {2}:</value>
+  </data>
+  <data name="TemplateCreator_Hint_Install" xml:space="preserve">
+    <value>To install the template package, run:</value>
+    <comment>The sentence is followed by the command to run the action</comment>
+  </data>
+  <data name="TemplateCreator_Hint_RebuildCache" xml:space="preserve">
+    <value>To rescan installed template packages, run:</value>
+    <comment>The sentence is followed by the command to run the action</comment>
+  </data>
+  <data name="TemplateCreator_Hint_Uninstall" xml:space="preserve">
+    <value>To uninstall the template package, run:</value>
+    <comment>The sentence is followed by the command to run the action</comment>
   </data>
 </root>

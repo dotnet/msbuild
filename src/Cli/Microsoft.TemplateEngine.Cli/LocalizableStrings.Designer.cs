@@ -911,15 +911,6 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable to locate the specified template content, the template cache may be corrupted. Try running &apos;dotnet {0} --debug:reinit&apos; to fix the issue..
-        /// </summary>
-        internal static string MissingTemplateContentDetected {
-            get {
-                return ResourceManager.GetString("MissingTemplateContentDetected", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Mount Point Factories.
         /// </summary>
         internal static string MountPointFactories {
@@ -1486,6 +1477,42 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string TemplateCommand_DisplayConstraintResults_Warning {
             get {
                 return ResourceManager.GetString("TemplateCommand_DisplayConstraintResults_Warning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to locate the specified template content, the template package might be removed or corrupted..
+        /// </summary>
+        internal static string TemplateCreator_Error_TemplateNotFound {
+            get {
+                return ResourceManager.GetString("TemplateCreator_Error_TemplateNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To install the template package, run:.
+        /// </summary>
+        internal static string TemplateCreator_Hint_Install {
+            get {
+                return ResourceManager.GetString("TemplateCreator_Hint_Install", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To rescan installed template packages, run:.
+        /// </summary>
+        internal static string TemplateCreator_Hint_RebuildCache {
+            get {
+                return ResourceManager.GetString("TemplateCreator_Hint_RebuildCache", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To uninstall the template package, run:.
+        /// </summary>
+        internal static string TemplateCreator_Hint_Uninstall {
+            get {
+                return ResourceManager.GetString("TemplateCreator_Hint_Uninstall", resourceCulture);
             }
         }
         

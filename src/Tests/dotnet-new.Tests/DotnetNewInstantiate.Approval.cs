@@ -549,5 +549,37 @@ namespace Microsoft.DotNet.New.Tests
                 });
         }
 
+        [Fact]
+        public Task CannotInstantiateTemplateWhenFolderIsRemoved()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDir = TestUtils.CreateTemporaryFolder();
+            string templateLocation = Path.Combine(workingDir, "template");
+            TestUtils.DirectoryCopy(TestUtils.GetTestTemplateLocation("TemplateWithSourceName"), templateLocation, true);
+
+            new DotnetNewCommand(_log, "install", templateLocation)
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDir)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr();
+
+            Directory.Delete(templateLocation, true);
+            // Template should be removed from the template list, and it's unknown template now.
+            var commandResult = new DotnetNewCommand(_log, "TestAssets.TemplateWithSourceName")
+                .WithCustomHive(home)
+                .Execute();
+
+            commandResult
+                .Should()
+                .Fail();
+
+            return Verifier.Verify(commandResult.FormatOutputStreams(), _verifySettings)
+                .UniqueForOSPlatform()
+                .ScrubInlineGuids();
+                
+        }
+
     }
 }

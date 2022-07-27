@@ -483,11 +483,6 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">Die obligatorische Option „{0}“ fehlt für die Vorlage „{1}“.</target>
         <note />
       </trans-unit>
-      <trans-unit id="MissingTemplateContentDetected">
-        <source>Unable to locate the specified template content, the template cache may be corrupted. Try running 'dotnet {0} --debug:reinit' to fix the issue.</source>
-        <target state="translated">Der angegebene Vorlageninhalt wurde nicht gefunden, der Vorlagencache ist möglicherweise beschädigt. Führen Sie \"dotnet {0} --debug:reinit\" aus, um das Problem zu beheben.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="MountPointFactories">
         <source>Mount Point Factories</source>
         <target state="translated">Bereitstellungspunkt-Factorys</target>
@@ -826,6 +821,26 @@ The header is followed by the list of parameters and their errors (might be seve
         <source>Warning: the following constraints for the template '{0}' are not met:</source>
         <target state="translated">Warnung: Die folgenden Einschränkungen für die Vorlage „{0}“ sind nicht erfüllt:</target>
         <note>{0} - template name (user friendly)</note>
+      </trans-unit>
+      <trans-unit id="TemplateCreator_Error_TemplateNotFound">
+        <source>Unable to locate the specified template content, the template package might be removed or corrupted.</source>
+        <target state="new">Unable to locate the specified template content, the template package might be removed or corrupted.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCreator_Hint_Install">
+        <source>To install the template package, run:</source>
+        <target state="new">To install the template package, run:</target>
+        <note>The sentence is followed by the command to run the action</note>
+      </trans-unit>
+      <trans-unit id="TemplateCreator_Hint_RebuildCache">
+        <source>To rescan installed template packages, run:</source>
+        <target state="new">To rescan installed template packages, run:</target>
+        <note>The sentence is followed by the command to run the action</note>
+      </trans-unit>
+      <trans-unit id="TemplateCreator_Hint_Uninstall">
+        <source>To uninstall the template package, run:</source>
+        <target state="new">To uninstall the template package, run:</target>
+        <note>The sentence is followed by the command to run the action</note>
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_Description">
         <source>The '{0}' command creates a .NET project based on a template.</source>

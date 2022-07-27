@@ -483,11 +483,6 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">テンプレート '{1}' の必須パラメーター '{0}' がありません。</target>
         <note />
       </trans-unit>
-      <trans-unit id="MissingTemplateContentDetected">
-        <source>Unable to locate the specified template content, the template cache may be corrupted. Try running 'dotnet {0} --debug:reinit' to fix the issue.</source>
-        <target state="translated">指定されたテンプレートのコンテンツが見つからないため、テンプレートキャッシュが壊れている可能性があります。'dotnet {0}--debug: reinit ' を実行して、問題を解決してください。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="MountPointFactories">
         <source>Mount Point Factories</source>
         <target state="translated">マウント ポイントのファクトリ</target>
@@ -826,6 +821,26 @@ The header is followed by the list of parameters and their errors (might be seve
         <source>Warning: the following constraints for the template '{0}' are not met:</source>
         <target state="translated">警告: テンプレート '{0}' は次の制約を満たされていません:</target>
         <note>{0} - template name (user friendly)</note>
+      </trans-unit>
+      <trans-unit id="TemplateCreator_Error_TemplateNotFound">
+        <source>Unable to locate the specified template content, the template package might be removed or corrupted.</source>
+        <target state="new">Unable to locate the specified template content, the template package might be removed or corrupted.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCreator_Hint_Install">
+        <source>To install the template package, run:</source>
+        <target state="new">To install the template package, run:</target>
+        <note>The sentence is followed by the command to run the action</note>
+      </trans-unit>
+      <trans-unit id="TemplateCreator_Hint_RebuildCache">
+        <source>To rescan installed template packages, run:</source>
+        <target state="new">To rescan installed template packages, run:</target>
+        <note>The sentence is followed by the command to run the action</note>
+      </trans-unit>
+      <trans-unit id="TemplateCreator_Hint_Uninstall">
+        <source>To uninstall the template package, run:</source>
+        <target state="new">To uninstall the template package, run:</target>
+        <note>The sentence is followed by the command to run the action</note>
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_Description">
         <source>The '{0}' command creates a .NET project based on a template.</source>

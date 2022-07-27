@@ -5,6 +5,7 @@
 
 using System.IO;
 using FluentAssertions;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
@@ -48,6 +49,11 @@ namespace Microsoft.DotNet.New.Tests
                   .And
                   .NotHaveStdErr();
             return Path.GetFullPath(testTemplate);
+        }
+
+        internal static string FormatOutputStreams(this CommandResult commandResult)
+        {
+            return "StdErr:" + Environment.NewLine + commandResult.StdErr + Environment.NewLine + "StdOut:" + Environment.NewLine + commandResult.StdOut;
         }
     }
 }
