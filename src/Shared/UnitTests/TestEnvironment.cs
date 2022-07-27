@@ -583,7 +583,14 @@ namespace Microsoft.Build.UnitTests
         {
             if (_processId > -1)
             {
-                Process.GetProcessById(_processId).KillTree(1000);
+                try
+                {
+                    Process.GetProcessById(_processId).KillTree(1000);
+                }
+                catch
+                {
+                    // ignore if process is already dead
+                }
             }
         }
     }
