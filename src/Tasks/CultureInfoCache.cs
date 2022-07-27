@@ -38,10 +38,12 @@ namespace Microsoft.Build.Tasks
                 validCultureNames.Add(cultureName.Name);
             }
 
+#if !FEATURE_CULTUREINFO_GETCULTURES
             if (Traits.Instance.EnableHardcodedCultureNames)
             {
                 validCultureNames.UnionWith(HardcodedCultureNames);
             }
+#endif
 
             // https://docs.microsoft.com/en-gb/windows/desktop/Intl/using-pseudo-locales-for-localization-testing
             // These pseudo-locales are available in versions of Windows from Vista and later.
