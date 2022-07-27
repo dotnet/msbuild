@@ -240,7 +240,11 @@ namespace Microsoft.Build.Engine.UnitTests
                 serverIsDown.ShouldBeTrue();
             }
 
-            serverProcess.WaitForExit(1000);
+            if (serverProcess.WaitForExit(3000))
+            {
+                serverProcess.WaitForExit();
+            }
+
             serverProcess.HasExited.ShouldBeTrue();
         }
 
