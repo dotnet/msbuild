@@ -16,7 +16,19 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static partial class FileUtilities
     {
-        internal static string TempFileDirectory = Path.GetTempPath(); // Path.GetDirectoryName(GetTemporaryFile());
+        private static string tempFileDirectory = Path.GetTempPath();
+        internal static string TempFileDirectory
+        {
+            get
+            {
+                if (BuildEnvironmentHelper.Instance.RunningTests)
+                {
+                    return Path.GetTempPath();
+                }
+
+                return tempFileDirectory;
+            }
+        }// Path.GetDirectoryName(GetTemporaryFile());
 
         /// <summary>
         /// Generates a unique directory name in the temporary folder.
@@ -98,6 +110,8 @@ namespace Microsoft.Build.Shared
             {
                 directory ??= TempFileDirectory;
 
+                Directory.CreateDirectory(directory);
+
                 // If the fileName is null, use tmp{Guid}; otherwise use fileName. If the extension needs a dot prepended, do so.
                 string file = Path.Combine(directory, fileName is null ? extension.Length > 0 && extension[0] != '.' ?
                     $"tmp{Guid.NewGuid():N}.{extension}" : $"tmp{Guid.NewGuid():N}{extension}" :
@@ -147,7 +161,7 @@ namespace Microsoft.Build.Shared
             {
                 Path = name == null
                     ? GetTemporaryDirectory()
-                    : System.IO.Path.Combine(System.IO.Path.GetTempPath(), name);
+                    : System.IO.Path.Combine(TempFileDirectory, name);
 
                 if (FileSystems.Default.DirectoryExists(Path))
                 {
