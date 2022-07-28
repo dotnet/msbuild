@@ -82,7 +82,7 @@ stages:
         command: restore
         feedsToUse: config
         restoreSolution: 'eng\common\internal\Tools.csproj'
-        nugetConfigPath: 'NuGet.config'
+        nugetConfigPath: 'eng\common\internal\NuGet.config'
         restoreDirectory: '$(Build.SourcesDirectory)\.packages'
 
     - task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
