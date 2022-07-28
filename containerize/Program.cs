@@ -75,6 +75,13 @@ async Task Containerize(DirectoryInfo folder, string workingDir, string registry
 
     x.SetEntrypoint(entrypoint);
 
+    await PushToLocalDockerViaRegistry(registryName, baseName, imageName, registry, x);
+
+    Console.WriteLine($"Loaded image into local Docker daemon. Use 'docker run --rm -it --name {imageName} {registryName}/{imageName}:latest' to run the application.");
+}
+
+static async Task PushToLocalDockerViaRegistry(string registryName, string baseName, string imageName, Registry registry, Image x)
+{
     // Push the image back to the local registry
 
     await registry.Push(x, imageName, baseName);
@@ -83,7 +90,4 @@ async Task Containerize(DirectoryInfo folder, string workingDir, string registry
 
     var pullBase = System.Diagnostics.Process.Start("docker", $"pull {registryName}/{imageName}:latest");
     await pullBase.WaitForExitAsync();
-
-    Console.WriteLine($"Loaded image into local Docker daemon. Use 'docker run --rm -it --name {imageName} {registryName}/{imageName}:latest' to run the application.");
-
 }
