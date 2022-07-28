@@ -748,6 +748,12 @@ namespace Microsoft.Build.Tasks
 
                         return false;
                     }
+
+                    if (!deleteSourceCodeFile)
+                    {
+                        // Log the location of the code file because MSBUILDLOGCODETASKFACTORYOUTPUT was set.
+                        _log.LogMessageFromResources(MessageImportance.Low, "CodeTaskFactory.FindSourceFileAt", sourceCodePath);
+                    }
                 }
 
                 // Return the assembly which is loaded into memory
