@@ -13,6 +13,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Parser = Microsoft.DotNet.Cli.Parser;
 using Microsoft.VisualBasic.CompilerServices;
 using System.Collections;
+using System.Diagnostics;
 
 namespace Microsoft.DotNet.Tools.Publish
 {
@@ -64,6 +65,14 @@ namespace Microsoft.DotNet.Tools.Publish
                 msbuildPath);
         }
 
+        /// <summary>
+        /// Provide a CLI input to change configuration based on 
+        /// a boolean that may or may not exist in the targeted project.
+        /// <param name="defaultedConfigurationProperty">The boolean property to check the project for. Ex: PublishRelease</param>
+        /// <param name="slnOrProjectArgs">The arguments or solution passed to a dotnet invocation.</param>
+        /// <param name="configOption">The arguments passed to a dotnet invocation related to Configuration.</param>
+        /// </summary>
+        /// <returns>Returns a string such as -property:configuration=value for a projects desired config. May be empty string.</returns>
         public static string GetAutomaticConfigurationIfSpecified(
             ParseResult parseResult,
             string defaultedConfigurationProperty,
@@ -71,29 +80,44 @@ namespace Microsoft.DotNet.Tools.Publish
             Option<string> configOption)
         {
             ProjectInstance project = GetTargetedProject(parseResult, slnOrProjectArgs);
-            string releaseMode = "";
+            
+            if (project != null)
+            {
+                string releaseMode = "";
+                string releasePropertyFlag = project.GetPropertyValue(defaultedConfigurationProperty);
+                if (!string.IsNullOrEmpty(releasePropertyFlag))
+                    releaseMode = releasePropertyFlag == "true" ? "Release" : "Debug";
 
-            string releasePropertyFlag = project.GetPropertyValue(defaultedConfigurationProperty);
-            if (!string.IsNullOrEmpty(releasePropertyFlag))
-                releaseMode = releasePropertyFlag == "true" ? "Release" : "Debug";
-        
-            if (
-                !ConfigurationAlreadySpecified(parseResult, ref project, configOption) &&
-                !string.IsNullOrEmpty(releaseMode) &&
-                !slnOrProjectArgs.Any(arg => arg.Contains(defaultedConfigurationProperty))
-               )
-                return $"-property:configuration={releaseMode}";
-            else
-                return String.Empty;
+                if (
+                    !ConfigurationAlreadySpecified(parseResult, project, configOption) &&
+                    !string.IsNullOrEmpty(releaseMode) &&
+                    !slnOrProjectArgs.Any(arg => arg.Contains(defaultedConfigurationProperty))
+                   )
+                    return $"-property:configuration={releaseMode}";
+            }
+            return String.Empty;
         }
 
         private static ProjectInstance GetTargetedProject(ParseResult parseResult, IEnumerable<string> slnOrProjectArgs)
         {
-            string potentialProject = slnOrProjectArgs
-                    .Where(arg => File.Exists(arg) &&
-                        LikeOperator.LikeString(arg, "*.*proj", VisualBasic.CompareMethod.Text))
-                    .ToList()
-                    .FirstOrDefault();
+            string potentialProject = "";
+            foreach (string arg in slnOrProjectArgs)
+            {
+                if (File.Exists(arg) && LikeOperator.LikeString(arg, "*.*proj", VisualBasic.CompareMethod.Text))
+                {
+                    potentialProject = arg;
+                    break;
+                }
+                else if(Directory.Exists(arg))
+                {
+                    List<string> projectFiles = Directory.EnumerateFileSystemEntries(arg, "*.*proj", SearchOption.TopDirectoryOnly).ToList();
+                    if(projectFiles.Any())
+                    {
+                        potentialProject = projectFiles.First();
+                        break;
+                    }
+                }
+            }
 
             if (string.IsNullOrWhiteSpace(potentialProject))
             {
@@ -107,10 +131,10 @@ namespace Microsoft.DotNet.Tools.Publish
                 }
             }
 
-            return new ProjectInstance(potentialProject);
+            return string.IsNullOrEmpty(potentialProject) ? null : new ProjectInstance(potentialProject);
         }
 
-        private static bool ConfigurationAlreadySpecified(ParseResult parseResult, ref ProjectInstance project, Option<string> configurationOption)
+        private static bool ConfigurationAlreadySpecified(ParseResult parseResult, ProjectInstance project, Option<string> configurationOption)
         {
             return parseResult.HasOption(configurationOption) || (project.GlobalProperties.ContainsKey("Configuration"));
         }
