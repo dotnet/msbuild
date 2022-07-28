@@ -442,7 +442,8 @@ namespace Microsoft.Build.Tasks
                 taskInfo.CodeType = RoslynCodeTaskFactoryCodeType.Class;
                 taskInfo.SourceCode = File.ReadAllText(sourceAttribute.Value.Trim());
             }
-            else if (typeAttribute != null)
+
+            if (typeAttribute != null)
             {
                 if (String.IsNullOrWhiteSpace(typeAttribute.Value))
                 {
