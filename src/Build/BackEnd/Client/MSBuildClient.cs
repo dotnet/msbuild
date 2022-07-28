@@ -232,7 +232,7 @@ namespace Microsoft.Build.Experimental
             bool serverIsAlreadyRunning = ServerNamedMutex.WasOpen(serverRunningMutexName);
             if (!serverIsAlreadyRunning)
             {
-                CommunicationsUtilities.Trace("No need to shutdown server node for it is n-ot running.");
+                CommunicationsUtilities.Trace("No need to shutdown server node for it is not running.");
                 return true;
             }
 
@@ -240,20 +240,20 @@ namespace Microsoft.Build.Experimental
             var serverWasBusy = ServerNamedMutex.WasOpen(serverBusyMutexName);
             if (serverWasBusy)
             {
-                CommunicationsUtilities.Trace("Server can not be shutdown for it is not idle.");
+                CommunicationsUtilities.Trace("Server cannot be shut down for it is not idle.");
                 return false;
             }
 
             // Connect to server.
             if (!TryConnectToServer(1_000))
             {
-                CommunicationsUtilities.Trace("Server connect to idle server to shutdown it.");
+                CommunicationsUtilities.Trace("Client cannot connect to idle server to shut it down.");
                 return false;
             }
 
             if (!TrySendShutdownCommand())
             {
-                CommunicationsUtilities.Trace("Failed sent shutdown command to the server.");
+                CommunicationsUtilities.Trace("Failed to send shutdown command to the server.");
                 return false;
             }
 
