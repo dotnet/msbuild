@@ -529,7 +529,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                     lock (_msiAdminInstallLock)
                     {
-                        string adminInstallLog = Path.Combine(Path.GetTempPath(), $"Microsoft.NET.Workload_{DateTime.Now:yyyyMMdd_HHmmss}_AdminInstall_{Path.GetFileNameWithoutExtension(msiPath)}.log");
+                        string adminInstallLog = GetMsiLogNameForAdminInstall(msiPath);
 
                         Log?.LogMessage($"ExtractManifestAsync: Running admin install for '{msiExtractionPath}'.  Log file: '{adminInstallLog}'");
 
