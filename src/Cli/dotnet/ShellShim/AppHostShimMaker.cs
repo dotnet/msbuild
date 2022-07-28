@@ -51,17 +51,17 @@ namespace Microsoft.DotNet.ShellShim
                                          appHostDestinationFilePath: appHostDestinationFilePath,
                                          appBinaryFilePath: appBinaryFilePath,
                                          windowsGraphicalUserInterface: (windowsGraphicalUserInterfaceBit == WindowsGUISubsystem),
-                                         assemblyToCopyResorcesFrom: entryPointFullPath);
+                                         assemblyToCopyResourcesFrom: entryPointFullPath);
             }
             else
             {
-                // by passing null to assemblyToCopyResorcesFrom, it will skip copying resources,
+                // by passing null to assemblyToCopyResourcesFrom, it will skip copying resources,
                 // which is only supported on Windows
                 HostWriter.CreateAppHost(appHostSourceFilePath: appHostSourcePath,
                                          appHostDestinationFilePath: appHostDestinationFilePath,
                                          appBinaryFilePath: appBinaryFilePath,
                                          windowsGraphicalUserInterface: false,
-                                         assemblyToCopyResorcesFrom: null,
+                                         assemblyToCopyResourcesFrom: null,
                                          enableMacOSCodeSign: OperatingSystem.IsMacOS());
             }
 
