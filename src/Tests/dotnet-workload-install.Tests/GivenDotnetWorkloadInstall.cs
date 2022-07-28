@@ -416,7 +416,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             // Install workload for RC1
             installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: new MockNuGetPackageDownloader(tmpDir),
-                workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: rc1SdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
+                workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: rc1SdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory, installedFeatureBand: rc1SdkFeatureVersion);
             installCommand.Execute();
 
             // Existing installation is present
