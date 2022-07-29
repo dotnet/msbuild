@@ -17,32 +17,26 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
     /// Collection of Suppressions which is able to add suppressions, check if a specific error is suppressed, and write all suppressions
     /// down to a file. The engine is thread-safe.
     /// </summary>
-    public class SuppressionEngine
+    public class SuppressionEngine : ISuppressionEngine
     {
         protected HashSet<Suppression> _validationSuppressions;
         private readonly ReaderWriterLockSlim _readerWriterLock = new();
         private readonly XmlSerializer _serializer = new(typeof(Suppression[]), new XmlRootAttribute("Suppressions"));
         private readonly HashSet<string> _noWarn;
 
-        /// <summary>
-        /// Creates a new instance of <see cref="SuppressionEngine"/>.
-        /// </summary>
-        /// <param name="suppressionsFile">The path to the suppressions file to be used for initialization.</param>
-        /// <param name="noWarn">Suppression ids to suppress specific errors. Multiple suppressions are separated by a ';' character.</param>
-        public SuppressionEngine(string? suppressionsFile = null, string ? noWarn = null)
+        public bool BaselineAllErrors { get; }
+
+        /// <inheritdoc/>
+        public SuppressionEngine(string? suppressionFile = null,
+            string? noWarn = null,
+            bool baselineAllErrors = false)
         {
-            _validationSuppressions = ParseSuppressionFile(suppressionsFile);
-            _noWarn = string.IsNullOrEmpty(noWarn) ? new HashSet<string>() : new HashSet<string>(noWarn?.Split(';'));
+            _validationSuppressions = ParseSuppressionFile(suppressionFile);
+            _noWarn = string.IsNullOrEmpty(noWarn) ? new HashSet<string>() : new HashSet<string>(noWarn!.Split(';'));
+            BaselineAllErrors = baselineAllErrors;
         }
 
-        /// <summary>
-        /// Checks if the passed in error is suppressed or not.
-        /// </summary>
-        /// <param name="diagnosticId">The diagnostic ID of the error to check.</param>
-        /// <param name="target">The target of where the <paramref name="diagnosticId"/> should be applied.</param>
-        /// <param name="left">Optional. The left operand in a APICompat error.</param>
-        /// <param name="right">Optional. The right operand in a APICompat error.</param>
-        /// <returns><see langword="true"/> if the error is already suppressed. <see langword="false"/> otherwise.</returns>
+        /// <inheritdoc/>
         public bool IsErrorSuppressed(string diagnosticId, string? target, string? left = null, string? right = null, bool isBaselineSuppression = false)
         {
             return IsErrorSuppressed(new Suppression(diagnosticId)
@@ -54,42 +48,44 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
             });
         }
 
-        /// <summary>
-        /// Checks if the passed in error is suppressed or not.
-        /// </summary>
-        /// <param name="error">The <see cref="Suppression"/> error to check.</param>
-        /// <returns><see langword="true"/> if the error is already suppressed. <see langword="false"/> otherwise.</returns>
+        /// <inheritdoc/>
         public bool IsErrorSuppressed(Suppression error)
         {
+            if (_noWarn.Contains(error.DiagnosticId))
+            {
+                return true;
+            }
+
             _readerWriterLock.EnterReadLock();
             try
             {
-                if (_noWarn.Contains(error.DiagnosticId) || _validationSuppressions.Contains(error))
+                if (_validationSuppressions.Contains(error))
                 {
                     return true;
                 }
-                else if (error.DiagnosticId.StartsWith("cp", StringComparison.InvariantCultureIgnoreCase))
+                else if (error.DiagnosticId.StartsWith("cp", StringComparison.InvariantCultureIgnoreCase) &&
+                         (_validationSuppressions.Contains(new Suppression(error.DiagnosticId) { Target = error.Target, IsBaselineSuppression = error.IsBaselineSuppression }) ||
+                          _validationSuppressions.Contains(new Suppression(error.DiagnosticId) { Left = error.Left, Right = error.Right, IsBaselineSuppression = error.IsBaselineSuppression })))
                 {
                     // See if the error is globally suppressed by checking if the same diagnosticid and target or with the same left and right
-                    return _validationSuppressions.Contains(new Suppression(error.DiagnosticId) { Target = error.Target, IsBaselineSuppression = error.IsBaselineSuppression }) ||
-                           _validationSuppressions.Contains(new Suppression(error.DiagnosticId) { Left = error.Left, Right = error.Right, IsBaselineSuppression = error.IsBaselineSuppression });
+                    return true;
                 }
-
-                return false;
             }
             finally
             {
                 _readerWriterLock.ExitReadLock();
             }
+
+            if (BaselineAllErrors)
+            {
+                AddSuppression(error);
+                return true;
+            }
+
+            return false;
         }
 
-        /// <summary>
-        /// Adds a suppression to the collection.
-        /// </summary>
-        /// <param name="diagnosticId">The diagnostic ID of the error to add.</param>
-        /// <param name="target">The target of where the <paramref name="diagnosticId"/> should be applied.</param>
-        /// <param name="left">Optional. The left operand in a APICompat error.</param>
-        /// <param name="right">Optional. The right operand in a APICompat error.</param>
+        /// <inheritdoc/>
         public void AddSuppression(string diagnosticId, string? target, string? left = null, string? right = null, bool isBaselineSuppression = false)
         {
             AddSuppression(new Suppression(diagnosticId)
@@ -101,10 +97,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
             });
         }
 
-        /// <summary>
-        /// Adds a suppression to the collection.
-        /// </summary>
-        /// <param name="suppression">The <see cref="Suppression"/> to be added.</param>
+        /// <inheritdoc/>
         public void AddSuppression(Suppression suppression)
         {
             _readerWriterLock.EnterUpgradeableReadLock();
@@ -129,14 +122,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
             }
         }
 
-        /// <summary>
-        /// Writes all suppressions in collection down to a file, if empty it doesn't write anything.
-        /// </summary>
-        /// <param name="supressionFile">The path to the file to be written.</param>
-        /// <returns>Whether it wrote the file.</returns>
+        /// <inheritdoc/>
         public bool WriteSuppressionsToFile(string supressionFile)
         {
-            if (_validationSuppressions.Count <= 0)
+            if (_validationSuppressions.Count == 0)
                 return false;
 
             using (Stream writer = GetWritableStream(supressionFile))
@@ -184,7 +173,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
             }
         }
 
-        protected virtual Stream GetReadableStream(string supressionFile) => new FileStream(supressionFile, FileMode.Open);
+        // FileAccess.Read and FileShare.Read are specified to allow multiple processes to concurrently read from the suppression file.
+        protected virtual Stream GetReadableStream(string supressionFile) => new FileStream(supressionFile, FileMode.Open, FileAccess.Read, FileShare.Read);
 
         protected virtual Stream GetWritableStream(string suppressionFile) => new FileStream(suppressionFile, FileMode.Create);
     }

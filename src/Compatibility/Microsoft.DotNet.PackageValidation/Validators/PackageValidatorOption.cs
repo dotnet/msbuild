@@ -1,8 +1,6 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
-
 namespace Microsoft.DotNet.PackageValidation.Validators
 {
     /// <summary>
@@ -11,43 +9,43 @@ namespace Microsoft.DotNet.PackageValidation.Validators
     public readonly struct PackageValidatorOption
     {
         /// <summary>
-        /// The latest package that should be validated
+        /// The latest package that should be validated.
         /// </summary>
         public Package Package { get; }
 
         /// <summary>
-        /// If true, comparison is performed in strict mode
+        /// If true, comparision is performed in strict mode.
         /// </summary>
         public bool EnableStrictMode { get; }
 
         /// <summary>
-        /// If true, ApiCompat comparison is performed in addition to other package checks
+        /// If true, work items for api compatibility checks are enqueued.
         /// </summary>
-        public bool RunApiCompat { get; }
+        public bool EnqueueApiCompatWorkItems { get; }
 
         /// <summary>
-        /// Assembly reference assemblies grouped per target framework
+        /// If true, executes enqueued api compatibility work items.
         /// </summary>
-        public Dictionary<string, HashSet<string>>? FrameworkReferences { get; }
+        public bool ExecuteApiCompatWorkItems { get; }
 
         /// <summary>
-        /// The baseline package to validate the latest package
+        /// The baseline package to validate the latest package.
         /// </summary>
         public Package? BaselinePackage { get; }
 
         /// <summary>
-        /// Intantiates a new PackageValidatorOption type to be passed into a validator
+        /// Intantiates a new PackageValidatorOption type to be passed into a validator.
         /// </summary>
         public PackageValidatorOption(Package package,
             bool enableStrictMode = false,
-            bool runApiCompat = false,
-            Dictionary<string, HashSet<string>>? frameworkReferences = null,
+            bool enqueueApiCompatWorkItems = true,
+            bool executeApiCompatWorkItems = true,
             Package? baselinePackage = null)
         {
             Package = package;
             EnableStrictMode = enableStrictMode;
-            RunApiCompat = runApiCompat;
-            FrameworkReferences = frameworkReferences;
+            EnqueueApiCompatWorkItems = enqueueApiCompatWorkItems;
+            ExecuteApiCompatWorkItems = executeApiCompatWorkItems;
             BaselinePackage = baselinePackage;
         }
     }

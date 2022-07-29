@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.DotNet.ApiCompatibility.Logging;
+using Microsoft.DotNet.ApiCompatibility.Runner;
 using NuGet.ContentModel;
 using NuGet.Frameworks;
 
@@ -14,34 +15,33 @@ namespace Microsoft.DotNet.PackageValidation.Validators
     /// </summary>
     public class BaselinePackageValidator : IPackageValidator
     {
-        private readonly CompatibilityLoggerBase _log;
+        private readonly ICompatibilityLogger _log;
+        private readonly IApiCompatRunner _apiCompatRunner;
 
-        public BaselinePackageValidator(CompatibilityLoggerBase log)
+        public BaselinePackageValidator(ICompatibilityLogger log,
+            IApiCompatRunner apiCompatRunner)
         {
             _log = log;
+            _apiCompatRunner = apiCompatRunner;
         }
 
         /// <summary>
         /// Validates the latest nuget package doesnot drop any target framework/rid and does not introduce any breaking changes.
         /// </summary>
         /// <param name="package">Nuget Package that needs to be validated.</param>
-        public void Validate(PackageValidatorOption option)
+        public void Validate(PackageValidatorOption options)
         {
-            if (option.BaselinePackage is null)
-                throw new ArgumentNullException(nameof(option.BaselinePackage));
+            if (options.BaselinePackage is null)
+                throw new ArgumentNullException(nameof(options.BaselinePackage));
 
-            ApiCompatRunner apiCompatRunner = new(_log,
-                option.EnableStrictMode,
-                option.FrameworkReferences,
-                option.BaselinePackage.PackagePath,
-                option.Package.PackagePath);
+            ApiCompatRunnerOptions apiCompatOptions = new(options.EnableStrictMode, isBaselineComparison: true);
 
             // Iterate over all available baseline assets
-            foreach (ContentItem baselineCompileTimeAsset in option.BaselinePackage.RefAssets)
+            foreach (ContentItem baselineCompileTimeAsset in options.BaselinePackage.RefAssets)
             {
                 // Search for a compatible compile time asset in the latest package
                 NuGetFramework baselineTargetFramework = (NuGetFramework)baselineCompileTimeAsset.Properties["tfm"];
-                ContentItem? latestCompileTimeAsset = option.Package.FindBestCompileAssetForFramework(baselineTargetFramework);
+                ContentItem? latestCompileTimeAsset = options.Package.FindBestCompileAssetForFramework(baselineTargetFramework);
                 if (latestCompileTimeAsset == null)
                 {
                     _log.LogError(
@@ -50,20 +50,24 @@ namespace Microsoft.DotNet.PackageValidation.Validators
                         Resources.MissingTargetFramework,
                         baselineTargetFramework.ToString());
                 }
-                else if (option.RunApiCompat)
+                else if (options.EnqueueApiCompatWorkItems)
                 {
-                    string header = string.Format(Resources.ApiCompatibilityBaselineHeader, baselineCompileTimeAsset.Path, latestCompileTimeAsset.Path, option.BaselinePackage.Version, option.Package.Version);
-                    apiCompatRunner.QueueApiCompatFromContentItem(option.Package.PackageId, baselineCompileTimeAsset, latestCompileTimeAsset, header, isBaseline: true);
+                    _apiCompatRunner.QueueApiCompatFromContentItem(_log,
+                        baselineCompileTimeAsset,
+                        latestCompileTimeAsset,
+                        apiCompatOptions,
+                        options.BaselinePackage,
+                        options.Package);
                 }
             }
 
             // Iterates over both runtime and runtime specific baseline assets and searches for a compatible non runtime
             // specific asset in the latest package.
-            foreach (ContentItem baselineRuntimeAsset in option.BaselinePackage.RuntimeAssets)
+            foreach (ContentItem baselineRuntimeAsset in options.BaselinePackage.RuntimeAssets)
             {
                 // Search for a compatible runtime asset in the latest package
                 NuGetFramework baselineTargetFramework = (NuGetFramework)baselineRuntimeAsset.Properties["tfm"];
-                ContentItem? latestRuntimeAsset = option.Package.FindBestRuntimeAssetForFramework(baselineTargetFramework);
+                ContentItem? latestRuntimeAsset = options.Package.FindBestRuntimeAssetForFramework(baselineTargetFramework);
                 if (latestRuntimeAsset == null)
                 {
                     _log.LogError(
@@ -72,19 +76,23 @@ namespace Microsoft.DotNet.PackageValidation.Validators
                         Resources.MissingTargetFramework,
                         baselineTargetFramework.ToString());
                 }
-                else if (option.RunApiCompat)
+                else if (options.EnqueueApiCompatWorkItems)
                 {
-                    string header = string.Format(Resources.ApiCompatibilityBaselineHeader, baselineRuntimeAsset.Path, latestRuntimeAsset.Path, option.BaselinePackage.Version, option.Package.Version);
-                    apiCompatRunner.QueueApiCompatFromContentItem(option.Package.PackageId, baselineRuntimeAsset, latestRuntimeAsset, header, isBaseline: true);
+                    _apiCompatRunner.QueueApiCompatFromContentItem(_log,
+                        baselineRuntimeAsset,
+                        latestRuntimeAsset,
+                        apiCompatOptions,
+                        options.BaselinePackage,
+                        options.Package);
                 }
             }
 
             // Compares runtime specific baseline assets against runtime specific latest assets.
-            foreach (ContentItem baselineRuntimeSpecificAsset in option.BaselinePackage.RuntimeSpecificAssets)
+            foreach (ContentItem baselineRuntimeSpecificAsset in options.BaselinePackage.RuntimeSpecificAssets)
             {
                 NuGetFramework baselineTargetFramework = (NuGetFramework)baselineRuntimeSpecificAsset.Properties["tfm"];
                 string baselineRid = (string)baselineRuntimeSpecificAsset.Properties["rid"];
-                ContentItem? latestRuntimeSpecificAsset = option.Package.FindBestRuntimeAssetForFrameworkAndRuntime(baselineTargetFramework, baselineRid);
+                ContentItem? latestRuntimeSpecificAsset = options.Package.FindBestRuntimeAssetForFrameworkAndRuntime(baselineTargetFramework, baselineRid);
                 if (latestRuntimeSpecificAsset == null)
                 {
                     _log.LogError(
@@ -94,15 +102,19 @@ namespace Microsoft.DotNet.PackageValidation.Validators
                         baselineTargetFramework.ToString(),
                         baselineRid);
                 }
-                else if (option.RunApiCompat)
+                else if (options.EnqueueApiCompatWorkItems)
                 {
-                    string header = string.Format(Resources.ApiCompatibilityBaselineHeader, baselineRuntimeSpecificAsset.Path, latestRuntimeSpecificAsset.Path, option.BaselinePackage.Version, option.Package.Version);
-                    apiCompatRunner.QueueApiCompatFromContentItem(option.Package.PackageId, baselineRuntimeSpecificAsset, latestRuntimeSpecificAsset, header, isBaseline: true);
+                    _apiCompatRunner.QueueApiCompatFromContentItem(_log,
+                        baselineRuntimeSpecificAsset,
+                        latestRuntimeSpecificAsset,
+                        apiCompatOptions,
+                        options.BaselinePackage,
+                        options.Package);
                 }
             }
 
-            if (option.RunApiCompat)
-                apiCompatRunner.RunApiCompat();
+            if (options.ExecuteApiCompatWorkItems)
+                _apiCompatRunner.ExecuteWorkItems();
         }
     }
 }

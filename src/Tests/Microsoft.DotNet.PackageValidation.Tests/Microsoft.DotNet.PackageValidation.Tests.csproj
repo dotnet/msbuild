@@ -1,17 +1,8 @@
-﻿<Project>
-  <PropertyGroup>
-    <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
-  </PropertyGroup>
-
-  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-    <TargetFrameworks>net472;$(ToolsetTargetFramework)</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">$(ToolsetTargetFramework)</TargetFrameworks>
+    <TargetFrameworks>$(ToolsetTargetFramework);net472</TargetFrameworks>
     <OutputType Condition="'$(TargetFramework)' == '$(ToolsetTargetFramework)'">Exe</OutputType>
-
-    <ExcludeFromSourceBuild>true</ExcludeFromSourceBuild>
     <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
@@ -20,18 +11,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\Compatibility\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
   </ItemGroup>
-
-  <Target Name="CopyCompatibilityFilesForTests" AfterTargets="Publish">
-    <ItemGroup>
-      <CompatibilityFiles Include="..\..\Compatibility\Microsoft.DotNet.Compatibility\**" />
-      <CompatibilityFiles Include="..\..\Tasks\Microsoft.NET.Build.Tasks\targets\Microsoft.NET.Compatibility.targets" />   
-  </ItemGroup>
-    <Copy SourceFiles="@(CompatibilityFiles)" DestinationFiles="@(CompatibilityFiles->'$(PublishDir)Compatibility\Microsoft.DotNet.Compatibility\%(RecursiveDir)%(Filename)%(Extension)')" />
-  </Target>
-
-  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
 </Project>

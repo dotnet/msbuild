@@ -155,7 +155,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.FSharp.props" Condition="'$(MSBuildProjectExtension)' == '.fsproj'" />
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.ILCompiler" />
   <Import Project="Sdk.props" Sdk="Microsoft.NET.ILLink.Tasks" />
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Compatibility.props" />
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackTool.props" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackProjectTool.props" />

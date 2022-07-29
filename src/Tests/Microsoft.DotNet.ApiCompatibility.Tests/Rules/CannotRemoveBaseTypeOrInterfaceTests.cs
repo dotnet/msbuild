@@ -281,7 +281,7 @@ namespace CompatTests
             };
 
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
-            MetadataInformation leftMetadata = new("left", "net6.0", "ref/a.dll");
+            MetadataInformation leftMetadata = new("left", @"ref\a.dll");
             ElementContainer<IAssemblySymbol> leftContainer = new(left, leftMetadata);
 
             IList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);

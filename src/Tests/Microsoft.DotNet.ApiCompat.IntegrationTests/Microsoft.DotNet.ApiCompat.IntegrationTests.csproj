@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net472;$(ToolsetTargetFramework)</TargetFrameworks>
+    <OutputType Condition="'$(TargetFramework)' == '$(ToolsetTargetFramework)'">Exe</OutputType>
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Microsoft.DotNet.PackageValidation.Tests\TestLogger.cs" />
+    <EmbeddedResource Include="..\..\Compatibility\Microsoft.DotNet.PackageValidation\Resources.resx" GenerateSource="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Compatibility\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" />
+    <ProjectReference Include="..\..\Compatibility\Microsoft.DotNet.ApiCompat.Task\Microsoft.DotNet.ApiCompat.Task.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
+  </ItemGroup>
+
+  <Target Name="CopyCompatibilityFilesForTests" AfterTargets="Publish">
+    <ItemGroup>
+      <CompatibilityFiles Include="..\..\Compatibility\Microsoft.DotNet.ApiCompat.Task\**" />
+      <CompatibilityFiles Include="..\..\Tasks\Microsoft.NET.Build.Tasks\targets\Microsoft.NET.ApiCompat.targets" />   
+    </ItemGroup>
+    <Copy SourceFiles="@(CompatibilityFiles)" DestinationFiles="@(CompatibilityFiles->'$(PublishDir)Compatibility\Microsoft.DotNet.ApiCompat.Task\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+</Project>

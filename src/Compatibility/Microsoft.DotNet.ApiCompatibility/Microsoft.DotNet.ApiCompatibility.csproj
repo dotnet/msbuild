@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>net6.0;net472</TargetFrameworks>
     <StrongNameKeyId>Open</StrongNameKeyId>
     <!-- We need to compare ISymbols in a special way (by name) and roslyn symbol comparers take more heuristics into consideration.-->
     <NoWarn>RS1024;$(NoWarn)</NoWarn>
@@ -12,11 +12,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Jab" Version="$(JabVersion)" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="$(_MicrosoftCodeAnalysisVersion)" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Update="Resources.resx" GenerateSource="True" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <Reference Include="System.IO.Compression" />
   </ItemGroup>
 
 </Project>
