@@ -74,6 +74,7 @@ jobs:
                     $(_OfficialBuildIdArgs)
                     /p:Test=false
                     $(_InternalRuntimeDownloadArgs)
+                    $(_OfficialBuildArgs)
           displayName: Build
           env:
             BuildConfig: $(_BuildConfig)
