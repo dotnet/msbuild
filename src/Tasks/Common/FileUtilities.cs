@@ -35,5 +35,13 @@ namespace Microsoft.NET.Build.Tasks
             return s_assemblyExtensions.Contains(extension) ? GetAssemblyVersion(sourcePath) : null;
         }
 
+        public static string CreateTempPath()
+        {
+            // TODO: Make this call the API once it is complete.
+            string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            Directory.CreateDirectory(path);
+            return path;
+        }
+
     }
 }
