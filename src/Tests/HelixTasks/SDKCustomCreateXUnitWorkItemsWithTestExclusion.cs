@@ -130,9 +130,6 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
 
             string msbuildAdditionalSdkResolverFolder = netFramework ? "-e DOTNET_SDK_TEST_MSBUILDSDKRESOLVER_FOLDER=%HELIX_CORRELATION_PAYLOAD%\\r" : IsPosixShell ? "" : "-msbuildAdditionalSdkResolverFolder %HELIX_CORRELATION_PAYLOAD%\\r";
 
-            // We want to add a nuget cache for predownloaded runtime packages but this appears to break the packageinstall tests. For now only enable on windows
-            string localNugetCache = IsPosixShell || assemblyName.Contains("Microsoft.DotNet.PackageInstall.Tests") ? "" : "dotnet nuget add source %DOTNET_ROOT%\\.nuget & ";
-
             var scheduler = new AssemblyScheduler(methodLimit: 32);
             var assemblyPartitionInfos = scheduler.Schedule(targetPath, netFramework: netFramework);
 
@@ -145,8 +142,6 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
                     var testFilter = String.IsNullOrEmpty(assemblyPartitionInfo.ClassListArgumentString) ? "" : $"--filter \"{assemblyPartitionInfo.ClassListArgumentString}\"";
                     command = $"{driver} test {assemblyName} {testExecutionDirectory} {msbuildAdditionalSdkResolverFolder} {(XUnitArguments != null ? " " + XUnitArguments : "")} --results-directory .\\ --logger trx {testFilter}";
                 }
-
-                command = localNugetCache + command;
 
                 Log.LogMessage($"Creating work item with properties Identity: {assemblyName}, PayloadDirectory: {publishDirectory}, Command: {command}");
 
