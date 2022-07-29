@@ -20,6 +20,7 @@
     <Compile Include="$(RepoRoot)src\Common\EnvironmentVariableNames.cs" LinkBase="Common" />
     <Compile Include="$(RepoRoot)src\Common\WorkloadFileBasedInstall.cs" LinkBase="Common" />
     <Compile Include="$(RepoRoot)src\Tasks\Common\FileUtilities.cs" LinkBase="Common" />
+    <Compile Include="$(RepoRoot)src\Tasks\Common\FileUtilities.MetadataReader.cs" LinkBase="Common" />
     <Compile Remove="commands\dotnet-workload\list\VisualStudioWorkloads.cs" Condition="'$(DotNetBuildFromSource)' == 'true'" />
     <EmbeddedResource Include="commands\dotnet-new\*.zip" />
     <EmbeddedResource Update="**\*.resx" GenerateSource="true" />
