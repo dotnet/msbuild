@@ -2,7 +2,7 @@
   "profiles": {
     "containerize": {
       "commandName": "Project",
-      "commandLineArgs": "--folder S:\\play\\helloworld6\\bin\\Debug\\net6.0\\publish --registry \"http://localhost:5010\" --base \"dotnet/sdk\" --baseTag \"6.0\" --entrypoint \"/app/helloworld6\" --name \"demo/container\""
+      "commandLineArgs": "S:\\play\\container-demo\\bin\\Debug\\net6.0\\linux-x64\\ --registry localhost:5010 --base \"dotnet/runtime\" --baseTag \"6.0\" --entrypoint \"/app/container-demo\" --name \"showcase/demo\""
     }
   }
 }
