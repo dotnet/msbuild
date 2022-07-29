@@ -13,6 +13,7 @@ using Microsoft.DotNet.Tools;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
+using Microsoft.NET.Build.Tasks;
 
 namespace Microsoft.DotNet.ToolPackage
 {
@@ -53,7 +54,7 @@ namespace Microsoft.DotNet.ToolPackage
                         Directory.CreateDirectory(stageDirectory.Value);
                         rollbackDirectory = stageDirectory.Value;
 
-                        var tempProject = CreateTempProject(
+                        Tuple<FilePath, string> tempProjectDetails = CreateDirectoryWithTempProject(
                             packageId: packageId,
                             versionRange: versionRange,
                             targetFramework: string.IsNullOrEmpty(targetFramework) ? BundledTargetFramework.GetTargetFrameworkMoniker() :  targetFramework,
@@ -65,13 +66,13 @@ namespace Microsoft.DotNet.ToolPackage
                         try
                         {
                             _projectRestorer.Restore(
-                                tempProject,
+                                new FilePath(tempProjectDetails.Item1.ToString() + tempProjectDetails.Item2),
                                 packageLocation,
                                 verbosity: verbosity);
                         }
                         finally
                         {
-                            File.Delete(tempProject.Value);
+                            Directory.Delete(tempProjectDetails.Item1.ToString(), recursive: true);
                         }
 
                         var version = _store.GetStagedPackageVersion(stageDirectory, packageId);
@@ -131,7 +132,7 @@ namespace Microsoft.DotNet.ToolPackage
 
             Directory.CreateDirectory(tempDirectoryForAssetJson.Value);
 
-            var tempProject = CreateTempProject(
+            var tempProject = CreateDirectoryWithTempProject(
                 packageId: packageId,
                 versionRange: versionRange,
                 targetFramework: string.IsNullOrEmpty(targetFramework) ? BundledTargetFramework.GetTargetFrameworkMoniker() : targetFramework,
@@ -155,7 +156,7 @@ namespace Microsoft.DotNet.ToolPackage
             return ToolPackageInstance.CreateFromAssetFile(packageId, tempDirectoryForAssetJson);
         }
 
-        private FilePath CreateTempProject(
+        private Tuple<FilePath, string> CreateDirectoryWithTempProject(
             PackageId packageId,
             VersionRange versionRange,
             string targetFramework,
@@ -164,16 +165,9 @@ namespace Microsoft.DotNet.ToolPackage
             DirectoryPath? rootConfigDirectory,
             string[] additionalFeeds)
         {
-            var tempProject = _tempProject ?? new DirectoryPath(Path.GetTempPath())
-                .WithSubDirectories(Path.GetRandomFileName())
-                .WithFile("restore.csproj");
-
-            if (Path.GetExtension(tempProject.Value) != "csproj")
-            {
-                tempProject = new FilePath(Path.ChangeExtension(tempProject.Value, "csproj"));
-            }
-
-            Directory.CreateDirectory(tempProject.GetDirectoryPath().Value);
+            string tempProjectName = "restore.csproj";
+            string tempProjectDir = _tempProject.ToString() ?? FileUtilities.CreateTempPath();
+            File.WriteAllText(Path.Combine(tempProjectDir, tempProjectName), null);
 
             var tempProjectContent = new XDocument(
                 new XElement("Project",
@@ -203,8 +197,8 @@ namespace Microsoft.DotNet.ToolPackage
                         new XAttribute("Project", "Sdk.targets"),
                         new XAttribute("Sdk", "Microsoft.NET.Sdk"))));
 
-            File.WriteAllText(tempProject.Value, tempProjectContent.ToString());
-            return tempProject;
+            File.WriteAllText(Path.Combine(tempProjectDir, tempProjectName), tempProjectContent.ToString());
+            return new Tuple<FilePath, string>(new FilePath(tempProjectDir), tempProjectName);
         }
 
         private string JoinSourceAndOfflineCache(string[] additionalFeeds)

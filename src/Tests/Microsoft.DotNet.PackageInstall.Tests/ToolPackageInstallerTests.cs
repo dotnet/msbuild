@@ -738,7 +738,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             var installer = new ToolPackageInstaller(
                 store: store,
                 projectRestorer: new Stage2ProjectRestorer(Log, reporter),
-                tempProject: GetUniqueTempProjectPathEachTest(),
+                tempProject: GetUniqueTempProjectPathEachTest(), // <-- is this a concern?
                 offlineFeed: new DirectoryPath("does not exist"));
 
             var package = installer.InstallPackage(new PackageLocation(nugetConfig: nugetConfigPath),
