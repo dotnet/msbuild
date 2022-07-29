@@ -9,6 +9,7 @@ using System;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools.Publish;
+using System.Linq;
 
 namespace Microsoft.DotNet.Tools.Pack
 {
@@ -41,11 +42,9 @@ namespace Microsoft.DotNet.Tools.Pack
 
             IEnumerable<string> slnOrProjectArgs = parseResult.GetValueForArgument(PublishCommandParser.SlnOrProjectArgument);
 
-
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PackCommandParser.GetCommand()));
-
-            msbuildArgs.Add(PublishCommand.GetAutomaticConfigurationIfSpecified(parseResult, PackCommandParser.customDefaultConfigurationProperty,
-                slnOrProjectArgs, PackCommandParser.ConfigurationOption) ?? String.Empty);
+            msbuildArgs.AddRange(PublishCommand.GetAutomaticConfigurationIfSpecified(parseResult, PackCommandParser.customDefaultConfigurationProperty,
+                slnOrProjectArgs, PackCommandParser.ConfigurationOption) ?? Array.Empty<string>());
             msbuildArgs.AddRange(slnOrProjectArgs ?? Array.Empty<string>());
 
             bool noRestore = parseResult.HasOption(PackCommandParser.NoRestoreOption) || parseResult.HasOption(PackCommandParser.NoBuildOption);

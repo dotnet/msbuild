@@ -5,15 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Execution;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
-using Parser = Microsoft.DotNet.Cli.Parser;
 using Microsoft.VisualBasic.CompilerServices;
-using System.Collections;
-using System.Diagnostics;
+using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tools.Publish
 {
@@ -46,14 +45,13 @@ namespace Microsoft.DotNet.Tools.Publish
             };
 
             IEnumerable<string> slnOrProjectArgs = parseResult.GetValueForArgument(PublishCommandParser.SlnOrProjectArgument);
-            
 
             CommonOptions.ValidateSelfContainedOptions(parseResult.HasOption(PublishCommandParser.SelfContainedOption),
                 parseResult.HasOption(PublishCommandParser.NoSelfContainedOption));
 
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PublishCommandParser.GetCommand()));
-            msbuildArgs.Add(GetAutomaticConfigurationIfSpecified(parseResult, PublishCommandParser.customDefaultConfigurationProperty,
-                    slnOrProjectArgs, PublishCommandParser.ConfigurationOption) ?? String.Empty);
+            msbuildArgs.AddRange(GetAutomaticConfigurationIfSpecified(parseResult, PublishCommandParser.customDefaultConfigurationProperty,
+                    slnOrProjectArgs, PublishCommandParser.ConfigurationOption) ?? Array.Empty<string>());
             msbuildArgs.AddRange(slnOrProjectArgs ?? Array.Empty<string>());
 
             bool noRestore = parseResult.HasOption(PublishCommandParser.NoRestoreOption)
@@ -73,13 +71,16 @@ namespace Microsoft.DotNet.Tools.Publish
         /// <param name="configOption">The arguments passed to a dotnet invocation related to Configuration.</param>
         /// </summary>
         /// <returns>Returns a string such as -property:configuration=value for a projects desired config. May be empty string.</returns>
-        public static string GetAutomaticConfigurationIfSpecified(
+        public static IEnumerable<string> GetAutomaticConfigurationIfSpecified(
             ParseResult parseResult,
             string defaultedConfigurationProperty,
             IEnumerable<string> slnOrProjectArgs,
-            Option<string> configOption)
+            Option<string> configOption
+            )
         {
-            ProjectInstance project = GetTargetedProject(parseResult, slnOrProjectArgs);
+            List<string> calledArguments = new List<string>(new List<Token>(parseResult.Tokens.ToList()).Select(x => x.ToString()));
+            IEnumerable<string> slnProjectAndCommandArgs = (slnOrProjectArgs).ToList().Concat(calledArguments);
+            ProjectInstance project = GetTargetedProject(slnProjectAndCommandArgs);
             
             if (project != null)
             {
@@ -93,13 +94,14 @@ namespace Microsoft.DotNet.Tools.Publish
                     !string.IsNullOrEmpty(releaseMode) &&
                     !slnOrProjectArgs.Any(arg => arg.Contains(defaultedConfigurationProperty))
                    )
-                    return $"-property:configuration={releaseMode}";
+                    return new List<string> { $"-property:configuration={releaseMode}" };
             }
-            return String.Empty;
+            return Array.Empty<string>();
         }
 
-        private static ProjectInstance GetTargetedProject(ParseResult parseResult, IEnumerable<string> slnOrProjectArgs)
+        private static ProjectInstance GetTargetedProject(IEnumerable<string> slnOrProjectArgs)
         {
+            Debugger.Launch();
             string potentialProject = "";
 
             foreach (string arg in slnOrProjectArgs.Append(Directory.GetCurrentDirectory()))
@@ -113,7 +115,7 @@ namespace Microsoft.DotNet.Tools.Publish
                 {
                     try
                     {
-                        potentialProject = MsbuildProject.GetProjectFileFromDirectory(arg).Name;
+                        potentialProject = MsbuildProject.GetProjectFileFromDirectory(arg).FullName;
                         break;
                     }
                     catch (GracefulException) { } // Caught by MSBuild XMake::ProcessProjectSwitch -- don't change the behavior by failing here. 
