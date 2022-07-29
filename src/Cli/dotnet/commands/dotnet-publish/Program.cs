@@ -101,7 +101,8 @@ namespace Microsoft.DotNet.Tools.Publish
         private static ProjectInstance GetTargetedProject(ParseResult parseResult, IEnumerable<string> slnOrProjectArgs)
         {
             string potentialProject = "";
-            foreach (string arg in slnOrProjectArgs)
+
+            foreach (string arg in slnOrProjectArgs.Append(Directory.GetCurrentDirectory()))
             {
                 if (File.Exists(arg) && LikeOperator.LikeString(arg, "*.*proj", VisualBasic.CompareMethod.Text))
                 {
@@ -110,24 +111,12 @@ namespace Microsoft.DotNet.Tools.Publish
                 }
                 else if(Directory.Exists(arg))
                 {
-                    List<string> projectFiles = Directory.EnumerateFileSystemEntries(arg, "*.*proj", SearchOption.TopDirectoryOnly).ToList();
-                    if(projectFiles.Any())
+                    try
                     {
-                        potentialProject = projectFiles.First();
+                        potentialProject = MsbuildProject.GetProjectFileFromDirectory(arg).Name;
                         break;
                     }
-                }
-            }
-
-            if (string.IsNullOrWhiteSpace(potentialProject))
-            {
-                try
-                {
-                    potentialProject = MsbuildProject.GetProjectFileFromDirectory(Directory.GetCurrentDirectory()).Name;
-                }
-                catch (GracefulException)
-                {
-                    ; // MSBuild XMake::ProcessProjectSwitch will handle errors if projects for publish/build weren't discoverable.
+                    catch (GracefulException) { } // Caught by MSBuild XMake::ProcessProjectSwitch -- don't change the behavior by failing here. 
                 }
             }
 

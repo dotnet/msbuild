@@ -8,6 +8,7 @@ using Parser = Microsoft.DotNet.Cli.Parser;
 using System;
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using Microsoft.DotNet.Tools.Publish;
 
 namespace Microsoft.DotNet.Tools.Pack
 {
@@ -38,9 +39,14 @@ namespace Microsoft.DotNet.Tools.Pack
                 "-property:_IsPacking=true"
             };
 
+            IEnumerable<string> slnOrProjectArgs = parseResult.GetValueForArgument(PublishCommandParser.SlnOrProjectArgument);
+
+
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PackCommandParser.GetCommand()));
 
-            msbuildArgs.AddRange(parseResult.GetValueForArgument(PackCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
+            msbuildArgs.Add(PublishCommand.GetAutomaticConfigurationIfSpecified(parseResult, PackCommandParser.customDefaultConfigurationProperty,
+                slnOrProjectArgs, PackCommandParser.ConfigurationOption) ?? String.Empty);
+            msbuildArgs.AddRange(slnOrProjectArgs ?? Array.Empty<string>());
 
             bool noRestore = parseResult.HasOption(PackCommandParser.NoRestoreOption) || parseResult.HasOption(PackCommandParser.NoBuildOption);
 

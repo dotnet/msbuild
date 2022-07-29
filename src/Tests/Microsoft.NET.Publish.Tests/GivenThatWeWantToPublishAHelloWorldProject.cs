@@ -472,7 +472,7 @@ public static class Program
             var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
 
             publishCommand
-            .Execute("-bl:C:\\users\\noahgilson\\publishrelease.binlog")
+            .Execute()
             .Should()
             .Pass();
 

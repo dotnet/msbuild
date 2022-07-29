@@ -111,6 +111,36 @@ namespace Microsoft.NET.Pack.Tests
         }
 
         [Fact]
+        public void It_packs_with_release_if_PackRelease_property_set_in_csproj()
+        {
+            var helloWorldAsset = _testAssetsManager
+               .CopyTestAsset("HelloWorld", "PackReleaseHelloWorld")
+               .WithSource()
+               .WithProjectChanges(project =>
+               {
+                   var ns = project.Root.Name.Namespace;
+                   var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                   propertyGroup.Add(new XElement(ns + "PackRelease", "true"));
+               });
+
+            new BuildCommand(helloWorldAsset)
+               .Execute()
+               .Should()
+               .Pass();
+
+            var packCommand = new DotnetPackCommand(Log, helloWorldAsset.TestRoot);
+
+            packCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", "HelloWorld.1.0.0.nupkg");
+            Assert.True(File.Exists(expectedAssetPath));
+        }
+
+
+        [Fact]
         public void A_PackRelease_property_does_not_override_other_command_configuration()
         {
             var helloWorldAsset = _testAssetsManager
