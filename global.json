@@ -4,6 +4,11 @@
   },
   "tools": {
     "dotnet": "7.0.100-preview.5.22307.18",
+    "runtimes": {
+        "dotnet": [
+            "6.0.6"
+        ]
+    },
     "vs": {
       "version": "17.0"
     }
