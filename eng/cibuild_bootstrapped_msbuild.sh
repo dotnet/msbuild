@@ -64,7 +64,7 @@ if [ $host_type = "core" ]
 then
   _InitializeBuildTool="$_InitializeDotNetCli/dotnet"
   _InitializeBuildToolCommand="$bootstrapRoot/net6.0/MSBuild/MSBuild.dll"
-  _InitializeBuildToolFramework="netcoreapp3.1"
+  _InitializeBuildToolFramework="net7.0" # must match Arcade's TF, not MSBuild's
 elif [ $host_type = "mono" ]
 then
   export _InitializeBuildTool="mono"

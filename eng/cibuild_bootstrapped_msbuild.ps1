@@ -92,7 +92,7 @@ try {
   {
     $buildToolPath = $dotnetExePath
     $buildToolCommand = Join-Path $bootstrapRoot "net6.0\MSBuild\MSBuild.dll"
-    $buildToolFramework = "netcoreapp3.1"
+    $buildToolFramework = "net7.0" # Must match Arcade's logger TF, not MSBuild's
   }
 
   # Use separate artifacts folder for stage 2
