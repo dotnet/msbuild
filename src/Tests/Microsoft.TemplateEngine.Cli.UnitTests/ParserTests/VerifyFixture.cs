@@ -16,6 +16,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         {
             Settings = new VerifySettings();
             Settings.UseDirectory("Approvals");
+            VerifyDiffPlex.Initialize(OutputType.Compact);
         }
 
         internal VerifySettings Settings { get; }

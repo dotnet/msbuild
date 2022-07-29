@@ -12,6 +12,7 @@ namespace Microsoft.DotNet.New.Tests
         {
             Settings = new VerifySettings();
             Settings.UseDirectory("Approvals");
+            VerifyDiffPlex.Initialize(OutputType.Compact);
         }
 
         internal VerifySettings Settings { get; }
