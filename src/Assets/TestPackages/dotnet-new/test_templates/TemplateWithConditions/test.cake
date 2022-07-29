@@ -6,3 +6,4 @@ foo
 // comment bar
 bar
 #endif
+baz

@@ -281,6 +281,7 @@ namespace Microsoft.DotNet.New.Tests
             //## comment bar
             //#bar
             //#endif
+            //baz
             //For extension test cases the template has 'test.<extension>' file defined.
 
             Helpers.InstallTestTemplate("TemplateWithConditions", _log, home, workingDirectory);
@@ -295,7 +296,7 @@ namespace Microsoft.DotNet.New.Tests
 
             string testFile = Path.Combine(workingDirectory, fileName);
             Assert.True(File.Exists(testFile));
-            Assert.Equal($"{string.Format(expectedCommandFormat, "foo")}{expectedEol}foo{expectedEol}", File.ReadAllText(testFile));
+            Assert.Equal($"{string.Format(expectedCommandFormat, "foo")}{expectedEol}foo{expectedEol}baz{expectedEol}", File.ReadAllText(testFile));
 
             workingDirectory = TestUtils.CreateTemporaryFolder();
             new DotnetNewCommand(_log, "TestAssets.TemplateWithConditions", "--A", "false")
@@ -309,7 +310,7 @@ namespace Microsoft.DotNet.New.Tests
 
             testFile = Path.Combine(workingDirectory, fileName);
             Assert.True(File.Exists(testFile));
-            Assert.Equal($"", File.ReadAllText(testFile));
+            Assert.Equal($"baz{expectedEol}", File.ReadAllText(testFile));
 
             workingDirectory = TestUtils.CreateTemporaryFolder();
             new DotnetNewCommand(_log, "TestAssets.TemplateWithConditions", "--B", "true")
@@ -323,7 +324,7 @@ namespace Microsoft.DotNet.New.Tests
 
             testFile = Path.Combine(workingDirectory, fileName);
             Assert.True(File.Exists(testFile));
-            Assert.Equal($"{string.Format(expectedCommandFormat, "bar")}{expectedEol}bar{expectedEol}", File.ReadAllText(testFile));
+            Assert.Equal($"{string.Format(expectedCommandFormat, "bar")}{expectedEol}bar{expectedEol}baz{expectedEol}", File.ReadAllText(testFile));
         }
 
         [Fact]
