@@ -117,6 +117,80 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             new CacheWriter(task); // Should not error
         }
 
+        [Fact]
+        public void It_warns_on_invalid_culture_codes_of_resources()
+        {
+            string projectAssetsJsonPath = Path.GetTempFileName();
+            var assetsContent = @"
+{
+  `version`: 3,
+  `targets`: {
+    `net7.0`: {
+      `JavaScriptEngineSwitcher.Core/3.3.0`: {
+        `type`: `package`,
+        `compile`: {
+          `lib/netstandard2.0/JavaScriptEngineSwitcher.Core.dll`: {}
+        },
+        `runtime`: {
+          `lib/netstandard2.0/JavaScriptEngineSwitcher.Core.dll`: {}
+        },
+        `resource`: {
+          `lib/netstandard2.0/ru-ru/JavaScriptEngineSwitcher.Core.resources.dll`: {
+            `locale`: `what is this even`
+          }
+        }
+      }
+    }
+  }
+}".Replace("`", "\"");
+            File.WriteAllText(projectAssetsJsonPath, assetsContent);
+            var task = InitializeTask(out _);
+            task.ProjectAssetsFile = projectAssetsJsonPath;
+            task.TargetFramework = "net7.0";
+            var writer = new CacheWriter(task);
+            writer.WriteToCacheFile();
+            var messages = (task.BuildEngine as MockBuildEngine).Warnings;
+            var invalidContextMessages = messages.Where(msg => msg.Code == "NETSDK1188");
+            invalidContextMessages.Should().HaveCount(1);
+        }
+        
+        [Fact]
+        public void It_warns_on_incorrectly_cased_culture_codes_of_resources()
+        {
+            string projectAssetsJsonPath = Path.GetTempFileName();
+            var assetsContent = @"
+{
+  `version`: 3,
+  `targets`: {
+    `net7.0`: {
+      `JavaScriptEngineSwitcher.Core/3.3.0`: {
+        `type`: `package`,
+        `compile`: {
+          `lib/netstandard2.0/JavaScriptEngineSwitcher.Core.dll`: {}
+        },
+        `runtime`: {
+          `lib/netstandard2.0/JavaScriptEngineSwitcher.Core.dll`: {}
+        },
+        `resource`: {
+          `lib/netstandard2.0/ru-ru/JavaScriptEngineSwitcher.Core.resources.dll`: {
+            `locale`: `ru-ru`
+          }
+        }
+      }
+    }
+  }
+}".Replace("`", "\"");
+            File.WriteAllText(projectAssetsJsonPath, assetsContent);
+            var task = InitializeTask(out _);
+            task.ProjectAssetsFile = projectAssetsJsonPath;
+            task.TargetFramework = "net7.0";
+            var writer = new CacheWriter(task);
+            writer.WriteToCacheFile();
+            var messages = (task.BuildEngine as MockBuildEngine).Warnings;
+            var invalidContextMessages = messages.Where(msg => msg.Code == "NETSDK1187");
+            invalidContextMessages.Should().HaveCount(1);
+        }
+
         private ResolvePackageAssets InitializeTask(out IEnumerable<PropertyInfo> inputProperties)
         {
             inputProperties = typeof(ResolvePackageAssets)
@@ -129,7 +203,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 .Where(p => p.IsDefined(typeof(RequiredAttribute)));
 
             var task = new ResolvePackageAssets();
-
             // Initialize all required properties as a genuine task invocation would. We do this
             // because HashSettings need not defend against required parameters being null.
             foreach (var property in requiredProperties)
@@ -140,6 +213,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
                 property.SetValue(task, "_");
             }
+            
+            task.BuildEngine = new MockBuildEngine();
 
             return task;
         }

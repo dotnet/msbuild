@@ -650,6 +650,16 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1146: PackAsTool 不支援正在設定的 TargetPlatformIdentifier。例如，TargetFramework 不可為 net5.0-windows，只能是 net5.0。當 PackAsTool 以 .NET 5 及更高版本為目標時，也不支援 UseWPF 或 UseWindowsForms。</target>
         <note>{StrBegin="NETSDK1146: "}</note>
       </trans-unit>
+      <trans-unit id="PackageContainsIncorrectlyCasedLocale">
+        <source>NETSDK1187: Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</source>
+        <target state="new">NETSDK1187: Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</target>
+        <note>Error code is NETSDK1187. 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
+      </trans-unit>
+      <trans-unit id="PackageContainsUnknownLocale">
+        <source>NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</source>
+        <target state="new">NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</target>
+        <note>Error code is NETSDK1188. 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
+      </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
         <target state="translated">NETSDK1064: 找不到套件 {0}，版本 {1}。該套件可能因 NuGet restore 還原而刪除，或是可能因為路徑長度上限的限制，而讓 NuGet restore 可能只有部分完成所致。</target>

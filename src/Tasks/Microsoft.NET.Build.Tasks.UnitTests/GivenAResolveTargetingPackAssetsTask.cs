@@ -40,10 +40,10 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             task.AnalyzersToAdd[0].ItemSpec.Should().Be(Path.Combine(mockPackageDirectory, "analyzers/dotnet/anyAnalyzer.dll"));
             task.AnalyzersToAdd[1].ItemSpec.Should().Be(Path.Combine(mockPackageDirectory, "analyzers/dotnet/cs/csAnalyzer.dll"));
 
-            ((MockBuildEngine4)task.BuildEngine).RegisteredTaskObjectsQueries.Should().Be(2,
+            ((MockBuildEngine)task.BuildEngine).RegisteredTaskObjectsQueries.Should().Be(2,
                 because: "There should be a lookup for the overall and the specific targeting pack");
 
-            ((MockBuildEngine4)task.BuildEngine).RegisteredTaskObjects.Count.Should().Be(2,
+            ((MockBuildEngine)task.BuildEngine).RegisteredTaskObjects.Count.Should().Be(2,
                 because: "There should be a cache entry for the overall lookup and for the specific targeting pack");
         }
 
@@ -74,7 +74,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             ResolveTargetingPackAssets task1 = InitializeMockTargetingPackAssetsDirectory(out string packageDirectory);
 
             // Save off that build engine to inspect and reuse
-            MockBuildEngine4 buildEngine = (MockBuildEngine4)task1.BuildEngine;
+            MockBuildEngine buildEngine = (MockBuildEngine)task1.BuildEngine;
 
             task1.Execute().Should().BeTrue();
 
@@ -101,7 +101,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             ResolveTargetingPackAssets task1 = InitializeMockTargetingPackAssetsDirectory(out string packageDirectory);
 
             // Save off that build engine to inspect and reuse
-            MockBuildEngine4 buildEngine = (MockBuildEngine4)task1.BuildEngine;
+            MockBuildEngine buildEngine = (MockBuildEngine)task1.BuildEngine;
 
             task1.Execute().Should().BeTrue();
 
@@ -135,7 +135,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             File.WriteAllText(Path.Combine(dataDir, "FrameworkList.xml"), _frameworkList);
             File.WriteAllText(Path.Combine(dataDir, "PlatformManifest.txt"), "");
 
-            return InitializeTask(mockPackageDirectory, new MockBuildEngine4());
+            return InitializeTask(mockPackageDirectory, new MockBuildEngine());
         }
 
         private ResolveTargetingPackAssets InitializeTask(string mockPackageDirectory, IBuildEngine buildEngine)
@@ -180,33 +180,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
   <File Type=""Analyzer"" Language=""vb"" Path=""analyzers/dotnet/vb/vbAnalyzer.dll"" PublicKeyToken=""null"" AssemblyName=""vbAnalyzer"" AssemblyVersion=""10.0.18362.3"" FileVersion=""10.0.18362.3"" />
 </FileList>";
 
-        private class MockBuildEngine4 : MockBuildEngine, IBuildEngine4
-        {
-            public bool IsRunningMultipleNodes => throw new NotImplementedException();
-
-            public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs, string toolsVersion) => throw new NotImplementedException();
-            public BuildEngineResult BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<string>[] removeGlobalProperties, string[] toolsVersion, bool returnTargetOutputs) => throw new NotImplementedException();
-            public bool BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IDictionary[] targetOutputsPerProject, string[] toolsVersion, bool useResultsCache, bool unloadProjectsOnCompletion) => throw new NotImplementedException();
-            public void Reacquire() => throw new NotImplementedException();
-            public object UnregisterTaskObject(object key, RegisteredTaskObjectLifetime lifetime) => throw new NotImplementedException();
-            public void Yield() => throw new NotImplementedException();
-
-            public object GetRegisteredTaskObject(object key, RegisteredTaskObjectLifetime lifetime)
-            {
-                RegisteredTaskObjectsQueries++;
-
-                RegisteredTaskObjects.TryGetValue(key, out object ret);
-                return ret;
-            }
-            public void RegisterTaskObject(object key, object obj, RegisteredTaskObjectLifetime lifetime, bool allowEarlyCollection)
-            {
-                RegisteredTaskObjects.Add(key, obj);
-            }
-
-            public Dictionary<object, object> RegisteredTaskObjects { get; } = new Dictionary<object, object>();
-
-            public int RegisteredTaskObjectsQueries = 0;
-        }
 
         [Fact]
         public void It_Hashes_All_Inputs()

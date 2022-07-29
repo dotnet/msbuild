@@ -1334,6 +1334,26 @@ namespace Microsoft.NET.Build.Tasks
                     {
                         WriteMetadata(MetadataKeys.AssetType, "resources");
                         string locale = asset.Properties["locale"];
+                        // Locales from packages can be free-form, so we normalize them to the standard
+                        // forms here. If the locale is mixed-case, that can cause issues on case-sensitive
+                        // file systems when the locale-specific assets are copied.
+                        try
+                        {
+                            var normalizedLocale = System.Globalization.CultureInfo.GetCultureInfo(locale).Name;
+                            if (normalizedLocale != locale)
+                            {
+                                _task.Log.LogWarning(Strings.PackageContainsIncorrectlyCasedLocale, package.Name, package.Version.ToNormalizedString(), locale, normalizedLocale);
+                            }
+                            locale = normalizedLocale;
+                        }
+                        catch (System.Globalization.CultureNotFoundException cnf)
+                        {
+                            _task.Log.LogWarning(Strings.PackageContainsUnknownLocale, package.Name, package.Version.ToNormalizedString(), cnf.InvalidCultureName);
+                            // We could potentially strip this unknown locales at this point, but we do not.
+                            // Locale data can change over time (it's typically an OS database that's kept updated),
+                            // and the data on the system running the build may not be the same data as
+                            // the system executing the built code. So we should be permissive for this case.
+                        }
                         bool wroteCopyLocalMetadata = WriteCopyLocalMetadataIfNeeded(
                                 package,
                                 Path.GetFileName(asset.Path),

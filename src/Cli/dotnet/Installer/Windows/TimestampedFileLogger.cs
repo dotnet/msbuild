@@ -182,7 +182,7 @@ namespace Microsoft.DotNet.Installer.Windows
         /// <param name="message">The message to log.</param>
         protected override void WriteMessage(string message)
         {
-            if (!_messageQueue.IsCompleted)
+            if (!_messageQueue.IsAddingCompleted)
             {
                 _messageQueue.Add(message);
             }
