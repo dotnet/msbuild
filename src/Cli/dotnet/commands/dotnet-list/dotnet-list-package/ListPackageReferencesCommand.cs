@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Tools.List.PackageReferences
         internal static void EnforceOptionRules(ParseResult parseResult)
         {
             var mutexOptionCount = 0;
-            mutexOptionCount += parseResult.HasOption(ListPackageReferencesCommandParser.DepreciatedOption) ? 1 : 0;
+            mutexOptionCount += parseResult.HasOption(ListPackageReferencesCommandParser.DeprecatedOption) ? 1 : 0;
             mutexOptionCount += parseResult.HasOption(ListPackageReferencesCommandParser.OutdatedOption) ? 1 : 0;
             mutexOptionCount += parseResult.HasOption(ListPackageReferencesCommandParser.VulnerableOption) ? 1 : 0;
             if (mutexOptionCount > 1)
