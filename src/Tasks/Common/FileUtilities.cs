@@ -46,7 +46,7 @@ namespace Microsoft.NET.Build.Tasks
         public static string CreateTempFile(string tempDirectory, string extension)
         {
             string fileName = Path.ChangeExtension(Path.Combine(tempDirectory, Path.GetTempFileName()), extension);
-            File.Create(fileName);
+            File.Create(fileName.ToString());
             return fileName;
         }
 
