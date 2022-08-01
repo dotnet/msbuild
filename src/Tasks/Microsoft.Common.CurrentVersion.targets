@@ -488,6 +488,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PublishDir Condition="'$(PublishDir)'==''">$(OutputPath)app.publish\</PublishDir>
   </PropertyGroup>
 
+  <!-- 
+    ClickOncePublishDir property is the output location used by all ClickOnce publish targets. This should be same as PublishDir except 
+    for a trailing slash. PublishDir when specified as a global property on the command line cannot be changed to add a trailing slash.
+  -->
+  <PropertyGroup>
+    <ClickOncePublishDir>$(PublishDir)</ClickOncePublishDir>
+    <ClickOncePublishDir Condition="!HasTrailingSlash('$(ClickOncePublishDir)')">$(ClickOncePublishDir)\</ClickOncePublishDir>
+  </PropertyGroup>
+
   <!--
     ProcessorArchitecture is the target processor architecture.
     -->
@@ -1780,7 +1789,23 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform)"
         ContinueOnError="!$(BuildingProject)"
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier$(_GlobalPropertiesToRemoveFromProjectReferences)"
-        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true'"
+        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true' and '$(EnableDynamicPlatformResolution)' != 'true'"
+        SkipNonexistentTargets="true">
+      <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetFrameworkPossibilities" />
+    </MSBuild>
+    
+    <!--
+       SetPlatform negotiation requires the 'GetTargetFrameworks' MSBuild call to NOT pass global properties. This is to verify
+       whether or not the referenced project would build as the same platform as the current project by default. The above
+       MSBuild call is kept for legacy scenarios that may depend on passing %(SetConfiguration) and %(SetPlatform).
+    -->
+    <MSBuild
+        Projects="@(_MSBuildProjectReferenceExistent)"
+        Targets="GetTargetFrameworks"
+        BuildInParallel="$(BuildInParallel)"
+        ContinueOnError="!$(BuildingProject)"
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier;Platform;Configuration$(_GlobalPropertiesToRemoveFromProjectReferences)"
+        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true' and '$(EnableDynamicPlatformResolution)' == 'true'"
         SkipNonexistentTargets="true">
       <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetFrameworkPossibilities" />
     </MSBuild>
@@ -1891,7 +1916,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <Platforms>$(Platforms)</Platforms>
         <!-- .vcxproj and .nativeproj contain a `ProjectConfiguration` item that have `Platform` metadata within.
              Build the `Platforms` property from that. -->
-        <Platforms Condition="'@(ProjectConfiguration)' != '' and ('$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj')">@(ProjectConfiguration->'%(Platform)'->Distinct())</Platforms>
+        <Platforms Condition="'$(UsePlatformFromProjectConfiguration)' != 'false' and '@(ProjectConfiguration)' != '' and ('$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj')">@(ProjectConfiguration->'%(Platform)'->Distinct())</Platforms>
       </_ThisProjectBuildMetadata>
     </ItemGroup>
 
@@ -4400,7 +4425,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     This is being done to avoid Windows Forms designer memory issues that can arise while operating directly on files located in Obj directory. -->
     <Copy
       SourceFiles="@(_DeploymentManifestEntryPoint)"
-      DestinationFolder="$(PublishDir)">
+      DestinationFolder="$(ClickOncePublishDir)">
 
       <Output TaskParameter="DestinationFiles" ItemName="_DeploymentClickOnceApplicationExecutable" />
     </Copy>
@@ -5663,8 +5688,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="CleanPublishFolder">
 
     <RemoveDir
-        Directories="$(PublishDir)"
-        Condition="'$(PublishDir)'=='$(OutputPath)app.publish\' and Exists('$(PublishDir)')"/>
+        Directories="$(ClickOncePublishDir)"
+        Condition="'$(ClickOncePublishDir)'=='$(OutputPath)app.publish\' and Exists('$(ClickOncePublishDir)')"/>
 
   </Target>
 
@@ -5856,7 +5881,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <PropertyGroup>
       <_DeploymentApplicationFolderName>Application Files\$(AssemblyName)_$(_DeploymentApplicationVersionFragment)</_DeploymentApplicationFolderName>
-      <_DeploymentApplicationDir>$(PublishDir)$(_DeploymentApplicationFolderName)\</_DeploymentApplicationDir>
+      <_DeploymentApplicationDir>$(ClickOncePublishDir)$(_DeploymentApplicationFolderName)\</_DeploymentApplicationDir>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -5962,7 +5987,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         ComponentsUrl="$(_DeploymentFormattedComponentsUrl)"
         Culture="$(TargetCulture)"
         FallbackCulture="$(FallbackCulture)"
-        OutputPath="$(PublishDir)"
+        OutputPath="$(ClickOncePublishDir)"
         SupportUrl="$(_DeploymentFormattedSupportUrl)"
         Path="$(GenerateBootstrapperSdkPath)"
         VisualStudioVersion="$(VisualStudioVersion)"
@@ -5994,7 +6019,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         TargetFrameworkVersion="$(_DeploymentManifestTargetFrameworkVersion)"
         ApplicationManifest="$(_DeploymentApplicationDir)$(_DeploymentTargetApplicationManifestFileName)"
         InputManifest="$(OutDir)$(TargetDeployManifestFileName)"
-        OutputManifest="$(PublishDir)$(TargetDeployManifestFileName)">
+        OutputManifest="$(ClickOncePublishDir)$(TargetDeployManifestFileName)">
 
       <Output TaskParameter="OutputManifest" ItemName="PublishedDeployManifest"/>
 
@@ -6003,7 +6028,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <SignFile
         CertificateThumbprint="$(_DeploymentResolvedManifestCertificateThumbprint)"
         TimestampUrl="$(ManifestTimestampUrl)"
-        SigningTarget="$(PublishDir)$(TargetDeployManifestFileName)"
+        SigningTarget="$(ClickOncePublishDir)$(TargetDeployManifestFileName)"
         TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
         TargetFrameworkVersion="$(TargetFrameworkVersion)"
         DisallowMansignTimestampFallback="$(DisallowMansignTimestampFallback)"
@@ -6012,7 +6037,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <SignFile
         CertificateThumbprint="$(_DeploymentResolvedManifestCertificateThumbprint)"
         TimestampUrl="$(ManifestTimestampUrl)"
-        SigningTarget="$(PublishDir)\setup.exe"
+        SigningTarget="$(ClickOncePublishDir)setup.exe"
         Condition="'$(BootstrapperEnabled)'=='true' and '$(_DeploymentSignClickOnceManifests)'=='true'" />
 
   </Target>

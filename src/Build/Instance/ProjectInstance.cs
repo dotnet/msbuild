@@ -471,6 +471,21 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="ProjectInstance"/> class directly.
+        /// No intermediate Project object is created.
+        /// This is ideal if the project is simply going to be built, and not displayed or edited.
+        /// Global properties may be null.
+        /// Tools version may be null.
+        /// Used by SolutionProjectGenerator so that it can explicitly pass the vsVersionFromSolution in for use in
+        /// determining the sub-toolset version.
+        /// </summary>
+        internal ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, ILoggingService loggingService, int visualStudioVersionFromSolution, ProjectCollection projectCollection, ISdkResolverService sdkResolverService, int submissionId)
+        {
+            BuildEventContext buildEventContext = new BuildEventContext(0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+            Initialize(xml, globalProperties, toolsVersion, null, visualStudioVersionFromSolution, new BuildParameters(projectCollection), loggingService, buildEventContext, sdkResolverService, submissionId);
+        }
+
+        /// <summary>
         /// Creates a mutable ProjectInstance directly, using the specified logging service.
         /// Assumes the project path is already normalized.
         /// Used by the RequestBuilder.

@@ -28,7 +28,8 @@ namespace Microsoft.Build.Shared
         /// <param name="assemblyLoadInfo">Information used to load the assembly</param>
         /// <param name="loadedAssembly">The assembly which has been loaded, if any</param>
         /// <param name="loadedViaMetadataLoadContext">Whether this type was loaded via MetadataLoadContext</param>
-        internal LoadedType(Type type, AssemblyLoadInfo assemblyLoadInfo, Assembly loadedAssembly, bool loadedViaMetadataLoadContext = false)
+        /// <param name="iTaskItemType">type of an ITaskItem</param>
+        internal LoadedType(Type type, AssemblyLoadInfo assemblyLoadInfo, Assembly loadedAssembly, Type iTaskItemType, bool loadedViaMetadataLoadContext = false)
         {
             ErrorUtilities.VerifyThrow(type != null, "We must have the type.");
             ErrorUtilities.VerifyThrow(assemblyLoadInfo != null, "We must have the assembly the type was loaded from.");
@@ -90,8 +91,6 @@ namespace Microsoft.Build.Shared
                     }
                 }
 
-                bool isAssignableToITask = false;
-
                 // Check whether it's assignable to ITaskItem or ITaskItem[]. Simplify to just checking for ITaskItem.
                 Type pt = props[i].PropertyType;
                 if (pt.IsArray)
@@ -99,20 +98,7 @@ namespace Microsoft.Build.Shared
                     pt = pt.GetElementType();
                 }
 
-                // Microsoft.Build.Framework.ITaskItem is different when loaded normally versus via MetadataLoadContext. This is the only reliable way to see
-                // whether this property derives from ITaskItem.
-                while (pt is not null)
-                {
-                    if (pt.FullName.Equals("Microsoft.Build.Framework.ITaskItem"))
-                    {
-                        isAssignableToITask = true;
-                        break;
-                    }
-                    else
-                    {
-                        pt = pt.BaseType;
-                    }
-                }
+                bool isAssignableToITask = iTaskItemType.IsAssignableFrom(pt);
 
                 Properties[i] = new ReflectableTaskPropertyInfo(props[i], outputAttribute, requiredAttribute, isAssignableToITask);
                 if (loadedViaMetadataLoadContext)

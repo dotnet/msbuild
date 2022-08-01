@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -317,6 +318,15 @@ namespace Microsoft.Build.UnitTests
             return WithTransientTestState(new TransientWorkingDirectory(newWorkingDirectory));
         }
 
+        /// <summary>
+        /// Register process ID to be finished/killed after tests ends.
+        /// </summary>
+        public TransientTestProcess WithTransientProcess(int processId)
+        {
+            TransientTestProcess transientTestProcess = new(processId);
+            return WithTransientTestState(transientTestProcess);
+        }
+
         #endregion
 
         private class DefaultOutput : ITestOutputHelper
@@ -545,6 +555,24 @@ namespace Microsoft.Build.UnitTests
             if (_deleteTempDirectory)
             {
                 FileUtilities.DeleteDirectoryNoThrow(TempPath, recursive: true);
+            }
+        }
+    }
+
+    public class TransientTestProcess : TransientTestState
+    {
+        private readonly int _processId;
+
+        public TransientTestProcess(int processId)
+        {
+            _processId = processId;
+        }
+
+        public override void Revert()
+        {
+            if (_processId > -1)
+            {
+                Process.GetProcessById(_processId).KillTree(1000);
             }
         }
     }

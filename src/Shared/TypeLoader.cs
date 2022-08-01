@@ -13,6 +13,7 @@ using System.Runtime.Loader;
 #endif
 using System.Threading;
 using Microsoft.Build.Eventing;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -47,7 +48,22 @@ namespace Microsoft.Build.Shared
 
         private static MetadataLoadContext _context;
 
-        private static string[] runtimeAssemblies = Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll");
+        private static string[] runtimeAssemblies = findRuntimeAssembliesWithMicrosoftBuildFramework();
+        private static string microsoftBuildFrameworkPath;
+
+        // We need to append Microsoft.Build.Framework from next to the executing assembly first to make sure it's loaded before the runtime variant.
+        private static string[] findRuntimeAssembliesWithMicrosoftBuildFramework()
+        {
+            string msbuildDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            microsoftBuildFrameworkPath = Path.Combine(msbuildDirectory, "Microsoft.Build.Framework.dll");
+            string[] msbuildAssemblies = Directory.GetFiles(msbuildDirectory, "*.dll");
+            string[] runtimeAssemblies = Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll");
+
+            List<string> msbuildAssembliesList = new(msbuildAssemblies);
+            msbuildAssembliesList.AddRange(runtimeAssemblies);
+
+            return msbuildAssembliesList.ToArray();
+        }
 
         /// <summary>
         /// Constructor.
@@ -354,7 +370,7 @@ namespace Microsoft.Build.Shared
                     return null;
                 });
 
-                return type != null ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly ?? type.Assembly, loadedViaMetadataLoadContext: false) : null;
+                return type != null ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly ?? type.Assembly, typeof(ITaskItem), loadedViaMetadataLoadContext: false) : null;
             }
 
             private LoadedType GetLoadedTypeFromTypeNameUsingMetadataLoadContext(string typeName)
@@ -370,7 +386,7 @@ namespace Microsoft.Build.Shared
                         if (_isDesiredType(publicType, null) && (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(publicType.FullName, typeName)))
                         {
                             MSBuildEventSource.Log.CreateLoadedTypeStart(loadedAssembly.FullName);
-                            LoadedType loadedType = new(publicType, _assemblyLoadInfo, loadedAssembly, loadedViaMetadataLoadContext: true);
+                            LoadedType loadedType = new(publicType, _assemblyLoadInfo, loadedAssembly, _context.LoadFromAssemblyPath(microsoftBuildFrameworkPath).GetType(typeof(ITaskItem).FullName), loadedViaMetadataLoadContext: true);
                             _context?.Dispose();
                             _context = null;
                             MSBuildEventSource.Log.CreateLoadedTypeStop(loadedAssembly.FullName);
