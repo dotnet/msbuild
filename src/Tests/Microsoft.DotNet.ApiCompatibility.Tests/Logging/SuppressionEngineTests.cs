@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Xml.Serialization;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Xunit;
 
 namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
@@ -57,8 +58,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
         [Fact]
         public void SuppressionEngineDoesNotThrowOnEmptyFile()
         {
-            SuppressionEngine _ = new(suppressionsFile: string.Empty);
-            _ = new SuppressionEngine(suppressionsFile: "      ");
+            SuppressionEngine _ = new(suppressionFile: string.Empty);
+            _ = new SuppressionEngine(suppressionFile: "      ");
         }
 
         [Fact]
@@ -197,9 +198,13 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
     {
         private MemoryStream _stream;
         private StreamWriter _writer;
-        public readonly string suppressionsFile = @"<?xml version=""1.0"" encoding=""utf-8""?>
+        // On .NET Framework the xsd element is written before the xsi element, where-as on modern .NET, it's the other way around.
+        private readonly static string s_suppressionsHeader = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework") ?
+            @"<Suppressions xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">" :
+            @"<Suppressions xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">";
+        public readonly string suppressionsFile = @$"<?xml version=""1.0"" encoding=""utf-8""?>
 <!-- This is a comment -->
-<Suppressions xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+{s_suppressionsHeader}
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:A.B</Target>
@@ -254,8 +259,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
   </Suppression>
 </Suppressions>";
 
-        public readonly string suppressionsFileWithoutComment = @"<?xml version=""1.0"" encoding=""utf-8""?>
-<Suppressions xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+        public readonly string suppressionsFileWithoutComment = @$"<?xml version=""1.0"" encoding=""utf-8""?>
+{s_suppressionsHeader}
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:A.B</Target>

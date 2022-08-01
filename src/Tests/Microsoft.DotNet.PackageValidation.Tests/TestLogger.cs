@@ -6,29 +6,24 @@ using Microsoft.DotNet.ApiCompatibility.Logging;
 
 namespace Microsoft.DotNet.PackageValidation.Tests
 {
-    public class TestLogger : CompatibilityLoggerBase
+    internal sealed class TestLogger : ICompatibilityLogger
     {
         public List<string> errors = new();
         public List<string> warnings = new();
 
-        public TestLogger()
-            : base(suppressionsFile: null, baselineAllErrors: false, noWarn: null)
-        {
-        }
-
-        public override bool LogError(Suppression suppression, string code, string format, params string[] args)
+        public bool LogError(Suppression suppression, string code, string format, params string[] args)
         {
             errors.Add(code + " " + string.Format(format, args));
             return true;
         }
 
-        public override bool LogWarning(Suppression suppression, string code, string format, params string[] args)
+        public bool LogWarning(Suppression suppression, string code, string format, params string[] args)
         {
             errors.Add(code + " " + string.Format(format, args));
             return true;
         }
 
-        public override void LogMessage(MessageImportance importance, string format, params string[] args)
+        public void LogMessage(MessageImportance importance, string format, params string[] args)
         {
         }
     }

@@ -2,16 +2,6 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Resources.resx">
     <body>
-      <trans-unit id="ApiCompatibilityBaselineHeader">
-        <source>Breaking changes to the API surface between '{0}' (left) and '{1}' (right) for versions {2} and {3} respectively:</source>
-        <target state="translated">分別針對版本 {2} 和 {3}，在 '{0}' (左) 和 '{1}' (右) 之間的 API 介面中斷性變更:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ApiCompatibilityHeader">
-        <source>API compatibility errors between '{0}' (left) and '{1}' (right):</source>
-        <target state="translated">'{0}' (左) 與 '{1}' (右) 之間的 API 相容性錯誤:</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Baseline">
         <source>[Baseline]</source>
         <target state="translated">[基準]</target>
@@ -20,11 +10,6 @@
       <trans-unit id="EmptyPackagePath">
         <source>Package path is empty. Please provide a valid package path.</source>
         <target state="translated">套件路徑為空白。請提供有效的套件路徑。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InvalidPackagePath">
-        <source>Package path '{0}' is invalid.</source>
-        <target state="translated">套件路徑 '{0}' 無效。</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingSearchDirectory">

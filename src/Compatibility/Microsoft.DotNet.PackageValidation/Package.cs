@@ -15,12 +15,13 @@ using NuGet.RuntimeModel;
 namespace Microsoft.DotNet.PackageValidation
 {
     /// <summary>
-    /// This class represents a dotnet package.
+    /// This class represents a nuget package.
     /// </summary>
     public class Package
     {
+        private readonly ContentItemCollection _contentItemCollection;
         private readonly ManagedCodeConventions _conventions;
-        private readonly ContentItemCollection _packageAssets = new();
+        private static RuntimeGraph? s_runtimeGraph;
 
         /// <summary>
         /// The name of the package
@@ -42,6 +43,8 @@ namespace Microsoft.DotNet.PackageValidation
         /// </summary>
         public Dictionary<NuGetFramework, IEnumerable<PackageDependency>> PackageDependencies { get; }
 
+        public IEnumerable<ContentItem> PackageAssets { get; }
+
         /// <summary>
         /// List of compile assets in the package.
         /// </summary>
@@ -59,11 +62,6 @@ namespace Microsoft.DotNet.PackageValidation
         public IEnumerable<ContentItem> LibAssets { get; }
 
         /// <summary>
-        /// List of all the assets in the package.
-        /// </summary>
-        public IEnumerable<ContentItem> PackageAssets { get; }
-
-        /// <summary>
         /// List of all the runtime specific assets in the package.
         /// </summary>
         public IEnumerable<ContentItem> RuntimeSpecificAssets { get; }
@@ -79,40 +77,58 @@ namespace Microsoft.DotNet.PackageValidation
         public IEnumerable<string> Rids { get; }
 
         /// <summary>
+        /// List of assembly references grouped by target framework.
+        /// </summary>
+        public Dictionary<string, string[]>? AssemblyReferences { get; }
+
+        /// <summary>
         /// List of the frameworks in the package.
         /// </summary>
         public IEnumerable<NuGetFramework> FrameworksInPackage { get; }
 
-        internal Package(string packagePath, string packageId, string version, IEnumerable<string> packageAssets, Dictionary<NuGetFramework, IEnumerable<PackageDependency>> packageDependencies, RuntimeGraph? runtimeGraph)
+        public Package(string packagePath,
+            string packageId,
+            string version,
+            IEnumerable<string> packageAssets,
+            Dictionary<NuGetFramework, IEnumerable<PackageDependency>> packageDependencies,
+            Dictionary<string, string[]>? assemblyReferences = null)
         {
             PackagePath = packagePath;
             PackageId = packageId;
             Version = version;
             PackageDependencies = packageDependencies;
 
-            _packageAssets.Load(packageAssets);
-            _conventions = new ManagedCodeConventions(runtimeGraph);
+            _conventions = new ManagedCodeConventions(s_runtimeGraph);
+            _contentItemCollection = new ContentItemCollection();
+            _contentItemCollection.Load(packageAssets);
 
-            PackageAssets = _packageAssets.FindItems(_conventions.Patterns.AnyTargettedFile);
-            RefAssets = _packageAssets.FindItems(_conventions.Patterns.CompileRefAssemblies);
-            LibAssets = _packageAssets.FindItems(_conventions.Patterns.CompileLibAssemblies);
+            PackageAssets = _contentItemCollection.FindItems(_conventions.Patterns.AnyTargettedFile);
+            RefAssets = _contentItemCollection.FindItems(_conventions.Patterns.CompileRefAssemblies);
+            LibAssets = _contentItemCollection.FindItems(_conventions.Patterns.CompileLibAssemblies);
             CompileAssets = RefAssets.Any() ? RefAssets : LibAssets;
-            RuntimeAssets = _packageAssets.FindItems(_conventions.Patterns.RuntimeAssemblies);
+            RuntimeAssets = _contentItemCollection.FindItems(_conventions.Patterns.RuntimeAssemblies);
             RuntimeSpecificAssets = RuntimeAssets.Where(t => t.Path.StartsWith("runtimes")).ToArray();
-            Rids = RuntimeSpecificAssets.Select(t => (string)t.Properties["rid"]).ToArray();
+            Rids = RuntimeSpecificAssets.Select(t => (string)t.Properties["rid"])
+                .Distinct()
+                .ToArray();
             FrameworksInPackage = CompileAssets.Select(t => (NuGetFramework)t.Properties["tfm"])
                 .Concat(RuntimeAssets.Select(t => (NuGetFramework)t.Properties["tfm"]))
                 .Distinct()
                 .ToArray();
+            AssemblyReferences = assemblyReferences;
+        }
+
+        public static void InitializeRuntimeGraph(string runtimeGraph)
+        {
+            s_runtimeGraph = JsonRuntimeFormat.ReadRuntimeGraph(runtimeGraph);
         }
 
         /// <summary>
-        /// Creates the package object from package path.
+        /// Creates a package object from a given package path and optional assembly references.
         /// </summary>
         /// <param name="packagePath">The path to the package path.</param>
-        /// <param name="runtimeGraph">The path to the the runtime graph.</param>
-        /// <returns>The package object.</returns>
-        public static Package Create(string? packagePath, string? runtimeGraph)
+        /// <param name="packageAssemblyReferences">Optional assembly references grouped per target framework.</param>
+        public static Package Create(string? packagePath, Dictionary<string, string[]>? packageAssemblyReferences = null)
         {
             if (string.IsNullOrEmpty(packagePath))
             {
@@ -136,13 +152,7 @@ namespace Microsoft.DotNet.PackageValidation
                 packageDependencies.Add(item.TargetFramework, item.Packages);
             }
 
-            RuntimeGraph? nugetRuntimeGraph = null;
-            if (!string.IsNullOrEmpty(runtimeGraph))
-            {
-                nugetRuntimeGraph = JsonRuntimeFormat.ReadRuntimeGraph(runtimeGraph);
-            }
-
-            return new Package(packagePath!, packageId, version, packageAssets, packageDependencies, nugetRuntimeGraph);
+            return new Package(packagePath!, packageId, version, packageAssets, packageDependencies, packageAssemblyReferences);
         }
 
         /// <summary>
@@ -153,7 +163,7 @@ namespace Microsoft.DotNet.PackageValidation
         public ContentItem? FindBestRuntimeAssetForFramework(NuGetFramework framework)
         {
             SelectionCriteria managedCriteria = _conventions.Criteria.ForFramework(framework);
-            return _packageAssets.FindBestItemGroup(managedCriteria,
+            return _contentItemCollection.FindBestItemGroup(managedCriteria,
                 _conventions.Patterns.RuntimeAssemblies)?.Items.FirstOrDefault();
         }
 
@@ -166,7 +176,7 @@ namespace Microsoft.DotNet.PackageValidation
         public ContentItem? FindBestRuntimeAssetForFrameworkAndRuntime(NuGetFramework framework, string rid)
         {
             SelectionCriteria managedCriteria = _conventions.Criteria.ForFrameworkAndRuntime(framework, rid);
-            return _packageAssets.FindBestItemGroup(managedCriteria,
+            return _contentItemCollection.FindBestItemGroup(managedCriteria,
                 _conventions.Patterns.RuntimeAssemblies)?.Items.FirstOrDefault();
         }
 
@@ -182,7 +192,7 @@ namespace Microsoft.DotNet.PackageValidation
                 _conventions.Patterns.CompileRefAssemblies :
                 _conventions.Patterns.CompileLibAssemblies;
 
-            return _packageAssets.FindBestItemGroup(managedCriteria, patternSet)?.Items.FirstOrDefault();
+            return _contentItemCollection.FindBestItemGroup(managedCriteria, patternSet)?.Items.FirstOrDefault();
         }
     }
 }

@@ -54,9 +54,9 @@
     <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="NuGet.Build.Tasks.Pack" Version="$(NuGetBuildTasksPackageVersion)" ExcludeAssets="All" />
     <PackageReference Include="Microsoft.Deployment.DotNet.Releases" Version="$(MicrosoftDeploymentDotNetReleasesVersion)" />
-    <ProjectReference Include="..\..\Compatibility\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" OutputItemType="ReferenceCopyLocalPaths" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\Compatibility\Microsoft.DotNet.ApiCompatibility\Microsoft.DotNet.ApiCompatibility.csproj" OutputItemType="ReferenceCopyLocalPaths" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\..\Compatibility\Microsoft.DotNet.Compatibility\Microsoft.DotNet.Compatibility.csproj" OutputItemType="ReferenceCopyLocalPaths" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\Compatibility\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" OutputItemType="ReferenceCopyLocalPaths" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\Compatibility\Microsoft.DotNet.ApiCompat.Task\Microsoft.DotNet.ApiCompat.Task.csproj" OutputItemType="ReferenceCopyLocalPaths" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 

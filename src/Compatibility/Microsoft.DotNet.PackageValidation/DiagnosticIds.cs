@@ -8,6 +8,9 @@ namespace Microsoft.DotNet.PackageValidation
     /// </summary>
     public static class DiagnosticIds
     {
+        // Assembly loading ids
+        public const string SearchDirectoriesNotFoundForTfm = "CP1003";
+
         public const string ApplicableCompileTimeAsset = "PKV0001";
         public const string ApplicableRuntimeSpecificAsset = "PKV0002";
         public const string ApplicableRidLessAsset = "PKV003";

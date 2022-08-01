@@ -3,7 +3,6 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,45 +13,9 @@ using System.Reflection.PortableExecutable;
 namespace Microsoft.DotNet.ApiCompatibility
 {
     /// <summary>
-    /// Class that represents a warning that occurred while trying to load a specific assembly.
+    /// Loads <see cref="IAssemblySymbol"/> objects from source files, binaries or directories containing binaries.
     /// </summary>
-    public class AssemblyLoadWarning : IDiagnostic, IEquatable<AssemblyLoadWarning>
-    {
-        private readonly StringComparer _ordinalComparer = StringComparer.Ordinal;
-
-        /// <summary>
-        /// Creates a new instance of an <see cref="AssemblyLoadWarning"/> class with a given <paramref name="diagnosticId"/>,
-        /// <paramref name="referenceId"/> and <paramref name="message"/>.
-        /// </summary>
-        /// <param name="diagnosticId">String representing the diagnostic ID.</param>
-        /// <param name="referenceId">String representing the ID for the object that the diagnostic was created for.</param>
-        /// <param name="message">String describing the diagnostic.</param>
-        public AssemblyLoadWarning(string diagnosticId, string referenceId, string message)
-        {
-            DiagnosticId = diagnosticId;
-            ReferenceId = referenceId;
-            Message = message;
-        }
-
-        /// <inheritdoc/>
-        public string DiagnosticId { get; }
-
-        /// <inheritdoc/>
-        public string ReferenceId { get; }
-
-        /// <inheritdoc/>
-        public string Message { get; }
-
-        /// <inheritdoc/>
-        public bool Equals(AssemblyLoadWarning other) => _ordinalComparer.Equals(DiagnosticId, other.DiagnosticId) &&
-                                                         _ordinalComparer.Equals(ReferenceId, other.ReferenceId) &&
-                                                         _ordinalComparer.Equals(Message, other.Message);
-    }
-
-    /// <summary>
-    /// Class that loads <see cref="IAssemblySymbol"/> objects from source files, binaries or directories containing binaries.
-    /// </summary>
-    public class AssemblySymbolLoader
+    public class AssemblySymbolLoader : IAssemblySymbolLoader
     {
         /// <summary>
         /// Dictionary that holds the paths to help loading dependencies. Keys will be assembly name and 
@@ -64,10 +27,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         private readonly bool _resolveReferences;
         private CSharpCompilation _cSharpCompilation;
 
-        /// <summary>
-        /// Instanciate an object with the desired setting to resolve assembly references or not.
-        /// </summary>
-        /// <param name="resolveAssemblyReferences">Indicates whether it should try to resolve assembly references when loading or not.</param>
+        /// <inheritdoc />
         public AssemblySymbolLoader(bool resolveAssemblyReferences = false)
         {
             _loadedAssemblies = new Dictionary<string, MetadataReference>();
@@ -76,19 +36,10 @@ namespace Microsoft.DotNet.ApiCompatibility
             _resolveReferences = resolveAssemblyReferences;
         }
 
-        /// <summary>
-        /// Adds a set of paths to the search directories to resolve references from.
-        /// This is only used when the setting to resolve assembly references is set to true.
-        /// </summary>
-        /// <param name="paths">Comma separated list of paths to register as search directories.</param>
+        /// <inheritdoc />
         public void AddReferenceSearchDirectories(string paths) => AddReferenceSearchDirectories(SplitPaths(paths));
 
-        /// <summary>
-        /// Adds a set of paths to the search directories to resolve references from. Paths may
-        /// be directories or full paths to assembly files.
-        /// This is only used when the setting to resolve assembly references is set to true.
-        /// </summary>
-        /// <param name="paths">The list of paths to register as search directories.</param>
+        /// <inheritdoc />
         public void AddReferenceSearchDirectories(IEnumerable<string> paths)
         {
             if (paths == null)
@@ -114,44 +65,27 @@ namespace Microsoft.DotNet.ApiCompatibility
             }
         }
 
-        /// <summary>
-        /// Indicates if the <see cref="CSharpCompilation"/> used to resolve binaries has any roslyn diagnostics.
-        /// Might be useful when loading an assembly from source files.
-        /// </summary>
-        /// <param name="diagnostics">List of diagnostics.</param>
-        /// <returns>True if there are any diagnostics, false otherwise.</returns>
+        /// <inheritdoc />
         public bool HasRoslynDiagnostics(out IEnumerable<Diagnostic> diagnostics)
         {
             diagnostics = _cSharpCompilation.GetDiagnostics();
             return diagnostics.Any();
         }
 
-        /// <summary>
-        /// Indicates if the loader emitted any warnings that might affect the assembly resolution.
-        /// </summary>
-        /// <param name="warnings">List of warnings.</param>
-        /// <returns>True if there are any warnings, false otherwise.</returns>
+        private static string[] SplitPaths(string paths) =>
+            paths == null ? null : paths.Split(new char[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+        /// <inheritdoc />
         public bool HasLoadWarnings(out IEnumerable<AssemblyLoadWarning> warnings)
         {
             warnings = _warnings;
             return _warnings.Count > 0;
         }
 
-        private static string[] SplitPaths(string paths) =>
-            paths == null ? null : paths.Split(new char[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
-
-        /// <summary>
-        /// Loads a list of assemblies and gets its corresponding <see cref="IAssemblySymbol"/> from the specified paths.
-        /// </summary>
-        /// <param name="paths">Comma separated list of paths to load binaries from. Can be full paths to binaries or a directory.</param>
-        /// <returns>The list of resolved <see cref="IAssemblySymbol"/>.</returns>
+        /// <inheritdoc />
         public IEnumerable<IAssemblySymbol> LoadAssemblies(string paths) => LoadAssemblies(SplitPaths(paths));
 
-        /// <summary>
-        /// Loads a list of assemblies and gets its corresponding <see cref="IAssemblySymbol"/> from the specified paths.
-        /// </summary>
-        /// <param name="paths">List of paths to load binaries from. Can be full paths to binaries or a directory.</param>
-        /// <returns>The list of resolved <see cref="IAssemblySymbol"/>.</returns>
+        /// <inheritdoc />
         public IEnumerable<IAssemblySymbol> LoadAssemblies(IEnumerable<string> paths)
         {
             if (paths == null)
@@ -174,11 +108,7 @@ namespace Microsoft.DotNet.ApiCompatibility
             return result;
         }
 
-        /// <summary>
-        /// Loads an assembly from the provided path.
-        /// </summary>
-        /// <param name="path">The full path to the assembly.</param>
-        /// <returns><see cref="IAssemblySymbol"/> representing the loaded assembly.</returns>
+        /// <inheritdoc />
         public IAssemblySymbol LoadAssembly(string path)
         {
             if (path == null)
@@ -190,13 +120,7 @@ namespace Microsoft.DotNet.ApiCompatibility
             return (IAssemblySymbol)_cSharpCompilation.GetAssemblyOrModuleSymbol(metadataReference);
         }
 
-        /// <summary>
-        /// Loads an assembly using the provided name from a given <see cref="Stream"/>.
-        /// </summary>
-        /// <param name="name">The name to use to resolve the assembly.</param>
-        /// <param name="stream">The stream to read the metadata from.</param>
-        /// <returns><see cref="IAssemblySymbol"/> respresenting the given <paramref name="stream"/>. If an 
-        /// assembly with the same <paramref name="name"/> was already loaded, the previously loaded assembly is returned.</returns>
+        /// <inheritdoc />
         public IAssemblySymbol LoadAssembly(string name, Stream stream)
         {
             if (name == null)
@@ -221,14 +145,8 @@ namespace Microsoft.DotNet.ApiCompatibility
 
             return (IAssemblySymbol)_cSharpCompilation.GetAssemblyOrModuleSymbol(metadataReference);
         }
-        
-        /// <summary>
-        /// Loads an <see cref="IAssemblySymbol"/> containing the metadata from the provided source files and given assembly name.
-        /// </summary>
-        /// <param name="filePaths">The file paths to use as syntax trees to create the <see cref="IAssemblySymbol"/>.</param>
-        /// <param name="assemblyName">The name of the <see cref="IAssemblySymbol"/>.</param>
-        /// <param name="referencePaths">Paths to use as references if we want all the references to be included in the metadata.</param>
-        /// <returns>The <see cref="IAssemblySymbol"/> containing the metadata from the provided source files.</returns>
+
+        /// <inheritdoc />
         public IAssemblySymbol LoadAssemblyFromSourceFiles(IEnumerable<string> filePaths, string assemblyName, IEnumerable<string> referencePaths)
         {
             if (filePaths == null || filePaths.Count() == 0)
@@ -260,14 +178,7 @@ namespace Microsoft.DotNet.ApiCompatibility
             return _cSharpCompilation.Assembly;
         }
 
-        /// <summary>
-        /// Loads a list of matching assemblies given the "from" list that we should try and load it's matching assembly from the given paths.
-        /// </summary>
-        /// <param name="fromAssemblies">List of <see cref="IAssemblySymbol"/> to search for.</param>
-        /// <param name="searchPaths">List of search paths.</param>
-        /// <param name="validateMatchingIdentity">Indicates if we should validate that the identity of the resolved assembly is the same.</param>
-        /// <param name="warnOnMissingAssemblies">Indicates if a warning should be added to the warning list when a matching assembly is not found.</param>
-        /// <returns>The list of matching assemblies represented as <see cref="IAssemblySymbol"/>.</returns>
+        /// <inheritdoc />
         public IEnumerable<IAssemblySymbol> LoadMatchingAssemblies(IEnumerable<IAssemblySymbol> fromAssemblies, IEnumerable<string> searchPaths, bool validateMatchingIdentity = true, bool warnOnMissingAssemblies = true)
         {
             if (fromAssemblies == null)

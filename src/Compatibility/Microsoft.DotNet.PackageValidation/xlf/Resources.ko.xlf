@@ -2,16 +2,6 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../Resources.resx">
     <body>
-      <trans-unit id="ApiCompatibilityBaselineHeader">
-        <source>Breaking changes to the API surface between '{0}' (left) and '{1}' (right) for versions {2} and {3} respectively:</source>
-        <target state="translated">버전 {2} 및 {3}에 대해 각각 '{0}'(왼쪽) 및 '{1}' (오른쪽) 사이의 API 표면에 호환성이 손상되는 변경 내용:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ApiCompatibilityHeader">
-        <source>API compatibility errors between '{0}' (left) and '{1}' (right):</source>
-        <target state="translated">'{0}'(왼쪽) 및 '{1}'(오른쪽) 사이의 API 호환성 오류:</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Baseline">
         <source>[Baseline]</source>
         <target state="translated">[기준선]</target>
@@ -20,11 +10,6 @@
       <trans-unit id="EmptyPackagePath">
         <source>Package path is empty. Please provide a valid package path.</source>
         <target state="translated">패키지 경로가 비어 있습니다. 유효한 패키지 경로를 제공하세요.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InvalidPackagePath">
-        <source>Package path '{0}' is invalid.</source>
-        <target state="translated">패키지 경로 '{0}'이(가) 잘못되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingSearchDirectory">

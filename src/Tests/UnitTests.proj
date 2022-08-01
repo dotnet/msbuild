@@ -18,6 +18,10 @@
       <TargetFramework>net472</TargetFramework>
       <RuntimeTargetFramework>net472</RuntimeTargetFramework>
     </SDKCustomXUnitProject>
+    <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true' And $(_AGENTOSNAME) == 'Windows_NT_FullFramework'"  Include="Microsoft.DotNet.ApiCompat.IntegrationTests\Microsoft.DotNet.ApiCompat.IntegrationTests.csproj">
+      <TargetFramework>net472</TargetFramework>
+      <RuntimeTargetFramework>net472</RuntimeTargetFramework>
+    </SDKCustomXUnitProject>
     <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true' And $(_AGENTOSNAME) == 'Windows_NT_FullFramework'"  Include="Microsoft.DotNet.PackageValidation.Tests\Microsoft.DotNet.PackageValidation.Tests.csproj">
       <TargetFramework>net472</TargetFramework>
       <RuntimeTargetFramework>net472</RuntimeTargetFramework>

@@ -2,16 +2,6 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pt-BR" original="../Resources.resx">
     <body>
-      <trans-unit id="ApiCompatibilityBaselineHeader">
-        <source>Breaking changes to the API surface between '{0}' (left) and '{1}' (right) for versions {2} and {3} respectively:</source>
-        <target state="translated">Alterações interruptivas na superfície da API entre '{0}' (esquerda) e '{1}' (direita) para as versões {2} e {3}, respectivamente:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ApiCompatibilityHeader">
-        <source>API compatibility errors between '{0}' (left) and '{1}' (right):</source>
-        <target state="translated">Erros de compatibilidade de API entre '{0}' (esquerda) e '{1}' (direita):</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Baseline">
         <source>[Baseline]</source>
         <target state="translated">[Linha de base]</target>
@@ -20,11 +10,6 @@
       <trans-unit id="EmptyPackagePath">
         <source>Package path is empty. Please provide a valid package path.</source>
         <target state="translated">O caminho do pacote está vazio. Forneça um caminho de pacote válido.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InvalidPackagePath">
-        <source>Package path '{0}' is invalid.</source>
-        <target state="translated">O caminho do pacote '{0}' é inválido.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingSearchDirectory">

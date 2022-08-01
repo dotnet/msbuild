@@ -2,16 +2,6 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ru" original="../Resources.resx">
     <body>
-      <trans-unit id="ApiCompatibilityBaselineHeader">
-        <source>Breaking changes to the API surface between '{0}' (left) and '{1}' (right) for versions {2} and {3} respectively:</source>
-        <target state="translated">Критические изменения поверхности API между "{0}" (слева) и "{1}" (справа) для версий {2} и {3} соответственно:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ApiCompatibilityHeader">
-        <source>API compatibility errors between '{0}' (left) and '{1}' (right):</source>
-        <target state="translated">Ошибки совместимости API между {0} (слева) и {1} (справа):</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Baseline">
         <source>[Baseline]</source>
         <target state="translated">[Базовый план]</target>
@@ -20,11 +10,6 @@
       <trans-unit id="EmptyPackagePath">
         <source>Package path is empty. Please provide a valid package path.</source>
         <target state="translated">Путь к пакету пуст. Укажи допустимый путь к пакету.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InvalidPackagePath">
-        <source>Package path '{0}' is invalid.</source>
-        <target state="translated">Путь к пакету {0} является недопустимым.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingSearchDirectory">

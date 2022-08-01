@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.ApiCompatibility.Logging;
+using Microsoft.DotNet.ApiCompatibility.Runner;
 using NuGet.Client;
 using NuGet.ContentModel;
 using NuGet.Frameworks;
@@ -15,30 +16,30 @@ namespace Microsoft.DotNet.PackageValidation.Validators
     /// </summary>
     public class CompatibleFrameworkInPackageValidator : IPackageValidator
     {
-        private readonly CompatibilityLoggerBase _log;
+        private readonly ICompatibilityLogger _log;
+        private readonly IApiCompatRunner _apiCompatRunner;
 
-        public CompatibleFrameworkInPackageValidator(CompatibilityLoggerBase log)
+        public CompatibleFrameworkInPackageValidator(ICompatibilityLogger log,
+            IApiCompatRunner apiCompatRunner)
         {
             _log = log;
+            _apiCompatRunner = apiCompatRunner;
         }
 
         /// <summary>
         /// Validates that the compatible frameworks have compatible surface area.
         /// </summary>
-        /// <param name="package">Nuget Package that needs to be validated.</param>
-        public void Validate(PackageValidatorOption option)
+        /// <param name="options">The options to configure the validator.</param>
+        public void Validate(PackageValidatorOption options)
         {
-            ApiCompatRunner apiCompatRunner = new(_log,
-                option.EnableStrictMode,
-                option.FrameworkReferences,
-                option.Package.PackagePath);
+            ApiCompatRunnerOptions apiCompatOptions = new(options.EnableStrictMode);
 
             ManagedCodeConventions conventions = new(null);
-            PatternSet patternSet = option.Package.RefAssets.Any() ?
+            PatternSet patternSet = options.Package.RefAssets.Any() ?
                conventions.Patterns.CompileRefAssemblies :
                conventions.Patterns.CompileLibAssemblies;
 
-            IEnumerable<ContentItem> compileAssets = option.Package.CompileAssets.OrderByDescending(t => ((NuGetFramework)t.Properties["tfm"]).Version);
+            IEnumerable<ContentItem> compileAssets = options.Package.CompileAssets.OrderByDescending(t => ((NuGetFramework)t.Properties["tfm"]).Version);
             Queue<ContentItem> compileAssetsQueue = new(compileAssets);
 
             while (compileAssetsQueue.Count > 0)
@@ -58,12 +59,16 @@ namespace Microsoft.DotNet.PackageValidation.Validators
                 ContentItem? compatibleFrameworkAsset = contentItemCollection.FindBestItemGroup(managedCriteria, patternSet)?.Items.FirstOrDefault();
                 if (compatibleFrameworkAsset != null)
                 {
-                    string header = string.Format(Resources.ApiCompatibilityHeader, compatibleFrameworkAsset.Path, compileTimeAsset.Path);
-                    apiCompatRunner.QueueApiCompatFromContentItem(option.Package.PackageId, compatibleFrameworkAsset, compileTimeAsset, header);
+                    _apiCompatRunner.QueueApiCompatFromContentItem(_log,
+                        compatibleFrameworkAsset,
+                        compileTimeAsset,
+                        apiCompatOptions,
+                        options.Package);
                 }
             }
 
-            apiCompatRunner.RunApiCompat();
+            if (options.ExecuteApiCompatWorkItems)
+                _apiCompatRunner.ExecuteWorkItems();
         }
     }
 }

@@ -188,7 +188,7 @@ namespace CompatTests
 
             ApiComparer differ = new();
             ElementContainer<IAssemblySymbol> left =
-                new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax), new MetadataInformation(string.Empty, string.Empty, "ref/net6.0/a.dll"));
+                new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax), new MetadataInformation("a.dll", "ref/net6.0/a.dll"));
 
             IList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
 
