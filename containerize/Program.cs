@@ -1,5 +1,6 @@
 ﻿using System.CommandLine;
 using System.Containers;
+using System.Text.Json;
 
 var fileOption = new Argument<DirectoryInfo>(
     name: "folder",
@@ -67,6 +68,14 @@ async Task Containerize(DirectoryInfo folder, string workingDir, string registry
 
     Image x = await registry.GetImageManifest(baseName, baseTag);
     x.WorkingDirectory = workingDir;
+
+    JsonSerializerOptions options = new()
+    {
+        WriteIndented = true,
+    };
+
+    File.WriteAllTextAsync("manifest.json", x.manifest.ToJsonString(options));
+    File.WriteAllTextAsync("config.json", x.config.ToJsonString(options));
 
     Console.WriteLine($"Copying from {folder.FullName} to {workingDir}");
     Layer l = Layer.FromDirectory(folder.FullName, workingDir);
