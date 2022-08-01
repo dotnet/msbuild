@@ -67,8 +67,8 @@
         In order to keep working with MSBuild 17.2, which had binding redirects
         for SCI 0-5.0.0.0 but not 6, this task must compile against 5, even
         though that's not the very latest. -->
-    <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
-    <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
+    <PackageReference Include="System.Reflection.Metadata" Version="6.0.0" />
   </ItemGroup>
 
   <!-- These are loaded from the CLI's copy on .NET Core, we don't need to duplicate them on disk -->
