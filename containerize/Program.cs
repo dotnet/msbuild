@@ -81,13 +81,10 @@ async Task Containerize(DirectoryInfo folder, string workingDir, string registry
 
     x.SetEntrypoint(entrypoint);
 
-    File.WriteAllTextAsync("manifest.json", x.manifest.ToJsonString(options));
-    File.WriteAllTextAsync("config.json", x.config.ToJsonString(options));
+    // File.WriteAllTextAsync("manifest.json", x.manifest.ToJsonString(options));
+    // File.WriteAllTextAsync("config.json", x.config.ToJsonString(options));
 
-    //await PushToLocalDockerViaRegistry(registryName, baseName, imageName, registry, x);
-
-    using FileStream tarStream = new FileStream("test.tar", FileMode.OpenOrCreate);
-    await LocalDocker.WriteImageToStream(x, imageName, baseName, tarStream);
+    await LocalDocker.Load(x, imageName, baseName);
 
     Console.WriteLine($"Loaded image into local Docker daemon. Use 'docker run --rm -it --name {imageName} {registryName}/{imageName}:latest' to run the application.");
 }
