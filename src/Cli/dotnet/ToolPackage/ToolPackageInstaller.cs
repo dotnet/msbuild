@@ -47,17 +47,18 @@ namespace Microsoft.DotNet.ToolPackage
             string rollbackDirectory = null;
 
             return TransactionalAction.Run<IToolPackage>(
-                action: () => {
+                action: () =>
+                {
                     try
                     {
                         var stageDirectory = _store.GetRandomStagingDirectory();
                         Directory.CreateDirectory(stageDirectory.Value);
                         rollbackDirectory = stageDirectory.Value;
 
-                        Tuple<string, string> tempProjectDetails = CreateDirectoryWithTempProject(
+                        string tempProjectPath = CreateDirectoryWithTempProject(
                             packageId: packageId,
                             versionRange: versionRange,
-                            targetFramework: string.IsNullOrEmpty(targetFramework) ? BundledTargetFramework.GetTargetFrameworkMoniker() :  targetFramework,
+                            targetFramework: string.IsNullOrEmpty(targetFramework) ? BundledTargetFramework.GetTargetFrameworkMoniker() : targetFramework,
                             restoreDirectory: stageDirectory,
                             assetJsonOutputDirectory: stageDirectory,
                             rootConfigDirectory: packageLocation.RootConfigDirectory,
@@ -66,13 +67,13 @@ namespace Microsoft.DotNet.ToolPackage
                         try
                         {
                             _projectRestorer.Restore(
-                                new FilePath(tempProjectDetails.Item1 + tempProjectDetails.Item2),
+                                new FilePath(tempProjectPath),
                                 packageLocation,
                                 verbosity: verbosity);
                         }
                         finally
                         {
-                            Directory.Delete(tempProjectDetails.Item1, recursive: true);
+                            Directory.Delete(Path.GetDirectoryName(tempProjectPath), recursive: true);
                         }
 
                         var version = _store.GetStagedPackageVersion(stageDirectory, packageId);
@@ -105,7 +106,8 @@ namespace Microsoft.DotNet.ToolPackage
                             ex);
                     }
                 },
-                rollback: () => {
+                rollback: () =>
+                {
                     if (!string.IsNullOrEmpty(rollbackDirectory) && Directory.Exists(rollbackDirectory))
                     {
                         Directory.Delete(rollbackDirectory, true);
@@ -130,7 +132,7 @@ namespace Microsoft.DotNet.ToolPackage
             var tempDirectoryForAssetJson = FileUtilities.CreateTempPath();
             File.WriteAllText(Path.Combine(tempDirectoryForAssetJson, "file1.txt"), null);
 
-            Tuple<string, string> tempProjectDetails = CreateDirectoryWithTempProject(
+            string tempProjectDetails = CreateDirectoryWithTempProject(
                 packageId: packageId,
                 versionRange: versionRange,
                 targetFramework: string.IsNullOrEmpty(targetFramework) ? BundledTargetFramework.GetTargetFrameworkMoniker() : targetFramework,
@@ -142,19 +144,19 @@ namespace Microsoft.DotNet.ToolPackage
             try
             {
                 _projectRestorer.Restore(
-                    new FilePath(tempProjectDetails.Item1 + tempProjectDetails.Item2),
+                    new FilePath(tempProjectDetails + tempProjectDetails),
                     packageLocation,
                     verbosity: verbosity);
             }
             finally
             {
-                Directory.Delete(tempProjectDetails.Item1, recursive:true);
+                Directory.Delete(Path.GetDirectoryName(tempProjectDetails), recursive: true);
             }
 
             return ToolPackageInstance.CreateFromAssetFile(packageId, new DirectoryPath(tempDirectoryForAssetJson));
         }
 
-        private Tuple<string, string> CreateDirectoryWithTempProject(
+        private string CreateDirectoryWithTempProject(
             PackageId packageId,
             VersionRange versionRange,
             string targetFramework,
@@ -163,9 +165,7 @@ namespace Microsoft.DotNet.ToolPackage
             DirectoryPath? rootConfigDirectory,
             string[] additionalFeeds)
         {
-            string tempProjectName = "restore.csproj";
-            string tempProjectDir = _tempProject.ToString() ?? FileUtilities.CreateTempPath();
-            File.WriteAllText(Path.Combine(tempProjectDir, tempProjectName), null);
+            string tempProject = _tempProject.ToString() ?? FileUtilities.CreateTempFile(FileUtilities.CreateTempPath(), "csproj");
 
             var tempProjectContent = new XDocument(
                 new XElement("Project",
@@ -195,8 +195,8 @@ namespace Microsoft.DotNet.ToolPackage
                         new XAttribute("Project", "Sdk.targets"),
                         new XAttribute("Sdk", "Microsoft.NET.Sdk"))));
 
-            File.WriteAllText(Path.Combine(tempProjectDir, tempProjectName), tempProjectContent.ToString());
-            return new Tuple<string, string>(tempProjectDir, tempProjectName);
+            File.WriteAllText(tempProject, tempProjectContent.ToString());
+            return tempProject;
         }
 
         private string JoinSourceAndOfflineCache(string[] additionalFeeds)
