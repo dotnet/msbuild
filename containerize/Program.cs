@@ -80,9 +80,9 @@ async Task Containerize(DirectoryInfo folder, string workingDir, string registry
     Console.WriteLine($"Copying from {folder.FullName} to {workingDir}");
     Layer l = Layer.FromDirectory(folder.FullName, workingDir);
 
-    x.AddLayer(l);
+    //x.AddLayer(l);
 
-    x.SetEntrypoint(entrypoint);
+    //x.SetEntrypoint(entrypoint);
 
     //await PushToLocalDockerViaRegistry(registryName, baseName, imageName, registry, x);
     using FileStream tarStream = new FileStream("test.tar", FileMode.OpenOrCreate);
