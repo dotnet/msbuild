@@ -135,6 +135,11 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
                     _logger.LogDebug("Failed to evaluate project context: {0}", _evaluationResult.ErrorMessage);
                     return TemplateConstraintResult.CreateRestricted(this, string.Format(LocalizableStrings.ProjectCapabilityConstraint_Restricted_EvaluationFailed_Message, _evaluationResult.ErrorMessage));
                 }
+                if (_evaluationResult is NonSDKStyleEvaluationResult)
+                {
+                    _logger.LogDebug("The project {0} is not an SDK style project, and is not supported for evaluation.", _evaluationResult.ProjectPath);
+                    return TemplateConstraintResult.CreateRestricted(this, string.Format(LocalizableStrings.ProjectCapabilityConstraint_Restricted_NonSDKStyle_Message, _evaluationResult.ProjectPath));
+                }
 
                 try
                 {

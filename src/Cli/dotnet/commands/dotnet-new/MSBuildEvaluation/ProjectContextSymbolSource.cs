@@ -49,6 +49,11 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
                     settings.Host.Logger.LogDebug("{0}: evaluation did not succeed, status: {1}, exiting.", nameof(ProjectContextSymbolSource), evaluationResult.Status);
                     return Task.FromResult((string?)null);
                 }
+                if (evaluationResult is NonSDKStyleEvaluationResult)
+                {
+                    settings.Host.Logger.LogDebug("The project {0} is not an SDK style project, and is not supported for evaluation.", evaluationResult.ProjectPath);
+                    return Task.FromResult((string?)null);
+                }
 
                 string? propertyValue = evaluationResult.EvaluatedProject.GetProperty(bindname)?.EvaluatedValue;
                 //we check only for null as property may exist with empty value

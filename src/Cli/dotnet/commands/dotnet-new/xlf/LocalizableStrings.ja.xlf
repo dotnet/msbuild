@@ -107,6 +107,11 @@
         <target state="new">This template can only be created inside the project.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_NonSDKStyle_Message">
+        <source>The project {0} is not an SDK style project, and is not supported for evaluation. It is only possible to use this template with SDK-style projects.</source>
+        <target state="new">The project {0} is not an SDK style project, and is not supported for evaluation. It is only possible to use this template with SDK-style projects.</target>
+        <note>{0} - path to the project</note>
+      </trans-unit>
       <trans-unit id="ProjectCapabilityConstraint_Restricted_NotRestored_CTA">
         <source>Run 'dotnet restore {0}' to restore the project.</source>
         <target state="new">Run 'dotnet restore {0}' to restore the project.</target>

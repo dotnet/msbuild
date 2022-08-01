@@ -73,6 +73,7 @@ namespace Microsoft.DotNet.New.Tests
 
             cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectPath)
+                .WithEnvironmentVariable("DOTNET_CLI_CONTEXT_VERBOSE", "true")
                 .Execute("new", "TestAssets.TestClassTemplate", "--debug:custom-hive", tempSettingsDir.Path, "--debug:enable-project-context", "--name", "MyTestClass");
             cmd.Should().Pass();
 
@@ -165,6 +166,26 @@ namespace Microsoft.DotNet.New.Tests
             cmd.Should().Pass();
         }
 
+        [Fact]
+        public void NonSDKStyleProject_BasicTest()
+        {
+            TestDirectory tempDir = _testAssetsManager.CreateTestDirectory();
+            TestDirectory tempSettingsDir = _testAssetsManager.CreateTestDirectory();
+
+            string templateLocation = GetTestTemplatePath("Item/ClassTemplate");
+            var cmd = new DotnetCommand(Log).Execute("new", "install", templateLocation, "--debug:custom-hive", tempSettingsDir.Path);
+            cmd.Should().Pass();
+            string projectPath = Path.Combine(tempDir.Path, "ConsoleFullFramework");
+            DirectoryCopy(GetTestTemplatePath("ConsoleFullFramework"), projectPath);
+
+            cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(projectPath)
+                .Execute("new", "TestAssets.ClassTemplate", "--debug:custom-hive", tempSettingsDir.Path, "--debug:enable-project-context", "--name", "MyTestClass");
+            cmd.Should().Fail()
+                .And.HaveStdErrContaining("Failed to instatiate template 'ClassTemplate', the following constraints are not met:")
+                .And.HaveStdErrContaining($"Project capabiltities: The project {Path.Combine(projectPath, "ConsoleFullFramework.csproj")} is not an SDK style project, and is not supported for evaluation.");
+        }
+
 
 
         private static string GetTestTemplatePath(string templateName)
@@ -172,6 +193,38 @@ namespace Microsoft.DotNet.New.Tests
             string templateFolder = Path.Combine(Path.GetDirectoryName(typeof(NewCommandTests).Assembly.Location) ?? string.Empty, "TestTemplates", templateName);
             Assert.True(Directory.Exists(templateFolder));
             return Path.GetFullPath(templateFolder);
+        }
+
+        private static void DirectoryCopy(string sourceDirName, string destDirName)
+        {
+            // Get the subdirectories for the specified directory.
+            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+
+            if (!dir.Exists)
+            {
+                throw new DirectoryNotFoundException(
+                    "Source directory does not exist or could not be found: "
+                    + dir.FullName);
+            }
+
+            DirectoryInfo[] dirs = dir.GetDirectories();
+
+            // If the destination directory doesn't exist, create it.       
+            Directory.CreateDirectory(destDirName);
+
+            // Get the files in the directory and copy them to the new location.
+            FileInfo[] files = dir.GetFiles();
+            foreach (FileInfo file in files)
+            {
+                string tempPath = Path.Combine(destDirName, file.Name);
+                file.CopyTo(tempPath, false);
+            }
+
+            foreach (DirectoryInfo subdir in dirs)
+            {
+                string tempPath = Path.Combine(destDirName, subdir.Name);
+                DirectoryCopy(subdir.FullName, tempPath);
+            }
         }
     }
 }
