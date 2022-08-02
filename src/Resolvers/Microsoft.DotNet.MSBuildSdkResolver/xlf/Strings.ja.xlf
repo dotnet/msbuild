@@ -7,6 +7,11 @@
         <target state="translated">global.json で指定されている .NET SDK が見つかりません。指定されたバージョンがインストールされていることをご確認ください。</target>
         <note />
       </trans-unit>
+      <trans-unit id="GlobalJsonResolutionFailedSpecificVersion">
+        <source>Unable to locate the .NET SDK version '{0}' as specified by global.json, please check that the specified version is installed.</source>
+        <target state="translated">global.json で指定されている .NET SDK バージョン '{0}' が見つかりません。指定されたバージョンがインストールされていることをご確認ください。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MSBuildSDKDirectoryNotFound">
         <source>{0} not found. Check that a recent enough .NET SDK is installed and/or increase the version specified in global.json.</source>
         <target state="translated">{0} が見つかりません。十分新しい .NET SDK がインストールされていることを確認するか、global.json で指定するバージョンを上げてください (どちらも実行する必要がある場合もあります)。</target>
@@ -28,8 +33,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UnableToLocateNETCoreSdk">
-        <source>Unable to locate the .NET SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.</source>
-        <target state="needs-review-translation">.NET SDK が見つかりません。それがインストールされていること、正しいアーキテクチャについて PATH が構成されていること、そのインストール済みバージョンが global.json で指定されているバージョンと一致していること (指定されている場合) をご確認ください。</target>
+        <source>Unable to locate the .NET SDK. Check that it is installed, your PATH is configured for the correct architecture, and that the version specified in global.json (if any) matches the installed version.</source>
+        <target state="translated">.NET SDK が見つかりません。それがインストールされていること、正しいアーキテクチャについて PATH が構成されていること、そのインストール済みバージョンが global.json で指定されているバージョンと一致していること (指定されている場合) をご確認ください。</target>
         <note />
       </trans-unit>
     </body>

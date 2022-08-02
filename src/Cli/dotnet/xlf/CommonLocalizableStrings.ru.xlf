@@ -37,6 +37,11 @@
         <target state="translated">Не удалось найти проекты в "{0}".</target>
         <note />
       </trans-unit>
+      <trans-unit id="DisableBuildServersOptionDescription">
+        <source>Force the command to ignore any persistent build servers.</source>
+        <target state="translated">Принудительно игнорировать все постоянные серверы сборки.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="EnvironmentPathOSXBashManualInstructions">
         <source>Tools directory '{0}' is not currently on the PATH environment variable.
 If you are using bash, you can add it to your profile by running the following command:
@@ -167,7 +172,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="ResponseFileNotFound">
         <source>Response file '{0}' does not exist.</source>
-        <target state="new">Response file '{0}' does not exist.</target>
+        <target state="translated">Файл отклика "{0}" не существует.</target>
         <note />
       </trans-unit>
       <trans-unit id="SelfContainAndNoSelfContainedConflict">
