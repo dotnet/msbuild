@@ -10,8 +10,8 @@
   </PropertyGroup>
   <!-- Repo Version Information -->
   <PropertyGroup>
-    <VersionPrefix>6.0.400</VersionPrefix>
-    <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
+    <VersionPrefix>6.0.401</VersionPrefix>
+    <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
     <!-- Enable to remove prerelease label. -->
     <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">true</StabilizePackageVersion>
     <DotNetFinalVersionKind Condition="'$(StabilizePackageVersion)' == 'true'">release</DotNetFinalVersionKind>
