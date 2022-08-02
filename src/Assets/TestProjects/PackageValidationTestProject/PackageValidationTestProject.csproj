@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildProjectDirectory)\..\..\..\..\src\Compatibility\Microsoft.DotNet.ApiCompat.Task\Microsoft.DotNet.ApiCompat.Task.csproj" />
+    <ProjectReference Include="$(MSBuildProjectDirectory)\..\..\..\..\src\ApiCompat\Microsoft.DotNet.ApiCompat.Task\Microsoft.DotNet.ApiCompat.Task.csproj" />
     <PackageReference Include="NuGet.Frameworks" Version="6.0.0-preview.1.66" />
     <PackageReference Include="NuGet.Packaging" Version="6.0.0-preview.1.66" />
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />

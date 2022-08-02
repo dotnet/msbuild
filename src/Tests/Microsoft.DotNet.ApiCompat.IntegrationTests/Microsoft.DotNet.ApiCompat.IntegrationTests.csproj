@@ -8,21 +8,21 @@
 
   <ItemGroup>
     <Compile Include="..\Microsoft.DotNet.PackageValidation.Tests\TestLogger.cs" />
-    <EmbeddedResource Include="..\..\Compatibility\Microsoft.DotNet.PackageValidation\Resources.resx" GenerateSource="true" />
+    <EmbeddedResource Include="..\..\ApiCompat\Microsoft.DotNet.PackageValidation\Resources.resx" GenerateSource="true" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Compatibility\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" />
-    <ProjectReference Include="..\..\Compatibility\Microsoft.DotNet.ApiCompat.Task\Microsoft.DotNet.ApiCompat.Task.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\ApiCompat\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" />
+    <ProjectReference Include="..\..\ApiCompat\Microsoft.DotNet.ApiCompat.Task\Microsoft.DotNet.ApiCompat.Task.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
   </ItemGroup>
 
-  <Target Name="CopyCompatibilityFilesForTests" AfterTargets="Publish">
+  <Target Name="CopyApiCompatFilesForTests" AfterTargets="Publish">
     <ItemGroup>
-      <CompatibilityFiles Include="..\..\Compatibility\Microsoft.DotNet.ApiCompat.Task\**" />
-      <CompatibilityFiles Include="..\..\Tasks\Microsoft.NET.Build.Tasks\targets\Microsoft.NET.ApiCompat.targets" />   
+      <ApiCompatFile Include="..\..\ApiCompat\Microsoft.DotNet.ApiCompat.Task\**" />
+      <ApiCompatFile Include="..\..\Tasks\Microsoft.NET.Build.Tasks\targets\Microsoft.NET.ApiCompat.targets" />   
     </ItemGroup>
-    <Copy SourceFiles="@(CompatibilityFiles)" DestinationFiles="@(CompatibilityFiles->'$(PublishDir)Compatibility\Microsoft.DotNet.ApiCompat.Task\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(ApiCompatFile)" DestinationFiles="@(ApiCompatFile->'$(PublishDir)ApiCompat\Microsoft.DotNet.ApiCompat.Task\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
 </Project>
