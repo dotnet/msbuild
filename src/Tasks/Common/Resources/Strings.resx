@@ -692,8 +692,8 @@ The following are names of parameters or literal values and should not be transl
   </data>
   <data name="WorkloadNotInstalled" xml:space="preserve">
     <value>NETSDK1147: To build this project, the following workloads must be installed: {0}
-To install these workloads, run the following command: {1}</value>
-    <comment>{StrBegin="NETSDK1147: "}</comment>
+To install these workloads, run the following command: dotnet workload restore</value>
+    <comment>{StrBegin="NETSDK1147: "} LOCALIZATION: Do not localize "dotnet workload restore"</comment>
   </data>
   <data name="WindowsSDKVersionConflicts" xml:space="preserve">
     <value>NETSDK1148: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll. Please update to a newer .NET SDK in order to reference this assembly.</value>
@@ -824,16 +824,12 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</value>
     <comment>{StrBegin="NETSDK1179: "}</comment>
   </data>
-  <data name="SingleFileWin7Incompatible" xml:space="preserve">
-    <value>NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</value>
-    <comment>{StrBegin="NETSDK1180: "}</comment>
-  </data>
   <data name="CouldNotGetPackVersionFromWorkloadManifests" xml:space="preserve">
     <value>NETSDK1181: Error getting pack version: Pack '{0}' was not present in workload manifests.</value>
     <comment>{StrBegin="NETSDK1181: "}</comment>
   </data>
   <data name="Net6NotCompatibleWithDev16" xml:space="preserve">
-    <value>NETSDK1182: Targeting .NET 6.0 in Visual Studio 2019 is not supported.</value>
+    <value>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</value>
     <comment>{StrBegin="NETSDK1182: "}</comment>
   </data>
 </root>

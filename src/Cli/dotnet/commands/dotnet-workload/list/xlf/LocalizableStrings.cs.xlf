@@ -17,9 +17,9 @@
         <target state="translated">Pokud chcete najít další úlohy, které se mají nainstalovat, použijte vyhledávání úloh dotnet.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WorkloadListHeader">
-        <source>This command lists only workloads that were installed via `dotnet workload install` in this version of the SDK and not those that were installed via Visual Studio.</source>
-        <target state="translated">Tento příkaz vypíše pouze úlohy nainstalované prostřednictvím instalace úlohy dotnet v této verzi sady SDK a ne ty, které byly nainstalovány prostřednictvím sady Visual Studio.</target>
+      <trans-unit id="WorkloadSourceColumn">
+        <source>Installation Source</source>
+        <target state="translated">Zdroj instalace</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">

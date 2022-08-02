@@ -17,6 +17,16 @@
         <target state="translated">脱机缓存 {0} 中不存在程序包 {1} 版本 {2}。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
+        <target state="translated">不能同时使用 {0} 和 {1} 选项。如果从回滚文件安装，请删除 {0}。否则，请删除 {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CheckForUpdatedWorkloadManifests">
+        <source>Checking for updated workload manifests.</source>
+        <target state="translated">正在检查更新的工作负载清单。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}…</source>
         <target state="translated">正在卸载工作负载包 {0} 版本 {1}…</target>
@@ -207,6 +217,11 @@
         <target state="translated">跳过更新工作负载清单。</target>
         <note />
       </trans-unit>
+      <trans-unit id="SkipSignCheckOptionDescription">
+        <source>Skip signature verification of workload packages and installers.</source>
+        <target state="translated">跳过对工作负载包和安装程序的签名验证。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippingManifestUpdate">
         <source>Manifest packages were not found. Skipping manifest update...</source>
         <target state="translated">找不到清单包。正在跳过清单更新...</target>
@@ -278,7 +293,7 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadAlreadyInstalled">
-        <source>Workload '{0}' is already installed.</source>
+        <source>Workload(s) '{0}' are already installed.</source>
         <target state="translated">已安装工作负载“{0}”。</target>
         <note />
       </trans-unit>

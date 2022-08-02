@@ -50,7 +50,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                     {
                         if (selected == null)
                         {
-                            Log.LogMessage("No compatible asset found for '{0}'", key);
+                            Log.LogMessage(MessageImportance.Low, "No compatible asset found for '{0}'", key);
                             continue;
                         }
                         else
@@ -65,7 +65,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                         selected.SourceType = StaticWebAsset.SourceTypes.Project;
                         resultAssets.Add(selected);
                     }
-                    Log.LogMessage(reason);
+                    Log.LogMessage(MessageImportance.Low, reason);
                 }
 
                 var patterns = new List<StaticWebAssetsManifest.DiscoveryPattern>();
@@ -75,11 +75,11 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                     {
                         if (!StaticWebAssetsManifest.DiscoveryPattern.HasSourceId(pattern, Source))
                         {
-                            Log.LogMessage("Skipping pattern '{0}' because is not defined in the current project.", pattern.ItemSpec);
+                            Log.LogMessage(MessageImportance.Low, "Skipping pattern '{0}' because is not defined in the current project.", pattern.ItemSpec);
                         }
                         else
                         {
-                            Log.LogMessage("Including pattern '{0}' because is defined in the current project.", pattern.ToString());
+                            Log.LogMessage(MessageImportance.Low, "Including pattern '{0}' because is defined in the current project.", pattern.ToString());
                             patterns.Add(StaticWebAssetsManifest.DiscoveryPattern.FromTaskItem(pattern));
                         }
                     }

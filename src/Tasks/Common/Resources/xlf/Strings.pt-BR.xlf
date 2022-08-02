@@ -561,8 +561,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1115: "}</note>
       </trans-unit>
       <trans-unit id="Net6NotCompatibleWithDev16">
-        <source>NETSDK1182: Targeting .NET 6.0 in Visual Studio 2019 is not supported.</source>
-        <target state="translated">NETSDK1182: a segmentação do .NET 6.0 no Visual Studio 2019 não é compatível.</target>
+        <source>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</source>
+        <target state="translated">NETSDK1182: o direcionamento do .NET 6.0 ou superior no Visual Studio 2019 não é compatível.</target>
         <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
@@ -657,7 +657,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PlaceholderRunCommandProjectAbbreviationDeprecated">
         <source>NETSDK1174: Placeholder</source>
-        <target state="translated">NETSDK1174: espaço reservado</target>
+        <target state="translated">NETSDK1174: Espaço reservado</target>
         <note>{StrBegin="NETSDK1174: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</note>
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
@@ -749,11 +749,6 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</source>
         <target state="translated">NETSDK1179: uma das opções '--auto--contidas ' ou '--não-independentes ' é necessária quando '--runtime ' é usado.</target>
         <note>{StrBegin="NETSDK1179: "}</note>
-      </trans-unit>
-      <trans-unit id="SingleFileWin7Incompatible">
-        <source>NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</source>
-        <target state="translated">NETSDK1180: o identificador de tempo de execução especificado '{0}'implica em compatibilidade com o Windows 7. A publicação de arquivo único não é compatível com o Windows 7.</target>
-        <note>{StrBegin="NETSDK1180: "}</note>
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
@@ -914,10 +909,11 @@ Talvez você precise compilar o projeto em outro sistema operacional ou arquitet
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
-To install these workloads, run the following command: {1}</source>
-        <target state="translated">NETSDK1147: para construir este projeto, as seguintes cargas de trabalho devem ser instaladas: {0}
-Para instalar essas cargas de trabalho, execute o seguinte comando: {1}</target>
-        <note>{StrBegin="NETSDK1147: "}</note>
+To install these workloads, run the following command: dotnet workload restore</source>
+        <target state="translated">NETSDK1147: Para criar este projeto, as seguintes cargas de trabalho devem ser instaladas: {0}
+ 
+Para instalar essas cargas de trabalho, execute o seguinte comando: dotnet workload restore</target>
+        <note>{StrBegin="NETSDK1147: "} LOCALIZATION: Do not localize "dotnet workload restore"</note>
       </trans-unit>
     </body>
   </file>

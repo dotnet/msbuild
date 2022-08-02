@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli;
-using Parser = Microsoft.DotNet.Cli.Parser;
 using System.CommandLine.Parsing;
 using System;
 
@@ -22,13 +21,16 @@ namespace Microsoft.DotNet.Tools.Build
 
         public static BuildCommand FromArgs(string[] args, string msbuildPath = null)
         {
-            PerformanceLogEventSource.Log.CreateBuildCommandStart();
-
-            var msbuildArgs = new List<string>();
-
-            var parser = Parser.Instance;
-
+            var parser = Cli.Parser.Instance;
             var parseResult = parser.ParseFrom("dotnet build", args);
+            return FromParseResult(parseResult, msbuildPath);
+        }
+
+        public static BuildCommand FromParseResult(ParseResult parseResult, string msbuildPath = null)
+        {
+            PerformanceLogEventSource.Log.CreateBuildCommandStart();
+             
+            var msbuildArgs = new List<string>();
 
             parseResult.ShowHelpOrErrorIfAppropriate();
 
@@ -41,7 +43,7 @@ namespace Microsoft.DotNet.Tools.Build
             {
                 msbuildArgs.Add("-target:Rebuild");
             }
-            var arguments = parseResult.ValueForArgument<IEnumerable<string>>(BuildCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>();
+            var arguments = parseResult.GetValueForArgument(BuildCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>();
 
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(BuildCommandParser.GetCommand()));
 
@@ -59,11 +61,11 @@ namespace Microsoft.DotNet.Tools.Build
             return command;
         }
 
-        public static int Run(string[] args)
+        public static int Run(ParseResult parseResult)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
+            parseResult.HandleDebugSwitch();
 
-            return FromArgs(args).Execute();
+            return FromParseResult(parseResult).Execute();
         }
     }
 }

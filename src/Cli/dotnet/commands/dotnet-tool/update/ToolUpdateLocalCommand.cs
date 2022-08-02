@@ -37,8 +37,8 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             IReporter reporter = null)
             : base(parseResult)
         {
-            _packageId = new PackageId(parseResult.ValueForArgument<string>(ToolUpdateCommandParser.PackageIdArgument));
-            _explicitManifestFile = parseResult.ValueForOption<string>(ToolUpdateCommandParser.ToolManifestOption);
+            _packageId = new PackageId(parseResult.GetValueForArgument(ToolUpdateCommandParser.PackageIdArgument));
+            _explicitManifestFile = parseResult.GetValueForOption(ToolUpdateCommandParser.ToolManifestOption);
 
             _reporter = (reporter ?? Reporter.Output);
 

@@ -16,16 +16,20 @@ namespace Microsoft.DotNet.Tools
     {
         public RestoreCommand SeparateRestoreCommand { get; }
 
+        private bool AdvertiseWorkloadUpdates;
+
         public RestoringCommand(
             IEnumerable<string> msbuildArgs,
             bool noRestore,
             string msbuildPath = null,
-            string userProfileDir = null)
+            string userProfileDir = null,
+            bool advertiseWorkloadUpdates = true)
             : base(GetCommandArguments(msbuildArgs, noRestore), msbuildPath)
         {
             userProfileDir = CliFolderPathCalculator.DotnetUserProfileFolderPath;
             Task.Run(() => WorkloadManifestUpdater.BackgroundUpdateAdvertisingManifestsAsync(userProfileDir));
             SeparateRestoreCommand = GetSeparateRestoreCommand(msbuildArgs, noRestore, msbuildPath);
+            AdvertiseWorkloadUpdates = advertiseWorkloadUpdates;
         }
 
         private static IEnumerable<string> GetCommandArguments(
@@ -71,7 +75,7 @@ namespace Microsoft.DotNet.Tools
         private static bool HasArgumentToExcludeFromRestore(IEnumerable<string> arguments)
             => arguments.Any(a => IsExcludedFromRestore(a));
 
-        private static readonly string[] propertyPrefixes = new string[]{ "-", "/" };
+        private static readonly string[] propertyPrefixes = new string[]{ "-", "/", "--" };
 
         private static bool IsExcludedFromRestore(string argument)
             => propertyPrefixes.Any(prefix => argument.StartsWith($"{prefix}property:TargetFramework=", StringComparison.Ordinal)) ||
@@ -98,7 +102,10 @@ namespace Microsoft.DotNet.Tools
             }
 
             exitCode = base.Execute();
-            WorkloadManifestUpdater.AdvertiseWorkloadUpdates();
+            if (AdvertiseWorkloadUpdates)
+            {
+                WorkloadManifestUpdater.AdvertiseWorkloadUpdates();
+            }
             return exitCode;
         }
     }

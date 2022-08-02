@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <Compile Include="Program.fs" />
+    <PackageReference Update="FSharp.Core" Version="6.0.1" />
   </ItemGroup>
 
 </Project>

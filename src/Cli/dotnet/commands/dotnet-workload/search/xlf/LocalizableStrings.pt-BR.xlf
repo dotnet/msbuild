@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>Search for available workloads.</source>
-        <target state="new">Search for available workloads.</target>
+        <target state="translated">Pesquise cargas de trabalho disponíveis.</target>
         <note />
       </trans-unit>
       <trans-unit id="DescriptionColumnName">
@@ -24,12 +24,12 @@
       </trans-unit>
       <trans-unit id="WorkloadIdStubArgumentDescription">
         <source>The text to search for in the IDs and descriptions of available workloads.</source>
-        <target state="new">The text to search for in the IDs and descriptions of available workloads.</target>
+        <target state="translated">O texto a ser pesquisado nas IDs e descrições das cargas de trabalho disponíveis.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdStubArgumentName">
         <source>SEARCH_STRING</source>
-        <target state="new">SEARCH_STRING</target>
+        <target state="translated">SEARCH_STRING</target>
         <note />
       </trans-unit>
     </body>

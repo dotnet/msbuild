@@ -8,10 +8,11 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-
+using Microsoft.NET.TestFramework;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
+    [Collection(TestConstants.UsesStaticTelemetryState)]
     public class GivenDotnetPackInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
         const string ExpectedPrefix = "-maxcpucount -verbosity:m -restore -target:pack";

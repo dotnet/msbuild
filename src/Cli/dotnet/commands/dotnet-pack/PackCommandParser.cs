@@ -3,13 +3,18 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Tools.Pack;
 using LocalizableStrings = Microsoft.DotNet.Tools.Pack.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class PackCommandParser
     {
+        public static readonly string DocsLink = "https://aka.ms/dotnet-pack";
+
         public static readonly Argument<IEnumerable<string>> SlnOrProjectArgument = new Argument<IEnumerable<string>>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
         {
             Description = CommonLocalizableStrings.SolutionOrProjectArgumentDescription,
@@ -36,11 +41,20 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<bool> NoLogoOption = new ForwardedOption<bool>("--nologo", LocalizableStrings.CmdNoLogo)
             .ForwardAs("-nologo");
 
-        public static readonly Option<bool> NoRestoreOption = CommonOptions.NoRestoreOption();
+        public static readonly Option<bool> NoRestoreOption = CommonOptions.NoRestoreOption;
+
+        public static readonly Option<string> ConfigurationOption = CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription);
+
+        private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
         {
-            var command = new Command("pack", LocalizableStrings.AppFullName);
+            return Command;
+        }
+
+        private static Command ConstructCommand()
+        {
+            var command = new DocumentedCommand("pack", DocsLink, LocalizableStrings.AppFullName);
 
             command.AddArgument(SlnOrProjectArgument);
             command.AddOption(OutputOption);
@@ -49,12 +63,14 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(IncludeSourceOption);
             command.AddOption(ServiceableOption);
             command.AddOption(NoLogoOption);
-            command.AddOption(CommonOptions.InteractiveMsBuildForwardOption());
+            command.AddOption(CommonOptions.InteractiveMsBuildForwardOption);
             command.AddOption(NoRestoreOption);
-            command.AddOption(CommonOptions.VerbosityOption());
-            command.AddOption(CommonOptions.VersionSuffixOption());
-            command.AddOption(CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription));
+            command.AddOption(CommonOptions.VerbosityOption);
+            command.AddOption(CommonOptions.VersionSuffixOption);
+            command.AddOption(ConfigurationOption);
             RestoreCommandParser.AddImplicitRestoreOptions(command, includeRuntimeOption: true, includeNoDependenciesOption: true);
+
+            command.SetHandler(PackCommand.Run);
 
             return command;
         }

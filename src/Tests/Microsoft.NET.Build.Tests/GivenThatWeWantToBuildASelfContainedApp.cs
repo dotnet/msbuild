@@ -348,5 +348,31 @@ namespace Microsoft.NET.Build.Tests
             testRuntimePack.metadata["NuGetPackageId"].Should().Be("Microsoft.NETCore.App.Test.RuntimePack");
             testRuntimePack.metadata["NuGetPackageVersion"].Should().Be("1.0.42-abc");
         }
+
+        [Theory]
+        [InlineData("net6.0")]
+        public void It_can_publish_runtime_specific_apps_with_library_dependencies_self_contained(string targetFramework) {
+
+            // create a basic library and a basic app, reference the library from the app and then
+            // publish the app with a RID specified and self-contained.
+            // verify that no warnings about missing the --self-contained flag are emitted.
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+            var libProject = new TestProject("RidSelfContainedLib"){
+                IsExe = false,
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true
+            };
+            var createdLibProject = _testAssetsManager.CreateTestProject(libProject);
+            var appProject = new TestProject("RidSelfContainedApp") {
+                IsExe = true,
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true
+            };
+            appProject.AdditionalProperties["NoWarn"] = "NU1505";
+            appProject.ReferencedProjects.Add(libProject);
+            var createdAppProject = _testAssetsManager.CreateTestProject(appProject);
+            var publishCommand = new PublishCommand(createdAppProject);
+            publishCommand.Execute(new [] {"-property:SelfContained=true", "-property:_CommandLineDefinedSelfContained=true", $"-property:RuntimeIdentifier={rid}", "-property:_CommandLineDefinedRuntimeIdentifier=true" }).Should().Pass().And.NotHaveStdOutContaining("warning");
+        }
     }
 }

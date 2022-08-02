@@ -19,29 +19,27 @@ using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 namespace Microsoft.DotNet.Workloads.Workload.Restore
 {
-    internal class WorkloadRestoreCommand : CommandBase
+    internal class WorkloadRestoreCommand : WorkloadCommandBase
     {
         private readonly ParseResult _result;
-        private readonly IReporter _reporter;
         private readonly IEnumerable<string> _slnOrProjectArgument;
 
         public WorkloadRestoreCommand(
             ParseResult result,
             IFileSystem fileSystem = null,
             IReporter reporter = null)
-            : base(result)
+            : base(result, reporter: reporter)
         {
             _result = result;
-            _reporter = reporter ?? Reporter.Output;
             _slnOrProjectArgument =
-                result.ValueForArgument<IEnumerable<string>>(RestoreCommandParser.SlnOrProjectArgument);
+                result.GetValueForArgument(RestoreCommandParser.SlnOrProjectArgument);
         }
 
         public override int Execute()
         {
             var allProjects = DiscoverAllProjects(Directory.GetCurrentDirectory(), _slnOrProjectArgument).Distinct();
             List<WorkloadId> allWorkloadId = RunTargetToGetWorkloadIds(allProjects);
-            _reporter.WriteLine(string.Format(LocalizableStrings.InstallingWorkloads, string.Join(" ", allWorkloadId)));
+            Reporter.WriteLine(string.Format(LocalizableStrings.InstallingWorkloads, string.Join(" ", allWorkloadId)));
 
             var workloadInstallCommand = new WorkloadInstallCommand(_result,
                 workloadIds: allWorkloadId.Select(a => a.ToString()).ToList().AsReadOnly());
@@ -65,9 +63,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Restore
                 bool buildResult = project.Build(new[] {"_GetRequiredWorkloads"},
                     loggers: new ILogger[]
                     {
-                        new ConsoleLogger(_result
-                            .ValueForOption<VerbosityOptions>(WorkloadInstallCommandParser.VerbosityOption)
-                            .ToLoggerVerbosity())
+                        new ConsoleLogger(Verbosity.ToLoggerVerbosity())
                     },
                     remoteLoggers: Enumerable.Empty<ForwardingLoggerRecord>(),
                     targetOutputs: out var targetOutputs);

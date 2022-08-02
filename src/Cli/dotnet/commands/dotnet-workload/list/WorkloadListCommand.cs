@@ -14,27 +14,22 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
-using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
-using NuGet.Common;
 using Product = Microsoft.DotNet.Cli.Utils.Product;
 
 namespace Microsoft.DotNet.Workloads.Workload.List
 {
-    internal class WorkloadListCommand : CommandBase
+    internal class WorkloadListCommand : WorkloadCommandBase
     {
         private readonly SdkFeatureBand _currentSdkFeatureBand;
         private readonly string _dotnetPath;
         private readonly bool _includePreviews;
         private readonly bool _machineReadableOption;
-        private readonly INuGetPackageDownloader _nugetPackageDownloader;
-        private readonly IReporter _reporter;
         private readonly string _targetSdkVersion;
-        private readonly string _tempDirPath;
         private readonly string _userProfileDir;
-        private readonly VerbosityOptions _verbosity;
         private readonly IWorkloadManifestUpdater _workloadManifestUpdater;
         private readonly IWorkloadInstallationRecordRepository _workloadRecordRepo;
+        private readonly IWorkloadResolver _workloadResolver;
 
         public WorkloadListCommand(
             ParseResult result,
@@ -47,23 +42,17 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             INuGetPackageDownloader nugetPackageDownloader = null,
             IWorkloadManifestUpdater workloadManifestUpdater = null,
             IWorkloadResolver workloadResolver = null
-        ) : base(result)
+        ) : base(result, CommonOptions.HiddenVerbosityOption, reporter, tempDirPath, nugetPackageDownloader)
         {
-            _reporter = reporter ?? Reporter.Output;
-            _machineReadableOption = result.ValueForOption<bool>(WorkloadListCommandParser.MachineReadableOption);
-            _verbosity = result.ValueForOption<VerbosityOptions>(WorkloadListCommandParser.VerbosityOption);
+            _machineReadableOption = result.GetValueForOption(WorkloadListCommandParser.MachineReadableOption);
 
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             ReleaseVersion currentSdkReleaseVersion = new(currentSdkVersion ?? Product.Version);
             _currentSdkFeatureBand = new SdkFeatureBand(currentSdkReleaseVersion);
-            
-            _includePreviews = result.ValueForOption<bool>(WorkloadListCommandParser.IncludePreviewsOption);
-            _tempDirPath = tempDirPath ??
-                           (string.IsNullOrWhiteSpace(
-                               result.ValueForOption<string>(WorkloadListCommandParser.TempDirOption))
-                               ? Path.GetTempPath()
-                               : result.ValueForOption<string>(WorkloadListCommandParser.TempDirOption));
-            _targetSdkVersion = result.ValueForOption<string>(WorkloadListCommandParser.VersionOption);
+
+            _includePreviews = result.GetValueForOption(WorkloadListCommandParser.IncludePreviewsOption);
+
+            _targetSdkVersion = result.GetValueForOption(WorkloadListCommandParser.VersionOption);
             _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
             var workloadManifestProvider =
                 new SdkDirectoryWorkloadManifestProvider(_dotnetPath,
@@ -71,22 +60,16 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                         ? currentSdkReleaseVersion.ToString()
                         : _targetSdkVersion,
                     _userProfileDir);
-            DirectoryPath tempPackagesDir =
-                new(Path.Combine(_userProfileDir, "sdk-advertising-temp"));
-            NullLogger nullLogger = new NullLogger();
-            _nugetPackageDownloader = nugetPackageDownloader ??
-                                      new NuGetPackageDownloader(tempPackagesDir, null,
-                                          new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, nullLogger),
-                                          verboseLogger: nullLogger,
-                                          restoreActionConfig: _parseResult.ToRestoreActionConfig());
-            workloadResolver ??= WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, currentSdkReleaseVersion.ToString(), _userProfileDir);
+
+            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, currentSdkReleaseVersion.ToString(), _userProfileDir);
 
             _workloadRecordRepo = workloadRecordRepo ??
-                WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand, workloadResolver, _verbosity, _userProfileDir,
+                WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand, _workloadResolver, Verbosity, _userProfileDir,
+                VerifySignatures,
                 elevationRequired: false).GetWorkloadInstallationRecordRepository();
 
-            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter,
-                workloadResolver, _nugetPackageDownloader, _userProfileDir, _tempDirPath, _workloadRecordRepo);
+            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(Reporter,
+                _workloadResolver, PackageDownloader, _userProfileDir, TempDirectoryPath, _workloadRecordRepo);
         }
 
         public override int Execute()
@@ -107,35 +90,38 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                 ListOutput listOutput = new(installedList.Select(id => id.ToString()).ToArray(),
                     updateAvailable);
 
-                _reporter.WriteLine("==workloadListJsonOutputStart==");
-                _reporter.WriteLine(
+                Reporter.WriteLine("==workloadListJsonOutputStart==");
+                Reporter.WriteLine(
                     JsonSerializer.Serialize(listOutput,
-                        new JsonSerializerOptions {PropertyNamingPolicy = JsonNamingPolicy.CamelCase}));
-                _reporter.WriteLine("==workloadListJsonOutputEnd==");
+                        new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
+                Reporter.WriteLine("==workloadListJsonOutputEnd==");
             }
             else
             {
+                InstalledWorkloadsCollection installedWorkloads = new(installedList, $"SDK {_currentSdkFeatureBand}");
+
                 if (OperatingSystem.IsWindows())
                 {
-                    _reporter.WriteLine();
-                    _reporter.WriteLine(LocalizableStrings.WorkloadListHeader);
+                    VisualStudioWorkloads.GetInstalledWorkloads(_workloadResolver, _currentSdkFeatureBand, installedWorkloads);
                 }
-                _reporter.WriteLine();
 
-                PrintableTable<WorkloadId> table = new();
-                table.AddColumn(LocalizableStrings.WorkloadIdColumn, workloadId => workloadId.ToString());
+                Reporter.WriteLine();
 
-                table.PrintRows(installedList, l => _reporter.WriteLine(l));
+                PrintableTable<KeyValuePair<string, string>> table = new();
+                table.AddColumn(LocalizableStrings.WorkloadIdColumn, workload => workload.Key);
+                table.AddColumn(LocalizableStrings.WorkloadSourceColumn, workload => workload.Value);
 
-                _reporter.WriteLine();
-                _reporter.WriteLine(LocalizableStrings.WorkloadListFooter);
-                _reporter.WriteLine();
+                table.PrintRows(installedWorkloads.AsEnumerable(), l => Reporter.WriteLine(l));
+
+                Reporter.WriteLine();
+                Reporter.WriteLine(LocalizableStrings.WorkloadListFooter);
+                Reporter.WriteLine();
 
                 var updatableWorkloads = _workloadManifestUpdater.GetUpdatableWorkloadsToAdvertise(installedList).Select(workloadId => workloadId.ToString());
                 if (updatableWorkloads.Any())
                 {
-                    _reporter.WriteLine(string.Format(LocalizableStrings.WorkloadUpdatesAvailable, string.Join(" ", updatableWorkloads)));
-                    _reporter.WriteLine();
+                    Reporter.WriteLine(string.Format(LocalizableStrings.WorkloadUpdatesAvailable, string.Join(" ", updatableWorkloads)));
+                    Reporter.WriteLine();
                 }
             }
 
@@ -146,21 +132,20 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         {
             HashSet<WorkloadId> installedWorkloads = installedList.ToHashSet();
             _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(_includePreviews).Wait();
-            IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion,
-                Dictionary<WorkloadId, WorkloadDefinition> Workloads)> manifestsToUpdate =
+            var manifestsToUpdate =
                 _workloadManifestUpdater.CalculateManifestUpdates();
 
             List<UpdateAvailableEntry> updateList = new();
-            foreach ((ManifestId _, ManifestVersion existingVersion, ManifestVersion newVersion,
-                Dictionary<WorkloadId, WorkloadDefinition> workloads) in manifestsToUpdate)
+            foreach ((ManifestVersionUpdate manifestUpdate, Dictionary<WorkloadId, WorkloadDefinition> workloads) in manifestsToUpdate)
             {
                 foreach ((WorkloadId WorkloadId, WorkloadDefinition workloadDefinition) in
                     workloads)
                 {
                     if (installedWorkloads.Contains(new WorkloadId(WorkloadId.ToString())))
                     {
-                        updateList.Add(new UpdateAvailableEntry(existingVersion.ToString(),
-                            newVersion.ToString(),
+                        //  TODO: Potentially show existing and new feature bands
+                        updateList.Add(new UpdateAvailableEntry(manifestUpdate.ExistingVersion.ToString(),
+                            manifestUpdate.NewVersion.ToString(),
                             workloadDefinition.Description, WorkloadId.ToString()));
                     }
                 }

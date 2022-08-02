@@ -11,6 +11,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.TestFramework.Utilities;
+using NuGet.Frameworks;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
@@ -25,6 +26,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
         private readonly Action _installCallback;
         private readonly Dictionary<PackageId, IEnumerable<string>> _warningsMap;
         private readonly Dictionary<PackageId, IReadOnlyList<FilePath>> _packagedShimsMap;
+        private readonly Dictionary<PackageId, IEnumerable<NuGetFramework>> _frameworksMap;
 
         public ToolPackageInstallerMock(
             IFileSystem fileSystem,
@@ -32,7 +34,8 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             ProjectRestorerMock projectRestorer,
             Action installCallback = null,
             Dictionary<PackageId, IEnumerable<string>> warningsMap = null,
-            Dictionary<PackageId, IReadOnlyList<FilePath>> packagedShimsMap = null)
+            Dictionary<PackageId, IReadOnlyList<FilePath>> packagedShimsMap = null,
+            Dictionary<PackageId, IEnumerable<NuGetFramework>> frameworksMap = null)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _store = store ?? throw new ArgumentNullException(nameof(store));
@@ -40,6 +43,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             _installCallback = installCallback;
             _warningsMap = warningsMap ?? new Dictionary<PackageId, IEnumerable<string>>();
             _packagedShimsMap = packagedShimsMap ?? new Dictionary<PackageId, IReadOnlyList<FilePath>>();
+            _frameworksMap = frameworksMap ?? new Dictionary<PackageId, IEnumerable<NuGetFramework>>();
         }
 
         public IToolPackage InstallPackage(PackageLocation packageLocation, PackageId packageId,
@@ -96,8 +100,11 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                     IReadOnlyList<FilePath> packedShims = null;
                     _packagedShimsMap.TryGetValue(packageId, out packedShims);
 
+                    IEnumerable<NuGetFramework> frameworks = null;
+                    _frameworksMap.TryGetValue(packageId, out frameworks);
+
                     return new ToolPackageMock(_fileSystem, packageId, version,
-                        packageDirectory, warnings: warnings, packagedShims: packedShims);
+                        packageDirectory, warnings: warnings, packagedShims: packedShims, frameworks: frameworks);
                 },
                 rollback: () =>
                 {
@@ -156,6 +163,8 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             public IEnumerable<string> Warnings { get; set; }
 
             public IReadOnlyList<FilePath> PackagedShims { get; set; }
+
+            public IEnumerable<NuGetFramework> Frameworks => throw new NotImplementedException();
         }
     }
 }

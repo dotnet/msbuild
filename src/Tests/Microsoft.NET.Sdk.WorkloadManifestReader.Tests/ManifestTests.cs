@@ -37,7 +37,7 @@ namespace ManifestReaderTests
         {
             using (FileStream fsSource = new FileStream(ManifestPath, FileMode.Open, FileAccess.Read))
             {
-                var result = WorkloadManifestReader.ReadWorkloadManifest("Sample", fsSource);
+                var result = WorkloadManifestReader.ReadWorkloadManifest("Sample", fsSource, ManifestPath);
                 result.Version.Should().Be("5.0.0-preview1");
                 var xamAndroidId = new WorkloadPackId("Xamarin.Android.Sdk");
 
@@ -203,15 +203,16 @@ namespace ManifestReaderTests
             };
 
             var inconsistentManifestEx = Assert.Throws<WorkloadManifestCompositionException>(() => WorkloadResolver.CreateForTests(inconsistentManifestProvider, fakeRootPath));
-            Assert.StartsWith("Workload manifest dependency 'DDD' version '39.0.0' is lower than version '30.0.0' required by manifest 'BBB'", inconsistentManifestEx.Message);
+            Assert.StartsWith("Workload manifest dependency 'DDD' version '30.0.0' is lower than version '39.0.0' required by manifest 'BBB'", inconsistentManifestEx.Message);
         }
 
         [Fact]
         public void WillNotLoadManifestWithNullAlias()
         {
-            using FileStream fsSource = new FileStream(GetSampleManifestPath("NullAliasError.json"), FileMode.Open, FileAccess.Read);
+            var manifestPath = GetSampleManifestPath("NullAliasError.json");
+            using FileStream fsSource = new FileStream(manifestPath, FileMode.Open, FileAccess.Read);
 
-            var ex = Assert.Throws<WorkloadManifestFormatException>(() => WorkloadManifestReader.ReadWorkloadManifest("NullAliasError", fsSource));
+            var ex = Assert.Throws<WorkloadManifestFormatException>(() => WorkloadManifestReader.ReadWorkloadManifest("NullAliasError", fsSource, manifestPath));
             Assert.Contains("Expected string value at offset", ex.Message);
         }
 

@@ -27,8 +27,8 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
         {
             var result = Parser.Instance.Parse(@"dotnet restore .\some.csproj --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
 
-            result.ValueForArgument<IEnumerable<string>>(RestoreCommandParser.SlnOrProjectArgument).Should().BeEquivalentTo(@".\some.csproj");
-            result.OptionValuesToBeForwarded(RestoreCommandParser.GetCommand()).Should().Contain(@"-property:SkipInvalidConfigurations=true");
+            result.GetValueForArgument<IEnumerable<string>>(RestoreCommandParser.SlnOrProjectArgument).Should().BeEquivalentTo(@".\some.csproj");
+            result.OptionValuesToBeForwarded(RestoreCommandParser.GetCommand()).Should().Contain(@"--property:SkipInvalidConfigurations=true");
         }
 
         [Fact]
@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
         {
             var result = Parser.Instance.Parse(@"dotnet restore --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
 
-            result.OptionValuesToBeForwarded(RestoreCommandParser.GetCommand()).Should().Contain(@"-property:SkipInvalidConfigurations=true");
+            result.OptionValuesToBeForwarded(RestoreCommandParser.GetCommand()).Should().Contain(@"--property:SkipInvalidConfigurations=true");
         }
 
         [Fact]
@@ -47,9 +47,9 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
                       .Parse(
                           @"dotnet restore --no-cache --packages ""D:\OSS\corefx\packages"" --source https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json --source https://dotnet.myget.org/F/dotnet-core/api/v3/index.json --source https://api.nuget.org/v3/index.json D:\OSS\corefx\external\runtime\runtime.depproj");
 
-            restore.ValueForArgument<IEnumerable<string>>(RestoreCommandParser.SlnOrProjectArgument);
+            restore.GetValueForArgument(RestoreCommandParser.SlnOrProjectArgument);
 
-            restore.ValueForOption<IEnumerable<string>>("--source")
+            restore.GetValueForOption(RestoreCommandParser.SourceOption)
                 .Should()
                 .BeEquivalentTo(
                     "https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json",

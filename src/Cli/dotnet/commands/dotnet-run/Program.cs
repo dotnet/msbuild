@@ -15,27 +15,25 @@ namespace Microsoft.DotNet.Tools.Run
         public static RunCommand FromArgs(string[] args)
         {
             var parseResult = Parser.Instance.ParseFrom("dotnet run", args);
+            return FromParseResult(parseResult);
+        }
 
-            if (parseResult.HasOption("--help"))
-            {
-                parseResult.ShowHelp();
-                throw new HelpException(string.Empty);
-            }
-
-            var project = parseResult.ValueForOption(RunCommandParser.ProjectOption);
+        public static RunCommand FromParseResult(ParseResult parseResult)
+        {
+            var project = parseResult.GetValueForOption(RunCommandParser.ProjectOption);
             if (parseResult.UsingRunCommandShorthandProjectOption())
             {
-                Console.WriteLine(LocalizableStrings.RunCommandProjectAbbreviationDeprecated.Yellow());
+                Reporter.Output.WriteLine(LocalizableStrings.RunCommandProjectAbbreviationDeprecated.Yellow());
                 project = parseResult.GetRunCommandShorthandProjectValues().FirstOrDefault();
             }
 
             var command = new RunCommand(
-                configuration: parseResult.ValueForOption<string>(RunCommandParser.ConfigurationOption),
-                framework: parseResult.ValueForOption<string>(RunCommandParser.FrameworkOption),
+                configuration: parseResult.GetValueForOption(RunCommandParser.ConfigurationOption),
+                framework: parseResult.GetValueForOption(RunCommandParser.FrameworkOption),
                 runtime: parseResult.GetCommandLineRuntimeIdentifier(),
                 noBuild: parseResult.HasOption(RunCommandParser.NoBuildOption),
                 project: project,
-                launchProfile: parseResult.ValueForOption<string>(RunCommandParser.LaunchProfileOption),
+                launchProfile: parseResult.GetValueForOption(RunCommandParser.LaunchProfileOption),
                 noLaunchProfile: parseResult.HasOption(RunCommandParser.NoLaunchProfileOption),
                 noRestore: parseResult.HasOption(RunCommandParser.NoRestoreOption) || parseResult.HasOption(RunCommandParser.NoBuildOption),
                 interactive: parseResult.HasOption(RunCommandParser.InteractiveOption),
@@ -46,11 +44,11 @@ namespace Microsoft.DotNet.Tools.Run
             return command;
         }
 
-        public static int Run(string[] args)
+        public static int Run(ParseResult parseResult)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
+            parseResult.HandleDebugSwitch();
 
-            return FromArgs(args).Execute();
+            return FromParseResult(parseResult).Execute();
         }
     }
 }
