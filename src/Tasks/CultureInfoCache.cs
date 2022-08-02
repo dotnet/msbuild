@@ -66,7 +66,7 @@ namespace Microsoft.Build.Tasks
                     CultureInfo.GetCultureInfo(name, true);
                     return true;
                 }
-                catch (CultureNotFoundException e)
+                catch
                 {
                     return false;
                 }
