@@ -27,9 +27,11 @@ namespace Microsoft.TemplateEngine.Cli
     /// </summary>
     internal class CliTemplateParameter
     {
-        private List<string> _shortNameOverrides = new List<string>();
+        private readonly List<string> _shortNameOverrides = new List<string>();
 
-        private List<string> _longNameOverrides = new List<string>();
+        private readonly List<string> _longNameOverrides = new List<string>();
+
+        private readonly TemplateParameterPrecedence _precedence;
 
         internal CliTemplateParameter(ITemplateParameter parameter, HostSpecificTemplateData data)
         {
@@ -46,8 +48,12 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 DefaultIfOptionWithoutValue = parameter.DefaultIfOptionWithoutValue;
             }
-            IsRequired = parameter.Priority == TemplateParameterPriority.Required && parameter.DefaultValue == null;
-            IsHidden = parameter.Priority == TemplateParameterPriority.Implicit || data.HiddenParameterNames.Contains(parameter.Name);
+            IsRequired = parameter.Precedence.PrecedenceDefinition == PrecedenceDefinition.Required && parameter.DefaultValue == null;
+            IsHidden =
+                parameter.Precedence.PrecedenceDefinition == PrecedenceDefinition.Implicit
+                || parameter.Precedence.PrecedenceDefinition == PrecedenceDefinition.Disabled
+                || data.HiddenParameterNames.Contains(parameter.Name);
+
             AlwaysShow = data.ParametersToAlwaysShow.Contains(parameter.Name);
             AllowMultipleValues = parameter.AllowMultipleValues;
 
@@ -59,6 +65,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 _longNameOverrides.Add(data.LongNameOverrides[parameter.Name]);
             }
+            _precedence = parameter.Precedence;
         }
 
         /// <summary>
@@ -79,6 +86,7 @@ namespace Microsoft.TemplateEngine.Cli
             DefaultValue = string.Empty;
             DefaultIfOptionWithoutValue = string.Empty;
             DataType = ParameterTypeToString(Type);
+            _precedence = TemplateParameterPrecedence.Default;
         }
 
         /// <summary>
@@ -98,7 +106,7 @@ namespace Microsoft.TemplateEngine.Cli
             _longNameOverrides = other.LongNameOverrides.ToList();
             DefaultIfOptionWithoutValue = other.DefaultIfOptionWithoutValue;
             AllowMultipleValues = other.AllowMultipleValues;
-
+            _precedence = other._precedence;
         }
 
         internal string Name { get; private set; }
@@ -306,6 +314,25 @@ namespace Microsoft.TemplateEngine.Cli
             };
         }
 
+        private static string? GetPrecedenceInfo(TemplateParameterPrecedence precedence)
+        {
+            switch (precedence.PrecedenceDefinition)
+            {
+                case PrecedenceDefinition.ConditionalyRequired:
+                    return string.Format(HelpStrings.Text_RequiredCondition, precedence.IsRequiredCondition);
+                case PrecedenceDefinition.ConditionalyDisabled:
+                    return string.Format(HelpStrings.Text_EnabledCondition, precedence.IsEnabledCondition);
+                case PrecedenceDefinition.Disabled:
+                    return HelpStrings.Text_Disabled;
+                case PrecedenceDefinition.Required:
+                case PrecedenceDefinition.Optional:
+                case PrecedenceDefinition.Implicit:
+                    return null;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
         private (bool, string) ConvertValueToString(string? value)
         {
             return (true, value ?? string.Empty);
@@ -357,6 +384,12 @@ namespace Microsoft.TemplateEngine.Cli
         {
             StringBuilder displayValue = new StringBuilder(255);
             displayValue.AppendLine(Description);
+
+            string? precedenceValue = GetPrecedenceInfo(_precedence);
+            if (!string.IsNullOrEmpty(precedenceValue))
+            {
+                displayValue.AppendLine(precedenceValue);
+            }
 
             if (this is ChoiceTemplateParameter choice)
             {
@@ -410,6 +443,7 @@ namespace Microsoft.TemplateEngine.Cli
                     }
                 }
             }
+
             return displayValue.ToString();
         }
     }

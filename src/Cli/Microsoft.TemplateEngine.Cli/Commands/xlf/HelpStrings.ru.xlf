@@ -72,10 +72,25 @@
         <target state="translated">вариант</target>
         <note>this text is used as argument help name when list of possible values is too long to fit the screen, " --my-o &lt;choice&gt;"</note>
       </trans-unit>
+      <trans-unit id="Text_Disabled">
+        <source>Enabled: *false*</source>
+        <target state="new">Enabled: *false*</target>
+        <note>Indication that parameter is not enabled</note>
+      </trans-unit>
+      <trans-unit id="Text_EnabledCondition">
+        <source>Enabled if: {0}</source>
+        <target state="new">Enabled if: {0}</target>
+        <note>{0} is the condition expression</note>
+      </trans-unit>
       <trans-unit id="Text_NoTemplateOptions">
         <source>(No options)</source>
         <target state="translated">(Нет параметров)</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Text_RequiredCondition">
+        <source>Required if: {0}</source>
+        <target state="new">Required if: {0}</target>
+        <note>{0} is the condition expression</note>
       </trans-unit>
       <trans-unit id="Text_UsageTemplateOptionsPart">
         <source>[template options]</source>

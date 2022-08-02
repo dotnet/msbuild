@@ -187,11 +187,38 @@ namespace Microsoft.TemplateEngine.Cli.Commands {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enabled: *false*.
+        /// </summary>
+        internal static string Text_Disabled {
+            get {
+                return ResourceManager.GetString("Text_Disabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enabled if: {0}.
+        /// </summary>
+        internal static string Text_EnabledCondition {
+            get {
+                return ResourceManager.GetString("Text_EnabledCondition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to (No options).
         /// </summary>
         internal static string Text_NoTemplateOptions {
             get {
                 return ResourceManager.GetString("Text_NoTemplateOptions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Required if: {0}.
+        /// </summary>
+        internal static string Text_RequiredCondition {
+            get {
+                return ResourceManager.GetString("Text_RequiredCondition", resourceCulture);
             }
         }
         

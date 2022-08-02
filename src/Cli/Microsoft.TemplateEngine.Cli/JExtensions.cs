@@ -6,6 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 #endif
+using System.Diagnostics.CodeAnalysis;
+using System.Xml.Linq;
+using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Newtonsoft.Json;
@@ -45,33 +48,48 @@ namespace Microsoft.TemplateEngine
             return element.ToString();
         }
 
-        internal static bool ToBool(this JToken? token, string? key = null, bool defaultValue = false)
+        internal static bool TryGetValue(this JToken? token, string? key, out JToken? result)
         {
-            JToken? checkToken;
+            result = null;
 
             // determine which token to bool-ify
             if (token == null)
             {
-                return defaultValue;
+                return false;
             }
             else if (key == null)
             {
-                checkToken = token;
+                result = token;
             }
-            else if (!((JObject)token).TryGetValue(key, StringComparison.OrdinalIgnoreCase, out checkToken))
+            else if (!((JObject)token).TryGetValue(key, StringComparison.OrdinalIgnoreCase, out result))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        internal static bool TryParseBool(this JToken token, out bool result)
+        {
+            result = false;
+            return (token.Type == JTokenType.Boolean || token.Type == JTokenType.String)
+                   &&
+                   bool.TryParse(token.ToString(), out result);
+        }
+
+        internal static bool ToBool(this JToken? token, string? key = null, bool defaultValue = false)
+        {
+            if (!token.TryGetValue(key, out JToken? checkToken))
             {
                 return defaultValue;
             }
 
-            // do the conversion on checkToken
-            if (checkToken.Type == JTokenType.Boolean || checkToken.Type == JTokenType.String)
+            if (!checkToken!.TryParseBool(out bool result))
             {
-                return string.Equals(checkToken.ToString(), "true", StringComparison.OrdinalIgnoreCase);
+                result = defaultValue;
             }
-            else
-            {
-                return defaultValue;
-            }
+
+            return result;
         }
 
         internal static int ToInt32(this JToken? token, string? key = null, int defaultValue = 0)
@@ -211,6 +229,21 @@ namespace Microsoft.TemplateEngine
             }
 
             return result;
+        }
+
+        internal static TemplateParameterPrecedence ToTemplateParameterPrecedence(this JToken jObject, string? key)
+        {
+            if (!jObject.TryGetValue(key, out JToken? checkToken))
+            {
+                return TemplateParameterPrecedence.Default;
+            }
+
+            PrecedenceDefinition precedenceDefinition = (PrecedenceDefinition)checkToken.ToInt32(nameof(PrecedenceDefinition));
+            string? isRequiredCondition = checkToken.ToString(nameof(TemplateParameterPrecedence.IsRequiredCondition));
+            string? isEnabledCondition = checkToken.ToString(nameof(TemplateParameterPrecedence.IsEnabledCondition));
+            bool isRequired = checkToken.ToBool(nameof(TemplateParameterPrecedence.IsRequired));
+
+            return new TemplateParameterPrecedence(precedenceDefinition, isRequiredCondition, isEnabledCondition, isRequired);
         }
 
         internal static IReadOnlyList<string> ArrayAsStrings(this JToken? token, string? propertyName = null)

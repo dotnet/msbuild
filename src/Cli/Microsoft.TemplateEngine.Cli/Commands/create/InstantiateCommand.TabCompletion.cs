@@ -67,6 +67,23 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                             ParseResult parseResult = parser.Parse(context.CommandLineText);
                             foreach (CompletionItem completion in parseResult.GetCompletions(context.CursorPosition))
                             {
+                                ////TODO: conditionals tab completion here
+                                ////
+                                //// - we'll need to assign all the parameters (and defaults) and evaluate the enabled conditions
+
+                                //// TemplateCreator tc = new TemplateCreator(environmentSettings);
+                                //// ITemplate? t = tc.LoadTemplate(template, null);
+
+                                //// Get parameterset, localize them
+                                ////
+                                //// Do not bind! untill we see any have the 'IsEnabled' condition - and put those last
+                                ////     - default and resolved values (bind somehow)
+
+                                //// get parameters without enablement condition - first get those that are required, then conditionaly required, then optional
+                                //// then do a topological sort of rest of parameters and evaluate enablement conditions on the fly - get them in order
+
+                                //template.ParameterDefinitionSet[0].Priority
+
                                 distinctCompletions.Add(completion);
                             }
                         }

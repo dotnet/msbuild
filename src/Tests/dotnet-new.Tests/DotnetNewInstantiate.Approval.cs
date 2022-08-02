@@ -301,6 +301,39 @@ namespace Microsoft.DotNet.New.Tests
         }
 
         [Fact]
+        public Task CanInstantiateTemplate_WithConditionalParameters_DisabledBehaveLikeNotSpecified()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            Helpers.InstallTestTemplate("TemplateWithConditionalParameters", _log, home, workingDirectory);
+
+            var commandResult = new DotnetNewCommand(
+                    _log,
+                    "TestAssets.TemplateWithConditionalParameters",
+                    "--A_enabled",
+                    "true",
+                    "--B_enabled",
+                    "false",
+                    "--paramA",
+                    "true",
+                    "--paramB",
+                    "true")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult
+                .Should()
+                .Pass()
+                .And.NotHaveStdErr()
+                .And.HaveStdOutMatching("The template \"TemplateWithConditionalParameters\" was created successfully\\.");
+
+            string resultFileContent = File.ReadAllText(Path.Combine(workingDirectory, "Test.cs"));
+
+            return Verifier.Verify(resultFileContent, _verifySettings);
+        }
+
+        [Fact]
         public void CannotInstantiateTemplate_MultiValueChoiceParameterWithExplicitUnsetAndOtherChoice()
         {
             string home = TestUtils.CreateTemporaryFolder("Home");

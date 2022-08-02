@@ -21,4 +21,8 @@
     <Content Include="nupkg_templates\**" />
     <None Include="nupkg_templates\**" CopyToOutputDirectory="Always" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="test_templates\TemplateWithConditionalParameters\.template.config\template.json" />
+    <None Remove="test_templates\TemplateWithConditionalParameters\Test.cs" />
+  </ItemGroup>
 </Project>

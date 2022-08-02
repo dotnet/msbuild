@@ -20,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 return defaultValue;
             }
-            ITemplateParameter? parameter = template.Parameters.FirstOrDefault(x => string.Equals(x.Name, paramName, StringComparison.Ordinal));
+            ITemplateParameter? parameter = template.ParameterDefinitions.FirstOrDefault(x => string.Equals(x.Name, paramName, StringComparison.Ordinal));
             if (parameter == null || parameter.Choices == null || parameter.Choices.Count == 0)
             {
                 return defaultValue;

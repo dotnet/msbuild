@@ -19,7 +19,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
     public partial class HelpTests
     {
         [Theory]
-#pragma warning disable SA1117 // Parameters should be on same line or separate lines
+#pragma warning disable SA1117 // ParameterDefinitionSet should be on same line or separate lines
         [InlineData("Template Name", "Language", "Me", "Template Description",
 @"Template Name (Language)
 Author: Me
@@ -46,7 +46,7 @@ Author: Me
 @"Template Name
 
 ")]
-#pragma warning restore SA1117 // Parameters should be on same line or separate lines
+#pragma warning restore SA1117 // ParameterDefinitionSet should be on same line or separate lines
         public void CanShowTemplateDescription(string name, string? language, string? author, string? description, string expected)
         {
             MockTemplateInfo templateInfo = new MockTemplateInfo(

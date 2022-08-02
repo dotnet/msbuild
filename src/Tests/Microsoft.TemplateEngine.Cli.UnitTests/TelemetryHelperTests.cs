@@ -3,6 +3,7 @@
 
 using FakeItEasy;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.Parameters;
 using Microsoft.TemplateEngine.Utils;
 using Xunit;
 
@@ -17,7 +18,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
 
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
-            A.CallTo(() => templateInfo.Parameters).Returns(new List<ITemplateParameter>() { param });
+            A.CallTo(() => templateInfo.ParameterDefinitions).Returns(new ParameterDefinitionSet(new List<ITemplateParameter>() { param }));
 
             string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "whatever");
             Assert.Null(canonical);
@@ -30,7 +31,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
 
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
-            A.CallTo(() => templateInfo.Parameters).Returns(new List<ITemplateParameter>() { param });
+            A.CallTo(() => templateInfo.ParameterDefinitions).Returns(new ParameterDefinitionSet(new List<ITemplateParameter>() { param }));
 
             string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "OtherName", "whatever");
             Assert.Null(canonical);
@@ -51,7 +52,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
-            A.CallTo(() => templateInfo.Parameters).Returns(new List<ITemplateParameter>() { param });
+            A.CallTo(() => templateInfo.ParameterDefinitions).Returns(new ParameterDefinitionSet(new List<ITemplateParameter>() { param }));
 
             string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "whatever");
             Assert.Null(canonical);
@@ -72,7 +73,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
-            A.CallTo(() => templateInfo.Parameters).Returns(new List<ITemplateParameter>() { param });
+            A.CallTo(() => templateInfo.ParameterDefinitions).Returns(new ParameterDefinitionSet(new List<ITemplateParameter>() { param }));
 
             string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "foo");
             Assert.Equal("foo", canonical);
@@ -92,7 +93,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 });
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
-            A.CallTo(() => templateInfo.Parameters).Returns(new List<ITemplateParameter>() { param });
+            A.CallTo(() => templateInfo.ParameterDefinitions).Returns(new ParameterDefinitionSet(new List<ITemplateParameter>() { param }));
 
             string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "f");
             Assert.Null(canonical);
@@ -114,7 +115,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
 
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
-            A.CallTo(() => templateInfo.Parameters).Returns(new List<ITemplateParameter>() { param });
+            A.CallTo(() => templateInfo.ParameterDefinitions).Returns(new ParameterDefinitionSet(new List<ITemplateParameter>() { param }));
 
             string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "f");
             Assert.Null(canonical);
@@ -134,7 +135,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 });
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
-            A.CallTo(() => templateInfo.Parameters).Returns(new List<ITemplateParameter>() { param });
+            A.CallTo(() => templateInfo.ParameterDefinitions).Returns(new ParameterDefinitionSet(new List<ITemplateParameter>() { param }));
 
             string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "FOO");
             Assert.Equal("FOO", canonical);
@@ -156,7 +157,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                   });
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
-            A.CallTo(() => templateInfo.Parameters).Returns(new List<ITemplateParameter>() { param });
+            A.CallTo(() => templateInfo.ParameterDefinitions).Returns(new ParameterDefinitionSet(new List<ITemplateParameter>() { param }));
 
             string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "foo");
             Assert.Null(canonical);

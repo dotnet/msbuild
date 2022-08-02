@@ -168,8 +168,20 @@
     <value>choice</value>
     <comment>this text is used as argument help name when list of possible values is too long to fit the screen, " --my-o &lt;choice&gt;"</comment>
   </data>
+  <data name="Text_Disabled" xml:space="preserve">
+    <value>Enabled: *false*</value>
+    <comment>Indication that parameter is not enabled</comment>
+  </data>
+  <data name="Text_EnabledCondition" xml:space="preserve">
+    <value>Enabled if: {0}</value>
+    <comment>{0} is the condition expression</comment>
+  </data>
   <data name="Text_NoTemplateOptions" xml:space="preserve">
     <value>(No options)</value>
+  </data>
+  <data name="Text_RequiredCondition" xml:space="preserve">
+    <value>Required if: {0}</value>
+    <comment>{0} is the condition expression</comment>
   </data>
   <data name="Text_UsageTemplateOptionsPart" xml:space="preserve">
     <value>[template options]</value>
