@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="WorkloadIdColumn">
         <source>Installed Workload Ids</source>
-        <target state="translated">설치된 워크로드 ID</target>
+        <target state="new">Installed Workload Ids</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadListFooter">
@@ -19,12 +19,12 @@
       </trans-unit>
       <trans-unit id="WorkloadManfiestVersionColumn">
         <source>Manifest Version</source>
-        <target state="translated">매니페스트 버전</target>
+        <target state="new">Manifest Version</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadSourceColumn">
         <source>Installation Source</source>
-        <target state="translated">설치 원본</target>
+        <target state="new">Installation Source</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
