@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -59,7 +60,16 @@ namespace Microsoft.Build.Tasks
 #if NET5_0_OR_GREATER
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
             {
-                return CultureInfo.GetCultureInfo(name, true);
+                try
+                {
+                    // GetCultureInfo throws if the culture doesn't exist
+                    CultureInfo.GetCultureInfo(name, true);
+                    return true;
+                }
+                catch (CultureNotFoundException e)
+                {
+                    return false;
+                }
             }
 #endif
             return ValidCultureNames.Contains(name);
