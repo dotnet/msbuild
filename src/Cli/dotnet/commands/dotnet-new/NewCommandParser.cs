@@ -35,8 +35,9 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-new";
         public const string CommandName = "new";
-        private const string HostIdentifier = "dotnetcli";
+        private const string EnableProjectContextEvaluationEnvVar = "DOTNET_CLI_ENABLE_PROJECT_EVAL";
 
+        private const string HostIdentifier = "dotnetcli";
         private static readonly Option<bool> _disableSdkTemplates = new Option<bool>("--debug:disable-sdk-templates", () => false, LocalizableStrings.DisableSdkTemplates_OptionDescription).Hide();
 
         private static readonly Option<bool> _enableProjectContextEvaluation = new Option<bool>("--debug:enable-project-context", () => false, LocalizableStrings.EnableProjectContextEval_OptionDescription).Hide();
@@ -82,7 +83,8 @@ namespace Microsoft.DotNet.Cli
 
             var getEngineHost = (ParseResult parseResult) => {
                 bool disableSdkTemplates = parseResult.GetValueForOption(_disableSdkTemplates);
-                bool enableProjectContext = parseResult.GetValueForOption(_enableProjectContextEvaluation);
+                bool enableProjectContext = parseResult.GetValueForOption(_enableProjectContextEvaluation)
+                    || Env.GetEnvironmentVariableAsBool(EnableProjectContextEvaluationEnvVar);
                 FileInfo? projectPath = parseResult.GetValueForOption(ProjectPathOption);
 
                 //TODO: read and pass output directory
