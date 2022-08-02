@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Tools.Pack
                 "-property:_IsPacking=true"
             };
 
-            IEnumerable<string> slnOrProjectArgs = parseResult.GetValueForArgument(PublishCommandParser.SlnOrProjectArgument);
+            IEnumerable<string> slnOrProjectArgs = parseResult.GetValueForArgument(PackCommandParser.SlnOrProjectArgument);
 
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PackCommandParser.GetCommand()));
             msbuildArgs.AddRange(PublishCommand.GetAutomaticConfigurationIfSpecified(parseResult, PackCommandParser.customDefaultConfigurationProperty,

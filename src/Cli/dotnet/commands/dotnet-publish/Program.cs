@@ -89,11 +89,7 @@ namespace Microsoft.DotNet.Tools.Publish
                 if (!string.IsNullOrEmpty(releasePropertyFlag))
                     releaseMode = releasePropertyFlag == "true" ? "Release" : "Debug";
 
-                if (
-                    !ConfigurationAlreadySpecified(parseResult, project, configOption) &&
-                    !string.IsNullOrEmpty(releaseMode) &&
-                    !slnOrProjectArgs.Any(arg => arg.Contains(defaultedConfigurationProperty))
-                   )
+                if (!ConfigurationAlreadySpecified(parseResult, project, configOption) && !string.IsNullOrEmpty(releaseMode))
                     return new List<string> { $"-property:configuration={releaseMode}" };
             }
             return Array.Empty<string>();
