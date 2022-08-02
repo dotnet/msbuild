@@ -1013,6 +1013,7 @@ namespace Microsoft.Build.Construction
                 traversalProject,
                 _globalProperties,
                 explicitToolsVersionSpecified ? wrapperProjectToolsVersion : null,
+                _loggingService,
                 _solutionFile.VisualStudioVersion,
                 new ProjectCollection(),
                 _sdkResolverService,
