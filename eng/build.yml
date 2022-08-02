@@ -384,11 +384,10 @@ jobs:
                 -ci
                 -restore
                 $(_Test)
-                -projects $(Build.SourcesDirectory)\src\Tests\dotnet-new.Tests\dotnet-new.IntegrationTests.csproj
-                /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\dotnet-new.IntegrationTests.binlog
+                -projects $(Build.SourcesDirectory)\src\Tests\Microsoft.TemplateEngine.Cli.UnitTests\Microsoft.TemplateEngine.Cli.UnitTests.csproj
+                /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\TemplateEngine.Cli.UnitTests.binlog
                 $(_InternalRuntimeDownloadArgs)
-          displayName: Run dotnet new Integration Tests
-          condition: succeededOrFailed()
+          displayName: Run TemplateEngine Cli Unit Tests
         - powershell: eng\common\build.ps1
                 -configuration $(_BuildConfig)
                 -prepareMachine
@@ -399,18 +398,16 @@ jobs:
                 /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\TemplateEngine.Cli.IntegrationTests.binlog
                 $(_InternalRuntimeDownloadArgs)
           displayName: Run TemplateEngine Cli Integration Tests
-          condition: succeededOrFailed()
         - powershell: eng\common\build.ps1
                 -configuration $(_BuildConfig)
                 -prepareMachine
                 -ci
                 -restore
                 $(_Test)
-                -projects $(Build.SourcesDirectory)\src\Tests\Microsoft.TemplateEngine.Cli.UnitTests\Microsoft.TemplateEngine.Cli.UnitTests.csproj
-                /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\TemplateEngine.Cli.UnitTests.binlog
+                -projects $(Build.SourcesDirectory)\src\Tests\dotnet-new.Tests\dotnet-new.IntegrationTests.csproj
+                /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\dotnet-new.IntegrationTests.binlog
                 $(_InternalRuntimeDownloadArgs)
-          displayName: Run TemplateEngine Cli Unit Tests
-          condition: succeededOrFailed()
+          displayName: Run dotnet new Integration Tests
 
       - ${{ if not(contains(parameters.agentOs, 'Windows_NT')) }}:
         - script: eng/common/cibuild.sh
@@ -428,11 +425,10 @@ jobs:
                 -ci
                 -restore
                 -test
-                -projects $(Build.SourcesDirectory)/src/Tests/dotnet-new.Tests/dotnet-new.IntegrationTests.csproj
-                /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/dotnet-new.IntegrationTests.binlog
+                -projects $(Build.SourcesDirectory)/src/Tests/Microsoft.TemplateEngine.Cli.UnitTests/Microsoft.TemplateEngine.Cli.UnitTests.csproj
+                /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/TemplateEngine.Cli.UnitTests.binlog
                 $(_InternalRuntimeDownloadArgs)
-          displayName: Run dotnet new Integration Tests
-          condition: succeededOrFailed()
+          displayName: Run TemplateEngine Cli Unit Tests
         - powershell: eng/common/build.sh
                 -configuration $(_BuildConfig)
                 -prepareMachine
@@ -443,18 +439,16 @@ jobs:
                 /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/TemplateEngine.Cli.IntegrationTests.binlog
                 $(_InternalRuntimeDownloadArgs)
           displayName: Run TemplateEngine Cli Integration Tests
-          condition: succeededOrFailed()
         - powershell: eng/common/build.sh
                 -configuration $(_BuildConfig)
                 -prepareMachine
                 -ci
                 -restore
                 -test
-                -projects $(Build.SourcesDirectory)/src/Tests/Microsoft.TemplateEngine.Cli.UnitTests/Microsoft.TemplateEngine.Cli.UnitTests.csproj
-                /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/TemplateEngine.Cli.UnitTests.binlog
+                -projects $(Build.SourcesDirectory)/src/Tests/dotnet-new.Tests/dotnet-new.IntegrationTests.csproj
+                /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/dotnet-new.IntegrationTests.binlog
                 $(_InternalRuntimeDownloadArgs)
-          displayName: Run TemplateEngine Cli Unit Tests
-          condition: succeededOrFailed()
+          displayName: Run dotnet new Integration Tests
   
       - task: PublishTestResults@2
         displayName: Publish Test Results	
