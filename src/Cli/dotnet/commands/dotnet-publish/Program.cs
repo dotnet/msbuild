@@ -97,7 +97,6 @@ namespace Microsoft.DotNet.Tools.Publish
 
         private static ProjectInstance GetTargetedProject(IEnumerable<string> slnOrProjectArgs)
         {
-            Debugger.Launch();
             string potentialProject = "";
 
             foreach (string arg in slnOrProjectArgs.Append(Directory.GetCurrentDirectory()))
