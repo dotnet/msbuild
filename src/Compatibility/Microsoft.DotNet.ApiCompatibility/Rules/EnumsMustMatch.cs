@@ -1,11 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
+#nullable enable
+
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 
@@ -14,13 +13,17 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     /// <summary>
     /// This class implements a rule to check that the constant values for an enum's fields don't change.
     /// </summary>
-    public class EnumsMustMatch : Rule
+    public class EnumsMustMatch : IRule
     {
-        public override void Initialize(RuleRunnerContext context) => context.RegisterOnTypeSymbolAction(RunOnTypeSymbol);
+        private readonly RuleSettings _settings;
 
-        private bool IsEnum(ITypeSymbol sym) => sym is not null && sym.TypeKind == TypeKind.Enum;
+        public EnumsMustMatch(RuleSettings settings, RuleRunnerContext context)
+        {
+            _settings = settings;
+            context.RegisterOnTypeSymbolAction(RunOnTypeSymbol);
+        }
 
-        private void RunOnTypeSymbol(ITypeSymbol left, ITypeSymbol right, string leftName, string rightName, IList<CompatDifference> differences)
+        private void RunOnTypeSymbol(ITypeSymbol? left, ITypeSymbol? right, string leftName, string rightName, IList<CompatDifference> differences)
         {
             // Ensure that this rule only runs on enums.
             if (!IsEnum(left) || !IsEnum(right))
@@ -41,7 +44,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             }
 
             // Check that the underlying types are equal.
-            if (Settings.SymbolComparer.Equals(leftType, rightType))
+            if (_settings.SymbolComparer.Equals(leftType, rightType))
             {
                 // If so, compare their fields.
                 // Build a map of the enum's fields, keyed by the field names.
@@ -58,7 +61,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 // Otherwise, emit a diagnostic.
                 foreach (KeyValuePair<string, IFieldSymbol> lEntry in leftMembers)
                 {
-                    if (!rightMembers.TryGetValue(lEntry.Key, out IFieldSymbol rField))
+                    if (!rightMembers.TryGetValue(lEntry.Key, out IFieldSymbol? rField))
                     {
                         continue;
                     }
@@ -76,5 +79,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 differences.Add(new CompatDifference(DiagnosticIds.EnumTypesMustMatch, msg, DifferenceType.Changed, right));
             }
         }
+
+        private static bool IsEnum(ITypeSymbol? sym) => sym is not null && sym.TypeKind == TypeKind.Enum;
     }
 }

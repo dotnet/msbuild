@@ -1,6 +1,8 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable enable
+
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
@@ -9,26 +11,29 @@ using Microsoft.DotNet.ApiCompatibility.Extensions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
-    public class CannotSealType : Rule
+    public class CannotSealType : IRule
     {
-        public override void Initialize(RuleRunnerContext context)
+        private readonly RuleSettings _settings;
+
+        public CannotSealType(RuleSettings settings, RuleRunnerContext context)
         {
+            _settings = settings;
             context.RegisterOnTypeSymbolAction(RunOnTypeSymbol);
         }
 
-        private void RunOnTypeSymbol(ITypeSymbol left, ITypeSymbol right, string leftName, string rightName, IList<CompatDifference> differences)
+        private void RunOnTypeSymbol(ITypeSymbol? left, ITypeSymbol? right, string leftName, string rightName, IList<CompatDifference> differences)
         {
             if (left == null || right == null || left.TypeKind == TypeKind.Interface || right.TypeKind == TypeKind.Interface)
                 return;
 
-            bool isLeftSealed = left.IsEffectivelySealed(Settings.IncludeInternalSymbols);
-            bool isRightSealed = right.IsEffectivelySealed(Settings.IncludeInternalSymbols);
+            bool isLeftSealed = left.IsEffectivelySealed(_settings.IncludeInternalSymbols);
+            bool isRightSealed = right.IsEffectivelySealed(_settings.IncludeInternalSymbols);
 
             if (!isLeftSealed && isRightSealed)
             {
                 differences.Add(CreateDifference(right, leftName, rightName));
             }
-            else if (Settings.StrictMode && !isRightSealed && isLeftSealed)
+            else if (_settings.StrictMode && !isRightSealed && isLeftSealed)
             {
                 differences.Add(CreateDifference(left, rightName, leftName));
             }

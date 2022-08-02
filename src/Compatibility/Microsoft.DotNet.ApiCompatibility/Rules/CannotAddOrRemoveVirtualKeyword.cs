@@ -1,14 +1,11 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
+#nullable enable
+
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
-
-#nullable enable
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
@@ -16,11 +13,17 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     /// This class implements a rule to check that the 'virtual' keyword is not added to
     /// or removed from a member.
     /// </summary>
-    public class CannotAddOrRemoveVirtualKeyword : Rule
+    public class CannotAddOrRemoveVirtualKeyword : IRule
     {
-        public override void Initialize(RuleRunnerContext context) => context.RegisterOnMemberSymbolAction(RunOnMemberSymbol);
+        private readonly RuleSettings _settings;
 
-        private void RunOnMemberSymbol(ISymbol left, ISymbol right, ITypeSymbol leftContainingType, ITypeSymbol rightContainingType, string leftName, string rightName, IList<CompatDifference> differences)
+        public CannotAddOrRemoveVirtualKeyword(RuleSettings settings, RuleRunnerContext context)
+        {
+            _settings = settings;
+            context.RegisterOnMemberSymbolAction(RunOnMemberSymbol);
+        }
+
+        private void RunOnMemberSymbol(ISymbol? left, ISymbol? right, ITypeSymbol leftContainingType, ITypeSymbol rightContainingType, string leftName, string rightName, IList<CompatDifference> differences)
         {
             // Members must exist
             if (left is null || right is null)
@@ -49,7 +52,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             // If the left member is not virtual, ensure that we're in strict mode.
             // TODO: This check can be expanded once compatibility rules for
             // adding a virtual keyword are clarified: https://github.com/dotnet/sdk/issues/26169.
-            else if (Settings.StrictMode)
+            else if (_settings.StrictMode)
             {
                 // If the right member is virtual, emit a diagnostic
                 // that the virtual modifier cannot be added.

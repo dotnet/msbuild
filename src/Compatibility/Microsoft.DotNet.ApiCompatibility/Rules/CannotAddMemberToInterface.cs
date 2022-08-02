@@ -1,24 +1,26 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable enable
+
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
-    public class CannotAddMemberToInterface : Rule
+    public class CannotAddMemberToInterface : IRule
     {
-        public override void Initialize(RuleRunnerContext context)
+        public CannotAddMemberToInterface(RuleSettings settings, RuleRunnerContext context)
         {
             // StrictMode scenario should be handled by MembersMustExist rule.
-            if (!Settings.StrictMode)
+            if (!settings.StrictMode)
             {
                 context.RegisterOnMemberSymbolAction(RunOnMemberSymbol);
             }
         }
 
-        private void RunOnMemberSymbol(ISymbol left, ISymbol right, string leftName, string rightName, IList<CompatDifference> differences)
+        private void RunOnMemberSymbol(ISymbol? left, ISymbol? right, string leftName, string rightName, IList<CompatDifference> differences)
         {
             if (left == null && right != null && right.ContainingType.TypeKind == TypeKind.Interface)
             {
@@ -37,10 +39,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                     differences.Add(new CompatDifference(DiagnosticIds.CannotAddMemberToInterface, string.Format(Resources.CannotAddMemberToInterface, right.ToDisplayString(), rightName, leftName), DifferenceType.Added, right));
                 }
             }
-
         }
 
-        private bool IsEventOrPropertyAccessor(IMethodSymbol symbol) =>
+        private static bool IsEventOrPropertyAccessor(IMethodSymbol symbol) =>
             symbol.MethodKind == MethodKind.PropertyGet ||
             symbol.MethodKind == MethodKind.PropertySet ||
             symbol.MethodKind == MethodKind.EventAdd ||
