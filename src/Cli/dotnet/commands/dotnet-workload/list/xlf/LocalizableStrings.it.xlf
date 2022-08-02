@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="WorkloadIdColumn">
         <source>Installed Workload Ids</source>
-        <target state="translated">ID carico di lavoro installati</target>
+        <target state="new">Installed Workload Ids</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadListFooter">
@@ -19,17 +19,17 @@
       </trans-unit>
       <trans-unit id="WorkloadManfiestVersionColumn">
         <source>Manifest Version</source>
-        <target state="translated">Versioni del manifesto</target>
+        <target state="new">Manifest Version</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadSourceColumn">
         <source>Installation Source</source>
-        <target state="translated">Origine dell'installazione</target>
+        <target state="new">Installation Source</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
         <source>Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
-        <target state="new">Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</target>
+        <target state="needs-review-translation">Gli aggiornamenti sono disponibili per i carichi di lavoro seguenti: {0}. Per ottenere la versione più recente, eseguire 'dotnet workload update'.</target>
         <note />
       </trans-unit>
     </body>

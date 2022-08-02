@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="WorkloadIdColumn">
         <source>Installed Workload Ids</source>
-        <target state="translated">Yüklü İş Yükü Kimlikleri</target>
+        <target state="new">Installed Workload Ids</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadListFooter">
@@ -19,17 +19,17 @@
       </trans-unit>
       <trans-unit id="WorkloadManfiestVersionColumn">
         <source>Manifest Version</source>
-        <target state="translated">Bildirim Sürümü</target>
+        <target state="new">Manifest Version</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadSourceColumn">
         <source>Installation Source</source>
-        <target state="translated">Yükleme Kaynağı</target>
+        <target state="new">Installation Source</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
         <source>Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
-        <target state="new">Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</target>
+        <target state="needs-review-translation">Şu iş yükleri için güncelleştirmeler var: {0}. En son sürümü almak için `dotnet workload update` çalıştırın.</target>
         <note />
       </trans-unit>
     </body>
