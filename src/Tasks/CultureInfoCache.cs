@@ -66,6 +66,12 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if the culture is determined to be valid.</returns>
         internal static bool IsValidCultureString(string name)
         {
+#if NET5_0_OR_GREATER
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+            {
+                return CultureInfo.GetCultureInfo(name, true);
+            }
+#endif
             return ValidCultureNames.Contains(name);
         }
 
