@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.ToolPackage
                         Directory.CreateDirectory(stageDirectory.Value);
                         rollbackDirectory = stageDirectory.Value;
 
-                        FilePath tempProject = CreateDirectoryWithTempProject(
+                        string tempProject = CreateDirectoryWithTempProject(
                             packageId: packageId,
                             versionRange: versionRange,
                             targetFramework: string.IsNullOrEmpty(targetFramework) ? BundledTargetFramework.GetTargetFrameworkMoniker() : targetFramework,
@@ -67,13 +67,13 @@ namespace Microsoft.DotNet.ToolPackage
                         try
                         {
                             _projectRestorer.Restore(
-                                tempProject,
+                                new FilePath(tempProject),
                                 packageLocation,
                                 verbosity: verbosity);
                         }
                         finally
                         {
-                            Directory.Delete(tempProject.GetDirectoryPath().ToString(), recursive: true);
+                            Directory.Delete(Path.GetDirectoryName(tempProject), recursive: true);
                         }
 
                         var version = _store.GetStagedPackageVersion(stageDirectory, packageId);
@@ -132,7 +132,7 @@ namespace Microsoft.DotNet.ToolPackage
             var tempDirectoryForAssetJson = FileUtilities.CreateTempPath();
             File.WriteAllText(Path.Combine(tempDirectoryForAssetJson, "file1.txt"), null);
 
-            FilePath tempProject = CreateDirectoryWithTempProject(
+            string tempProject = CreateDirectoryWithTempProject(
                 packageId: packageId,
                 versionRange: versionRange,
                 targetFramework: string.IsNullOrEmpty(targetFramework) ? BundledTargetFramework.GetTargetFrameworkMoniker() : targetFramework,
@@ -144,19 +144,19 @@ namespace Microsoft.DotNet.ToolPackage
             try
             {
                 _projectRestorer.Restore(
-                    tempProject,
+                    new FilePath(tempProject),
                     packageLocation,
                     verbosity: verbosity);
             }
             finally
             {
-                Directory.Delete(tempProject.GetDirectoryPath().ToString(), recursive: true);
+                Directory.Delete(Path.GetDirectoryName(tempProject), recursive: true);
             }
 
             return ToolPackageInstance.CreateFromAssetFile(packageId, new DirectoryPath(tempDirectoryForAssetJson));
         }
 
-        private FilePath CreateDirectoryWithTempProject(
+        private string CreateDirectoryWithTempProject(
             PackageId packageId,
             VersionRange versionRange,
             string targetFramework,
@@ -165,11 +165,11 @@ namespace Microsoft.DotNet.ToolPackage
             DirectoryPath? rootConfigDirectory,
             string[] additionalFeeds)
         {
-            FilePath tempProject = _tempProject ?? new FilePath(FileUtilities.CreateTempFile(FileUtilities.CreateTempPath(), "csproj"));
+            string tempProject = _tempProject.ToString() ?? (FileUtilities.CreateTempFile(FileUtilities.CreateTempPath(), "csproj"));
             if (_tempProject != null)
             {
-                tempProject = new FilePath(Path.ChangeExtension(tempProject.Value, "csproj"));
-                Directory.CreateDirectory(tempProject.GetDirectoryPath().Value);
+                tempProject = Path.ChangeExtension(tempProject, "csproj");
+                Directory.CreateDirectory(Path.GetDirectoryName(tempProject));
             }
 
             var tempProjectContent = new XDocument(
@@ -200,7 +200,7 @@ namespace Microsoft.DotNet.ToolPackage
                         new XAttribute("Project", "Sdk.targets"),
                         new XAttribute("Sdk", "Microsoft.NET.Sdk"))));
 
-            File.WriteAllText(tempProject.ToString(), tempProjectContent.ToString());
+            File.WriteAllText(tempProject, tempProjectContent.ToString());
             return tempProject;
         }
 
