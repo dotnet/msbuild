@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="fr" original="../CommonResources.resx">
+    <body>
+      <trans-unit id="CreateWorkItemPerAssemblyAssembliesNotEqual">
+        <source>When enqueuing work items per assembly, the number of passed in left and right assemblies must be equal.</source>
+        <target state="new">When enqueuing work items per assembly, the number of passed in left and right assemblies must be equal.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidRexegStringTransformationPattern">
+        <source>Invalid transformation pattern provided: '{0} - {1}'.</source>
+        <target state="new">Invalid transformation pattern provided: '{0} - {1}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SuppressionsFileNotSpecified">
+        <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
+        <target state="new">A file path must be passed in to successfully generate a compatibility suppression file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSdkVersion">
+        <source>The minimum version required of Roslyn is '{1}' and you are using '{0}' version of the Roslyn. You can update the sdk to get the latest version.</source>
+        <target state="new">The minimum version required of Roslyn is '{1}' and you are using '{0}' version of the Roslyn. You can update the sdk to get the latest version.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WroteSuppressions">
+        <source>Successfully wrote compatibility suppressions to '{0}'.</source>
+        <target state="new">Successfully wrote compatibility suppressions to '{0}'.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
