@@ -159,6 +159,8 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                 "Validates api compatibility in strict mode for contract and implementation assemblies for all compatible target frameworks.");
             Option<bool> enableStrictModeForCompatibleFrameworksInPackageOption = new("--enable-strict-mode-for-compatible-frameworks-in-package",
                 "Validates api compatibility in strict mode for assemblies that are compatible based on their target framework.");
+            Option<bool> enableStrictModeForBaselineValidationOption = new("--enable-strict-mode-for-baseline-validation",
+                "Validates api compatibility in strict mode for package baseline checks.");
             Option<string?> baselinePackageOption = new("--baseline-package",
                 "The path to a baseline package to validate against the current package.")
             {
@@ -187,6 +189,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
             packageCommand.AddOption(runApiCompatOption);
             packageCommand.AddOption(enableStrictModeForCompatibleTfmsOption);
             packageCommand.AddOption(enableStrictModeForCompatibleFrameworksInPackageOption);
+            packageCommand.AddOption(enableStrictModeForBaselineValidationOption);
             packageCommand.AddOption(baselinePackageOption);
             packageCommand.AddOption(packageAssemblyReferencesOption);
             packageCommand.AddOption(baselinePackageAssemblyReferencesOption);
@@ -206,6 +209,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                 bool runApiCompat = context.ParseResult.GetValueForOption(runApiCompatOption);
                 bool enableStrictModeForCompatibleTfms = context.ParseResult.GetValueForOption(enableStrictModeForCompatibleTfmsOption);
                 bool enableStrictModeForCompatibleFrameworksInPackage = context.ParseResult.GetValueForOption(enableStrictModeForCompatibleFrameworksInPackageOption);
+                bool enableStrictModeForBaselineValidation = context.ParseResult.GetValueForOption(enableStrictModeForBaselineValidationOption);
                 string? baselinePackage = context.ParseResult.GetValueForOption(baselinePackageOption);
                 string? runtimeGraph = context.ParseResult.GetValueForOption(runtimeGraphOption);
                 Dictionary<string, string[]>? packageAssemblyReferences = context.ParseResult.GetValueForOption(packageAssemblyReferencesOption);
@@ -220,6 +224,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                     runApiCompat,
                     enableStrictModeForCompatibleTfms,
                     enableStrictModeForCompatibleFrameworksInPackage,
+                    enableStrictModeForBaselineValidation,
                     baselinePackage,
                     runtimeGraph,
                     packageAssemblyReferences,

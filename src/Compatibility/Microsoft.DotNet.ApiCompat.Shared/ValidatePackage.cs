@@ -50,6 +50,7 @@ namespace Microsoft.DotNet.ApiCompat
             bool runApiCompat,
             bool enableStrictModeForCompatibleTfms,
             bool enableStrictModeForCompatibleFrameworksInPackage,
+            bool enableStrictModeForBaselineValidation,
             string? baselinePackagePath,
             string? runtimeGraph,
             Dictionary<string, string[]>? packageAssemblyReferences,
@@ -85,7 +86,7 @@ namespace Microsoft.DotNet.ApiCompat
             if (!string.IsNullOrEmpty(baselinePackagePath))
             {
                 serviceProvider.GetService<BaselinePackageValidator>().Validate(new PackageValidatorOption(package,
-                    enableStrictMode: false,
+                    enableStrictMode: enableStrictModeForBaselineValidation,
                     enqueueApiCompatWorkItems: runApiCompat,
                     executeApiCompatWorkItems: false,
                     baselinePackage: Package.Create(baselinePackagePath, baselinePackageAssemblyReferences)));

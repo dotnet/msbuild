@@ -54,6 +54,11 @@ namespace Microsoft.DotNet.ApiCompat.Task
         public bool EnableStrictModeForCompatibleFrameworksInPackage { get; set; }
 
         /// <summary>
+        /// Enables strict mode api comparison checks enqueued by the baseline package validator.
+        /// </summary>
+        public bool EnableStrictModeForBaselineValidation { get; set; }
+
+        /// <summary>
         /// The path to the baseline package that acts as the contract to inspect.
         /// </summary>
         public string? BaselinePackageTargetPath { get; set; }
@@ -123,6 +128,7 @@ namespace Microsoft.DotNet.ApiCompat.Task
                 RunApiCompat,
                 EnableStrictModeForCompatibleTfms,
                 EnableStrictModeForCompatibleFrameworksInPackage,
+                EnableStrictModeForBaselineValidation,
                 BaselinePackageTargetPath,
                 RuntimeGraph,
                 ParsePackageAssemblyReferences(PackageAssemblyReferences),
