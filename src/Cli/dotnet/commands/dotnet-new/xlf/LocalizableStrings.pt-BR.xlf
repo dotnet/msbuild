@@ -4,17 +4,17 @@
     <body>
       <trans-unit id="AddPackageReferenceCallback_Failed">
         <source>Failed to add package reference: {0}</source>
-        <target state="new">Failed to add package reference: {0}</target>
+        <target state="translated">Falha ao adicionar referência de pacote: {0}</target>
         <note>{0} - the reason why operation failed, normally ends with period</note>
       </trans-unit>
       <trans-unit id="AddProjectReferenceCallback_Failed">
         <source>Failed to add project reference: {0}</source>
-        <target state="new">Failed to add project reference: {0}</target>
+        <target state="translated">Falha ao adicionar referência do projeto: {0}</target>
         <note>{0} - the reason why operation failed, normally ends with period</note>
       </trans-unit>
       <trans-unit id="AddProjectsToSolutionCallback_Failed">
         <source>Failed to add project(s) to the solution: {0}</source>
-        <target state="new">Failed to add project(s) to the solution: {0}</target>
+        <target state="translated">Falha ao adicionar projeto(s) à solução: {0}</target>
         <note>{0} - the reason why operation failed, normally ends with period</note>
       </trans-unit>
       <trans-unit id="CapabilityExpressionEvaluator_Exception_InvalidExpression">
@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="DisableSdkTemplates_OptionDescription">
         <source>If present, prevents templates bundled in the SDK from being presented.</source>
-        <target state="new">If present, prevents templates bundled in the SDK from being presented.</target>
+        <target state="translated">Se presente, impede que os modelos agrupados no SDK sejam apresentados.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnableProjectContextEval_OptionDescription">
@@ -129,22 +129,22 @@
       </trans-unit>
       <trans-unit id="RestoreCallback_Failed">
         <source>Failed to perform restore: {0}</source>
-        <target state="new">Failed to perform restore: {0}</target>
+        <target state="translated">Falha ao executar a restauração: {0}</target>
         <note>{0} - the reason why operation failed, normally ends with period</note>
       </trans-unit>
       <trans-unit id="SdkInfoProvider_Message_InstallSdk">
         <source>Go to aka.ms/get-dotnet and install any of the supported SDK versions: '{0}'.</source>
-        <target state="new">Go to aka.ms/get-dotnet and install any of the supported SDK versions: '{0}'.</target>
+        <target state="translated">Acesse aka.ms/get-dotnet e instale qualquer uma das versões do SDK compatíveis: '{0}'.</target>
         <note>{0} is the list of supported versions.</note>
       </trans-unit>
       <trans-unit id="SdkInfoProvider_Message_SwitchSdk">
         <source>You have other SDK version(s) installed that can be used to run this template. Switch to any of the following SDK(s) on your system to run this template: '{0}'. Details on selecting SDK version to run: https://docs.microsoft.com/dotnet/core/tools/global-json.</source>
-        <target state="new">You have other SDK version(s) installed that can be used to run this template. Switch to any of the following SDK(s) on your system to run this template: '{0}'. Details on selecting SDK version to run: https://docs.microsoft.com/dotnet/core/tools/global-json.</target>
+        <target state="translated">Você tem outras versões do SDK instaladas que podem ser usadas para executar este modelo. Alterne para qualquer um dos seguintes SDKs em seu sistema para executar este modelo: '{0}'. Detalhes sobre como selecionar a versão do SDK a ser executada: https://docs.microsoft.com/dotnet/core/tools/global-json.</target>
         <note>{0} is the list of installed and supported versions.</note>
       </trans-unit>
       <trans-unit id="WorkloadInfoProvider_Message_AddWorkloads">
         <source>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</source>
-        <target state="new">Run 'dotnet workload search' to search workloads available to be installed on your SDK.</target>
+        <target state="translated">Execute 'pesquisa de carga de trabalho dotnet' para pesquisar cargas de trabalho disponíveis para serem instaladas em seu SDK.</target>
         <note />
       </trans-unit>
     </body>
