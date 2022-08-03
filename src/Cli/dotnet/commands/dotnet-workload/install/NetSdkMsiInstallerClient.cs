@@ -487,8 +487,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return new PackageId($"{manifestId}.Manifest-{featureBand}.Msi.{RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant()}");
         }
 
+        private static object _msiAdminInstallLock = new();
+
         public async Task ExtractManifestAsync(string nupkgPath, string targetPath)
         {
+            Log?.LogMessage($"ExtractManifestAsync: Extracting '{nupkgPath}' to '{targetPath}'");
+
             string extractionPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             if (Directory.Exists(extractionPath))
             {
@@ -499,7 +503,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 Directory.CreateDirectory(extractionPath);
 
-                Log?.LogMessage($"Extracting '{nupkgPath}' to '{extractionPath}'");
+                Log?.LogMessage($"ExtractManifestAsync: Temporary extraction path: '{extractionPath}'");
                 await _nugetPackageDownloader.ExtractPackageAsync(nupkgPath, new DirectoryPath(extractionPath));
                 if (Directory.Exists(targetPath))
                 {
@@ -509,7 +513,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 string extractedManifestPath = Path.Combine(extractionPath, "data", "extractedManifest");
                 if (Directory.Exists(extractedManifestPath))
                 {
-                    Log?.LogMessage($"Copying manifest from '{extractionPath}' to '{targetPath}'");
+                    Log?.LogMessage($"ExtractManifestAsync: Copying manifest from '{extractionPath}' to '{targetPath}'");
                     Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
                     FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(extractedManifestPath, targetPath));
                 }
@@ -523,12 +527,21 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     string msiExtractionPath = Path.Combine(extractionPath, "msi");
 
 
-                    _ = WindowsInstaller.SetInternalUI(InstallUILevel.None);
-                    var result = WindowsInstaller.InstallProduct(msiPath, $"TARGETDIR={msiExtractionPath} ACTION=ADMIN");
-
-                    if (result != Error.SUCCESS)
+                    lock (_msiAdminInstallLock)
                     {
-                        throw new GracefulException(String.Format(LocalizableStrings.FailedToExtractMsi, msiPath));
+                        string adminInstallLog = GetMsiLogNameForAdminInstall(msiPath);
+
+                        Log?.LogMessage($"ExtractManifestAsync: Running admin install for '{msiExtractionPath}'.  Log file: '{adminInstallLog}'");
+
+                        ConfigureInstall(adminInstallLog);
+
+                        var result = WindowsInstaller.InstallProduct(msiPath, $"TARGETDIR={msiExtractionPath} ACTION=ADMIN");
+
+                        if (result != Error.SUCCESS)
+                        {
+                            Log?.LogMessage($"ExtractManifestAsync: Admin install failed: {result}");
+                            throw new GracefulException(String.Format(LocalizableStrings.FailedToExtractMsi, msiPath));
+                        }
                     }
 
                     var manifestsFolder = Path.Combine(msiExtractionPath, "dotnet", "sdk-manifests");
