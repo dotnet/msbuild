@@ -20,7 +20,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     internal static class CultureInfoCache
     {
-        private static readonly HashSet<string> ValidCultureNames = InitializeValidCultureNames();
+        private static readonly Lazy<HashSet<string>> ValidCultureNames = new Lazy<HashSet<string>> (() => InitializeValidCultureNames());
 
         static HashSet<string> InitializeValidCultureNames()
         {
@@ -72,7 +72,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 #endif
-            return ValidCultureNames.Contains(name);
+            return ValidCultureNames.Value.Contains(name);
         }
 
 #if !FEATURE_CULTUREINFO_GETCULTURES
