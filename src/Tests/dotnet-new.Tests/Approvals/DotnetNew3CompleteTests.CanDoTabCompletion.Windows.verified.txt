@@ -19,6 +19,7 @@ razorclasslib
 razorcomponent
 react
 sln
+solution
 tool-manifest
 viewimports
 viewstart
