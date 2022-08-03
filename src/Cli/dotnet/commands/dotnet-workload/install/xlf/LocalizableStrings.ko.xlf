@@ -67,11 +67,6 @@
         <target state="translated">MSI에서 정보를 추출하지 못했습니다. {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToGetPackageManifestUrl">
-        <source>Failed to resolve manifest package URL {0}.</source>
-        <target state="translated">매니페스트 패키지 URL {0}을(를) 확인하지 못했습니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="FailedToInstallWorkloadManifest">
         <source>Failed to install manifest {0} version {1}: {2}.</source>
         <target state="translated">매니페스트 {0} 버전 {1}: {2}을 설치하지 못했습니다.</target>
@@ -165,6 +160,11 @@
       <trans-unit id="ManifestMsiNotFoundInNuGetPackage">
         <source>Manifest MSI not found in NuGet package {0}</source>
         <target state="translated">NuGet 패키지 {0}에서 매니페스트 MSI를 찾을 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPackageUrlNotResolved">
+        <source>Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</source>
+        <target state="new">Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">
