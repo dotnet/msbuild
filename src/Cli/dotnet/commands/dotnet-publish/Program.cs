@@ -10,7 +10,9 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Execution;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools.Common;
 using Microsoft.VisualBasic.CompilerServices;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
@@ -78,9 +80,27 @@ namespace Microsoft.DotNet.Tools.Publish
             Option<string> configOption
             )
         {
-            List<string> calledArguments = new List<string>(new List<Token>(parseResult.Tokens.ToList()).Select(x => x.ToString()));
-            IEnumerable<string> slnProjectAndCommandArgs = (slnOrProjectArgs).ToList().Concat(calledArguments);
-            ProjectInstance project = GetTargetedProject(slnProjectAndCommandArgs);
+            Debugger.Launch();
+            string potentialSln = GetTargetedSolutionFileIfExists(slnOrProjectArgs);
+            ProjectInstance project = null;
+            if (!String.IsNullOrEmpty(potentialSln))
+            {
+                SlnFile sln = SlnFileFactory.CreateFromFileOrDirectory(potentialSln);
+                foreach(SlnPropertySet x in sln.ProjectConfigurationsSection)
+                {
+                    x.Values.Clear();
+                    x.Values.Add("Release|Any CPU");
+                    x.Values.Add("Release|Any CPU");
+                    x.Values.Add("Release|Any CPU");
+                    x.Values.Add("Release|Any CPU");
+                }
+            }
+            else
+            {
+                List<string> calledArguments = new List<string>(new List<Token>(parseResult.Tokens.ToList()).Select(x => x.ToString()));
+                IEnumerable<string> slnProjectAndCommandArgs = (slnOrProjectArgs).ToList().Concat(calledArguments);
+                project = GetTargetedProject(slnProjectAndCommandArgs);
+            }
             
             if (project != null)
             {
@@ -95,6 +115,7 @@ namespace Microsoft.DotNet.Tools.Publish
             return Array.Empty<string>();
         }
 
+        /// <returns>A project instance that will be targeted to publish/pack, etc. null if one does not exist.</returns>
         private static ProjectInstance GetTargetedProject(IEnumerable<string> slnOrProjectArgs)
         {
             string potentialProject = "";
@@ -120,9 +141,21 @@ namespace Microsoft.DotNet.Tools.Publish
             return string.IsNullOrEmpty(potentialProject) ? null : new ProjectInstance(potentialProject);
         }
 
+        /// <returns>True if Configuration is a global property or was provided by the CLI: IE, the user customized configuration.</returns>
         private static bool ConfigurationAlreadySpecified(ParseResult parseResult, ProjectInstance project, Option<string> configurationOption)
         {
             return parseResult.HasOption(configurationOption) || (project.GlobalProperties.ContainsKey("Configuration"));
+        }
+
+        /// <returns>The sln file provided or empty string if not provided.</returns>
+        private static string GetTargetedSolutionFileIfExists(IEnumerable<string> slnOrProjectArgs)
+        {
+            foreach(string arg in slnOrProjectArgs)
+            {
+                if (File.Exists(arg) && Path.GetExtension(arg) == ".sln")
+                    return arg;
+            }
+            return String.Empty;
         }
 
         public static int Run(ParseResult parseResult)
