@@ -76,7 +76,7 @@ Raisons possibles :
         <note />
       </trans-unit>
       <trans-unit id="DotNetSdkInfoLabel">
-        <source>.NET SDK (reflecting any global.json):</source>
+        <source>.NET SDK:</source>
         <target state="needs-review-translation">SDK .NET :</target>
         <note />
       </trans-unit>
