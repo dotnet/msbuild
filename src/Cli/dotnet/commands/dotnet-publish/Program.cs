@@ -86,13 +86,11 @@ namespace Microsoft.DotNet.Tools.Publish
             if (!String.IsNullOrEmpty(potentialSln))
             {
                 SlnFile sln = SlnFileFactory.CreateFromFileOrDirectory(potentialSln);
-                foreach(SlnPropertySet x in sln.ProjectConfigurationsSection)
+                ProjectInstance metaProject = new ProjectInstance();
+                
+                foreach(SlnProject x in sln.Projects)
                 {
-                    x.Values.Clear();
-                    x.Values.Add("Release|Any CPU");
-                    x.Values.Add("Release|Any CPU");
-                    x.Values.Add("Release|Any CPU");
-                    x.Values.Add("Release|Any CPU");
+                    x.FilePath
                 }
             }
             else
