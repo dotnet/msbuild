@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
+using Microsoft.NET.Build.Tasks;
 using NuGet.Common;
 using NuGet.Configuration;
 
@@ -18,8 +19,6 @@ namespace Microsoft.DotNet.Cli
     /// </summary>
     public static class SudoEnvironmentDirectoryOverride
     {
-        private const string SudoHomeDirectory = "/tmp/dotnet_sudo_home/";
-
         /// <summary>
         /// Not for security use. Detect if command is running under sudo
         /// via if SUDO_UID being set.
@@ -38,22 +37,10 @@ namespace Microsoft.DotNet.Cli
         {
             if (!OperatingSystem.IsWindows() && IsRunningUnderSudo() && IsRunningWorkloadCommand(parseResult))
             {
-                if (!TempHomeIsOnlyRootWritable(SudoHomeDirectory))
-                {
-                    try
-                    {
-                        Directory.Delete(SudoHomeDirectory, recursive: true);
-                    }
-                    catch (DirectoryNotFoundException)
-                    {
-                        // Avoid read after write race condition
-                    }
-                }
-
-                Directory.CreateDirectory(SudoHomeDirectory);
+                string newProcessHomeDirectory = FileUtilities.CreateTempPath();
 
                 var homeBeforeOverride = Path.Combine(Environment.GetEnvironmentVariable("HOME"));
-                Environment.SetEnvironmentVariable("HOME", SudoHomeDirectory);
+                Environment.SetEnvironmentVariable("HOME", newProcessHomeDirectory);
 
                 CopyUserNuGetConfigToOverriddenHome(homeBeforeOverride);
             }
