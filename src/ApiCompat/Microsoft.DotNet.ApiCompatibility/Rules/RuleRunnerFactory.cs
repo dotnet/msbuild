@@ -10,47 +10,33 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
     public class RuleRunnerFactory
     {
-        private readonly bool _strictMode;
-        private readonly string _leftName;
-        private readonly string[] _rightNames;
-        private readonly IEqualityComparer<ISymbol> _equalityComparer;
-        private readonly bool _includeInternalSymbols;
-        private readonly bool _withReferences;
-        private RuleRunner _runner;
+        private readonly Lazy<RuleRunner> _runner;
 
-        public RuleRunnerFactory(string leftName, string[] rightNames, IEqualityComparer<ISymbol> equalityComparer, bool includeInternalSymbols, bool strictMode, bool withReferences)
+        public RuleRunnerFactory(string? leftName, string[]? rightNames, IEqualityComparer<ISymbol> equalityComparer, bool includeInternalSymbols, bool strictMode, bool withReferences)
         {
-            _strictMode = strictMode;
-            _withReferences = withReferences;
-            _equalityComparer = equalityComparer;
-            _includeInternalSymbols = includeInternalSymbols;
-            _leftName = string.IsNullOrEmpty(leftName) ? RuleRunner.DEFAULT_LEFT_NAME : leftName;
-            _rightNames = rightNames ?? new string[] { RuleRunner.DEFAULT_RIGHT_NAME };
-            if (_rightNames.Length <= 0)
+            if (string.IsNullOrEmpty(leftName))
+                leftName = RuleRunner.DEFAULT_LEFT_NAME;
+
+            rightNames ??= new string[] { RuleRunner.DEFAULT_RIGHT_NAME };
+            if (rightNames.Length == 0)
             {
-                throw new ArgumentException(nameof(rightNames), Resources.RightNamesAtLeastOne);
+                throw new ArgumentException(Resources.RightNamesAtLeastOne, nameof(rightNames));
             }
 
-            InitializeRightNamesIfNeeded();
-        }
-
-        private void InitializeRightNamesIfNeeded()
-        {
-            for (int i = 0; i < _rightNames.Length; i++)
+            for (int i = 0; i < rightNames.Length; i++)
             {
-                if (string.IsNullOrEmpty(_rightNames[i]))
+                if (string.IsNullOrEmpty(rightNames[i]))
                 {
-                    _rightNames[i] = RuleRunner.DEFAULT_RIGHT_NAME;
+                    rightNames[i] = RuleRunner.DEFAULT_RIGHT_NAME;
                 }
             }
+
+            _runner = new Lazy<RuleRunner>(() => new RuleRunner(leftName!, rightNames, strictMode, equalityComparer, includeInternalSymbols, withReferences));
         }
 
         public virtual IRuleRunner GetRuleRunner()
         {
-            if (_runner == null)
-                _runner = new RuleRunner(_leftName, _rightNames, _strictMode, _equalityComparer, _includeInternalSymbols, _withReferences);
-
-            return _runner;
+            return _runner.Value;
         }
     }
 }
