@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
     <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <OutputType>Exe</OutputType>

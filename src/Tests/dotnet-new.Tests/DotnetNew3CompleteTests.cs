@@ -19,14 +19,13 @@ using Xunit.Abstractions;
 namespace Microsoft.DotNet.New.Tests
 {
     [UsesVerify]
-    public class DotnetNew3CompleteTests : SdkTest, IClassFixture<VerifySettingsFixture>
+    [Collection("Verify Tests")]
+    public class DotnetNew3CompleteTests : SdkTest
     {
-        private readonly VerifySettings _verifySettings;
         private readonly ITestOutputHelper _log;
 
-        public DotnetNew3CompleteTests(VerifySettingsFixture verifySettings, ITestOutputHelper log) : base(log)
+        public DotnetNew3CompleteTests(ITestOutputHelper log) : base(log)
         {
-            _verifySettings = verifySettings.Settings;
             _log = log;
         }
 
@@ -51,7 +50,7 @@ namespace Microsoft.DotNet.New.Tests
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings).UniqueForOSPlatform();
+            return Verify(commandResult.StdOut).UniqueForOSPlatform();
         }
 
 #pragma warning disable xUnit1004 // Test methods should not be skipped

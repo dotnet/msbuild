@@ -113,7 +113,7 @@ Author: Me
             HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowCommandOptions(new[] { templateCommand }, templateCommand, helpContext);
-            return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
+            return Verify(sw.ToString());
         }
 
         [Fact]
@@ -136,7 +136,7 @@ Author: Me
             HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowCommandOptions(new[] { templateCommand }, templateCommand, helpContext);
-            return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
+            return Verify(sw.ToString());
         }
 
         [Fact]
@@ -159,7 +159,7 @@ Author: Me
             HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowCommandOptions(new[] { templateCommand }, templateCommand, helpContext);
-            return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
+            return Verify(sw.ToString());
         }
 
         [Fact]
@@ -206,7 +206,7 @@ Author: Me
             HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
-            return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
+            return Verify(sw.ToString());
         }
 
         [Fact]
@@ -233,7 +233,7 @@ Author: Me
             HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand2, templateCommand1 }, helpContext);
-            return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
+            return Verify(sw.ToString());
         }
 
         [Fact]
@@ -257,7 +257,7 @@ Author: Me
             HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
-            return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
+            return Verify(sw.ToString());
         }
 
         [Fact]
@@ -286,7 +286,7 @@ Author: Me
             HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand2, templateCommand1 }, helpContext);
-            return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
+            return Verify(sw.ToString());
         }
 
         [Fact]
@@ -310,7 +310,7 @@ Author: Me
             HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
-            return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
+            return Verify(sw.ToString());
         }
 
         [Fact]
@@ -356,7 +356,7 @@ Author: Me
             StringWriter sw = new StringWriter();
 
             InstantiateCommand.ShowHintForOtherTemplates(templateGroup, templateGroup.Templates[0], args, sw);
-            return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
+            return Verify(sw.ToString());
         }
 
         [Fact]
@@ -380,7 +380,7 @@ Author: Me
             HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance, maxWidth: 100), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
-            return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
+            return Verify(sw.ToString());
         }
 
         [Fact]
@@ -404,7 +404,7 @@ Author: Me
             HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance, maxWidth: 50), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
-            return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
+            return Verify(sw.ToString());
         }
 
         [Fact]
@@ -447,7 +447,7 @@ Author: Me
             HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance, maxWidth: 50), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand1, templateCommand2 }, helpContext);
-            return Verifier.Verify(sw.ToString(), _verifySettings.Settings);
+            return Verifier.Verify(sw.ToString());
         }
     }
 }

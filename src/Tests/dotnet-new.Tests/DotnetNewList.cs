@@ -17,18 +17,17 @@ using Xunit.Abstractions;
 namespace Microsoft.DotNet.New.Tests
 {
     [UsesVerify]
-    public partial class DotnetNewList : SdkTest, IClassFixture<SharedHomeDirectory>, IClassFixture<VerifySettingsFixture>
+    [Collection("Verify Tests")]
+    public partial class DotnetNewList : SdkTest, IClassFixture<SharedHomeDirectory>
     {
-        private readonly VerifySettings _verifySettings;
         private readonly SharedHomeDirectory _sharedHome;
         private readonly ITestOutputHelper _log;
 
-        public DotnetNewList(SharedHomeDirectory sharedHome, VerifySettingsFixture verifySettings, ITestOutputHelper log) : base(log)
+        public DotnetNewList(SharedHomeDirectory sharedHome, ITestOutputHelper log) : base(log)
         {
             _sharedHome = sharedHome;
             _sharedHome.InstallPackage("Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0");
             _log = log;
-            _verifySettings = verifySettings.Settings;
         }
 
         [Theory]

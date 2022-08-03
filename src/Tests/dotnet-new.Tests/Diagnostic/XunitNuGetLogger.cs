@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using NuGet.Common;
 using Xunit.Abstractions;
 using Xunit.Sdk;
+using DiagnosticMessage = Xunit.Sdk.DiagnosticMessage;
 
 namespace Microsoft.DotNet.New.Tests
 {

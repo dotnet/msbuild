@@ -12,6 +12,7 @@ using Xunit;
 namespace Microsoft.DotNet.New.Tests
 {
     [UsesVerify]
+    [Collection("Verify Tests")]
     public partial class DotnetNewInstallTests
     {
         [Fact]
@@ -26,7 +27,7 @@ namespace Microsoft.DotNet.New.Tests
                 .Should()
                 .Fail();
 
-            return Verifier.Verify(commandResult.StdErr, _verifySettings)
+            return Verify(commandResult.StdErr)
                 .AddScrubber(output =>
                 {
                     output.ScrubByRegex("   Microsoft\\.DotNet\\.Common\\.ItemTemplates::[A-Za-z0-9.-]+", "   Microsoft.DotNet.Common.ItemTemplates::%VERSION%");
@@ -45,7 +46,7 @@ namespace Microsoft.DotNet.New.Tests
                 .Should()
                 .Pass();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+            return Verify(commandResult.StdOut)
                 .AddScrubber(output =>
                 {
                     output.ScrubByRegex("   Microsoft.DotNet.Common.ItemTemplates::[A-Za-z0-9.-]+", "   Microsoft.DotNet.Common.ItemTemplates::%VERSION%");
@@ -64,7 +65,7 @@ namespace Microsoft.DotNet.New.Tests
                 .Should()
                 .Fail();
 
-            return Verifier.Verify(commandResult.StdErr, _verifySettings)
+            return Verify(commandResult.StdErr)
                 .AddScrubber(output =>
                 {
                     output.ScrubByRegex("   Microsoft\\.DotNet\\.Common\\.ItemTemplates::[A-Za-z0-9.-]+", "   Microsoft.DotNet.Common.ItemTemplates::%VERSION%");
@@ -85,7 +86,7 @@ namespace Microsoft.DotNet.New.Tests
                 .Should()
                 .Pass();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+            return Verify(commandResult.StdOut)
                 .UseTextForParameters("common")
                 .DisableRequireUniquePrefix();
         }
@@ -102,7 +103,7 @@ namespace Microsoft.DotNet.New.Tests
                 .Should()
                 .Pass();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+            return Verify(commandResult.StdOut);
         }
 
         [Fact]
@@ -118,14 +119,14 @@ namespace Microsoft.DotNet.New.Tests
                 .Should()
                 .Pass();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+            return Verify(commandResult.StdOut)
                 .AddScrubber(output =>
                 {
                     output.ScrubAndReplace(testTemplateLocation, "%TEMPLATE FOLDER%");
                     output.ScrubByRegex("dotnetcli \\(version: v[A-Za-z0-9.-]+\\)", "dotnetcli (version: v%VERSION%)");
                 });
         }
-        
+
         [Fact]
         public Task CanInstallSameSourceTwice_Folder_WhenSourceIsSpecified()
         {
@@ -144,7 +145,7 @@ namespace Microsoft.DotNet.New.Tests
                  .Execute();
 
             commandResult.Should().Pass();
-            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+            return Verify(commandResult.StdOut)
                 .AddScrubber(output => output.ScrubAndReplace(basicFSharp, "%TEMPLATE FOLDER%"));
         }
 
@@ -166,7 +167,7 @@ namespace Microsoft.DotNet.New.Tests
                  .Execute();
 
             commandResult.Should().Pass();
-            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+            return Verify(commandResult.StdOut);
         }
 
         [Fact]
@@ -191,7 +192,7 @@ namespace Microsoft.DotNet.New.Tests
                  .Execute();
 
             commandResult.Should().Fail();
-            return Verifier.Verify(commandResult.StdErr, _verifySettings);
+            return Verify(commandResult.StdErr);
         }
 
         [Fact]
@@ -222,7 +223,7 @@ namespace Microsoft.DotNet.New.Tests
            .Execute();
 
             commandResult.Should().Fail();
-            return Verifier.Verify(commandResult.StdErr, _verifySettings)
+            return Verify(commandResult.StdErr)
                 .AddScrubber(output => output.ScrubAndReplace(basicFSharp, "%TEMPLATE FOLDER%"));
         }
 

@@ -15,15 +15,9 @@ using Xunit;
 namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 {
     [UsesVerify]
-    public partial class HelpTests : IClassFixture<VerifyFixture>
+    [Collection("Verify Tests")]
+    public partial class HelpTests
     {
-        private readonly VerifyFixture _verifySettings;
-
-        public HelpTests(VerifyFixture verifySettings)
-        {
-            _verifySettings = verifySettings;
-        }
-    
         [Fact]
         public void UniqueNameMatchesCorrectly()
         {
@@ -70,7 +64,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             StringWriter output = new StringWriter();
             Reporter reporter = new Reporter(new AnsiConsole(output));
             Assert.False(InstantiateCommand.VerifyMatchingTemplates(settings, matchingTemplates, reporter, out _));
-            return Verifier.Verify(output.ToString(), _verifySettings.Settings);
+            return Verify(output.ToString());
         }
 
         [Fact]

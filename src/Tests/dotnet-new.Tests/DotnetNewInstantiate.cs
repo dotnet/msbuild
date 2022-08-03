@@ -17,16 +17,14 @@ using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.New.Tests
 {
-    public partial class DotnetNewInstantiate : SdkTest, IClassFixture<SharedHomeDirectory>, IClassFixture<VerifySettingsFixture>
+    public partial class DotnetNewInstantiate : SdkTest, IClassFixture<SharedHomeDirectory>
     {
         private readonly SharedHomeDirectory _fixture;
-        private readonly VerifySettings _verifySettings;
         private readonly ITestOutputHelper _log;
 
-        public DotnetNewInstantiate(SharedHomeDirectory fixture, VerifySettingsFixture verifySettings, ITestOutputHelper log) : base(log)
+        public DotnetNewInstantiate(SharedHomeDirectory fixture, ITestOutputHelper log) : base(log)
         {
             _fixture = fixture;
-            _verifySettings = verifySettings.Settings;
             _log = log;
         }
 

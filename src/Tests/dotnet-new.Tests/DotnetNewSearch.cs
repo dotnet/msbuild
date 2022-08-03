@@ -20,16 +20,15 @@ using Xunit.Abstractions;
 namespace Microsoft.DotNet.New.Tests
 {
     [UsesVerify]
-    public class DotnetNewSearch : SdkTest, IClassFixture<SharedHomeDirectory>, IClassFixture<VerifySettingsFixture>
+    [Collection("Verify Tests")]
+    public class DotnetNewSearch : SdkTest, IClassFixture<SharedHomeDirectory>
     {
         private readonly SharedHomeDirectory _sharedHome;
-        private readonly VerifySettings _verifySettings;
         private readonly ITestOutputHelper _log;
 
-        public DotnetNewSearch(SharedHomeDirectory sharedHome, VerifySettingsFixture verifySettings, ITestOutputHelper log) : base(log)
+        public DotnetNewSearch(SharedHomeDirectory sharedHome, ITestOutputHelper log) : base(log)
         {
             _sharedHome = sharedHome;
-            _verifySettings = verifySettings.Settings;
             _log = log;
         }
 
@@ -73,7 +72,7 @@ namespace Microsoft.DotNet.New.Tests
 
             commandResult.Should().Fail();
 
-            return Verifier.Verify(commandResult.StdErr, _verifySettings)
+            return Verify(commandResult.StdErr)
                 .UseTextForParameters("common")
                 .DisableRequireUniquePrefix();
         }
@@ -489,7 +488,7 @@ namespace Microsoft.DotNet.New.Tests
 
             // rows can be shrunk: ML.NET Console App for Training and ML.NET Console App for Train...
             // in this case ML.NET Console App for Training < ML.NET Console App for Train...
-            // therefore use custom comparer 
+            // therefore use custom comparer
             var nameComparer = new ShrinkAwareOrdinalStringComparer();
             var downloadCountComparer = new DownloadCountComparer();
 

@@ -10,12 +10,15 @@ namespace Microsoft.DotNet.New.Tests
     {
         public VerifySettingsFixture()
         {
-            Settings = new VerifySettings();
-            Settings.UseDirectory("Approvals");
+            VerifierSettings.DerivePathInfo(
+                (_, _, type, method) => new(
+                    directory: "Approvals",
+                    typeName: type.Name,
+                    methodName: method.Name));
+
+            // Customize diff output of verifier
             VerifyDiffPlex.Initialize(OutputType.Compact);
         }
-
-        internal VerifySettings Settings { get; }
 
         public void Dispose() { }
     }

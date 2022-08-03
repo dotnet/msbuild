@@ -13,6 +13,7 @@ using Xunit;
 namespace Microsoft.DotNet.New.Tests
 {
     [UsesVerify]
+    [Collection("Verify Tests")]
     public partial class DotnetNewHelp
     {
         [Theory]
@@ -33,7 +34,7 @@ namespace Microsoft.DotNet.New.Tests
             commandResult.Should().ExitWith(0)
                 .And.NotHaveStdErr();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+            return Verify(commandResult.StdOut)
                 .UseTextForParameters("common")
                 .DisableRequireUniquePrefix();
         }
@@ -53,7 +54,7 @@ namespace Microsoft.DotNet.New.Tests
             commandResult.Should().ExitWith(0)
                 .And.NotHaveStdErr();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+            return Verify(commandResult.StdOut)
                 .UseTextForParameters("common")
                 .DisableRequireUniquePrefix();
         }
@@ -73,7 +74,7 @@ namespace Microsoft.DotNet.New.Tests
             commandResult.Should().ExitWith(0)
                 .And.NotHaveStdErr();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+            return Verify(commandResult.StdOut)
                 .UseTextForParameters("common")
                 .DisableRequireUniquePrefix();
         }
@@ -93,7 +94,7 @@ namespace Microsoft.DotNet.New.Tests
             commandResult.Should().ExitWith(0)
                 .And.NotHaveStdErr();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+            return Verify(commandResult.StdOut)
                  .UseTextForParameters("common")
                 .DisableRequireUniquePrefix();
         }
@@ -113,7 +114,7 @@ namespace Microsoft.DotNet.New.Tests
             commandResult.Should().ExitWith(0)
                 .And.NotHaveStdErr();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+            return Verify(commandResult.StdOut)
                 .UseTextForParameters("common")
                 .DisableRequireUniquePrefix();
         }
@@ -133,7 +134,7 @@ namespace Microsoft.DotNet.New.Tests
             commandResult.Should().ExitWith(0)
                 .And.NotHaveStdErr();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+            return Verify(commandResult.StdOut)
                 .UseTextForParameters("common")
                 .DisableRequireUniquePrefix();
         }
@@ -159,7 +160,7 @@ namespace Microsoft.DotNet.New.Tests
                 .And.NotHaveStdErr()
                 .And.NotHaveStdOutContaining("Usage: new [options]");
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+            return Verify(commandResult.StdOut)
                 .UseTextForParameters(setName)
                 .DisableRequireUniquePrefix();
         }
@@ -175,7 +176,7 @@ namespace Microsoft.DotNet.New.Tests
                 .Execute();
 
             commandResult.Should().Pass().And.NotHaveStdErr();
-            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+            return Verify(commandResult.StdOut);
         }
 
         [Fact]
@@ -190,7 +191,7 @@ namespace Microsoft.DotNet.New.Tests
 
             //help command cannot fail, therefore the output is written to stdout
             commandResult.Should().Pass().And.NotHaveStdErr();
-            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+            return Verify(commandResult.StdOut);
         }
 
         [Fact]
@@ -207,7 +208,7 @@ namespace Microsoft.DotNet.New.Tests
 
             //help command cannot fail, therefore the output is written to stdout
             commandResult.Should().Pass().And.NotHaveStdErr();
-            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+            return Verify(commandResult.StdOut);
         }
 
         [Fact]
@@ -223,7 +224,7 @@ namespace Microsoft.DotNet.New.Tests
 
             //help command should not fail, therefore the output is written to stdout
             commandResult.Should().Pass().And.NotHaveStdErr();
-            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+            return Verify(commandResult.StdOut);
         }
 
         [Fact]
@@ -241,7 +242,7 @@ namespace Microsoft.DotNet.New.Tests
                 .And.NotHaveStdErr()
                 .And.NotHaveStdOutContaining("Usage: new [options]");
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+            return Verify(commandResult.StdOut);
         }
 
         [Fact]
@@ -256,7 +257,7 @@ namespace Microsoft.DotNet.New.Tests
 
             //help command cannot fail, therefore the output is written to stdout
             commandResult.Should().Pass().And.NotHaveStdErr();
-            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+            return Verify(commandResult.StdOut);
         }
 
         [Fact]
@@ -271,7 +272,7 @@ namespace Microsoft.DotNet.New.Tests
 
             //help command cannot fail, therefore the output is written to stdout
             commandResult.Should().Pass().And.NotHaveStdErr();
-            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+            return Verify(commandResult.StdOut);
         }
 
         [Fact]
@@ -286,7 +287,7 @@ namespace Microsoft.DotNet.New.Tests
 
             //help command cannot fail, therefore the output is written to stdout
             commandResult.Should().Pass().And.NotHaveStdErr().And.NotHaveStdOutContaining("Usage: new [options]");
-            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+            return Verify(commandResult.StdOut);
         }
 
         [Fact]
@@ -304,7 +305,7 @@ namespace Microsoft.DotNet.New.Tests
                     .And.NotHaveStdErr()
                     .And.NotHaveStdOutContaining("Usage: new [options]");
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+            return Verify(commandResult.StdOut);
         }
 
         [Fact]
@@ -319,7 +320,7 @@ namespace Microsoft.DotNet.New.Tests
 
             //help command cannot fail, therefore the output is written to stdout
             commandResult.Should().Pass().And.NotHaveStdErr();
-            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+            return Verify(commandResult.StdOut);
         }
 
         [Fact]
@@ -337,7 +338,7 @@ namespace Microsoft.DotNet.New.Tests
                 .Execute();
 
             commandResult.Should().Pass().And.NotHaveStdErr();
-            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+            return Verify(commandResult.StdOut);
         }
     }
 }

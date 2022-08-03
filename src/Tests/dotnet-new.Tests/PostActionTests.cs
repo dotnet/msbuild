@@ -15,14 +15,12 @@ using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.New.Tests
 {
-    public partial class PostActionTests : SdkTest, IClassFixture<VerifySettingsFixture>
+    public partial class PostActionTests : SdkTest
     {
-        private readonly VerifySettings _verifySettings;
         private readonly ITestOutputHelper _log;
 
-        public PostActionTests(VerifySettingsFixture verifySettings, ITestOutputHelper log) : base(log)
+        public PostActionTests(ITestOutputHelper log) : base(log)
         {
-            _verifySettings = verifySettings.Settings;
             _log = log;
         }
 

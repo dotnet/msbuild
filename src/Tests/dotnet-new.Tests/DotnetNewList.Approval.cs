@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.New.Tests
                 .Should()
                 .Pass();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+            return Verify(commandResult.StdOut)
                 .UniqueForOSPlatform()
                 .UseTextForParameters("common")
                 .DisableRequireUniquePrefix();
@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.New.Tests
                 .Should()
                 .Pass();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings).UniqueForOSPlatform();
+            return Verify(commandResult.StdOut).UniqueForOSPlatform();
         }
 
         [Fact]
@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.New.Tests
                 .Should()
                 .Fail();
 
-            return Verifier.Verify(commandResult.StdErr, _verifySettings);
+            return Verify(commandResult.StdErr);
         }
 
         [Fact]
@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.New.Tests
                 .Should()
                 .Pass();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+            return Verify(commandResult.StdOut);
         }
     }
 }

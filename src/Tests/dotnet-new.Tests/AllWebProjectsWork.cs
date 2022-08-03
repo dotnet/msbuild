@@ -15,17 +15,16 @@ using Xunit.Abstractions;
 namespace Microsoft.DotNet.New.Tests
 {
     [UsesVerify]
-    public class AllWebProjectsWork : SdkTest, IClassFixture<WebProjectsFixture>, IClassFixture<VerifySettingsFixture>
+    [Collection("Verify Tests")]
+    public class AllWebProjectsWork : SdkTest, IClassFixture<WebProjectsFixture>
     {
         private readonly WebProjectsFixture _fixture;
         private readonly ITestOutputHelper _log;
-        private readonly VerifySettings _verifySettings;
 
-        public AllWebProjectsWork(WebProjectsFixture fixture, VerifySettingsFixture verifySettings, ITestOutputHelper log) : base(log)
+        public AllWebProjectsWork(WebProjectsFixture fixture, ITestOutputHelper log) : base(log)
         {
             _fixture = fixture;
             _log = log;
-            _verifySettings = verifySettings.Settings;
         }
 
         [Theory]
@@ -84,7 +83,7 @@ namespace Microsoft.DotNet.New.Tests
                .And
                .NotHaveStdErr();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+            return Verify(commandResult.StdOut);
         }
 
         [Fact]
@@ -101,7 +100,7 @@ namespace Microsoft.DotNet.New.Tests
                .And
                .NotHaveStdErr();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+            return Verify(commandResult.StdOut)
                 .AddScrubber(output => output.ScrubByRegex("[A-Za-z0-9\\.]+-third-party-notices", "%version%-third-party-notices"));
         }
 
@@ -121,7 +120,7 @@ namespace Microsoft.DotNet.New.Tests
                .And
                .NotHaveStdErr();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+            return Verify(commandResult.StdOut)
                 .UseTextForParameters("common")
                 .DisableRequireUniquePrefix()
                 .AddScrubber(output => output.ScrubByRegex("[A-Za-z0-9\\.]+-third-party-notices", "%version%-third-party-notices"));
@@ -139,5 +138,5 @@ namespace Microsoft.DotNet.New.Tests
         }
 
         internal string BaseWorkingDirectory { get; private set; }
-    } 
+    }
 }

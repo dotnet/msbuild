@@ -20,14 +20,13 @@ using Xunit.Abstractions;
 namespace Microsoft.DotNet.New.Tests
 {
     [UsesVerify]
-    public class DotnetNewDebugOptions : SdkTest, IClassFixture<VerifySettingsFixture>
+    [Collection("Verify Tests")]
+    public class DotnetNewDebugOptions : SdkTest
     {
-        private readonly VerifySettings _verifySettings;
         private readonly ITestOutputHelper _log;
 
-        public DotnetNewDebugOptions(VerifySettingsFixture verifySettings, ITestOutputHelper log) : base(log)
+        public DotnetNewDebugOptions(ITestOutputHelper log) : base(log)
         {
-            _verifySettings = verifySettings.Settings;
             _log = log;
         }
 
@@ -89,7 +88,7 @@ namespace Microsoft.DotNet.New.Tests
 
             commandResult.Should().ExitWith(0).And.NotHaveStdErr();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+            return Verify(commandResult.StdOut)
                 .UniqueForOSPlatform()
                 .AddScrubber(output =>
                 {

@@ -18,6 +18,7 @@ using Xunit;
 namespace Microsoft.DotNet.New.Tests
 {
     [UsesVerify]
+    [Collection("Verify Tests")]
     public partial class PostActionTests
     {
         private string testExecDirPatternForVerify = $"{{SolutionDirectory}}artifacts(\\\\|\\/)tmp(\\\\|\\/){TestUtils.Configuration}";
@@ -39,7 +40,7 @@ namespace Microsoft.DotNet.New.Tests
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+            return Verify(commandResult.StdOut)
                 .UniqueForOSPlatform()
                 .ScrubInlineGuids()
                 .AddScrubber(output =>
@@ -70,7 +71,7 @@ namespace Microsoft.DotNet.New.Tests
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+            return Verify(commandResult.StdOut)
                 .UniqueForOSPlatform();
         }
 
@@ -92,7 +93,7 @@ namespace Microsoft.DotNet.New.Tests
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+            return Verify(commandResult.StdOut)
                 .UniqueForOSPlatform()
                 .ScrubInlineGuids()
                 .AddScrubber(output =>
@@ -122,7 +123,7 @@ namespace Microsoft.DotNet.New.Tests
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+            return Verify(commandResult.StdOut)
                 .UniqueForOSPlatform()
                 .ScrubInlineGuids()
                 .AddScrubber(output =>
@@ -161,7 +162,7 @@ namespace Microsoft.DotNet.New.Tests
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings)
+            return Verify(commandResult.StdOut)
                 .UniqueForOSPlatform()
                 .ScrubInlineGuids()
                 .AddScrubber(output =>
@@ -192,7 +193,7 @@ namespace Microsoft.DotNet.New.Tests
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+            return Verify(commandResult.StdOut);
         }
 
         [Fact]
@@ -216,7 +217,7 @@ namespace Microsoft.DotNet.New.Tests
             Assert.False(File.Exists(Path.Combine(workingDirectory, "MyProject.csproj")));
             Assert.False(File.Exists(Path.Combine(workingDirectory, "Program.cs")));
 
-            return Verifier.Verify(commandResult.StdOut, _verifySettings);
+            return Verify(commandResult.StdOut);
         }
 
         [Fact]
@@ -236,7 +237,7 @@ namespace Microsoft.DotNet.New.Tests
             commandResult
                 .Should().Fail();
 
-            return Verifier.Verify(commandResult.StdOut + Environment.NewLine + commandResult.StdErr, _verifySettings);
+            return Verify(commandResult.StdOut + Environment.NewLine + commandResult.StdErr);
         }
 
         [Fact]
@@ -257,7 +258,7 @@ namespace Microsoft.DotNet.New.Tests
                 .Should()
                 .Fail();
 
-            return Verifier.Verify(commandResult.StdOut + Environment.NewLine + commandResult.StdErr, _verifySettings)
+            return Verify(commandResult.StdOut + Environment.NewLine + commandResult.StdErr)
                 .UniqueForOSPlatform();
         }
     }
