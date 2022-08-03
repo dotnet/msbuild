@@ -608,9 +608,16 @@ namespace Microsoft.DotNet.New.Tests
                 .Should()
                 .Fail();
 
+            string testExecDirPatternForVerify = $"{{SolutionDirectory}}artifacts(\\\\|\\/)tmp(\\\\|\\/){TestUtils.Configuration}";
             return Verifier.Verify(commandResult.FormatOutputStreams(), _verifySettings)
                 .UniqueForOSPlatform()
-                .ScrubInlineGuids();
+                .ScrubInlineGuids()
+                .AddScrubber(output =>
+                {
+                    // for Linux Verify.NET replaces sub path /tmp/ to be {TempPath} wrongly
+                    output.Replace("{TempPath}", "/tmp/");
+                    output.ScrubByRegex(testExecDirPatternForVerify, "%Test Execution Direcotry%");
+                });
                 
         }
 

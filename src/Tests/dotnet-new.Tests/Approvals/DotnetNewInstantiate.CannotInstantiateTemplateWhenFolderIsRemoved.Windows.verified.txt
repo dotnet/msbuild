@@ -5,10 +5,10 @@ Unable to locate the specified template content, the template package might be r
 For details on the exit code, refer to https://aka.ms/templating-exit-codes#103
 StdOut:
 To rescan installed template packages, run:
-   dotnet-new3 new3 --debug:rebuild-cache
+   dotnet new --debug:rebuild-cache
 
 To uninstall the template package, run:
-   dotnet-new3 new3 uninstall {TempPath}TemplateEngine.Tests\Guid_1\template
+   dotnet new uninstall %Test Execution Direcotry%\TemplateEngine.Tests\Guid_1\template
 
 To install the template package, run:
-   dotnet-new3 new3 install {TempPath}TemplateEngine.Tests\Guid_1\template
+   dotnet new install %Test Execution Direcotry%\TemplateEngine.Tests\Guid_1\template
