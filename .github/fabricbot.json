@@ -117,7 +117,7 @@
             {
               "name": "labelAdded",
               "parameters": {
-                "label": "Area-Compatibility"
+                "label": "Area-ApiCompat"
               }
             }
           ]
@@ -127,12 +127,12 @@
           "issues",
           "project_card"
         ],
-        "taskName": "Notify compatibility of new untriaged bugs",
+        "taskName": "Notify apicompat of new untriaged bugs",
         "actions": [
           {
             "name": "addReply",
             "parameters": {
-              "comment": "@dotnet/area-infrastructure-libraries a new issue has been filed in the Compatibility area, please triage"
+              "comment": "@dotnet/area-infrastructure-libraries a new issue has been filed in the ApiCompat area, please triage"
             }
           }
         ]

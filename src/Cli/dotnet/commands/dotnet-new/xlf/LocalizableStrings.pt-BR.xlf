@@ -17,9 +17,114 @@
         <target state="new">Failed to add project(s) to the solution: {0}</target>
         <note>{0} - the reason why operation failed, normally ends with period</note>
       </trans-unit>
+      <trans-unit id="CapabilityExpressionEvaluator_Exception_InvalidExpression">
+        <source>Invalid expression, position: {0}.</source>
+        <target state="new">Invalid expression, position: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisableSdkTemplates_OptionDescription">
         <source>If present, prevents templates bundled in the SDK from being presented.</source>
         <target state="new">If present, prevents templates bundled in the SDK from being presented.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnableProjectContextEval_OptionDescription">
+        <source>Enables evaluating project context using MSBuild.</source>
+        <target state="new">Enables evaluating project context using MSBuild.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildEvaluationResult_Error_NoProjectFound">
+        <source>No project was found at the path: {0}.</source>
+        <target state="new">No project was found at the path: {0}.</target>
+        <note>{0} - the file path where project was expected to be found.</note>
+      </trans-unit>
+      <trans-unit id="MSBuildEvaluationResult_Error_NotRestored">
+        <source>{0} is not restored.</source>
+        <target state="new">{0} is not restored.</target>
+        <note>{0} - the full path to the project.</note>
+      </trans-unit>
+      <trans-unit id="MSBuildEvaluator_Error_NoTargetFramework">
+        <source>Project '{0}' is a SDK-style project, but does not specify the framework.</source>
+        <target state="new">Project '{0}' is a SDK-style project, but does not specify the framework.</target>
+        <note>{0} - the full path to the project.</note>
+      </trans-unit>
+      <trans-unit id="MultipleProjectsEvaluationResult_Error">
+        <source>Multiple projects found: {0}.</source>
+        <target state="new">Multiple projects found: {0}.</target>
+        <note>{0} - semi-colon separated list of path to projects found.</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraintFactory_Exception_EvaluationFailed">
+        <source>Failed to create constraint '{0}': failed to evaluate the project: {1}</source>
+        <target state="new">Failed to create constraint '{0}': failed to evaluate the project: {1}</target>
+        <note>{0} - type of constraint (non-localizable), {1} - localized reason why evaluation failed, ends with period.</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraintFactory_Exception_NoEvaluator">
+        <source>Failed to create constraint '{0}': {1} component is not available.</source>
+        <target state="new">Failed to create constraint '{0}': {1} component is not available.</target>
+        <note>{0} - type of constraint (non-localizable), {1} - name of required component (non-localizable).</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_DisplayName">
+        <source>Project capabiltities</source>
+        <target state="new">Project capabiltities</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Error_ArgumentShouldBeString">
+        <source>argument should be a string</source>
+        <target state="new">argument should be a string</target>
+        <note>part of a sentence</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Error_ArgumentShouldNotBeEmpty">
+        <source>arguments should not contain empty values</source>
+        <target state="new">arguments should not contain empty values</target>
+        <note>part of a sentence</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Error_InvalidConstraintConfiguration">
+        <source>Invalid constraint configuration</source>
+        <target state="new">Invalid constraint configuration</target>
+        <note>part of a sentence</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Error_InvalidJson">
+        <source>invalid JSON</source>
+        <target state="new">invalid JSON</target>
+        <note>part of a sentence</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_EvaluationFailed_Message">
+        <source>Failed to evaluate project context: {0}</source>
+        <target state="new">Failed to evaluate project context: {0}</target>
+        <note>{0} - failure reason</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_Message">
+        <source>The template needs project capability '{0}', and current project ({1}) does not satisfy it.</source>
+        <target state="new">The template needs project capability '{0}', and current project ({1}) does not satisfy it.</target>
+        <note>{0} - project capability expression (non-localizable), {1} - path to the project.</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_MultipleProjectsFound_CTA">
+        <source>Specify the project to use using {0} option.</source>
+        <target state="new">Specify the project to use using {0} option.</target>
+        <note>{0} - option to use - non localizable</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_NoProjectFound_CTA">
+        <source>This template can only be created inside the project.</source>
+        <target state="new">This template can only be created inside the project.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_NonSDKStyle_Message">
+        <source>The project {0} is not an SDK style project, and is not supported for evaluation. It is only possible to use this template with SDK-style projects.</source>
+        <target state="new">The project {0} is not an SDK style project, and is not supported for evaluation. It is only possible to use this template with SDK-style projects.</target>
+        <note>{0} - path to the project</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_NotRestored_CTA">
+        <source>Run 'dotnet restore {0}' to restore the project.</source>
+        <target state="new">Run 'dotnet restore {0}' to restore the project.</target>
+        <note>do not translate 'dotnet restore {0}'</note>
+      </trans-unit>
+      <trans-unit id="ProjectContextSymbolSource_DisplayName">
+        <source>Project context</source>
+        <target state="new">Project context</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectPath_OptionDescription">
+        <source>The project that should be used for context evaluation.</source>
+        <target state="new">The project that should be used for context evaluation.</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreCallback_Failed">

@@ -343,6 +343,46 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
                 Assert.NotEmpty(log.errors.Where(e => e.Contains("CP1003")));
         }
 
+        [RequiresMSBuildVersionFact("17.0.0.32901", Skip = "https://github.com/dotnet/sdk/issues/23533")]
+        public void ValidatePackageTargetFailsWithBaselineVersionInStrictMode()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("PackageValidationTestProject", allowCopyIfPresent: true)
+                .WithSource();
+
+            var result = new PackCommand(Log, Path.Combine(testAsset.TestRoot, "PackageValidationTestProject.csproj"))
+                .Execute($"-p:PackageOutputPath={testAsset.TestRoot}");
+
+            Assert.Equal(0, result.ExitCode);
+
+            string packageValidationBaselinePath = Path.Combine(testAsset.TestRoot, "PackageValidationTestProject.1.0.0.nupkg");
+            result = new PackCommand(Log, Path.Combine(testAsset.TestRoot, "PackageValidationTestProject.csproj"))
+                .Execute($"-p:PackageVersion=2.0.0;ForceStrictModeBaselineValidationProblem=true;EnableStrictModeForBaselineValidation=true;PackageValidationBaselinePath={packageValidationBaselinePath}");
+
+            Assert.Equal(1, result.ExitCode);
+            Assert.Contains("error CP0002: Member 'PackageValidationTestProject.Program.SomeApiOnlyInLatestVersion()' exists on lib/net6.0/PackageValidationTestProject.dll but not on [Baseline] lib/net6.0/PackageValidationTestProject.dll", result.StdOut);
+            Assert.Contains("error CP0002: Member 'PackageValidationTestProject.Program.SomeApiOnlyInLatestVersion()' exists on lib/netstandard2.0/PackageValidationTestProject.dll but not on [Baseline] lib/netstandard2.0/PackageValidationTestProject.dll", result.StdOut);
+        }
+
+        [RequiresMSBuildVersionFact("17.0.0.32901", Skip = "https://github.com/dotnet/sdk/issues/23533")]
+        public void ValidatePackageTargetSucceedsWithBaselineVersionNotInStrictMode()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("PackageValidationTestProject", allowCopyIfPresent: true)
+                .WithSource();
+
+            var result = new PackCommand(Log, Path.Combine(testAsset.TestRoot, "PackageValidationTestProject.csproj"))
+                .Execute($"-p:PackageOutputPath={testAsset.TestRoot}");
+
+            Assert.Equal(0, result.ExitCode);
+
+            string packageValidationBaselinePath = Path.Combine(testAsset.TestRoot, "PackageValidationTestProject.1.0.0.nupkg");
+            result = new PackCommand(Log, Path.Combine(testAsset.TestRoot, "PackageValidationTestProject.csproj"))
+                .Execute($"-p:PackageVersion=2.0.0;ForceStrictModeBaselineValidationProblem=true;PackageValidationBaselinePath={packageValidationBaselinePath}");
+
+            Assert.Equal(0, result.ExitCode);
+        }
+
         private TestProject CreateTestProject(string sourceCode, string tfms, IEnumerable<TestProject> referenceProjects = null)
         {
             string name = Path.GetFileNameWithoutExtension(Path.GetTempFileName());

@@ -67,9 +67,9 @@
 /src/Tests/Microsoft.AspNetCore.Watch.BrowserRefresh.Tests/       @captainsafia @mkArtakMSFT
 /src/BuiltInTools/   @captainsafia @mkArtakMSFT
 
-# Compatibility tools owned by runtime team
-# Area-Compatibility
-/src/Compatibility/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
+# ApiCompat tools owned by runtime team
+# Area-ApiCompat
+/src/ApiCompat/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
 /src/Tests/Microsoft.DotNet.ApiCompatibility*/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
 /src/Tests/Microsoft.DotNet.ApiCompat*/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
 /src/Tests/Microsoft.DotNet.PackageValidation*/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 

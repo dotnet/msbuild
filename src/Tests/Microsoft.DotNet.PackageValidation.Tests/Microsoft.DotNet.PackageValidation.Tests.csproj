@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="..\..\Compatibility\Microsoft.DotNet.PackageValidation\Resources.resx" GenerateSource="true" />
+    <EmbeddedResource Include="..\..\ApiCompat\Microsoft.DotNet.PackageValidation\Resources.resx" GenerateSource="true" />
   </ItemGroup>
 
   <ItemGroup>
@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Compatibility\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" />
+    <ProjectReference Include="..\..\ApiCompat\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
   </ItemGroup>
 

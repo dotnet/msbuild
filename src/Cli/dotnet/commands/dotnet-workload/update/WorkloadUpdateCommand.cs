@@ -40,10 +40,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             string dotnetDir = null,
             string userProfileDir = null,
             string tempDirPath = null,
-            string version = null)
+            string version = null,
+            string installedFeatureBand = null)
             : base(parseResult, reporter: reporter, workloadResolver: workloadResolver, workloadInstaller: workloadInstaller,
                   nugetPackageDownloader: nugetPackageDownloader, workloadManifestUpdater: workloadManifestUpdater,
-                  dotnetDir: dotnetDir, userProfileDir: userProfileDir, tempDirPath: tempDirPath, version: version)
+                  dotnetDir: dotnetDir, userProfileDir: userProfileDir, tempDirPath: tempDirPath, version: version, installedFeatureBand: installedFeatureBand)
 
         {
             _fromPreviousSdk = parseResult.GetValueForOption(WorkloadUpdateCommandParser.FromPreviousSdkOption);
@@ -76,8 +77,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             }
             else if (_printDownloadLinkOnly)
             {
-                var packageUrls = GetUpdatablePackageUrlsAsync(_includePreviews).GetAwaiter().GetResult();
-
+                var packageUrls = GetUpdatablePackageUrlsAsync(_includePreviews).GetAwaiter().GetResult();      
                 Reporter.WriteLine("==allPackageLinksJsonOutputStart==");
                 Reporter.WriteLine(JsonSerializer.Serialize(packageUrls, new JsonSerializerOptions() { WriteIndented = true }));
                 Reporter.WriteLine("==allPackageLinksJsonOutputEnd==");

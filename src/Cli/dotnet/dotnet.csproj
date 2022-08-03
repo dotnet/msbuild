@@ -15,7 +15,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="commands\dotnet-new\**" />
-    <Compile Include="commands\dotnet-new\*.cs" />
+    <Compile Include="commands\dotnet-new\**\*.cs" />
     <Compile Include="..\..\Resolvers\Microsoft.DotNet.MSBuildSdkResolver\FXVersion.cs" />
     <Compile Include="$(RepoRoot)src\Common\EnvironmentVariableNames.cs" LinkBase="Common" />
     <Compile Include="$(RepoRoot)src\Common\WorkloadFileBasedInstall.cs" LinkBase="Common" />

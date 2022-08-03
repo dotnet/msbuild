@@ -129,8 +129,86 @@
     <value>Failed to add project(s) to the solution: {0}</value>
     <comment>{0} - the reason why operation failed, normally ends with period</comment>
   </data>
+  <data name="CapabilityExpressionEvaluator_Exception_InvalidExpression" xml:space="preserve">
+    <value>Invalid expression, position: {0}.</value>
+  </data>
   <data name="DisableSdkTemplates_OptionDescription" xml:space="preserve">
     <value>If present, prevents templates bundled in the SDK from being presented.</value>
+  </data>
+  <data name="EnableProjectContextEval_OptionDescription" xml:space="preserve">
+    <value>Enables evaluating project context using MSBuild.</value>
+  </data>
+  <data name="MSBuildEvaluationResult_Error_NoProjectFound" xml:space="preserve">
+    <value>No project was found at the path: {0}.</value>
+    <comment>{0} - the file path where project was expected to be found.</comment>
+  </data>
+  <data name="MSBuildEvaluationResult_Error_NotRestored" xml:space="preserve">
+    <value>{0} is not restored.</value>
+    <comment>{0} - the full path to the project.</comment>
+  </data>
+  <data name="MSBuildEvaluator_Error_NoTargetFramework" xml:space="preserve">
+    <value>Project '{0}' is a SDK-style project, but does not specify the framework.</value>
+    <comment>{0} - the full path to the project.</comment>
+  </data>
+  <data name="MultipleProjectsEvaluationResult_Error" xml:space="preserve">
+    <value>Multiple projects found: {0}.</value>
+    <comment>{0} - semi-colon separated list of path to projects found.</comment>
+  </data>
+  <data name="ProjectCapabilityConstraintFactory_Exception_EvaluationFailed" xml:space="preserve">
+    <value>Failed to create constraint '{0}': failed to evaluate the project: {1}</value>
+    <comment>{0} - type of constraint (non-localizable), {1} - localized reason why evaluation failed, ends with period.</comment>
+  </data>
+  <data name="ProjectCapabilityConstraintFactory_Exception_NoEvaluator" xml:space="preserve">
+    <value>Failed to create constraint '{0}': {1} component is not available.</value>
+    <comment>{0} - type of constraint (non-localizable), {1} - name of required component (non-localizable).</comment>
+  </data>
+  <data name="ProjectCapabilityConstraint_DisplayName" xml:space="preserve">
+    <value>Project capabiltities</value>
+  </data>
+  <data name="ProjectCapabilityConstraint_Error_ArgumentShouldBeString" xml:space="preserve">
+    <value>argument should be a string</value>
+    <comment>part of a sentence</comment>
+  </data>
+  <data name="ProjectCapabilityConstraint_Error_ArgumentShouldNotBeEmpty" xml:space="preserve">
+    <value>arguments should not contain empty values</value>
+    <comment>part of a sentence</comment>
+  </data>
+  <data name="ProjectCapabilityConstraint_Error_InvalidConstraintConfiguration" xml:space="preserve">
+    <value>Invalid constraint configuration</value>
+    <comment>part of a sentence</comment>
+  </data>
+  <data name="ProjectCapabilityConstraint_Error_InvalidJson" xml:space="preserve">
+    <value>invalid JSON</value>
+    <comment>part of a sentence</comment>
+  </data>
+  <data name="ProjectCapabilityConstraint_Restricted_EvaluationFailed_Message" xml:space="preserve">
+    <value>Failed to evaluate project context: {0}</value>
+    <comment>{0} - failure reason</comment>
+  </data>
+  <data name="ProjectCapabilityConstraint_Restricted_Message" xml:space="preserve">
+    <value>The template needs project capability '{0}', and current project ({1}) does not satisfy it.</value>
+    <comment>{0} - project capability expression (non-localizable), {1} - path to the project.</comment>
+  </data>
+  <data name="ProjectCapabilityConstraint_Restricted_MultipleProjectsFound_CTA" xml:space="preserve">
+    <value>Specify the project to use using {0} option.</value>
+    <comment>{0} - option to use - non localizable</comment>
+  </data>
+  <data name="ProjectCapabilityConstraint_Restricted_NonSDKStyle_Message" xml:space="preserve">
+    <value>The project {0} is not an SDK style project, and is not supported for evaluation. It is only possible to use this template with SDK-style projects.</value>
+    <comment>{0} - path to the project</comment>
+  </data>
+  <data name="ProjectCapabilityConstraint_Restricted_NoProjectFound_CTA" xml:space="preserve">
+    <value>This template can only be created inside the project.</value>
+  </data>
+  <data name="ProjectCapabilityConstraint_Restricted_NotRestored_CTA" xml:space="preserve">
+    <value>Run 'dotnet restore {0}' to restore the project.</value>
+    <comment>do not translate 'dotnet restore {0}'</comment>
+  </data>
+  <data name="ProjectContextSymbolSource_DisplayName" xml:space="preserve">
+    <value>Project context</value>
+  </data>
+  <data name="ProjectPath_OptionDescription" xml:space="preserve">
+    <value>The project that should be used for context evaluation.</value>
   </data>
   <data name="RestoreCallback_Failed" xml:space="preserve">
     <value>Failed to perform restore: {0}</value>

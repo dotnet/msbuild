@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             // Install a workload
             var installParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", installingWorkload });
             var installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: nugetDownloader,
-                workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
+                workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory, installedFeatureBand: sdkFeatureVersion);
             installCommand.Execute();
 
             // 7 packs in packs dir, 1 template pack
@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             // Update workload
             var updateParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update" });
             var updateCommand = new WorkloadUpdateCommand(updateParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: nugetDownloader,
-            workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
+            workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory, installedFeatureBand: sdkFeatureVersion);
             updateCommand.Execute();
 
             // 6 packs in packs dir, 1 template pack
@@ -166,7 +166,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             // Update workload (without installing any workloads to this feature band)
             var updateParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--from-previous-sdk" });
             var updateCommand = new WorkloadUpdateCommand(updateParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: nugetDownloader,
-            workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
+            workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory, installedFeatureBand: sdkFeatureVersion);
             updateCommand.Execute();
 
             foreach (var pack in workloadPacks)
@@ -187,7 +187,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         public void GivenWorkloadUpdateItUpdatesOutOfDatePacks()
         {
             var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android") };
-            (_, var command, var installer, _, _, _) = GetTestInstallers(_parseResult, installedWorkloads: mockWorkloadIds);
+            (_, var command, var installer, _, _, _) = GetTestInstallers(_parseResult, installedWorkloads: mockWorkloadIds, installedFeatureBand: "6.0.100");
 
             command.Execute();
 
@@ -201,7 +201,8 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         public void GivenWorkloadUpdateItRollsBackOnFailedUpdate()
         {
             var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android"), new WorkloadId("xamarin-android-build") };
-            (_, var command, var installer, var workloadResolver, _, _) = GetTestInstallers(_parseResult, installedWorkloads: mockWorkloadIds, failingPack: "Xamarin.Android.Framework");
+            (_, var command, var installer, var workloadResolver, _, _) = GetTestInstallers(_parseResult, installedWorkloads: mockWorkloadIds, failingPack: "Xamarin.Android.Framework", installedFeatureBand: "6.0.100");
+
 
             var exceptionThrown = Assert.Throws<GracefulException>(() => command.Execute());
             exceptionThrown.Message.Should().Contain("Failing pack: Xamarin.Android.Framework");
@@ -220,7 +221,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android") };
             var cachePath = Path.Combine(_testAssetsManager.CreateTestDirectory(identifier: "cachePath").Path, "mockCachePath");
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--download-to-cache", cachePath });
-            (_, var command, var installer, _, var manifestUpdater, var packageDownloader) = GetTestInstallers(parseResult, installedWorkloads: mockWorkloadIds, includeInstalledPacks: true);
+            (_, var command, var installer, _, var manifestUpdater, var packageDownloader) = GetTestInstallers(parseResult, installedWorkloads: mockWorkloadIds, includeInstalledPacks: true, installedFeatureBand: "6.0.100");
 
             command.Execute();
 
@@ -241,7 +242,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android") };
             var cachePath = "mockCachePath";
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--from-cache", cachePath });
-            (_, var command, var installer, _, _, var nugetDownloader) = GetTestInstallers(parseResult, installedWorkloads: mockWorkloadIds);
+            (_, var command, var installer, _, _, var nugetDownloader) = GetTestInstallers(parseResult, installedWorkloads: mockWorkloadIds, installedFeatureBand: "6.0.100");
 
             command.Execute();
 
@@ -257,7 +258,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         {
             var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android") };
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--print-download-link-only" });
-            (_, var command, _, _, _, _) = GetTestInstallers(parseResult, installedWorkloads: mockWorkloadIds, includeInstalledPacks: true);
+            (_, var command, _, _, _, _) = GetTestInstallers(parseResult, installedWorkloads: mockWorkloadIds, includeInstalledPacks: true, installedFeatureBand: "6.0.100");
 
             command.Execute();
 
@@ -283,7 +284,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                 WorkloadFileBasedInstall.SetUserLocal(dotnetRoot, sdkFeatureVersion);
             }
 
-            var exceptionThrown = Assert.Throws<GracefulException>(() => new WorkloadUpdateCommand(updateParseResult, reporter: _reporter, dotnetDir: dotnetRoot, userProfileDir: userProfileDir));
+            var exceptionThrown = Assert.Throws<GracefulException>(() => new WorkloadUpdateCommand(updateParseResult, reporter: _reporter, dotnetDir: dotnetRoot, userProfileDir: userProfileDir, installedFeatureBand: "6.0.400"));
             exceptionThrown.Message.Should().Contain("No manifests exist");
         }
 
@@ -316,7 +317,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
 }
 ");
 
-            var exceptionThrown = Assert.Throws<GracefulException>(() => new WorkloadUpdateCommand(updateParseResult, reporter: _reporter, dotnetDir: dotnetRoot, userProfileDir: userProfileDir));
+            var exceptionThrown = Assert.Throws<GracefulException>(() => new WorkloadUpdateCommand(updateParseResult, reporter: _reporter, dotnetDir: dotnetRoot, userProfileDir: userProfileDir, installedFeatureBand: sdkFeatureVersion));
             exceptionThrown.Message.Should().Contain(string.Format(Workloads.Workload.Install.LocalizableStrings.IncompatibleManifests, "7.0.100"));
         }
 
@@ -324,7 +325,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         public void GivenOnlyUpdateAdManifestItSucceeds()
         {
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--advertising-manifests-only" });
-            (_, var command, _, _, var manifestUpdater, _) = GetTestInstallers(parseResult);
+            (_, var command, _, _, var manifestUpdater, _) = GetTestInstallers(parseResult, installedFeatureBand: "6.0.100");
 
             command.Execute();
             manifestUpdater.UpdateAdvertisingManifestsCallCount.Should().Be(1);
@@ -334,7 +335,8 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         public void GivenPrintRollbackDefinitionItIncludesAllInstalledManifests()
         {
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--print-rollback" });
-            (_, var updateCommand, _, _, _, _) = GetTestInstallers(parseResult);
+            (_, var updateCommand, _, _, _, _) = GetTestInstallers(parseResult, installedFeatureBand: "6.0.100");
+
 
             updateCommand.Execute();
             _reporter.Lines.Count().Should().Be(3);
@@ -361,7 +363,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                             null),
                     };
 
-            (_, var updateCommand, var packInstaller, var workloadResolver, var workloadManifestUpdater, var nuGetPackageDownloader) = GetTestInstallers(parseResult, manifestUpdates: manifestsToUpdate, sdkVersion: "6.0.300", identifier: existingSdkFeatureBand + newSdkFeatureBand);
+            (_, var updateCommand, var packInstaller, var workloadResolver, var workloadManifestUpdater, var nuGetPackageDownloader) = GetTestInstallers(parseResult, manifestUpdates: manifestsToUpdate, sdkVersion: "6.0.300", identifier: existingSdkFeatureBand + newSdkFeatureBand, installedFeatureBand: existingSdkFeatureBand);
 
             updateCommand.UpdateWorkloads();
 
@@ -390,7 +392,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                             null),
                     };
 
-            (_, var updateCommand, var packInstaller, var workloadResolver, var workloadManifestUpdater, var nuGetPackageDownloader) = GetTestInstallers(parseResult, manifestUpdates: manifestsToUpdate, sdkVersion: "6.0.300");
+            (_, var updateCommand, var packInstaller, var workloadResolver, var workloadManifestUpdater, var nuGetPackageDownloader) = GetTestInstallers(parseResult, manifestUpdates: manifestsToUpdate, sdkVersion: "6.0.300", installedFeatureBand: "6.0.300");
 
             updateCommand.UpdateWorkloads();
 
@@ -423,7 +425,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             
             var updateParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--from-rollback-file", rollbackFilePath });
             
-            var updateCommand = new WorkloadUpdateCommand(updateParseResult, reporter: _reporter, userProfileDir: userProfileDir, dotnetDir: dotnetRoot, version: sdkFeatureVersion, tempDirPath: testDirectory);
+            var updateCommand = new WorkloadUpdateCommand(updateParseResult, reporter: _reporter, userProfileDir: userProfileDir, dotnetDir: dotnetRoot, version: sdkFeatureVersion, tempDirPath: testDirectory, installedFeatureBand: sdkFeatureVersion);
 
             var exception = Assert.Throws<GracefulException>(() => updateCommand.Execute());
             exception.InnerException.Should().BeOfType<FormatException>();
@@ -439,7 +441,8 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             IList<WorkloadId> installedWorkloads = null,
             bool includeInstalledPacks = false,
             string sdkVersion = "6.0.100",
-            string identifier = null)
+            string identifier = null,
+            string installedFeatureBand = null)
         {
             _reporter.Clear();
             var testDirectory = _testAssetsManager.CreateTestDirectory(testName: testName, identifier).Path;
@@ -464,7 +467,8 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                 workloadManifestUpdater: manifestUpdater,
                 dotnetDir: dotnetRoot,
                 userProfileDir: testDirectory,
-                version: sdkVersion);
+                version: sdkVersion,
+                installedFeatureBand: installedFeatureBand);
 
             return (testDirectory, installManager, installer, workloadResolver, manifestUpdater, nugetDownloader);
         }

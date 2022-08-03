@@ -11,6 +11,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project>
   <PropertyGroup>
+    <ApiCompatValidatePackageSemaphoreFile>$(IntermediateOutputPath)$(MSBuildThisFileName).semaphore</ApiCompatValidatePackageSemaphoreFile>
     <!-- Add any custom targets that need to run before package validation to the following property. -->
     <RunPackageValidationDependsOn>CollectApiCompatInputs;_GetReferencePathFromInnerProjects;$(RunPackageValidationDependsOn)</RunPackageValidationDependsOn>
   </PropertyGroup>
@@ -18,6 +19,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="RunPackageValidation"
           DependsOnTargets="$(RunPackageValidationDependsOn)"
           AfterTargets="Pack"
+          Inputs="@(NuGetPackInput);$(CompatibilitySuppressionFilePath)"
+          Outputs="$(ApiCompatValidatePackageSemaphoreFile)"
           Condition="'$(EnablePackageValidation)' == 'true' and '$(IsPackable)' == 'true'">
     <PropertyGroup>
       <PackageValidationBaselineName Condition="'$(PackageValidationBaselineName)' == ''">$(PackageId)</PackageValidationBaselineName>
@@ -33,11 +36,14 @@ Copyright (c) .NET Foundation. All rights reserved.
       RunApiCompat="$(RunApiCompat)"
       EnableStrictModeForCompatibleTfms="$([MSBuild]::ValueOrDefault('$(EnableStrictModeForCompatibleTfms)', 'true'))"
       EnableStrictModeForCompatibleFrameworksInPackage="$(EnableStrictModeForCompatibleFrameworksInPackage)"
+      EnableStrictModeForBaselineValidation="$(EnableStrictModeForBaselineValidation)"
       GenerateCompatibilitySuppressionFile="$(GenerateCompatibilitySuppressionFile)"
       CompatibilitySuppressionFilePath="$(CompatibilitySuppressionFilePath)"
       BaselinePackageTargetPath="$(_packageValidationBaselinePath)"
       RoslynAssembliesPath="$(RoslynAssembliesPath)"
       PackageAssemblyReferences="@(PackageValidationReferencePath)" />
+
+      <Touch Files="$(ApiCompatValidatePackageSemaphoreFile)" AlwaysCreate="true" />
   </Target>
 
   <Target Name="_GetReferencePathForPackageValidation"
