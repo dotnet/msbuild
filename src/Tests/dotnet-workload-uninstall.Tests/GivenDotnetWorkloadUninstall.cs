@@ -181,7 +181,7 @@ namespace Microsoft.DotNet.Cli.Workload.Uninstall.Tests
             var manifestUpdater = new MockWorkloadManifestUpdater();
             var installParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", installingWorkload });
             var installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: nugetDownloader,
-                workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
+                workloadManifestUpdater: manifestUpdater, userProfileDir: userProfileDir, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory, installedFeatureBand: sdkFeatureVersion);
             installCommand.Execute();
         }
 

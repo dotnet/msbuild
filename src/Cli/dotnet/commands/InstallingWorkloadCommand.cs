@@ -34,8 +34,10 @@ namespace Microsoft.DotNet.Workloads.Workload
         protected readonly string _downloadToCacheOption;
         protected readonly string _dotnetPath;
         protected readonly string _userProfileDir;
+        protected readonly bool _checkIfManifestExist;
         protected readonly ReleaseVersion _sdkVersion;
         protected readonly SdkFeatureBand _sdkFeatureBand;
+        protected readonly SdkFeatureBand _installedFeatureBand;
         protected readonly string _fromRollbackDefinition;
         protected readonly PackageSourceLocation _packageSourceLocation;
         protected IWorkloadResolver _workloadResolver;
@@ -54,7 +56,8 @@ namespace Microsoft.DotNet.Workloads.Workload
             string dotnetDir,
             string userProfileDir,
             string tempDirPath,
-            string version)
+            string version,
+            string installedFeatureBand = null)
             : base(parseResult, reporter: reporter, tempDirPath: tempDirPath, nugetPackageDownloader: nugetPackageDownloader)
         {
             _printDownloadLinkOnly = parseResult.GetValueForOption(InstallingWorkloadCommandParser.PrintDownloadLinkOnlyOption);
@@ -63,15 +66,21 @@ namespace Microsoft.DotNet.Workloads.Workload
             _downloadToCacheOption = parseResult.GetValueForOption(InstallingWorkloadCommandParser.DownloadToCacheOption);
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(InstallingWorkloadCommandParser.VersionOption), version, _dotnetPath, _userProfileDir);
+            _checkIfManifestExist = !(_printDownloadLinkOnly);      // don't check for manifest existence when print download link is passed
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(InstallingWorkloadCommandParser.VersionOption), version, _dotnetPath, _userProfileDir, _checkIfManifestExist);
             _sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
+
+            _installedFeatureBand = installedFeatureBand == null ? new SdkFeatureBand(DotnetFiles.VersionFileObject.BuildNumber) : new SdkFeatureBand(installedFeatureBand);
+
             _fromRollbackDefinition = parseResult.GetValueForOption(InstallingWorkloadCommandParser.FromRollbackFileOption);
             var configOption = parseResult.GetValueForOption(InstallingWorkloadCommandParser.ConfigOption);
             var sourceOption = parseResult.GetValueForOption(InstallingWorkloadCommandParser.SourceOption);
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides: sourceOption);
-            var sdkWorkloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString(), userProfileDir);
+                       
+            var sdkWorkloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _installedFeatureBand.ToString(), userProfileDir);
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(sdkWorkloadManifestProvider, _dotnetPath, _sdkVersion.ToString(), _userProfileDir);
+
             _workloadInstallerFromConstructor = workloadInstaller;
             _workloadManifestUpdaterFromConstructor = workloadManifestUpdater;
         }
@@ -121,6 +130,7 @@ namespace Microsoft.DotNet.Workloads.Workload
 
                     //  Use updated, extracted manifests to resolve packs
                     var overlayProvider = new TempDirectoryWorkloadManifestProvider(extractedManifestsPath, _sdkVersion.ToString());
+
                     var newResolver = _workloadResolver.CreateOverlayResolver(overlayProvider);
                     _workloadInstaller.ReplaceWorkloadResolver(newResolver);
                 }
@@ -153,11 +163,11 @@ namespace Microsoft.DotNet.Workloads.Workload
 
         protected IEnumerable<WorkloadId> GetInstalledWorkloads(bool fromPreviousSdk)
         {
-            var currentFeatureBand = new SdkFeatureBand(_sdkVersion);
+            //var currentFeatureBand = new SdkFeatureBand(_installedFeatureBand.ToString());
             if (fromPreviousSdk)
             {
                 var priorFeatureBands = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetFeatureBandsWithInstallationRecords()
-                    .Where(featureBand => featureBand.CompareTo(currentFeatureBand) < 0);
+                    .Where(featureBand => featureBand.CompareTo(_installedFeatureBand) < 0);
                 if (priorFeatureBands.Any())
                 {
                     var maxPriorFeatureBand = priorFeatureBands.Max();
@@ -167,7 +177,7 @@ namespace Microsoft.DotNet.Workloads.Workload
             }
             else
             {
-                var workloads = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(currentFeatureBand);
+                var workloads = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(_installedFeatureBand);
 
                 return workloads ?? Enumerable.Empty<WorkloadId>();
             }

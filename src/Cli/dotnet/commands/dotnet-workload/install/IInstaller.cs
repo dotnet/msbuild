@@ -66,5 +66,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             NuGetPackageId = nuGetPackageId;
             NuGetPackageVersion = nuGetPackageVersion;
         }
+
     }
 }
