@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Watcher.Tools;
 using Microsoft.Extensions.Tools.Internal;
+using Microsoft.NET.Build.Tasks;
 using IReporter = Microsoft.Extensions.Tools.Internal.IReporter;
 
 namespace Microsoft.DotNet.Watcher.Internal
@@ -63,7 +64,7 @@ namespace Microsoft.DotNet.Watcher.Internal
 
         public async Task<FileSet> CreateAsync(CancellationToken cancellationToken)
         {
-            var watchList = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var watchList = FileUtilities.CreateTempFile(FileUtilities.CreateTempPath(), ".txt");
             try
             {
                 var projectDir = Path.GetDirectoryName(_projectFile);
