@@ -63,7 +63,7 @@ namespace Microsoft.Build.Tasks
                 try
                 {
                     // GetCultureInfo throws if the culture doesn't exist
-                    CultureInfo.GetCultureInfo(name, true);
+                    CultureInfo.GetCultureInfo(name, predefinedOnly: true);
                     return true;
                 }
                 catch
