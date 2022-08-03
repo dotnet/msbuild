@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli
         {
             var telemetry = new ThreadBlockingTelemetry();
             ProcessInputAndSendTelemetry(parseResult, telemetry);
-
+            telemetry.Dispose();
             return 0;
         }
 
@@ -55,6 +55,11 @@ namespace Microsoft.DotNet.Cli
 
             public void Flush()
             {
+            }
+
+            public void Dispose()
+            {
+                telemetry.Dispose();
             }
 
             public void TrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)
