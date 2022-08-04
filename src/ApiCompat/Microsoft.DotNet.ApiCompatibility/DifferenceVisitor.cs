@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
-using Microsoft.DotNet.ApiCompatibility.Extensions;
 using System;
 using System.Collections.Generic;
 
@@ -40,11 +39,6 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// <param name="assembly">The mapper to visit.</param>
         public override void Visit(AssemblyMapper assembly)
         {
-            if (assembly == null)
-            {
-                throw new ArgumentNullException(nameof(assembly));
-            }
-
             AddDifferences(assembly);
             base.Visit(assembly);
             // After visiting the assembly, the assembly mapper will contain any assembly load errors that happened
@@ -58,11 +52,6 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// <param name="type">The mapper to visit.</param>
         public override void Visit(TypeMapper type)
         {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
             AddDifferences(type);
 
             if (type.ShouldDiffMembers)
@@ -77,11 +66,6 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// <param name="member">The mapper to visit.</param>
         public override void Visit(MemberMapper member)
         {
-            if (member == null)
-            {
-                throw new ArgumentNullException(nameof(member));
-            }
-
             AddDifferences(member);
         }
 
@@ -114,7 +98,10 @@ namespace Microsoft.DotNet.ApiCompatibility
 
             for (int i = 0; i < diagnosticsToAdd.Count; i++)
             {
-                _diagnostics[i].AddRange(diagnosticsToAdd[i]);
+                foreach (CompatDifference item in diagnosticsToAdd[i])
+                {
+                    _diagnostics[i].Add(item);
+                }
             }
         }
     }

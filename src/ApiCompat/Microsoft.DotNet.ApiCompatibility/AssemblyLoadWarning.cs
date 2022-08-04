@@ -1,8 +1,9 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using System;
+using System.Collections.Generic;
+using Microsoft.DotNet.ApiCompatibility.Abstractions;
 
 namespace Microsoft.DotNet.ApiCompatibility
 {
@@ -12,6 +13,15 @@ namespace Microsoft.DotNet.ApiCompatibility
     public class AssemblyLoadWarning : IDiagnostic, IEquatable<AssemblyLoadWarning>
     {
         private readonly StringComparer _ordinalComparer = StringComparer.Ordinal;
+
+        /// <inheritdoc/>
+        public string DiagnosticId { get; }
+
+        /// <inheritdoc/>
+        public string ReferenceId { get; }
+
+        /// <inheritdoc/>
+        public string Message { get; }
 
         /// <summary>
         /// Creates a new instance of an <see cref="AssemblyLoadWarning"/> class with a given <paramref name="diagnosticId"/>,
@@ -28,17 +38,23 @@ namespace Microsoft.DotNet.ApiCompatibility
         }
 
         /// <inheritdoc/>
-        public string DiagnosticId { get; }
+        public bool Equals(AssemblyLoadWarning? other) => other != null &&
+            _ordinalComparer.Equals(DiagnosticId, other.DiagnosticId) &&
+            _ordinalComparer.Equals(ReferenceId, other.ReferenceId) &&
+            _ordinalComparer.Equals(Message, other.Message);
 
-        /// <inheritdoc/>
-        public string ReferenceId { get; }
+        /// <inheritdoc />
+        public override bool Equals(object? obj) =>
+            obj is AssemblyLoadWarning assemblyLoadWarning && Equals(assemblyLoadWarning);
 
-        /// <inheritdoc/>
-        public string Message { get; }
-
-        /// <inheritdoc/>
-        public bool Equals(AssemblyLoadWarning other) => _ordinalComparer.Equals(DiagnosticId, other.DiagnosticId) &&
-                                                         _ordinalComparer.Equals(ReferenceId, other.ReferenceId) &&
-                                                         _ordinalComparer.Equals(Message, other.Message);
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            int hashCode = 1447485498;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(DiagnosticId);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ReferenceId);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Message);
+            return hashCode;
+        }
     }
 }

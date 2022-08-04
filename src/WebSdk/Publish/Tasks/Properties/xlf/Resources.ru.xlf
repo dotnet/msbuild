@@ -1165,7 +1165,7 @@ Error details:</source>
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_FailedDeploy">
         <source>The attempt to publish the ZIP file through '{0}' failed with HTTP status code '{1}'.</source>
-        <target state="new">The attempt to publish the ZIP file through '{0}' failed with HTTP status code '{1}'.</target>
+        <target state="needs-review-translation">Попытка публикации ZIP-файла по адресу "{0}" завершилась сбоем с кодом состояния HTTP "{1}".</target>
         <note>{0} - URL to deploy zip, {1} - HTTP response code</note>
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_FailedDeployWithLogs">

@@ -10,11 +10,10 @@ namespace Microsoft.DotNet.ApiCompatibility
 {
     internal class DefaultSymbolsEqualityComparer : IEqualityComparer<ISymbol>
     {
-        public bool Equals(ISymbol x, ISymbol y) =>
-            string.Equals(GetKey(x), GetKey(y), StringComparison.OrdinalIgnoreCase);
+        public bool Equals(ISymbol? x, ISymbol? y) =>
+            string.Equals(x != null ? GetKey(x) : null, y != null ? GetKey(y) : null, StringComparison.OrdinalIgnoreCase);
 
-        public int GetHashCode(ISymbol obj) =>
-            GetKey(obj).GetHashCode();
+        public int GetHashCode(ISymbol obj) => GetKey(obj).GetHashCode();
 
         private static string GetKey(ISymbol symbol)
         {

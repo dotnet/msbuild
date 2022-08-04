@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// </summary>
         /// <param name="path">The full path to the assembly.</param>
         /// <returns><see cref="IAssemblySymbol"/> representing the loaded assembly.</returns>
-        IAssemblySymbol LoadAssembly(string path);
+        IAssemblySymbol? LoadAssembly(string path);
 
         /// <summary>
         /// Loads an assembly using the provided name from a given <see cref="Stream"/>.
@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// <param name="stream">The stream to read the metadata from.</param>
         /// <returns><see cref="IAssemblySymbol"/> respresenting the given <paramref name="stream"/>. If an 
         /// assembly with the same <paramref name="name"/> was already loaded, the previously loaded assembly is returned.</returns>
-        IAssemblySymbol LoadAssembly(string name, Stream stream);
+        IAssemblySymbol? LoadAssembly(string name, Stream stream);
 
         /// <summary>
         /// Loads an <see cref="IAssemblySymbol"/> containing the metadata from the provided source files and given assembly name.

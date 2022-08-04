@@ -1,14 +1,14 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Microsoft.DotNet.ApiCompatibility
 {
@@ -60,7 +60,13 @@ namespace Microsoft.DotNet.ApiCompatibility
                 {
                     string assemblyName = Path.GetFileName(path);
                     if (!_referencePaths.ContainsKey(assemblyName))
-                        _referencePaths.Add(assemblyName, Path.GetDirectoryName(path));
+                    {
+                        string? directoryName = Path.GetDirectoryName(path);
+                        if (directoryName != null)
+                        {
+                            _referencePaths.Add(assemblyName, directoryName);
+                        }
+                    }
                 }
             }
         }
@@ -73,7 +79,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         }
 
         private static string[] SplitPaths(string paths) =>
-            paths == null ? null : paths.Split(new char[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+            paths.Split(new char[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
 
         /// <inheritdoc />
         public bool HasLoadWarnings(out IEnumerable<AssemblyLoadWarning> warnings)
@@ -88,17 +94,12 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// <inheritdoc />
         public IEnumerable<IAssemblySymbol> LoadAssemblies(IEnumerable<string> paths)
         {
-            if (paths == null)
-            {
-                throw new ArgumentNullException(nameof(paths));
-            }
-
             IEnumerable<MetadataReference> assembliesToReturn = LoadFromPaths(paths);
 
             List<IAssemblySymbol> result = new();
             foreach (MetadataReference metadataReference in assembliesToReturn)
             {
-                ISymbol symbol = _cSharpCompilation.GetAssemblyOrModuleSymbol(metadataReference);
+                ISymbol? symbol = _cSharpCompilation.GetAssemblyOrModuleSymbol(metadataReference);
                 if (symbol is IAssemblySymbol assemblySymbol)
                 {
                     result.Add(assemblySymbol);
@@ -109,47 +110,32 @@ namespace Microsoft.DotNet.ApiCompatibility
         }
 
         /// <inheritdoc />
-        public IAssemblySymbol LoadAssembly(string path)
+        public IAssemblySymbol? LoadAssembly(string path)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
-
             MetadataReference metadataReference = CreateOrGetMetadataReferenceFromPath(path);
-            return (IAssemblySymbol)_cSharpCompilation.GetAssemblyOrModuleSymbol(metadataReference);
+            return _cSharpCompilation.GetAssemblyOrModuleSymbol(metadataReference) as IAssemblySymbol;
         }
 
         /// <inheritdoc />
-        public IAssemblySymbol LoadAssembly(string name, Stream stream)
+        public IAssemblySymbol? LoadAssembly(string name, Stream stream)
         {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            if (stream == null)
-            {
-                throw new ArgumentNullException(nameof(stream));
-            }
-
             if (stream.Position >= stream.Length)
             {
                 throw new ArgumentException(Resources.StreamPositionGreaterThanLength, nameof(stream));
             }
 
-            if (!_loadedAssemblies.TryGetValue(name, out MetadataReference metadataReference))
+            if (!_loadedAssemblies.TryGetValue(name, out MetadataReference? metadataReference))
             {
                 metadataReference = CreateAndAddReferenceToCompilation(name, stream);
             }
 
-            return (IAssemblySymbol)_cSharpCompilation.GetAssemblyOrModuleSymbol(metadataReference);
+            return _cSharpCompilation.GetAssemblyOrModuleSymbol(metadataReference) as IAssemblySymbol;
         }
 
         /// <inheritdoc />
-        public IAssemblySymbol LoadAssemblyFromSourceFiles(IEnumerable<string> filePaths, string assemblyName, IEnumerable<string> referencePaths)
+        public IAssemblySymbol LoadAssemblyFromSourceFiles(IEnumerable<string> filePaths, string? assemblyName, IEnumerable<string> referencePaths)
         {
-            if (filePaths == null || filePaths.Count() == 0)
+            if (!filePaths.Any())
             {
                 throw new ArgumentNullException(nameof(filePaths), Resources.ShouldNotBeNullAndContainAtLeastOneElement);
             }
@@ -181,16 +167,6 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// <inheritdoc />
         public IEnumerable<IAssemblySymbol> LoadMatchingAssemblies(IEnumerable<IAssemblySymbol> fromAssemblies, IEnumerable<string> searchPaths, bool validateMatchingIdentity = true, bool warnOnMissingAssemblies = true)
         {
-            if (fromAssemblies == null)
-            {
-                throw new ArgumentNullException(nameof(fromAssemblies));
-            }
-
-            if (searchPaths == null)
-            {
-                throw new ArgumentNullException(nameof(searchPaths));
-            }
-
             List<IAssemblySymbol> matchingAssemblies = new();
             foreach (IAssemblySymbol assembly in fromAssemblies)
             {
@@ -207,7 +183,7 @@ namespace Microsoft.DotNet.ApiCompatibility
                     if (File.Exists(possiblePath))
                     {
                         MetadataReference reference = CreateOrGetMetadataReferenceFromPath(possiblePath);
-                        ISymbol symbol = _cSharpCompilation.GetAssemblyOrModuleSymbol(reference);
+                        ISymbol? symbol = _cSharpCompilation.GetAssemblyOrModuleSymbol(reference);
                         if (symbol is IAssemblySymbol matchingAssembly)
                         {
                             if (validateMatchingIdentity && !matchingAssembly.Identity.Equals(assembly.Identity))
@@ -240,7 +216,7 @@ namespace Microsoft.DotNet.ApiCompatibility
             foreach (string path in paths)
             {
                 string resolvedPath = Environment.ExpandEnvironmentVariables(path);
-                string directory = null;
+                string? directory = null;
                 if (Directory.Exists(resolvedPath))
                 {
                     directory = resolvedPath;
@@ -275,7 +251,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         {
             // Roslyn doesn't support having two assemblies as references with the same identity and then getting the symbol for it.
             string name = Path.GetFileName(path);
-            if (!_loadedAssemblies.TryGetValue(name, out MetadataReference metadataReference))
+            if (!_loadedAssemblies.TryGetValue(name, out MetadataReference? metadataReference))
             {
                 using FileStream stream = File.OpenRead(path);
                 metadataReference = CreateAndAddReferenceToCompilation(name, stream);
@@ -306,7 +282,6 @@ namespace Microsoft.DotNet.ApiCompatibility
                 ResolveReferences(reader);
             }
 
-
             return metadataReference;
         }
 
@@ -322,7 +297,7 @@ namespace Microsoft.DotNet.ApiCompatibility
                 {
                     // First we try to see if a reference path for this specific assembly was passed in directly, and if so
                     // we use that.
-                    if (_referencePaths.TryGetValue(name, out string fullReferencePath))
+                    if (_referencePaths.TryGetValue(name, out string? fullReferencePath))
                     {
                         using FileStream resolvedStream = File.OpenRead(Path.Combine(fullReferencePath, name));
                         CreateAndAddReferenceToCompilation(name, resolvedStream);
@@ -332,7 +307,7 @@ namespace Microsoft.DotNet.ApiCompatibility
                     // rest of the reference paths are located to see if we can find the dependency there.
                     else
                     {
-                        foreach (var referencePath in _referencePaths)
+                        foreach (KeyValuePair<string, string> referencePath in _referencePaths)
                         {
                             string potentialPath = Path.Combine(referencePath.Value, name);
                             if (File.Exists(potentialPath))
