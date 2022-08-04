@@ -220,11 +220,14 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Testing that certain aliases are considered valid cultures.
+        /// Testing that certain aliases are considered valid cultures. Regression test for https://github.com/dotnet/msbuild/issues/3897.
         /// </summary>
         /// <param name="culture"></param>
         [Theory]
         [InlineData("zh-TW")]
+        [InlineData("zh-MO")]
+        [InlineData("sh-BA")]
+        [InlineData("shi-MA")]
         public void SupportAliasedCultures(string culture)
         {
             AssignCulture t = new AssignCulture();
