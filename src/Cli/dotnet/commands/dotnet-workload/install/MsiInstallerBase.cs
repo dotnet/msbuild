@@ -392,6 +392,17 @@ namespace Microsoft.DotNet.Installer.Windows
         }
 
         /// <summary>
+        /// Creates the log filename to use when performing an admin install on an MSI.
+        /// </summary>
+        /// <param name="msiPath">The full path to the MSI</param>
+        /// <returns>The full path of the log file</returns>
+        protected string GetMsiLogNameForAdminInstall(string msiPath)
+        {
+            return Path.Combine(Path.GetDirectoryName(Log.LogPath),
+                Path.GetFileNameWithoutExtension(Log.LogPath) + $"_{Path.GetFileNameWithoutExtension(msiPath)}_AdminInstall.log");
+        }
+
+        /// <summary>
         /// Creates the log filename to use when executing an MSI. The name is based on the primary log, workload pack record and <see cref="InstallAction"/>.
         /// </summary>
         /// <param name="record">The workload record to use when generating the log name.</param>
