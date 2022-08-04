@@ -218,5 +218,26 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal($"MyResource.{culture}.resx", t.AssignedFiles[0].ItemSpec);
             Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
         }
+
+        /// <summary>
+        /// Testing that certain aliases are considered valid cultures.
+        /// </summary>
+        /// <param name="culture"></param>
+        [Theory]
+        [InlineData("zh-TW")]
+        public void SupportAliasedCultures(string culture)
+        {
+            AssignCulture t = new AssignCulture();
+            t.BuildEngine = new MockEngine();
+            ITaskItem i = new TaskItem($"MyResource.{culture}.resx");
+            t.Files = new ITaskItem[] { i };
+            t.Execute();
+
+            Assert.Single(t.AssignedFiles);
+            Assert.Single(t.CultureNeutralAssignedFiles);
+            Assert.Equal(culture, t.AssignedFiles[0].GetMetadata("Culture"));
+            Assert.Equal($"MyResource.{culture}.resx", t.AssignedFiles[0].ItemSpec);
+            Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
+        }
     }
 }
