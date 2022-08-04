@@ -7,6 +7,11 @@
         <target state="translated">global.json tarafından belirtilen .NET SDK bulunamıyor, lütfen belirtilen sürümün yüklü olduğundan emin olun.</target>
         <note />
       </trans-unit>
+      <trans-unit id="GlobalJsonResolutionFailedSpecificVersion">
+        <source>Unable to locate the .NET SDK version '{0}' as specified by global.json, please check that the specified version is installed.</source>
+        <target state="translated">global.json tarafından belirtilen .NET SDK sürüm '{0}' bulunamıyor, lütfen belirtilen sürümün yüklü olduğundan emin olun.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MSBuildSDKDirectoryNotFound">
         <source>{0} not found. Check that a recent enough .NET SDK is installed and/or increase the version specified in global.json.</source>
         <target state="translated">{0} bulunamadı. Yeterince yeni bir .NET SDK'nın yüklü olduğundan emin olun ve/veya global.json içinde belirtilen sürümü artırın.</target>
@@ -28,8 +33,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UnableToLocateNETCoreSdk">
-        <source>Unable to locate the .NET SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.</source>
-        <target state="needs-review-translation">.NET SDK bulunamadı. Yüklü olduğundan, PATH’inizin doğru mimari için yapılandırıldığından ve (varsa) global.json içinde belirtilen sürümün yüklü sürümle eşleştiğinden emin olun.</target>
+        <source>Unable to locate the .NET SDK. Check that it is installed, your PATH is configured for the correct architecture, and that the version specified in global.json (if any) matches the installed version.</source>
+        <target state="translated">.NET SDK bulunamadı. Yüklü olduğundan, PATH’inizin doğru mimari için yapılandırıldığından ve (varsa) global.json içinde belirtilen sürümün yüklü sürümle eşleştiğinden emin olun.</target>
         <note />
       </trans-unit>
     </body>

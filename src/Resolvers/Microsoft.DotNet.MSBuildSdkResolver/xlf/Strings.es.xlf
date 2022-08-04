@@ -7,6 +7,11 @@
         <target state="translated">No se encuentra el SDK de .NET tal y como se especifica en global.json; compruebe que la versión especificada esté instalada.</target>
         <note />
       </trans-unit>
+      <trans-unit id="GlobalJsonResolutionFailedSpecificVersion">
+        <source>Unable to locate the .NET SDK version '{0}' as specified by global.json, please check that the specified version is installed.</source>
+        <target state="translated">No se encuentra la versión del SDK de .NET "{0}" tal como se especifica en global.json. Compruebe que la versión especificada está instalada.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MSBuildSDKDirectoryNotFound">
         <source>{0} not found. Check that a recent enough .NET SDK is installed and/or increase the version specified in global.json.</source>
         <target state="translated">No se encuentra {0}. Compruebe que hay un SDK de .NET suficientemente reciente instalado o aumente la versión especificada en global.json.</target>
@@ -28,8 +33,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UnableToLocateNETCoreSdk">
-        <source>Unable to locate the .NET SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.</source>
-        <target state="needs-review-translation">No se encuentra el SDK de .NET. Compruebe que está instalado, que su RUTA DE ACCESO está configurada para la arquitectura correcta y que la versión especificada en global.json (si la hubiera) coincide con la versión instalada.</target>
+        <source>Unable to locate the .NET SDK. Check that it is installed, your PATH is configured for the correct architecture, and that the version specified in global.json (if any) matches the installed version.</source>
+        <target state="translated">No se encuentra el SDK de .NET. Compruebe que está instalado, que su RUTA DE ACCESO está configurada para la arquitectura correcta y que la versión especificada en global.json (si la hubiera) coincide con la versión instalada.</target>
         <note />
       </trans-unit>
     </body>

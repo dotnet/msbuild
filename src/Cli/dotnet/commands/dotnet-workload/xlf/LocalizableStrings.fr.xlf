@@ -17,6 +17,11 @@
         <target state="translated">Commande d'installation .NET</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoWorkloadsInstalledInfoWarning">
+        <source>There are no installed workloads to display.</source>
+        <target state="translated">Il n'y a aucune charge de travail installée à afficher.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkipSignCheckInvalidOption">
         <source>Unable to bypass signature verification. The specified option conflicts with a global policy.</source>
         <target state="translated">Impossible de contourner la vérification de signature. L’option spécifiée est en conflit avec une stratégie globale.</target>
@@ -25,6 +30,31 @@
       <trans-unit id="WasmToolsDescription">
         <source>.NET WebAssembly build tools</source>
         <target state="translated">Outils de construction .NET WebAssembly</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadIdColumn">
+        <source>Installed Workload Id</source>
+        <target state="translated">ID de la charge de travail installée</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadInstallTypeColumn">
+        <source>Install Type</source>
+        <target state="translated">Type d'installation</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadManfiestVersionColumn">
+        <source>Manifest Version</source>
+        <target state="translated">Version de manifeste</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadManifestPathColumn">
+        <source>Manifest Path</source>
+        <target state="translated">Chemin d'accès au Manifeste</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadSourceColumn">
+        <source>Installation Source</source>
+        <target state="translated">Source de l’installation</target>
         <note />
       </trans-unit>
     </body>

@@ -37,6 +37,11 @@
         <target state="translated">V {0} se nenašel žádný projekt.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DisableBuildServersOptionDescription">
+        <source>Force the command to ignore any persistent build servers.</source>
+        <target state="translated">Vynuťte, aby příkaz ignoroval všechny trvalé buildovací servery.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="EnvironmentPathOSXBashManualInstructions">
         <source>Tools directory '{0}' is not currently on the PATH environment variable.
 If you are using bash, you can add it to your profile by running the following command:
