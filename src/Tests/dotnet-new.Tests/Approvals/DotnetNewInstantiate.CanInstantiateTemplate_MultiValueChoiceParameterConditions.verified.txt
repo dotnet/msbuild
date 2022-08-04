@@ -1,15 +1,15 @@
 ﻿
 // This file is generated for platfrom: MacOS, iOS
 
-	// NOT Quoted Windows
-		
-		
-	// NOT Windows
+    // NOT Quoted Windows
+        
+        
+    // NOT Windows
 
-	// Quoted MacOS
+    // Quoted MacOS
 
-	// MacOS
+    // MacOS
 
-	// Quoted iOS
+    // Quoted iOS
 
-	// iOS
+    // iOS

@@ -13,7 +13,7 @@
       "description": "The target framework for the project.",
       "datatype": "choice",
       "allowMultipleValues": true,
-	  "enableQuotelessLiterals": true,
+      "enableQuotelessLiterals": true,
       "choices": [
         {
           "choice": "Windows",
