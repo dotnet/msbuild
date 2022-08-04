@@ -7,29 +7,14 @@
         <target state="translated">Список доступных рабочих нагрузок.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WorkloadIdColumn">
-        <source>Installed Workload Ids</source>
-        <target state="new">Installed Workload Ids</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WorkloadListFooter">
         <source>Use `dotnet workload search` to find additional workloads to install.</source>
         <target state="translated">Используйте "Поиск рабочей нагрузки DotNet", чтобы найти дополнительные рабочие нагрузки для установки.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WorkloadManfiestVersionColumn">
-        <source>Manifest Version</source>
-        <target state="new">Manifest Version</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadSourceColumn">
-        <source>Installation Source</source>
-        <target state="new">Installation Source</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
-        <source>Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
-        <target state="needs-review-translation">Обновления доступны для следующих рабочих нагрузок: {0}. Чтобы получить последнюю версию, запустите обновление рабочей нагрузки DotNet.</target>
+        <source>Updates are available for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
+        <target state="translated">Обновления доступны для следующих рабочих нагрузок: {0}. Чтобы получить последнюю версию, запустите обновление рабочей нагрузки DotNet.</target>
         <note />
       </trans-unit>
     </body>
