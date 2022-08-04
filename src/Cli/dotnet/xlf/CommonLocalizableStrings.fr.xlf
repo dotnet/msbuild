@@ -167,7 +167,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="ResponseFileNotFound">
         <source>Response file '{0}' does not exist.</source>
-        <target state="new">Response file '{0}' does not exist.</target>
+        <target state="translated">Le fichier réponse '{0}' n’existe pas.</target>
         <note />
       </trans-unit>
       <trans-unit id="SelfContainAndNoSelfContainedConflict">
