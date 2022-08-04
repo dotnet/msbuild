@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// name for the left and right the user specified.
         /// This callback is called at the beginning of every <see cref="GetDifferences"/> overload.
         /// </summary>
-        Func<string, string[], ComparingSettings> GetComparingSettings { get; set; }
+        Func<string?, string[]?, ComparingSettings>? GetComparingSettings { get; set; }
 
         /// <summary>
         /// Get's the differences when comparing Left vs Right based on the settings at the moment this method is called.

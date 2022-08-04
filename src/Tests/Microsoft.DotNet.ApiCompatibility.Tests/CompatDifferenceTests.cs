@@ -59,13 +59,5 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             Assert.False(difference.Equals(differentMemberId));
             Assert.True(difference.Equals(differentMessage));
         }
-
-        [Fact]
-        public void ConstructorThrowsExpected()
-        {
-            Assert.Throws<ArgumentNullException>("diagnosticId", () => new CompatDifference(null, string.Empty, DifferenceType.Added, string.Empty));
-            Assert.Throws<ArgumentNullException>("message", () => new CompatDifference(string.Empty, null, DifferenceType.Added, string.Empty));
-            Assert.Throws<ArgumentNullException>("memberId", () => new CompatDifference(string.Empty, string.Empty, DifferenceType.Added, (ISymbol)null));
-        }
     }
 }

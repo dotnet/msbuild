@@ -17,6 +17,11 @@
         <target state="new">API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</target>
         <note />
       </trans-unit>
+      <trans-unit id="AssemblyLoadError">
+        <source>Could not load assembly symbols for '{0}'. Skipping the assembly.</source>
+        <target state="new">Could not load assembly symbols for '{0}'. Skipping the assembly.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AssemblyNameDoesNotExist">
         <source>Assembly with name '{0}' does not exist at {1}.</source>
         <target state="translated">名為 '{0}' 的組件不存在於 {1}。</target>

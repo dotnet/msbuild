@@ -1,8 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable enable
-
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.CodeAnalysis;
@@ -51,28 +50,45 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
                 List<ElementContainer<IAssemblySymbol>> leftContainerList = new();
                 foreach (MetadataInformation left in workItem.Lefts)
                 {
-                    IAssemblySymbol leftSymbols;
+                    IAssemblySymbol? leftAssemblySymbol;
                     using (Stream leftAssemblyStream = _metadataStreamProvider.GetStream(left))
                     {
-                        leftSymbols = GetAssemblySymbolFromStream(leftAssemblyStream, left, workItem.Options, out bool resolvedReferences);
+                        leftAssemblySymbol = GetAssemblySymbolFromStream(leftAssemblyStream, left, workItem.Options, out bool resolvedReferences);
                         runWithReferences &= resolvedReferences;
                     }
 
-                    leftContainerList.Add(new ElementContainer<IAssemblySymbol>(leftSymbols, left));
+                    if (leftAssemblySymbol == null)
+                    {
+                        _log.LogMessage(MessageImportance.High, string.Format(Resources.AssemblyLoadError, left.AssemblyId));
+                        continue;
+                    }
+
+                    leftContainerList.Add(new ElementContainer<IAssemblySymbol>(leftAssemblySymbol, left));
                 }
 
                 List<ElementContainer<IAssemblySymbol>> rightContainerList = new();
                 foreach (MetadataInformation right in workItem.Rights)
                 {
-                    IAssemblySymbol rightSymbols;
+                    IAssemblySymbol? rightAssemblySymbol;
                     using (Stream rightAssemblyStream = _metadataStreamProvider.GetStream(right))
                     {
-                        rightSymbols = GetAssemblySymbolFromStream(rightAssemblyStream, right, workItem.Options, out bool resolvedReferences);
+                        rightAssemblySymbol = GetAssemblySymbolFromStream(rightAssemblyStream, right, workItem.Options, out bool resolvedReferences);
                         runWithReferences &= resolvedReferences;
                     }
 
-                    rightContainerList.Add(new ElementContainer<IAssemblySymbol>(rightSymbols, right));
+                    if (rightAssemblySymbol == null)
+                    {
+                        _log.LogMessage(MessageImportance.High, string.Format(Resources.AssemblyLoadError, right.AssemblyId));
+                        continue;
+                    }
+
+                    rightContainerList.Add(new ElementContainer<IAssemblySymbol>(rightAssemblySymbol, right));
                 }
+
+                // There must at least be one left and one right element in the container.
+                // If assemblies symbols failed to load and nothing is to compare, skip this work item.
+                if (leftContainerList.Count == 0 || rightContainerList.Count == 0)
+                    continue;
 
                 // Create and configure the work item specific api comparer
                 IApiComparer apiComparer = _apiComparerFactory.Create();
@@ -111,8 +127,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
                                 Resources.ApiCompatibilityHeader,
                                 diff.Left.AssemblyId,
                                 diff.Right.AssemblyId,
-                                workItem.Options.IsBaselineComparison ? diff.Left.FullPath! : "left",
-                                workItem.Options.IsBaselineComparison ? diff.Right.FullPath! : "right");
+                                workItem.Options.IsBaselineComparison ? diff.Left.FullPath : "left",
+                                workItem.Options.IsBaselineComparison ? diff.Right.FullPath : "right");
                         }
 
                         _log.LogError(suppression,
@@ -124,15 +140,15 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
                         Resources.ApiCompatibilityFooter,
                         diff.Left.AssemblyId,
                         diff.Right.AssemblyId,
-                        workItem.Options.IsBaselineComparison ? diff.Left.FullPath! : "left",
-                        workItem.Options.IsBaselineComparison ? diff.Right.FullPath! : "right");
+                        workItem.Options.IsBaselineComparison ? diff.Left.FullPath : "left",
+                        workItem.Options.IsBaselineComparison ? diff.Right.FullPath : "right");
                 }
             }
 
             _workItems.Clear();
         }
 
-        private IAssemblySymbol GetAssemblySymbolFromStream(Stream assemblyStream, MetadataInformation assemblyInformation, ApiCompatRunnerOptions options, out bool resolvedReferences)
+        private IAssemblySymbol? GetAssemblySymbolFromStream(Stream assemblyStream, MetadataInformation assemblyInformation, ApiCompatRunnerOptions options, out bool resolvedReferences)
         {
             resolvedReferences = false;
 

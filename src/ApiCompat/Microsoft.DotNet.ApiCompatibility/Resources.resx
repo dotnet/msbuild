@@ -228,4 +228,7 @@
   <data name="ApiCompatRunnerExecutingWorkItems" xml:space="preserve">
     <value>Executing {0} work item(s)...</value>
   </data>
+  <data name="AssemblyLoadError" xml:space="preserve">
+    <value>Could not load assembly symbols for '{0}'. Skipping the assembly.</value>
+  </data>
 </root>
