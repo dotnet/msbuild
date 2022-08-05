@@ -220,6 +220,8 @@ namespace Microsoft.Build.Execution
 
         private string _outputResultsCacheFile;
 
+        private bool _reportFileAccesses;
+
         /// <summary>
         /// Constructor for those who intend to set all properties themselves.
         /// </summary>
@@ -303,6 +305,7 @@ namespace Microsoft.Build.Execution
             _projectIsolationMode = other.ProjectIsolationMode;
             _inputResultsCacheFiles = other._inputResultsCacheFiles;
             _outputResultsCacheFile = other._outputResultsCacheFile;
+            _reportFileAccesses = other._reportFileAccesses;
             DiscardBuildResults = other.DiscardBuildResults;
             LowPriority = other.LowPriority;
             Question = other.Question;
@@ -802,6 +805,28 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether file accesses should be reported to any configured project cache plugins.
+        /// </summary>
+        public bool ReportFileAccesses
+        {
+            get => _reportFileAccesses;
+            set
+            {
+                _reportFileAccesses = value;
+
+                // TODO dfederm: What if either of these are set after ReportFileAccesses is? Do we need to move this elsewhere?
+                if (_reportFileAccesses)
+                {
+                    // To properly report file access, we need to disable the in-proc node which won't be detoured.
+                    DisableInProcNode = true;
+
+                    // Node reuse must be disabled as future builds will not be able to listen to events raised by detours.
+                    EnableNodeReuse = false;
+                }
+            }
+        }
+
+        /// <summary>
         /// Determines whether MSBuild will save the results of builds after EndBuild to speed up future builds.
         /// </summary>
         public bool DiscardBuildResults { get; set; } = false;
@@ -885,6 +910,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _interactive);
             translator.Translate(ref _question);
             translator.TranslateEnum(ref _projectIsolationMode, (int)_projectIsolationMode);
+            translator.Translate(ref _reportFileAccesses);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.

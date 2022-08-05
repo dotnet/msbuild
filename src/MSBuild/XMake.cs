@@ -1332,6 +1332,7 @@ namespace Microsoft.Build.CommandLine
                     parameters.InputResultsCacheFiles = inputResultsCaches;
                     parameters.OutputResultsCacheFile = outputResultsCache;
                     parameters.Question = question;
+                    parameters.ReportFileAccesses = reportFileAccesses;
 
                     // Propagate the profiler flag into the project load settings so the evaluator
                     // can pick it up
