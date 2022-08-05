@@ -109,7 +109,7 @@ namespace Microsoft.DotNet.Workloads.Workload
                         folderForManifestDownloads = tempPath.Value;
                     }
 
-                    var manifestDownloads = await _workloadManifestUpdater.GetManifestPackageDownloadsAsync(includePreview);
+                    var manifestDownloads = await _workloadManifestUpdater.GetManifestPackageDownloadsAsync(includePreview, new SdkFeatureBand(_sdkVersion), _installedFeatureBand);
 
                     if (!manifestDownloads.Any())
                     {

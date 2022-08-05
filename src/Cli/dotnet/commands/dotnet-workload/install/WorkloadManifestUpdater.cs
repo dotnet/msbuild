@@ -239,10 +239,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         }
 
 
-        public async Task<IEnumerable<WorkloadDownload>> GetManifestPackageDownloadsAsync(bool includePreviews)
+        public async Task<IEnumerable<WorkloadDownload>> GetManifestPackageDownloadsAsync(bool includePreviews, SdkFeatureBand origSdkFeatureBand, SdkFeatureBand installedSdkFeatureBand)
         {
             var packageIds = GetInstalledManifestIds()
-                .Select(manifestId => _workloadManifestInstaller.GetManifestPackageId(manifestId, _sdkFeatureBand));
+                .Select(manifestId => _workloadManifestInstaller.GetManifestPackageId(manifestId, origSdkFeatureBand));
 
             var downloads = new List<WorkloadDownload>();
             foreach (var manifest in _workloadResolver.GetInstalledManifests())
@@ -250,7 +250,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 try
                 {
                     
-                    var packageId = _workloadManifestInstaller.GetManifestPackageId(new ManifestId(manifest.Id), _sdkFeatureBand);
+                    var packageId = _workloadManifestInstaller.GetManifestPackageId(new ManifestId(manifest.Id), origSdkFeatureBand);
 
                     bool success;
                     (success, var latestVersion) = await GetPackageVersion(packageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreviews);
@@ -260,8 +260,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     }
                     if (!success)
                     {
-                        var newFeatureBand = new SdkFeatureBand(manifest.ManifestFeatureBand);
-                        var newPackageId = _workloadManifestInstaller.GetManifestPackageId(new ManifestId(manifest.Id), newFeatureBand);
+                        //var newFeatureBand = new SdkFeatureBand(manifest.ManifestFeatureBand);
+                        var newPackageId = _workloadManifestInstaller.GetManifestPackageId(new ManifestId(manifest.Id), installedSdkFeatureBand);
 
                         (success, latestVersion) = await GetPackageVersion(newPackageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreviews);
                         
