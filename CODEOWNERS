@@ -47,8 +47,12 @@
 /src/Tests/dotnet-vstest.Tests @dotnet/dotnet-test-templates-admin
 
 # Area-Templates
-/src/Cli/dotnet/commands/dotnet-new @DonJoseLuis
-/src/Tests/dotnet-new.Tests @DonJoseLuis
+/src/Cli/dotnet/commands/dotnet-new @dotnet/templating-engine-maintainers 
+/src/Cli/dotnet-new3 @dotnet/templating-engine-maintainers 
+/src/Cli/Microsoft.TemplateEngine.Cli @dotnet/templating-engine-maintainers 
+/src/Tests/dotnet-new.Tests @dotnet/templating-engine-maintainers
+/src/Tests/Microsoft.TemplateEngine.* @dotnet/templating-engine-maintainers 
+/template_feed @dotnet/templating-engine-maintainers 
 
 # ILLink and ReadyToRun targets and tasks owned by runtime team
 # Area-ILLink Area-ReadyToRun
