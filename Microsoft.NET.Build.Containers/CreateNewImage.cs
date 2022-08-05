@@ -113,14 +113,14 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
 
         if (OutputRegistry.StartsWith("docker://"))
         {
-            LocalDocker.Load(image, ImageName, BaseImageName).Wait();
+            LocalDocker.Load(image, ImageName, ImageTag, BaseImageName).Wait();
         }
         else
         {
             Registry outputReg = new Registry(new Uri(OutputRegistry));
             try
             {
-                outputReg.Push(image, ImageName, BaseImageName).Wait();
+                outputReg.Push(image, ImageName, ImageTag, BaseImageName).Wait();
             }
             catch (Exception e)
             {

@@ -8,7 +8,7 @@ namespace Microsoft.NET.Build.Containers;
 
 public class LocalDocker
 {
-    public static async Task Load(Image x, string name, string baseName)
+    public static async Task Load(Image x, string name, string tag, string baseName)
     {
         // call `docker load` and get it ready to recieve input
         ProcessStartInfo loadInfo = new("docker", $"load");
@@ -24,14 +24,14 @@ public class LocalDocker
 
         // Create new stream tarball
 
-        await WriteImageToStream(x, name, loadProcess.StandardInput.BaseStream);
+        await WriteImageToStream(x, name, tag, loadProcess.StandardInput.BaseStream);
 
         loadProcess.StandardInput.Close();
 
         await loadProcess.WaitForExitAsync();
     }
 
-    public static async Task WriteImageToStream(Image x, string name, Stream imageStream)
+    public static async Task WriteImageToStream(Image x, string name, string tag, Stream imageStream)
     {
         TarWriter writer = new(imageStream, TarEntryFormat.Gnu, leaveOpen: true);
 
@@ -70,7 +70,7 @@ public class LocalDocker
         // Add manifest
         JsonArray tagsNode = new()
         {
-            name + ":latest" // TODO: do something else here?
+            name + ":" + tag
         };
 
         JsonNode manifestNode = new JsonArray(new JsonObject

@@ -169,8 +169,10 @@ public record struct Registry(Uri BaseUri)
         return client;
     }
 
-    public async Task Push(Image x, string name, string baseName)
+    public async Task Push(Image x, string name, string? tag, string baseName)
     {
+        tag ??= "latest";
+
         using HttpClient client = GetClient();
 
         foreach (var descriptor in x.LayerDescriptors)
@@ -217,7 +219,7 @@ public record struct Registry(Uri BaseUri)
 
         putResponse.EnsureSuccessStatusCode();
 
-        var putResponse2 = await client.PutAsync(new Uri(BaseUri, $"/v2/{name}/manifests/latest"), manifestUploadContent);
+        var putResponse2 = await client.PutAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{tag}"), manifestUploadContent);
 
         putResponse2.EnsureSuccessStatusCode();
     }
