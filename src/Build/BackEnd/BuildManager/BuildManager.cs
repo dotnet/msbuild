@@ -24,6 +24,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Experimental;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
@@ -1111,10 +1112,12 @@ namespace Microsoft.Build.Execution
         {
             if (_nodeManager == null)
             {
-                _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
+                _nodeManager = (INodeManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager);
             }
 
             _nodeManager.ShutdownAllNodes();
+
+            MSBuildClient.ShutdownServer(CancellationToken.None);
         }
 
         /// <summary>
