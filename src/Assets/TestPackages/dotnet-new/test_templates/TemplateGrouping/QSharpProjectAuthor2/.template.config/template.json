@@ -1,0 +1,15 @@
+{
+  "author": "Author2",
+  "classifications": [ "Test Asset" ],
+  "name": "Basic FSharp",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateGrouping",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateGrouping.QSharpProjectAuthor2",
+  "shortName": "template-grouping",
+  "sourceName": "bar",
+  "tags": {
+    "language": "Q#",
+    "type": "project"
+  }
+}

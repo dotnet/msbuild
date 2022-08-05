@@ -9,13 +9,16 @@
     <Exec Command="$(DotnetTool) --version" ConsoleToMsbuild="true">
       <Output TaskParameter="ConsoleOutput" PropertyName="Stage0SdkVersion"/>
     </Exec>
+    <!--Prepare Microsoft.DotNet.Common.*.nupkg instead of copying from LKG SDK-->
+    <Exec Command="$(DotnetTool) pack $(RepoRoot)template_feed\Microsoft.DotNet.Common.ProjectTemplates.7.0 --configuration $(Configuration)" />
+    <Exec Command="$(DotnetTool) pack $(RepoRoot)template_feed\Microsoft.DotNet.Common.ItemTemplates --configuration $(Configuration)" />
 
     <PropertyGroup>
       <Stage0IncludedWorkloadManifestsFile>$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/IncludedWorkloadManifests.txt</Stage0IncludedWorkloadManifestsFile>
     </PropertyGroup>
 
     <ItemGroup>
-      <OverlaySDK Include="$(_DotNetHiveRoot)/**/*" Exclude="$(_DotNetHiveRoot)sdk/**/*"/>
+      <OverlaySDK Include="$(_DotNetHiveRoot)/**/*" Exclude="$(_DotNetHiveRoot)sdk/**/*;$(_DotNetHiveRoot)templates/**/microsoft.dotnet.common.*.nupkg"/>
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/Microsoft.NETCoreSdk.BundledCliTools.props" />
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/RuntimeIdentifierGraph.json" />
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/NETCoreSdkRuntimeIdentifierChain.txt" />
@@ -25,10 +28,14 @@
         Exclude="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/DotnetTools/dotnet-watch/**" />
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/AppHostTemplate/**/*" RelativeDestination="AppHostTemplate"/>
       <ToolsetToOverlay Include="$(OutputPath)/**/*" />
+      <ExcludeTemplatesFromSDK Include="$(_DotNetHiveRoot)templates/**/microsoft.dotnet.common.*.nupkg" />
+      <DotNetCommonTemplates Include="$(ArtifactsNonShippingPackagesDir)Microsoft.DotNet.Common.*.nupkg" Exclude="$(ArtifactsNonShippingPackagesDir)Microsoft.DotNet.Common.*.symbols.nupkg" />
     </ItemGroup>
 
     <Copy SourceFiles="@(OverlaySDK)"
           DestinationFiles="@(OverlaySDK->'$(RedistLayoutPath)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(DotNetCommonTemplates)"
+          DestinationFolder="$(RedistLayoutPath)\templates\%(ExcludeTemplatesFromSDK.RecursiveDir)" />
 
     <PropertyGroup>
       <SdkOutputDirectory>$(RedistLayoutPath)/sdk/$(Version)</SdkOutputDirectory>

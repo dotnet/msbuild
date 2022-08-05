@@ -1,0 +1,8 @@
+﻿The template "TestAssets.PostActions.RunScript.Basic" was created successfully.
+
+Processing post-creation actions...
+Execution of 'Run script' post action is not allowed.
+Manual instructions: Run 'setup.cmd'
+Actual command: setup.cmd 
+
+For details on the exit code, refer to https://aka.ms/templating-exit-codes#104

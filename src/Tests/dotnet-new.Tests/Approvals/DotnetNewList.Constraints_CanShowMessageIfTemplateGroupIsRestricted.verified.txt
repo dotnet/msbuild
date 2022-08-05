@@ -1,0 +1,8 @@
+﻿No templates found matching: 'RestrictedTemplate'.
+1 template(s) are hidden because their constraints are not satisfied. To show them, use the '--ignore-constraints' option.
+
+To search for the templates on NuGet.org, run:
+   dotnet new search RestrictedTemplate
+
+
+For details on the exit code, refer to https://aka.ms/templating-exit-codes#103

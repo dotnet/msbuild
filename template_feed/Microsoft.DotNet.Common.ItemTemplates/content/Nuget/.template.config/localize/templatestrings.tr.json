@@ -1,0 +1,6 @@
+﻿{
+  "author": "Microsoft",
+  "name": "NuGet Yapılandırması",
+  "description": "NuGet'in paketleri arama yapacağı konumları yapılandırmaya yönelik dosya",
+  "postActions/open-file/description": "Düzenleyicide nuget.config’i açar"
+}

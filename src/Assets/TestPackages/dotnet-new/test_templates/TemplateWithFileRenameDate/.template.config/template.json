@@ -1,0 +1,34 @@
+{
+    "author": "Test Asset",
+    "classifications": [ "Test Asset" ],
+    "name": "TestAssets.TemplateWithFileRenameDate",
+    "generatorVersions": "[1.0.0.0-*)",
+    "groupIdentity": "TestAssets.TemplateWithFileRenameDate",
+    "precedence": "100",
+    "identity": "TestAssets.TemplateWithFileRenameDate",
+    "shortName": "TestAssets.TemplateWithFileRenameDate",
+    "symbols": {
+        "migrationName": {
+            "type": "parameter",
+            "datatype": "text",
+            "isRequired": true
+        },
+        "nameLower": {
+            "type": "generated",
+            "generator": "casing",
+            "parameters": {
+                "source": "migrationName",
+                "toLower": true
+            },
+            "fileRename": "name"
+        },
+        "date": {
+            "type": "generated",
+            "generator": "now",
+            "parameters": {
+                "format": "yyyyMMdd"
+            },
+            "fileRename": "date"
+        }
+    }
+}

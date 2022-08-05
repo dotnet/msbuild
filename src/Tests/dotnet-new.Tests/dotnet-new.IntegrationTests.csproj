@@ -1,0 +1,66 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+    <OutputType>Exe</OutputType>
+    <IsUnitTestProject>true</IsUnitTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Cli\dotnet\dotnet.csproj" />
+    <ProjectReference Include="..\..\Cli\dotnet-new3\dotnet-new3.csproj" />
+    <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
+    <ProjectReference Include="..\Microsoft.TemplateEngine.TestHelper\Microsoft.TemplateEngine.TestHelper.csproj" />
+    <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
+    <PackageReference Include="Verify.Xunit" Version="17.1.4" />
+    <PackageReference Include="Wcwidth.Sources" Version="0.6.0" />
+    <PackageReference Include="Verify.DiffPlex" Version="1.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.2.1" Version="5.0" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.3.1" Version="5.0" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.5.0" Version="5.0" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Web.ProjectTemplates.3.1" Version="3.1.*" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Web.ProjectTemplates.5.0" Version="5.0.*" GeneratePathProperty="true" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <GeneratedText>
+      <![CDATA[
+namespace Microsoft.DotNet.New.Tests
+{
+  class TemplatePackagesPaths
+  {
+      public const string MicrosoftDotNetCommonProjectTemplates21Path = @"$(PkgMicrosoft_DotNet_Common_ProjectTemplates_2_1)"%3B
+      public const string MicrosoftDotNetCommonProjectTemplates31Path = @"$(PkgMicrosoft_DotNet_Common_ProjectTemplates_3_1)"%3B
+      public const string MicrosoftDotNetCommonProjectTemplates50Path = @"$(PkgMicrosoft_DotNet_Common_ProjectTemplates_5_0)"%3B
+      public const string MicrosoftDotNetWebProjectTemplates31Path = @"$(PkgMicrosoft_DotNet_Web_ProjectTemplates_3_1)"%3B
+      public const string MicrosoftDotNetWebProjectTemplates50Path = @"$(PkgMicrosoft_DotNet_Web_ProjectTemplates_5_0)"%3B
+  }
+}
+      ]]>
+    </GeneratedText>
+  </PropertyGroup>
+
+  <Target Name="AddGeneratedFile" BeforeTargets="BeforeCompile;CoreCompile" Inputs="$(MSBuildAllProjects)" Outputs="$(IntermediateOutputPath)GeneratedFile.cs">
+    <PropertyGroup>
+      <GeneratedFilePath>$(IntermediateOutputPath)TemplatePackagesPaths.cs</GeneratedFilePath>
+    </PropertyGroup>
+    <ItemGroup>
+      <Compile Include="$(GeneratedFilePath)" />
+      <FileWrites Include="$(GeneratedFilePath)" />
+    </ItemGroup>
+    <WriteLinesToFile Lines="$(GeneratedText)" File="$(GeneratedFilePath)" WriteOnlyWhenDifferent="true" Overwrite="true" />
+  </Target>
+
+  <ItemGroup>
+    <Compile Remove="TestTemplates\**\*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="TestTemplates\**\*" Exclude="TestTemplates\**\bin\**;TestTemplates\**\obj\**" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

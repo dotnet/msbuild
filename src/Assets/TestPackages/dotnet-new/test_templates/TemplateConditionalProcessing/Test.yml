@@ -1,0 +1,11 @@
+#if defaultTrue
+DefaultTrueIncluded
+#else
+DefaultTrueExcluded
+#endif
+
+#if defaultFalse
+    DefaultFalseExcluded
+#else
+    DefaultFalseIncluded
+#endif

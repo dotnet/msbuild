@@ -1,8 +1,10 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Tools.New;
@@ -25,14 +27,25 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void GetInstalledVersionsAsync_ShouldContainCurrentVersion()
         {
-            ISdkInfoProvider sp = new SdkInfoProvider();
+            string dotnetRootUnderTest = TestContext.Current.ToolsetUnderTest.DotNetRoot;
+            string pathOrig = Environment.GetEnvironmentVariable("PATH");
+            Environment.SetEnvironmentVariable("PATH", dotnetRootUnderTest + Path.PathSeparator + pathOrig);
 
-            string currentVersion = sp.GetCurrentVersionAsync(default).Result;
-            List<string> allVersions = sp.GetInstalledVersionsAsync(default).Result?.ToList();
+            try
+            {
+                ISdkInfoProvider sp = new SdkInfoProvider();
 
-            currentVersion.Should().NotBeNullOrEmpty("Current Sdk version should be populated");
-            allVersions.Should().NotBeNull();
-            allVersions.Should().Contain(currentVersion, "All installed versions should contain current version");
+                string currentVersion = sp.GetCurrentVersionAsync(default).Result;
+                List<string> allVersions = sp.GetInstalledVersionsAsync(default).Result?.ToList();
+
+                currentVersion.Should().NotBeNullOrEmpty("Current Sdk version should be populated");
+                allVersions.Should().NotBeNull();
+                allVersions.Should().Contain(currentVersion, "All installed versions should contain current version");
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("PATH", pathOrig);
+            }
         }
     }
 }

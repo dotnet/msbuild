@@ -1,0 +1,8 @@
+﻿Search failed: not enough information specified for search.
+To search for templates, specify partial template name or use one of the supported filters: '--author', '--baseline', '--language', '--type', '--tag', '--package'.
+Examples:
+   dotnet new search web
+   dotnet new search --author Microsoft
+   dotnet new search web --language C#
+
+For details on the exit code, refer to https://aka.ms/templating-exit-codes#102

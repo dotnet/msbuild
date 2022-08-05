@@ -1,0 +1,7 @@
+﻿Creating this template will make changes to existing files:
+  Overwrite   folderA/%FILENAME%
+  Overwrite   folderA/%FILENAME%
+
+Rerun the command and pass --force to accept and create.
+
+For details on the exit code, refer to https://aka.ms/templating-exit-codes#73

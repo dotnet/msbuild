@@ -1,0 +1,6 @@
+﻿{
+  "author": "Microsoft",
+  "name": "Plik Web Config",
+  "description": "Plik do konfiguracji ustawień aplikacji internetowej",
+  "postActions/open-file/description": "Otwiera plik web.config w edytorze"
+}

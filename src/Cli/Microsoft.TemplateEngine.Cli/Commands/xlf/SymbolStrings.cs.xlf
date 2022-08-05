@@ -1,0 +1,238 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="cs" original="../SymbolStrings.resx">
+    <body>
+      <trans-unit id="Command_AliasAdd_Description">
+        <source>Creates an alias for instantiate command with a certain set of arguments.</source>
+        <target state="translated">Vytvoří alias pro vytvoření instance příkazu s určitou sadou argumentů.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_AliasShow_Description">
+        <source>Displays defined aliases.</source>
+        <target state="translated">Zobrazí definované aliasy.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Alias_Description">
+        <source>Creates or displays defined aliases.</source>
+        <target state="translated">Vytvoří nebo zobrazí definované aliasy.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Install_Argument_Package">
+        <source>NuGet package ID or path to folder or NuGet package to install. 
+To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;version&gt;.
+</source>
+        <target state="translated">ID balíčku NuGet nebo cesta ke složce nebo balíčku NuGet, který se má nainstalovat. 
+Pokud chcete nainstalovat balíček NuGet určité verze, použijte &lt;package ID&gt;::&lt;version&gt;.
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Install_Description">
+        <source>Installs a template package.</source>
+        <target state="translated">Nainstaluje balíček šablon.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Instantiate_Argument_ShortName">
+        <source>A short name of the template to create.</source>
+        <target state="translated">Krátký název šablony, která se má vytvořit.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Instantiate_Argument_TemplateOptions">
+        <source>Template specific options to use.</source>
+        <target state="translated">Možnosti specifické pro šablonu, které se mají použít.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Instantiate_Description">
+        <source>Instantiates a template with given short name.</source>
+        <target state="translated">Vytvoří instanci šablony se zadaným krátkým názvem.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Legacy_Update_Check_Description">
+        <source>Checks the currently installed template packages for updates.</source>
+        <target state="translated">Vyhledá aktualizace pro aktuálně nainstalované balíčky šablon.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_List_Argument_Name">
+        <source>If specified, only the templates matching the name will be shown.</source>
+        <target state="translated">Když se určí, zobrazí se jenom šablony, které odpovídají názvu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_List_Description">
+        <source>Lists templates containing the specified template name. If no name is specified, lists all templates.</source>
+        <target state="translated">Vypíše šablony, které obsahují zadaný název šablony. Pokud se nezadá žádný název, vypíše seznam všech šablon.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_New_Description">
+        <source>Template Instantiation Commands for .NET CLI.</source>
+        <target state="translated">Příkazy pro vytvoření instancí šablon pro .NET CLI.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Search_Argument_Name">
+        <source>If specified, only the templates matching the name will be shown.</source>
+        <target state="translated">Když se určí, zobrazí se jenom šablony, které odpovídají názvu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Search_Description">
+        <source>Searches for the templates on NuGet.org.</source>
+        <target state="translated">Vyhledá šablony na NuGet.org.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Uninstall_Argument_Package">
+        <source>NuGet package ID (without version) or path to folder to uninstall. 
+If command is specified without the argument, it lists all the template packages installed.</source>
+        <target state="translated">ID balíčku NuGet (bez verze) nebo cesta ke složce, která se má odinstalovat. 
+Pokud je příkaz zadán bez argumentu, zobrazí seznam všech nainstalovaných balíčků šablon.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Uninstall_Description">
+        <source>Uninstalls a template package.</source>
+        <target state="translated">Odinstaluje balíček šablon.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Update_Description">
+        <source>Checks the currently installed template packages for update, and install the updates.</source>
+        <target state="translated">Vyhledejte aktualizace pro aktuálně nainstalované balíčky šablon a nainstalujte je.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Update_Option_CheckOnly">
+        <source>Only check for updates and display the template packages to be updated without applying update.</source>
+        <target state="translated">Zkontrolujte pouze aktualizace a zobrazte balíčky šablon, které se mají aktualizovat bez použití aktualizace.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListCommand_Option_IgnoreConstraints">
+        <source>Disables checking if the template meets the constraints to be run.</source>
+        <target state="translated">Zakáže kontrolu, jestli šablona splňuje omezení, aby ji bylo možné spustit.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_AddSource">
+        <source>Specifies a NuGet source to use during install.</source>
+        <target state="translated">Určuje zdroj NuGet, který se má použít během instalace.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_AuthorFilter">
+        <source>Filters the templates based on the template author.</source>
+        <target state="translated">Filtruje šablony na základě autora šablony.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_BaselineFilter">
+        <source>Filters the templates based on baseline defined in the template.</source>
+        <target state="translated">Filtruje šablony podle směrného plánu definovaného v šabloně.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Columns">
+        <source>Specifies the columns to display in the output. </source>
+        <target state="translated">Určete sloupce k zobrazení ve výstupu. </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_ColumnsAll">
+        <source>Display all columns in the output.</source>
+        <target state="translated">Zobrazí všechny sloupce ve výstupu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_Attach">
+        <source>Allows to pause execution in order to attach to the process for debug purposes.</source>
+        <target state="translated">Umožňuje pozastavit provádění, aby se mohlo připojit k procesu pro účely ladění.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_CustomSettings">
+        <source>Sets custom settings location.</source>
+        <target state="translated">Nastaví vlastní umístění nastavení.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_RebuildCache">
+        <source>If specified, removes the template cache prior to command execution.</source>
+        <target state="translated">Když se tato možnost zadá, před provedením příkazu se odebere mezipaměť šablony.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_Reinit">
+        <source>If specified, resets the settings prior to command execution.</source>
+        <target state="translated">Pokud je zadáno, obnoví nastavení před provedením příkazu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_ShowConfig">
+        <source>If specified, shows the template engine config prior to command execution.</source>
+        <target state="translated">Pokud je zadáno, zobrazí konfiguraci modulu šablony před spuštěním příkazu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_VirtualSettings">
+        <source>If specified, the settings will be not preserved on file system.</source>
+        <target state="translated">Pokud je zadáno, nastavení nebudou v systému souborů zachována.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Install_Force">
+        <source>Allows installing template packages from the specified sources even if they would override a template package from another source.</source>
+        <target state="translated">Umožňuje instalaci balíčků šablon ze zadaných zdrojů i v případě, že by přepsaly balíček šablony z jiného zdroje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Interactive">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">Umožňuje, aby se příkaz zastavil a počkal na vstup nebo akci uživatele (například na dokončení ověření).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_LanguageFilter">
+        <source>Filters templates based on language.</source>
+        <target state="translated">Filtruje šablony podle jazyka.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Output">
+        <source>Location to place the generated output.</source>
+        <target state="translated">Umístění, do kterého se uloží vygenerovaný výstup</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_PackageFilter">
+        <source>Filters the templates based on NuGet package ID.</source>
+        <target state="translated">Filtruje šablony podle ID balíčku NuGet.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_TagFilter">
+        <source>Filters the templates based on the tag.</source>
+        <target state="translated">Filtruje šablony na základě značky.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_TypeFilter">
+        <source>Filters templates based on available types. Predefined values are "project" and "item".</source>
+        <target state="translated">Filtruje šablony na základě dostupných typů. Předem definované hodnoty jsou project a item.</target>
+        <note>project and item should not be translated</note>
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_AllowScripts">
+        <source>Specifies if post action scripts should run.</source>
+        <target state="translated">Určuje, jestli se mají spouštět skripty akcí publikování.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_Baseline">
+        <source>Specifies the baseline to instantiate.</source>
+        <target state="translated">Určuje směrný plán pro vytvoření instance.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_DryRun">
+        <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
+        <target state="translated">Zobrazí souhrn toho, co by se mohlo stát, kdyby se daný příkazový řádek spustil, pokud by to vedlo k vytvoření šablony.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_Force">
+        <source>Forces content to be generated even if it would change existing files.</source>
+        <target state="translated">Vynutí vygenerování obsahu i v případě, že by došlo ke změně existujících souborů.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_Language">
+        <source>Specifies the template language to instantiate.</source>
+        <target state="translated">Určuje jazyk šablony, pro který má být vytvořena instance.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_Name">
+        <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
+        <target state="translated">Název vytvářeného výstupu. Pokud se žádný název nezadá, použije se název výstupního adresáře.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_NoUpdateCheck">
+        <source>Disables checking for the template package updates when instantiating a template.</source>
+        <target state="translated">Zakáže kontrolu aktualizací balíčků šablony při vytváření instance šablony.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_Type">
+        <source>Specifies the template type to instantiate.</source>
+        <target state="translated">Určuje typ šablony, pro který má být vytvořena instance.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

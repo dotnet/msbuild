@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "EditorConfig 파일",
+  "description": "코드 스타일 기본 설정을 구성하기 위한 .editorconfig 파일을 만듭니다.",
+  "symbols/Empty/displayName": "비어 있음",
+  "symbols/Empty/description": ".NET의 기본값 대신 빈 .editorconfig를 만듭니다."
+}
