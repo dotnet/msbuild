@@ -4,13 +4,8 @@ This guidance will track the most up-to-date version of the package and tasks.
 You should expect it to shrink noticeably over time!
 
 ```bash
-# Prerequisite - have a local container registry running on port 5010.
-# This will go away shortly in favor of pushing to your local docker 
-# daemon by default
-docker run -d -p 5010:5000 --restart=always --name registry registry:2
-
 # create a new project and move to its directory
-dotnet new console -n my-awesome-container-app
+dotnet new web -n my-awesome-container-app
 cd my-awesome-container-app
 
 # create a nuget.config file to store the configuration for this repo
@@ -25,16 +20,12 @@ dotnet nuget add source https://nuget.pkg.github.com/rainersigwald/index.json \
     --store-password-in-clear-text --configfile nuget.config
 
 # add a reference to the package
-dotnet add package System.Containers.Tasks --version 0.1.0
+dotnet add package System.Containers.Tasks --version 0.1.3
 
 # publish your project
-dotnet publish --os linux --arch x64 -p:PublishProfile=DefaultContainer `
-    -p:ContainerBaseImageName=dotnet/runtime `
-    -p:ContainerBaseImageTag=7.0    `
-    -p:ContainerEntryPoint="dotnet"
-    -p:ContainerEntryPointArgs="/app/my-awesome-container-app.dll"
+dotnet publish --os linux --arch x64 -p:PublishProfile=DefaultContainer
 
 # run your app
-docker run -it --rm localhost:5010/my-awesome-container-app
+docker run -it --rm my-awesome-container-app:latest
 ```
 
