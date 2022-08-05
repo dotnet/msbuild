@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
-using System.Threading;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Constraints;
 using Microsoft.TemplateEngine.Abstractions.Installer;
@@ -12,6 +10,7 @@ using Microsoft.TemplateEngine.Cli.PostActionProcessors;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
+using Command = System.CommandLine.Command;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {

@@ -6,6 +6,7 @@ using System.CommandLine.Help;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.Linq;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
@@ -227,7 +228,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         private static NewCommandStatus HandleAmbiguousLanguage(
             IEngineEnvironmentSettings environmentSettings,
             IEnumerable<CliTemplateInfo> templates,
-            Reporter reporter)
+            IReporter reporter)
         {
             reporter.WriteLine(HelpStrings.TableHeader_AmbiguousTemplatesList);
             TemplateGroupDisplay.DisplayTemplateList(
@@ -242,7 +243,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         private static NewCommandStatus HandleAmbiguousType(
             IEngineEnvironmentSettings environmentSettings,
             IEnumerable<CliTemplateInfo> templates,
-            Reporter reporter)
+            IReporter reporter)
         {
             reporter.WriteLine(HelpStrings.TableHeader_AmbiguousTemplatesList);
             TemplateGroupDisplay.DisplayTemplateList(

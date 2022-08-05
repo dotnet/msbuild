@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>$(SdkTargetFramework)</TargetFramework>
     <OutputType>Exe</OutputType>
@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Cli\Microsoft.TemplateEngine.Cli\Microsoft.TemplateEngine.Cli.csproj" />
+    <ProjectReference Include="..\..\Cli\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
     <ProjectReference Include="..\Microsoft.TemplateEngine.TestHelper\Microsoft.TemplateEngine.TestHelper.csproj" />
   </ItemGroup>
 

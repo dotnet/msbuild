@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Text;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Cli.TabularOutput;

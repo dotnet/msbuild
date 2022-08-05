@@ -5,9 +5,11 @@ using System.CommandLine;
 using System.CommandLine.Help;
 using System.CommandLine.Parsing;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
+using Command = System.CommandLine.Command;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -97,7 +99,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal static bool VerifyMatchingTemplates(
             IEngineEnvironmentSettings environmentSettings,
             IEnumerable<TemplateCommand> matchingTemplates,
-            Reporter reporter,
+            IReporter reporter,
             [NotNullWhen(true)]
             out IEnumerable<TemplateCommand>? filteredTemplates)
         {

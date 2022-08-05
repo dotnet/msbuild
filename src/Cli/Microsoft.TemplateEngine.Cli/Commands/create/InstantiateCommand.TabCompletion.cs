@@ -4,6 +4,7 @@
 using System.CommandLine;
 using System.CommandLine.Completions;
 using System.CommandLine.Parsing;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;

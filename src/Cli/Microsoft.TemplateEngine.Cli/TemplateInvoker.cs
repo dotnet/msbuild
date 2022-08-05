@@ -3,6 +3,7 @@
 
 using System.IO;
 using System.Text.RegularExpressions;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;

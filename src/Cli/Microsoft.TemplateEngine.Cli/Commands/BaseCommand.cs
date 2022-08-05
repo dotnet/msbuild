@@ -6,12 +6,14 @@ using System.CommandLine.Completions;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.Reflection;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
 using Microsoft.TemplateEngine.Cli.TabularOutput;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
+using Command = System.CommandLine.Command;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {

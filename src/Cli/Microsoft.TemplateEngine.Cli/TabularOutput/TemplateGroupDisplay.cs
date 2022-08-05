@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Utils;
@@ -26,7 +27,7 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
             IEngineEnvironmentSettings engineEnvironmentSettings,
             IEnumerable<TemplateGroup> templateGroups,
             TabularOutputSettings helpFormatterSettings,
-            Reporter reporter,
+            IReporter reporter,
             string? selectedLanguage = null)
         {
             IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = GetTemplateGroupsForListDisplay(
@@ -53,7 +54,7 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
             IEngineEnvironmentSettings engineEnvironmentSettings,
             IEnumerable<ITemplateInfo> templates,
             TabularOutputSettings helpFormatterSettings,
-            Reporter reporter,
+            IReporter reporter,
             string? selectedLanguage = null)
         {
             IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = GetTemplateGroupsForListDisplay(
@@ -149,7 +150,7 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
         private static void DisplayTemplateList(
             IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay,
             TabularOutputSettings tabularOutputSettings,
-            Reporter reporter)
+            IReporter reporter)
         {
             TabularOutput<TemplateGroupTableRow> formatter =
                 TabularOutput

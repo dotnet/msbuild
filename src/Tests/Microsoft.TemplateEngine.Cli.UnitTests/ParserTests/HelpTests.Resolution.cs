@@ -3,6 +3,8 @@
 
 using System.CommandLine;
 using FakeItEasy;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.NET.TestFramework.Utilities;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Edge;
@@ -35,10 +37,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Single(matchingTemplates);
-            StringWriter output = new StringWriter();
-            Reporter reporter = new Reporter(new AnsiConsole(output));
+            BufferedReporter reporter = new BufferedReporter();
             Assert.True(InstantiateCommand.VerifyMatchingTemplates(settings, matchingTemplates, reporter, out _));
-            Assert.Empty(output.ToString());
+            Assert.Empty(reporter.Lines);
         }
 
         [Fact]
@@ -62,9 +63,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(3, matchingTemplates.Count());
             StringWriter output = new StringWriter();
-            Reporter reporter = new Reporter(new AnsiConsole(output));
+            BufferedReporter reporter = new BufferedReporter();
             Assert.False(InstantiateCommand.VerifyMatchingTemplates(settings, matchingTemplates, reporter, out _));
-            return Verify(output.ToString());
+            return Verify(string.Join(Environment.NewLine, reporter.Lines));
         }
 
         [Fact]
@@ -87,12 +88,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(2, matchingTemplates.Count());
-            StringWriter output = new StringWriter();
-            Reporter reporter = new Reporter(new AnsiConsole(output));
+            BufferedReporter reporter = new BufferedReporter();
             Assert.True(InstantiateCommand.VerifyMatchingTemplates(settings, matchingTemplates, reporter, out IEnumerable<TemplateCommand>? filtered));
             Assert.Equal(1, filtered?.Count());
             Assert.Equal("Console.App.L1", filtered?.Single().Template.Identity);
-            Assert.Empty(output.ToString());
+            Assert.Empty(reporter.Lines);
         }
 
         [Fact]
@@ -114,12 +114,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Single(matchingTemplates);
-            StringWriter output = new StringWriter();
-            Reporter reporter = new Reporter(new AnsiConsole(output));
+            BufferedReporter reporter = new BufferedReporter();
             Assert.True(InstantiateCommand.VerifyMatchingTemplates(settings, matchingTemplates, reporter, out IEnumerable<TemplateCommand>? filtered));
             Assert.Equal(1, filtered?.Count());
             Assert.Equal("Console.App.L2", filtered?.Single().Template.Identity);
-            Assert.Empty(output.ToString());
+            Assert.Empty(reporter.Lines);
         }
 
         [Fact]
@@ -139,11 +138,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var matchingTemplates = InstantiateCommand.GetMatchingTemplates(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Equal(3, matchingTemplates.Count());
-            StringWriter output = new StringWriter();
-            Reporter reporter = new Reporter(new AnsiConsole(output));
+            BufferedReporter reporter = new BufferedReporter();
             Assert.True(InstantiateCommand.VerifyMatchingTemplates(settings, matchingTemplates, reporter, out IEnumerable<TemplateCommand>? filtered));
             Assert.Equal(3, filtered?.Count());
-            Assert.Empty(output.ToString());
+            Assert.Empty(reporter.Lines);
         }
 
         [Fact]
