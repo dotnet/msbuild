@@ -1051,6 +1051,7 @@ namespace Microsoft.Build.UnitTests
                                         question: false,
                                         inputResultsCaches: null,
                                         outputResultsCache: null,
+                                        reportFileAccesses: false,
                                         commandLine: null);
                 }
                 finally
