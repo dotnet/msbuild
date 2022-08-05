@@ -8,6 +8,7 @@ using System.CommandLine.Parsing;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Microsoft.Build.Execution;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Sln.Internal;
@@ -86,11 +87,11 @@ namespace Microsoft.DotNet.Tools.Publish
             if (!String.IsNullOrEmpty(potentialSln))
             {
                 SlnFile sln = SlnFileFactory.CreateFromFileOrDirectory(potentialSln);
-                ProjectInstance metaProject = new ProjectInstance();
-                
-                foreach(SlnProject x in sln.Projects)
+                ProjectInstance metaProject = (ProjectInstance)Activator.CreateInstance(typeof(ProjectInstance), (BindingFlags.NonPublic | BindingFlags.Instance), null, new object[] {"metaproject.csproj", new ProjectInstance(sln.Projects.First().FilePath), new Dictionary<string, string>()}, null);
+
+                foreach (SlnProject x in sln.Projects)
                 {
-                    x.FilePath
+                    NewCommandParser.AddProjectReference(metaProject.FullPath, new List<string> { x.FilePath });
                 }
             }
             else
