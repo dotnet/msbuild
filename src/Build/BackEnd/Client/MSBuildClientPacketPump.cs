@@ -247,7 +247,7 @@ namespace Microsoft.Build.BackEnd.Client
                                     }
                                     else
                                     {
-                                        ErrorUtilities.ThrowInternalError("Incomplete header read from server.  {0} of {1} bytes read", headerBytesRead, headerByte.Length);
+                                        ErrorUtilities.ThrowInternalError("Incomplete header read.  {0} of {1} bytes read", headerBytesRead, headerByte.Length);
                                     }
                                 }
 
@@ -260,14 +260,18 @@ namespace Microsoft.Build.BackEnd.Client
                                 _readBufferMemoryStream.SetLength(packetLength);
                                 byte[] packetData = _readBufferMemoryStream.GetBuffer();
 
-                                packetBytesRead = localStream.Read(packetData, 0, packetLength);
-                                
-                                if (packetBytesRead != packetLength)
+                                while (packetBytesRead < packetLength)
                                 {
-                                    // Incomplete read.  Abort.
-                                    ErrorUtilities.ThrowInternalError("Incomplete header read from server. {0} of {1} bytes read", headerBytesRead, headerByte.Length);
-                                }
+                                    int bytesRead = localStream.Read(packetData, packetBytesRead, packetLength-packetBytesRead);
+                                    if (bytesRead == 0)
+                                    {
+                                        // Incomplete read.  Abort.
+                                        ErrorUtilities.ThrowInternalError("Incomplete packet read. {0} of {1} bytes read", packetBytesRead, packetLength);
+                                    }
 
+                                    packetBytesRead += bytesRead;
+                                }
+                                
                                 try
                                 {
                                     _packetFactory.DeserializeAndRoutePacket(0, packetType, _binaryReadTranslator);
