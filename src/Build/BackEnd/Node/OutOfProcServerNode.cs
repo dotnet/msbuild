@@ -272,11 +272,27 @@ namespace Microsoft.Build.Experimental
                 case NodePacketType.ServerNodeBuildCommand:
                     HandleServerNodeBuildCommandAsync((ServerNodeBuildCommand)packet);
                     break;
+                case NodePacketType.NodeBuildComplete:
+                    HandleServerShutdownCommand((NodeBuildComplete)packet);
+                    break;
                 case NodePacketType.ServerNodeBuildCancel:
-                    BuildManager.DefaultBuildManager.CancelAllSubmissions();
+                    HandleBuildCancel();
                     break;
             }
         }
+
+        /// <summary>
+        /// NodeBuildComplete is used to signalize that node work is done (including server node)
+        /// and shall recycle or shutdown if PrepareForReuse is false.
+        /// </summary>
+        /// <param name="buildComplete"></param>
+        private void HandleServerShutdownCommand(NodeBuildComplete buildComplete)
+        {
+            _shutdownReason = buildComplete.PrepareForReuse ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
+            _shutdownEvent.Set();
+        }
+
+        private static void HandleBuildCancel() => BuildManager.DefaultBuildManager.CancelAllSubmissions();
 
         private void HandleServerNodeBuildCommandAsync(ServerNodeBuildCommand command)
         {

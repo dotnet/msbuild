@@ -96,6 +96,11 @@ namespace Microsoft.Build.Experimental
         private TargetConsoleConfiguration? _consoleConfiguration;
 
         /// <summary>
+        /// Incoming packet pump and redirection.
+        /// </summary>
+        private MSBuildClientPacketPump _packetPump;
+
+        /// <summary>
         /// Public constructor with parameters.
         /// </summary>
         /// <param name="commandLine">The command line to process. The first argument
@@ -122,10 +127,10 @@ namespace Microsoft.Build.Experimental
             _pipeName = OutOfProcServerNode.GetPipeName(_handshake);
             _nodeStream = new NamedPipeClientStream(".", _pipeName, PipeDirection.InOut, PipeOptions.Asynchronous
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                                                                         | PipeOptions.CurrentUserOnly
+                | PipeOptions.CurrentUserOnly
 #endif
             );
-
+            _packetPump = new MSBuildClientPacketPump(_nodeStream);
             _packetMemoryStream = new MemoryStream();
             _binaryWriter = new BinaryWriter(_packetMemoryStream);
         }
@@ -195,10 +200,74 @@ namespace Microsoft.Build.Experimental
             _numConsoleWritePackets = 0;
             _sizeOfConsoleWritePackets = 0;
 
+            ReadPacketsLoop(cancellationToken);
+
+            MSBuildEventSource.Log.MSBuildServerBuildStop(descriptiveCommandLine, _numConsoleWritePackets, _sizeOfConsoleWritePackets, _exitResult.MSBuildClientExitType.ToString(), _exitResult.MSBuildAppExitTypeString);
+            CommunicationsUtilities.Trace("Build finished.");
+            return _exitResult;
+        }
+
+        /// <summary>
+        /// Attempt to shutdown MSBuild Server node.
+        /// </summary>
+        /// <remarks>
+        /// It shutdown only server created by current user with current admin elevation.
+        /// </remarks>
+        /// <param name="cancellationToken"></param>
+        /// <returns>True if server is not running anymore.</returns>
+        public static bool ShutdownServer(CancellationToken cancellationToken)
+        {
+            // Neither commandLine nor msbuildlocation is involved in node shutdown
+            var client = new MSBuildClient(commandLine: null!, msbuildLocation: null!);
+
+            return client.TryShutdownServer(cancellationToken);
+        }
+
+        private bool TryShutdownServer(CancellationToken cancellationToken)
+        {
+            CommunicationsUtilities.Trace("Trying shutdown server node.");
+            string serverRunningMutexName = OutOfProcServerNode.GetRunningServerMutexName(_handshake);
+            string serverBusyMutexName = OutOfProcServerNode.GetBusyServerMutexName(_handshake);
+
+            bool serverIsAlreadyRunning = ServerNamedMutex.WasOpen(serverRunningMutexName);
+            if (!serverIsAlreadyRunning)
+            {
+                CommunicationsUtilities.Trace("No need to shutdown server node for it is not running.");
+                return true;
+            }
+
+            // Check that server is not busy.
+            var serverWasBusy = ServerNamedMutex.WasOpen(serverBusyMutexName);
+            if (serverWasBusy)
+            {
+                CommunicationsUtilities.Trace("Server cannot be shut down for it is not idle.");
+                return false;
+            }
+
+            // Connect to server.
+            if (!TryConnectToServer(1_000))
+            {
+                CommunicationsUtilities.Trace("Client cannot connect to idle server to shut it down.");
+                return false;
+            }
+
+            if (!TrySendShutdownCommand())
+            {
+                CommunicationsUtilities.Trace("Failed to send shutdown command to the server.");
+                return false;
+            }
+
+            ReadPacketsLoop(cancellationToken);
+
+            return _exitResult.MSBuildClientExitType == MSBuildClientExitType.Success;
+        }
+
+        private void ReadPacketsLoop(CancellationToken cancellationToken)
+        {
             try
             {
                 // Start packet pump
-                using MSBuildClientPacketPump packetPump = new(_nodeStream);
+                using MSBuildClientPacketPump packetPump = _packetPump;
 
                 packetPump.RegisterPacketHandler(NodePacketType.ServerNodeConsoleWrite, ServerNodeConsoleWrite.FactoryForDeserialization, packetPump);
                 packetPump.RegisterPacketHandler(NodePacketType.ServerNodeBuildResult, ServerNodeBuildResult.FactoryForDeserialization, packetPump);
@@ -207,7 +276,7 @@ namespace Microsoft.Build.Experimental
                 WaitHandle[] waitHandles =
                 {
                     cancellationToken.WaitHandle,
-                    packetPump.PacketPumpErrorEvent,
+                    packetPump.PacketPumpCompleted,
                     packetPump.PacketReceivedEvent
                 };
 
@@ -224,7 +293,7 @@ namespace Microsoft.Build.Experimental
                             break;
 
                         case 1:
-                            HandlePacketPumpError(packetPump);
+                            HandlePacketPumpCompleted(packetPump);
                             break;
 
                         case 2:
@@ -246,10 +315,6 @@ namespace Microsoft.Build.Experimental
                 CommunicationsUtilities.Trace("MSBuild client error: problem during packet handling occurred: {0}.", ex);
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.Unexpected;
             }
-
-            MSBuildEventSource.Log.MSBuildServerBuildStop(descriptiveCommandLine, _numConsoleWritePackets, _sizeOfConsoleWritePackets, _exitResult.MSBuildClientExitType.ToString(), _exitResult.MSBuildAppExitTypeString);
-            CommunicationsUtilities.Trace("Build finished.");
-            return _exitResult;
         }
 
         private void ConfigureAndQueryConsoleProperties()
@@ -409,6 +474,12 @@ namespace Microsoft.Build.Experimental
 
         private bool TrySendCancelCommand() => TrySendPacket(() => new ServerNodeBuildCancel());
 
+        private bool TrySendShutdownCommand()
+        {
+            _packetPump.ServerWillDisconnect();
+            return  TrySendPacket(() => new NodeBuildComplete(false /* no node reuse */));
+        }
+
         private ServerNodeBuildCommand GetServerNodeBuildCommand()
         {
             Dictionary<string, string> envVars = new();
@@ -457,16 +528,21 @@ namespace Microsoft.Build.Experimental
         {
             TrySendCancelCommand();
 
-            CommunicationsUtilities.Trace("MSBuild client sent cancelation command.");
+            CommunicationsUtilities.Trace("MSBuild client sent cancellation command.");
         }
 
         /// <summary>
-        /// Handle packet pump error.
+        /// Handle when packet pump is completed both successfully or with error.
         /// </summary>
-        private void HandlePacketPumpError(MSBuildClientPacketPump packetPump)
+        private void HandlePacketPumpCompleted(MSBuildClientPacketPump packetPump)
         {
-            CommunicationsUtilities.Trace("MSBuild client error: packet pump unexpectedly shut down: {0}", packetPump.PacketPumpException);
-            throw packetPump.PacketPumpException ?? new InternalErrorException("Packet pump unexpectedly shut down");
+            if (packetPump.PacketPumpException != null)
+            {
+                CommunicationsUtilities.Trace("MSBuild client error: packet pump unexpectedly shut down: {0}", packetPump.PacketPumpException);
+                throw packetPump.PacketPumpException ?? new InternalErrorException("Packet pump unexpectedly shut down");
+            }
+
+            _buildFinished = true;
         }
 
         /// <summary>
