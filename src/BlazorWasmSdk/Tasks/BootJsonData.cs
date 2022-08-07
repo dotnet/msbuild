@@ -98,6 +98,13 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         /// </summary>
         [DataMember(EmitDefaultValue = false)]
         public Dictionary<string, ResourceHashesByNameDictionary> extensions { get; set; }
+
+        /// <summary>
+        /// Additional assets that the runtime consumes as part of the boot process.
+        /// </summary>
+        [DataMember(EmitDefaultValue = false)]
+        public Dictionary<string, AdditionalAsset> runtimeAssets { get; set; }
+
     }
 
     public enum ICUDataMode : int

@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using Microsoft.Build.Framework;
@@ -99,9 +100,11 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 var resourceData = result.resources;
                 foreach (var resource in Resources)
                 {
-                    ResourceHashesByNameDictionary resourceList;
+                    ResourceHashesByNameDictionary resourceList = null;
 
+                    string behavior = null;
                     var fileName = resource.GetMetadata("FileName");
+                    var fileExtension = resource.GetMetadata("Extension");
                     var assetTraitName = resource.GetMetadata("AssetTraitName");
                     var assetTraitValue = resource.GetMetadata("AssetTraitValue");
                     var resourceName = Path.GetFileName(resource.GetMetadata("RelativePath"));
@@ -113,7 +116,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         resourceData.lazyAssembly ??= new ResourceHashesByNameDictionary();
                         resourceList = resourceData.lazyAssembly;
                     }
-                    else if (string.Equals("Culture", assetTraitName))
+                    else if (string.Equals("Culture", assetTraitName, StringComparison.OrdinalIgnoreCase))
                     {
                         Log.LogMessage(MessageImportance.Low, "Candidate '{0}' is defined as satellite assembly with culture '{1}'.", resource.ItemSpec, assetTraitValue);
                         resourceData.satelliteResources ??= new Dictionary<string, ResourceHashesByNameDictionary>(StringComparer.OrdinalIgnoreCase);
@@ -149,6 +152,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                             string.Equals(assetTraitValue, "native", StringComparison.OrdinalIgnoreCase))
                     {
                         Log.LogMessage(MessageImportance.Low, "Candidate '{0}' is defined as a native application resource.", resource.ItemSpec);
+                        if (string.Equals(fileName, "dotnet", StringComparison.OrdinalIgnoreCase) &&
+                            string.Equals(fileExtension, ".wasm", StringComparison.OrdinalIgnoreCase))
+                        {
+                            behavior = "dotnetwasm";
+                        }
+
                         resourceList = resourceData.runtime;
                     }
                     else if (string.Equals("JSModule", assetTraitName, StringComparison.OrdinalIgnoreCase) &&
@@ -161,6 +170,11 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         Debug.Assert(!string.IsNullOrEmpty(targetPath), "Target path for '{0}' must exist.", resource.ItemSpec);
                         AddResourceToList(resource, resourceList, targetPath);
                         continue;
+                    } 
+                    else if(string.Equals(assetTraitName, "BlazorWebAssemblyResource", StringComparison.OrdinalIgnoreCase) &&
+                            string.Equals(assetTraitValue, "js-module-crypto", StringComparison.OrdinalIgnoreCase))
+                    {
+                        behavior = assetTraitValue;
                     }
                     else if (string.Equals("BlazorWebAssemblyResource", assetTraitName, StringComparison.OrdinalIgnoreCase) &&
                              assetTraitValue.StartsWith("extension:", StringComparison.OrdinalIgnoreCase))
@@ -185,7 +199,16 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         continue;
                     }
 
-                    AddResourceToList(resource, resourceList, resourceName);
+                    if (resourceList != null)
+                    {
+                        AddResourceToList(resource, resourceList, resourceName);
+                    }
+
+                    if (!string.IsNullOrEmpty(behavior))
+                    {
+                        resourceData.runtimeAssets ??= new Dictionary<string, AdditionalAsset>();
+                        AddToAdditionalResources(resource, resourceData.runtimeAssets, resourceName, behavior);
+                    }
                 }
 
                 if (remainingLazyLoadAssemblies.Count > 0)
@@ -235,9 +258,32 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             }
         }
 
+        private void AddToAdditionalResources(ITaskItem resource, Dictionary<string, AdditionalAsset> additionalResources, string resourceName, string behavior)
+        {
+            if (!additionalResources.ContainsKey(resourceName))
+            {
+                Log.LogMessage(MessageImportance.Low, "Added resource '{0}' to the list of additional assets in the manifest.", resource.ItemSpec);
+                additionalResources.Add(resourceName, new AdditionalAsset
+                {
+                    Hash = $"sha256-{resource.GetMetadata("FileHash")}",
+                    Behavior = behavior
+                });
+            }
+        }
+
         private bool TryGetLazyLoadedAssembly(string fileName, out ITaskItem lazyLoadedAssembly)
         {
             return (lazyLoadedAssembly = LazyLoadedAssemblies?.SingleOrDefault(a => a.ItemSpec == fileName)) != null;
         }
+    }
+
+    [DataContract]
+    public class AdditionalAsset
+    {
+        [DataMember(Name = "hash")]
+        public string Hash { get; set; }
+
+        [DataMember(Name = "behavior")]
+        public string Behavior { get; set; }
     }
 }

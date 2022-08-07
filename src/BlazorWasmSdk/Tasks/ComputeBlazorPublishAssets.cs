@@ -157,8 +157,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 var key = kvp.Key;
                 var asset = kvp.Value;
                 var isDotNetJs = IsDotNetJs(key);
+                var isDotNetCryptoJs = IsDotNetCryptoJs(key);
                 var isDotNetWasm = IsDotNetWasm(key);
-                if (!isDotNetJs && !isDotNetWasm)
+                if (!isDotNetJs && !isDotNetWasm && !isDotNetCryptoJs)
                 {
                     if (resolvedNativeAssetToPublish.TryGetValue(Path.GetFileName(asset.GetMetadata("OriginalItemSpec")), out var existing))
                     {
@@ -175,6 +176,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         }
                         else
                         {
+                            Log.LogMessage(MessageImportance.Low, "Removing asset '{0}'.", existing.ItemSpec);
                             // This was a file that was filtered, so just remove it, we don't need to add any publish static web asset
                             filesToRemove.Add(removed);
 
@@ -208,6 +210,34 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     ApplyPublishProperties(newDotNetJs);
                     nativeStaticWebAssets.Add(newDotNetJs);
                     if (resolvedNativeAssetToPublish.TryGetValue("dotnet.js", out var resolved))
+                    {
+                        filesToRemove.Add(resolved);
+                    }
+                    continue;
+                }
+
+                if (isDotNetCryptoJs)
+                {
+                    var aotDotNetCryptoJs = WasmAotAssets.SingleOrDefault(a => $"{a.GetMetadata("FileName")}{a.GetMetadata("Extension")}" == "dotnet-crypto-worker.js");
+                    ITaskItem newDotNetCryptoJs = null;
+                    if (aotDotNetCryptoJs != null)
+                    {
+                        newDotNetCryptoJs = new TaskItem(Path.GetFullPath(aotDotNetCryptoJs.ItemSpec), asset.CloneCustomMetadata());
+                        newDotNetCryptoJs.SetMetadata("OriginalItemSpec", aotDotNetCryptoJs.ItemSpec);
+                        newDotNetCryptoJs.SetMetadata("RelativePath", $"_framework/{$"dotnet-crypto-worker.{DotNetJsVersion}.{FileHasher.GetFileHash(aotDotNetCryptoJs.ItemSpec)}.js"}");
+
+                        updateMap.Add(asset.ItemSpec, newDotNetCryptoJs);
+                        Log.LogMessage(MessageImportance.Low, "Replacing asset '{0}' with AoT version '{1}'", asset.ItemSpec, newDotNetCryptoJs.ItemSpec);
+                    }
+                    else
+                    {
+                        newDotNetCryptoJs = new TaskItem(asset);
+                        Log.LogMessage(MessageImportance.Low, "Promoting asset '{0}' to Publish asset.", asset.ItemSpec);
+                    }
+
+                    ApplyPublishProperties(newDotNetCryptoJs);
+                    nativeStaticWebAssets.Add(newDotNetCryptoJs);
+                    if (resolvedNativeAssetToPublish.TryGetValue("dotnet-crypto-worker.js", out var resolved))
                     {
                         filesToRemove.Add(resolved);
                     }
@@ -252,9 +282,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             static bool IsDotNetJs(string key)
             {
                 var fileName = Path.GetFileName(key);
-                return fileName.StartsWith("dotnet.", StringComparison.Ordinal) && fileName.EndsWith(".js", StringComparison.Ordinal);
+                return fileName.StartsWith("dotnet.", StringComparison.Ordinal) && fileName.EndsWith(".js", StringComparison.Ordinal) && !fileName.Contains("worker");
             }
 
+            static bool IsDotNetCryptoJs(string key)
+            {
+                var fileName = Path.GetFileName(key);
+                return fileName.StartsWith("dotnet-crypto-worker.", StringComparison.Ordinal) && fileName.EndsWith(".js", StringComparison.Ordinal);
+            }
             static bool IsDotNetWasm(string key) => string.Equals("dotnet.wasm", Path.GetFileName(key), StringComparison.Ordinal);
         }
 
@@ -411,7 +446,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             Dictionary<string, ITaskItem> updatedAssets)
         {
             var processed = new List<string>();
-            var additionalAssetsToUpdate = new List<ITaskItem>();
+            var runtimeAssetsToUpdate = new List<ITaskItem>();
             foreach (var kvp in compressedRepresentations)
             {
                 var compressedAsset = kvp.Value;
@@ -423,7 +458,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         Log.LogMessage(MessageImportance.Low, "Related assembly for '{0}' was not updated and the compressed asset can be reused.", relatedAsset);
                         var newCompressedAsset = new TaskItem(compressedAsset);
                         ApplyPublishProperties(newCompressedAsset);
-                        additionalAssetsToUpdate.Add(newCompressedAsset);
+                        runtimeAssetsToUpdate.Add(newCompressedAsset);
                     }
                     else
                     {
@@ -440,7 +475,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 compressedRepresentations.Remove(element);
             }
 
-            return additionalAssetsToUpdate;
+            return runtimeAssetsToUpdate;
         }
 
         private static void UpdateRelatedAssetProperty(ITaskItem asset, TaskItem newAsset, Dictionary<string, ITaskItem> updatedAssetsMap)
@@ -603,10 +638,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             }
         }
 
-        private static bool IsNativeAsset(string traitValue) => string.Equals(traitValue, "native", StringComparison.Ordinal);
+        private static bool IsNativeAsset(string traitValue) => string.Equals(traitValue, "native", StringComparison.Ordinal) || string.Equals(traitValue, "js-module-crypto", StringComparison.Ordinal);
 
         private static bool IsRuntimeAsset(string traitValue) => string.Equals(traitValue, "runtime", StringComparison.Ordinal);
-
         private static bool IsSymbolAsset(string traitValue) => string.Equals(traitValue, "symbol", StringComparison.Ordinal);
 
         private static bool IsAlternative(ITaskItem asset) => string.Equals(asset.GetMetadata("AssetRole"), "Alternative", StringComparison.Ordinal);
