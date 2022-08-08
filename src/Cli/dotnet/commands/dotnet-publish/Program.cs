@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.Build.Execution;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Sln.Internal;
@@ -104,7 +105,6 @@ namespace Microsoft.DotNet.Tools.Publish
         /// in the configuration property to check.</returns>
         private static ProjectInstance GetConfiguredTopLevelSlnProject(string configPropertytoCheck, string slnPath)
         {
-            ProjectInstance potentialProject = null;
             SlnFile sln;
             try
             {
@@ -112,45 +112,48 @@ namespace Microsoft.DotNet.Tools.Publish
             }
             catch (GracefulException)
             {
-                return potentialProject; // This can be called if a solution doesn't exist. MSBuild will catch that for us.
+                return null; // This can be called if a solution doesn't exist. MSBuild will catch that for us.
             }
 
-            string expectedConfig = "";
+            List<ProjectInstance> configuredProjects = new List<ProjectInstance>();
+            HashSet<string> configValues = new HashSet<string>();
             const string topLevelProjectOutputType = "Exe"; // Note that even on Unix when we don't produce exe this is still an exe, same for ASP
+            const string solutionFolderGuid = "{{2150E333-8FDC-42A3-9474-1A3956D46DE8}}";
+            bool shouldReturnNull = false;
 
-            foreach (SlnProject project in sln.Projects)
+            Parallel.ForEach(sln.Projects.AsEnumerable(), (project, state) =>
             {
-                const string solutionFolderGuid = "{{2150E333-8FDC-42A3-9474-1A3956D46DE8}}";
-                if (project.TypeGuid == solutionFolderGuid)
-                    continue;
+                if (project.TypeGuid == solutionFolderGuid || !IsValidProjectFilePath(project.FilePath))
+                    return;
 
-                ProjectInstance projectData = TryGetProjectInstance(project.FilePath);
+                var projectData = TryGetProjectInstance(project.FilePath);
                 if (projectData == null)
-                    continue;
+                    return;
 
                 if (projectData.GetPropertyValue("OutputType") == topLevelProjectOutputType)
                 {
                     if (ProjectHasUserCustomizedConfiguration(projectData))
-                        return null; // We don't want to override Configuration if ANY project in a sln uses a custom configuration
+                    {
+                        shouldReturnNull = true;
+                        state.Stop(); // We don't want to override Configuration if ANY project in a sln uses a custom configuration
+                        return;
+                    }
 
                     string configuration = projectData.GetPropertyValue(configPropertytoCheck);
-
                     if (!string.IsNullOrEmpty(configuration))
                     {
-                        if (potentialProject != null && expectedConfig != configuration)
-                        {
-                            throw new GracefulException(LocalizableStrings.TopLevelPublishConfigurationMismatchError);
-                        }
-                        else
-                        {
-                            potentialProject = projectData;
-                            expectedConfig = configuration;
-                        }
+                        configuredProjects.Add(projectData); // we don't care about race conditions here
+                        configValues.Add(configuration);
                     }
                 }
+            });
+
+            if (configuredProjects.Any() && configValues.Count > 1)
+            {
+                throw new GracefulException(LocalizableStrings.TopLevelPublishConfigurationMismatchError);
             }
 
-            return potentialProject;
+            return shouldReturnNull || configuredProjects.Count == 0 ? null : configuredProjects.First();
         }
 
         /// <returns>A project instance that will be targeted to publish/pack, etc. null if one does not exist.</returns>
