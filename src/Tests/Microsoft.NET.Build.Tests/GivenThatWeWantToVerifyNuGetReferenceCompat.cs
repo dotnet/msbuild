@@ -189,7 +189,7 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyFact]
         public void It_chooses_lowest_netfx_in_default_atf()
         {
-            var testProjectName = $"{Regex.Replace(ToolsetInfo.CurrentTargetFramework, @"\.", "")}_multiple_atf";
+            var testProjectName = $"{ToolsetInfo.CurrentTargetFramework.Replace(".", "")}_multiple_atf";
 
             var (testProjectTestAsset, testPackageReference) = CreateTestAsset(
                testProjectName,
