@@ -1,13 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#nullable disable
-
-using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ApiCompatibility.Extensions;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.ApiCompatibility.Extensions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
@@ -18,31 +15,35 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
     /// </summary>
     public class TypeMapper : ElementMapper<ITypeSymbol>
     {
-        private readonly TypeMapper _containingType;
-        private Dictionary<ITypeSymbol, TypeMapper> _nestedTypes;
-        private Dictionary<ISymbol, MemberMapper> _members;
+        private Dictionary<ITypeSymbol, TypeMapper>? _nestedTypes;
+        private Dictionary<ISymbol, MemberMapper>? _members;
+
+        /// <summary>
+        /// The containing type of this type. Null if the type isn't nested.
+        /// </summary>
+        internal TypeMapper? ContainingType { get; }
 
         /// <summary>
         /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
         /// </summary>
         /// <param name="settings">The settings used to diff the elements in the mapper.</param>
         /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
-        public TypeMapper(ComparingSettings settings, TypeMapper containingType = null, int rightSetSize = 1)
+        public TypeMapper(ComparingSettings settings, TypeMapper? containingType = null, int rightSetSize = 1)
             : base(settings, rightSetSize)
         {
-            _containingType = containingType;
+            ContainingType = containingType;
         }
 
         internal bool ShouldDiffElement(int rightIndex)
         {
-            if (IsNested)
+            if (ContainingType != null)
             {
-                Debug.Assert(_containingType.ShouldDiffMembers);
+                Debug.Assert(ContainingType.ShouldDiffMembers);
 
                 // This should only be called at a point where containingType.ShouldDiffMembers is true
                 // So that means that containingType.Left is not null and we don't need to check.
                 // If containingType.Right only contains one element, we can assume it is not null.
-                return _containingType.Right.Length == 1 || _containingType.Right[rightIndex] != null;
+                return ContainingType.Right.Length == 1 || ContainingType.Right[rightIndex] != null;
             }
 
             return true;
@@ -74,11 +75,6 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         }
 
         /// <summary>
-        /// Indicates whether a type is nested or not.
-        /// </summary>
-        public bool IsNested => _containingType != null;
-
-        /// <summary>
         /// Gets the nested types within the mapped types.
         /// </summary>
         /// <returns>The list of <see cref="TypeMapper"/> representing the nested types.</returns>
@@ -89,21 +85,14 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                 _nestedTypes = new Dictionary<ITypeSymbol, TypeMapper>(Settings.EqualityComparer);
 
                 AddOrCreateMappers(Left, ElementSide.Left);
-
-                if (Right.Length == 1)
+                for (int i = 0; i < Right.Length; i++)
                 {
-                    AddOrCreateMappers(Right[0], ElementSide.Right);
-                }
-                else
-                {
-                    for (int i = 0; i < Right.Length; i++)
-                    {
-                        AddOrCreateMappers(Right[i], ElementSide.Right, i);
-                    }
+                    AddOrCreateMappers(Right[i], ElementSide.Right, i);
                 }
 
-                void AddOrCreateMappers(ITypeSymbol symbol, ElementSide side, int setIndex = 0)
+                void AddOrCreateMappers(ITypeSymbol? symbol, ElementSide side, int setIndex = 0)
                 {
+                    // Silently return if the element hasn't been added yet.
                     if (symbol == null)
                     {
                         return;
@@ -113,7 +102,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                     {
                         if (Settings.Filter.Include(nestedType))
                         {
-                            if (!_nestedTypes.TryGetValue(nestedType, out TypeMapper mapper))
+                            if (!_nestedTypes.TryGetValue(nestedType, out TypeMapper? mapper))
                             {
                                 mapper = new TypeMapper(Settings, this, Right.Length);
                                 _nestedTypes.Add(nestedType, mapper);
@@ -138,21 +127,14 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                 _members = new Dictionary<ISymbol, MemberMapper>(Settings.EqualityComparer);
 
                 AddOrCreateMappers(Left, ElementSide.Left);
-
-                if (Right.Length == 1)
+                for (int i = 0; i < Right.Length; i++)
                 {
-                    AddOrCreateMappers(Right[0], ElementSide.Right);
-                }
-                else
-                {
-                    for (int i = 0; i < Right.Length; i++)
-                    {
-                        AddOrCreateMappers(Right[i], ElementSide.Right, i);
-                    }
+                    AddOrCreateMappers(Right[i], ElementSide.Right, i);
                 }
 
-                void AddOrCreateMappers(ITypeSymbol symbol, ElementSide side, int setIndex = 0)
+                void AddOrCreateMappers(ITypeSymbol? symbol, ElementSide side, int setIndex = 0)
                 {
+                    // Silently return if the element hasn't been added yet.
                     if (symbol == null)
                     {
                         return;
@@ -166,7 +148,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                         // we would compare __value vs null and emit some warnings.
                         if (Settings.Filter.Include(member) && member is not ITypeSymbol && !IsSpecialEnumField(member))
                         {
-                            if (!_members.TryGetValue(member, out MemberMapper mapper))
+                            if (!_members.TryGetValue(member, out MemberMapper? mapper))
                             {
                                 mapper = new MemberMapper(Settings, this, Right.Length);
                                 _members.Add(member, mapper);

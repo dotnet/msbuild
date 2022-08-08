@@ -9,17 +9,17 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
     /// Class to wrap an Element of T with it's <see cref="MetadataInformation"/>.
     /// </summary>
     /// <typeparam name="T">The type of the Element that is holded</typeparam>
-    public class ElementContainer<T> where T : ISymbol
+    public readonly struct ElementContainer<T> where T : ISymbol
     {
         /// <summary>
         /// The element that the container is holding.
         /// </summary>
-        public T Element { get; private set; }
+        public T Element { get; }
 
         /// <summary>
         /// The metadata associated to the element.
         /// </summary>
-        public MetadataInformation MetadataInformation { get; private set; }
+        public MetadataInformation MetadataInformation { get; }
 
         /// <summary>
         /// Instantiates a new object with the <paramref name="element"/> and <paramref name="metadataInformation"/> used.

@@ -1,11 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.ApiCompatibility.Abstractions;
 
 namespace Microsoft.DotNet.ApiCompatibility
 {
@@ -38,7 +37,7 @@ namespace Microsoft.DotNet.ApiCompatibility
 
             DifferenceVisitor visitor = new();
             visitor.Visit(mapper);
-            return visitor.DiagnosticCollections.First();
+            return visitor.DiagnosticCollections[0];
         }
 
         /// <inheritdoc />
@@ -47,23 +46,13 @@ namespace Microsoft.DotNet.ApiCompatibility
             string? leftName = null,
             string? rightName = null)
         {
-            if (left == null)
-            {
-                throw new ArgumentNullException(nameof(left));
-            }
-
-            if (right == null)
-            {
-                throw new ArgumentNullException(nameof(right));
-            }
-
             AssemblyMapper mapper = new(GetComparingSettingsCore(leftName, rightName != null ? new[] { rightName } : null));
             mapper.AddElement(left, ElementSide.Left);
             mapper.AddElement(right, ElementSide.Right);
 
             DifferenceVisitor visitor = new();
             visitor.Visit(mapper);
-            return visitor.DiagnosticCollections.First();
+            return visitor.DiagnosticCollections[0];
         }
 
         /// <inheritdoc />
@@ -71,29 +60,28 @@ namespace Microsoft.DotNet.ApiCompatibility
             IList<ElementContainer<IAssemblySymbol>> right)
         {
             int rightCount = right.Count;
-            AssemblyMapper mapper = new(new ComparingSettings(), rightSetSize: rightCount);
-            mapper.AddElement(left.Element, ElementSide.Left);
 
+            // Retrieve the right names
             string[] rightNames = new string[rightCount];
             for (int i = 0; i < rightCount; i++)
             {
-                ElementContainer<IAssemblySymbol> element = right[i];
-                rightNames[i] = element.MetadataInformation.DisplayString;
-                mapper.AddElement(element.Element, ElementSide.Right, i);
+                rightNames[i] = right[i].MetadataInformation.DisplayString;
             }
 
-            mapper.Settings = GetComparingSettingsCore(left.MetadataInformation.DisplayString, rightNames);
+            AssemblyMapper mapper = new(GetComparingSettingsCore(left.MetadataInformation.DisplayString, rightNames), rightSetSize: rightCount);
+            mapper.AddElement(left.Element, ElementSide.Left);
+            for (int i = 0; i < rightCount; i++)
+            {
+                mapper.AddElement(right[i].Element, ElementSide.Right, i);
+            }
 
             DifferenceVisitor visitor = new(rightCount: rightCount);
             visitor.Visit(mapper);
 
             (MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)[] result = new(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)[rightCount];
-
-            int count = 0;
-            foreach (IEnumerable<CompatDifference> collection in visitor.DiagnosticCollections)
+            for (int i = 0; i < visitor.DiagnosticCollections.Count; i++)
             {
-                result[count] = (left.MetadataInformation, right[count].MetadataInformation, collection);
-                count++;
+                result[i] = (left.MetadataInformation, right[i].MetadataInformation, visitor.DiagnosticCollections[i]);
             }
             
             return result;

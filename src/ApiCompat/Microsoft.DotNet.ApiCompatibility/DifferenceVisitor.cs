@@ -1,9 +1,9 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using System;
 using System.Collections.Generic;
+using Microsoft.DotNet.ApiCompatibility.Abstractions;
 
 namespace Microsoft.DotNet.ApiCompatibility
 {
@@ -13,6 +13,12 @@ namespace Microsoft.DotNet.ApiCompatibility
     public class DifferenceVisitor : MapperVisitor
     {
         private readonly HashSet<CompatDifference>[] _diagnostics;
+
+        /// <summary>
+        /// A list of <see cref="DiagnosticBag{CompatDifference}"/>.
+        /// One per element compared in the right hand side.
+        /// </summary>
+        public IReadOnlyList<IReadOnlyCollection<CompatDifference>> DiagnosticCollections => _diagnostics;
 
         /// <summary>
         /// Instantiates the visitor with the desired settings.
@@ -26,7 +32,6 @@ namespace Microsoft.DotNet.ApiCompatibility
             }
 
             _diagnostics = new HashSet<CompatDifference>[rightCount];
-
             for (int i = 0; i < rightCount; i++)
             {
                 _diagnostics[i] = new HashSet<CompatDifference>();
@@ -43,7 +48,7 @@ namespace Microsoft.DotNet.ApiCompatibility
             base.Visit(assembly);
             // After visiting the assembly, the assembly mapper will contain any assembly load errors that happened
             // when trying to resolve typeforwarded types. If there were any, we add them to the diagnostic bag next.
-            AddAssemblyLoadErrors(assembly);
+            AddToDiagnosticCollections(assembly.AssemblyLoadErrors);
         }
 
         /// <summary>
@@ -69,24 +74,10 @@ namespace Microsoft.DotNet.ApiCompatibility
             AddDifferences(member);
         }
 
-        /// <summary>
-        /// A list of <see cref="DiagnosticBag{CompatDifference}"/>.
-        /// One per element compared in the right hand side.
-        /// </summary>
-        public IEnumerable<IEnumerable<CompatDifference>> DiagnosticCollections => _diagnostics;
-
         private void AddDifferences<T>(ElementMapper<T> mapper)
         {
             IReadOnlyList<IEnumerable<CompatDifference>> differences = mapper.GetDifferences();
-
             AddToDiagnosticCollections(differences);
-        }
-
-        private void AddAssemblyLoadErrors<T>(ElementMapper<T> mapper)
-        {
-            IReadOnlyList<IEnumerable<CompatDifference>> assemblyLoadErrors = mapper.GetAssemblyLoadErrors();
-
-            AddToDiagnosticCollections(assemblyLoadErrors);
         }
 
         private void AddToDiagnosticCollections(IReadOnlyList<IEnumerable<CompatDifference>> diagnosticsToAdd)

@@ -4,6 +4,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
@@ -50,14 +51,20 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 else if (mapper is MemberMapper mm)
                 {
                     if (mm.ShouldDiffElement(rightIndex))
+                    {
+                        // ContainingType Left and Right cannot be null, as otherwise, the above condition would be false.
+                        Debug.Assert(mm.ContainingType.Left != null);
+                        Debug.Assert(mm.ContainingType.Right[rightIndex] != null);
+
                         _context.RunOnMemberSymbolActions(
                             mm.Left,
                             mm.Right[rightIndex],
-                            mm.ContainingType.Left,
-                            mm.ContainingType.Right[rightIndex],
+                            mm.ContainingType.Left!,
+                            mm.ContainingType.Right[rightIndex]!,
                             leftName,
                             rightName,
                             differences);
+                    }
                 }
 
                 result[rightIndex] = differences;
