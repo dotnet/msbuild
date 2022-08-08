@@ -451,7 +451,59 @@ public static class Program
         }
 
         [Fact]
+        public void It_publishes_on_release_if_PublishRelease_property_set_in_sln()
+        {
+            var slnAsset = _testAssetsManager
+               .CopyTestAsset("TestAppWithSlnUsingPublishRelease", "PublishReleaseSln");
+
+            new BuildCommand(slnAsset)
+           .Execute()
+           .Should()
+           .Pass();
+
+            var publishCommand = new DotnetPublishCommand(Log, slnAsset.TestRoot);
+
+            publishCommand
+            .Execute()
+            .Should()
+            .Pass();
+
+            var expectedAssetPath = System.IO.Path.Combine(slnAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
+            Assert.True(File.Exists(expectedAssetPath));
+        }
+
+        [Fact]
         public void It_publishes_on_release_if_PublishRelease_property_set_in_csproj()
+        {
+            var helloWorldAsset = _testAssetsManager
+               .CopyTestAsset("HelloWorld", "PublishReleaseHelloWorldCsProj")
+               .WithSource()
+               .WithTargetFramework(ToolsetInfo.CurrentTargetFramework)
+               .WithProjectChanges(project =>
+               {
+                   var ns = project.Root.Name.Namespace;
+                   var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                   propertyGroup.Add(new XElement(ns + "PublishRelease", "true"));
+               });
+
+            new BuildCommand(helloWorldAsset)
+           .Execute()
+           .Should()
+           .Pass();
+
+            var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
+
+            publishCommand
+            .Execute()
+            .Should()
+            .Pass();
+
+            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
+            Assert.True(File.Exists(expectedAssetPath));
+        }
+
+        [Fact]
+        public void It_errors_with_conflicting_PublishRelease_top_level_projects()
         {
             var helloWorldAsset = _testAssetsManager
                .CopyTestAsset("HelloWorld", "PublishReleaseHelloWorldCsProj")

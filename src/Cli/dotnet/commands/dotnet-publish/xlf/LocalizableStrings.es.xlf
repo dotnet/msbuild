@@ -47,6 +47,11 @@
         <target state="translated">No compile el proyecto antes de publicarlo. Implica --no-restore.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectDeductionFailure">
+        <source>A problem with the project or solution prevented checking properties for Release.</source>
+        <target state="new">A problem with the project or solution prevented checking properties for Release.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>
@@ -57,6 +62,11 @@ El valor predeterminado es publicar una aplicación dependiente del marco.</targ
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default is 'Debug'. Use the `PublishRelease` property to make 'Release' the default for this command.</source>
         <target state="translated">Configuración para la que se va a publicar. El valor predeterminado es "Debug". Use la propiedad "PublishRelease" para que "Release" sea el valor predeterminado para este comando.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TopLevelPublishConfigurationMismatchError">
+        <source>Multiple top-level projects in the given solution contain conflicting PublishRelease or PackRelease values. To use conflicting configurations, leverage a Directory.build.props file instead of setting flags that don't match.</source>
+        <target state="new">Multiple top-level projects in the given solution contain conflicting PublishRelease or PackRelease values. To use conflicting configurations, leverage a Directory.build.props file instead of setting flags that don't match.</target>
         <note />
       </trans-unit>
     </body>
