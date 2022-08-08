@@ -58,6 +58,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private const double DefaultCustomSchedulerForSQLConfigurationLimitMultiplier = 1.1;
 
+        private static bool InprocNodeDisabledViaEnvironmentVariable = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
+
         #region Scheduler Data
 
         /// <summary>
@@ -144,7 +146,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Flag used for debugging by forcing all scheduling to go out-of-proc.
         /// </summary>
-        internal bool ForceAffinityOutOfProc { get; private set; }
+        internal bool ForceAffinityOutOfProc => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
+            ? InprocNodeDisabledViaEnvironmentVariable || _componentHost.BuildParameters.DisableInProcNode
+            : InprocNodeDisabledViaEnvironmentVariable;
 
         /// <summary>
         /// The path into which debug files will be written.
@@ -621,10 +625,6 @@ namespace Microsoft.Build.BackEnd
             _resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
             _configCache = (IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache);
             _inprocNodeContext =  new NodeLoggingContext(_componentHost.LoggingService, InProcNodeId, true);
-            var inprocNodeDisabledViaEnvironmentVariable = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
-            ForceAffinityOutOfProc = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
-                ? inprocNodeDisabledViaEnvironmentVariable || _componentHost.BuildParameters.DisableInProcNode
-                : inprocNodeDisabledViaEnvironmentVariable;
         }
 
         /// <summary>
