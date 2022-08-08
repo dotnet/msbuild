@@ -1,5 +1,5 @@
 ﻿using System.CommandLine;
-using System.Containers;
+using Microsoft.NET.Build.Containers;
 using System.Text.Json;
 
 var fileOption = new Argument<DirectoryInfo>(
