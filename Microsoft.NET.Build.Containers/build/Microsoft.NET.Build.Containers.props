@@ -1,0 +1,14 @@
+<Project>
+    <PropertyGroup>
+        <taskForldername>tasks</taskForldername>
+        <taskFramework>net7.0</taskFramework>
+        <!--The folder where the custom task will be present. It points to inside the nuget package. -->
+        <CustomTasksFolder>$(MSBuildThisFileDirectory)..\$(taskForldername)\$(taskFramework)</CustomTasksFolder>
+        <!--Reference to the assembly which contains the MSBuild Task-->
+        <CustomTasksAssembly>$(CustomTasksFolder)\$(MSBuildThisFileName).dll</CustomTasksAssembly>
+    </PropertyGroup>
+
+    <!--Register our custom task-->
+    <UsingTask TaskName="$(MSBuildThisFileName).CreateNewImage" AssemblyFile="$(CustomTasksAssembly)"/>
+    <UsingTask TaskName="$(MSBuildThisFileName).ParseContainerProperties" AssemblyFile="$(CustomTasksAssembly)"/>
+</Project>
