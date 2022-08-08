@@ -15,22 +15,21 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal NewCommand(
             string commandName,
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
-            NewCommandCallbacks callbacks)
-            : base(hostBuilder, telemetryLoggerBuilder, callbacks, commandName, SymbolStrings.Command_New_Description)
+            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
+            : base(hostBuilder, telemetryLoggerBuilder, commandName, SymbolStrings.Command_New_Description)
         {
             this.TreatUnmatchedTokensAsErrors = true;
 
             //it is important that legacy commands are built before non-legacy, as non legacy commands are building validators that rely on legacy stuff
-            BuildLegacySymbols(hostBuilder, telemetryLoggerBuilder, callbacks);
+            BuildLegacySymbols(hostBuilder, telemetryLoggerBuilder);
 
-            this.Add(new InstantiateCommand(hostBuilder, telemetryLoggerBuilder, callbacks));
-            this.Add(new InstallCommand(this, hostBuilder, telemetryLoggerBuilder, callbacks));
-            this.Add(new UninstallCommand(this, hostBuilder, telemetryLoggerBuilder, callbacks));
-            this.Add(new UpdateCommand(this, hostBuilder, telemetryLoggerBuilder, callbacks));
-            this.Add(new SearchCommand(this, hostBuilder, telemetryLoggerBuilder, callbacks));
-            this.Add(new ListCommand(this, hostBuilder, telemetryLoggerBuilder, callbacks));
-            this.Add(new AliasCommand(hostBuilder, telemetryLoggerBuilder, callbacks));
+            this.Add(new InstantiateCommand(hostBuilder, telemetryLoggerBuilder));
+            this.Add(new InstallCommand(this, hostBuilder, telemetryLoggerBuilder));
+            this.Add(new UninstallCommand(this, hostBuilder, telemetryLoggerBuilder));
+            this.Add(new UpdateCommand(this, hostBuilder, telemetryLoggerBuilder));
+            this.Add(new SearchCommand(this, hostBuilder, telemetryLoggerBuilder));
+            this.Add(new ListCommand(this, hostBuilder, telemetryLoggerBuilder));
+            this.Add(new AliasCommand(hostBuilder, telemetryLoggerBuilder));
 
             this.AddGlobalOption(DebugCustomSettingsLocationOption);
             this.AddGlobalOption(DebugVirtualizeSettingsOption);

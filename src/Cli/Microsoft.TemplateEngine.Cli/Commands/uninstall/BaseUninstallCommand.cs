@@ -14,9 +14,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal BaseUninstallCommand(
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
             Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
-            NewCommandCallbacks callbacks,
             string commandName)
-            : base(hostBuilder, telemetryLoggerBuilder, callbacks, commandName, SymbolStrings.Command_Uninstall_Description)
+            : base(hostBuilder, telemetryLoggerBuilder, commandName, SymbolStrings.Command_Uninstall_Description)
         {
             this.AddArgument(NameArgument);
         }

@@ -28,6 +28,9 @@ using LocalizableStrings = Microsoft.DotNet.Tools.New.LocalizableStrings;
 using Microsoft.TemplateEngine.MSBuildEvaluation;
 using Microsoft.TemplateEngine.Abstractions.Constraints;
 using System.IO;
+using NuGet.Packaging;
+using Microsoft.TemplateEngine.Cli.PostActionProcessors;
+using Microsoft.DotNet.Tools.New.PostActionProcessors;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -73,14 +76,6 @@ namespace Microsoft.DotNet.Cli
                 return logger;
             };
 
-            var callbacks = new Microsoft.TemplateEngine.Cli.NewCommandCallbacks()
-            {
-                RestoreProject = RestoreProject,
-                AddPackageReference = AddPackageReference,
-                AddProjectReference = AddProjectReference,
-                AddProjectsToSolution = AddProjectsToSolution
-            };
-
             var getEngineHost = (ParseResult parseResult) => {
                 bool disableSdkTemplates = parseResult.GetValueForOption(_disableSdkTemplates);
                 bool disableProjectContext = parseResult.GetValueForOption(_disableProjectContextEvaluation)
@@ -91,7 +86,7 @@ namespace Microsoft.DotNet.Cli
                 return CreateHost(disableSdkTemplates, disableProjectContext, projectPath);
             };
 
-            var command = Microsoft.TemplateEngine.Cli.NewCommandFactory.Create(CommandName, getEngineHost, getLogger, callbacks);
+            var command = Microsoft.TemplateEngine.Cli.NewCommandFactory.Create(CommandName, getEngineHost, getLogger);
 
             // adding this option lets us look for its bound value during binding in a typed way
             command.AddGlobalOption(_disableSdkTemplates);
@@ -107,6 +102,14 @@ namespace Microsoft.DotNet.Cli
             builtIns.AddRange(Microsoft.TemplateEngine.Edge.Components.AllComponents);
             builtIns.AddRange(Microsoft.TemplateEngine.Cli.Components.AllComponents);
             builtIns.AddRange(Microsoft.TemplateSearch.Common.Components.AllComponents);
+
+            //post actions
+            builtIns.AddRange(new (Type, IIdentifiedComponent)[]
+            {
+                (typeof(IPostActionProcessor), new DotnetAddPostActionProcessor()),
+                (typeof(IPostActionProcessor), new DotnetSlnPostActionProcessor()),
+                (typeof(IPostActionProcessor), new DotnetRestorePostActionProcessor()),
+            });
             if (!disableSdkTemplates)
             {
                 builtIns.Add((typeof(ITemplatePackageProviderFactory), new BuiltInTemplatePackageProviderFactory()));
@@ -135,76 +138,6 @@ namespace Microsoft.DotNet.Cli
             return new DefaultTemplateEngineHost(HostIdentifier, "v" + Product.Version, preferences, builtIns);
         }
 
-        private static bool RestoreProject(string pathToRestore)
-        {
-            try
-            {
-                PathUtility.EnsureAllPathsExist(new[] { pathToRestore }, CommonLocalizableStrings.FileNotFound, allowDirectories: true);
-                return RestoreCommand.Run(new string[] { pathToRestore }) == 0;
-            }
-            catch (Exception e)
-            {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.RestoreCallback_Failed, e.Message));
-                return false;
-            }
-        }
 
-        private static bool AddPackageReference(string projectPath, string packageName, string? version)
-        {
-            try
-            {
-                PathUtility.EnsureAllPathsExist(new[] { projectPath }, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
-                IEnumerable<string> commandArgs = new [] { "add", projectPath, "package", packageName };
-                if (!string.IsNullOrWhiteSpace(version))
-                {
-                    commandArgs = commandArgs.Append(AddPackageParser.VersionOption.Aliases.First()).Append(version);
-                }
-                var addPackageReferenceCommand = new AddPackageReferenceCommand(AddCommandParser.GetCommand().Parse(commandArgs.ToArray()));
-                return addPackageReferenceCommand.Execute() == 0;
-            }
-            catch (Exception e)
-            {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.AddPackageReferenceCallback_Failed, e.Message));
-                return false;
-            }
-        }
-
-        private static bool AddProjectReference(string projectPath, IReadOnlyList<string> projectsToAdd)
-        {
-            try
-            {
-                PathUtility.EnsureAllPathsExist(new[] { projectPath }, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
-                PathUtility.EnsureAllPathsExist(projectsToAdd, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
-                IEnumerable<string> commandArgs = new[] { "add", projectPath, "reference", }.Concat(projectsToAdd);
-                var addProjectReferenceCommand = new AddProjectToProjectReferenceCommand(AddCommandParser.GetCommand().Parse(commandArgs.ToArray()));
-                return addProjectReferenceCommand.Execute() == 0;
-            }
-            catch (Exception e)
-            {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.AddProjectReferenceCallback_Failed, e.Message));
-                return false;
-            }
-        }
-
-        private static bool AddProjectsToSolution(string solutionPath, IReadOnlyList<string> projectsToAdd, string? solutionFolder)
-        {
-            try
-            {
-                PathUtility.EnsureAllPathsExist(new[] { solutionPath }, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
-                PathUtility.EnsureAllPathsExist(projectsToAdd, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
-                IEnumerable<string> commandArgs = new[] { "sln", solutionPath, "add" }.Concat(projectsToAdd);
-                if (!string.IsNullOrWhiteSpace(solutionFolder))
-                {
-                    commandArgs = commandArgs.Append(SlnAddParser.SolutionFolderOption.Aliases.First()).Append(solutionFolder);
-                }
-                var addProjectToSolutionCommand = new AddProjectToSolutionCommand(SlnCommandParser.GetCommand().Parse(commandArgs.ToArray()));
-                return addProjectToSolutionCommand.Execute() == 0;
-            }
-            catch (Exception e)
-            {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.AddProjectsToSolutionCallback_Failed, e.Message));
-                return false;
-            }
-        }
     }
 }

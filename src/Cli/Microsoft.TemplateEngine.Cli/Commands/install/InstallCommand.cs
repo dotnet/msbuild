@@ -12,9 +12,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         public InstallCommand(
                 NewCommand parentCommand,
                 Func<ParseResult, ITemplateEngineHost> hostBuilder,
-                Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
-                NewCommandCallbacks callbacks)
-            : base(parentCommand, hostBuilder, telemetryLoggerBuilder, callbacks, "install")
+                Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
+            : base(parentCommand, hostBuilder, telemetryLoggerBuilder, "install")
         {
             parentCommand.AddNoLegacyUsageValidators(this);
         }

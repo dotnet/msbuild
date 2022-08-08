@@ -15,9 +15,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             NewCommand parentCommand,
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
             Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
-            NewCommandCallbacks callbacks,
             string commandName)
-            : base(hostBuilder, telemetryLoggerBuilder, callbacks, commandName, SymbolStrings.Command_Install_Description)
+            : base(hostBuilder, telemetryLoggerBuilder, commandName, SymbolStrings.Command_Install_Description)
         {
             ParentCommand = parentCommand;
             this.AddArgument(NameArgument);

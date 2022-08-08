@@ -25,18 +25,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected BaseCommand(
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
             Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
-            NewCommandCallbacks callbacks,
             string name,
             string description)
             : base(name, description)
         {
             _hostBuilder = hostBuilder;
             _telemetryLoggerBuilder = telemetryLoggerBuilder;
-            Callbacks = callbacks;
-
         }
-
-        internal NewCommandCallbacks Callbacks { get; }
 
         protected internal virtual IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings)
         {
@@ -84,10 +79,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal BaseCommand(
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
             Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
-            NewCommandCallbacks callbacks,
             string name,
             string description)
-            : base(hostBuilder, telemetryLoggerBuilder, callbacks, name, description)
+            : base(hostBuilder, telemetryLoggerBuilder, name, description)
         {
             this.Handler = this;
         }

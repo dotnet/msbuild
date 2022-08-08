@@ -12,13 +12,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         internal AliasCommand(
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
-            NewCommandCallbacks callbacks)
-            : base(hostBuilder, telemetryLoggerBuilder, callbacks, "alias", SymbolStrings.Command_Alias_Description)
+            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
+            : base(hostBuilder, telemetryLoggerBuilder, "alias", SymbolStrings.Command_Alias_Description)
         {
             IsHidden = true;
-            this.Add(new AliasAddCommand(hostBuilder, telemetryLoggerBuilder, callbacks));
-            this.Add(new AliasShowCommand(hostBuilder, telemetryLoggerBuilder, callbacks));
+            this.Add(new AliasAddCommand(hostBuilder, telemetryLoggerBuilder));
+            this.Add(new AliasShowCommand(hostBuilder, telemetryLoggerBuilder));
         }
 
         protected override Task<NewCommandStatus> ExecuteAsync(

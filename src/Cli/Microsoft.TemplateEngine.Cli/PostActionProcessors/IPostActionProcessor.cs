@@ -8,7 +8,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
     /// <summary>
     /// The interface defining the post action processor supported by dotnet CLI.
     /// </summary>
-    internal interface IPostActionProcessor : IIdentifiedComponent
+    public interface IPostActionProcessor : IIdentifiedComponent
     {
         /// <summary>
         /// Processes the post action.
