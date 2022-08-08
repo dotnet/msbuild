@@ -53,18 +53,8 @@ namespace Microsoft.DotNet.Tools.Publish
                 parseResult.HasOption(PublishCommandParser.NoSelfContainedOption));
 
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PublishCommandParser.GetCommand()));
-            try
-            {
-                msbuildArgs.AddRange(GetAutomaticConfigurationIfSpecified(parseResult, PublishCommandParser.customDefaultConfigurationProperty,
-                        slnOrProjectArgs, PublishCommandParser.ConfigurationOption) ?? Array.Empty<string>());
-            }
-            catch(Exception)
-            {
-                // Shouldn't get here but there are many many scenarios to consider.
-                // Like failed file access, invalid projects or solution files that cause errors when read into memory,
-                // etc. For 7.0.100, It is better to not break the entire publish scenario and log a warning than to do so for scenarios we dont expect. 
-                Reporter.Output.WriteLine(LocalizableStrings.ProjectDeductionFailure.Yellow() + ". Args: " + slnOrProjectArgs);
-            }
+            msbuildArgs.AddRange(GetAutomaticConfigurationIfSpecified(parseResult, PublishCommandParser.customDefaultConfigurationProperty,
+                slnOrProjectArgs, PublishCommandParser.ConfigurationOption) ?? Array.Empty<string>());
             msbuildArgs.AddRange(slnOrProjectArgs ?? Array.Empty<string>());
 
             bool noRestore = parseResult.HasOption(PublishCommandParser.NoRestoreOption)
@@ -91,13 +81,12 @@ namespace Microsoft.DotNet.Tools.Publish
             Option<string> configOption
             )
         {
-            Debugger.Launch();
             ProjectInstance project = null;
 
-            List<string> calledArguments = new List<string>(new List<Token>(parseResult.Tokens.ToList()).Select(x => x.ToString()));
-            IEnumerable<string> slnProjectAndCommandArgs = (slnOrProjectArgs).ToList().Concat(calledArguments);
+            IEnumerable<string> calledArguments = parseResult.Tokens.Select(x => x.ToString());
+            IEnumerable<string> slnProjectAndCommandArgs = slnOrProjectArgs.Concat(calledArguments);
             project = GetTargetedProject(slnProjectAndCommandArgs, defaultedConfigurationProperty);
-            
+
             if (project != null)
             {
                 string releaseMode = "";
@@ -131,19 +120,15 @@ namespace Microsoft.DotNet.Tools.Publish
 
             foreach (SlnProject project in sln.Projects)
             {
-                ProjectInstance projectData = null;
                 const string solutionFolderGuid = "{{2150E333-8FDC-42A3-9474-1A3956D46DE8}}";
-                if (project.TypeGuid == solutionFolderGuid || !IsValidProjectFile(project.FilePath))
+                if (project.TypeGuid == solutionFolderGuid)
                     continue;
-                try
-                {
-                    projectData = new ProjectInstance(project.FilePath);
-                }
-                catch(Exception) // Access level protection prevents us from reading project, etc
-                {
+
+                ProjectInstance projectData = TryGetProjectInstance(project.FilePath);
+                if (projectData == null)
                     continue;
-                }
-                if(projectData.GetPropertyValue("OutputType") == topLevelProjectOutputType)
+
+                if (projectData.GetPropertyValue("OutputType") == topLevelProjectOutputType)
                 {
                     if (ProjectHasUserCustomizedConfiguration(projectData))
                         return null; // We don't want to override Configuration if ANY project in a sln uses a custom configuration
@@ -169,33 +154,33 @@ namespace Microsoft.DotNet.Tools.Publish
         }
 
         /// <returns>A project instance that will be targeted to publish/pack, etc. null if one does not exist.</returns>
-        private static ProjectInstance GetTargetedProject(IEnumerable<string> slnOrProjectArgs, string slnProjectConfigPropertytoCheck="")
+        private static ProjectInstance GetTargetedProject(IEnumerable<string> slnOrProjectArgs, string slnProjectConfigPropertytoCheck = "")
         {
             string potentialProject = "";
 
             foreach (string arg in slnOrProjectArgs.Append(Directory.GetCurrentDirectory()))
             {
-                if (IsValidProjectFile(arg))
+                if (IsValidProjectFilePath(arg))
                 {
-                    return new ProjectInstance(arg);
+                    return TryGetProjectInstance(arg);
                 }
-                else if(Directory.Exists(arg)) // We should get here if the user did not provide a .proj or a .sln
+                else if (Directory.Exists(arg)) // We should get here if the user did not provide a .proj or a .sln
                 {
                     try
                     {
-                        return new ProjectInstance(MsbuildProject.GetProjectFileFromDirectory(arg).FullName);
+                        return TryGetProjectInstance(MsbuildProject.GetProjectFileFromDirectory(arg).FullName);
                     }
                     catch (GracefulException)
                     {
                         string potentialSln = Directory.GetFiles(arg, "*.sln", SearchOption.TopDirectoryOnly).FirstOrDefault();
-                     
-                        if(!string.IsNullOrEmpty(potentialSln))
+
+                        if (!string.IsNullOrEmpty(potentialSln))
                             return GetConfiguredTopLevelSlnProject(slnProjectConfigPropertytoCheck, potentialSln);
                     } // If nothing can be found: that's caught by MSBuild XMake::ProcessProjectSwitch -- don't change the behavior by failing here. 
                 }
             }
 
-            return string.IsNullOrEmpty(potentialProject) ? null : new ProjectInstance(potentialProject);
+            return string.IsNullOrEmpty(potentialProject) ? null : TryGetProjectInstance(potentialProject);
         }
 
         /// <returns>True if Configuration is a global property or was provided by the CLI: IE, the user customized configuration.</returns>
@@ -203,8 +188,8 @@ namespace Microsoft.DotNet.Tools.Publish
         {
             return parseResult.HasOption(configurationOption) || ProjectHasUserCustomizedConfiguration(project);
         }
-        
-        private static bool IsValidProjectFile(string path)
+
+        private static bool IsValidProjectFilePath(string path)
         {
             return File.Exists(path) && LikeOperator.LikeString(path, "*.*proj", VisualBasic.CompareMethod.Text);
         }
@@ -212,6 +197,20 @@ namespace Microsoft.DotNet.Tools.Publish
         private static bool ProjectHasUserCustomizedConfiguration(ProjectInstance project)
         {
             return project.GlobalProperties.ContainsKey("Configuration");
+        }
+
+        /// <returns>Creates a ProjectInstance if the project is valid, elsewise, fails..</returns>
+        private static ProjectInstance TryGetProjectInstance(string projectPath)
+        {
+            try
+            {
+                return new ProjectInstance(projectPath);
+            }
+            catch (Exception) // Catch failed file access, or invalid project files that cause errors when read into memory,
+            {
+                Reporter.Output.WriteLine(LocalizableStrings.ProjectDeductionFailure.Yellow());
+            }
+            return null;
         }
 
         public static int Run(ParseResult parseResult)
