@@ -226,9 +226,26 @@ namespace Microsoft.Build.UnitTests
         [Theory]
         [InlineData("zh-TW")]
         [InlineData("zh-MO")]
+        public void SupportAliasedCultures(string culture)
+        {
+            AssignCulture t = new AssignCulture();
+            t.BuildEngine = new MockEngine();
+            ITaskItem i = new TaskItem($"MyResource.{culture}.resx");
+            t.Files = new ITaskItem[] { i };
+            t.Execute();
+
+            Assert.Single(t.AssignedFiles);
+            Assert.Single(t.CultureNeutralAssignedFiles);
+            Assert.Equal(culture, t.AssignedFiles[0].GetMetadata("Culture"));
+            Assert.Equal($"MyResource.{culture}.resx", t.AssignedFiles[0].ItemSpec);
+            Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
+        }
+
+        [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "These cultures are not returned via Culture api on net472.")]
         [InlineData("sh-BA")]
         [InlineData("shi-MA")]
-        public void SupportAliasedCultures(string culture)
+        public void AliasedCultures_SupportedOnNetCore(string culture)
         {
             AssignCulture t = new AssignCulture();
             t.BuildEngine = new MockEngine();
