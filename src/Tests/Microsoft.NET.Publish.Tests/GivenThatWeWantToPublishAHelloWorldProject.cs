@@ -453,57 +453,50 @@ public static class Program
         [Fact]
         public void It_publishes_on_release_if_PublishRelease_property_set_in_sln()
         {
-            var slnAsset = _testAssetsManager
-               .CopyTestAsset("TestAppWithSlnUsingPublishRelease", "PublishReleaseSln");
+            var slnDir = _testAssetsManager
+               .CopyTestAsset("TestAppWithSlnUsingPublishRelease", "PublishReleaseSln")
+               .WithSource()
+               .Path;
 
-            new BuildCommand(slnAsset)
-           .Execute()
-           .Should()
-           .Pass();
+            new BuildCommand(Log, slnDir, "App.sln")
+               .Execute()
+               .Should()
+               .Pass();
 
-            var publishCommand = new DotnetPublishCommand(Log, slnAsset.TestRoot);
+            var publishCommand = new DotnetCommand(Log)
+                .WithWorkingDirectory(slnDir)
+                .Execute(@"dotnet", "publish")
+                .Should()
+                .Pass();
 
-            publishCommand
-            .Execute()
-            .Should()
-            .Pass();
-
-            var expectedAssetPath = System.IO.Path.Combine(slnAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
+            var expectedAssetPath = System.IO.Path.Combine(slnDir, "App", "bin", "Release", ToolsetInfo.CurrentTargetFramework, "publish", "App.dll");
             Assert.True(File.Exists(expectedAssetPath));
+        }
+
+        [Fact]
+        public void It_fails_if_PublishRelease_property_differs_in_sln_top_level_projects()
+        {
+            var slnDir = _testAssetsManager
+               .CopyTestAsset("TestAppWithSlnUsingConflictingPublishReleaseConfigurations", "PublishReleaseFailedSln")
+               .WithSource()
+               .Path;
+
+            new BuildCommand(Log, slnDir, "App.sln")
+               .Execute()
+               .Should()
+               .Pass();
+
+            var publishCommand = new DotnetCommand(Log)
+                .WithWorkingDirectory(slnDir)
+                .Execute(@"dotnet", "publish")
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDKERR:");
         }
 
         [Fact]
         public void It_publishes_on_release_if_PublishRelease_property_set_in_csproj()
-        {
-            var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld", "PublishReleaseHelloWorldCsProj")
-               .WithSource()
-               .WithTargetFramework(ToolsetInfo.CurrentTargetFramework)
-               .WithProjectChanges(project =>
-               {
-                   var ns = project.Root.Name.Namespace;
-                   var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                   propertyGroup.Add(new XElement(ns + "PublishRelease", "true"));
-               });
-
-            new BuildCommand(helloWorldAsset)
-           .Execute()
-           .Should()
-           .Pass();
-
-            var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
-
-            publishCommand
-            .Execute()
-            .Should()
-            .Pass();
-
-            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
-            Assert.True(File.Exists(expectedAssetPath));
-        }
-
-        [Fact]
-        public void It_errors_with_conflicting_PublishRelease_top_level_projects()
         {
             var helloWorldAsset = _testAssetsManager
                .CopyTestAsset("HelloWorld", "PublishReleaseHelloWorldCsProj")

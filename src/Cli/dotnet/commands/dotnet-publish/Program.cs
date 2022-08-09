@@ -18,6 +18,7 @@ using Microsoft.DotNet.Tools.Common;
 using Microsoft.VisualBasic.CompilerServices;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
+
 namespace Microsoft.DotNet.Tools.Publish
 {
     public class PublishCommand : RestoringCommand
@@ -211,7 +212,7 @@ namespace Microsoft.DotNet.Tools.Publish
             }
             catch (Exception) // Catch failed file access, or invalid project files that cause errors when read into memory,
             {
-                Reporter.Output.WriteLine(LocalizableStrings.ProjectDeductionFailure.Yellow());
+                Reporter.Output.WriteLine(LocalizableStrings.ProjectDeductionFailure.Yellow() + " " + projectPath.Yellow());
             }
             return null;
         }
