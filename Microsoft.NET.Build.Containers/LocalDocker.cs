@@ -50,7 +50,7 @@ public class LocalDocker
 
             // Stuff that (uncompressed) tarball into the image tar stream
             string layerTarballPath = $"{d.Digest.Substring("sha256:".Length)}/layer.tar";
-            writer.WriteEntry(localPath, layerTarballPath);
+            await writer.WriteEntryAsync(localPath, layerTarballPath);
             layerTarballPaths.Add(layerTarballPath);
         }
 
@@ -64,7 +64,7 @@ public class LocalDocker
                 DataStream = configStream
             };
 
-            writer.WriteEntry(configEntry); // TODO: asyncify these when API available (Preview 7)
+            await writer.WriteEntryAsync(configEntry);
         }
 
         // Add manifest
@@ -87,7 +87,7 @@ public class LocalDocker
                 DataStream = manifestStream
             };
 
-            writer.WriteEntry(manifestEntry); // TODO: asyncify these when API available (Preview 7)
+            await writer.WriteEntryAsync(manifestEntry);
         }
     }
 }
