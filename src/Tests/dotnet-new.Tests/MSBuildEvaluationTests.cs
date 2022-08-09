@@ -6,10 +6,9 @@
 using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Commands;
-using Xunit;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.Assertions;
-using System.IO;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.New.Tests
 {
@@ -26,19 +25,23 @@ namespace Microsoft.DotNet.New.Tests
             TestDirectory tempSettingsDir = _testAssetsManager.CreateTestDirectory();
 
             string templateLocation = GetTestTemplatePath("Item/ClassTemplate");
-            var cmd = new DotnetCommand(Log).Execute("new", "install", templateLocation, "--debug:custom-hive", tempSettingsDir.Path);
+            CommandResult cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir.Path)
+                .Execute("install", templateLocation);
             cmd.Should().Pass();
 
-            cmd = new DotnetCommand(Log)
+            cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir.Path)
                 .WithWorkingDirectory(tempDir.Path)
-                .Execute("new", "console", "--debug:custom-hive", tempSettingsDir.Path, "--name", "MyConsole");
+                .Execute("console", "--name", "MyConsole");
             cmd.Should().Pass();
 
             string projectPath = Path.Combine(tempDir.Path, "MyConsole");
 
-            cmd = new DotnetCommand(Log)
+            cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir.Path)
                 .WithWorkingDirectory(projectPath)
-                .Execute("new", "TestAssets.ClassTemplate", "--debug:custom-hive", tempSettingsDir.Path, "--debug:enable-project-context", "--name", "MyTestClass");
+                .Execute("TestAssets.ClassTemplate", "--name", "MyTestClass");
             cmd.Should().Pass();
 
             string testFilePath = Path.Combine(projectPath, "MyTestClass.cs");
@@ -46,9 +49,9 @@ namespace Microsoft.DotNet.New.Tests
             Assert.True(File.Exists(testFilePath));
             Assert.Contains("namespace MyConsole", File.ReadAllText(testFilePath));
 
-            cmd = new DotnetCommand(Log)
+            cmd = new DotnetBuildCommand(Log)
                 .WithWorkingDirectory(projectPath)
-                .Execute("build");
+                .Execute();
 
             cmd.Should().Pass();
         }
@@ -60,21 +63,25 @@ namespace Microsoft.DotNet.New.Tests
             TestDirectory tempSettingsDir = _testAssetsManager.CreateTestDirectory();
 
             string templateLocation = GetTestTemplatePath("Item/TestClassTemplate");
-            var cmd = new DotnetCommand(Log).Execute("new", "install", templateLocation, "--debug:custom-hive", tempSettingsDir.Path);
+            CommandResult cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir.Path)
+                .Execute("install", templateLocation);
             cmd.Should().Pass();
 
-            cmd = new DotnetCommand(Log)
+            cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir.Path)
                 .WithWorkingDirectory(tempDir.Path)
-                .Execute("new", "xunit", "--debug:custom-hive", tempSettingsDir.Path, "--name", "MyTestProject");
+                .Execute("xunit", "--name", "MyTestProject");
             cmd.Should().Pass();
 
 
             string projectPath = Path.Combine(tempDir.Path, "MyTestProject");
 
-            cmd = new DotnetCommand(Log)
+            cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir.Path)
                 .WithWorkingDirectory(projectPath)
                 .WithEnvironmentVariable("DOTNET_CLI_CONTEXT_VERBOSE", "true")
-                .Execute("new", "TestAssets.TestClassTemplate", "--debug:custom-hive", tempSettingsDir.Path, "--debug:enable-project-context", "--name", "MyTestClass");
+                .Execute("TestAssets.TestClassTemplate", "--name", "MyTestClass");
             cmd.Should().Pass();
 
             string testFilePath = Path.Combine(projectPath, "MyTestClass.cs");
@@ -82,9 +89,9 @@ namespace Microsoft.DotNet.New.Tests
             Assert.True(File.Exists(testFilePath));
             Assert.Contains("namespace MyTestProject", File.ReadAllText(testFilePath));
 
-            cmd = new DotnetCommand(Log)
+            cmd = new DotnetBuildCommand(Log)
                  .WithWorkingDirectory(projectPath)
-                 .Execute("build");
+                 .Execute();
 
             cmd.Should().Pass();
         }
@@ -96,26 +103,35 @@ namespace Microsoft.DotNet.New.Tests
             TestDirectory tempSettingsDir = _testAssetsManager.CreateTestDirectory();
 
             string templateLocation = GetTestTemplatePath("Item/TestClassTemplate");
-            var cmd = new DotnetCommand(Log).Execute("new", "install", templateLocation, "--debug:custom-hive", tempSettingsDir.Path);
-            cmd.Should().Pass();
-            templateLocation = GetTestTemplatePath("Item/ClassTemplate");
-            cmd = new DotnetCommand(Log).Execute("new", "install", templateLocation, "--debug:custom-hive", tempSettingsDir.Path);
+            CommandResult cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir.Path)
+                .Execute("install", templateLocation);
             cmd.Should().Pass();
 
-            cmd = new DotnetCommand(Log).Execute("new", "list", "--debug:enable-project-context", "--debug:custom-hive", tempSettingsDir.Path);
+            templateLocation = GetTestTemplatePath("Item/ClassTemplate");
+            cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir.Path)
+                .Execute("install", templateLocation);
+            cmd.Should().Pass();
+
+            cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir.Path)
+                .Execute("list");
             cmd.Should().Pass();
             cmd.StdOut.Should().NotContain("TestAssets.ClassTemplate").And.NotContain("TestAssets.TestClassTemplate");
 
-            cmd = new DotnetCommand(Log)
+            cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir.Path)
                 .WithWorkingDirectory(tempDir.Path)
-                .Execute("new", "console", "--debug:custom-hive", tempSettingsDir.Path, "--name", "MyConsole");
+                .Execute("console", "--name", "MyConsole");
             cmd.Should().Pass();
 
             string projectPath = Path.Combine(tempDir.Path, "MyConsole");
 
-            cmd = new DotnetCommand(Log)
+            cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir.Path)
                 .WithWorkingDirectory(projectPath)
-                .Execute("new", "list", "--debug:enable-project-context", "--debug:custom-hive", tempSettingsDir.Path);
+                .Execute("list");
             cmd.Should().Pass();
             cmd.StdOut.Should().Contain("TestAssets.ClassTemplate").And.NotContain("TestAssets.TestClassTemplate");
         }
@@ -127,42 +143,48 @@ namespace Microsoft.DotNet.New.Tests
             TestDirectory tempSettingsDir = _testAssetsManager.CreateTestDirectory();
 
             string templateLocation = GetTestTemplatePath("Item/ClassTemplate");
-            var cmd = new DotnetCommand(Log).Execute("new", "install", templateLocation, "--debug:custom-hive", tempSettingsDir.Path);
+            CommandResult cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir.Path)
+                .Execute("install", templateLocation);
             cmd.Should().Pass();
 
-            cmd = new DotnetCommand(Log)
+            cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir.Path)
                 .WithWorkingDirectory(tempDir.Path)
-                .Execute("new", "console", "--debug:custom-hive", tempSettingsDir.Path, "--name", "MyProject");
+                .Execute("console", "--name", "MyProject");
             cmd.Should().Pass();
 
-            cmd = new DotnetCommand(Log)
+            cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir.Path)
                 .WithWorkingDirectory(tempDir.Path)
-                .Execute("new", "classlib", "--debug:custom-hive", tempSettingsDir.Path, "--language", "F#", "--name", "MyProject");
+                .Execute("classlib", "--language", "F#", "--name", "MyProject");
             cmd.Should().Pass();
 
             string projectPath = Path.Combine(tempDir.Path, "MyProject");
 
-            cmd = new DotnetCommand(Log)
+            cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir.Path)
                 .WithWorkingDirectory(projectPath)
-                .Execute("new", "TestAssets.ClassTemplate", "--debug:custom-hive", tempSettingsDir.Path, "--debug:enable-project-context", "--name", "MyTestClass");
+                .Execute("TestAssets.ClassTemplate", "--name", "MyTestClass");
             cmd.Should().Fail()
                 .And.HaveStdErrContaining("Failed to instatiate template 'ClassTemplate', the following constraints are not met:")
                 .And.HaveStdErrContaining("Project capabiltities: Multiple projects found:")
                 .And.HaveStdErrContaining("Specify the project to use using --project option.");
 
-            cmd = new DotnetCommand(Log)
-                     .WithWorkingDirectory(projectPath)
-                     .Execute("new", "TestAssets.ClassTemplate", "--debug:custom-hive", tempSettingsDir.Path, "--debug:enable-project-context", "--name", "MyTestClass", "--project", "MyProject.csproj");
-            cmd.Should().Pass();
-
-            cmd = new DotnetCommand(Log)
+            cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir.Path)
                 .WithWorkingDirectory(projectPath)
-                .Execute("build", "MyProject.csproj");
+                .Execute("TestAssets.ClassTemplate", "--name", "MyTestClass", "--project", "MyProject.csproj");
             cmd.Should().Pass();
 
-            cmd = new DotnetCommand(Log)
+            cmd = new DotnetBuildCommand(Log)
+                .WithWorkingDirectory(projectPath)
+                .Execute("MyProject.csproj");
+            cmd.Should().Pass();
+
+            cmd = new DotnetBuildCommand(Log)
             .WithWorkingDirectory(projectPath)
-            .Execute("build", "MyProject.fsproj");
+            .Execute("MyProject.fsproj");
             cmd.Should().Pass();
         }
 
@@ -173,14 +195,17 @@ namespace Microsoft.DotNet.New.Tests
             TestDirectory tempSettingsDir = _testAssetsManager.CreateTestDirectory();
 
             string templateLocation = GetTestTemplatePath("Item/ClassTemplate");
-            var cmd = new DotnetCommand(Log).Execute("new", "install", templateLocation, "--debug:custom-hive", tempSettingsDir.Path);
+            CommandResult cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir.Path)
+                .Execute("install", templateLocation);
             cmd.Should().Pass();
             string projectPath = Path.Combine(tempDir.Path, "ConsoleFullFramework");
             DirectoryCopy(GetTestTemplatePath("ConsoleFullFramework"), projectPath);
 
-            cmd = new DotnetCommand(Log)
+            cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir.Path)
                 .WithWorkingDirectory(projectPath)
-                .Execute("new", "TestAssets.ClassTemplate", "--debug:custom-hive", tempSettingsDir.Path, "--debug:enable-project-context", "--name", "MyTestClass");
+                .Execute("TestAssets.ClassTemplate", "--name", "MyTestClass");
             cmd.Should().Fail()
                 .And.HaveStdErrContaining("Failed to instatiate template 'ClassTemplate', the following constraints are not met:")
                 .And.HaveStdErrContaining($"Project capabiltities: The project {Path.Combine(projectPath, "ConsoleFullFramework.csproj")} is not an SDK style project, and is not supported for evaluation.");
@@ -198,7 +223,7 @@ namespace Microsoft.DotNet.New.Tests
         private static void DirectoryCopy(string sourceDirName, string destDirName)
         {
             // Get the subdirectories for the specified directory.
-            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+            DirectoryInfo dir = new(sourceDirName);
 
             if (!dir.Exists)
             {

@@ -22,14 +22,14 @@
         <target state="translated">表达式无效，位置: {0}。</target>
         <note />
       </trans-unit>
+      <trans-unit id="DisableProjectContextEval_OptionDescription">
+        <source>Disables evaluating project context using MSBuild.</source>
+        <target state="new">Disables evaluating project context using MSBuild.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisableSdkTemplates_OptionDescription">
         <source>If present, prevents templates bundled in the SDK from being presented.</source>
         <target state="translated">如果存在，则阻止显示捆绑在 SDK 中的模板。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="EnableProjectContextEval_OptionDescription">
-        <source>Enables evaluating project context using MSBuild.</source>
-        <target state="translated">支持使用 MSBuild 评估项目上下文。</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildEvaluationResult_Error_NoProjectFound">

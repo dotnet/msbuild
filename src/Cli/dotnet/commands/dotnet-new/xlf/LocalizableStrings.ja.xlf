@@ -22,14 +22,14 @@
         <target state="translated">式が無効です、位置: {0}。</target>
         <note />
       </trans-unit>
+      <trans-unit id="DisableProjectContextEval_OptionDescription">
+        <source>Disables evaluating project context using MSBuild.</source>
+        <target state="new">Disables evaluating project context using MSBuild.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisableSdkTemplates_OptionDescription">
         <source>If present, prevents templates bundled in the SDK from being presented.</source>
         <target state="translated">SDK にバンドルされているテンプレートがある場合にそれらが表示されないようにします。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="EnableProjectContextEval_OptionDescription">
-        <source>Enables evaluating project context using MSBuild.</source>
-        <target state="translated">MSBuild を使用してプロジェクト コンテキストを評価できるようにします。</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildEvaluationResult_Error_NoProjectFound">

@@ -35,12 +35,12 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-new";
         public const string CommandName = "new";
-        private const string EnableProjectContextEvaluationEnvVar = "DOTNET_CLI_ENABLE_PROJECT_EVAL";
+        private const string EnableProjectContextEvaluationEnvVar = "DOTNET_CLI_DISABLE_PROJECT_EVAL";
 
         private const string HostIdentifier = "dotnetcli";
         private static readonly Option<bool> _disableSdkTemplates = new Option<bool>("--debug:disable-sdk-templates", () => false, LocalizableStrings.DisableSdkTemplates_OptionDescription).Hide();
 
-        private static readonly Option<bool> _enableProjectContextEvaluation = new Option<bool>("--debug:enable-project-context", () => false, LocalizableStrings.EnableProjectContextEval_OptionDescription).Hide();
+        private static readonly Option<bool> _disableProjectContextEvaluation = new Option<bool>("--debug:disable-project-context", () => false, LocalizableStrings.DisableProjectContextEval_OptionDescription).Hide();
 
         internal static Option<FileInfo> ProjectPathOption { get; } = new Option<FileInfo>("--project", LocalizableStrings.ProjectPath_OptionDescription).ExistingOnly().Hide();
 
@@ -83,24 +83,24 @@ namespace Microsoft.DotNet.Cli
 
             var getEngineHost = (ParseResult parseResult) => {
                 bool disableSdkTemplates = parseResult.GetValueForOption(_disableSdkTemplates);
-                bool enableProjectContext = parseResult.GetValueForOption(_enableProjectContextEvaluation)
+                bool disableProjectContext = parseResult.GetValueForOption(_disableProjectContextEvaluation)
                     || Env.GetEnvironmentVariableAsBool(EnableProjectContextEvaluationEnvVar);
                 FileInfo? projectPath = parseResult.GetValueForOption(ProjectPathOption);
 
                 //TODO: read and pass output directory
-                return CreateHost(disableSdkTemplates, enableProjectContext, projectPath);
+                return CreateHost(disableSdkTemplates, disableProjectContext, projectPath);
             };
 
             var command = Microsoft.TemplateEngine.Cli.NewCommandFactory.Create(CommandName, getEngineHost, getLogger, callbacks);
 
             // adding this option lets us look for its bound value during binding in a typed way
             command.AddGlobalOption(_disableSdkTemplates);
-            command.AddGlobalOption(_enableProjectContextEvaluation);
+            command.AddGlobalOption(_disableProjectContextEvaluation);
             command.AddGlobalOption(ProjectPathOption);
             return command;
         }
 
-        private static ITemplateEngineHost CreateHost(bool disableSdkTemplates, bool enableProjectContext, FileInfo? projectPath)
+        private static ITemplateEngineHost CreateHost(bool disableSdkTemplates, bool disableProjectContext, FileInfo? projectPath)
         {
             var builtIns = new List<(Type InterfaceType, IIdentifiedComponent Instance)>();
             builtIns.AddRange(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Components.AllComponents);
@@ -112,7 +112,7 @@ namespace Microsoft.DotNet.Cli
                 builtIns.Add((typeof(ITemplatePackageProviderFactory), new BuiltInTemplatePackageProviderFactory()));
                 builtIns.Add((typeof(ITemplatePackageProviderFactory), new OptionalWorkloadProviderFactory()));
             }
-            if (enableProjectContext)
+            if (!disableProjectContext)
             {
                 builtIns.Add((typeof(IBindSymbolSource), new ProjectContextSymbolSource()));
                 builtIns.Add((typeof(ITemplateConstraintFactory), new ProjectCapabilityConstraintFactory()));

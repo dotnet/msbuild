@@ -22,14 +22,14 @@
         <target state="translated">Недопустимое выражение, позиция: {0}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DisableProjectContextEval_OptionDescription">
+        <source>Disables evaluating project context using MSBuild.</source>
+        <target state="new">Disables evaluating project context using MSBuild.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisableSdkTemplates_OptionDescription">
         <source>If present, prevents templates bundled in the SDK from being presented.</source>
         <target state="translated">При наличии этого параметра шаблоны, входящие в пакет SDK, не будут представлены.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="EnableProjectContextEval_OptionDescription">
-        <source>Enables evaluating project context using MSBuild.</source>
-        <target state="translated">Позволяет оценивать контекст проекта с помощью MSBuild.</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildEvaluationResult_Error_NoProjectFound">

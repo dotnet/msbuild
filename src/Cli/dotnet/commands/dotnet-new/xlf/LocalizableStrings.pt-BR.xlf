@@ -22,14 +22,14 @@
         <target state="translated">Expressão inválida, posição: {0}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DisableProjectContextEval_OptionDescription">
+        <source>Disables evaluating project context using MSBuild.</source>
+        <target state="new">Disables evaluating project context using MSBuild.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisableSdkTemplates_OptionDescription">
         <source>If present, prevents templates bundled in the SDK from being presented.</source>
         <target state="translated">Se presente, impede que os modelos agrupados no SDK sejam apresentados.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="EnableProjectContextEval_OptionDescription">
-        <source>Enables evaluating project context using MSBuild.</source>
-        <target state="translated">Habilita a avaliação do contexto do projeto usando o MSBuild.</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildEvaluationResult_Error_NoProjectFound">

@@ -22,14 +22,14 @@
         <target state="translated">運算式無效，位置: {0}。</target>
         <note />
       </trans-unit>
+      <trans-unit id="DisableProjectContextEval_OptionDescription">
+        <source>Disables evaluating project context using MSBuild.</source>
+        <target state="new">Disables evaluating project context using MSBuild.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisableSdkTemplates_OptionDescription">
         <source>If present, prevents templates bundled in the SDK from being presented.</source>
         <target state="translated">如果存在，則會防止顯示 SDK 中套件組合的範本。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="EnableProjectContextEval_OptionDescription">
-        <source>Enables evaluating project context using MSBuild.</source>
-        <target state="translated">使用 MSBuild 啟用評估專案內容。</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildEvaluationResult_Error_NoProjectFound">

@@ -132,11 +132,11 @@
   <data name="CapabilityExpressionEvaluator_Exception_InvalidExpression" xml:space="preserve">
     <value>Invalid expression, position: {0}.</value>
   </data>
+  <data name="DisableProjectContextEval_OptionDescription" xml:space="preserve">
+    <value>Disables evaluating project context using MSBuild.</value>
+  </data>
   <data name="DisableSdkTemplates_OptionDescription" xml:space="preserve">
     <value>If present, prevents templates bundled in the SDK from being presented.</value>
-  </data>
-  <data name="EnableProjectContextEval_OptionDescription" xml:space="preserve">
-    <value>Enables evaluating project context using MSBuild.</value>
   </data>
   <data name="MSBuildEvaluationResult_Error_NoProjectFound" xml:space="preserve">
     <value>No project was found at the path: {0}.</value>
