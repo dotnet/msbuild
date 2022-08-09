@@ -1052,7 +1052,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         }
 
         [Fact]
-        public void NotAllNodeDefineAPlugin()
+        public void NotAllNodesDefineAPlugin()
         {
             var graph = Helpers.CreateProjectGraph(
                 _env,
