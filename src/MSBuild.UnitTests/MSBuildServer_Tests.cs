@@ -218,7 +218,11 @@ namespace Microsoft.Build.Engine.UnitTests
         public void CanShutdownServerProcess(bool byBuildManager)
         {
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+
+            // Just for sure close server, so previous server instances does not effect this run.
+            BuildManager.DefaultBuildManager.ShutdownAllNodes();
 
             // Start a server node and find its PID.
             string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success, false, _output);
@@ -240,18 +244,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 serverIsDown.ShouldBeTrue();
             }
 
-            if (serverProcess.WaitForExit(3000))
-            {
-                serverProcess.WaitForExit();
-            }
-
-            if (!NativeMethodsShared.IsWindows)
-            {
-                // For one reason or another on non Windows OS, it looks like if process dies it still take some time until
-                // owned mutexes are released.
-                // This was causing flaky tests. Lets wait a bit.
-                Thread.Sleep(1000);
-            }
+            serverProcess.WaitForExit(10_000);
 
             serverProcess.HasExited.ShouldBeTrue();
         }
