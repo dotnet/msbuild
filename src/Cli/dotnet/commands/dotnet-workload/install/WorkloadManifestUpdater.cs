@@ -240,32 +240,41 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         }
 
 
-        public async Task<IEnumerable<WorkloadDownload>> GetManifestPackageDownloadsAsync(bool includePreviews, SdkFeatureBand origSdkFeatureBand, SdkFeatureBand installedSdkFeatureBand)
+        public async Task<IEnumerable<WorkloadDownload>> GetManifestPackageDownloadsAsync(bool includePreviews, SdkFeatureBand providedSdkFeatureBand, SdkFeatureBand installedSdkFeatureBand)
         {
-            var packageIds = GetInstalledManifestIds()
-                .Select(manifestId => _workloadManifestInstaller.GetManifestPackageId(manifestId, origSdkFeatureBand));
-
             var downloads = new List<WorkloadDownload>();
             foreach (var manifest in _workloadResolver.GetInstalledManifests())
             {
                 try
                 {
-                    
-                    var packageId = _workloadManifestInstaller.GetManifestPackageId(new ManifestId(manifest.Id), origSdkFeatureBand);
+                    var packageId = _workloadManifestInstaller.GetManifestPackageId(new ManifestId(manifest.Id), providedSdkFeatureBand);
 
                     bool success;
+                    // After checking the --sdk-version, check the current sdk band, and then the manifest band in that order
                     (success, var latestVersion) = await GetPackageVersion(packageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreviews);
                     if (success)
                     {
                         downloads.Add(new WorkloadDownload(manifest.Id, packageId.ToString(), latestVersion.ToString()));
                     }
-                    if (!success)
+
+                    if (!success && !installedSdkFeatureBand.Equals(providedSdkFeatureBand))
                     {
-                        //var newFeatureBand = new SdkFeatureBand(manifest.ManifestFeatureBand);
                         var newPackageId = _workloadManifestInstaller.GetManifestPackageId(new ManifestId(manifest.Id), installedSdkFeatureBand);
 
                         (success, latestVersion) = await GetPackageVersion(newPackageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreviews);
                         
+                        if (success)
+                        {
+                            downloads.Add(new WorkloadDownload(manifest.Id, newPackageId.ToString(), latestVersion.ToString()));
+                        }
+                    }
+                    var fallbackFeatureBand = new SdkFeatureBand(manifest.ManifestFeatureBand);
+                    if (!success && !fallbackFeatureBand.Equals(installedSdkFeatureBand))
+                    {
+                        var newPackageId = _workloadManifestInstaller.GetManifestPackageId(new ManifestId(manifest.Id), fallbackFeatureBand);
+
+                        (success, latestVersion) = await GetPackageVersion(newPackageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreviews);
+
                         if (success)
                         {
                             downloads.Add(new WorkloadDownload(manifest.Id, newPackageId.ToString(), latestVersion.ToString()));
