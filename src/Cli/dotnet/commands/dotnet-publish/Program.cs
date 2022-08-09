@@ -85,9 +85,13 @@ namespace Microsoft.DotNet.Tools.Publish
         {
             ProjectInstance project = null;
 
+            Environment.SetEnvironmentVariable("MsBuildUseSimpleProjectRootElementCacheConcurrency", "1");
+
             IEnumerable<string> calledArguments = parseResult.Tokens.Select(x => x.ToString());
             IEnumerable<string> slnProjectAndCommandArgs = slnOrProjectArgs.Concat(calledArguments);
             project = GetTargetedProject(slnProjectAndCommandArgs, defaultedConfigurationProperty);
+
+            Environment.SetEnvironmentVariable("MsBuildUseSimpleProjectRootElementCacheConcurrency", null);
 
             if (project != null)
             {
@@ -118,13 +122,15 @@ namespace Microsoft.DotNet.Tools.Publish
 
             List<ProjectInstance> configuredProjects = new List<ProjectInstance>();
             HashSet<string> configValues = new HashSet<string>();
-            const string topLevelProjectOutputType = "Exe"; // Note that even on Unix when we don't produce exe this is still an exe, same for ASP
-            const string solutionFolderGuid = "{{2150E333-8FDC-42A3-9474-1A3956D46DE8}}";
             bool shouldReturnNull = false;
 
             Parallel.ForEach(sln.Projects.AsEnumerable(), (project, state) =>
             {
-                if (project.TypeGuid == solutionFolderGuid || !IsValidProjectFilePath(project.FilePath))
+                const string topLevelProjectOutputType = "Exe"; // Note that even on Unix when we don't produce exe this is still an exe, same for ASP
+                const string solutionFolderGuid = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}";
+                const string sharedProjectGuid = "{D954291E-2A0B-460D-934E-DC6B0785DB48}";
+
+                if (project.TypeGuid == solutionFolderGuid || project.TypeGuid == sharedProjectGuid || !IsValidProjectFilePath(project.FilePath))
                     return;
 
                 var projectData = TryGetProjectInstance(project.FilePath);
