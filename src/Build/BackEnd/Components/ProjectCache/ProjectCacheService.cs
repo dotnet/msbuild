@@ -82,7 +82,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 {
                     foreach (ProjectCacheDescriptor projectCacheDescriptor in GetProjectCacheDescriptors(node.ProjectInstance))
                     {
-                        // Intentionally fire-and-forget
+                        // Intentionally fire-and-forget to asynchronously initialize the plugin. Any exceptions will bubble up later when querying.
                         _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph, buildRequestConfiguration: null, cancellationToken)
                             .ContinueWith(t => { }, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted);
                     }
@@ -109,7 +109,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 s_parallelOptions,
                 projectCacheDescriptor =>
                 {
-                    // Intentionally fire-and-forget
+                    // Intentionally fire-and-forget to asynchronously initialize the plugin. Any exceptions will bubble up later when querying.
                     _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph: null, buildRequestConfiguration, cancellationToken)
                         .ContinueWith(t => { }, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted);
                 });
@@ -122,6 +122,8 @@ namespace Microsoft.Build.Experimental.ProjectCache
             CancellationToken cancellationToken)
             => _projectCachePlugins.GetOrAdd(
                 projectCacheDescriptor,
+                // The use of Lazy is because ConcurrentDictionary doesn't guarantee the value factory executes only once if there are multiple simultaneous callers,
+                // so this ensures that CreateAndInitializePluginAsync is only called exactly once.
                 descriptor => new Lazy<Task<ProjectCachePlugin>>(() => CreateAndInitializePluginAsync(descriptor, projectGraph, buildRequestConfiguration, cancellationToken))).Value;
 
         private IEnumerable<ProjectCacheDescriptor> GetProjectCacheDescriptors(ProjectInstance projectInstance)
