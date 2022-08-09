@@ -28,6 +28,7 @@
     <RepositoryUrl>https://github.com/rainersigwald/containers</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>containers;docker;Microsoft.NET.Build.Containers</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -37,6 +38,7 @@
   <ItemGroup>
     <Content Include="build\Microsoft.NET.Build.Containers.props" Pack="true" PackagePath="build\" />
     <Content Include="build\Microsoft.NET.Build.Containers.targets" Pack="true" PackagePath="build\" />
+    <Content Include="README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <!-- This target adds all of our PackageReference and ProjectReference's runtime assets to our package output. -->
