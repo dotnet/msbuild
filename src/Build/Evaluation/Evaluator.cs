@@ -822,7 +822,7 @@ namespace Microsoft.Build.Evaluation
         {
             foreach (var item in _data.GetItems(ItemTypeNames.ProjectCachePlugin))
             {
-                string pluginPath = FileUtilities.NormalizePath(Path.Combine(_data.Directory, item.EvaluatedInclude));
+                string pluginPath = FileUtilities.NormalizePath(_data.Directory, item.EvaluatedInclude);
                 var pluginSettings = item.Metadata.ToDictionary(m => m.Key, m => m.EscapedValue);
                 var projectCacheItem = ProjectCacheDescriptor.FromAssemblyPath(pluginPath, pluginSettings);
                 BuildManager.ProjectCacheDescriptors.TryAdd(projectCacheItem, projectCacheItem);
