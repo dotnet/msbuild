@@ -74,6 +74,24 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
             return !Log.HasLoggedErrors;
         }
 
+        string registryToUse = string.Empty;
+
+        if (!ContainerRegistry.StartsWith("http://") &&
+             !ContainerRegistry.StartsWith("https://") &&
+             !ContainerRegistry.StartsWith("docker://"))
+        {
+            // Default to https when no scheme is present: https://github.com/distribution/distribution/blob/26163d82560f4dda94bd7b87d587f94644c5af79/reference/normalize.go#L88
+            registryToUse = "https://";
+        }
+
+        registryToUse += ContainerRegistry;
+
+        if (!ContainerHelpers.IsValidRegistry(registryToUse))
+        {
+            Log.LogError("Could not recognize registry '{0}'. Does your registry need a scheme, like 'https://'?", ContainerRegistry);
+            return !Log.HasLoggedErrors;
+        }
+
         if (FullyQualifiedBaseImageName.Contains(' ') && BuildEngine != null)
         {
             Log.LogWarning($"{nameof(FullyQualifiedBaseImageName)} had spaces in it, replacing with dashes.");
@@ -91,7 +109,7 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
         ParsedContainerRegistry = outputReg;
         ParsedContainerImage = outputImage;
         ParsedContainerTag = outputTag;
-        NewContainerRegistry = ContainerRegistry;
+        NewContainerRegistry = registryToUse;
         NewContainerImageName = ContainerImageName;
         NewContainerTag = ContainerImageTag;
 

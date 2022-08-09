@@ -31,6 +31,34 @@ public static class ContainerHelpers
     }
 
     /// <summary>
+    /// Ensures the given registry is valid.
+    /// </summary>
+    /// <param name="imageName"></param>
+    /// <returns></returns>
+    public static bool IsValidRegistry(string registryName)
+    {
+        // No scheme prefixed onto the registry
+        if (string.IsNullOrEmpty(registryName) ||
+            (!registryName.StartsWith("http://") && 
+             !registryName.StartsWith("https://") && 
+             !registryName.StartsWith("docker://")))
+        {
+            return false;
+        }
+
+        try
+        {
+            UriBuilder uri = new UriBuilder(registryName);
+        }
+        catch
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// Ensures the given image name is valid.
     /// Spec: https://github.com/opencontainers/distribution-spec/blob/4ab4752c3b86a926d7e5da84de64cbbdcc18d313/spec.md#pulling-manifests
     /// </summary>
@@ -82,7 +110,7 @@ public static class ContainerHelpers
         // If the image has a ':', there's a tag we need to parse.
         int indexOfColon = image.IndexOf(':');
 
-        containerRegistry = uri.Scheme + "://" + uri.Host;
+        containerRegistry = uri.Scheme + "://" + uri.Host + (uri.Port > 0 && !uri.IsDefaultPort ? ":" + uri.Port : "");
         containerName = indexOfColon == -1 ? image : image.Substring(0, indexOfColon);
         containerTag = indexOfColon == -1 ? "" : image.Substring(indexOfColon + 1);
         return true;
