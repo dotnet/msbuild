@@ -153,11 +153,7 @@ namespace Microsoft.Build.Experimental
 #endif
 
             CommunicationsUtilities.Trace("Executing build with command line '{0}'", descriptiveCommandLine);
-            string serverRunningMutexName = OutOfProcServerNode.GetRunningServerMutexName(_handshake);
-            string serverBusyMutexName = OutOfProcServerNode.GetBusyServerMutexName(_handshake);
-
-            // Start server it if is not running.
-            bool serverIsAlreadyRunning = ServerNamedMutex.WasOpen(serverRunningMutexName);
+            bool serverIsAlreadyRunning = ServerIsRunning();
             if (KnownTelemetry.BuildTelemetry != null)
             {
                 KnownTelemetry.BuildTelemetry.InitialServerState = serverIsAlreadyRunning ? "hot" : "cold";
@@ -173,7 +169,7 @@ namespace Microsoft.Build.Experimental
             }
 
             // Check that server is not busy.
-            var serverWasBusy = ServerNamedMutex.WasOpen(serverBusyMutexName);
+            bool serverWasBusy = ServerWasBusy();
             if (serverWasBusy)
             {
                 CommunicationsUtilities.Trace("Server is busy, falling back to former behavior.");
@@ -226,10 +222,8 @@ namespace Microsoft.Build.Experimental
         private bool TryShutdownServer(CancellationToken cancellationToken)
         {
             CommunicationsUtilities.Trace("Trying shutdown server node.");
-            string serverRunningMutexName = OutOfProcServerNode.GetRunningServerMutexName(_handshake);
-            string serverBusyMutexName = OutOfProcServerNode.GetBusyServerMutexName(_handshake);
 
-            bool serverIsAlreadyRunning = ServerNamedMutex.WasOpen(serverRunningMutexName);
+            bool serverIsAlreadyRunning = ServerIsRunning();
             if (!serverIsAlreadyRunning)
             {
                 CommunicationsUtilities.Trace("No need to shutdown server node for it is not running.");
@@ -237,7 +231,7 @@ namespace Microsoft.Build.Experimental
             }
 
             // Check that server is not busy.
-            var serverWasBusy = ServerNamedMutex.WasOpen(serverBusyMutexName);
+            bool serverWasBusy = ServerWasBusy();
             if (serverWasBusy)
             {
                 CommunicationsUtilities.Trace("Server cannot be shut down for it is not idle.");
@@ -260,6 +254,22 @@ namespace Microsoft.Build.Experimental
             ReadPacketsLoop(cancellationToken);
 
             return _exitResult.MSBuildClientExitType == MSBuildClientExitType.Success;
+        }
+
+        internal bool ServerIsRunning()
+        {
+            string serverRunningMutexName = OutOfProcServerNode.GetRunningServerMutexName(_handshake);
+
+            // Start server it if is not running.
+            bool serverIsAlreadyRunning = ServerNamedMutex.WasOpen(serverRunningMutexName);
+            return serverIsAlreadyRunning;
+        }
+
+        private bool ServerWasBusy()
+        {
+            string serverBusyMutexName = OutOfProcServerNode.GetBusyServerMutexName(_handshake);
+            var serverWasBusy = ServerNamedMutex.WasOpen(serverBusyMutexName);
+            return serverWasBusy;
         }
 
         private void ReadPacketsLoop(CancellationToken cancellationToken)

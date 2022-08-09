@@ -245,6 +245,14 @@ namespace Microsoft.Build.Engine.UnitTests
                 serverProcess.WaitForExit();
             }
 
+            if (!NativeMethodsShared.IsWindows)
+            {
+                // For one reason or another on non Windows OS, it looks like if process dies it still take some time until
+                // owned mutexes are released.
+                // This was causing flaky tests. Lets wait a bit.
+                Thread.Sleep(1000);
+            }
+
             serverProcess.HasExited.ShouldBeTrue();
         }
 
