@@ -22,9 +22,9 @@ Option<string> baseImageTag = new(
     description: "Base image tag.",
     getDefaultValue: () => $"{System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription[5]}.0");
 
-Option<string> entrypoint = new(
+Option<string[]> entrypoint = new(
     name: "--entrypoint",
-    description: "Entrypoint application.");
+    description: "Entrypoint application command.");
 
 Option<string> imageName = new(
     name: "--name",
@@ -60,7 +60,7 @@ rootCommand.SetHandler(async (folder, containerWorkingDir, uri, baseImageName, b
 
 return await rootCommand.InvokeAsync(args);
 
-async Task Containerize(DirectoryInfo folder, string workingDir, string registryName, string baseName, string baseTag, string entrypoint, string imageName, string imageTag)
+async Task Containerize(DirectoryInfo folder, string workingDir, string registryName, string baseName, string baseTag, string[] entrypoint, string imageName, string imageTag)
 {
     Registry registry = new Registry(new Uri($"http://{registryName}"));
 

@@ -5,7 +5,7 @@
         <!--The folder where the custom task will be present. It points to inside the nuget package. -->
         <CustomTasksFolder>$(MSBuildThisFileDirectory)..\$(taskForldername)\$(taskFramework)</CustomTasksFolder>
         <!--Reference to the assembly which contains the MSBuild Task-->
-        <CustomTasksAssembly>$(CustomTasksFolder)\$(MSBuildThisFileName).dll</CustomTasksAssembly>
+        <CustomTasksAssembly Condition="'$(CustomTasksAssembly)' == ''">$(CustomTasksFolder)\$(MSBuildThisFileName).dll</CustomTasksAssembly>
     </PropertyGroup>
 
     <!--Register our custom task-->

@@ -1,11 +1,16 @@
 <Project>
     <Target Name="ComputeContainerConfig">
+        <!-- Reference data about this project -->
+        <PropertyGroup>
+            <_IsAspNet Condition="@(ProjectCapability->Count()) > 0 and @(ProjectCapability->AnyHaveMetadataValue('Identity', 'AspNetCore'))">true</_IsAspNet>
+            <_IsSelfContained Condition="'$(SelfContained)' == 'true' or '$(PublishSelfContained)' == 'true'">true</_IsSelfContained>
+        </PropertyGroup>
+
         <!-- Compute private defaults -->
         <PropertyGroup Condition="$(ContainerBaseImage) == ''">
-            <_IsSelfContained Condition="'$(SelfContained)' == 'true' or '$(PublishSelfContained)' == 'true'">true</_IsSelfContained>
             <_ContainerBaseRegistry>https://mcr.microsoft.com</_ContainerBaseRegistry>
             <_ContainerBaseImageName Condition="'$(_IsSelfContained)' == 'true'">dotnet/runtime-deps</_ContainerBaseImageName>
-            <_ContainerBaseImageName Condition="'$(_ContainerBaseImageName)' == '' and @(ProjectCapability->AnyHaveMetadataValue('Identity', 'AspNetCore'))">dotnet/aspnet</_ContainerBaseImageName>
+            <_ContainerBaseImageName Condition="'$(_ContainerBaseImageName)' == '' and '$(_IsAspNet)' == 'true'">dotnet/aspnet</_ContainerBaseImageName>
             <_ContainerBaseImageName Condition="'$(_ContainerBaseImageName)' == ''">dotnet/runtime</_ContainerBaseImageName>
             <_ContainerBaseImageTag>$(_TargetFrameworkVersionWithoutV)</_ContainerBaseImageTag>
         </PropertyGroup>
@@ -18,18 +23,19 @@
             <ContainerImageName Condition="'$(ContainerImageName)' == ''">$(AssemblyName)</ContainerImageName>
             <ContainerImageTag Condition="'$(ContainerImageTag)' == ''">$(Version)</ContainerImageTag>
             <ContainerWorkingDirectory Condition="'$(ContainerWorkingDirectory)' == ''">/app</ContainerWorkingDirectory>
-            <ContainerEntrypoint Condition="'$(ContainerEntrypoint)' == '' and '$(UseAppHost)' != 'true'">dotnet $(TargetFileName)</ContainerEntrypoint>
-            <ContainerEntrypoint Condition="'$(ContainerEntrypoint)' == '' and '$(UseAppHost)' == 'true'">$(ContainerWorkingDirectory)/$(AssemblyName)$(_NativeExecutableExtension)</ContainerEntrypoint>
             <!-- Could be semicolon-delimited -->
-            <ContainerEntrypointArgs Condition="'$(ContainerEntrypointArgs)' == ''"></ContainerEntrypointArgs>
         </PropertyGroup>
-
+        
         <ItemGroup>
             <ContainerLabel Condition="@(ContainerLabel) == ''"></ContainerLabel>
+            <!-- For non-apphosts, we need to invoke `dotnet` `workingdir/app` as separate args -->
+            <ContainerEntrypoint Condition="'$(ContainerEntrypoint)' == '' and '$(UseAppHost)' != 'true'" Include="dotnet;$(ContainerWorkingDirectory)/$(TargetFileName)" />
+            <!-- For apphosts, we need to invoke `workingdir/app` as a single arg -->
+            <ContainerEntrypoint Condition="'$(ContainerEntrypoint)' == '' and '$(UseAppHost)' == 'true'" Include="$(ContainerWorkingDirectory)/$(AssemblyName)$(_NativeExecutableExtension)" />
         </ItemGroup>
 
         <!-- Asp.NET defaults -->
-        <ItemGroup Condition="@(ProjectCapability->AnyHaveMetadataValue('Identity', 'AspNetCore'))">
+        <ItemGroup Condition="'$(_IsAspNet)' == 'true'">
             <ContainerPort Include="80" Type="tcp" Condition="@(ContainerPort->WithMetadataValue('Identity', '80')->AnyHaveMetadataValue('Type', 'tcp')) == ''" />
 
             <ContainerEnvironmentVariable Include="ASPNETCORE_URLS" Value="http://localhost:5000;https://localhost:5001"

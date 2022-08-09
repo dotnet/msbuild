@@ -58,7 +58,9 @@ public class Image
         manifest["config"]!["digest"] = GetDigest(config);
     }
 
-    public void SetEntrypoint(string executable, string[]? args = null)
+    static JsonArray ToJsonArray(string[] items) => new JsonArray(items.Where(s => !string.IsNullOrEmpty(s)).Select(s =>(JsonValue) s).ToArray());
+
+    public void SetEntrypoint(string[] executableArgs, string[]? args = null)
     {
         JsonObject? configObject = config["config"]!.AsObject();
 
@@ -67,7 +69,7 @@ public class Image
             throw new NotImplementedException("Expected base image to have a config node");
         }
 
-        configObject["Entrypoint"] = executable;
+        configObject["Entrypoint"] = ToJsonArray(executableArgs);
 
         if (args is null)
         {
@@ -75,7 +77,7 @@ public class Image
         }
         else
         {
-            configObject["Cmd"] = new JsonArray(args.Where(s => !string.IsNullOrEmpty(s)).Select(s =>(JsonObject)s).ToArray());
+            configObject["Cmd"] = ToJsonArray(args);
         }
 
         RecalculateDigest();

@@ -59,12 +59,12 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
     /// The entrypoint application of the container.
     /// </summary>
     [Required]
-    public string Entrypoint { get; set; }
+    public ITaskItem[] Entrypoint { get; set; }
 
     /// <summary>
     /// Arguments to pass alongside Entrypoint.
     /// </summary>
-    public string EntrypointArgs { get; set; }
+    public ITaskItem[] EntrypointArgs { get; set; }
 
     public CreateNewImage()
     {
@@ -76,8 +76,8 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
         ImageTag = "";
         PublishDirectory = "";
         WorkingDirectory = "";
-        Entrypoint = "";
-        EntrypointArgs = "";
+        Entrypoint = Array.Empty<ITaskItem>();
+        EntrypointArgs = Array.Empty<ITaskItem>();
     }
 
 
@@ -109,7 +109,7 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
         
         Layer newLayer = Layer.FromDirectory(PublishDirectory, WorkingDirectory);
         image.AddLayer(newLayer);
-        image.SetEntrypoint(Entrypoint, EntrypointArgs?.Split(' ').ToArray());
+        image.SetEntrypoint(Entrypoint.Select(i => i.ItemSpec).ToArray(), EntrypointArgs.Select(i => i.ItemSpec).ToArray());
 
         if (OutputRegistry.StartsWith("docker://"))
         {
