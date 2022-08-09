@@ -123,7 +123,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
         }
 
-        private void BuildLegacySymbols(Func<ParseResult, ITemplateEngineHost> hostBuilder, Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
+        private void BuildLegacySymbols(Func<ParseResult, ITemplateEngineHost> hostBuilder)
         {
             this.AddArgument(ShortNameArgument);
             this.AddArgument(RemainingArguments);
@@ -144,14 +144,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             this.TreatUnmatchedTokensAsErrors = true;
 
-            this.Add(new LegacyInstallCommand(this, hostBuilder, telemetryLoggerBuilder));
-            this.Add(new LegacyUninstallCommand(this, hostBuilder, telemetryLoggerBuilder));
-            this.Add(new LegacyUpdateCheckCommand(this, hostBuilder, telemetryLoggerBuilder));
-            this.Add(new LegacyUpdateApplyCommand(this, hostBuilder, telemetryLoggerBuilder));
-            this.Add(new LegacySearchCommand(this, hostBuilder, telemetryLoggerBuilder));
-            this.Add(new LegacyListCommand(this, hostBuilder, telemetryLoggerBuilder));
-            this.Add(new LegacyAliasAddCommand(hostBuilder, telemetryLoggerBuilder));
-            this.Add(new LegacyAliasShowCommand(hostBuilder, telemetryLoggerBuilder));
+            this.Add(new LegacyInstallCommand(this, hostBuilder));
+            this.Add(new LegacyUninstallCommand(this, hostBuilder));
+            this.Add(new LegacyUpdateCheckCommand(this, hostBuilder));
+            this.Add(new LegacyUpdateApplyCommand(this, hostBuilder));
+            this.Add(new LegacySearchCommand(this, hostBuilder));
+            this.Add(new LegacyListCommand(this, hostBuilder));
+            this.Add(new LegacyAliasAddCommand(hostBuilder));
+            this.Add(new LegacyAliasShowCommand(hostBuilder));
         }
     }
 }

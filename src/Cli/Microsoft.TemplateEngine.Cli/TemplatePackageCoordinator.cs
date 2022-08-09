@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Parsing;
+using System.ComponentModel.DataAnnotations;
+using System.Runtime.CompilerServices;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Constraints;
@@ -23,18 +26,15 @@ namespace Microsoft.TemplateEngine.Cli
     /// </summary>
     internal class TemplatePackageCoordinator
     {
-        private readonly ITelemetryLogger _telemetryLogger;
         private readonly IEngineEnvironmentSettings _engineEnvironmentSettings;
         private readonly TemplatePackageManager _templatePackageManager;
         private readonly TemplateConstraintManager _constraintsManager;
         private readonly HostSpecificDataLoader _hostSpecificDataLoader;
 
         internal TemplatePackageCoordinator(
-            ITelemetryLogger telemetryLogger,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager)
         {
-            _telemetryLogger = telemetryLogger ?? throw new ArgumentNullException(nameof(telemetryLogger));
             _engineEnvironmentSettings = environmentSettings ?? throw new ArgumentNullException(nameof(environmentSettings));
             _templatePackageManager = templatePackageManager ?? throw new ArgumentNullException(nameof(templatePackageManager));
             _constraintsManager = new TemplateConstraintManager(_engineEnvironmentSettings);
@@ -188,7 +188,7 @@ namespace Microsoft.TemplateEngine.Cli
             InitializeNuGetCredentialService(args.Interactive);
 
             NewCommandStatus resultStatus = NewCommandStatus.Success;
-            _telemetryLogger.TrackEvent(args.RootCommand.Name + TelemetryConstants.InstallEventSuffix, new Dictionary<string, string?> { { TelemetryConstants.ToInstallCount, args.TemplatePackages.Count.ToString() } });
+            TelemetryEventEntry.TrackEvent(TelemetryConstants.InstallEvent, new Dictionary<string, string?> { { TelemetryConstants.ToInstallCount, args.TemplatePackages.Count.ToString() } });
 
             var details = new Dictionary<string, string>();
             if (args.AdditionalSources?.Count > 0)

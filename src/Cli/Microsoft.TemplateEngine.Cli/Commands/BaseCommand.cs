@@ -4,7 +4,6 @@
 using System.CommandLine;
 using System.CommandLine.Completions;
 using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using System.Reflection;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
@@ -20,17 +19,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     internal abstract class BaseCommand : Command
     {
         private readonly Func<ParseResult, ITemplateEngineHost> _hostBuilder;
-        private readonly Func<ParseResult, ITelemetryLogger> _telemetryLoggerBuilder;
 
         protected BaseCommand(
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
             string name,
             string description)
             : base(name, description)
         {
             _hostBuilder = hostBuilder;
-            _telemetryLoggerBuilder = telemetryLoggerBuilder;
         }
 
         protected internal virtual IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings)
@@ -50,11 +46,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 virtualizeSettings: args.DebugVirtualizeSettings,
                 environment: new CliEnvironment());
             return environmentSettings;
-        }
-
-        protected ITelemetryLogger CreateTelemetryLogger(ParseResult parseResult)
-        {
-            return _telemetryLoggerBuilder(parseResult);
         }
 
         private static string? ParseOutputOption(ParseResult commandParseResult)
@@ -78,10 +69,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         internal BaseCommand(
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
             string name,
             string description)
-            : base(hostBuilder, telemetryLoggerBuilder, name, description)
+            : base(hostBuilder, name, description)
         {
             this.Handler = this;
         }
@@ -90,8 +80,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             TArgs args = ParseContext(context.ParseResult);
             using IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args, context.ParseResult);
-            ITelemetryLogger telemetryLogger = CreateTelemetryLogger(context.ParseResult);
-
             CancellationToken cancellationToken = context.GetCancellationToken();
 
             NewCommandStatus returnCode;
@@ -101,7 +89,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 using (Timing.Over(environmentSettings.Host.Logger, "Execute"))
                 {
                     await HandleGlobalOptionsAsync(args, environmentSettings, cancellationToken).ConfigureAwait(false);
-                    returnCode = await ExecuteAsync(args, environmentSettings, telemetryLogger, context).ConfigureAwait(false);
+                    returnCode = await ExecuteAsync(args, environmentSettings, context).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -159,7 +147,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return GetCompletions(context, environmentSettings).ToList();
         }
 
-        protected abstract Task<NewCommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, ITelemetryLogger telemetryLogger, InvocationContext context);
+        protected abstract Task<NewCommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context);
 
         protected abstract TArgs ParseContext(ParseResult parseResult);
 

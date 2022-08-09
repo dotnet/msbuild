@@ -21,7 +21,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Instantiate_CanParseTemplateWithOptions()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             var parseResult = myCommand.Parse("new console --framework net5.0");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
@@ -225,7 +225,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             ITemplateEngineHost host = TestHost.GetVirtualHost(defaultParameters: defaultParams);
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             var parseResult = myCommand.Parse($" new {command}");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
@@ -255,7 +255,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             var parseResult = myCommand.Parse($"new {command}");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
@@ -320,7 +320,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             Parser parser = ParserFactory.CreateParser(myCommand);
             var parseResult = parser.Parse($" new {command}");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
@@ -364,7 +364,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             var parseResult = myCommand.Parse($" new {command}");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
@@ -408,7 +408,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             var parseResult = myCommand.Parse($" new {command}");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
@@ -478,7 +478,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             var parseResult = myCommand.Parse($" new {command}");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
@@ -521,7 +521,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             Parser parser = ParserFactory.CreateParser(myCommand);
             var parseResult = parser.Parse($" new {command}");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
@@ -546,7 +546,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             var parseResult = myCommand.Parse($" new foo");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
@@ -579,7 +579,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             var parseResult = myCommand.Parse(command);
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
@@ -612,7 +612,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             ITemplateEngineHost host = TestHost.GetVirtualHost(defaultParameters: defaultParams);
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             var parseResult = myCommand.Parse($"new {shortName}");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
@@ -640,7 +640,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             ITemplateEngineHost host = TestHost.GetVirtualHost(defaultParameters: defaultParams);
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             string command = $"new {shortName} --language F#";
             var parseResult = myCommand.Parse(command);
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
@@ -670,7 +670,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             ITemplateEngineHost host = TestHost.GetVirtualHost(defaultParameters: defaultParams);
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             string command = $"new {name} --foo {fooChoice}";
             var parseResult = myCommand.Parse($" new {command}");
@@ -700,7 +700,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             ITemplateEngineHost host = TestHost.GetVirtualHost(defaultParameters: defaultParams);
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             string command = $"new {name} --{paramName} {paramValue}";
             var parseResult = myCommand.Parse($" new {command}");

@@ -3,7 +3,6 @@
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
@@ -12,14 +11,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         internal BaseAliasShowCommand(
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
             string commandName)
-            : base(hostBuilder, telemetryLoggerBuilder, commandName, SymbolStrings.Command_AliasShow_Description) { }
+            : base(hostBuilder, commandName, SymbolStrings.Command_AliasShow_Description) { }
 
         protected override Task<NewCommandStatus> ExecuteAsync(
             AliasShowCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
-            ITelemetryLogger telemetryLogger,
             InvocationContext context) => throw new NotImplementedException();
 
         protected override AliasShowCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using FakeItEasy;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Parameters;
 using Microsoft.TemplateEngine.Utils;
@@ -19,9 +20,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
             A.CallTo(() => templateInfo.ParameterDefinitions).Returns(new ParameterDefinitionSet(new List<ITemplateParameter>() { param }));
+            Dictionary<string, string?> parameterValues = new()
+            {
+                { "TestName", "whatever" }
+            };
 
-            string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "whatever");
-            Assert.Null(canonical);
+            string? telemetryEntry = TelemetryHelper.PrepareHashedChoiceValue(templateInfo, parameterValues, "TestName");
+            Assert.Null(telemetryEntry);
         }
 
         [Fact(DisplayName = nameof(UnknownParameterNameHasNullCanonicalValueTest))]
@@ -33,8 +38,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
             A.CallTo(() => templateInfo.ParameterDefinitions).Returns(new ParameterDefinitionSet(new List<ITemplateParameter>() { param }));
 
-            string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "OtherName", "whatever");
-            Assert.Null(canonical);
+            Dictionary<string, string?> parameterValues = new()
+            {
+                { "TestName", "whatever" }
+            };
+
+
+            string? telemetryEntry = TelemetryHelper.PrepareHashedChoiceValue(templateInfo, parameterValues, "OtherName");
+            Assert.Null(telemetryEntry);
         }
 
         [Fact(DisplayName = nameof(InvalidChoiceValueForParameterHasNullCanonicalValueTest))]
@@ -53,9 +64,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
             A.CallTo(() => templateInfo.ParameterDefinitions).Returns(new ParameterDefinitionSet(new List<ITemplateParameter>() { param }));
+            Dictionary<string, string?> parameterValues = new()
+            {
+                { "TestName", "whatever" }
+            };
 
-            string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "whatever");
-            Assert.Null(canonical);
+            string? telemetryEntry = TelemetryHelper.PrepareHashedChoiceValue(templateInfo, parameterValues, "TestName");
+            Assert.Null(telemetryEntry);
         }
 
         [Fact(DisplayName = nameof(ValidChoiceForParameterIsItsOwnCanonicalValueTest))]
@@ -74,13 +89,17 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
             A.CallTo(() => templateInfo.ParameterDefinitions).Returns(new ParameterDefinitionSet(new List<ITemplateParameter>() { param }));
+            Dictionary<string, string?> parameterValues = new()
+            {
+                { "TestName", "foo" }
+            };
 
-            string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "foo");
-            Assert.Equal("foo", canonical);
+            string? telemetryEntry = TelemetryHelper.PrepareHashedChoiceValue(templateInfo, parameterValues, "TestName");
+            Assert.Equal(Sha256Hasher.HashWithNormalizedCasing("foo"), telemetryEntry);
         }
 
         [Fact]
-        public void UniqueStartsWithValueDoNotResolvesCanonicalValueTest()
+        public void UniqueStartsWithValueDoesNotResolveCanonicalValueTest()
         {
             ITemplateParameter param = new TemplateParameter(
                 name: "TestName",
@@ -94,9 +113,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
             A.CallTo(() => templateInfo.ParameterDefinitions).Returns(new ParameterDefinitionSet(new List<ITemplateParameter>() { param }));
+            Dictionary<string, string?> parameterValues = new()
+            {
+                { "TestName", "f" }
+            };
 
-            string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "f");
-            Assert.Null(canonical);
+
+            string? telemetryEntry = TelemetryHelper.PrepareHashedChoiceValue(templateInfo, parameterValues, "TestName");
+            Assert.Null(telemetryEntry);
         }
 
         [Fact(DisplayName = nameof(AmbiguousStartsWithValueHasNullCanonicalValueTest))]
@@ -116,9 +140,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
             A.CallTo(() => templateInfo.ParameterDefinitions).Returns(new ParameterDefinitionSet(new List<ITemplateParameter>() { param }));
+            Dictionary<string, string?> parameterValues = new()
+            {
+                { "TestName", "f" }
+            };
 
-            string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "f");
-            Assert.Null(canonical);
+            string? telemetryEntry = TelemetryHelper.PrepareHashedChoiceValue(templateInfo, parameterValues, "TestName");
+            Assert.Null(telemetryEntry);
         }
 
         [Fact(DisplayName = nameof(ChoiceValueCaseDifferenceIsAMatchTest))]
@@ -136,9 +164,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
             A.CallTo(() => templateInfo.ParameterDefinitions).Returns(new ParameterDefinitionSet(new List<ITemplateParameter>() { param }));
+            Dictionary<string, string?> parameterValues = new()
+            {
+                { "TestName", "FOO" }
+            };
 
-            string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "FOO");
-            Assert.Equal("FOO", canonical);
+            string? telemetryEntry = TelemetryHelper.PrepareHashedChoiceValue(templateInfo, parameterValues, "TestName");
+            Assert.Equal(Sha256Hasher.HashWithNormalizedCasing("FOO"), telemetryEntry);
         }
 
         [Fact(DisplayName = nameof(ChoiceValueCaseDifferencesContributeToAmbiguousMatchTest))]
@@ -158,9 +190,65 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
             ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
             A.CallTo(() => templateInfo.ParameterDefinitions).Returns(new ParameterDefinitionSet(new List<ITemplateParameter>() { param }));
+            Dictionary<string, string?> parameterValues = new()
+            {
+                { "TestName", "foo" }
+            };
 
-            string? canonical = TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateInfo, "TestName", "foo");
-            Assert.Null(canonical);
+            string? telemetryEntry = TelemetryHelper.PrepareHashedChoiceValue(templateInfo, parameterValues, "TestName");
+            Assert.Null(telemetryEntry);
+        }
+
+        [Fact]
+        public void MultiValueChoiceTest()
+        {
+            ITemplateParameter param = new TemplateParameter(
+                  name: "TestName",
+                  type: "parameter",
+                  datatype: "choice",
+                  choices: new Dictionary<string, ParameterChoice>()
+                  {
+                        { "foo", new ParameterChoice("Foo", "Foo value") },
+                        { "bar", new ParameterChoice("Bar", "Bar value") },
+                        { "baz", new ParameterChoice("Baz", "Baz value") },
+                  });
+
+            IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
+            ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
+            A.CallTo(() => templateInfo.ParameterDefinitions).Returns(new ParameterDefinitionSet(new List<ITemplateParameter>() { param }));
+            Dictionary<string, string?> parameterValues = new()
+            {
+                { "TestName", "foo|bar" }
+            };
+
+            string? telemetryEntry = TelemetryHelper.PrepareHashedChoiceValue(templateInfo, parameterValues, "TestName");
+            Assert.Equal(Sha256Hasher.HashWithNormalizedCasing("foo") + ";" + Sha256Hasher.HashWithNormalizedCasing("bar"), telemetryEntry);
+        }
+
+        [Fact]
+        public void MultiValueChoice_SkipsInvalidEntriesTest()
+        {
+            ITemplateParameter param = new TemplateParameter(
+                  name: "TestName",
+                  type: "parameter",
+                  datatype: "choice",
+                  choices: new Dictionary<string, ParameterChoice>()
+                  {
+                        { "foo", new ParameterChoice("Foo", "Foo value") },
+                        { "bar", new ParameterChoice("Bar", "Bar value") },
+                        { "baz", new ParameterChoice("Baz", "Baz value") },
+                  });
+
+            IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
+            ITemplateInfo templateInfo = A.Fake<ITemplateInfo>();
+            A.CallTo(() => templateInfo.ParameterDefinitions).Returns(new ParameterDefinitionSet(new List<ITemplateParameter>() { param }));
+            Dictionary<string, string?> parameterValues = new()
+            {
+                { "TestName", "foo|unknown|bar" }
+            };
+
+            string? telemetryEntry = TelemetryHelper.PrepareHashedChoiceValue(templateInfo, parameterValues, "TestName");
+            Assert.Equal(Sha256Hasher.HashWithNormalizedCasing("foo") + ";" + Sha256Hasher.HashWithNormalizedCasing("bar"), telemetryEntry);
         }
     }
 }

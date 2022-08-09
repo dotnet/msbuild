@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
@@ -19,18 +18,15 @@ namespace Microsoft.TemplateEngine.Cli
     internal class TemplateInvoker
     {
         private readonly IEngineEnvironmentSettings _environmentSettings;
-        private readonly ITelemetryLogger _telemetryLogger;
         private readonly Func<string> _inputGetter;
         private readonly TemplateCreator _templateCreator;
         private readonly PostActionDispatcher _postActionDispatcher;
 
         internal TemplateInvoker(
             IEngineEnvironmentSettings environment,
-            ITelemetryLogger telemetryLogger,
             Func<string> inputGetter)
         {
             _environmentSettings = environment;
-            _telemetryLogger = telemetryLogger;
             _inputGetter = inputGetter;
 
             _templateCreator = new TemplateCreator(_environmentSettings);
@@ -41,20 +37,14 @@ namespace Microsoft.TemplateEngine.Cli
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            string? templateLanguage = templateArgs.Template.GetLanguage();
-            bool isMicrosoftAuthored = string.Equals(templateArgs.Template.Author, "Microsoft", StringComparison.OrdinalIgnoreCase);
-            string? framework = null;
-            string? auth = null;
-            string? templateName = TelemetryHelper.HashWithNormalizedCasing(templateArgs.Template.Identity);
+            CliTemplateInfo templateToRun = templateArgs.Template;
+            IReadOnlyDictionary<string, string?> templateParameters = templateArgs.TemplateParameters;
 
-            if (isMicrosoftAuthored)
-            {
-                templateArgs.TemplateParameters.TryGetValue("Framework", out string? inputFrameworkValue);
-                framework = TelemetryHelper.HashWithNormalizedCasing(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateArgs.Template, "Framework", inputFrameworkValue));
-
-                templateArgs.TemplateParameters.TryGetValue("auth", out string? inputAuthValue);
-                auth = TelemetryHelper.HashWithNormalizedCasing(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateArgs.Template, "auth", inputAuthValue));
-            }
+            string? templateLanguage = templateToRun.GetLanguage();
+            bool isMicrosoftAuthored = string.Equals(templateToRun.Author, "Microsoft", StringComparison.OrdinalIgnoreCase);
+            string? framework = isMicrosoftAuthored ? TelemetryHelper.PrepareHashedChoiceValue(templateToRun, templateParameters, "Framework") : null;
+            string? auth = isMicrosoftAuthored ? TelemetryHelper.PrepareHashedChoiceValue(templateToRun, templateParameters, "auth") : null;
+            string? templateName = Sha256Hasher.HashWithNormalizedCasing(templateToRun.Identity);
 
             bool success = true;
 
@@ -80,7 +70,9 @@ namespace Microsoft.TemplateEngine.Cli
             }
             finally
             {
-                _telemetryLogger.TrackEvent(templateArgs.RootCommand.Name + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string?>
+                TelemetryEventEntry.TrackEvent(
+                    TelemetryConstants.CreateEvent, 
+                    new Dictionary<string, string?>
                     {
                         { TelemetryConstants.Language, templateLanguage },
                         { TelemetryConstants.ArgError, "False" },
@@ -148,7 +140,7 @@ namespace Microsoft.TemplateEngine.Cli
             // Name returns <disk letter>:\ for root disk folder on Windows - replace invalid chars
             else if (fallbackName.IndexOfAny(invalidChars) > -1)
             {
-                Regex pattern = new Regex($"[{Regex.Escape(new string(invalidChars))}]");
+                Regex pattern = new($"[{Regex.Escape(new string(invalidChars))}]");
                 fallbackName = pattern.Replace(fallbackName, "");
                 if (string.IsNullOrWhiteSpace(fallbackName))
                 {
@@ -240,7 +232,7 @@ namespace Microsoft.TemplateEngine.Cli
                     IManagedTemplatePackage? templatePackage = null;
                     try
                     {
-                        using TemplatePackageManager templatePackageManager = new TemplatePackageManager(_environmentSettings);
+                        using TemplatePackageManager templatePackageManager = new(_environmentSettings);
                         templatePackage = await templateArgs.Template.GetManagedTemplatePackageAsync(templatePackageManager, cancellationToken).ConfigureAwait(false);
 
                     }

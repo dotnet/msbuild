@@ -17,21 +17,18 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly IEngineEnvironmentSettings _engineEnvironmentSettings;
         private readonly TemplatePackageManager _templatePackageManager;
         private readonly IHostSpecificDataLoader _hostSpecificDataLoader;
-        private readonly ITelemetryLogger _telemetryLogger;
         private readonly string? _defaultLanguage;
         private readonly TemplateConstraintManager _constraintManager;
 
         internal TemplateListCoordinator(
             IEngineEnvironmentSettings engineEnvironmentSettings,
             TemplatePackageManager templatePackageManager,
-            IHostSpecificDataLoader hostSpecificDataLoader,
-            ITelemetryLogger telemetryLogger)
+            IHostSpecificDataLoader hostSpecificDataLoader)
 
         {
             _engineEnvironmentSettings = engineEnvironmentSettings ?? throw new ArgumentNullException(nameof(engineEnvironmentSettings));
             _templatePackageManager = templatePackageManager ?? throw new ArgumentNullException(nameof(templatePackageManager));
             _hostSpecificDataLoader = hostSpecificDataLoader ?? throw new ArgumentNullException(nameof(hostSpecificDataLoader));
-            _telemetryLogger = telemetryLogger ?? throw new ArgumentNullException(nameof(telemetryLogger));
             _defaultLanguage = engineEnvironmentSettings.GetDefaultLanguage();
             _constraintManager = new TemplateConstraintManager(_engineEnvironmentSettings);
         }

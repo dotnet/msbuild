@@ -18,9 +18,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     internal partial class InstantiateCommand : BaseCommand<InstantiateCommandArgs>, ICustomHelp
     {
         internal InstantiateCommand(
-            Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
-            : base(hostBuilder, telemetryLoggerBuilder, "create", SymbolStrings.Command_Instantiate_Description)
+            Func<ParseResult, ITemplateEngineHost> hostBuilder)
+            : base(hostBuilder, "create", SymbolStrings.Command_Instantiate_Description)
         {
             this.AddArgument(ShortNameArgument);
             this.AddArgument(RemainingArguments);
@@ -39,9 +38,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Arity = new ArgumentArity(0, 999)
         };
 
-        internal static Task<NewCommandStatus> ExecuteAsync(NewCommandArgs newCommandArgs, IEngineEnvironmentSettings environmentSettings, ITelemetryLogger telemetryLogger, InvocationContext context)
+        internal static Task<NewCommandStatus> ExecuteAsync(NewCommandArgs newCommandArgs, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
         {
-            return ExecuteIntAsync(InstantiateCommandArgs.FromNewCommandArgs(newCommandArgs), environmentSettings, telemetryLogger, context);
+            return ExecuteIntAsync(InstantiateCommandArgs.FromNewCommandArgs(newCommandArgs), environmentSettings, context);
         }
 
         internal static async Task<IEnumerable<TemplateGroup>> GetMatchingTemplateGroupsAsync(
@@ -171,10 +170,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override Task<NewCommandStatus> ExecuteAsync(
             InstantiateCommandArgs instantiateArgs,
             IEngineEnvironmentSettings environmentSettings,
-            ITelemetryLogger telemetryLogger,
             InvocationContext context)
         {
-            return ExecuteIntAsync(instantiateArgs, environmentSettings, telemetryLogger, context);
+            return ExecuteIntAsync(instantiateArgs, environmentSettings, context);
         }
 
         protected override InstantiateCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);
@@ -182,7 +180,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         private static async Task<NewCommandStatus> ExecuteIntAsync(
             InstantiateCommandArgs instantiateArgs,
             IEngineEnvironmentSettings environmentSettings,
-            ITelemetryLogger telemetryLogger,
             InvocationContext context)
         {
             var cancellationToken = context.GetCancellationToken();
@@ -193,8 +190,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 TemplateListCoordinator templateListCoordinator = new TemplateListCoordinator(
                     environmentSettings,
                     templatePackageManager,
-                    hostSpecificDataLoader,
-                    telemetryLogger);
+                    hostSpecificDataLoader);
 
                 return await templateListCoordinator.DisplayCommandDescriptionAsync(instantiateArgs, cancellationToken).ConfigureAwait(false);
             }
@@ -217,7 +213,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return await HandleTemplateInstantationAsync(
                 instantiateArgs,
                 environmentSettings,
-                telemetryLogger,
                 templatePackageManager,
                 selectedTemplateGroups.Single(),
                 cancellationToken).ConfigureAwait(false);
@@ -258,7 +253,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         private static async Task<NewCommandStatus> HandleTemplateInstantationAsync(
             InstantiateCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
-            ITelemetryLogger telemetryLogger,
             TemplatePackageManager templatePackageManager,
             TemplateGroup templateGroup,
             CancellationToken cancellationToken)
@@ -270,7 +264,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 args.Command.AddCommand(templateCommandToRun);
 
                 ParseResult updatedParseResult = args.ParseResult.Parser.Parse(args.ParseResult.Tokens.Select(t => t.Value).ToList());
-                return await candidates.Single().InvokeAsync(updatedParseResult, telemetryLogger, cancellationToken).ConfigureAwait(false);
+                return await candidates.Single().InvokeAsync(updatedParseResult, cancellationToken).ConfigureAwait(false);
             }
             else if (candidates.Any())
             {

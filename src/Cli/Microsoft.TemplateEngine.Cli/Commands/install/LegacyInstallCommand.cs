@@ -10,8 +10,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class LegacyInstallCommand : BaseInstallCommand
     {
-        public LegacyInstallCommand(NewCommand parentCommand, Func<ParseResult, ITemplateEngineHost> hostBuilder, Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
-            : base(parentCommand, hostBuilder, telemetryLoggerBuilder, "--install")
+        public LegacyInstallCommand(NewCommand parentCommand, Func<ParseResult, ITemplateEngineHost> hostBuilder)
+            : base(parentCommand, hostBuilder, "--install")
         {
             this.IsHidden = true;
             this.AddAlias("-i");
@@ -23,10 +23,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal override Option<string[]> AddSourceOption => ParentCommand.AddSourceOption;
 
-        protected override Task<NewCommandStatus> ExecuteAsync(InstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, ITelemetryLogger telemetryLogger, InvocationContext context)
+        protected override Task<NewCommandStatus> ExecuteAsync(InstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
         {
             PrintDeprecationMessage<LegacyInstallCommand, InstallCommand>(args.ParseResult);
-            return base.ExecuteAsync(args, environmentSettings, telemetryLogger, context);
+            return base.ExecuteAsync(args, environmentSettings, context);
         }
     }
 }

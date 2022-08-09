@@ -25,8 +25,7 @@ namespace Dotnet_new3
         {
             Command newCommand = NewCommandFactory.Create(
                 CommandName,
-                (ParseResult parseResult) => HostFactory.CreateHost(parseResult.GetValueForOption(_debugDisableBuiltInTemplatesOption)),
-                (ParseResult parseResult) => new TelemetryLogger(null, parseResult.GetValueForOption(_debugEmitTelemetryOption)));
+                (ParseResult parseResult) => HostFactory.CreateHost(parseResult.GetValueForOption(_debugDisableBuiltInTemplatesOption)));
 
             newCommand.AddGlobalOption(_debugEmitTelemetryOption);
             newCommand.AddGlobalOption(_debugDisableBuiltInTemplatesOption);

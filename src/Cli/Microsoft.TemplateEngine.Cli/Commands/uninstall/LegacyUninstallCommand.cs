@@ -12,9 +12,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         public LegacyUninstallCommand(
             NewCommand parentCommand,
-            Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
-            : base(hostBuilder, telemetryLoggerBuilder, "--uninstall")
+            Func<ParseResult, ITemplateEngineHost> hostBuilder)
+            : base(hostBuilder, "--uninstall")
         {
             this.IsHidden = true;
             this.AddAlias("-u");
@@ -22,10 +21,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             parentCommand.AddNoLegacyUsageValidators(this);
         }
 
-        protected override Task<NewCommandStatus> ExecuteAsync(UninstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, ITelemetryLogger telemetryLogger, InvocationContext context)
+        protected override Task<NewCommandStatus> ExecuteAsync(UninstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
         {
             PrintDeprecationMessage<LegacyUninstallCommand, UninstallCommand>(args.ParseResult);
-            return base.ExecuteAsync(args, environmentSettings, telemetryLogger, context);
+            return base.ExecuteAsync(args, environmentSettings, context);
         }
     }
 }

@@ -63,7 +63,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             FilterOptionDefinition expectedDef = _stringToFilterDefMap[expectedFilter];
 
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse(command);
             SearchCommandArgs args = new SearchCommandArgs((BaseSearchCommand)parseResult.CommandResult.Command, parseResult);
@@ -97,7 +97,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             FilterOptionDefinition expectedDef = _stringToFilterDefMap[expectedFilter];
 
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse(command);
             SearchCommandArgs args = new SearchCommandArgs((BaseSearchCommand)parseResult.CommandResult.Command, parseResult);
@@ -113,7 +113,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Search_CannotParseMultipleArgs(string command)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse(command);
 
@@ -125,7 +125,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Search_CannotParseArgsAtNewLevel()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse("new smth search");
 
@@ -143,7 +143,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Search_CannotParseOptionsAtNewLevel(string command, string expectedFilter)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse(command);
 
@@ -155,7 +155,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Search_Legacy_CannotParseArgsAtBothLevels()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse("new smth --search smth-else");
 
@@ -171,7 +171,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Search_HandleParseErrors(string command, string expectedInvalidTokens)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse(command);
             var errorMessages = parseResult.Errors.Select(error => error.Message);
@@ -193,7 +193,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Search_CanParseColumnsAll(string command)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse(command);
 
@@ -213,7 +213,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Search_CanParseColumns(string command, string[] expectedColumns)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse(command);
 
@@ -234,7 +234,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Search_CannotParseUnknownColumns(string command)
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse(command);
 
@@ -246,7 +246,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void CommandExampleCanShowParentCommandsBeyondNew()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             Command rootCommand = new Command("dotnet")
             {
                 myCommand
@@ -260,7 +260,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void CommandExampleShowsMandatoryArg()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             Command rootCommand = new Command("dotnet")
             {
                 myCommand
@@ -274,7 +274,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void CommandExampleShowsOptionalArgWhenOptionsAreGiven()
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             Command rootCommand = new Command("dotnet")
             {
                 myCommand

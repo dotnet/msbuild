@@ -51,31 +51,6 @@ namespace Microsoft.DotNet.Cli
 
         public static System.CommandLine.Command GetCommand()
         {
-            var getLogger = (ParseResult parseResult) => {
-                var sessionId = Environment.GetEnvironmentVariable(MSBuildForwardingApp.TelemetrySessionIdEnvironmentVariableName);
-
-                // senderCount: 0 to disable sender.
-                // When senders in different process running at the same
-                // time they will read from the same global queue and cause
-                // sending duplicated events. Disable sender to reduce it.
-                var telemetry = new Microsoft.DotNet.Cli.Telemetry.Telemetry(new FirstTimeUseNoticeSentinel(),
-                                            sessionId,
-                                            senderCount: 0);
-                var logger = new TelemetryLogger(null);
-
-                if (telemetry.Enabled)
-                {
-                    logger = new TelemetryLogger((name, props, measures) =>
-                    {
-                        if (telemetry.Enabled)
-                        {
-                            telemetry.TrackEvent($"template/{name}", props, measures);
-                        }
-                    });
-                }
-                return logger;
-            };
-
             var getEngineHost = (ParseResult parseResult) => {
                 bool disableSdkTemplates = parseResult.GetValueForOption(_disableSdkTemplates);
                 bool disableProjectContext = parseResult.GetValueForOption(_disableProjectContextEvaluation)
@@ -86,7 +61,7 @@ namespace Microsoft.DotNet.Cli
                 return CreateHost(disableSdkTemplates, disableProjectContext, projectPath);
             };
 
-            var command = Microsoft.TemplateEngine.Cli.NewCommandFactory.Create(CommandName, getEngineHost, getLogger);
+            var command = NewCommandFactory.Create(CommandName, getEngineHost);
 
             // adding this option lets us look for its bound value during binding in a typed way
             command.AddGlobalOption(_disableSdkTemplates);

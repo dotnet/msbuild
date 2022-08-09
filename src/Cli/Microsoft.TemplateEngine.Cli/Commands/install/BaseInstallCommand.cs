@@ -3,7 +3,6 @@
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Settings;
 
@@ -14,9 +13,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal BaseInstallCommand(
             NewCommand parentCommand,
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
             string commandName)
-            : base(hostBuilder, telemetryLoggerBuilder, commandName, SymbolStrings.Command_Install_Description)
+            : base(hostBuilder, commandName, SymbolStrings.Command_Install_Description)
         {
             ParentCommand = parentCommand;
             this.AddArgument(NameArgument);
@@ -42,12 +40,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override async Task<NewCommandStatus> ExecuteAsync(
             InstallCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
-            ITelemetryLogger telemetryLogger,
             InvocationContext context)
         {
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
             TemplatePackageCoordinator templatePackageCoordinator = new TemplatePackageCoordinator(
-                telemetryLogger,
                 environmentSettings,
                 templatePackageManager);
 

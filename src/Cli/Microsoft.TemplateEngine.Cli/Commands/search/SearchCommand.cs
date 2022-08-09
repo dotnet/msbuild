@@ -11,9 +11,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         public SearchCommand(
                 NewCommand parentCommand,
-                Func<ParseResult, ITemplateEngineHost> hostBuilder,
-                Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
-            : base(parentCommand, hostBuilder, telemetryLoggerBuilder, "search")
+                Func<ParseResult, ITemplateEngineHost> hostBuilder)
+            : base(parentCommand, hostBuilder, "search")
         {
             parentCommand.AddNoLegacyUsageValidators(this);
         }
