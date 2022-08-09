@@ -54,7 +54,10 @@ public class Image
         RecalculateDigest();
     }
 
-    private void RecalculateDigest() {
+    private void RecalculateDigest()
+    {
+        config["created"] = DateTime.UtcNow;
+
         manifest["config"]!["digest"] = GetDigest(config);
     }
 
