@@ -48,7 +48,8 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             _getEnvironmentVariable = getEnvironmentVariable;
             _netCoreSdkResolver = new NETCoreSdkResolver(getEnvironmentVariable, vsSettings);
 
-            if (!string.IsNullOrEmpty(_getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_ENABLE_LOG")))
+            if (_getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_ENABLE_LOG") is String val &&
+                string.Equals(val, "true", StringComparison.OrdinalIgnoreCase))
             {
                 _shouldLog = true;
             }
@@ -106,7 +107,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
             if (msbuildSdksDir == null)
             {
-                dotnetRoot = EnvironmentProvider.GetDotnetExeDirectory(_getEnvironmentVariable);
+                dotnetRoot = EnvironmentProvider.GetDotnetExeDirectory(_getEnvironmentVariable, logger.LogMessage);
                 logger.LogMessage($"\tDotnet root: {dotnetRoot}");
 
                 logger.LogMessage("Resolving .NET Core SDK directory");
