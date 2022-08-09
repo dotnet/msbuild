@@ -201,7 +201,10 @@ namespace Microsoft.Build.UnitTests
             var projectImportsZipPath = Path.ChangeExtension(_logFile, ".ProjectImports.zip");
             using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
             using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
-            zipArchive.Entries.ShouldContain(zE => zE.Name == "testtaskoutputfile.txt");
+
+            // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
+            // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
+            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"));
         }
 
         [Fact]
