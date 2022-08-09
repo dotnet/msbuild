@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -80,6 +81,8 @@ namespace Microsoft.Build.BackEnd
 
             // SDK resolution
             _componentEntriesByType[BuildComponentType.SdkResolverService] = new BuildComponentEntry(BuildComponentType.SdkResolverService, MainNodeSdkResolverService.CreateComponent, CreationPattern.Singleton);
+
+            _componentEntriesByType[BuildComponentType.FileAccessManager] = new BuildComponentEntry(BuildComponentType.FileAccessManager, FileAccessManager.CreateComponent, CreationPattern.Singleton);
         }
 
         /// <summary>

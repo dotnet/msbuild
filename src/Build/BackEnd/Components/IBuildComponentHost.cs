@@ -130,6 +130,11 @@ namespace Microsoft.Build.BackEnd
         /// The SDK resolution service.
         /// </summary>
         SdkResolverService,
+
+        /// <summary>
+        /// The component which is the sink for file access reports and forwards reports to other components.
+        /// </summary>
+        FileAccessManager,
     }
 
     /// <summary>
