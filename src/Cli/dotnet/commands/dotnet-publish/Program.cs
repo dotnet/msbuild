@@ -85,13 +85,9 @@ namespace Microsoft.DotNet.Tools.Publish
         {
             ProjectInstance project = null;
 
-            Environment.SetEnvironmentVariable("MsBuildUseSimpleProjectRootElementCacheConcurrency", "1");
-
             IEnumerable<string> calledArguments = parseResult.Tokens.Select(x => x.ToString());
             IEnumerable<string> slnProjectAndCommandArgs = slnOrProjectArgs.Concat(calledArguments);
             project = GetTargetedProject(slnProjectAndCommandArgs, defaultedConfigurationProperty);
-
-            Environment.SetEnvironmentVariable("MsBuildUseSimpleProjectRootElementCacheConcurrency", null);
 
             if (project != null)
             {
