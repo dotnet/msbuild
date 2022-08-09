@@ -259,8 +259,6 @@ namespace Microsoft.Build.Experimental
         internal bool ServerIsRunning()
         {
             string serverRunningMutexName = OutOfProcServerNode.GetRunningServerMutexName(_handshake);
-
-            // Start server it if is not running.
             bool serverIsAlreadyRunning = ServerNamedMutex.WasOpen(serverRunningMutexName);
             return serverIsAlreadyRunning;
         }
