@@ -27,7 +27,7 @@ namespace Microsoft.Build.UnitTests
             buildFinishedEvent = new BuildFinishedEventArgs("{0}", "HelpKeyword", true, new DateTime(), "Message");
             buildFinishedEvent = new BuildFinishedEventArgs(null, null, true);
             buildFinishedEvent = new BuildFinishedEventArgs(null, null, true, new DateTime());
-            buildFinishedEvent = new BuildFinishedEventArgs(null, null, true, new DateTime(), null);
+            buildFinishedEvent = new BuildFinishedEventArgs(null, null, true, new DateTime(), messageArgs: null);
         }
 
         /// <summary>

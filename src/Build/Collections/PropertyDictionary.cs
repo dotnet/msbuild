@@ -521,5 +521,22 @@ namespace Microsoft.Build.Collections
                 }
             }
         }
+
+        internal IEnumerable<TResult> Filter<TResult>(Func<T, bool> filter, Func<T, TResult> selector)
+        {
+            List<TResult> result = new();
+            lock (_properties)
+            {
+                foreach (T property in _properties)
+                {
+                    if (filter(property))
+                    {
+                        result.Add(selector(property));
+                    }
+                }
+            }
+
+            return result;
+        }
     }
 }
