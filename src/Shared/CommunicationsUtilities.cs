@@ -676,6 +676,9 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static void Trace(int nodeId, string format, params object[] args)
         {
+            // TODO: debug logging, delete before merge
+            Console.WriteLine(String.Format(CultureInfo.CurrentCulture, format, args));
+
             if (s_trace)
             {
                 lock (s_traceLock)
