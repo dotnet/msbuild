@@ -5,12 +5,16 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Evaluation;
+using Microsoft.DotNet.Cli.Telemetry;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Utils;
+using Newtonsoft.Json.Linq;
 using LocalizableStrings = Microsoft.DotNet.Tools.New.LocalizableStrings;
 
 namespace Microsoft.TemplateEngine.MSBuildEvaluation
@@ -113,18 +117,25 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
                 projectPath = _projectFullPath;
             }
 
+            Stopwatch watch = new();
+            Stopwatch innerBuildWatch = new();
+            bool IsSdkStyleProject = false;
+            IReadOnlyList<string>? targetFrameworks = null;
+            string? targetFramework = null;
+            
             try
             {
+                watch.Start();
                 _logger?.LogDebug("Evaluating project: {0}", projectPath);
                 Project evaluatedProject = RunEvaluate(projectPath);
 
                 //if project is using Microsoft.NET.Sdk, then it is SDK-style project.
-                bool IsSdkStyleProject = evaluatedProject.GetProperty("UsingMicrosoftNETSDK")?.EvaluatedValue == "true";
+                IsSdkStyleProject = evaluatedProject.GetProperty("UsingMicrosoftNETSDK")?.EvaluatedValue == "true";
                 _logger?.LogDebug("SDK-style project: {0}", IsSdkStyleProject);
 
-                IReadOnlyList<string>? targetFrameworks = evaluatedProject.GetProperty("TargetFrameworks")?.EvaluatedValue?.Split(";");
+                targetFrameworks = evaluatedProject.GetProperty("TargetFrameworks")?.EvaluatedValue?.Split(";");
                 _logger?.LogDebug("Target frameworks: {0}", string.Join("; ", targetFrameworks ?? Array.Empty<string>()));
-                string? targetFramework = evaluatedProject.GetProperty("TargetFramework")?.EvaluatedValue;
+                targetFramework = evaluatedProject.GetProperty("TargetFramework")?.EvaluatedValue;
                 _logger?.LogDebug("Target framework: {0}", targetFramework ?? "<null>");
 
                 if (!IsSdkStyleProject || string.IsNullOrWhiteSpace(targetFramework) && targetFrameworks == null)
@@ -159,11 +170,13 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
 
                 //For multi-target project, we need to do additional evaluation for each target framework.
                 Dictionary<string, Project?> evaluatedTfmBasedProjects = new Dictionary<string, Project?>();
+                innerBuildWatch.Start();
                 foreach (string tfm in targetFrameworks)
                 {
                     _logger?.LogDebug("Evaluating project for target framework: {0}", tfm);
                     evaluatedTfmBasedProjects[tfm] = RunEvaluate(projectPath, tfm);
                 }
+                innerBuildWatch.Stop();
                 _logger?.LogDebug("Project is SDK style, multi-target, evaluation succeeded.");
                 return MultiTargetEvaluationResult.CreateSuccess(projectPath, evaluatedProject, evaluatedTfmBasedProjects);
 
@@ -172,6 +185,27 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
             {
                 _logger?.LogDebug("Unexpected error: {0}", e);
                 return MSBuildEvaluationResult.CreateFailure(projectPath, e.Message);
+            }
+            finally
+            {
+                watch.Stop();
+                if (innerBuildWatch.IsRunning)
+                {
+                    innerBuildWatch.Stop();
+                }
+                string? targetFrameworksString = targetFrameworks != null ? string.Join(",", targetFrameworks) : targetFramework;
+                Dictionary<string, string> properties = new()
+                {
+                    { "ProjectPath",  Sha256Hasher.HashWithNormalizedCasing(projectPath)},
+                    { "SdkStyleProject", IsSdkStyleProject.ToString() },
+                    { "TargetFrameworks", targetFrameworksString ?? "<null>"},
+                };
+                Dictionary<string, double> measurements = new()
+                {
+                    { "EvaluationTime",  watch.ElapsedMilliseconds },
+                    { "InnerEvaluationTime",  innerBuildWatch.ElapsedMilliseconds }
+                };
+                TelemetryEventEntry.TrackEvent("new/msbuild-eval", properties, measurements);
             }
         }
 
