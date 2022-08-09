@@ -15,3 +15,6 @@ Out of the box, this package will infer a number of properties about the generat
 
 > **Note**
 > This package only supports Linux containers in this version.
+
+> **Note**
+> This package only supports Web projects (those that use the `Microsoft.NET.Sdk.Web` SDK) in this version.
