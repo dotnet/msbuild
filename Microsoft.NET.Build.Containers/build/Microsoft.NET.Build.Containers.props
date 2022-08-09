@@ -9,6 +9,6 @@
     </PropertyGroup>
 
     <!--Register our custom task-->
-    <UsingTask TaskName="$(MSBuildThisFileName).CreateNewImage" AssemblyFile="$(CustomTasksAssembly)"/>
-    <UsingTask TaskName="$(MSBuildThisFileName).ParseContainerProperties" AssemblyFile="$(CustomTasksAssembly)"/>
+    <UsingTask TaskName="$(MSBuildThisFileName).Tasks.CreateNewImage" AssemblyFile="$(CustomTasksAssembly)"/>
+    <UsingTask TaskName="$(MSBuildThisFileName).Tasks.ParseContainerProperties" AssemblyFile="$(CustomTasksAssembly)"/>
 </Project>

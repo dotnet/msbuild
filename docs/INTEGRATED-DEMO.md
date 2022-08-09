@@ -20,7 +20,7 @@ dotnet nuget add source https://nuget.pkg.github.com/rainersigwald/index.json \
     --store-password-in-clear-text --configfile nuget.config
 
 # add a reference to the package
-dotnet add package Microsoft.NET.Build.Containers --version 0.1.3
+dotnet add package Microsoft.NET.Build.Containers --prerelease
 
 # publish your project
 dotnet publish --os linux --arch x64 -p:PublishProfile=DefaultContainer
