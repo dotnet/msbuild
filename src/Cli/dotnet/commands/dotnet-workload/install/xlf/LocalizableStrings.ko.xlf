@@ -164,7 +164,7 @@
       </trans-unit>
       <trans-unit id="ManifestPackageUrlNotResolved">
         <source>Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</source>
-        <target state="new">Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</target>
+        <target state="translated">매니페스트 패키지가 해결되지 않았습니다. {0}에 대한 매니페스트 패키지 또는 URL이 존재하지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">
