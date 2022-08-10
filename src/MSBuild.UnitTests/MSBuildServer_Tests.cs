@@ -21,6 +21,7 @@ using System.IO;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using Path = System.IO.Path;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
@@ -224,7 +225,7 @@ namespace Microsoft.Build.Engine.UnitTests
             // TODO: delete
             var debugFolder = _env.CreateFolder();
             _env.SetEnvironmentVariable("MSBUILDDEBUGENGINE", "1");
-            _env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugFolder.Path);
+            _env.SetEnvironmentVariable("MSBUILDDEBUGPATH", Path.GetTempPath());
 
             // Just for sure close server, so previous server instances does not effect this run.
             BuildManager.DefaultBuildManager.ShutdownAllNodes();
