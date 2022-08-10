@@ -227,9 +227,6 @@ namespace Microsoft.Build.Engine.UnitTests
             _env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
             _env.SetEnvironmentVariable("MSBUILDDEBUGPATH", Path.GetTempPath());
 
-            // Just for sure close server, so previous server instances does not effect this run.
-            BuildManager.DefaultBuildManager.ShutdownAllNodes();
-
             // Start a server node and find its PID.
             string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success, false, _output);
             success.ShouldBeTrue();
