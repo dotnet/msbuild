@@ -35,7 +35,7 @@ dotnet add package Microsoft.NET.Build.Containers
 dotnet publish --os linux --arch x64 -p:PublishProfile=DefaultContainer
 
 # run your app
-docker run -it --rm -p 5010:80 my-awesome-container-app:latest
+docker run -it --rm -p 5010:80 my-awesome-container-app:1.0.0
 ```
 
 Now you can go to `localhost:5010` and you should see the `Hello World!` text!
