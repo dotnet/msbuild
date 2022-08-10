@@ -820,6 +820,18 @@ namespace Microsoft.Build.BackEnd
 
                 thrownException = ex;
             }
+            catch (UnbuildableProjectType ex)
+            {
+                thrownException = ex;
+                if (_projectLoggingContext is null)
+                {
+                    _nodeLoggingContext.LogWarning("SolutionParseUnknownProjectType", ex.Message);
+                }
+                else
+                {
+                    _projectLoggingContext.LogWarning("SolutionParseUnknownProjectType", ex.Message);
+                }
+            }
             catch (Exception ex)
             {
                 thrownException = ex;
