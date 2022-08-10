@@ -221,6 +221,11 @@ namespace Microsoft.Build.Engine.UnitTests
 
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
 
+            // TODO: delete
+            var debugFolder = _env.CreateFolder();
+            _env.SetEnvironmentVariable("MSBUILDDEBUGENGINE", "1");
+            _env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugFolder.Path);
+
             // Just for sure close server, so previous server instances does not effect this run.
             BuildManager.DefaultBuildManager.ShutdownAllNodes();
 
