@@ -73,7 +73,7 @@ namespace Microsoft.Build.Experimental
         /// <summary>
         /// The named pipe stream for client-server communication.
         /// </summary>
-        private readonly NamedPipeClientStream _nodeStream;
+        private NamedPipeClientStream _nodeStream;
 
         /// <summary>
         /// A way to cache a byte array when writing out packets
@@ -126,14 +126,19 @@ namespace Microsoft.Build.Experimental
             // Client <-> Server communication stream
             _handshake = GetHandshake();
             _pipeName = OutOfProcServerNode.GetPipeName(_handshake);
+            CreateNodePipeStream();
+            _packetMemoryStream = new MemoryStream();
+            _binaryWriter = new BinaryWriter(_packetMemoryStream);
+        }
+
+        private void CreateNodePipeStream()
+        {
             _nodeStream = new NamedPipeClientStream(".", _pipeName, PipeDirection.InOut, PipeOptions.Asynchronous
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
                 | PipeOptions.CurrentUserOnly
 #endif
             );
             _packetPump = new MSBuildClientPacketPump(_nodeStream);
-            _packetMemoryStream = new MemoryStream();
-            _binaryWriter = new BinaryWriter(_packetMemoryStream);
         }
 
         /// <summary>
@@ -622,6 +627,7 @@ namespace Microsoft.Build.Experimental
                         // This solves race condition for time in which server started but have not yet listen on pipe or
                         // when it just finished build request and is recycling pipe.
                         tryAgain = true;
+                        CreateNodePipeStream();
                     }
                     else
                     {
