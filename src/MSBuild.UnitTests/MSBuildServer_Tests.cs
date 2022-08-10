@@ -224,7 +224,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             // TODO: delete
             var debugFolder = _env.CreateFolder();
-            _env.SetEnvironmentVariable("MSBUILDDEBUGENGINE", "1");
+            _env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
             _env.SetEnvironmentVariable("MSBUILDDEBUGPATH", Path.GetTempPath());
 
             // Just for sure close server, so previous server instances does not effect this run.
