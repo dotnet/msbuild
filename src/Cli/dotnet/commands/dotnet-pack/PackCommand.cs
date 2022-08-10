@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Tools.Pack
             IEnumerable<string> slnOrProjectArgs = parseResult.GetValueForArgument(PackCommandParser.SlnOrProjectArgument);
 
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PackCommandParser.GetCommand()));
-            msbuildArgs.AddRange(PublishCommand.GetAutomaticConfigurationIfSpecified(parseResult, PackCommandParser.customDefaultConfigurationProperty,
+            msbuildArgs.AddRange(ReleasePropertyProjectLocator.GetCustomDefaultConfigurationValueIfSpecified(parseResult, PackCommandParser.customDefaultConfigurationProperty,
                 slnOrProjectArgs, PackCommandParser.ConfigurationOption) ?? Array.Empty<string>());
             msbuildArgs.AddRange(slnOrProjectArgs ?? Array.Empty<string>());
 

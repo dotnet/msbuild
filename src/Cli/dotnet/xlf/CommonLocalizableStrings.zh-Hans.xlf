@@ -120,6 +120,11 @@ EOF
         <target state="translated">项目已经具有对“{0}”的引用。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectDeductionFailure">
+        <source>A problem with the project or solution prevented checking properties for Release.</source>
+        <target state="new">A problem with the project or solution prevented checking properties for Release.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectReferenceCouldNotBeFound">
         <source>Project reference `{0}` could not be found.</source>
         <target state="translated">找不到项目引用“{0}”。</target>

@@ -47,11 +47,6 @@
         <target state="translated">Nie kompiluj tego projektu przed opublikowaniem. Powoduje przyjęcie, że podano parametr --no-restore.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectDeductionFailure">
-        <source>A problem with the project or solution prevented checking properties for Release.</source>
-        <target state="new">A problem with the project or solution prevented checking properties for Release.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>

@@ -420,6 +420,9 @@
   <data name="SpecifyAtLeastOneProjectToRemove" xml:space="preserve">
     <value>You must specify at least one project to remove.</value>
   </data>
+  <data name="ProjectDeductionFailure" xml:space="preserve">
+    <value>A problem with the project or solution prevented checking properties for Release.</value>
+  </data>
   <data name="ProjectDeleted" xml:space="preserve">
     <value>Project `{0}` deleted from solution.</value>
   </data>
