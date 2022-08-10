@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
+using System.Linq;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Client;
@@ -601,17 +602,28 @@ namespace Microsoft.Build.Experimental
         /// Connects to MSBuild server.
         /// </summary>
         /// <returns> Whether the client connected to MSBuild server successfully.</returns>
-        private bool TryConnectToServer(int timeout)
+        private bool TryConnectToServer(int timeoutMilliseconds)
         {
-            try
+            bool tryAgain = true;
+            Stopwatch sw = Stopwatch.StartNew();
+
+            while (tryAgain && sw.ElapsedMilliseconds < timeoutMilliseconds)
             {
-                NodeProviderOutOfProcBase.ConnectToPipeStream(_nodeStream, _pipeName, _handshake, timeout);
-            }
-            catch (Exception ex)
-            {
-                CommunicationsUtilities.Trace("Failed to connect to server: {0}", ex);
-                _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnableToConnect;
-                return false;
+                tryAgain = false;
+                try
+                {
+                    NodeProviderOutOfProcBase.ConnectToPipeStream(_nodeStream, _pipeName, _handshake, Math.Max(1, timeoutMilliseconds - (int)sw.ElapsedMilliseconds));
+                }
+                catch (AggregateException ex) when (ex.Flatten().InnerExceptions.OfType<IOException>().Any())
+                {
+                    tryAgain = true;
+                }
+                catch (Exception ex)
+                {
+                    CommunicationsUtilities.Trace("Failed to connect to server: {0}", ex);
+                    _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnableToConnect;
+                    return false;
+                }
             }
 
             return true;
