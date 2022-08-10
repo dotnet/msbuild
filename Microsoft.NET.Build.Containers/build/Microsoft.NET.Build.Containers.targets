@@ -71,7 +71,7 @@
                         ImageTag="$(ContainerImageTag)"
                         PublishDirectory="$(PublishDir)"
                         WorkingDirectory="$(ContainerWorkingDirectory)"
-                        Entrypoint="$(ContainerEntrypoint)"
-                        EntrypointArgs="$(ContainerEntrypointArgs)"/>
+                        Entrypoint="@(ContainerEntrypoint)"
+                        EntrypointArgs="@(ContainerEntrypointArgs)"/>
     </Target>
 </Project>
