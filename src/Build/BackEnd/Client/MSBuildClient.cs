@@ -73,7 +73,7 @@ namespace Microsoft.Build.Experimental
         /// <summary>
         /// The named pipe stream for client-server communication.
         /// </summary>
-        private NamedPipeClientStream _nodeStream;
+        private NamedPipeClientStream _nodeStream = null!;
 
         /// <summary>
         /// A way to cache a byte array when writing out packets
@@ -99,7 +99,7 @@ namespace Microsoft.Build.Experimental
         /// <summary>
         /// Incoming packet pump and redirection.
         /// </summary>
-        private MSBuildClientPacketPump _packetPump;
+        private MSBuildClientPacketPump _packetPump = null!;
 
         /// <summary>
         /// Public constructor with parameters.
@@ -126,9 +126,10 @@ namespace Microsoft.Build.Experimental
             // Client <-> Server communication stream
             _handshake = GetHandshake();
             _pipeName = OutOfProcServerNode.GetPipeName(_handshake);
-            CreateNodePipeStream();
             _packetMemoryStream = new MemoryStream();
             _binaryWriter = new BinaryWriter(_packetMemoryStream);
+
+            CreateNodePipeStream();
         }
 
         private void CreateNodePipeStream()
