@@ -614,15 +614,21 @@ namespace Microsoft.Build.Experimental
                 {
                     NodeProviderOutOfProcBase.ConnectToPipeStream(_nodeStream, _pipeName, _handshake, Math.Max(1, timeoutMilliseconds - (int)sw.ElapsedMilliseconds));
                 }
-                catch (AggregateException ex) when (ex.Flatten().InnerExceptions.OfType<IOException>().Any())
-                {
-                    tryAgain = true;
-                }
                 catch (Exception ex)
                 {
-                    CommunicationsUtilities.Trace("Failed to connect to server: {0}", ex);
-                    _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnableToConnect;
-                    return false;
+                    if (ex is IOException || (ex is AggregateException exa && exa.Flatten().InnerExceptions.OfType<IOException>().Any()))
+                    {
+                        CommunicationsUtilities.Trace("Retrying to connect to server after {0} ms", sw.ElapsedMilliseconds);
+                        // This solves race condition for time in which server started but have not yet listen on pipe or
+                        // when it just finished build request and is recycling pipe.
+                        tryAgain = true;
+                    }
+                    else
+                    {
+                        CommunicationsUtilities.Trace("Failed to connect to server: {0}", ex);
+                        _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnableToConnect;
+                        return false;
+                    }
                 }
             }
 
