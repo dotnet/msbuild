@@ -113,7 +113,15 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
 
         if (OutputRegistry.StartsWith("docker://"))
         {
-            LocalDocker.Load(image, ImageName, ImageTag, BaseImageName).Wait();
+            try
+            {
+                LocalDocker.Load(image, ImageName, ImageTag, BaseImageName).Wait();
+            }
+            catch (AggregateException ex) when (ex.InnerException is DockerLoadException dle)
+            {
+                Log.LogErrorFromException(dle, showStackTrace: false);
+                return !Log.HasLoggedErrors;
+            }
         }
         else
         {
