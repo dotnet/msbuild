@@ -14,15 +14,14 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Utils;
-using Newtonsoft.Json.Linq;
 using LocalizableStrings = Microsoft.DotNet.Tools.New.LocalizableStrings;
 
 namespace Microsoft.TemplateEngine.MSBuildEvaluation
 {
     internal class MSBuildEvaluator : IIdentifiedComponent
     {
-        private readonly ProjectCollection _projectCollection = new ProjectCollection();
-        private readonly object _lockObj = new object();
+        private readonly ProjectCollection _projectCollection = new();
+        private readonly object _lockObj = new();
 
         private IEngineEnvironmentSettings? _settings;
         private ILogger? _logger;
@@ -122,6 +121,7 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
             bool IsSdkStyleProject = false;
             IReadOnlyList<string>? targetFrameworks = null;
             string? targetFramework = null;
+            MSBuildEvaluationResult? result = null;
             
             try
             {
@@ -143,21 +143,21 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
                     //For non SDK style project, we cannot evaluate more info. Also there is no indication, whether the project
                     //was restored or not, so it is not checked.
                     _logger?.LogDebug("Project is non-SDK style, cannot evaluate restore status, succeeding.");
-                    return NonSDKStyleEvaluationResult.CreateSuccess(projectPath, evaluatedProject);
+                    return result = NonSDKStyleEvaluationResult.CreateSuccess(projectPath, evaluatedProject);
                 }
 
                 //For SDK-style project, if the project was restored "RestoreSuccess" property will be set to true.
                 if (!evaluatedProject.GetProperty("RestoreSuccess")?.EvaluatedValue.Equals("true", StringComparison.OrdinalIgnoreCase) ?? true)
                 {
                     _logger?.LogDebug("Project is not restored, exiting.");
-                    return MSBuildEvaluationResult.CreateNoRestore(projectPath);
+                    return result = MSBuildEvaluationResult.CreateNoRestore(projectPath);
                 }
 
                 //If target framework is set, no further evaluation is needed.
                 if (!string.IsNullOrWhiteSpace(targetFramework))
                 {
                     _logger?.LogDebug("Project is SDK style, single TFM:{0}, evaluation succeeded.", targetFramework);
-                    return SDKStyleEvaluationResult.CreateSuccess(projectPath, targetFramework, evaluatedProject);
+                    return result = SDKStyleEvaluationResult.CreateSuccess(projectPath, targetFramework, evaluatedProject);
                 }
 
                 //If target framework is not set, then presumably it is multi-target project.
@@ -165,7 +165,7 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
                 if (targetFrameworks == null)
                 {
                     _logger?.LogDebug("Project is SDK style, but does not specify the framework.");
-                    return MSBuildEvaluationResult.CreateFailure(projectPath, string.Format(LocalizableStrings.MSBuildEvaluator_Error_NoTargetFramework, projectPath));
+                    return result = MSBuildEvaluationResult.CreateFailure(projectPath, string.Format(LocalizableStrings.MSBuildEvaluator_Error_NoTargetFramework, projectPath));
                 }
 
                 //For multi-target project, we need to do additional evaluation for each target framework.
@@ -178,33 +178,44 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
                 }
                 innerBuildWatch.Stop();
                 _logger?.LogDebug("Project is SDK style, multi-target, evaluation succeeded.");
-                return MultiTargetEvaluationResult.CreateSuccess(projectPath, evaluatedProject, evaluatedTfmBasedProjects);
+                return result = MultiTargetEvaluationResult.CreateSuccess(projectPath, evaluatedProject, evaluatedTfmBasedProjects);
 
             }
             catch (Exception e)
             {
                 _logger?.LogDebug("Unexpected error: {0}", e);
-                return MSBuildEvaluationResult.CreateFailure(projectPath, e.Message);
+                return result = MSBuildEvaluationResult.CreateFailure(projectPath, e.Message);
             }
             finally
             {
                 watch.Stop();
-                if (innerBuildWatch.IsRunning)
+                innerBuildWatch.Stop();
+
+                string? targetFrameworksString = null;
+
+                if (targetFrameworks != null)
                 {
-                    innerBuildWatch.Stop();
+                    targetFrameworksString = string.Join(",", targetFrameworks.Select(tfm => Sha256Hasher.HashWithNormalizedCasing(tfm)));
                 }
-                string? targetFrameworksString = targetFrameworks != null ? string.Join(",", targetFrameworks) : targetFramework;
+                else if (targetFramework != null)
+                {
+                    targetFrameworksString = Sha256Hasher.HashWithNormalizedCasing(targetFramework);
+                }
+
                 Dictionary<string, string> properties = new()
                 {
                     { "ProjectPath",  Sha256Hasher.HashWithNormalizedCasing(projectPath)},
                     { "SdkStyleProject", IsSdkStyleProject.ToString() },
+                    { "Status", result?.Status.ToString() ?? "<null>"},
                     { "TargetFrameworks", targetFrameworksString ?? "<null>"},
                 };
+
                 Dictionary<string, double> measurements = new()
                 {
                     { "EvaluationTime",  watch.ElapsedMilliseconds },
                     { "InnerEvaluationTime",  innerBuildWatch.ElapsedMilliseconds }
                 };
+
                 TelemetryEventEntry.TrackEvent("new/msbuild-eval", properties, measurements);
             }
         }
