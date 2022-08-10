@@ -64,11 +64,6 @@ Ve výchozím nastavení je publikována aplikace závislá na architektuře.</t
         <target state="translated">Konfigurace, pro kterou se má publikovat. Výchozí hodnota je Debug. Pomocí vlastnosti PublishRelease nastavte release jako výchozí pro tento příkaz.</target>
         <note />
       </trans-unit>
-      <trans-unit id="TopLevelPublishConfigurationMismatchError">
-        <source>NETSDKERR: Multiple top-level projects in the given solution contain conflicting PublishRelease or PackRelease values. To use conflicting configurations, leverage a Directory.build.props file instead of setting flags that don't match.</source>
-        <target state="new">NETSDKERR: Multiple top-level projects in the given solution contain conflicting PublishRelease or PackRelease values. To use conflicting configurations, leverage a Directory.build.props file instead of setting flags that don't match.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

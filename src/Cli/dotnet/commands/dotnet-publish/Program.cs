@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
             IEnumerable<string> calledArguments = parseResult.Tokens.Select(x => x.ToString());
             IEnumerable<string> slnProjectAndCommandArgs = slnOrProjectArgs.Concat(calledArguments);
-            project = GetTargetedProject(slnProjectAndCommandArgs, defaultedConfigurationProperty);
+            project = GetTargetedProject(slnProjectAndCommandArgs);
 
             if (project != null)
             {
@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.Tools.Publish
         }
 
         /// <returns>A project instance that will be targeted to publish/pack, etc. null if one does not exist.</returns>
-        private static ProjectInstance GetTargetedProject(IEnumerable<string> slnOrProjectArgs, string slnProjectConfigPropertytoCheck = "")
+        private static ProjectInstance GetTargetedProject(IEnumerable<string> slnOrProjectArgs)
         {
             string potentialProject = "";
 

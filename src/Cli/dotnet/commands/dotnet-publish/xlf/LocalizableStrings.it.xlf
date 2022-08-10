@@ -64,11 +64,6 @@ Per impostazione predefinita, viene generato un pacchetto dipendente dal framewo
         <target state="translated">Configurazione per cui eseguire la pubblicazione. L'impostazione predefinita è 'Debug'. Usare la proprietà 'PublishRelease' per rendere 'Release' il valore predefinito per questo comando.</target>
         <note />
       </trans-unit>
-      <trans-unit id="TopLevelPublishConfigurationMismatchError">
-        <source>NETSDKERR: Multiple top-level projects in the given solution contain conflicting PublishRelease or PackRelease values. To use conflicting configurations, leverage a Directory.build.props file instead of setting flags that don't match.</source>
-        <target state="new">NETSDKERR: Multiple top-level projects in the given solution contain conflicting PublishRelease or PackRelease values. To use conflicting configurations, leverage a Directory.build.props file instead of setting flags that don't match.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

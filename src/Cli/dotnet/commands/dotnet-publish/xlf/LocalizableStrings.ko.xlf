@@ -64,11 +64,6 @@ The default is to publish a framework-dependent application.</source>
         <target state="translated">게시할 구성입니다. 기본값은 '디버그'입니다. 'PublishRelease' 속성을 사용하여 'Release'를 이 명령의 기본값으로 설정합니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="TopLevelPublishConfigurationMismatchError">
-        <source>NETSDKERR: Multiple top-level projects in the given solution contain conflicting PublishRelease or PackRelease values. To use conflicting configurations, leverage a Directory.build.props file instead of setting flags that don't match.</source>
-        <target state="new">NETSDKERR: Multiple top-level projects in the given solution contain conflicting PublishRelease or PackRelease values. To use conflicting configurations, leverage a Directory.build.props file instead of setting flags that don't match.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

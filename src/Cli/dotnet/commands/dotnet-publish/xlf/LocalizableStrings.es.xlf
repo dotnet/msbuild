@@ -64,11 +64,6 @@ El valor predeterminado es publicar una aplicación dependiente del marco.</targ
         <target state="translated">Configuración para la que se va a publicar. El valor predeterminado es "Debug". Use la propiedad "PublishRelease" para que "Release" sea el valor predeterminado para este comando.</target>
         <note />
       </trans-unit>
-      <trans-unit id="TopLevelPublishConfigurationMismatchError">
-        <source>NETSDKERR: Multiple top-level projects in the given solution contain conflicting PublishRelease or PackRelease values. To use conflicting configurations, leverage a Directory.build.props file instead of setting flags that don't match.</source>
-        <target state="new">NETSDKERR: Multiple top-level projects in the given solution contain conflicting PublishRelease or PackRelease values. To use conflicting configurations, leverage a Directory.build.props file instead of setting flags that don't match.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

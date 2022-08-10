@@ -151,9 +151,6 @@ The default is to publish a framework-dependent application.</value>
   <data name="CmdNoLogo" xml:space="preserve">
     <value>Do not display the startup banner or the copyright message.</value>
   </data>
-  <data name="TopLevelPublishConfigurationMismatchError" xml:space="preserve">
-    <value>NETSDKERR: Multiple top-level projects in the given solution contain conflicting PublishRelease or PackRelease values. To use conflicting configurations, leverage a Directory.build.props file instead of setting flags that don't match.</value>
-  </data>
   <data name="ProjectDeductionFailure" xml:space="preserve">
     <value>A problem with the project or solution prevented checking properties for Release.</value>
   </data>
