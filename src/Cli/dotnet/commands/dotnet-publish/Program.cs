@@ -102,63 +102,6 @@ namespace Microsoft.DotNet.Tools.Publish
             return Array.Empty<string>();
         }
 
-        /// <returns>The top-level project (first if multiple exist) in a SLN. Returns null if no top level project. Throws exception if two top level projects disagree
-        /// in the configuration property to check.</returns>
-        private static ProjectInstance GetConfiguredTopLevelSlnProject(string configPropertytoCheck, string slnPath)
-        {
-            SlnFile sln;
-            try
-            {
-                sln = SlnFileFactory.CreateFromFileOrDirectory(slnPath);
-            }
-            catch (GracefulException)
-            {
-                return null; // This can be called if a solution doesn't exist. MSBuild will catch that for us.
-            }
-
-            List<ProjectInstance> configuredProjects = new List<ProjectInstance>();
-            HashSet<string> configValues = new HashSet<string>();
-            bool shouldReturnNull = false;
-
-            Parallel.ForEach(sln.Projects.AsEnumerable(), (project, state) =>
-            {
-                const string topLevelProjectOutputType = "Exe"; // Note that even on Unix when we don't produce exe this is still an exe, same for ASP
-                const string solutionFolderGuid = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}";
-                const string sharedProjectGuid = "{D954291E-2A0B-460D-934E-DC6B0785DB48}";
-
-                if (project.TypeGuid == solutionFolderGuid || project.TypeGuid == sharedProjectGuid || !IsValidProjectFilePath(project.FilePath))
-                    return;
-
-                var projectData = TryGetProjectInstance(project.FilePath);
-                if (projectData == null)
-                    return;
-
-                if (projectData.GetPropertyValue("OutputType") == topLevelProjectOutputType)
-                {
-                    if (ProjectHasUserCustomizedConfiguration(projectData))
-                    {
-                        shouldReturnNull = true;
-                        state.Stop(); // We don't want to override Configuration if ANY project in a sln uses a custom configuration
-                        return;
-                    }
-
-                    string configuration = projectData.GetPropertyValue(configPropertytoCheck);
-                    if (!string.IsNullOrEmpty(configuration))
-                    {
-                        configuredProjects.Add(projectData); // we don't care about race conditions here
-                        configValues.Add(configuration);
-                    }
-                }
-            });
-
-            if (configuredProjects.Any() && configValues.Count > 1)
-            {
-                throw new GracefulException(LocalizableStrings.TopLevelPublishConfigurationMismatchError);
-            }
-
-            return shouldReturnNull || configuredProjects.Count == 0 ? null : configuredProjects.First();
-        }
-
         /// <returns>A project instance that will be targeted to publish/pack, etc. null if one does not exist.</returns>
         private static ProjectInstance GetTargetedProject(IEnumerable<string> slnOrProjectArgs, string slnProjectConfigPropertytoCheck = "")
         {
@@ -178,10 +121,6 @@ namespace Microsoft.DotNet.Tools.Publish
                     }
                     catch (GracefulException)
                     {
-                        string potentialSln = Directory.GetFiles(arg, "*.sln", SearchOption.TopDirectoryOnly).FirstOrDefault();
-
-                        if (!string.IsNullOrEmpty(potentialSln))
-                            return GetConfiguredTopLevelSlnProject(slnProjectConfigPropertytoCheck, potentialSln);
                     } // If nothing can be found: that's caught by MSBuild XMake::ProcessProjectSwitch -- don't change the behavior by failing here. 
                 }
             }
