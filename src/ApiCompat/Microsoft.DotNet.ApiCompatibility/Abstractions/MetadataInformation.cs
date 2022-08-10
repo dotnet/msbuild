@@ -62,10 +62,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             int hashCode = 1447485498;
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(AssemblyName);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(AssemblyId);
-            if (FullPath != null)
-            {
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(FullPath);
-            }
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(FullPath);
             return hashCode;
         }
 

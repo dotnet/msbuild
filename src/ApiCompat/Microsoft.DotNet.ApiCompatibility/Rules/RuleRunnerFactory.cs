@@ -12,26 +12,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     {
         private readonly Lazy<RuleRunner> _runner;
 
-        public RuleRunnerFactory(string? leftName, string[]? rightNames, IEqualityComparer<ISymbol> equalityComparer, bool includeInternalSymbols, bool strictMode, bool withReferences)
+        public RuleRunnerFactory(bool strictMode, IEqualityComparer<ISymbol> equalityComparer, bool includeInternalSymbols, bool withReferences)
         {
-            if (string.IsNullOrEmpty(leftName))
-                leftName = RuleRunner.DEFAULT_LEFT_NAME;
-
-            rightNames ??= new string[] { RuleRunner.DEFAULT_RIGHT_NAME };
-            if (rightNames.Length == 0)
-            {
-                throw new ArgumentException(Resources.RightNamesAtLeastOne, nameof(rightNames));
-            }
-
-            for (int i = 0; i < rightNames.Length; i++)
-            {
-                if (string.IsNullOrEmpty(rightNames[i]))
-                {
-                    rightNames[i] = RuleRunner.DEFAULT_RIGHT_NAME;
-                }
-            }
-
-            _runner = new Lazy<RuleRunner>(() => new RuleRunner(leftName!, rightNames, strictMode, equalityComparer, includeInternalSymbols, withReferences));
+            _runner = new Lazy<RuleRunner>(() => new RuleRunner(strictMode, equalityComparer, includeInternalSymbols, withReferences));
         }
 
         public virtual IRuleRunner GetRuleRunner()

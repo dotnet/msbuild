@@ -44,13 +44,11 @@ namespace Microsoft.DotNet.ApiCompatibility
             IEqualityComparer<ISymbol>? equalityComparer = null,
             bool includeInternalSymbols = false,
             bool strictMode = false,
-            bool warnOnMissingReferences = false,
-            string? leftName = null,
-            string[]? rightNames = null)
+            bool warnOnMissingReferences = false)
         {
             Filter = filter ?? new SymbolAccessibilityBasedFilter(includeInternalSymbols: includeInternalSymbols);
             EqualityComparer = equalityComparer ?? new DefaultSymbolsEqualityComparer();
-            RuleRunnerFactory = ruleRunnerFactory ?? new RuleRunnerFactory(leftName, rightNames, EqualityComparer, includeInternalSymbols, strictMode, warnOnMissingReferences);
+            RuleRunnerFactory = ruleRunnerFactory ?? new RuleRunnerFactory(strictMode, EqualityComparer, includeInternalSymbols, warnOnMissingReferences);
             WarnOnMissingReferences = warnOnMissingReferences;
         }
     }

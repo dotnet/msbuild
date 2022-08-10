@@ -7,14 +7,19 @@ using Microsoft.CodeAnalysis;
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
     /// <summary>
-    /// Object that represents a mapping between two <see cref="IAssemblySymbol"/> objects.
+    /// Object that represents a mapping between multiple <see cref="IAssemblySymbol"/> objects.
     /// This also holds a list of <see cref="NamespaceMapper"/> to represent the mapping of namespaces in between
     /// <see cref="ElementMapper{T}.Left"/> and <see cref="ElementMapper{T}.Right"/>.
     /// </summary>
-    public class AssemblyMapper : ElementMapper<IAssemblySymbol>
+    public class AssemblyMapper : ElementMapper<ElementContainer<IAssemblySymbol>>
     {
         private Dictionary<INamespaceSymbol, NamespaceMapper>? _namespaces;
         private readonly List<CompatDifference>[] _assemblyLoadErrors;
+
+        /// <summary>
+        /// The containing assembly set of this assembly. Null if the assembly is not part of a set.
+        /// </summary>
+        public AssemblySetMapper? ContainingAssemblySet { get; }
 
         /// <summary>
         /// Gets the assembly load errors that happened when trying to follow type forwards.
@@ -26,9 +31,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// </summary>
         /// <param name="settings">The settings used to diff the elements in the mapper.</param>
         /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
-        public AssemblyMapper(ComparingSettings settings, int rightSetSize = 1)
+        /// <param name="containingAssemblySet">The containing assembly set. Null, if the assembly isn't part of a set.</param>
+        public AssemblyMapper(ComparingSettings settings, int rightSetSize = 1, AssemblySetMapper? containingAssemblySet = null)
             : base(settings, rightSetSize)
         {
+            ContainingAssemblySet = containingAssemblySet;
             _assemblyLoadErrors = new List<CompatDifference>[rightSetSize];
             for (int i = 0; i < rightSetSize; i++)
                 _assemblyLoadErrors[i] = new List<CompatDifference>();
@@ -50,18 +57,18 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                     AddOrCreateMappers(Right[i], ElementSide.Right, i);
                 }
 
-                void AddOrCreateMappers(IAssemblySymbol? symbol, ElementSide side, int setIndex = 0)
+                void AddOrCreateMappers(ElementContainer<IAssemblySymbol>? assemblyContainer, ElementSide side, int setIndex = 0)
                 {
                     // Silently return if the element hasn't been added yet.
-                    if (symbol == null)
+                    if (assemblyContainer == null)
                     {
                         return;
                     }
 
-                    Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> typeForwards = ResolveTypeForwards(symbol, Settings.EqualityComparer, setIndex);
+                    Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> typeForwards = ResolveTypeForwards(assemblyContainer.Element, Settings.EqualityComparer, setIndex);
 
                     Stack<INamespaceSymbol> stack = new();
-                    stack.Push(symbol.GlobalNamespace);
+                    stack.Push(assemblyContainer.Element.GlobalNamespace);
                     while (stack.Count > 0)
                     {
                         INamespaceSymbol nsSymbol = stack.Pop();
@@ -98,7 +105,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                     {
                         if (!_namespaces.TryGetValue(ns, out NamespaceMapper? mapper))
                         {
-                            mapper = new NamespaceMapper(Settings, Right.Length, typeforwardsOnly: typeforwardsOnly);
+                            mapper = new NamespaceMapper(Settings, this, Right.Length, typeforwardsOnly: typeforwardsOnly);
                             _namespaces.Add(ns, mapper);
                         }
                         else if (checkIfExists && mapper.GetElement(side, setIndex) != null)

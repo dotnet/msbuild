@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner.Tests
             // Mock the api comparer's GetDifferences method so that it returns items.
             Mock<IApiComparer> apiComparerMock = new();
             apiComparerMock
-                .Setup(y => y.GetDifferences(It.IsAny<ElementContainer<IAssemblySymbol>>(), It.IsAny<IList<ElementContainer<IAssemblySymbol>>>()))
+                .Setup(y => y.GetDifferences(It.IsAny<ElementContainer<IAssemblySymbol>>(), It.IsAny<IReadOnlyList<ElementContainer<IAssemblySymbol>>>()))
                 .Returns(new (MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)[]
                 {
                     new ( left, right, new CompatDifference[] { new CompatDifference("CP0001", "Invalid", DifferenceType.Removed, "X01") } )

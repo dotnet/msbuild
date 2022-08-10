@@ -18,14 +18,20 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         private readonly bool _typeforwardsOnly;
 
         /// <summary>
+        /// The containing assembly of this namespace.
+        /// </summary>
+        public AssemblyMapper ContainingAssembly { get; }
+
+        /// <summary>
         /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
         /// </summary>
         /// <param name="settings">The settings used to diff the elements in the mapper.</param>
         /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
         /// <param name="typeforwardsOnly">Indicates if <see cref="GetTypes"/> should only return typeforwards.</param>
-        public NamespaceMapper(ComparingSettings settings, int rightSetSize = 1, bool typeforwardsOnly = false)
+        public NamespaceMapper(ComparingSettings settings, AssemblyMapper containingAssembly, int rightSetSize = 1, bool typeforwardsOnly = false)
             : base(settings, rightSetSize)
         {
+            ContainingAssembly = containingAssembly;
             _types = new Dictionary<ITypeSymbol, TypeMapper>(Settings.EqualityComparer);
             _typeforwardsOnly = typeforwardsOnly;
         }
@@ -91,7 +97,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                 {
                     if (!_types.TryGetValue(type, out TypeMapper? mapper))
                     {
-                        mapper = new TypeMapper(Settings, null, Right.Length);
+                        mapper = new TypeMapper(Settings, this, null, Right.Length);
                         _types.Add(type, mapper);
                     }
 

@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// <summary>
         /// The containg type of this member.
         /// </summary>
-        internal TypeMapper ContainingType { get; }
+        public TypeMapper ContainingType { get; }
 
         /// <summary>
         /// Instantiates an object with the provided <see cref="ComparingSettings"/>.

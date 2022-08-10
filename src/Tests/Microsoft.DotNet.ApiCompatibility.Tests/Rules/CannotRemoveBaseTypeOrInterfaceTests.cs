@@ -284,7 +284,7 @@ namespace CompatTests
             MetadataInformation leftMetadata = new("left", @"ref\a.dll");
             ElementContainer<IAssemblySymbol> leftContainer = new(left, leftMetadata);
 
-            IList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
+            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
 
             ApiComparer differ = new();
             IEnumerable<(MetadataInformation left, MetadataInformation right, IEnumerable<CompatDifference> differences)> result =

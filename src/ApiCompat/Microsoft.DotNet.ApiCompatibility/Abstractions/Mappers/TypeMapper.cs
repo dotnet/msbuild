@@ -19,6 +19,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         private Dictionary<ISymbol, MemberMapper>? _members;
 
         /// <summary>
+        /// The containg namespace of this type.
+        /// </summary>
+        public NamespaceMapper ContainingNamespace { get; }
+
+        /// <summary>
         /// The containing type of this type. Null if the type isn't nested.
         /// </summary>
         internal TypeMapper? ContainingType { get; }
@@ -28,9 +33,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// </summary>
         /// <param name="settings">The settings used to diff the elements in the mapper.</param>
         /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
-        public TypeMapper(ComparingSettings settings, TypeMapper? containingType = null, int rightSetSize = 1)
+        public TypeMapper(ComparingSettings settings, NamespaceMapper containingNamespace, TypeMapper? containingType = null, int rightSetSize = 1)
             : base(settings, rightSetSize)
         {
+            ContainingNamespace = containingNamespace;
             ContainingType = containingType;
         }
 
@@ -104,7 +110,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                         {
                             if (!_nestedTypes.TryGetValue(nestedType, out TypeMapper? mapper))
                             {
-                                mapper = new TypeMapper(Settings, this, Right.Length);
+                                mapper = new TypeMapper(Settings, ContainingNamespace, this, Right.Length);
                                 _nestedTypes.Add(nestedType, mapper);
                             }
                             mapper.AddElement(nestedType, side, setIndex);
