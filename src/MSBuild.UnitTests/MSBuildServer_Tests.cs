@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
@@ -208,6 +210,62 @@ namespace Microsoft.Build.Engine.UnitTests
             _env.Dispose();
             // 2nd wait for sleep task which will ends as soon as the process is killed above.
             t.Wait();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void CanShutdownServerProcess(bool byBuildManager)
+        {
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+
+            // Start a server node and find its PID.
+            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success, false, _output);
+            success.ShouldBeTrue();
+            int pidOfServerProcess = ParseNumber(output, "Server ID is ");
+            _env.WithTransientProcess(pidOfServerProcess);
+
+            var serverProcess = Process.GetProcessById(pidOfServerProcess);
+
+            serverProcess.HasExited.ShouldBeFalse();
+
+            if (byBuildManager)
+            {
+                BuildManager.DefaultBuildManager.ShutdownAllNodes();
+            }
+            else
+            {
+                bool serverIsDown = MSBuildClient.ShutdownServer(CancellationToken.None);
+                serverIsDown.ShouldBeTrue();
+            }
+
+            if (serverProcess.WaitForExit(3000))
+            {
+                serverProcess.WaitForExit();
+            }
+
+            serverProcess.HasExited.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void CanShutdownServerProcessWhenNotRunning()
+        {
+            bool serverIsDown = MSBuildClient.ShutdownServer(CancellationToken.None);
+            serverIsDown.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void ServerShouldNotRunWhenNodeReuseEqualsFalse()
+        {
+            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+
+            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " /nodereuse:false", out bool success, false, _output);
+            success.ShouldBeTrue();
+            int pidOfInitialProcess = ParseNumber(output, "Process ID is ");
+            int pidOfServerProcess = ParseNumber(output, "Server ID is ");
+            pidOfInitialProcess.ShouldBe(pidOfServerProcess, "We started a server node even when nodereuse is false.");
         }
 
         private int ParseNumber(string searchString, string toFind)

@@ -90,6 +90,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_RUNTIMEINFORMATION</DefineConstants>
     <DefineConstants>$(DefineConstants);USE_MSBUILD_DLL_EXTN</DefineConstants>
     <DefineConstants>$(DefineConstants);WORKAROUND_COREFX_19110</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_SYMLINK_TARGET</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' or '$(TargetFramework)' == 'net6.0'">

@@ -260,17 +260,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Create a temp file name under a specific temporary folder. The file is expected to exist when the test completes.
-        /// </summary>
-        /// <param name="transientTestFolder">Temp folder</param>
-        /// <param name="extension">Extension of the file (defaults to '.tmp')</param>
-        /// <returns></returns>
-        public TransientTestFile ExpectFile(TransientTestFolder transientTestFolder, string extension = ".tmp")
-        {
-            return WithTransientTestState(new TransientTestFile(transientTestFolder.Path, extension, createFile: false, expectedAsOutput: true));
-        }
-
-        /// <summary>
         ///     Creates a test variant used to add a unique temporary folder during a test. Will be deleted when the test
         ///     completes.
         /// </summary>
@@ -583,7 +572,14 @@ namespace Microsoft.Build.UnitTests
         {
             if (_processId > -1)
             {
-                Process.GetProcessById(_processId).KillTree(1000);
+                try
+                {
+                    Process.GetProcessById(_processId).KillTree(1000);
+                }
+                catch
+                {
+                    // ignore if process is already dead
+                }
             }
         }
     }

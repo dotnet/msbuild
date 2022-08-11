@@ -5,8 +5,6 @@ using System;
 using System.IO;
 using Microsoft.Build.Shared;
 
-#nullable disable
-
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -40,9 +38,9 @@ namespace Microsoft.Build.Framework
         /// <param name="succeeded">true indicates project built successfully</param>
         public ProjectFinishedEventArgs
         (
-            string message,
-            string helpKeyword,
-            string projectFile,
+            string? message,
+            string? helpKeyword,
+            string? projectFile,
             bool succeeded
         )
             : this(message, helpKeyword, projectFile, succeeded, DateTime.UtcNow)
@@ -60,9 +58,9 @@ namespace Microsoft.Build.Framework
         /// <param name="eventTimestamp">Timestamp when the event was created</param>
         public ProjectFinishedEventArgs
         (
-            string message,
-            string helpKeyword,
-            string projectFile,
+            string? message,
+            string? helpKeyword,
+            string? projectFile,
             bool succeeded,
             DateTime eventTimestamp
         )
@@ -72,7 +70,7 @@ namespace Microsoft.Build.Framework
             this.succeeded = succeeded;
         }
 
-        private string projectFile;
+        private string? projectFile;
         private bool succeeded;
 
         #region CustomSerializationToStream
@@ -105,7 +103,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Project name
         /// </summary>
-        public string ProjectFile => projectFile;
+        public string? ProjectFile => projectFile;
 
         /// <summary>
         /// True if project built successfully, false otherwise

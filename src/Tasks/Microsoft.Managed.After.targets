@@ -38,33 +38,36 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   -->
   <PropertyGroup Condition="'$(IsGraphBuild)' == 'true'">
     <!-- Empty case is for outer builds which do not import the target files that set BuildProjectReferences -->
-    <_MainReferenceTarget Condition="'$(BuildProjectReferences)' == '' or '$(BuildProjectReferences)' == 'true'">.projectReferenceTargetsOrDefaultTargets</_MainReferenceTarget>
-    <_MainReferenceTarget Condition="'$(_MainReferenceTarget)' == ''">GetTargetPath</_MainReferenceTarget>
+    <_MainReferenceTargetForBuild Condition="'$(BuildProjectReferences)' == '' or '$(BuildProjectReferences)' == 'true'">.projectReferenceTargetsOrDefaultTargets</_MainReferenceTargetForBuild>
+    <_MainReferenceTargetForBuild Condition="'$(_MainReferenceTargetForBuild)' == ''">GetTargetPath</_MainReferenceTargetForBuild>
 
     <ProjectReferenceTargetsForBuildInOuterBuild>GetTargetFrameworks;$(ProjectReferenceTargetsForBuildInOuterBuild)</ProjectReferenceTargetsForBuildInOuterBuild>
-    <ProjectReferenceTargetsForBuild>$(_MainReferenceTarget);GetNativeManifest;$(_RecursiveTargetForContentCopying);GetTargetFrameworksWithPlatformForSingleTargetFramework;$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
+    <ProjectReferenceTargetsForBuild>$(_MainReferenceTargetForBuild);GetNativeManifest;$(_RecursiveTargetForContentCopying);GetTargetFrameworksWithPlatformForSingleTargetFramework;$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
 
     <ProjectReferenceTargetsForCleanInOuterBuild>GetTargetFrameworks;$(ProjectReferenceTargetsForCleanInOuterBuild)</ProjectReferenceTargetsForCleanInOuterBuild>
     <ProjectReferenceTargetsForClean>Clean;GetTargetFrameworksWithPlatformForSingleTargetFramework;$(ProjectReferenceTargetsForClean)</ProjectReferenceTargetsForClean>
 
-    <ProjectReferenceTargetsForRebuildInOuterBuild>$(ProjectReferenceTargetsForCleanInOuterBuild);$(ProjectReferenceTargetsForBuildInOuterBuild);$(ProjectReferenceTargetsForRebuildInOuterBuild)</ProjectReferenceTargetsForRebuildInOuterBuild>
     <ProjectReferenceTargetsForRebuild>$(ProjectReferenceTargetsForClean);$(ProjectReferenceTargetsForBuild);$(ProjectReferenceTargetsForRebuild)</ProjectReferenceTargetsForRebuild>
 
-    <ProjectReferenceTargetsForPublish>GetCopyToPublishDirectoryItems;$(ProjectReferenceTargetsForPublish)</ProjectReferenceTargetsForPublish>
+    <!-- Publish has the same logic as Build for the main reference target except it also takes $(NoBuild) into account. -->
+    <_MainReferenceTargetForPublish Condition="'$(NoBuild)' == 'true'">GetTargetPath</_MainReferenceTargetForPublish>
+    <_MainReferenceTargetForPublish Condition="'$(NoBuild)' != 'true'">$(_MainReferenceTargetForBuild)</_MainReferenceTargetForPublish>
+    <ProjectReferenceTargetsForPublish>GetTargetFrameworks;$(_MainReferenceTargetForPublish);GetNativeManifest;GetCopyToPublishDirectoryItems;$(ProjectReferenceTargetsForPublish)</ProjectReferenceTargetsForPublish>
+
     <ProjectReferenceTargetsForGetCopyToPublishDirectoryItems>GetCopyToPublishDirectoryItems;$(ProjectReferenceTargetsForGetCopyToPublishDirectoryItems)</ProjectReferenceTargetsForGetCopyToPublishDirectoryItems>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(IsGraphBuild)' == 'true'">
-    <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuildInOuterBuild)" Condition=" '$(ProjectReferenceTargetsForBuildInOuterBuild)' != '' " OuterBuild="true"/>
+    <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuildInOuterBuild)" Condition=" '$(ProjectReferenceTargetsForBuildInOuterBuild)' != '' " OuterBuild="true" />
     <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuild)" Condition=" '$(ProjectReferenceTargetsForBuild)' != '' " />
 
-    <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForCleanInOuterBuild)" Condition=" '$(ProjectReferenceTargetsForCleanInOuterBuild)' != '' " OuterBuild="true"/>
+    <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForCleanInOuterBuild)" Condition=" '$(ProjectReferenceTargetsForCleanInOuterBuild)' != '' " OuterBuild="true" />
     <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForClean)" Condition=" '$(ProjectReferenceTargetsForClean)' != '' " />
 
-    <ProjectReferenceTargets Include="Rebuild" Targets="$(ProjectReferenceTargetsForRebuildInOuterBuild)" Condition=" '$(ProjectReferenceTargetsForRebuildInOuterBuild)' != '' " />
     <ProjectReferenceTargets Include="Rebuild" Targets="$(ProjectReferenceTargetsForRebuild)" Condition=" '$(ProjectReferenceTargetsForRebuild)' != '' " />
 
     <ProjectReferenceTargets Include="Publish" Targets="$(ProjectReferenceTargetsForPublish)" Condition=" '$(ProjectReferenceTargetsForPublish)' != '' " />
+
     <ProjectReferenceTargets Include="GetCopyToPublishDirectoryItems" Targets="$(ProjectReferenceTargetsForGetCopyToPublishDirectoryItems)" Condition=" '$(ProjectReferenceTargetsForGetCopyToPublishDirectoryItems)' != '' " />
   </ItemGroup>
 

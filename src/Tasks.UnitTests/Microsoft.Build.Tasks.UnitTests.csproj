@@ -44,7 +44,6 @@
     <Compile Include="..\Shared\UnitTests\EscapingUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\FileMatcher_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\MockEngine.cs" />
     <Compile Include="..\Shared\UnitTests\MockLogger.cs" />
     <Compile Include="..\Shared\UnitTests\NativeMethodsShared_Tests.cs">
@@ -70,6 +69,12 @@
     <None Include="..\Shared\UnitTests\xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup> 
+    <Content Include="TestDocuments\**"> 
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory> 
+    </Content> 
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
