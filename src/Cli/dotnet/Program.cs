@@ -239,6 +239,8 @@ namespace Microsoft.DotNet.Cli
             telemetryClient.Flush();
             PerformanceLogEventSource.Log.TelemetryClientFlushStop();
 
+            telemetryClient.Dispose();
+
             return exitCode;
         }
 
