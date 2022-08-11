@@ -308,7 +308,7 @@ $@"<ItemGroup>
             Assert.All(fileset, f => Assert.False(f.IsStaticFile, $"File {f.FilePath} should not be a static file."));
         }
 
-        [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/29213")]
+        [Fact]
         public async Task ProjectReferences_Graph()
         {
             // A->B,F,W(Watch=False)
