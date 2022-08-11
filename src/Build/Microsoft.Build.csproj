@@ -32,6 +32,7 @@
 
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
+    <PackageReference Include="System.Security.Principal.Windows" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
     <PackageReference Include="System.Text.Json" />
 
@@ -39,6 +40,8 @@
     <PackageReference Include="System.Reflection.MetadataLoadContext" />
 
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
+
+    <PackageReference Include="Microsoft.BuildXL.Processes" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildFromSource)' != 'true'">
@@ -51,7 +54,6 @@
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
     <PackageReference Include="System.Reflection.Metadata" />
-    <PackageReference Include="System.Security.Principal.Windows" />
     <PackageReference Include="System.Text.Encoding.CodePages" />
   </ItemGroup>
 
@@ -155,6 +157,7 @@
     <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\ProjectCache\*.cs" />
     <Compile Include="BackEnd\Components\Communications\CurrentHost.cs" />
+    <Compile Include="BackEnd\Components\Communications\DetouredNodeLauncher.cs" />
     <Compile Include="BackEnd\Components\Communications\ServerNodeEndpointOutOfProc.cs" />
     <Compile Include="BackEnd\Components\FileAccesses\FileAccessManager.cs" />
     <Compile Include="BackEnd\Components\FileAccesses\IFileAccessManager.cs" />

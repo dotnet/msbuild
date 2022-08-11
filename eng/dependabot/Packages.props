@@ -13,6 +13,9 @@
     <PackageVersion Include="BenchmarkDotNet" Version="0.13.1" />
     <PackageVersion Update="BenchmarkDotNet" Condition="'$(BenchmarkDotNetVersion)' != ''" Version="$(BenchmarkDotNetVersion)" />
 
+    <PackageVersion Include="Microsoft.BuildXL.Processes" Version="0.1.0-20230608.2" />
+    <PackageVersion Update="Microsoft.BuildXL.Processes" Condition="'$(BuildXLProcessesVersion)' != ''" Version="$(BuildXLProcessesVersion)" />
+
     <PackageVersion Include="LargeAddressAware" Version="1.0.5" />
     <PackageVersion Update="LargeAddressAware" Condition="'$(LargeAddressAwareVersion)' != ''" Version="$(LargeAddressAwareVersion)" />
 

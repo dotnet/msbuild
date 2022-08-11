@@ -7,6 +7,6 @@ namespace Microsoft.Build.BackEnd
 {
     internal interface INodeLauncher
     {
-        Process Start(string msbuildLocation, string commandLineArgs);
+        Process Start(string msbuildLocation, string commandLineArgs, int nodeId);
     }
 }

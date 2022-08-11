@@ -557,6 +557,11 @@ namespace Microsoft.Build.Execution
                     _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath("msbuild-cache");
                 }
 
+                if (_buildParameters.ReportFileAccesses)
+                {
+                    _componentFactories.ReplaceFactory(BuildComponentType.NodeLauncher, DetouredNodeLauncher.CreateComponent);
+                }
+
                 // Initialize components.
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
 

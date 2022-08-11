@@ -35,7 +35,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Creates a new MSBuild process
         /// </summary>
-        public Process Start(string msbuildLocation, string commandLineArgs)
+        public Process Start(string msbuildLocation, string commandLineArgs, int nodeId)
         {
             // Disable MSBuild server for a child process.
             // In case of starting msbuild server it prevents an infinite recurson. In case of starting msbuild node we also do not want this variable to be set.
@@ -195,7 +195,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private Process DisableMSBuildServer(Func<Process> func)
+        private static Process DisableMSBuildServer(Func<Process> func)
         {
             string useMSBuildServerEnvVarValue = Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName);
             try
