@@ -859,4 +859,8 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</value>
     <comment>Error code is NETSDK1188. 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</comment>
   </data>
+  <data name="PReleaseRequiresEnvVarOnSln" xml:space="preserve">
+    <value>NETSDK1187: To use PackRelease or PublishRelease in a project in a solution, you must set the environment variable ENABLE_P_RELEASE_SLN to true. Doing so will increase the time required to publish a sln.</value>
+    <comment>{StrBegin="NETSDK1187: "}</comment>
+  </data>
 </root>

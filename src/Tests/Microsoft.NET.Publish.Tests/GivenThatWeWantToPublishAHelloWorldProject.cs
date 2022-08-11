@@ -493,7 +493,7 @@ public static class Program
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining("NETSDKERR")
+                .HaveStdOutContaining("NETSDKERR");
         }
 
 

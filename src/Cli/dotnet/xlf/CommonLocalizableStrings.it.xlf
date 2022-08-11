@@ -242,6 +242,11 @@ L'impostazione predefinita è 'true' se si specifica un identificatore di runtim
         <target state="translated">Elimina</target>
         <note />
       </trans-unit>
+      <trans-unit id="TopLevelPublishConfigurationMismatchError">
+        <source>Multiple top-level projects in the given solution contain conflicting PublishRelease or PackRelease values. To use conflicting configurations, leverage a Directory.build.props file instead of setting flags that don't match.</source>
+        <target state="new">Multiple top-level projects in the given solution contain conflicting PublishRelease or PackRelease values. To use conflicting configurations, leverage a Directory.build.props file instead of setting flags that don't match.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Update">
         <source>Update</source>
         <target state="translated">Aggiorna</target>

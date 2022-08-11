@@ -526,7 +526,7 @@
   <data name="ToolSettingsUnsupportedRunner" xml:space="preserve">
     <value>Command '{0}' uses unsupported runner '{1}'."</value>
   </data>
-  <data name="TopLevelPublishConfigurationMismatchErTopLevelPublishConfigurationMismatchError" xml:space="preserve">
+  <data name="TopLevelPublishConfigurationMismatchError" xml:space="preserve">
     <value>Multiple top-level projects in the given solution contain conflicting PublishRelease or PackRelease values. To use conflicting configurations, leverage a Directory.build.props file instead of setting flags that don't match.</value>
   </data>
   <data name="ShellShimConflict" xml:space="preserve">

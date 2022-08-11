@@ -640,6 +640,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1162: PDB 產生: 找不到 R2R 可執行檔 '{0}'。</target>
         <note>{StrBegin="NETSDK1162: "}</note>
       </trans-unit>
+      <trans-unit id="PReleaseRequiresEnvVarOnSln">
+        <source>NETSDK1187: To use PackRelease or PublishRelease in a project in a solution, you must set the environment variable ENABLE_P_RELEASE_SLN to true. Doing so will increase the time required to publish a sln.</source>
+        <target state="new">NETSDK1187: To use PackRelease or PublishRelease in a project in a solution, you must set the environment variable ENABLE_P_RELEASE_SLN to true. Doing so will increase the time required to publish a sln.</target>
+        <note>{StrBegin="NETSDK1187: "}</note>
+      </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>
         <target state="translated">NETSDK1053: 封裝為工具不支援包含本身。</target>
