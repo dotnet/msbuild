@@ -552,7 +552,8 @@ namespace Microsoft.Build.Shared
                 MSBuildToolsDirectoryRoot = CurrentMSBuildToolsDirectory;
 
                 // If we're standalone, we might not be in the SDK. Rely on folder paths at this point.
-                if (currentToolsDirectory.Name == "amd64" || currentToolsDirectory.Name == "arm64")
+                if (string.Equals(currentToolsDirectory.Name, "amd64", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(currentToolsDirectory.Name, "arm64", StringComparison.OrdinalIgnoreCase))
                 {
                     MSBuildToolsDirectoryRoot = currentToolsDirectory.Parent?.FullName;
                 }
