@@ -14,6 +14,7 @@ public class LocalDocker
         ProcessStartInfo loadInfo = new("docker", $"load");
         loadInfo.RedirectStandardInput = true;
         loadInfo.RedirectStandardOutput = true;
+        loadInfo.RedirectStandardError = true;
 
         using Process? loadProcess = Process.Start(loadInfo);
 
@@ -29,6 +30,11 @@ public class LocalDocker
         loadProcess.StandardInput.Close();
 
         await loadProcess.WaitForExitAsync();
+
+        if (loadProcess.ExitCode != 0)
+        {
+            throw new DockerLoadException($"Failed to load image to local Docker daemon. stdout: {await loadProcess.StandardError.ReadToEndAsync()}");
+        }
     }
 
     public static async Task WriteImageToStream(Image x, string name, string tag, Stream imageStream)

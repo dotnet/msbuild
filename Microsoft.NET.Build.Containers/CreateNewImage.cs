@@ -109,11 +109,20 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
         
         Layer newLayer = Layer.FromDirectory(PublishDirectory, WorkingDirectory);
         image.AddLayer(newLayer);
+        image.WorkingDirectory = WorkingDirectory;
         image.SetEntrypoint(Entrypoint.Select(i => i.ItemSpec).ToArray(), EntrypointArgs.Select(i => i.ItemSpec).ToArray());
 
         if (OutputRegistry.StartsWith("docker://"))
         {
-            LocalDocker.Load(image, ImageName, ImageTag, BaseImageName).Wait();
+            try
+            {
+                LocalDocker.Load(image, ImageName, ImageTag, BaseImageName).Wait();
+            }
+            catch (AggregateException ex) when (ex.InnerException is DockerLoadException dle)
+            {
+                Log.LogErrorFromException(dle, showStackTrace: false);
+                return !Log.HasLoggedErrors;
+            }
         }
         else
         {
