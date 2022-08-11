@@ -1737,8 +1737,7 @@ namespace Microsoft.Build.Evaluation
             string directoryOfImportingFile,
             ProjectImportElement importElement,
             out List<ProjectRootElement> projects,
-            out SdkResult sdkResult,
-            bool throwOnFileNotExistsError = true)
+            out SdkResult sdkResult)
         {
             projects = null;
             sdkResult = null;
@@ -1877,7 +1876,7 @@ namespace Microsoft.Build.Evaluation
                 if (sdkResult.Path != null)
                 {
                     ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, Path.Combine(sdkResult.Path, project),
-                        throwOnFileNotExistsError, out projects);
+                        throwOnFileNotExistsError: true, out projects);
 
                     if (projects?.Count > 0)
                     {
@@ -1890,7 +1889,7 @@ namespace Microsoft.Build.Evaluation
                         foreach (var additionalPath in sdkResult.AdditionalPaths)
                         {
                             ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, Path.Combine(additionalPath, project),
-                                throwOnFileNotExistsError, out var additionalProjects);
+                                throwOnFileNotExistsError: true, out var additionalProjects);
 
                             if (additionalProjects?.Count > 0)
                             {
@@ -1916,7 +1915,7 @@ namespace Microsoft.Build.Evaluation
             else
             {
                 ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, project,
-                    throwOnFileNotExistsError, out projects);
+                    throwOnFileNotExistsError: true, out projects);
             }
         }
 
@@ -2259,31 +2258,31 @@ namespace Microsoft.Build.Evaluation
                         // There's a specific message for file not existing
                         if (!FileSystems.Default.FileExists(importFileUnescaped))
                         {
-                            bool ignoreMissingImportsFlagSet = (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) != 0;
-                            if (!throwOnFileNotExistsError || ignoreMissingImportsFlagSet)
+                            if ((_loadSettings & ProjectLoadSettings.IgnoreMissingImports) != 0)
                             {
-                                if (ignoreMissingImportsFlagSet)
+                                // Log message for import skipped
+                                ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
+                                    importElement.Location.Line,
+                                    importElement.Location.Column,
+                                    ProjectImportSkippedMissingFile,
+                                    importFileUnescaped,
+                                    importElement.ContainingProject.FullPath,
+                                    importElement.Location.Line,
+                                    importElement.Location.Column)
                                 {
-                                    // Log message for import skipped
-                                    ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
-                                        importElement.Location.Line,
-                                        importElement.Location.Column,
-                                        ProjectImportSkippedMissingFile,
-                                        importFileUnescaped,
-                                        importElement.ContainingProject.FullPath,
-                                        importElement.Location.Line,
-                                        importElement.Location.Column)
-                                    {
-                                        BuildEventContext = _evaluationLoggingContext.BuildEventContext,
-                                        UnexpandedProject = importElement.Project,
-                                        ProjectFile = importElement.ContainingProject.FullPath,
-                                        ImportedProjectFile = importFileUnescaped,
-                                        ImportIgnored = true,
-                                    };
+                                    BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                                    UnexpandedProject = importElement.Project,
+                                    ProjectFile = importElement.ContainingProject.FullPath,
+                                    ImportedProjectFile = importFileUnescaped,
+                                    ImportIgnored = true,
+                                };
 
-                                    _evaluationLoggingContext.LogBuildEvent(eventArgs);
-                                }
+                                _evaluationLoggingContext.LogBuildEvent(eventArgs);
 
+                                continue;
+                            }
+                            else if (!throwOnFileNotExistsError)
+                            {
                                 continue;
                             }
 
