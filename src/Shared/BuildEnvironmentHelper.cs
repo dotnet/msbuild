@@ -550,6 +550,12 @@ namespace Microsoft.Build.Shared
             {
                 // In the .NET SDK, there's one copy of MSBuild.dll and it's in the root folder.
                 MSBuildToolsDirectoryRoot = CurrentMSBuildToolsDirectory;
+
+                // If we're standalone, we might not be in the SDK. Rely on folder paths at this point.
+                if (currentToolsDirectory.Name == "amd64" || currentToolsDirectory.Name == "arm64")
+                {
+                    MSBuildToolsDirectoryRoot = currentToolsDirectory.Parent?.FullName;
+                }
             }
 
             if (MSBuildToolsDirectoryRoot != null)
