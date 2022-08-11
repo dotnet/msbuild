@@ -62,11 +62,6 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
 
     public override bool Execute()
     {
-        if (!ContainerHelpers.IsValidImageName(ContainerImageName))
-        {
-            Log.LogError($"Invalid {nameof(ContainerImageName)}: {0}", ContainerImageName);
-            return !Log.HasLoggedErrors;
-        }
 
         if (!string.IsNullOrEmpty(ContainerImageTag) && !ContainerHelpers.IsValidImageTag(ContainerImageTag))
         {
@@ -106,11 +101,29 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
             return !Log.HasLoggedErrors;
         }
 
+        try
+        {
+            if (!ContainerHelpers.NormalizeImageName(ContainerImageName, out string? normalizedImageName))
+            {
+                Log.LogWarning(null, "CONTAINER001", null, null, 0, 0, 0, 0, $"{nameof(ContainerImageName)} was not a valid container image name, it was normalized to {normalizedImageName}");
+                NewContainerImageName = normalizedImageName;
+            }
+            else
+            {
+                // name was valid already
+                NewContainerImageName = ContainerImageName;
+            }
+        }
+        catch (ArgumentException)
+        {
+            Log.LogError($"Invalid {nameof(ContainerImageName)}: {{0}}", ContainerImageName);
+            return !Log.HasLoggedErrors;
+        }
+
         ParsedContainerRegistry = outputReg;
         ParsedContainerImage = outputImage;
         ParsedContainerTag = outputTag;
         NewContainerRegistry = registryToUse;
-        NewContainerImageName = ContainerImageName;
         NewContainerTag = ContainerImageTag;
 
         if (BuildEngine != null)

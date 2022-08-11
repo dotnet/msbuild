@@ -10,6 +10,11 @@ public static class ContainerHelpers
     private static Regex imageNameRegex = new Regex("^[a-z0-9]+([._-][a-z0-9]+)*(/[a-z0-9]+([._-][a-z0-9]+)*)*$");
 
     /// <summary>
+    /// Matches if the string is not lowercase or numeric, or ., _, or -.
+    /// </summary>
+    private static Regex imageNameCharacters = new Regex("[^a-zA-Z0-9._-]");
+
+    /// <summary>
     /// Given some "fully qualified" image name (e.g. mcr.microsoft.com/dotnet/runtime), return
     /// a valid UriBuilder. This means appending 'https' if the URI is not absolute, otherwise UriBuilder will throw.
     /// </summary>
@@ -39,8 +44,8 @@ public static class ContainerHelpers
     {
         // No scheme prefixed onto the registry
         if (string.IsNullOrEmpty(registryName) ||
-            (!registryName.StartsWith("http://") && 
-             !registryName.StartsWith("https://") && 
+            (!registryName.StartsWith("http://") &&
+             !registryName.StartsWith("https://") &&
              !registryName.StartsWith("docker://")))
         {
             return false;
@@ -89,9 +94,9 @@ public static class ContainerHelpers
     /// <param name="containerName"></param>
     /// <param name="containerTag"></param>
     /// <returns>True if the parse was successful. When false is returned, all out vars are set to empty strings.</returns>
-    public static bool TryParseFullyQualifiedContainerName(string fullyQualifiedContainerName, 
-                                                            [NotNullWhen(true)] out string? containerRegistry, 
-                                                            [NotNullWhen(true)] out string? containerName, 
+    public static bool TryParseFullyQualifiedContainerName(string fullyQualifiedContainerName,
+                                                            [NotNullWhen(true)] out string? containerRegistry,
+                                                            [NotNullWhen(true)] out string? containerName,
                                                             [NotNullWhen(true)] out string? containerTag)
     {
         Uri? uri = ContainerImageToUri(fullyQualifiedContainerName);
@@ -114,5 +119,28 @@ public static class ContainerHelpers
         containerName = indexOfColon == -1 ? image : image.Substring(0, indexOfColon);
         containerTag = indexOfColon == -1 ? "" : image.Substring(indexOfColon + 1);
         return true;
+    }
+
+    /// <summary>
+    /// Checks if a given container image name adheres to the image name spec. If not, and recoverable, then normalizes invalid characters.
+    /// </summary>
+    public static bool NormalizeImageName(string containerImageName, [NotNullWhen(false)] out string? normalizedImageName)
+    {
+        if (IsValidImageName(containerImageName))
+        {
+            normalizedImageName = null;
+            return true;
+        }
+        else
+        {
+            if (Char.IsUpper(containerImageName, 0))
+            {
+                containerImageName = Char.ToLowerInvariant(containerImageName[0]) + containerImageName[1..];
+            } else if (!Char.IsLetterOrDigit(containerImageName, 0)) {
+                throw new ArgumentException("The first character of the image name must be a lowercase letter or a digit.");
+            }
+            normalizedImageName = imageNameCharacters.Replace(containerImageName, "-");
+            return false;
+        }
     }
 }
