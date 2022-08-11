@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.Build.Execution;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Cli
@@ -51,7 +52,7 @@ namespace Microsoft.DotNet.Cli
 
         /// <returns>The top-level project (first if multiple exist) in a SLN. Returns null if no top level project. Throws exception if two top level projects disagree
         /// in the configuration property to check.</returns>
-        public override ProjectInstance GetSlnProject(string potentialSlnPath, string slnProjectConfigPropertytoCheck = "")
+        public override ProjectInstance GetSlnProject(string slnPath, string slnProjectConfigPropertytoCheck = "")
         {
             SlnFile sln;
             try
@@ -89,7 +90,7 @@ namespace Microsoft.DotNet.Cli
                         return;
                     }
 
-                    string configuration = projectData.GetPropertyValue(configPropertytoCheck);
+                    string configuration = projectData.GetPropertyValue(slnProjectConfigPropertytoCheck);
                     if (!string.IsNullOrEmpty(configuration))
                     {
                         configuredProjects.Add(projectData); // we don't care about race conditions here
@@ -100,7 +101,7 @@ namespace Microsoft.DotNet.Cli
 
             if (configuredProjects.Any() && configValues.Count > 1)
             {
-                throw new GracefulException(LocalizableStrings.TopLevelPublishConfigurationMismatchError);
+                throw new GracefulException(CommonLocalizableStrings.TopLevelPublishConfigurationMismatchError);
             }
 
             return shouldReturnNull || configuredProjects.Count == 0 ? null : configuredProjects.First();

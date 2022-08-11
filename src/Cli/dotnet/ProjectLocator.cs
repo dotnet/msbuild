@@ -22,8 +22,12 @@ namespace Microsoft.DotNet.Cli
         /// <returns>A project instance that will be targeted to publish/pack, etc. null if one does not exist.</returns>
         public abstract ProjectInstance GetTargetedProject(IEnumerable<string> slnOrProjectArgs, string slnProjectPropertytoCheck = "");
 
+        /// <returns>The top-level project (first if multiple exist) in a SLN. Returns null if no top level project. Throws exception if two top level projects disagree
+        /// in the configuration property to check.</returns>
+        public abstract ProjectInstance GetSlnProject(string potentialSlnPath, string slnProjectConfigPropertytoCheck = "");
+
         /// <returns>Creates a ProjectInstance if the project is valid, elsewise, fails..</returns>
-        private static ProjectInstance TryGetProjectInstance(string projectPath)
+        protected static ProjectInstance TryGetProjectInstance(string projectPath)
         {
             try
             {
@@ -36,19 +40,16 @@ namespace Microsoft.DotNet.Cli
             return null;
         }
 
-        private static bool IsValidProjectFilePath(string path)
+        protected static bool IsValidProjectFilePath(string path)
         {
             return File.Exists(path) && LikeOperator.LikeString(path, "*.*proj", VisualBasic.CompareMethod.Text);
         }
 
-        private static bool ProjectHasUserCustomizedConfiguration(ProjectInstance project)
+        protected static bool ProjectHasUserCustomizedConfiguration(ProjectInstance project)
         {
             return project.GlobalProperties.ContainsKey("Configuration");
         }
 
-        /// <returns>The top-level project (first if multiple exist) in a SLN. Returns null if no top level project. Throws exception if two top level projects disagree
-        /// in the configuration property to check.</returns>
-        public abstract ProjectInstance GetSlnProject(string potentialSlnPath, string slnProjectConfigPropertytoCheck = "");
 
     }
 }

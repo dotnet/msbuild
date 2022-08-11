@@ -450,6 +450,75 @@ public static class Program
             Assert.True(File.Exists(expectedAssetPath));
         }
 
+
+        [Fact]
+        public void It_publishes_on_release_if_PublishRelease_property_set_in_sln()
+        {
+            var slnDir = _testAssetsManager
+               .CopyTestAsset("TestAppWithSlnUsingPublishRelease", "PublishReleaseSln")
+               .WithSource()
+               .Path;
+
+            new BuildCommand(Log, slnDir, "App.sln")
+               .Execute()
+               .Should()
+               .Pass();
+
+            var publishCommand = new DotnetCommand(Log)
+                .WithWorkingDirectory(slnDir)
+                .Execute(@"dotnet", "publish")
+                .Should()
+                .Pass();
+
+            var expectedAssetPath = System.IO.Path.Combine(slnDir, "App", "bin", "Release", ToolsetInfo.CurrentTargetFramework, "publish", "App.dll");
+            Assert.True(File.Exists(expectedAssetPath));
+        }
+
+        [Fact]
+        public void It_warns_if_PublishRelease_set_on_sln_but_env_var_not_used()
+        {
+            var slnDir = _testAssetsManager
+               .CopyTestAsset("TestAppWithSlnUsingPublishRelease", "PublishReleaseSln")
+               .WithSource()
+               .Path;
+
+            new BuildCommand(Log, slnDir, "App.sln")
+               .Execute()
+               .Should()
+               .Pass();
+
+            var publishCommand = new DotnetCommand(Log)
+                .WithWorkingDirectory(slnDir)
+                .Execute(@"dotnet", "publish")
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDKERR")
+        }
+
+
+        [Fact]
+        public void It_fails_if_PublishRelease_property_differs_in_sln_top_level_projects()
+        {
+            var slnDir = _testAssetsManager
+               .CopyTestAsset("TestAppWithSlnUsingConflictingPublishReleaseConfigurations", "PublishReleaseFailedSln")
+               .WithSource()
+               .Path;
+
+            new BuildCommand(Log, slnDir, "App.sln")
+               .Execute()
+               .Should()
+               .Pass();
+
+            var publishCommand = new DotnetCommand(Log)
+                .WithWorkingDirectory(slnDir)
+                .Execute(@"dotnet", "publish")
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("PublishRelease"); // language agnostic check 
+        }
+
         [Fact]
         public void It_publishes_on_release_if_PublishRelease_property_set_in_csproj()
         {
