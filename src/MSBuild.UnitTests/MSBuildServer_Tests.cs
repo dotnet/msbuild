@@ -222,11 +222,6 @@ namespace Microsoft.Build.Engine.UnitTests
 
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
 
-            // TODO: delete
-            var debugFolder = _env.CreateFolder();
-            _env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
-            _env.SetEnvironmentVariable("MSBUILDDEBUGPATH", Path.GetTempPath());
-
             // Start a server node and find its PID.
             string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success, false, _output);
             success.ShouldBeTrue();
