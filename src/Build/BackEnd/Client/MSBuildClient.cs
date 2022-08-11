@@ -622,7 +622,7 @@ namespace Microsoft.Build.Experimental
                 }
                 catch (Exception ex)
                 {
-                    if (ex is IOException || (ex is AggregateException exa && exa.Flatten().InnerExceptions.OfType<IOException>().Any()))
+                    if (ex is not TimeoutException && sw.ElapsedMilliseconds < timeoutMilliseconds)
                     {
                         CommunicationsUtilities.Trace("Retrying to connect to server after {0} ms", sw.ElapsedMilliseconds);
                         // This solves race condition for time in which server started but have not yet listen on pipe or
