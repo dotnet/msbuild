@@ -11,20 +11,14 @@ public record struct Layer
 
     public static Layer FromDirectory(string directory, string containerPath)
     {
-        DirectoryInfo di = new(directory);
-
-        IEnumerable<(string path, string containerPath)> fileList = 
-            di.GetFileSystemInfos()
-                .Where(fsi => fsi is FileInfo).Select(
-                fsi =>
-                {
-                    string destinationPath =
-                        Path.Join(containerPath,
-                            Path.GetRelativePath(directory, fsi.FullName))
-                        .Replace(Path.DirectorySeparatorChar, '/');
-                    return (fsi.FullName, destinationPath);
-                });
-
+        var fileList =
+            new DirectoryInfo(directory)
+            .EnumerateFiles("*", SearchOption.AllDirectories)
+            .Select(fsi =>
+                    {
+                        string destinationPath = Path.Join(containerPath, Path.GetRelativePath(directory, fsi.FullName)).Replace(Path.DirectorySeparatorChar, '/');
+                        return (fsi.FullName, destinationPath);
+                    });
         return FromFiles(fileList);
     }
 
