@@ -501,33 +501,6 @@ public static class Program
                 .HaveStdOutContaining("NETSDK1187");
         }
 
-
-        [Fact]
-        public void It_fails_if_PublishRelease_property_differs_in_sln_top_level_projects()
-        {
-            Environment.SetEnvironmentVariable("ENABLE_P_RELEASE_SLN", "true");
-
-            var slnDir = _testAssetsManager
-               .CopyTestAsset("TestAppWithSlnUsingConflictingPublishReleaseConfigurations", "PublishReleaseFailedSln")
-               .WithSource()
-               .Path;
-
-            new BuildCommand(Log, slnDir, "App.sln")
-               .Execute()
-               .Should()
-               .Pass();
-
-            var publishCommand = new DotnetCommand(Log)
-                .WithWorkingDirectory(slnDir)
-                .Execute(@"dotnet", "publish")
-                .Should()
-                .Fail()
-                .And
-                .HaveStdOutContaining("PublishRelease"); // language agnostic check 
-
-            Environment.SetEnvironmentVariable("ENABLE_P_RELEASE_SLN", null);
-        }
-
         [Fact]
         public void It_publishes_on_release_if_PublishRelease_property_set_in_csproj()
         {
