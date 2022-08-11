@@ -19,6 +19,7 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Common;
 using NuGet.Frameworks;
 using NuGet.Versioning;
+using Microsoft.NET.Build.Tasks;
 
 namespace Microsoft.DotNet.Tools.Tool.Install
 {
@@ -72,7 +73,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             _environmentPathInstruction = environmentPathInstruction
                 ?? EnvironmentPathFactory.CreateEnvironmentPathInstruction();
             _createShellShimRepository = createShellShimRepository ?? ShellShimRepositoryFactory.CreateShellShimRepository;
-            var tempDir = new DirectoryPath(Path.Combine(Path.GetTempPath(), "dotnet-tool-install"));
+            var tempDir = new DirectoryPath(FileUtilities.CreateTempPath());
             var configOption = parseResult.GetValueForOption(ToolInstallCommandParser.ConfigOption);
             var sourceOption = parseResult.GetValueForOption(ToolInstallCommandParser.AddSourceOption);
             var packageSourceLocation = new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), additionalSourceFeeds: sourceOption);
@@ -143,7 +144,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                     }
                     else
                     {
-                        framework = string.IsNullOrEmpty(_framework)  ?
+                        framework = string.IsNullOrEmpty(_framework) ?
                             null :
                             NuGetFramework.Parse(_framework);
                     }
