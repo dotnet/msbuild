@@ -498,7 +498,7 @@ public static class Program
                 .Should()
                 .Pass()
                 .And
-                .HaveStdOutContaining("NETSDK1187");
+                .HaveStdOutContaining("NETSDK1189");
         }
 
         [Fact]
