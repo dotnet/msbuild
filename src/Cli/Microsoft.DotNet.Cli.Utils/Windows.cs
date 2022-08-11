@@ -40,19 +40,6 @@ namespace Microsoft.DotNet.Cli.Utils
         }
 
         /// <summary>
-        /// Queries the Windows Update Agent API to determine if there is a pending reboot.
-        /// </summary>
-        /// <returns><see langword="true"/> if there is a pending reboot; <see langword="false"> otherwise.</see></returns>
-        /// <remarks>
-        /// See <see href="https://docs.microsoft.com/en-us/windows/win32/api/wuapi/nf-wuapi-isysteminformation-get_rebootrequired">this</see>
-        /// for more information.
-        /// </remarks>
-        public static bool RebootRequired()
-        {
-            return new SystemInformationClass().RebootRequired;
-        }
-
-        /// <summary>
         /// Returns the commandline of the currently executing process.
         /// </summary>
         /// <returns>The commandline of the current process.</returns>
