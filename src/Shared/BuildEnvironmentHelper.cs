@@ -552,7 +552,7 @@ namespace Microsoft.Build.Shared
                 MSBuildToolsDirectoryRoot = CurrentMSBuildToolsDirectory;
             }
 
-            if (mode == BuildEnvironmentMode.VisualStudio && MSBuildToolsDirectoryRoot != null)
+            if (MSBuildToolsDirectoryRoot != null)
             {
                 // Calculate potential paths to other architecture MSBuild.exe
                 var potentialAmd64FromX86 = FileUtilities.CombinePaths(MSBuildToolsDirectoryRoot, "amd64", msBuildExeName);
@@ -563,8 +563,8 @@ namespace Microsoft.Build.Shared
                 var existsCheck = mode == BuildEnvironmentMode.VisualStudio ? new Func<string, bool>(_ => true) : File.Exists;
 
                 MSBuildToolsDirectory32 = MSBuildToolsDirectoryRoot;
-                MSBuildToolsDirectory64 = Path.Combine(MSBuildToolsDirectoryRoot, "amd64");
-                MSBuildToolsDirectoryArm64 = File.Exists(potentialARM64FromX86) ? Path.Combine(MSBuildToolsDirectoryRoot, "arm64") : null;
+                MSBuildToolsDirectory64 = existsCheck(potentialAmd64FromX86) ? Path.Combine(MSBuildToolsDirectoryRoot, "amd64") : null;
+                MSBuildToolsDirectoryArm64 = existsCheck(potentialARM64FromX86) ? Path.Combine(MSBuildToolsDirectoryRoot, "arm64") : null;
             }
 
             MSBuildExtensionsPath = mode == BuildEnvironmentMode.VisualStudio
