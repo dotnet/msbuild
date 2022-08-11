@@ -60,9 +60,10 @@ namespace Microsoft.DotNet.Installer.Windows
         /// <returns><see langword="true"/> if there is a pending reboot; <see langword="false"> otherwise.</see></returns>
         public static bool RebootRequired()
         {
-            using RegistryKey auKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired");
-            using RegistryKey cbsKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending");
-            using RegistryKey sessionKey = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Control\Session Manager");
+            using RegistryKey localMachineKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+            using RegistryKey auKey = localMachineKey?.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired");
+            using RegistryKey cbsKey = localMachineKey?.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending");
+            using RegistryKey sessionKey = localMachineKey?.OpenSubKey(@"SYSTEM\CurrentControlSet\Control\Session Manager");
 
             string[] pendingFileRenameOperations = (string[])sessionKey?.GetValue("PendingFileRenameOperations") ?? new string[0];
 
