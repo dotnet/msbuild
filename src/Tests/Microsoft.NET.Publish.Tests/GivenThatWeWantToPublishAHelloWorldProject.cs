@@ -454,6 +454,8 @@ public static class Program
         [Fact]
         public void It_publishes_on_release_if_PublishRelease_property_set_in_sln()
         {
+            Environment.SetEnvironmentVariable("ENABLE_P_RELEASE_SLN", "true");
+
             var slnDir = _testAssetsManager
                .CopyTestAsset("TestAppWithSlnUsingPublishRelease", "PublishReleaseSln")
                .WithSource()
@@ -470,8 +472,11 @@ public static class Program
                 .Should()
                 .Pass();
 
+            Environment.SetEnvironmentVariable("ENABLE_P_RELEASE_SLN", null);
+
             var expectedAssetPath = System.IO.Path.Combine(slnDir, "App", "bin", "Release", ToolsetInfo.CurrentTargetFramework, "publish", "App.dll");
             Assert.True(File.Exists(expectedAssetPath));
+
         }
 
         [Fact]
@@ -491,15 +496,17 @@ public static class Program
                 .WithWorkingDirectory(slnDir)
                 .Execute(@"dotnet", "publish")
                 .Should()
-                .Fail()
+                .Pass()
                 .And
-                .HaveStdOutContaining("NETSDKERR");
+                .HaveStdOutContaining("NETSDK1187");
         }
 
 
         [Fact]
         public void It_fails_if_PublishRelease_property_differs_in_sln_top_level_projects()
         {
+            Environment.SetEnvironmentVariable("ENABLE_P_RELEASE_SLN", "true");
+
             var slnDir = _testAssetsManager
                .CopyTestAsset("TestAppWithSlnUsingConflictingPublishReleaseConfigurations", "PublishReleaseFailedSln")
                .WithSource()
@@ -517,6 +524,8 @@ public static class Program
                 .Fail()
                 .And
                 .HaveStdOutContaining("PublishRelease"); // language agnostic check 
+
+            Environment.SetEnvironmentVariable("ENABLE_P_RELEASE_SLN", null);
         }
 
         [Fact]
