@@ -26,12 +26,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
   </PropertyGroup>
 
-  "'$(PublishTrimmed)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'"
-
-  <!-- Enable warning for trying to use PublishRelease or PackRelease with a solution if env-var is not set.-->
-  <NETSdkWarning Condition="('$(PublishRelease)' != '' or '$(PackRelease)' != '') and '$(_RestoreSolutionFileUsed)' == 'true' and '$(ENABLE_P_RELEASE_SLN)' == ''"
-                 ResourceName="PReleaseRequiresEnvVarOnSln" />/>
-
   <!-- User-facing configuration-agnostic defaults -->
   <PropertyGroup>
     <OutputType Condition=" '$(OutputType)' == '' ">Library</OutputType>

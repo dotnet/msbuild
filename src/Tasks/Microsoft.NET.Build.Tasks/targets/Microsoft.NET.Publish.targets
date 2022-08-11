@@ -112,6 +112,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                             '$(SelfContained)' != 'true'"
                  ResourceName="CompressionInSingleFileRequiresSelfContained" />
 
+    <!-- Enable warning for trying to use PublishRelease or PackRelease with a solution if env-var is not set.-->
+    <NETSdkWarning Condition="'$(PublishRelease)' != '' and '$(SolutionExt)' == '.sln' and '$(ENABLE_P_RELEASE_SLN)' == ''"
+                   ResourceName="PReleaseRequiresEnvVarOnSln" />
+
     <PropertyGroup>
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
       <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
