@@ -671,10 +671,10 @@ The header is followed by the list of parameters and their errors (might be seve
     project(s): {0}
     to solution file: {1}
     solution folder: {2}</source>
-        <target state="translated">追加しています
-    プロジェクト: {0}
-    ターゲットのソリューション ファイル: {1}
-    ソリューション フォルダー: {2}</target>
+        <target state="translated">
+ プロジェクトの追加 対象: {0}
+ 対応するソリューション ファイル: {1}
+ ソリューション フォルダー: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Succeeded">
@@ -824,22 +824,22 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplateCreator_Error_TemplateNotFound">
         <source>Unable to locate the specified template content, the template package might be removed or corrupted.</source>
-        <target state="new">Unable to locate the specified template content, the template package might be removed or corrupted.</target>
+        <target state="translated">指定されたテンプレート コンテンツが見つかりません。テンプレート パッケージが削除されたか、破損している可能性があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateCreator_Hint_Install">
         <source>To install the template package, run:</source>
-        <target state="new">To install the template package, run:</target>
+        <target state="translated">テンプレート パッケージをインストールするには、次を実行します:</target>
         <note>The sentence is followed by the command to run the action</note>
       </trans-unit>
       <trans-unit id="TemplateCreator_Hint_RebuildCache">
         <source>To rescan installed template packages, run:</source>
-        <target state="new">To rescan installed template packages, run:</target>
+        <target state="translated">インストールされているテンプレート パッケージを再スキャンするには、次を実行します:</target>
         <note>The sentence is followed by the command to run the action</note>
       </trans-unit>
       <trans-unit id="TemplateCreator_Hint_Uninstall">
         <source>To uninstall the template package, run:</source>
-        <target state="new">To uninstall the template package, run:</target>
+        <target state="translated">テンプレート パッケージをアンインストールするには、次を実行します:</target>
         <note>The sentence is followed by the command to run the action</note>
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_Description">

@@ -56,7 +56,7 @@ Varsayılan durum, çerçeveye bağımlı bir uygulama yayımlamaktır.</target>
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default is 'Debug'. Use the `PublishRelease` property to make 'Release' the default for this command.</source>
-        <target state="needs-review-translation">Yayımlama için yapılandırma. Varsayılan değer: 'Debug'. Bu komutta, 'Release' komutunu varsayılan yapmak için 'PublishRelease' özelliğini kullanın.</target>
+        <target state="translated">Yayımlama için yapılandırma. Varsayılan değer: 'Debug'. Bu komutta, 'Release' komutunu varsayılan yapmak için 'PublishRelease' özelliğini kullanın.</target>
         <note />
       </trans-unit>
     </body>

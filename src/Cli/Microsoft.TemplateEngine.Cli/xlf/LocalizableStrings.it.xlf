@@ -623,7 +623,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostActionDispatcher_Error_RunScriptNotAllowed">
         <source>Execution of 'Run script' post action is not allowed.</source>
-        <target state="translated">L'esecuzione dell'azione post \"Esegui script\" non è consentita.</target>
+        <target state="translated">L'esecuzione dell'azione post "Esegui script" non è consentita.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionFailedInstructionHeader">
@@ -734,7 +734,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
         <source>Failed to run the command: argument 'executable' is missing in post action configuration.</source>
-        <target state="translated">Non è stato possibile eseguire il comando: argomento \"eseguibile\" mancante nella configurazione dell'azione post.</target>
+        <target state="translated">Non è stato possibile eseguire il comando: argomento "eseguibile" mancante nella configurazione dell'azione post.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_Restore_Error_FailedToDetermineProjectToRestore">
@@ -824,22 +824,22 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplateCreator_Error_TemplateNotFound">
         <source>Unable to locate the specified template content, the template package might be removed or corrupted.</source>
-        <target state="new">Unable to locate the specified template content, the template package might be removed or corrupted.</target>
+        <target state="translated">Impossibile individuare il contenuto del modello specificato. Il pacchetto di modelli potrebbe essere stato rimosso o danneggiato.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateCreator_Hint_Install">
         <source>To install the template package, run:</source>
-        <target state="new">To install the template package, run:</target>
+        <target state="translated">Per installare il pacchetto di modelli, usare:</target>
         <note>The sentence is followed by the command to run the action</note>
       </trans-unit>
       <trans-unit id="TemplateCreator_Hint_RebuildCache">
         <source>To rescan installed template packages, run:</source>
-        <target state="new">To rescan installed template packages, run:</target>
+        <target state="translated">Per ripetere l'analisi dei pacchetti di modelli installati, eseguire:</target>
         <note>The sentence is followed by the command to run the action</note>
       </trans-unit>
       <trans-unit id="TemplateCreator_Hint_Uninstall">
         <source>To uninstall the template package, run:</source>
-        <target state="new">To uninstall the template package, run:</target>
+        <target state="translated">Per disinstallare il pacchetto di modelli, usare:</target>
         <note>The sentence is followed by the command to run the action</note>
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_Description">

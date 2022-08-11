@@ -445,7 +445,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="InvalidNameParameter">
         <source>Name cannot contain any of the following characters {0} or character codes {1}</source>
-        <target state="translated">이름은 다음 문자 {0} 또는 문자 코드{1}를 포함할 수 없습니다.</target>
+        <target state="translated">이름은 다음 문자 {0} 또는 문자 코드{1}을(를) 포함할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterDefault">
@@ -672,7 +672,7 @@ The header is followed by the list of parameters and their errors (might be seve
     to solution file: {1}
     solution folder: {2}</source>
         <target state="translated">
-    프로젝트 추가: {0}
+    프로젝트 추가 {0}
     대상 솔루션 파일: {1}
     솔루션 폴더: {2}</target>
         <note />
@@ -824,22 +824,22 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplateCreator_Error_TemplateNotFound">
         <source>Unable to locate the specified template content, the template package might be removed or corrupted.</source>
-        <target state="new">Unable to locate the specified template content, the template package might be removed or corrupted.</target>
+        <target state="translated">지정된 템플릿 콘텐츠를 찾을 수 없습니다. 템플릿 패키지가 제거되었거나 손상되었을 수 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateCreator_Hint_Install">
         <source>To install the template package, run:</source>
-        <target state="new">To install the template package, run:</target>
+        <target state="translated">템플릿 패키지를 설치하려면 다음을 실행합니다.</target>
         <note>The sentence is followed by the command to run the action</note>
       </trans-unit>
       <trans-unit id="TemplateCreator_Hint_RebuildCache">
         <source>To rescan installed template packages, run:</source>
-        <target state="new">To rescan installed template packages, run:</target>
+        <target state="translated">설치된 템플릿 패키지를 다시 검사하려면 다음을 실행합니다.</target>
         <note>The sentence is followed by the command to run the action</note>
       </trans-unit>
       <trans-unit id="TemplateCreator_Hint_Uninstall">
         <source>To uninstall the template package, run:</source>
-        <target state="new">To uninstall the template package, run:</target>
+        <target state="translated">템플릿 패키지를 제거하려면 다음을 실행합니다.</target>
         <note>The sentence is followed by the command to run the action</note>
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_Description">
@@ -1115,7 +1115,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ThirdPartyNotices">
         <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
-        <target state="translated">이 템플릿에는 Microsoft 이외의 타사 기술이 포함되어 있습니다. 자세한 내용은{0}를 참조하세요.</target>
+        <target state="translated">이 템플릿에는 Microsoft 이외의 타사 기술이 포함되어 있습니다. 자세한 내용은{0}을(를) 참조하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="Type">

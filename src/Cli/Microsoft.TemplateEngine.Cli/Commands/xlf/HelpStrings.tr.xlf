@@ -74,12 +74,12 @@
       </trans-unit>
       <trans-unit id="Text_Disabled">
         <source>Enabled: *false*</source>
-        <target state="new">Enabled: *false*</target>
+        <target state="translated">Etkin: *false*</target>
         <note>Indication that parameter is not enabled</note>
       </trans-unit>
       <trans-unit id="Text_EnabledCondition">
         <source>Enabled if: {0}</source>
-        <target state="new">Enabled if: {0}</target>
+        <target state="translated">{0} ise etkin</target>
         <note>{0} is the condition expression</note>
       </trans-unit>
       <trans-unit id="Text_NoTemplateOptions">
@@ -89,7 +89,7 @@
       </trans-unit>
       <trans-unit id="Text_RequiredCondition">
         <source>Required if: {0}</source>
-        <target state="new">Required if: {0}</target>
+        <target state="translated">{0} ise gerekli</target>
         <note>{0} is the condition expression</note>
       </trans-unit>
       <trans-unit id="Text_UsageTemplateOptionsPart">

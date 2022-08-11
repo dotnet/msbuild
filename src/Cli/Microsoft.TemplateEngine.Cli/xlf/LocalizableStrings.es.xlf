@@ -26,7 +26,7 @@
       </trans-unit>
       <trans-unit id="AliasCannotBeShortName">
         <source>Alias '{0}' is a template short name, and therefore cannot be aliased.</source>
-        <target state="translated">El alias \"{0}\" es un nombre corto de plantilla y, por lo tanto, no puede tener alias.</target>
+        <target state="translated">El alias "{0}" es un nombre corto de plantilla y, por lo tanto, no puede tener alias.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasCommandAfterExpansion">
@@ -38,7 +38,7 @@
       </trans-unit>
       <trans-unit id="AliasCreated">
         <source>Successfully created alias named '{0}' with value '{1}'</source>
-        <target state="translated">Se creó correctamente el alias denominado \"{0}\" con el valor \"{1}\"</target>
+        <target state="translated">Se creó correctamente el alias denominado "{0}" con el valor "{1}"</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasCycleError">
@@ -73,12 +73,12 @@
       </trans-unit>
       <trans-unit id="AliasRemoveNonExistentFailed">
         <source>Unable to remove alias '{0}'. It did not exist.</source>
-        <target state="translated">No se puede quitar el alias \"{0}\". No existe.</target>
+        <target state="translated">No se puede quitar el alias "{0}". No existe.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasRemoved">
         <source>Successfully removed alias named '{0}' whose value was '{1}'.</source>
-        <target state="translated">Se quitó correctamente el alias denominado \"{0}\" cuyo valor era \"{1}\".</target>
+        <target state="translated">Se quitó correctamente el alias denominado "{0}" cuyo valor era "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasShowAllAliasesHeader">
@@ -89,13 +89,13 @@
       <trans-unit id="AliasShowErrorUnknownAlias">
         <source>Unknown alias name '{0}'.
 Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
-        <target state="translated">Nombre de alias desconocido \"{0}\".
-Ejecute \"dotnet {1} --show-aliases\" sin argumentos para mostrar todos los alias.</target>
+        <target state="translated">Nombre de alias desconocido "{0}".
+Ejecute "dotnet {1} --show-aliases" sin argumentos para mostrar todos los alias.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasUpdated">
         <source>Successfully updated alias named '{0}' to value '{1}'.</source>
-        <target state="translated">El alias denominado \"{0}\" se actualizó correctamente al valor \"{1}\".</target>
+        <target state="translated">El alias denominado "{0}" se actualizó correctamente al valor "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasValue">
@@ -125,7 +125,7 @@ Ejecute \"dotnet {1} --show-aliases\" sin argumentos para mostrar todos los alia
       </trans-unit>
       <trans-unit id="AmbiguousParameterDetail">
         <source>The value '{1}' is ambiguous for option {0}.</source>
-        <target state="translated">El valor \"{1}\" es ambiguo para la opción {0}.</target>
+        <target state="translated">El valor "{1}" es ambiguo para la opción {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHint">
@@ -195,7 +195,7 @@ Ejecute \"dotnet {1} --show-aliases\" sin argumentos para mostrar todos los alia
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NotFound">
         <source>Template '{0}' was not found.</source>
-        <target state="translated">No se encontró la plantilla \"{0}\".</target>
+        <target state="translated">No se encontró la plantilla "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_SearchFailure">
@@ -450,17 +450,17 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="InvalidParameterDefault">
         <source>The default value '{1}' is not a valid value for {0}.</source>
-        <target state="translated">El valor predeterminado \"{1}\" no es un valor válido para {0}.</target>
+        <target state="translated">El valor predeterminado "{1}" no es un valor válido para {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterDetail">
         <source>'{1}' is not a valid value for {0}.</source>
-        <target state="translated">\"{1}\" no es un valor válido para \"{0}\".</target>
+        <target state="translated">"{1}" no es un valor válido para "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterNameDetail">
         <source>'{0}' is not a valid option</source>
-        <target state="translated">\"{0}\" no es una opción válida</target>
+        <target state="translated">"{0}" no es una opción válida</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterTemplateHint">
@@ -470,7 +470,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="InvalidSyntax">
         <source>Invalid command syntax: use '{0}' instead.</source>
-        <target state="translated">Sintaxis de comando no válida: utilice \"{0}\" en su lugar.</target>
+        <target state="translated">Sintaxis de comando no válida: utilice "{0}" en su lugar.</target>
         <note>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</note>
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
@@ -623,7 +623,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostActionDispatcher_Error_RunScriptNotAllowed">
         <source>Execution of 'Run script' post action is not allowed.</source>
-        <target state="translated">No se permite la ejecución de la acción posterior \"Ejecutar el script\".</target>
+        <target state="translated">No se permite la ejecución de la acción posterior "Ejecutar el script".</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionFailedInstructionHeader">
@@ -671,10 +671,10 @@ The header is followed by the list of parameters and their errors (might be seve
     project(s): {0}
     to solution file: {1}
     solution folder: {2}</source>
-        <target state="translated">Agregando
-    proyectos: {0}
-     al archivo de solución: {1}
-     carpeta de la solución: {2}</target>
+        <target state="new">Adding
+    project(s): {0}
+    to solution file: {1}
+    solution folder: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Succeeded">
@@ -734,7 +734,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
         <source>Failed to run the command: argument 'executable' is missing in post action configuration.</source>
-        <target state="translated">No se pudo ejecutar el comando: falta el argumento \"executable\" en la configuración de la acción posterior.</target>
+        <target state="translated">No se pudo ejecutar el comando: falta el argumento "executable" en la configuración de la acción posterior.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_Restore_Error_FailedToDetermineProjectToRestore">
@@ -779,7 +779,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="RunningCommand">
         <source>Running command '{0}'...</source>
-        <target state="translated">Ejecutando comando \"{0}\"...</target>
+        <target state="translated">Ejecutando comando "{0}"...</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
@@ -789,7 +789,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="SettingsReadError">
         <source>Error reading the installed configuration, file may be corrupted. If this problem persists, try resetting with the `--debug:reinit' flag</source>
-        <target state="translated">Error al leer la configuración instalada, es posible que el archivo esté dañado. Si el problema persiste, pruebe a restablecer con la marca \"--debug:reinit\"</target>
+        <target state="translated">Error al leer la configuración instalada, es posible que el archivo esté dañado. Si el problema persiste, pruebe a restablecer con la marca "--debug:reinit"</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowsAllTemplates">
@@ -824,22 +824,22 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplateCreator_Error_TemplateNotFound">
         <source>Unable to locate the specified template content, the template package might be removed or corrupted.</source>
-        <target state="new">Unable to locate the specified template content, the template package might be removed or corrupted.</target>
+        <target state="translated">No se encuentra el contenido de la plantilla especificada. Es posible que el paquete de plantillas se haya quitado o esté dañado.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateCreator_Hint_Install">
         <source>To install the template package, run:</source>
-        <target state="new">To install the template package, run:</target>
+        <target state="translated">Para instalar el paquete de plantillas, ejecute:</target>
         <note>The sentence is followed by the command to run the action</note>
       </trans-unit>
       <trans-unit id="TemplateCreator_Hint_RebuildCache">
         <source>To rescan installed template packages, run:</source>
-        <target state="new">To rescan installed template packages, run:</target>
+        <target state="translated">Para volver a examinar los paquetes de plantillas instalados, ejecute:</target>
         <note>The sentence is followed by the command to run the action</note>
       </trans-unit>
       <trans-unit id="TemplateCreator_Hint_Uninstall">
         <source>To uninstall the template package, run:</source>
-        <target state="new">To uninstall the template package, run:</target>
+        <target state="translated">Para desinstalar el paquete de plantillas, ejecute:</target>
         <note>The sentence is followed by the command to run the action</note>
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_Description">
@@ -895,7 +895,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
         <source>Could not find the template package containing template '{0}'</source>
-        <target state="translated">No encontró el paquete de plantillas que contiene la plantilla \"{0}\"</target>
+        <target state="translated">No encontró el paquete de plantillas que contiene la plantilla "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageNameContainsTemplates">
@@ -905,12 +905,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageNotFound">
         <source>The template package '{0}' is not found.</source>
-        <target state="translated">No se encuentra el paquete de plantillas \"{0}\".</target>
+        <target state="translated">No se encuentra el paquete de plantillas "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_TemplateIncludedToPackages">
         <source>The template '{0}' is included to the packages:</source>
-        <target state="translated">La plantilla \"{0}\" se incluye en los paquetes:</target>
+        <target state="translated">La plantilla "{0}" se incluye en los paquetes:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_ConstraintsNotice">
@@ -925,7 +925,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Error_SameInstallRequests">
         <source>The command is attempting to install the template package '{0}' twice, check the arguments and retry.</source>
-        <target state="translated">El comando está intentando instalar el paquete de plantillas \"{0}\" dos veces, compruebe los argumentos y vuelva a intentarlo.</target>
+        <target state="translated">El comando está intentando instalar el paquete de plantillas "{0}" dos veces, compruebe los argumentos y vuelva a intentarlo.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_OverrideNotice">
@@ -1020,7 +1020,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_UpdateAvailable">
         <source>An update for template package '{0}' is available.</source>
-        <target state="translated">Hay disponible una actualización para el paquete de plantillas \"{0}\".</target>
+        <target state="translated">Hay disponible una actualización para el paquete de plantillas "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_UpdateAvailablePackages">

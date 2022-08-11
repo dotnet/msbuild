@@ -4,22 +4,22 @@
     <body>
       <trans-unit id="ApiCompatRunnerExecutingWorkItems">
         <source>Executing {0} work item(s)...</source>
-        <target state="new">Executing {0} work item(s)...</target>
+        <target state="translated">Trwa wykonywanie następującej liczby elementów roboczych: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ApiCompatibilityFooter">
         <source>Performed api validation on '{0}' ({2}) and '{1}' ({3}).</source>
-        <target state="new">Performed api validation on '{0}' ({2}) and '{1}' ({3}).</target>
+        <target state="translated">Wykonano weryfikację interfejsu API dla elementu „{0}” ({2}) i „{1}” ({3}).</target>
         <note />
       </trans-unit>
       <trans-unit id="ApiCompatibilityHeader">
         <source>API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</source>
-        <target state="new">API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</target>
+        <target state="translated">Błędy zgodności interfejsu API między elementem „{0}” ({2}) i „{1}” ({3}):</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyLoadError">
         <source>Could not load assembly symbols for '{0}'. Skipping the assembly.</source>
-        <target state="new">Could not load assembly symbols for '{0}'. Skipping the assembly.</target>
+        <target state="translated">Nie można załadować symboli zestawu dla elementu „{0}”. Pomijanie zestawu.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyNameDoesNotExist">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="CannotAddVirtualToMember">
         <source>Cannot add virtual keyword to member '{0}'.</source>
-        <target state="new">Cannot add virtual keyword to member '{0}'.</target>
+        <target state="translated">Nie można dodać wirtualnego słowa kluczowego do składowej „{0}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="CannotRemoveVirtualFromMember">
         <source>Cannot remove virtual keyword from member '{0}'.</source>
-        <target state="new">Cannot remove virtual keyword from member '{0}'.</target>
+        <target state="translated">Nie można usunąć wirtualnego słowa kluczowego z składowej „{0}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveReference">
@@ -94,17 +94,17 @@
       </trans-unit>
       <trans-unit id="ElementShouldNotBeNullAtIndex">
         <source>Element should not be null. Found null at index: {0}.</source>
-        <target state="new">Element should not be null. Found null at index: {0}.</target>
+        <target state="translated">Element nie może mieć wartości null. Znaleziono wartość null w indeksie: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnumTypesMustMatch">
         <source>Underlying type of enum '{0}' changed from '{1}' to '{2}'.</source>
-        <target state="new">Underlying type of enum '{0}' changed from '{1}' to '{2}'.</target>
+        <target state="translated">Bazowy typ wyliczenia „{0}” został zmieniony z „{1}” na „{2}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnumValuesMustMatch">
         <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
-        <target state="new">Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</target>
+        <target state="translated">Wartość pola „{1}” w wyliczeniu „{0}” zmieniona z „{2}” na „{3}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileDoesNotExist">

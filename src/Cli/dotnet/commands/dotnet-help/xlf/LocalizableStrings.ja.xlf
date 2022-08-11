@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="UserJwtsDefinition">
         <source>Manage JSON Web Tokens in development.</source>
-        <target state="new">Manage JSON Web Tokens in development.</target>
+        <target state="translated">開発中の JSON Web トークンを管理します。</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionDescription">

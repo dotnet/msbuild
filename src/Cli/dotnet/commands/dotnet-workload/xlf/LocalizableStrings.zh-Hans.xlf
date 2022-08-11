@@ -19,12 +19,12 @@
       </trans-unit>
       <trans-unit id="NoWorkloadsInstalledInfoWarning">
         <source>There are no installed workloads to display.</source>
-        <target state="new">There are no installed workloads to display.</target>
+        <target state="translated">没有要显示的已安装工作负载。</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipSignCheckInvalidOption">
         <source>Unable to bypass signature verification. The specified option conflicts with a global policy.</source>
-        <target state="new">Unable to bypass signature verification. The specified option conflicts with a global policy.</target>
+        <target state="translated">无法绕过签名验证。指定的选项与全局策略冲突。</target>
         <note />
       </trans-unit>
       <trans-unit id="WasmToolsDescription">
@@ -34,27 +34,27 @@
       </trans-unit>
       <trans-unit id="WorkloadIdColumn">
         <source>Installed Workload Id</source>
-        <target state="new">Installed Workload Id</target>
+        <target state="translated">已安装的工作负载 ID</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadInstallTypeColumn">
         <source>Install Type</source>
-        <target state="new">Install Type</target>
+        <target state="translated">安装类型</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadManfiestVersionColumn">
         <source>Manifest Version</source>
-        <target state="new">Manifest Version</target>
+        <target state="translated">清单版本</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadManifestPathColumn">
         <source>Manifest Path</source>
-        <target state="new">Manifest Path</target>
+        <target state="translated">清单路径</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadSourceColumn">
         <source>Installation Source</source>
-        <target state="new">Installation Source</target>
+        <target state="translated">安装源文件</target>
         <note />
       </trans-unit>
     </body>

@@ -22,7 +22,7 @@
 To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;version&gt;.
 </source>
         <target state="translated">要安裝之資料夾或 NuGet 套件的 NuGet 套件識別碼或路徑。
-若要安裝特定版本的 NuGet 套件，請使用&lt;套件識別碼&gt;::&lt;version&gt;。
+若要安裝特定版本的 NuGet 套件，請使用 &lt;package ID&gt;::&lt;version&gt;。
 </target>
         <note />
       </trans-unit>
@@ -79,8 +79,8 @@ To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;ver
       <trans-unit id="Command_Uninstall_Argument_Package">
         <source>NuGet package ID (without version) or path to folder to uninstall. 
 If command is specified without the argument, it lists all the template packages installed.</source>
-        <target state="translated">NuGet 套件識別碼(沒有要卸載的版本)或資料夾路徑。
-如果指定的命令沒有引數，它會列出所有已安裝的範本套件。</target>
+        <target state="translated">要解除安裝之資料夾的 NuGet 套件識別碼 (沒有版本) 或路徑。
+如果指定的命令沒有引數，則其會列出所有已安裝的範本套件。</target>
         <note />
       </trans-unit>
       <trans-unit id="Command_Uninstall_Description">

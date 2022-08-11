@@ -12,7 +12,7 @@
   "symbols/Framework/choices/netstandard2.0/description": "Hedef netstandard2.0",
   "symbols/Framework/choices/netstandard2.0/displayName": ".NET Standard 2.0",
   "symbols/Framework/displayName": "Çerçeve",
-  "symbols/skipRestore/description": "Belirtilmişse, oluşturulmakta olan projenin otomatik geri yüklenmesini atlar.",
+  "symbols/skipRestore/description": "Belirtilirse, oluşturma sırasında projenin otomatik geri yüklenmesini atlar.",
   "symbols/skipRestore/displayName": "Geri yüklemeyi atla",
   "postActions/restore/description": "Bu projenin gerektirdiği NuGet paketlerini geri yükleyin.",
   "postActions/restore/manualInstructions/default/text": "'dotnet restore' çalıştır",

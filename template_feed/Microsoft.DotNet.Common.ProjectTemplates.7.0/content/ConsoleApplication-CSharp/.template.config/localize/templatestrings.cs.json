@@ -13,7 +13,7 @@
   "symbols/skipRestore/description": "Pokud se tato možnost zadá, přeskočí automatické obnovení projektu při vytvoření.",
   "symbols/skipRestore/displayName": "Přeskočit obnovení",
   "symbols/UseProgramMain/description": "Určuje, jestli se má místo příkazů nejvyšší úrovně generovat explicitní třída Program a metoda Main.",
-  "symbols/UseProgramMain/displayName": "Nepoužívat příkazy nejvyšší úrovně",
+  "symbols/UseProgramMain/displayName": "Nepoužívat _příkazy nejvyšší úrovně",
   "postActions/restore/description": "Obnoví balíčky NuGet vyžadované tímto projektem.",
   "postActions/restore/manualInstructions/default/text": "Spustit dotnet restore",
   "postActions/open-file/description": "Otevře Program.cs v editoru."

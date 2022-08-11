@@ -21,8 +21,8 @@
         <source>NuGet package ID or path to folder or NuGet package to install. 
 To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;version&gt;.
 </source>
-        <target state="translated">要安装的文件夹或 NuGet 包的 NuGet 包 ID 或路径。
-若要安装特定版本的 NuGet 包，请使用 &lt;package ID&gt;::&lt;version&gt;。
+        <target state="new">NuGet package ID or path to folder or NuGet package to install. 
+To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;version&gt;.
 </target>
         <note />
       </trans-unit>
@@ -79,8 +79,8 @@ To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;ver
       <trans-unit id="Command_Uninstall_Argument_Package">
         <source>NuGet package ID (without version) or path to folder to uninstall. 
 If command is specified without the argument, it lists all the template packages installed.</source>
-        <target state="translated">要卸载的文件夹的 NuGet 包 ID (没有版本) 或路径。
-如果在不使用参数的情况下指定命令，则它将列出安装的所有模板包。</target>
+        <target state="new">NuGet package ID (without version) or path to folder to uninstall. 
+If command is specified without the argument, it lists all the template packages installed.</target>
         <note />
       </trans-unit>
       <trans-unit id="Command_Uninstall_Description">

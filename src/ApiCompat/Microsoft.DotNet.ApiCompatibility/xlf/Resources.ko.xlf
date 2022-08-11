@@ -4,22 +4,22 @@
     <body>
       <trans-unit id="ApiCompatRunnerExecutingWorkItems">
         <source>Executing {0} work item(s)...</source>
-        <target state="new">Executing {0} work item(s)...</target>
+        <target state="translated">{0} 작업 항목을 실행하는 중...</target>
         <note />
       </trans-unit>
       <trans-unit id="ApiCompatibilityFooter">
         <source>Performed api validation on '{0}' ({2}) and '{1}' ({3}).</source>
-        <target state="new">Performed api validation on '{0}' ({2}) and '{1}' ({3}).</target>
+        <target state="translated">'{0}'({2}) 및 '{1}'({3})에서 API 유효성 검사를 수행했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ApiCompatibilityHeader">
         <source>API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</source>
-        <target state="new">API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</target>
+        <target state="translated">'{0}'({2}) 및 '{1}'({3}) 사이의 API 호환성 오류:</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyLoadError">
         <source>Could not load assembly symbols for '{0}'. Skipping the assembly.</source>
-        <target state="new">Could not load assembly symbols for '{0}'. Skipping the assembly.</target>
+        <target state="translated">'{0}'에 대한 어셈블리 기호를 로드할 수 없습니다. 어셈블리를 건너뛰는 중입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyNameDoesNotExist">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="CannotAddVirtualToMember">
         <source>Cannot add virtual keyword to member '{0}'.</source>
-        <target state="new">Cannot add virtual keyword to member '{0}'.</target>
+        <target state="translated">'{0}' 구성원에 가상 키워드를 추가할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="CannotRemoveVirtualFromMember">
         <source>Cannot remove virtual keyword from member '{0}'.</source>
-        <target state="new">Cannot remove virtual keyword from member '{0}'.</target>
+        <target state="translated">구성원 '{0}'에서 가상 키워드를 제거할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveReference">
@@ -94,17 +94,17 @@
       </trans-unit>
       <trans-unit id="ElementShouldNotBeNullAtIndex">
         <source>Element should not be null. Found null at index: {0}.</source>
-        <target state="new">Element should not be null. Found null at index: {0}.</target>
+        <target state="translated">요소는 Null이 아니어야 합니다. 인덱스 {0}에 Null이 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnumTypesMustMatch">
         <source>Underlying type of enum '{0}' changed from '{1}' to '{2}'.</source>
-        <target state="new">Underlying type of enum '{0}' changed from '{1}' to '{2}'.</target>
+        <target state="translated">열거형 '{0}'의 기본 유형이 '{1}'에서 '{2}'(으)로 변경되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnumValuesMustMatch">
         <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
-        <target state="new">Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</target>
+        <target state="translated">열거형 '{0}'의 필드 '{1}' 값이 '{2}'에서 '{3}'(으)로 변경되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileDoesNotExist">

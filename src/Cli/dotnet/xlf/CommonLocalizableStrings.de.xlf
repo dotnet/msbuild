@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
         <source>Force the command to ignore any persistent build servers.</source>
-        <target state="new">Force the command to ignore any persistent build servers.</target>
+        <target state="translated">Erzwingen Sie, dass der Befehl alle persistenten Buildserver ignoriert.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXBashManualInstructions">
@@ -172,7 +172,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="ResponseFileNotFound">
         <source>Response file '{0}' does not exist.</source>
-        <target state="new">Response file '{0}' does not exist.</target>
+        <target state="translated">Die Antwortdatei „{0}“ ist nicht vorhanden.</target>
         <note />
       </trans-unit>
       <trans-unit id="SelfContainAndNoSelfContainedConflict">

@@ -19,12 +19,12 @@
       </trans-unit>
       <trans-unit id="NoWorkloadsInstalledInfoWarning">
         <source>There are no installed workloads to display.</source>
-        <target state="new">There are no installed workloads to display.</target>
+        <target state="translated">Il n'y a aucune charge de travail installée à afficher.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipSignCheckInvalidOption">
         <source>Unable to bypass signature verification. The specified option conflicts with a global policy.</source>
-        <target state="new">Unable to bypass signature verification. The specified option conflicts with a global policy.</target>
+        <target state="translated">Impossible de contourner la vérification de signature. L’option spécifiée est en conflit avec une stratégie globale.</target>
         <note />
       </trans-unit>
       <trans-unit id="WasmToolsDescription">
@@ -34,27 +34,27 @@
       </trans-unit>
       <trans-unit id="WorkloadIdColumn">
         <source>Installed Workload Id</source>
-        <target state="new">Installed Workload Id</target>
+        <target state="translated">ID de la charge de travail installée</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadInstallTypeColumn">
         <source>Install Type</source>
-        <target state="new">Install Type</target>
+        <target state="translated">Type d'installation</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadManfiestVersionColumn">
         <source>Manifest Version</source>
-        <target state="new">Manifest Version</target>
+        <target state="translated">Version de manifeste</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadManifestPathColumn">
         <source>Manifest Path</source>
-        <target state="new">Manifest Path</target>
+        <target state="translated">Chemin d'accès au Manifeste</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadSourceColumn">
         <source>Installation Source</source>
-        <target state="new">Installation Source</target>
+        <target state="translated">Source de l’installation</target>
         <note />
       </trans-unit>
     </body>

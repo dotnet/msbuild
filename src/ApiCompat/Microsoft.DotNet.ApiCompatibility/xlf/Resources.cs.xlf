@@ -4,22 +4,22 @@
     <body>
       <trans-unit id="ApiCompatRunnerExecutingWorkItems">
         <source>Executing {0} work item(s)...</source>
-        <target state="new">Executing {0} work item(s)...</target>
+        <target state="translated">Spouští se pracovní položky ({0})...</target>
         <note />
       </trans-unit>
       <trans-unit id="ApiCompatibilityFooter">
         <source>Performed api validation on '{0}' ({2}) and '{1}' ({3}).</source>
-        <target state="new">Performed api validation on '{0}' ({2}) and '{1}' ({3}).</target>
+        <target state="translated">Provedlo se ověření rozhraní API pro {0} ({2}) a {1} ({3}).</target>
         <note />
       </trans-unit>
       <trans-unit id="ApiCompatibilityHeader">
         <source>API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</source>
-        <target state="new">API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</target>
+        <target state="translated">Chyby kompatibility rozhraní API mezi {0} ({2}) a {1} ({3}):</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyLoadError">
         <source>Could not load assembly symbols for '{0}'. Skipping the assembly.</source>
-        <target state="new">Could not load assembly symbols for '{0}'. Skipping the assembly.</target>
+        <target state="translated">Nepovedlo se načíst symboly sestavení pro {0}. Sestavení se přeskočí.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyNameDoesNotExist">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="CannotAddVirtualToMember">
         <source>Cannot add virtual keyword to member '{0}'.</source>
-        <target state="new">Cannot add virtual keyword to member '{0}'.</target>
+        <target state="translated">Do člena {0} nelze přidat virtuální klíčové slovo.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="CannotRemoveVirtualFromMember">
         <source>Cannot remove virtual keyword from member '{0}'.</source>
-        <target state="new">Cannot remove virtual keyword from member '{0}'.</target>
+        <target state="translated">Nelze odebrat virtuální klíčové slovo ze člena {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveReference">
@@ -94,17 +94,17 @@
       </trans-unit>
       <trans-unit id="ElementShouldNotBeNullAtIndex">
         <source>Element should not be null. Found null at index: {0}.</source>
-        <target state="new">Element should not be null. Found null at index: {0}.</target>
+        <target state="translated">Element by neměl mít hodnotu null. V indexu byla nalezena hodnota null: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnumTypesMustMatch">
         <source>Underlying type of enum '{0}' changed from '{1}' to '{2}'.</source>
-        <target state="new">Underlying type of enum '{0}' changed from '{1}' to '{2}'.</target>
+        <target state="translated">Základní typ výčtu{0}se změnil z {1} na {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnumValuesMustMatch">
         <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
-        <target state="new">Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</target>
+        <target state="translated">Hodnota pole {1} ve výčtu {0} se změnila z {2} na {3}.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileDoesNotExist">

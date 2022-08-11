@@ -164,7 +164,7 @@
       </trans-unit>
       <trans-unit id="ManifestPackageUrlNotResolved">
         <source>Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</source>
-        <target state="new">Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</target>
+        <target state="translated">Пакет манифеста не разрешен. Пакет манифеста или URL-адрес для {0} не существует.</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">
@@ -214,7 +214,7 @@
       </trans-unit>
       <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
         <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</source>
-        <target state="new">Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</target>
+        <target state="translated">Недопустимое определение отката. Идентификаторы манифеста в определении отката {0} не совпадают с установленными идентификаторами манифеста {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionFileDoesNotExist">
@@ -239,7 +239,7 @@
       </trans-unit>
       <trans-unit id="SkipSignCheckOptionDescription">
         <source>Skip signature verification of workload packages and installers.</source>
-        <target state="new">Skip signature verification of workload packages and installers.</target>
+        <target state="translated">Пропустить проверку подписи пакетов рабочих нагрузок и установщиков.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingManifestUpdate">

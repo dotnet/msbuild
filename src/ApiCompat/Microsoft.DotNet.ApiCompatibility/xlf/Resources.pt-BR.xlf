@@ -4,22 +4,22 @@
     <body>
       <trans-unit id="ApiCompatRunnerExecutingWorkItems">
         <source>Executing {0} work item(s)...</source>
-        <target state="new">Executing {0} work item(s)...</target>
+        <target state="translated">Executando {0} item(ns) de trabalho...</target>
         <note />
       </trans-unit>
       <trans-unit id="ApiCompatibilityFooter">
         <source>Performed api validation on '{0}' ({2}) and '{1}' ({3}).</source>
-        <target state="new">Performed api validation on '{0}' ({2}) and '{1}' ({3}).</target>
+        <target state="translated">Validação de API realizada em '{0}' ({2}) e ​​'{1}' ({3}).</target>
         <note />
       </trans-unit>
       <trans-unit id="ApiCompatibilityHeader">
         <source>API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</source>
-        <target state="new">API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</target>
+        <target state="translated">Erros de compatibilidade de API entre '{0}' ({2}) e ​​'{1}' ({3}):</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyLoadError">
         <source>Could not load assembly symbols for '{0}'. Skipping the assembly.</source>
-        <target state="new">Could not load assembly symbols for '{0}'. Skipping the assembly.</target>
+        <target state="translated">Não foi possível carregar símbolos de montagem para '{0}'. Ignorando a montagem.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyNameDoesNotExist">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="CannotAddVirtualToMember">
         <source>Cannot add virtual keyword to member '{0}'.</source>
-        <target state="new">Cannot add virtual keyword to member '{0}'.</target>
+        <target state="translated">Não é possível adicionar palavra-chave virtual ao membro '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="CannotRemoveVirtualFromMember">
         <source>Cannot remove virtual keyword from member '{0}'.</source>
-        <target state="new">Cannot remove virtual keyword from member '{0}'.</target>
+        <target state="translated">Não é possível remover a palavra-chave virtual do membro '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveReference">
@@ -94,17 +94,17 @@
       </trans-unit>
       <trans-unit id="ElementShouldNotBeNullAtIndex">
         <source>Element should not be null. Found null at index: {0}.</source>
-        <target state="new">Element should not be null. Found null at index: {0}.</target>
+        <target state="translated">O elemento não deve ser nulo. Nulo encontrado no índice: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnumTypesMustMatch">
         <source>Underlying type of enum '{0}' changed from '{1}' to '{2}'.</source>
-        <target state="new">Underlying type of enum '{0}' changed from '{1}' to '{2}'.</target>
+        <target state="translated">Tipo subjacente de enum '{0}' alterado de '{1}' para '{2}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnumValuesMustMatch">
         <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
-        <target state="new">Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</target>
+        <target state="translated">Valor do campo '{1}' na enumeração '{0}' alterado de '{2}' para '{3}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileDoesNotExist">

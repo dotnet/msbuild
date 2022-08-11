@@ -19,12 +19,12 @@
       </trans-unit>
       <trans-unit id="NoWorkloadsInstalledInfoWarning">
         <source>There are no installed workloads to display.</source>
-        <target state="new">There are no installed workloads to display.</target>
+        <target state="translated">Es sind keine installierten Workloads zum Anzeigen vorhanden.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipSignCheckInvalidOption">
         <source>Unable to bypass signature verification. The specified option conflicts with a global policy.</source>
-        <target state="new">Unable to bypass signature verification. The specified option conflicts with a global policy.</target>
+        <target state="translated">Die Signaturüberprüfung kann nicht umgangen werden. Die angegebene Option verursacht einen Konflikt mit einer globalen Richtlinie.</target>
         <note />
       </trans-unit>
       <trans-unit id="WasmToolsDescription">
@@ -34,27 +34,27 @@
       </trans-unit>
       <trans-unit id="WorkloadIdColumn">
         <source>Installed Workload Id</source>
-        <target state="new">Installed Workload Id</target>
+        <target state="translated">Installierte Workload-ID</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadInstallTypeColumn">
         <source>Install Type</source>
-        <target state="new">Install Type</target>
+        <target state="translated">Installationstyp</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadManfiestVersionColumn">
         <source>Manifest Version</source>
-        <target state="new">Manifest Version</target>
+        <target state="translated">Manifestversion</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadManifestPathColumn">
         <source>Manifest Path</source>
-        <target state="new">Manifest Path</target>
+        <target state="translated">Manifestpfad</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadSourceColumn">
         <source>Installation Source</source>
-        <target state="new">Installation Source</target>
+        <target state="translated">Installationsquelle</target>
         <note />
       </trans-unit>
     </body>

@@ -164,7 +164,7 @@
       </trans-unit>
       <trans-unit id="ManifestPackageUrlNotResolved">
         <source>Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</source>
-        <target state="new">Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</target>
+        <target state="translated">Bildirim paketi çözümlenmedi. {0} için bildirim paketi veya URL yok.</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">
@@ -214,7 +214,7 @@
       </trans-unit>
       <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
         <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</source>
-        <target state="new">Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</target>
+        <target state="translated">Geri alma tanımı geçersiz. {0} geri alma tanımındaki bildirim kimlikleri yüklü bildirim kimlikleriyle ({1}) eşleşmiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionFileDoesNotExist">
@@ -239,7 +239,7 @@
       </trans-unit>
       <trans-unit id="SkipSignCheckOptionDescription">
         <source>Skip signature verification of workload packages and installers.</source>
-        <target state="new">Skip signature verification of workload packages and installers.</target>
+        <target state="translated">İş yükü paketlerinin ve yükleyicilerin imza doğrulamasını atlayın.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingManifestUpdate">

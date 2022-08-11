@@ -77,7 +77,7 @@ Mezi možné příčiny patří toto:
       </trans-unit>
       <trans-unit id="DotNetSdkInfoLabel">
         <source>.NET SDK:</source>
-        <target state="needs-review-translation">SADA .NET SDK:</target>
+        <target state="translated">SADA .NET SDK:</target>
         <note />
       </trans-unit>
       <trans-unit id="DotNetRuntimeInfoLabel">

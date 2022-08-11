@@ -21,8 +21,8 @@
         <source>NuGet package ID or path to folder or NuGet package to install. 
 To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;version&gt;.
 </source>
-        <target state="translated">Id. del paquete NuGet o ruta de acceso a la carpeta o paquete NuGet que se va a instalar. 
-Para instalar el paquete NuGet de una versión determinada, use &lt;package ID&gt;::&lt;version&gt;.
+        <target state="new">NuGet package ID or path to folder or NuGet package to install. 
+To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;version&gt;.
 </target>
         <note />
       </trans-unit>
@@ -79,8 +79,8 @@ Para instalar el paquete NuGet de una versión determinada, use &lt;package ID&g
       <trans-unit id="Command_Uninstall_Argument_Package">
         <source>NuGet package ID (without version) or path to folder to uninstall. 
 If command is specified without the argument, it lists all the template packages installed.</source>
-        <target state="translated">Identificador del paquete NuGet (sin versión) o ruta de acceso a la carpeta que se va a desinstalar. 
-Si el comando se especifica sin el argumento, muestra todos los paquetes de plantillas instalados.</target>
+        <target state="new">NuGet package ID (without version) or path to folder to uninstall. 
+If command is specified without the argument, it lists all the template packages installed.</target>
         <note />
       </trans-unit>
       <trans-unit id="Command_Uninstall_Description">

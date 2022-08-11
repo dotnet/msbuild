@@ -4,22 +4,22 @@
     <body>
       <trans-unit id="ApiCompatRunnerExecutingWorkItems">
         <source>Executing {0} work item(s)...</source>
-        <target state="new">Executing {0} work item(s)...</target>
+        <target state="translated">{0} 件の作業項目を移動しています...</target>
         <note />
       </trans-unit>
       <trans-unit id="ApiCompatibilityFooter">
         <source>Performed api validation on '{0}' ({2}) and '{1}' ({3}).</source>
-        <target state="new">Performed api validation on '{0}' ({2}) and '{1}' ({3}).</target>
+        <target state="translated">'{0}' ({2}) と '{1}' ({3}) に API 検証を実行しました。</target>
         <note />
       </trans-unit>
       <trans-unit id="ApiCompatibilityHeader">
         <source>API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</source>
-        <target state="new">API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</target>
+        <target state="translated">'{0}' ({2}) と '{1}' ({3}) の API 互換性エラーは、以下のとおりです。</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyLoadError">
         <source>Could not load assembly symbols for '{0}'. Skipping the assembly.</source>
-        <target state="new">Could not load assembly symbols for '{0}'. Skipping the assembly.</target>
+        <target state="translated">'{0}' のアセンブリ シンボルを読み込めませんでした。アセンブリをスキップしています。</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyNameDoesNotExist">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="CannotAddVirtualToMember">
         <source>Cannot add virtual keyword to member '{0}'.</source>
-        <target state="new">Cannot add virtual keyword to member '{0}'.</target>
+        <target state="translated">メンバー '{0}' に仮想キーワードを追加できません。</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="CannotRemoveVirtualFromMember">
         <source>Cannot remove virtual keyword from member '{0}'.</source>
-        <target state="new">Cannot remove virtual keyword from member '{0}'.</target>
+        <target state="translated">メンバー '{0}' から仮想キーワードを削除できません。</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveReference">
@@ -94,17 +94,17 @@
       </trans-unit>
       <trans-unit id="ElementShouldNotBeNullAtIndex">
         <source>Element should not be null. Found null at index: {0}.</source>
-        <target state="new">Element should not be null. Found null at index: {0}.</target>
+        <target state="translated">要素を null にすることはできません。インデックスに null が見つかりました: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnumTypesMustMatch">
         <source>Underlying type of enum '{0}' changed from '{1}' to '{2}'.</source>
-        <target state="new">Underlying type of enum '{0}' changed from '{1}' to '{2}'.</target>
+        <target state="translated">基になる列挙型 '{0}' が '{1}' から '{2}' に変更されました。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnumValuesMustMatch">
         <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
-        <target state="new">Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</target>
+        <target state="translated">列挙型 '{0}' のフィールド '{1}' の値が '{2}' から '{3}' に変更されました。</target>
         <note />
       </trans-unit>
       <trans-unit id="FileDoesNotExist">

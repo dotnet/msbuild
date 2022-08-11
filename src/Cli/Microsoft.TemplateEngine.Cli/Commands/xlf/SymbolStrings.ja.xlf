@@ -21,8 +21,8 @@
         <source>NuGet package ID or path to folder or NuGet package to install. 
 To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;version&gt;.
 </source>
-        <target state="translated">インストールする NuGet パッケージ ID、フォルダー、または NuGet パッケージへのパス。
-特定のバージョンの NuGet パッケージをインストールするには、&lt;package ID&gt;::&lt;version&gt; を使用します。
+        <target state="translated">NuGet パッケージ ID、フォルダーのパス、またはインストールする NuGet パッケージ。
+ 特定のバージョンの NuGet パッケージをインストールするには、&lt;package ID&gt;::&lt;version&gt; を使用します。
 </target>
         <note />
       </trans-unit>
@@ -80,7 +80,7 @@ To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;ver
         <source>NuGet package ID (without version) or path to folder to uninstall. 
 If command is specified without the argument, it lists all the template packages installed.</source>
         <target state="translated">NuGet パッケージ ID (バージョンなし) またはアンインストールするフォルダーへのパス。
-引数なしでコマンドを指定した場合、インストールされているすべてのテンプレート パッケージが一覧表示されます。</target>
+ 引数なしでコマンドを指定した場合、インストールされているすべてのテンプレート パッケージが一覧表示されます。</target>
         <note />
       </trans-unit>
       <trans-unit id="Command_Uninstall_Description">

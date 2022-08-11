@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="MissingSearchDirectory">
         <source>Could not find a reference directory in the provided directories for TargetFramework '{0}' when loading '{1}'. For more information see: https://aka.ms/dotnetpackagevalidation</source>
-        <target state="new">Could not find a reference directory in the provided directories for TargetFramework '{0}' when loading '{1}'. For more information see: https://aka.ms/dotnetpackagevalidation</target>
+        <target state="translated">Répertoire de référence introuvable dans les répertoires fournis pour le « {0} » pour le chargement de « {1} ». Pour plus d’informations, consultez : https://aka.ms/dotnetpackagevalidation</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingTargetFramework">

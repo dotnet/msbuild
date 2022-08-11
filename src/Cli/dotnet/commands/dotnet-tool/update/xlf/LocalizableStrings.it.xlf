@@ -54,12 +54,12 @@
       </trans-unit>
       <trans-unit id="UpdateSucceededPreVersionNoChange">
         <source>Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</source>
-        <target state="new">Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</target>
+        <target state="translated">Lo strumento '{0}' è stato reinstallato con l'ultima versione preliminare (versione '{1}').</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateSucceededStableVersionNoChange">
         <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
-        <target state="new">Tool '{0}' was reinstalled with the latest stable version (version '{1}').</target>
+        <target state="translated">Lo strumento '{0}' è stato reinstallato con l'ultima versione stabile (versione '{1}').</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToLowerVersion">

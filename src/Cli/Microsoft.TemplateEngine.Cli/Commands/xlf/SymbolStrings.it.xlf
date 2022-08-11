@@ -80,7 +80,7 @@ Per installare il pacchetto NuGet di una determinata versione, usare &lt;package
         <source>NuGet package ID (without version) or path to folder to uninstall. 
 If command is specified without the argument, it lists all the template packages installed.</source>
         <target state="translated">ID pacchetto NuGet (senza versione) o percorso della cartella da disinstallare. 
-Se il comando è specificato senza l'argomento, elenca tutti i pacchetti di modelli installati.</target>
+Se il comando è specificato senza l'argomento, vengono elencati tutti i pacchetti modello installati.</target>
         <note />
       </trans-unit>
       <trans-unit id="Command_Uninstall_Description">

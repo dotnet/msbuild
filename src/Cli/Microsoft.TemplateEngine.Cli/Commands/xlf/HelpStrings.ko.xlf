@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="Info_TemplateThirdPartyNotice">
         <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
-        <target state="translated">이 템플릿에는 Microsoft 이외의 타사 기술이 포함되어 있습니다. 자세한 내용은{0}를 참조하세요.</target>
+        <target state="translated">이 템플릿에는 Microsoft 이외의 타사 기술이 포함되어 있습니다. 자세한 내용은{0}을(를) 참조하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="RowHeader_AllowMultiValue">
@@ -74,12 +74,12 @@
       </trans-unit>
       <trans-unit id="Text_Disabled">
         <source>Enabled: *false*</source>
-        <target state="new">Enabled: *false*</target>
+        <target state="translated">사용 여부: *false*</target>
         <note>Indication that parameter is not enabled</note>
       </trans-unit>
       <trans-unit id="Text_EnabledCondition">
         <source>Enabled if: {0}</source>
-        <target state="new">Enabled if: {0}</target>
+        <target state="translated">다음 경우에 사용: {0}</target>
         <note>{0} is the condition expression</note>
       </trans-unit>
       <trans-unit id="Text_NoTemplateOptions">
@@ -89,7 +89,7 @@
       </trans-unit>
       <trans-unit id="Text_RequiredCondition">
         <source>Required if: {0}</source>
-        <target state="new">Required if: {0}</target>
+        <target state="translated">다음 경우에 필요: {0}</target>
         <note>{0} is the condition expression</note>
       </trans-unit>
       <trans-unit id="Text_UsageTemplateOptionsPart">

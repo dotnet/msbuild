@@ -77,7 +77,7 @@ Algunas de las posibles causas son :
       </trans-unit>
       <trans-unit id="DotNetSdkInfoLabel">
         <source>.NET SDK:</source>
-        <target state="needs-review-translation">SDK DE .NET:</target>
+        <target state="translated">SDK DE .NET:</target>
         <note />
       </trans-unit>
       <trans-unit id="DotNetRuntimeInfoLabel">

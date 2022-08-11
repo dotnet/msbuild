@@ -22,7 +22,7 @@
 To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;version&gt;.
 </source>
         <target state="translated">ID de package NuGet ou chemin d’accès au dossier ou au package NuGet à installer. 
-Pour installer le package NuGet d’une certaine version, utilisez &lt;ID de package&gt;::&lt;version&gt;.
+Pour installer le package NuGet d’une certaine version, utilisez &lt;package ID&gt;::&lt;version&gt;.
 </target>
         <note />
       </trans-unit>

@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="GlobalJsonResolutionFailedSpecificVersion">
         <source>Unable to locate the .NET SDK version '{0}' as specified by global.json, please check that the specified version is installed.</source>
-        <target state="new">Unable to locate the .NET SDK version '{0}' as specified by global.json, please check that the specified version is installed.</target>
+        <target state="translated">Nepovedlo se najít verzi sady .NET SDK {0} podle souboru global.json. Zkontrolujte prosím, jestli je zadaná verze nainstalovaná.</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildSDKDirectoryNotFound">
@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="UnableToLocateNETCoreSdk">
         <source>Unable to locate the .NET SDK. Check that it is installed, your PATH is configured for the correct architecture, and that the version specified in global.json (if any) matches the installed version.</source>
-        <target state="needs-review-translation">Nepovedlo se najít sadu .NET SDK. Zkontrolujte, jestli je nainstalovaná, jestli je vaše cesta nakonfigurovaná pro správnou architekturu a jestli verze zadaná v souboru global.json (pokud existuje) odpovídá nainstalované verzi.</target>
+        <target state="translated">Nepovedlo se najít sadu .NET SDK. Zkontrolujte, jestli je nainstalovaná, jestli je vaše cesta nakonfigurovaná pro správnou architekturu a jestli verze zadaná v souboru global.json (pokud existuje) odpovídá nainstalované verzi.</target>
         <note />
       </trans-unit>
     </body>

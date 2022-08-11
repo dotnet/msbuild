@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for building the package. The default is 'Debug'. Use the `PackRelease` property to make 'Release' the default for this command.</source>
-        <target state="needs-review-translation">La configuration à utiliser pour construire le package. La valeur par défaut est 'Débogage'. Utilisez la propriété `PackRelease` pour faire de 'Release' la valeur par défaut pour cette commande.</target>
+        <target state="translated">La configuration à utiliser pour construire le package. La valeur par défaut est 'Débogage'. Utilisez la propriété `PackRelease` pour faire de 'Release' la valeur par défaut pour cette commande.</target>
         <note />
       </trans-unit>
     </body>

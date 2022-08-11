@@ -3,7 +3,7 @@
   "name": "Application console",
   "description": "Projet de création d'une application en ligne de commande pouvant s'exécuter sur .NET sur Windows, Linux et macOS",
   "symbols/TargetFrameworkOverride/description": "Remplace l’infrastructure cible",
-  "symbols/TargetFrameworkOverride/displayName": "Remplacement de l’infrastructure cible",
+  "symbols/TargetFrameworkOverride/displayName": "Remplacement du frame cible",
   "symbols/Framework/description": "Framework cible du projet.",
   "symbols/Framework/choices/net7.0/description": "Cible net7.0",
   "symbols/Framework/choices/net7.0/displayName": ".NET 7.0",

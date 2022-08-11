@@ -12,7 +12,7 @@
   "symbols/Framework/choices/netstandard2.0/description": "Docelowy netstandard2.0",
   "symbols/Framework/choices/netstandard2.0/displayName": ".NET Standard 2.0",
   "symbols/Framework/displayName": "Platforma",
-  "symbols/langVersion/description": "Ustawia właściwość LangVersion w utworzonym pliku projektu",
+  "symbols/langVersion/description": "Ustawia właściwość LangVersion w utworzonym pliku projektu",
   "symbols/langVersion/displayName": "Wersja języka",
   "symbols/skipRestore/description": "Jeśli ta opcja jest określona, pomija automatyczne przywracanie projektu podczas tworzenia.",
   "symbols/skipRestore/displayName": "Pomiń przywracanie",

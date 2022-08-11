@@ -80,7 +80,7 @@ Belirli bir sürümün NuGet paketini yüklemek için &lt;package ID&gt;::&lt;ve
         <source>NuGet package ID (without version) or path to folder to uninstall. 
 If command is specified without the argument, it lists all the template packages installed.</source>
         <target state="translated">NuGet paket kimliği (sürüm olmadan) veya kaldırılacak klasörün yolu. 
-Eğer komut bağımsız değişken olmadan belirtilirse, yüklü tüm şablon paketlerini listeler.</target>
+Eğer komut bağımsız değişken olmadan belirtilirse yüklü tüm şablon paketlerini listeler.</target>
         <note />
       </trans-unit>
       <trans-unit id="Command_Uninstall_Description">
