@@ -148,7 +148,7 @@ namespace Microsoft.DotNet.Cli
                 if (!ProjectHasUserCustomizedConfiguration(project) && !string.IsNullOrEmpty(configurationToUse))
                     return new List<string> { $"-property:configuration={configurationToUse}" };
             }
-            return Array.Empty<string>();
+            return Enumerable.Empty<string>();
         }
     }
 }
