@@ -47,14 +47,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             PackageSourceLocation packageSourceLocation = null,
             Func<string, string> getEnvironmentVariable = null,
             bool displayManifestUpdates = true,
-            SdkFeatureBand? sdkVersion = null)
+            SdkFeatureBand? sdkFeatureBand = null)
         {
             _reporter = reporter;
             _workloadResolver = workloadResolver;
             _userProfileDir = userProfileDir;
             _tempDirPath = tempDirPath;
             _nugetPackageDownloader = nugetPackageDownloader;
-            _sdkFeatureBand = sdkVersion ?? new SdkFeatureBand(_workloadResolver.GetSdkFeatureBand());
+            _sdkFeatureBand = sdkFeatureBand ?? new SdkFeatureBand(_workloadResolver.GetSdkFeatureBand());
             _packageSourceLocation = packageSourceLocation;
             _getEnvironmentVariable = getEnvironmentVariable ?? Environment.GetEnvironmentVariable;
             _workloadRecordRepo = workloadRecordRepo;

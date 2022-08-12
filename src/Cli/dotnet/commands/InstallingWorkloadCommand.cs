@@ -131,7 +131,7 @@ namespace Microsoft.DotNet.Workloads.Workload
                     }
 
                     //  Use updated, extracted manifests to resolve packs
-                    var overlayProvider = new TempDirectoryWorkloadManifestProvider(extractedManifestsPath, _sdkVersion.ToString());
+                    var overlayProvider = new TempDirectoryWorkloadManifestProvider(extractedManifestsPath, _sdkFeatureBand.ToString());
 
                     var newResolver = _workloadResolver.CreateOverlayResolver(overlayProvider);
                     _workloadInstaller.ReplaceWorkloadResolver(newResolver);
