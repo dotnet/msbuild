@@ -105,9 +105,15 @@ namespace Microsoft.DotNet.ShellShim
                     {
                         foreach (var file in GetShimFiles(commandName).Where(f => _fileSystem.File.Exists(f.Value)))
                         {
-                            var tempPath = FileUtilities.CreateTempPath();
-                            FileAccessRetrier.RetryOnMoveAccessFailure(() => _fileSystem.File.Move(file.Value, tempPath));
-                            files[file.Value] = tempPath;
+                            using (var tempPath = File.OpenWrite(FileUtilities.CreateTempFile()))
+                            {
+                                Stream oldFile = _fileSystem.File.OpenRead(file.Value);
+                                oldFile.Seek(0, SeekOrigin.Begin);
+                                oldFile.CopyTo(tempPath);
+                                oldFile.Dispose();
+                                File.Delete(file.Value);
+                                files[file.Value] = tempPath.Name;
+                            }
                         }
                     }
                     catch (Exception ex) when (ex is UnauthorizedAccessException || ex is IOException)
