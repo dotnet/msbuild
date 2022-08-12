@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
+using Microsoft.DotNet.Cli;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -35,11 +37,19 @@ namespace Microsoft.NET.Build.Tasks
             return s_assemblyExtensions.Contains(extension) ? GetAssemblyVersion(sourcePath) : null;
         }
 
+        [DllImport("libc", SetLastError = true)]
+        public static extern int mkdir(string pathname, UnixFileMode mode);
         public static string CreateTempPath()
         {
-            // TODO: Make this call the API once it is complete.
             string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            Directory.CreateDirectory(path);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                mkdir(path, StatInterop.Permissions.S_IRWXU)
+            }
+            else
+            {
+                Directory.CreateDirectory(path, StatInterop.Permissions.S_IRWXU);
+            }
             return path;
         }
 
