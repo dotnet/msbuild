@@ -43,11 +43,24 @@ namespace Microsoft.NET.Build.Tasks
             return path;
         }
 
-        public static string CreateTempFile(string tempDirectory, string extension)
+        public static string CreateTempFile(string tempDirectory, string extension="")
         {
+            if(extension == "")
+            {
+                extension = Path.GetExtension(Path.GetRandomFileName());
+            }
             string fileName = Path.ChangeExtension(Path.Combine(tempDirectory, Path.GetTempFileName()), extension);
             File.Create(fileName.ToString());
             return fileName;
+        }
+
+        /// <summary>
+        ///  
+        /// </summary>
+        /// <returns>The full path of a newly created temp file with OK permissions.</returns>
+        public static string CreateTempFile()
+        {
+            return Path.GetTempFileName();
         }
 
     }
