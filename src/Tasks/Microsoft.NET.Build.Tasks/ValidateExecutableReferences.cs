@@ -55,16 +55,16 @@ namespace Microsoft.NET.Build.Tasks
 
                 bool selfContainedIsGlobalProperty = BuildEngine6.GetGlobalProperties().ContainsKey("SelfContained");
 
-                bool projectAcceptsRuntimeIdentifier = false;
-                if (projectAdditionalProperties.TryGetValue("AcceptsRuntimeIdentifier", out string acceptsRID) &&
-                    bool.TryParse(acceptsRID, out bool acceptsRIDParseResult))
+                bool projectIsRidAgnostic = true;
+                if (projectAdditionalProperties.TryGetValue("IsRidAgnostic", out string isRidAgnostic) &&
+                    bool.TryParse(isRidAgnostic, out bool isRidAgnosticParseResult))
                 {
-                    projectAcceptsRuntimeIdentifier = acceptsRIDParseResult;
+                    projectIsRidAgnostic = isRidAgnosticParseResult;
                 }
 
-                if (selfContainedIsGlobalProperty && projectAcceptsRuntimeIdentifier)
+                if (selfContainedIsGlobalProperty && !projectIsRidAgnostic)
                 {
-                    //  If AcceptsRuntimeIdentifier is true for the project, and SelfContained was set as a global property,
+                    //  If a project is NOT RID agnostic, and SelfContained was set as a global property,
                     //  then the SelfContained value will flow across the project reference when we go to build it, despite the
                     //  fact that we ignored it when doing the GetTargetFrameworks negotiation.
                     referencedProjectIsSelfContained = SelfContained;

@@ -21,7 +21,7 @@ If `SelfContained` was specified on the command line, it would always flow to re
 
 Both `SelfContained` and `RuntimeIdentifier` will flow a referenced project if any of the following are true for the referenced project:
 
-- The `AcceptsRuntimeIdentifier` property is set to `true`
+- The `IsRidAgnostic` property is set to `false`
 - The `OutputType` is `Exe` or `WinExe`
 - Either the `RuntimeIdentifer` or `RuntimeIdentifiers` property is non-empty
 
@@ -44,10 +44,10 @@ true without having a `RuntimeIdentifier` set.
 ## Recommended action
 
 If you were relying on the `SelfContained` property to apply to all projects when it was specified on the command line, then you can get similar behavior
-by setting `AcceptsRuntimeIdentifier` to true (either in a file [such as Directory.Build.props](https://docs.microsoft.com/visualstudio/msbuild/customize-your-build#directorybuildprops-and-directorybuildtargets)),
-or as a command-line parameter such as `-p:AcceptsRuntimeIdentifier=true`.
+by setting `IsRidAgnostic` to false either in a file ([such as Directory.Build.props](https://docs.microsoft.com/visualstudio/msbuild/customize-your-build#directorybuildprops-and-directorybuildtargets)),
+or as a command-line parameter such as `-p:IsRidAgnostic=false`.
 
 ## Open Questions
 
-TODO: How does this apply to solutions?  Could a solution build set AcceptsRuntimeIdentifier for all projects, and would that fix other issues we have when specifying the RuntimeIdentifier for a solution build?
+TODO: How does this apply to solutions?  Could a solution build set IsRidAgnostic to false for all projects, and would that fix other issues we have when specifying the RuntimeIdentifier for a solution build?
 TODO: What happens if there's an Exe1 -> Library -> Exe2 reference, especially if there's also a direct reference from Exe1 -> Exe2

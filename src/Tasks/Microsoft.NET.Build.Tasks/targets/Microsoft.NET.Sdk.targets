@@ -79,12 +79,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PredefinedCulturesOnly Condition="'$(PredefinedCulturesOnly)' == '' and '$(InvariantGlobalization)' == 'true'">true</PredefinedCulturesOnly>
   </PropertyGroup>
 
-  <!-- Set the AcceptsRuntimeIdentifier property if this project should accept global RuntimeIdentifier and SelfContained
+  <!-- Set the IsRidAgnostic property if this project should NOT accept global RuntimeIdentifier and SelfContained
        property values from referencing projects. -->
-  <PropertyGroup Condition="'$(AcceptsRuntimeIdentifier)' == '' And '$(IsTestProject)' != 'true'">
-    <AcceptsRuntimeIdentifier Condition="'$(_IsExecutable)' == 'true' Or
-                                         '$(RuntimeIdentifier)' != '' Or
-                                         '$(RuntimeIdentifiers)' != ''">true</AcceptsRuntimeIdentifier>
+  <PropertyGroup Condition="'$(IsRidAgnostic)' == ''">
+    <IsRidAgnostic Condition="('$(_IsExecutable)' == 'true' And '$(IsTestProject)' != 'true') Or
+                              '$(RuntimeIdentifier)' != '' Or
+                              '$(RuntimeIdentifiers)' != ''">false</IsRidAgnostic>
+    <IsRidAgnostic Condition="'$(IsRidAgnostic)' == ''">true</IsRidAgnostic>
   </PropertyGroup>
 
   <!-- Opt into .NET Core resource-serialization strategy by default when targeting frameworks
@@ -1077,6 +1078,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <ItemGroup>
     <AdditionalTargetFrameworkInfoProperty Include="SelfContained"/>
     <AdditionalTargetFrameworkInfoProperty Include="_IsExecutable"/>
+    <AdditionalTargetFrameworkInfoProperty Include="IsRidAgnostic"/>
     <AdditionalTargetFrameworkInfoProperty Include="ShouldBeValidatedAsExecutableReference"/>
   </ItemGroup>
 
