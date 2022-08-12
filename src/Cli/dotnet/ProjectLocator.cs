@@ -33,9 +33,9 @@ namespace Microsoft.DotNet.Cli
             {
                 return new ProjectInstance(projectPath);
             }
-            catch (Exception) // Catch failed file access, or invalid project files that cause errors when read into memory,
+            catch (Exception e) // Catch failed file access, or invalid project files that cause errors when read into memory,
             {
-                Reporter.Output.WriteLine(CommonLocalizableStrings.ProjectDeductionFailure.Yellow() + " " + projectPath.Yellow());
+                Reporter.Output.WriteLine(e.Message.Yellow());
             }
             return null;
         }
