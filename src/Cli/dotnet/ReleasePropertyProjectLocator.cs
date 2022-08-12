@@ -138,23 +138,17 @@ namespace Microsoft.DotNet.Cli
             IEnumerable<string> slnProjectAndCommandArgs = slnOrProjectArgs.Concat(calledArguments);
             project = GetTargetedProject(slnProjectAndCommandArgs, defaultedConfigurationProperty);
 
-            if (project != null)
+            if (project != null && !parseResult.HasOption(configOption))
             {
                 string configurationToUse = "";
                 string releasePropertyFlag = project.GetPropertyValue(defaultedConfigurationProperty);
                 if (!string.IsNullOrEmpty(releasePropertyFlag))
                     configurationToUse = releasePropertyFlag.Equals("true", StringComparison.OrdinalIgnoreCase) ? "Release" : "";
 
-                if (!ConfigurationAlreadySpecified(parseResult, project, configOption) && !string.IsNullOrEmpty(configurationToUse))
+                if (!ProjectHasUserCustomizedConfiguration(project) && !string.IsNullOrEmpty(configurationToUse))
                     return new List<string> { $"-property:configuration={configurationToUse}" };
             }
             return Array.Empty<string>();
-        }
-
-        /// <returns>True if Configuration is a global property or was provided by the CLI: IE, the user customized configuration.</returns>
-        private static bool ConfigurationAlreadySpecified(ParseResult parseResult, ProjectInstance project, Option<string> configurationOption)
-        {
-            return parseResult.HasOption(configurationOption) || ProjectHasUserCustomizedConfiguration(project);
         }
     }
 }
