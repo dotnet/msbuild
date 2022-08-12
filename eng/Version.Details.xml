@@ -168,23 +168,23 @@
     </Dependency>
     <Dependency Name="Microsoft.WindowsDesktop.App.Runtime.win-x64" Version="6.0.9">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-windowsdesktop</Uri>
-      <Sha>ce1c93ec33c9b10f587f8461efa2966877636d4f</Sha>
+      <Sha>1a2d6d3fa1af68bd4cca49ff41811c0075711e17</Sha>
     </Dependency>
-    <Dependency Name="VS.Redist.Common.WindowsDesktop.SharedFramework.x64.6.0" Version="6.0.9-servicing.22412.12">
+    <Dependency Name="VS.Redist.Common.WindowsDesktop.SharedFramework.x64.6.0" Version="6.0.9-servicing.22412.14">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-windowsdesktop</Uri>
-      <Sha>ce1c93ec33c9b10f587f8461efa2966877636d4f</Sha>
+      <Sha>1a2d6d3fa1af68bd4cca49ff41811c0075711e17</Sha>
     </Dependency>
-    <Dependency Name="VS.Redist.Common.WindowsDesktop.TargetingPack.x64.6.0" Version="6.0.9-servicing.22412.12">
+    <Dependency Name="VS.Redist.Common.WindowsDesktop.TargetingPack.x64.6.0" Version="6.0.9-servicing.22412.14">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-windowsdesktop</Uri>
-      <Sha>ce1c93ec33c9b10f587f8461efa2966877636d4f</Sha>
+      <Sha>1a2d6d3fa1af68bd4cca49ff41811c0075711e17</Sha>
     </Dependency>
     <Dependency Name="Microsoft.WindowsDesktop.App.Ref" Version="6.0.9">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-windowsdesktop</Uri>
-      <Sha>ce1c93ec33c9b10f587f8461efa2966877636d4f</Sha>
+      <Sha>1a2d6d3fa1af68bd4cca49ff41811c0075711e17</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="6.0.9-servicing.22412.7" CoherentParentDependency="Microsoft.WindowsDesktop.App.Runtime.win-x64">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="6.0.9-servicing.22412.11" CoherentParentDependency="Microsoft.WindowsDesktop.App.Runtime.win-x64">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
-      <Sha>dc66453c5bc9a75f2072eba74bfc04db44356767</Sha>
+      <Sha>a0940a4217049e37408907ce806b02c46d6fbaea</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.App.Ref" Version="6.0.8">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-aspnetcore</Uri>
