@@ -120,11 +120,6 @@ export PATH="$PATH:{0}"
         <target state="translated">Projekt zawiera już odwołanie do elementu „{0}”.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectDeductionFailure">
-        <source>A problem with the project or solution prevented checking properties for Release.</source>
-        <target state="new">A problem with the project or solution prevented checking properties for Release.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ProjectReferenceCouldNotBeFound">
         <source>Project reference `{0}` could not be found.</source>
         <target state="translated">Nie można odnaleźć odwołania do projektu „{0}”.</target>

@@ -5,9 +5,4 @@
     <TargetFramework>$(CurrentTargetFramework)</TargetFramework>
     <PublishRelease>true</PublishRelease>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Lib\Lib.csproj" />
-  </ItemGroup>
-
 </Project>

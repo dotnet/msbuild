@@ -120,11 +120,6 @@ export PATH="$PATH:{0}"
         <target state="translated">프로젝트에 이미 '{0}'에 대한 참조가 있습니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectDeductionFailure">
-        <source>A problem with the project or solution prevented checking properties for Release.</source>
-        <target state="new">A problem with the project or solution prevented checking properties for Release.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ProjectReferenceCouldNotBeFound">
         <source>Project reference `{0}` could not be found.</source>
         <target state="translated">프로젝트 참조 '{0}'을(를) 찾을 수 없습니다.</target>
