@@ -1867,7 +1867,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
            unless the project is expecting those properties to flow.
            We include SelfContained together with RuntimeIdentifier, because otherwise a referenced project could try to build with
            SelfContained set to true but no RuntimeIdentifier set, which causes an error (for Exe projects). -->
-      <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.AcceptsRuntimeIdentifier)' != 'true'">
+      <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.IsRidAgnostic)' != 'false'">
         <UndefineProperties>%(AnnotatedProjects.UndefineProperties);RuntimeIdentifier;SelfContained</UndefineProperties>
       </AnnotatedProjects>
 
@@ -1901,7 +1901,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetPlatformMonikers>@(_TargetFrameworkInfo->'%(TargetPlatformMonikers)')</TargetPlatformMonikers>
         <AdditionalPropertiesFromProject>$(_AdditionalPropertiesFromProject)</AdditionalPropertiesFromProject>
         <HasSingleTargetFramework>true</HasSingleTargetFramework>
-        <AcceptsRuntimeIdentifier>@(_TargetFrameworkInfo->'%(AcceptsRuntimeIdentifier)')</AcceptsRuntimeIdentifier>
+        <IsRidAgnostic>@(_TargetFrameworkInfo->'%(IsRidAgnostic)')</IsRidAgnostic>
         <!-- Extract necessary information for SetPlatform negotiation -->
         <IsVcxOrNativeProj Condition="'$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj'">true</IsVcxOrNativeProj>
         <Platform Condition="$([MSBuild]::AreFeaturesEnabled('17.4'))">$(Platform)</Platform>
@@ -1943,15 +1943,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetPlatformMonikers Condition="'$(TargetPlatformMoniker)' == ''">None</TargetPlatformMonikers>
         <AdditionalPropertiesFromProject>$(_AdditionalTargetFrameworkInfoProperties)</AdditionalPropertiesFromProject>
 
-        <!-- Determine whether a global RuntimeIdentifier property should flow to this project across project references.
-             We will let the property flow if any of the following are true:
-             - The AcceptsRuntimeIdentifier property is set to true (or really, any non-empty value except "false")
-             - The RuntimeIdentifier is set
-             - The RuntimeIdentifiers property is set
-             Otherwise, we will include RuntimeIdentifier (and SelfContained) in the list of global properties to remove across project references-->
-        <AcceptsRuntimeIdentifier>$(AcceptsRuntimeIdentifier)</AcceptsRuntimeIdentifier>
-        <AcceptsRuntimeIdentifier Condition=" '$(AcceptsRuntimeIdentifier)' == ''">true</AcceptsRuntimeIdentifier>
-        <AcceptsRuntimeIdentifier Condition=" '$(AcceptsRuntimeIdentifier)' == '' and '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">false</AcceptsRuntimeIdentifier>
+        <!-- Determine whether a project is "RID agnostic" for each TargetFramework.  "RID agnostic" means that global properties such as SelfContained and RuntimeIdentifier should
+             not flow across project references.
+
+             Generally this value will come from the IsRidAgnostic property set by the .NET SDK.  If that's not set, then the fallback logic here will be that the project
+             is RID agnostic if it doesn't have RuntimeIdentifier or RuntimeIdentifiers properties set. -->
+        <IsRidAgnostic>$(IsRidAgnostic)</IsRidAgnostic>
+        <IsRidAgnostic Condition=" '$(IsRidAgnostic)' == '' and '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">false</IsRidAgnostic>
+        <IsRidAgnostic Condition=" '$(IsRidAgnostic)' == ''">true</IsRidAgnostic>
 
       </_TargetFrameworkInfo>
     </ItemGroup>
