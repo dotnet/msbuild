@@ -39,6 +39,7 @@ namespace Microsoft.DotNet.Cli
                     }
                     catch (GracefulException)
                     {
+                        // Fall back to looking for a solution if multiple project files are found.
                         string potentialSln = Directory.GetFiles(arg, "*.sln", SearchOption.TopDirectoryOnly).FirstOrDefault();
 
                         if (!string.IsNullOrEmpty(potentialSln))
@@ -69,6 +70,8 @@ namespace Microsoft.DotNet.Cli
 
             List<ProjectInstance> configuredProjects = new List<ProjectInstance>();
             HashSet<string> configValues = new HashSet<string>();
+            object projectDataLock = new object();
+
             bool shouldReturnNull = false;
 
             Parallel.ForEach(sln.Projects.AsEnumerable(), (project, state) =>
@@ -76,6 +79,7 @@ namespace Microsoft.DotNet.Cli
                 const string topLevelProjectOutputType = "Exe"; // Note that even on Unix when we don't produce exe this is still an exe, same for ASP
                 const string solutionFolderGuid = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}";
                 const string sharedProjectGuid = "{D954291E-2A0B-460D-934E-DC6B0785DB48}";
+
 
                 if (project.TypeGuid == solutionFolderGuid || project.TypeGuid == sharedProjectGuid || !IsValidProjectFilePath(project.FilePath))
                     return;
@@ -96,13 +100,16 @@ namespace Microsoft.DotNet.Cli
                     string configuration = projectData.GetPropertyValue(slnProjectConfigPropertytoCheck);
                     if (!string.IsNullOrEmpty(configuration))
                     {
-                        configuredProjects.Add(projectData); // we don't care about race conditions here
-                        configValues.Add(configuration);
+                        lock (projectDataLock)
+                        {
+                            configuredProjects.Add(projectData); // we don't care about race conditions here
+                            configValues.Add(configuration);
+                        }
                     }
                 }
             });
 
-            if (configuredProjects.Any() && configValues.Count > 1)
+            if (configuredProjects.Any() && configValues.Count > 1 && !shouldReturnNull)
             {
                 throw new GracefulException(CommonLocalizableStrings.TopLevelPublishConfigurationMismatchError);
             }
@@ -133,13 +140,13 @@ namespace Microsoft.DotNet.Cli
 
             if (project != null)
             {
-                string releaseMode = "";
+                string configurationToUse = "";
                 string releasePropertyFlag = project.GetPropertyValue(defaultedConfigurationProperty);
                 if (!string.IsNullOrEmpty(releasePropertyFlag))
-                    releaseMode = releasePropertyFlag == "true" ? "Release" : "Debug";
+                    configurationToUse = releasePropertyFlag.Equals("true", StringComparison.OrdinalIgnoreCase) ? "Release" : "";
 
-                if (!ConfigurationAlreadySpecified(parseResult, project, configOption) && !string.IsNullOrEmpty(releaseMode))
-                    return new List<string> { $"-property:configuration={releaseMode}" };
+                if (!ConfigurationAlreadySpecified(parseResult, project, configOption) && !string.IsNullOrEmpty(configurationToUse))
+                    return new List<string> { $"-property:configuration={configurationToUse}" };
             }
             return Array.Empty<string>();
         }
