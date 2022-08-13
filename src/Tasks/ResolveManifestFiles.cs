@@ -396,7 +396,8 @@ namespace Microsoft.Build.Tasks
                         AssemblyIdentity identity = AssemblyIdentity.FromManagedAssembly(item.ItemSpec);
                         if (identity != null && !String.Equals(identity.Culture, "neutral", StringComparison.Ordinal))
                         {
-                            CultureInfo satelliteCulture = GetItemCulture(item);
+                            CultureInfo satelliteCulture = new CultureInfo(identity.Culture);
+                            item.SetMetadata("Culture", identity.Culture);
                             if (PublishFlags.IsSatelliteIncludedByDefault(satelliteCulture, _targetCulture, _includeAllSatellites))
                             {
                                 _satelliteAssembliesPassedAsReferences.Add(item);
