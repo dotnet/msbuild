@@ -21,6 +21,7 @@ using System.IO;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using Path = System.IO.Path;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
@@ -218,6 +219,7 @@ namespace Microsoft.Build.Engine.UnitTests
         public void CanShutdownServerProcess(bool byBuildManager)
         {
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
 
             // Start a server node and find its PID.
@@ -240,10 +242,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 serverIsDown.ShouldBeTrue();
             }
 
-            if (serverProcess.WaitForExit(3000))
-            {
-                serverProcess.WaitForExit();
-            }
+            serverProcess.WaitForExit(10_000);
 
             serverProcess.HasExited.ShouldBeTrue();
         }
