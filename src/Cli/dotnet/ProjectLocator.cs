@@ -4,16 +4,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.CommandLine;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Build.Execution;
-using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools;
-using Microsoft.DotNet.Tools.Common;
-using Microsoft.VisualBasic.CompilerServices;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -42,7 +35,7 @@ namespace Microsoft.DotNet.Cli
 
         protected static bool IsValidProjectFilePath(string path)
         {
-            return File.Exists(path) && LikeOperator.LikeString(path, "*.*proj", VisualBasic.CompareMethod.Text);
+            return File.Exists(path) && Path.GetExtension(path).EndsWith("proj");
         }
 
         protected static bool ProjectHasUserCustomizedConfiguration(ProjectInstance project)
