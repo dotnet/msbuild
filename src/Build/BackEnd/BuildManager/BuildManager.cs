@@ -1092,14 +1092,10 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public void ShutdownAllNodes()
         {
-            if (_nodeManager == null)
-            {
-                _nodeManager = (INodeManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager);
-            }
-
-            _nodeManager.ShutdownAllNodes();
-
             MSBuildClient.ShutdownServer(CancellationToken.None);
+
+            _nodeManager ??= (INodeManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager);
+            _nodeManager.ShutdownAllNodes();
         }
 
         /// <summary>
