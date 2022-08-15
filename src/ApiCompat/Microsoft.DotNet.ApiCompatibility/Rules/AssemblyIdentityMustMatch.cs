@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     {
         private readonly RuleSettings _settings;
 
-        public AssemblyIdentityMustMatch(RuleSettings settings, RuleRunnerContext context)
+        public AssemblyIdentityMustMatch(RuleSettings settings, IRuleRegistrationContext context)
         {
             _settings = settings;
             context.RegisterOnAssemblySymbolAction(RunOnAssemblySymbol);

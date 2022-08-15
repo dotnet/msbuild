@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
     public class CannotAddMemberToInterface : IRule
     {
-        public CannotAddMemberToInterface(RuleSettings settings, RuleRunnerContext context)
+        public CannotAddMemberToInterface(RuleSettings settings, IRuleRegistrationContext context)
         {
             // StrictMode scenario should be handled by MembersMustExist rule.
             if (!settings.StrictMode)

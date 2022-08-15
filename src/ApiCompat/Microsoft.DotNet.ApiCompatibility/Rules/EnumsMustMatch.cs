@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     {
         private readonly RuleSettings _settings;
 
-        public EnumsMustMatch(RuleSettings settings, RuleRunnerContext context)
+        public EnumsMustMatch(RuleSettings settings, IRuleRegistrationContext context)
         {
             _settings = settings;
             context.RegisterOnTypeSymbolAction(RunOnTypeSymbol);

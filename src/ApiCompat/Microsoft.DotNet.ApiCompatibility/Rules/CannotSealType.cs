@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     {
         private readonly RuleSettings _settings;
 
-        public CannotSealType(RuleSettings settings, RuleRunnerContext context)
+        public CannotSealType(RuleSettings settings, IRuleRegistrationContext context)
         {
             _settings = settings;
             context.RegisterOnTypeSymbolAction(RunOnTypeSymbol);

@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.ApiCompatibility.Rules;
 
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
@@ -18,8 +19,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// </summary>
         /// <param name="settings">The settings used to diff the elements in the mapper.</param>
         /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
-        public AssemblySetMapper(ComparingSettings settings, int rightSetSize = 1)
-            : base(settings, rightSetSize) { }
+        public AssemblySetMapper(IRuleRunner ruleRunner,
+            MapperSettings settings = default,
+            int rightSetSize = 1)
+            : base(ruleRunner, settings, rightSetSize) { }
 
         /// <summary>
         /// Gets the assembly mappers built from the provided lists of <see cref="IAssemblySymbol"/>.
@@ -48,7 +51,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                     {
                         if (!_assemblies.TryGetValue(assemblyContainer.Element, out AssemblyMapper? mapper))
                         {
-                            mapper = new AssemblyMapper(Settings, Right.Length, this);
+                            mapper = new AssemblyMapper(RuleRunner, Settings, Right.Length, this);
                             _assemblies.Add(assemblyContainer.Element, mapper);
                         }
 

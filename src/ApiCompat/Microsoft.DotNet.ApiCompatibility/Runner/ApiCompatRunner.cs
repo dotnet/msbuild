@@ -1,12 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Logging;
+using Microsoft.DotNet.ApiCompatibility.Rules;
 
 namespace Microsoft.DotNet.ApiCompatibility.Runner
 {
@@ -91,9 +91,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
                     continue;
 
                 // Create and configure the work item specific api comparer
-                IApiComparer apiComparer = _apiComparerFactory.Create();
-                apiComparer.StrictMode = workItem.Options.EnableStrictMode;
-                apiComparer.WarnOnMissingReferences = runWithReferences;
+                IApiComparer apiComparer = _apiComparerFactory.Create(new ApiComparerSettings(
+                    strictMode: workItem.Options.EnableStrictMode,
+                    withReferences: runWithReferences));
 
                 // TODO: Support passing in multiple lefts in ApiComparer: https://github.com/dotnet/sdk/issues/17364.
 

@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     {
         private readonly RuleSettings _settings;
 
-        public CannotAddOrRemoveVirtualKeyword(RuleSettings settings, RuleRunnerContext context)
+        public CannotAddOrRemoveVirtualKeyword(RuleSettings settings, IRuleRegistrationContext context)
         {
             _settings = settings;
             context.RegisterOnMemberSymbolAction(RunOnMemberSymbol);

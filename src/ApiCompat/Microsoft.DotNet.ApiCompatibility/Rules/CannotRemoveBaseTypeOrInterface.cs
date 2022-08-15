@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     {
         private readonly RuleSettings _settings;
 
-        public CannotRemoveBaseTypeOrInterface(RuleSettings settings, RuleRunnerContext context)
+        public CannotRemoveBaseTypeOrInterface(RuleSettings settings, IRuleRegistrationContext context)
         {
             _settings = settings;
             context.RegisterOnTypeSymbolAction(RunOnTypeSymbol);
@@ -68,10 +68,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             }
             
             differences.Add(new CompatDifference(
-                                    DiagnosticIds.CannotRemoveBaseType,
-                                    string.Format(Resources.CannotRemoveBaseType, left.ToDisplayString(), leftBaseType.ToDisplayString(), rightName, leftName),
-                                    DifferenceType.Changed,
-                                    right));
+                DiagnosticIds.CannotRemoveBaseType,
+                string.Format(Resources.CannotRemoveBaseType, left.ToDisplayString(), leftBaseType.ToDisplayString(), rightName, leftName),
+                DifferenceType.Changed,
+                right));
         }
 
         private void ValidateInterfaceNotRemoved(ITypeSymbol left, ITypeSymbol right, string leftName, string rightName, IList<CompatDifference> differences)
@@ -95,10 +95,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 if (!rightInterfaces.Contains(leftInterface))
                 {
                     differences.Add(new CompatDifference(
-                                            DiagnosticIds.CannotRemoveBaseInterface,
-                                            string.Format(Resources.CannotRemoveBaseInterface, left.ToDisplayString(), leftInterface.ToDisplayString(), rightName, leftName),
-                                            DifferenceType.Changed,
-                                            right));
+                        DiagnosticIds.CannotRemoveBaseInterface,
+                        string.Format(Resources.CannotRemoveBaseInterface, left.ToDisplayString(), leftInterface.ToDisplayString(), rightName, leftName),
+                        DifferenceType.Changed,
+                        right));
                     return;
                 }
             }
@@ -115,10 +115,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         private static void AddAssemblyLoadError(IList<CompatDifference> differences, ITypeSymbol type)
         {
             differences.Add(new CompatDifference(
-                                    DiagnosticIds.AssemblyReferenceNotFound,
-                                    string.Format(Resources.MatchingAssemblyNotFound, $"{type.ContainingAssembly.Name}.dll"),
-                                    DifferenceType.Changed,
-                                    string.Empty));
+                DiagnosticIds.AssemblyReferenceNotFound,
+                string.Format(Resources.MatchingAssemblyNotFound, $"{type.ContainingAssembly.Name}.dll"),
+                DifferenceType.Changed,
+                string.Empty));
         }
     }
 }

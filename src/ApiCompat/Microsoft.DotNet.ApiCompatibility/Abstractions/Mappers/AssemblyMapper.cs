@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.ApiCompatibility.Rules;
 
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
@@ -32,8 +33,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// <param name="settings">The settings used to diff the elements in the mapper.</param>
         /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
         /// <param name="containingAssemblySet">The containing assembly set. Null, if the assembly isn't part of a set.</param>
-        public AssemblyMapper(ComparingSettings settings, int rightSetSize = 1, AssemblySetMapper? containingAssemblySet = null)
-            : base(settings, rightSetSize)
+        public AssemblyMapper(IRuleRunner ruleRunner,
+            MapperSettings settings = default,
+            int rightSetSize = 1,
+            AssemblySetMapper? containingAssemblySet = null)
+            : base(ruleRunner, settings, rightSetSize)
         {
             ContainingAssemblySet = containingAssemblySet;
             _assemblyLoadErrors = new List<CompatDifference>[rightSetSize];
@@ -105,7 +109,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                     {
                         if (!_namespaces.TryGetValue(ns, out NamespaceMapper? mapper))
                         {
-                            mapper = new NamespaceMapper(Settings, this, Right.Length, typeforwardsOnly: typeforwardsOnly);
+                            mapper = new NamespaceMapper(RuleRunner, this, Settings, Right.Length, typeforwardsOnly: typeforwardsOnly);
                             _namespaces.Add(ns, mapper);
                         }
                         else if (checkIfExists && mapper.GetElement(side, setIndex) != null)

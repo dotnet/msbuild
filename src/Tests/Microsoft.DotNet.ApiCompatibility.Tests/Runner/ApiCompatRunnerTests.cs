@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner.Tests
                 });
             Mock<IApiComparerFactory> apiComparerFactoryMock = new();
             apiComparerFactoryMock
-                .Setup(x => x.Create())
+                .Setup(x => x.Create(null))
                 .Returns(apiComparerMock.Object);
 
             // Mock the suppression engine

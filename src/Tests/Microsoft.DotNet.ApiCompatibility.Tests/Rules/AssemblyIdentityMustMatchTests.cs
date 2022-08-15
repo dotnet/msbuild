@@ -14,6 +14,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
 {
     public class AssemblyIdentityMustMatchTests
     {
+        private static readonly TestRuleFactory s_ruleFactory = new((settings, context) => new AssemblyIdentityMustMatch(settings, context));
+
         private static readonly byte[] _publicKey = new byte[]
         { 
             0, 36, 0, 0, 4, 128, 0, 0, 148, 0, 0, 0, 6, 2, 0, 0, 0, 36, 0, 0,
@@ -33,11 +35,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
         {
             IAssemblySymbol left = CSharpCompilation.Create("AssemblyA").Assembly;
             IAssemblySymbol right = CSharpCompilation.Create("AssemblyB").Assembly;
-            ApiComparer differ = new();
+            ApiComparer differ = new(s_ruleFactory);
+
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
             Assert.Single(differences);
-
             CompatDifference expected = new(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, "AssemblyB, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
             Assert.Equal(expected, differences.First());
         }
@@ -54,10 +56,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
             Assert.Equal(string.Empty, leftSymbol.Identity.CultureName);
             Assert.Equal("de", rightSymbol.Identity.CultureName);
 
-            ApiComparer differ = new();
+            ApiComparer differ = new(s_ruleFactory);
             IEnumerable<CompatDifference> differences = differ.GetDifferences(leftSymbol, rightSymbol);
+            
             Assert.Single(differences);
-
             CompatDifference expected = new(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, $"{leftSymbol.Name}, Version=0.0.0.0, Culture=de, PublicKeyToken=null");
             Assert.Equal(expected, differences.First());
         }
@@ -74,12 +76,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
             Assert.Equal(new Version(2, 0, 0, 0), leftSymbol.Identity.Version);
             Assert.Equal(new Version(0, 0, 0, 0), rightSymbol.Identity.Version);
 
-            ApiComparer differ = new();
+            ApiComparer differ = new(s_ruleFactory);
             IEnumerable<CompatDifference> differences = differ.GetDifferences(leftSymbol, rightSymbol);
 
             // right assembly should have same or higher version than left
             Assert.Single(differences);
-
             CompatDifference expected = new(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, $"{rightSymbol.Name}, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
             Assert.Equal(expected, differences.First());
         }
@@ -97,11 +98,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
             Assert.Equal(new Version(2, 0, 0, 0), rightSymbol.Identity.Version);
 
             // Compatible assembly versions
-            ApiComparer differ = new();
+            ApiComparer differ = new(s_ruleFactory);
             IEnumerable<CompatDifference> differences = differ.GetDifferences(leftSymbol, rightSymbol);
             Assert.Empty(differences);
 
-            differ.StrictMode = true;
+            differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: true));
 
             // Not strictly compatible
             differences = differ.GetDifferences(leftSymbol, rightSymbol);
@@ -125,8 +126,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
             Assert.Equal(_publicKey, rightSymbol.Identity.PublicKey);
 
             // public key tokens must match
-            ApiComparer differ = new();
-            differ.StrictMode = strictMode;
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: strictMode));
 
             IEnumerable<CompatDifference> differences = differ.GetDifferences(leftSymbol, rightSymbol);
             Assert.Empty(differences);
@@ -145,8 +145,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
             Assert.False(leftSymbol.Identity.HasPublicKey);
             Assert.Equal(_publicKey, rightSymbol.Identity.PublicKey);
 
-            ApiComparer differ = new();
-            differ.StrictMode = strictMode;
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: strictMode));
             IEnumerable<CompatDifference> differences = differ.GetDifferences(leftSymbol, rightSymbol);
 
             if (strictMode)
@@ -174,12 +173,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
             Assert.Equal(_publicKey, leftSymbol.Identity.PublicKey);
             Assert.False(rightSymbol.Identity.HasPublicKey);
 
-            ApiComparer differ = new();
-            differ.StrictMode = strictMode;
-
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: strictMode));
             IEnumerable<CompatDifference> differences = differ.GetDifferences(leftSymbol, rightSymbol);
+            
             Assert.Single(differences);
-
             CompatDifference expected = new(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, $"{leftSymbol.Name}, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
             Assert.Equal(expected, differences.First());
         }
@@ -208,8 +205,7 @@ using System.Reflection;
             Assert.False(rightSymbol.Identity.HasPublicKey);
             Assert.Equal(_publicKey, leftSymbol.Identity.PublicKey);
 
-            ApiComparer differ = new();
-            differ.StrictMode = strictMode;
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: strictMode));
 
             Assert.Empty(differ.GetDifferences(leftSymbol, rightSymbol));
         }

@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     {
         private readonly RuleSettings _settings;
 
-        public CannotAddAbstractMember(RuleSettings settings, RuleRunnerContext context)
+        public CannotAddAbstractMember(RuleSettings settings, IRuleRegistrationContext context)
         {
             _settings = settings;
             // This rule should only run when not in strict mode. 

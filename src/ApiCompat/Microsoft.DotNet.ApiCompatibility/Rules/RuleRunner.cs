@@ -9,22 +9,30 @@ using Microsoft.DotNet.ApiCompatibility.Abstractions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
+    /// <summary>
+    /// Rule runner that exposes functionality to initialize rules and run element mapper objects.
+    /// </summary>
     public class RuleRunner : IRuleRunner
     {
-        private readonly RuleRunnerContext _context;
-        private readonly RuleSettings _settings;
+        private readonly IRuleContext _context;
+        private readonly IRuleFactory _ruleFactory;
         private const string DEFAULT_LEFT_NAME = "left";
         private const string DEFAULT_RIGHT_NAME = "right";
 
-        internal RuleRunner(bool strictMode, IEqualityComparer<ISymbol> symbolComparer, bool includeInternalSymbols, bool withReferences)
+        public RuleRunner(IRuleFactory ruleFactory, IRuleContext context)
         {
-            _context = new RuleRunnerContext();
-            _settings = new RuleSettings(strictMode, symbolComparer, includeInternalSymbols, withReferences);
-
-            // Initialize registered rules but don't invoke anything on them as they register themselves on "events" inside their constructor.
-            new RuleLocator(_context, _settings).GetService<IEnumerable<IRule>>();
+            _ruleFactory = ruleFactory;
+            _context = context;
         }
 
+        /// <inheritdoc />
+        public void InitializeRules(RuleSettings settings)
+        {
+            // Instantiate the rules but don't invoke anything on them as they register themselves on "events" inside their constructor.
+            _ = _ruleFactory.CreateRules(settings, _context);
+        }
+
+        /// <inheritdoc />
         public IReadOnlyList<IEnumerable<CompatDifference>> Run<T>(ElementMapper<T> mapper)
         {
             int rightLength = mapper.Right.Length;

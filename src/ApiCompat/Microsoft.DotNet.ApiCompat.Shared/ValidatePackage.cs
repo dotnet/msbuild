@@ -6,37 +6,35 @@ using System.Collections.Generic;
 using System.IO;
 using Jab;
 using Microsoft.DotNet.ApiCompatibility.Logging;
+using Microsoft.DotNet.ApiCompatibility.Rules;
 using Microsoft.DotNet.ApiCompatibility.Runner;
 using Microsoft.DotNet.PackageValidation;
 using Microsoft.DotNet.PackageValidation.Validators;
-using Microsoft.DotNet.ApiCompatibility;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 
 namespace Microsoft.DotNet.ApiCompat
 {
-    [ServiceProvider]
-    [Singleton(typeof(ISuppressionEngine), Factory = nameof(SuppressionEngineFactory))]
-    [Singleton(typeof(ICompatibilityLogger), Factory = nameof(LogFactory))]
-    [Singleton(typeof(IApiComparerFactory), typeof(ApiComparerFactory))]
-    [Singleton(typeof(IAssemblySymbolLoaderFactory), typeof(AssemblySymbolLoaderFactory))]
-    [Singleton(typeof(IMetadataStreamProvider), typeof(MetadataStreamProvider))]
-    [Singleton(typeof(IApiCompatRunner), typeof(ApiCompatRunner))]
+    [ServiceProvider(RootServices = new[] { typeof(IEnumerable<IRule>) })]
+    [Import(typeof(IApiCompatServiceProviderModule))]
     [Singleton(typeof(CompatibleFrameworkInPackageValidator))]
     [Singleton(typeof(CompatibleTfmValidator))]
     [Singleton(typeof(BaselinePackageValidator))]
-    internal partial class ValidatePackageServiceProvider
+    internal partial class ValidatePackageServiceProvider : IApiCompatServiceProviderModule
     {
         public Func<ICompatibilityLogger> LogFactory { get; }
 
         public Func<ISuppressionEngine> SuppressionEngineFactory { get; }
 
+        public RuleFactory RuleFactory { get; }
+
         public ValidatePackageServiceProvider(Func<ISuppressionEngine, ICompatibilityLogger> logFactory,
-            Func<ISuppressionEngine> suppressionEngineFactory)
+            Func<ISuppressionEngine> suppressionEngineFactory,
+            RuleFactory ruleFactory)
         {
             // It's important to use GetService<T> here instead of directly invoking the factory
-            // to avoid two suppression engine being created.
+            // to avoid two instances being created when retrieving a singleton.
             LogFactory = () => logFactory(GetService<ISuppressionEngine>());
             SuppressionEngineFactory = suppressionEngineFactory;
+            RuleFactory = ruleFactory;
         }
     }
 
@@ -58,10 +56,11 @@ namespace Microsoft.DotNet.ApiCompat
         {
             // Configure the suppression engine. Ignore the passed in suppression file if it should be generated and doesn't yet exist.
             string? suppressionFileForEngine = generateSuppressionFile && !File.Exists(suppressionFile) ? null : suppressionFile;
-            Func<ISuppressionEngine> suppressionEngineFactory = () => new SuppressionEngine(suppressionFileForEngine, noWarn, generateSuppressionFile);
 
             // Initialize the service provider
-            ValidatePackageServiceProvider serviceProvider = new(logFactory, suppressionEngineFactory);
+            ValidatePackageServiceProvider serviceProvider = new(logFactory,
+                () => new SuppressionEngine(suppressionFileForEngine, noWarn, generateSuppressionFile),
+                new RuleFactory());
 
             // If a runtime graph is provided, parse and use it for asset selection during the in-memory package construction.
             if (runtimeGraph != null)

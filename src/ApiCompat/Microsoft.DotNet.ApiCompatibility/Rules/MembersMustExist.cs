@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     {
         private readonly RuleSettings _settings;
 
-        public MembersMustExist(RuleSettings settings, RuleRunnerContext context)
+        public MembersMustExist(RuleSettings settings, IRuleRegistrationContext context)
         {
             _settings = settings;
             context.RegisterOnTypeSymbolAction(RunOnTypeSymbol);

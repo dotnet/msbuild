@@ -1,54 +1,45 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
-using Microsoft.DotNet.ApiCompatibility.Rules;
-using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ApiCompatibility
 {
     /// <summary>
     /// Class that contains all the settings used to filter metadata, compare symbols and run rules.
     /// </summary>
-    public class ComparingSettings
+    public readonly struct MapperSettings
     {
-        /// <summary>
-        /// The factory to get the <see cref="IRuleRunner"/>.
-        /// </summary>
-        public RuleRunnerFactory RuleRunnerFactory { get; }
-
         /// <summary>
         /// The metadata filter to use when creating the <see cref="ElementMapper{T}"/>.
         /// </summary>
-        public ISymbolFilter Filter { get; }
+        public readonly ISymbolFilter Filter;
 
         /// <summary>
         /// The comparer to map metadata.
         /// </summary>
-        public IEqualityComparer<ISymbol> EqualityComparer { get; }
+        public readonly IEqualityComparer<ISymbol> EqualityComparer;
 
         /// <summary>
         /// Indicates if we should warn on missing references.
         /// </summary>
-        public bool WarnOnMissingReferences { get; }
+        public readonly bool WarnOnMissingReferences;
 
         /// <summary>
-        /// Instantiate an object with the desired settings.
+        /// Instantiate an object with the desired comparison settings.
         /// </summary>
-        /// <param name="ruleRunnerFactory">The factory to create a <see cref="IRuleRunner"/></param>
+        /// <param name="ruleRunner">The rule runner.</param>
         /// <param name="filter">The symbol filter.</param>
         /// <param name="equalityComparer">The comparer to map metadata.</param>
-        public ComparingSettings(RuleRunnerFactory? ruleRunnerFactory = null,
-            ISymbolFilter? filter = null,
+        public MapperSettings(ISymbolFilter? filter = null,
             IEqualityComparer<ISymbol>? equalityComparer = null,
-            bool includeInternalSymbols = false,
-            bool strictMode = false,
-            bool warnOnMissingReferences = false)
+            bool warnOnMissingReferences = false,
+            bool includeInternalSymbols = false)
         {
-            Filter = filter ?? new SymbolAccessibilityBasedFilter(includeInternalSymbols: includeInternalSymbols);
+            Filter = filter ?? new SymbolAccessibilityBasedFilter(includeInternalSymbols);
             EqualityComparer = equalityComparer ?? new DefaultSymbolsEqualityComparer();
-            RuleRunnerFactory = ruleRunnerFactory ?? new RuleRunnerFactory(strictMode, EqualityComparer, includeInternalSymbols, warnOnMissingReferences);
             WarnOnMissingReferences = warnOnMissingReferences;
         }
     }

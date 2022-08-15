@@ -9,6 +9,7 @@
     <Import_RootNamespace>Microsoft.DotNet.ApiCompat</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)IApiCompatServiceProviderModule.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SuppressionFileHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ValidatePackage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ValidateAssemblies.cs" />

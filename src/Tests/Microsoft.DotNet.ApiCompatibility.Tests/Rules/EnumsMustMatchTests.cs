@@ -11,6 +11,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
 {
     public class EnumsMustMatchTests
     {
+        private static readonly TestRuleFactory s_ruleFactory = new((settings, context) => new EnumsMustMatch(settings, context));
+
         [Fact]
         public static void DifferencesReported()
         {
@@ -40,7 +42,7 @@ namespace CompatTests
 ";
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
-            ApiComparer differ = new();
+            ApiComparer differ = new(s_ruleFactory);
             IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
             CompatDifference[] expected = new[]
             {
@@ -78,8 +80,11 @@ namespace CompatTests
 ";
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
-            ApiComparer differ = new();
+            // Register EnumMustMatch and MemberMustExist rules as this test validates both.
+            ApiComparer differ = new(s_ruleFactory.WithRule((settings, context) => new MembersMustExist(settings, context)));
+
             IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
+
             Assert.NotEmpty(differences);
         }
 
@@ -112,7 +117,7 @@ namespace CompatTests
 ";
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
-            ApiComparer differ = new();
+            ApiComparer differ = new(s_ruleFactory);
             IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
             Assert.Empty(differences);
         }
@@ -145,7 +150,7 @@ namespace CompatTests
 ";
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
-            ApiComparer differ = new();
+            ApiComparer differ = new(s_ruleFactory);
             IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
             CompatDifference[] expected = new[]
             {

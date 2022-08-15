@@ -2,14 +2,21 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.s
 
 using System.Collections.Generic;
+using Microsoft.DotNet.ApiCompatibility.Abstractions;
 
-namespace Microsoft.DotNet.ApiCompatibility.Abstractions
+namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
     /// <summary>
-    /// Interface for rule drivers to implement in order to be used returned by the <see cref="IRuleRunnerFactory"/>
+    /// Rule runner interface that exposes functionality to initialize rules and run element mapper objects.
     /// </summary>
     public interface IRuleRunner
     {
+        /// <summary>
+        /// Initializes the rules provided by the <see cref="IRuleFactory" /> based on given rule settings.
+        /// </summary>
+        /// <param name="settings">The rule settings.</param>
+        void InitializeRules(RuleSettings settings);
+
         /// <summary>
         /// Runs the registered rules on the mapper.
         /// </summary>

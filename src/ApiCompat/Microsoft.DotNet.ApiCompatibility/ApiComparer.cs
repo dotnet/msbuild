@@ -1,9 +1,11 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using Microsoft.DotNet.ApiCompatibility.Rules;
 
 namespace Microsoft.DotNet.ApiCompatibility
 {
@@ -12,35 +14,27 @@ namespace Microsoft.DotNet.ApiCompatibility
     /// </summary>
     public class ApiComparer : IApiComparer
     {
-        private ComparingSettings? _comparingSettings;
+        private readonly IDifferenceVisitorFactory _differenceVisitorFactory;
+        private readonly IElementMapperFactory _elementMapperFactory;
 
         /// <inheritdoc />
-        public bool IncludeInternalSymbols { get; set; }
+        public ApiComparerSettings Settings { get; }
 
-        /// <inheritdoc />
-        public bool StrictMode { get; set; }
-
-        /// <inheritdoc />
-        public bool WarnOnMissingReferences { get; set; }
-
-        /// <inheritdoc />
-        public ComparingSettings ComparingSettings
+        public ApiComparer(IRuleFactory ruleFactory,
+            ApiComparerSettings? settings = null,
+            IDifferenceVisitorFactory? differenceVisitorFactory = null,
+            IRuleContext? ruleContext = null,
+            Func<IRuleFactory, IRuleContext, IRuleRunner>? ruleRunnerFactory = null,
+            Func<IRuleRunner, IElementMapperFactory>? elementMapperFactory = null)
         {
-            get => _comparingSettings ?? new ComparingSettings(includeInternalSymbols: IncludeInternalSymbols,
-                strictMode: StrictMode,
-                warnOnMissingReferences: WarnOnMissingReferences);
-            set => _comparingSettings = value;
-        }
+            ruleContext ??= new RuleContext();
+            IRuleRunner ruleRunner = ruleRunnerFactory?.Invoke(ruleFactory, ruleContext) ?? new RuleRunner(ruleFactory, ruleContext);
 
-        public ApiComparer(bool includeInternalSymbols = false,
-            bool strictMode = false,
-            bool warnOnMissingReferences = false,
-            ComparingSettings? comparingSettings = null)
-        {
-            IncludeInternalSymbols = includeInternalSymbols;
-            StrictMode = strictMode;
-            WarnOnMissingReferences = warnOnMissingReferences;
-            _comparingSettings = comparingSettings;
+            _differenceVisitorFactory = differenceVisitorFactory ?? new DifferenceVisitorFactory();
+            _elementMapperFactory = elementMapperFactory?.Invoke(ruleRunner) ?? new ElementMapperFactory(ruleRunner);
+            Settings = settings ?? new ApiComparerSettings();
+
+            ruleRunner.InitializeRules(Settings.ToRuleSettings());
         }
 
         /// <inheritdoc />
@@ -55,12 +49,13 @@ namespace Microsoft.DotNet.ApiCompatibility
         public IEnumerable<CompatDifference> GetDifferences(ElementContainer<IAssemblySymbol> left,
             ElementContainer<IAssemblySymbol> right)
         {
-            AssemblyMapper mapper = new(ComparingSettings);
+            var mapper = _elementMapperFactory.CreateAssemblyMapper(Settings.ToMapperSettings());
             mapper.AddElement(left, ElementSide.Left);
             mapper.AddElement(right, ElementSide.Right);
 
-            DifferenceVisitor visitor = new();
+            IDifferenceVisitor visitor = _differenceVisitorFactory.Create();
             visitor.Visit(mapper);
+
             return visitor.DiagnosticCollections[0];
         }
 
@@ -68,12 +63,13 @@ namespace Microsoft.DotNet.ApiCompatibility
         public IEnumerable<CompatDifference> GetDifferences(IEnumerable<ElementContainer<IAssemblySymbol>> left,
             IEnumerable<ElementContainer<IAssemblySymbol>> right)
         {
-            AssemblySetMapper mapper = new(ComparingSettings);
+            var mapper = _elementMapperFactory.CreateAssemblySetMapper(Settings.ToMapperSettings());
             mapper.AddElement(left, ElementSide.Left);
             mapper.AddElement(right, ElementSide.Right);
 
-            DifferenceVisitor visitor = new();
+            IDifferenceVisitor visitor = _differenceVisitorFactory.Create();
             visitor.Visit(mapper);
+
             return visitor.DiagnosticCollections[0];
         }
 
@@ -101,16 +97,14 @@ namespace Microsoft.DotNet.ApiCompatibility
             IReadOnlyList<ElementContainer<IAssemblySymbol>> right)
         {
             int rightCount = right.Count;
-
-            AssemblyMapper mapper = new(ComparingSettings, rightCount);
+            var mapper = _elementMapperFactory.CreateAssemblyMapper(Settings.ToMapperSettings(), rightCount);
             mapper.AddElement(left, ElementSide.Left);
-
             for (int i = 0; i < rightCount; i++)
             {
                 mapper.AddElement(right[i], ElementSide.Right, i);
             }
 
-            DifferenceVisitor visitor = new(rightCount);
+            IDifferenceVisitor visitor = _differenceVisitorFactory.Create(rightCount);
             visitor.Visit(mapper);
 
             var result = new(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)[rightCount];

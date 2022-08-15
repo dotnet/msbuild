@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using Microsoft.DotNet.ApiCompatibility.Rules;
 
 namespace Microsoft.DotNet.ApiCompatibility
 {
@@ -13,27 +14,9 @@ namespace Microsoft.DotNet.ApiCompatibility
     public interface IApiComparer
     {
         /// <summary>
-        /// Flag indicating whether internal symbols should be included in the comparisons or not.
+        /// <see cref="ApiComparerSettings"/> to be used when creating the mapping and getting the differences.
         /// </summary>
-        bool IncludeInternalSymbols { get; set; }
-
-        /// <summary>
-        /// Flag indicating whether we should run on strict mode or not.
-        /// If StrictMode is set, the behavior of some rules will change and some other rules will be
-        /// executed when getting the differences. This is useful when you want both sides we are comparing
-        /// to be strictly the same on their surface area.
-        /// </summary>
-        bool StrictMode { get; set; }
-
-        /// <summary>
-        /// Flag indicating whether the API comparison should warn when references are missing.
-        /// </summary>
-        bool WarnOnMissingReferences { get; set; }
-
-        /// <summary>
-        /// <see cref="ComparingSettings"/> to be used when creating the mapping to get the differences.
-        /// </summary>
-        ComparingSettings ComparingSettings { get; set; }
+        ApiComparerSettings Settings { get; }
 
         /// <summary>
         /// Get's the differences when comparing a left assembly against a right based on the comparison settings.

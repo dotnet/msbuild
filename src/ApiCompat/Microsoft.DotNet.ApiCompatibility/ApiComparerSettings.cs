@@ -3,13 +3,14 @@
 
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.ApiCompatibility.Rules;
 
-namespace Microsoft.DotNet.ApiCompatibility.Rules
+namespace Microsoft.DotNet.ApiCompatibility
 {
     /// <summary>
-    /// General rule settings that are passed to the rules.
+    /// Settings for an ApiComparer instance.
     /// </summary>
-    public readonly struct RuleSettings
+    public readonly struct ApiComparerSettings
     {
         /// <summary>
         /// Flag indicating whether api comparison should be performed in strict mode.
@@ -29,12 +30,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         /// </summary>
         public readonly bool WithReferences;
 
-        /// <summary>
-        /// The symbol comparer to check for equality of a given left and right.
-        /// </summary>
-        public readonly IEqualityComparer<ISymbol> SymbolComparer;
-
-        public RuleSettings(bool strictMode = false,
+        public ApiComparerSettings(bool strictMode = false,
             bool includeInternalSymbols = false,
             bool withReferences = false,
             IEqualityComparer<ISymbol>? symbolComparer = null)
@@ -42,7 +38,20 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             StrictMode = strictMode;
             IncludeInternalSymbols = includeInternalSymbols;
             WithReferences = withReferences;
-            SymbolComparer = symbolComparer ?? new DefaultSymbolsEqualityComparer();
         }
+
+        /// <summary>
+        /// Transforms the api comparer settings to rule settings.
+        /// </summary>
+        /// <returns>Returns the transformed settings as rule settings.</returns>
+        public RuleSettings ToRuleSettings() =>
+            new(StrictMode, IncludeInternalSymbols, WithReferences);
+
+        /// <summary>
+        /// Transforms the api comparer settings to mapper settings.
+        /// </summary>
+        /// <returns>Returns the transformed settings as mapper settings.</returns>
+        public MapperSettings ToMapperSettings() =>
+            new(warnOnMissingReferences: WithReferences, includeInternalSymbols: IncludeInternalSymbols);
     }
 }
