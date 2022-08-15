@@ -13,10 +13,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         private readonly string _manifestsPath;
         private readonly string _sdkVersionBand;
 
-        public TempDirectoryWorkloadManifestProvider(string manifestsPath, string sdkVersion)
+        public TempDirectoryWorkloadManifestProvider(string manifestsPath, string sdkFeatureBand)
         {
             _manifestsPath = manifestsPath;
-            _sdkVersionBand = sdkVersion;
+            _sdkVersionBand = sdkFeatureBand;
         }
 
         public IEnumerable<ReadableWorkloadManifest>

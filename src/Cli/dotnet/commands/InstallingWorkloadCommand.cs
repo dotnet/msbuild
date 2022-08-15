@@ -37,6 +37,7 @@ namespace Microsoft.DotNet.Workloads.Workload
         protected readonly string _userProfileDir;
         protected readonly bool _checkIfManifestExist;
         protected readonly ReleaseVersion _sdkVersion;
+        protected readonly ReleaseVersion _installedSdkVersion;
         protected readonly SdkFeatureBand _sdkFeatureBand;
         protected readonly SdkFeatureBand _installedFeatureBand;
         protected readonly string _fromRollbackDefinition;
@@ -70,8 +71,8 @@ namespace Microsoft.DotNet.Workloads.Workload
             _checkIfManifestExist = !(_printDownloadLinkOnly);      // don't check for manifest existence when print download link is passed
             _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(InstallingWorkloadCommandParser.VersionOption), version, _dotnetPath, _userProfileDir, _checkIfManifestExist);
             _sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
-
-            _installedFeatureBand = installedFeatureBand == null ? new SdkFeatureBand(Product.Version) : new SdkFeatureBand(installedFeatureBand);
+            _installedSdkVersion = new ReleaseVersion(version ?? Product.Version);
+            _installedFeatureBand = new SdkFeatureBand(installedFeatureBand ?? Product.Version);
 
             _fromRollbackDefinition = parseResult.GetValueForOption(InstallingWorkloadCommandParser.FromRollbackFileOption);
             var configOption = parseResult.GetValueForOption(InstallingWorkloadCommandParser.ConfigOption);
@@ -79,8 +80,8 @@ namespace Microsoft.DotNet.Workloads.Workload
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides: sourceOption);
                        
-            var sdkWorkloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString(), userProfileDir);
-            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(sdkWorkloadManifestProvider, _dotnetPath, _sdkVersion.ToString(), _userProfileDir);
+            var sdkWorkloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _installedSdkVersion.ToString(), userProfileDir);
+            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(sdkWorkloadManifestProvider, _dotnetPath, _installedSdkVersion.ToString(), _userProfileDir);
 
             _workloadInstallerFromConstructor = workloadInstaller;
             _workloadManifestUpdaterFromConstructor = workloadManifestUpdater;
@@ -109,7 +110,7 @@ namespace Microsoft.DotNet.Workloads.Workload
                         folderForManifestDownloads = tempPath.Value;
                     }
 
-                    var manifestDownloads = await _workloadManifestUpdater.GetManifestPackageDownloadsAsync(includePreview);
+                    var manifestDownloads = await _workloadManifestUpdater.GetManifestPackageDownloadsAsync(includePreview, _sdkFeatureBand, _installedFeatureBand);
 
                     if (!manifestDownloads.Any())
                     {
@@ -130,7 +131,7 @@ namespace Microsoft.DotNet.Workloads.Workload
                     }
 
                     //  Use updated, extracted manifests to resolve packs
-                    var overlayProvider = new TempDirectoryWorkloadManifestProvider(extractedManifestsPath, _sdkVersion.ToString());
+                    var overlayProvider = new TempDirectoryWorkloadManifestProvider(extractedManifestsPath, _sdkFeatureBand.ToString());
 
                     var newResolver = _workloadResolver.CreateOverlayResolver(overlayProvider);
                     _workloadInstaller.ReplaceWorkloadResolver(newResolver);

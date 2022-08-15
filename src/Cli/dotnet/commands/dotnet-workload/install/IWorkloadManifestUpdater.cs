@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         IEnumerable<ManifestVersionUpdate>
             CalculateManifestRollbacks(string rollbackDefinitionFilePath);
 
-        Task<IEnumerable<WorkloadDownload>> GetManifestPackageDownloadsAsync(bool includePreviews);
+        Task<IEnumerable<WorkloadDownload>> GetManifestPackageDownloadsAsync(bool includePreviews, SdkFeatureBand providedSdkFeatureBand, SdkFeatureBand installedSdkFeatureBand);
 
         IEnumerable<WorkloadId> GetUpdatableWorkloadsToAdvertise(IEnumerable<WorkloadId> installedWorkloads);
 
