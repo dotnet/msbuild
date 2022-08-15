@@ -99,7 +99,10 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] Crossgen2Packs { get; set; }
 
         [Output]
-        public ITaskItem[] ILCompilerPacks { get; set; }        
+        public ITaskItem[] HostILCompilerPacks { get; set; }
+
+        [Output]
+        public ITaskItem[] TargetILCompilerPacks { get; set; }
 
         //  Runtime packs which aren't available for the specified RuntimeIdentifier
         [Output]
@@ -617,7 +620,29 @@ namespace Microsoft.NET.Build.Tasks
             }
             else
             {
-                ILCompilerPacks = new[] { newItem };
+                HostILCompilerPacks = new[] { newItem };
+                // ILCompiler supports cross target compilation. If there is a cross-target request, we need to download that package as well
+                // We expect RuntimeIdentifier to be defined during publish but can allow during build
+                if (RuntimeIdentifier != null)
+                {
+                    var targetRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(runtimeGraph, RuntimeIdentifier, packSupportedRuntimeIdentifiers, out bool wasInGraph2);
+                    if (targetRuntimeIdentifier == null)
+                    {
+                        return false;
+                    }
+                    if (!hostRuntimeIdentifier.Equals(targetRuntimeIdentifier))
+                    {
+                        var runtimeIlcPackName = packPattern.Replace("**RID**", targetRuntimeIdentifier);
+                        TaskItem targetIlcPackToDownload = new TaskItem(runtimeIlcPackName);
+                        targetIlcPackToDownload.SetMetadata(MetadataKeys.Version, packVersion);
+                        packagesToDownload.Add(targetIlcPackToDownload);
+
+                        var newItem2 = new TaskItem(runtimeIlcPackName);
+                        newItem2.SetMetadata(MetadataKeys.NuGetPackageId, runtimeIlcPackName);
+                        newItem2.SetMetadata(MetadataKeys.NuGetPackageVersion, packVersion);
+                        TargetILCompilerPacks = new[] { newItem2 };
+                    }
+                }
             }            
 
             return true;
