@@ -139,6 +139,28 @@ namespace Microsoft.NET.Pack.Tests
             Assert.True(File.Exists(expectedAssetPath));
         }
 
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/27066")]
+        public void It_warns_if_PackRelease_set_on_sln_but_env_var_not_used()
+        {
+            var slnDir = _testAssetsManager
+               .CopyTestAsset("TestAppWithSlnUsingPublishRelease", "PublishReleaseSln") // This also has PackRelease enabled
+               .WithSource()
+               .Path;
+
+            new BuildCommand(Log, slnDir, "App.sln")
+               .Execute()
+               .Should()
+               .Pass();
+
+            var publishCommand = new DotnetCommand(Log)
+                .WithWorkingDirectory(slnDir)
+                .Execute(@"dotnet", "pack")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("NETSDK1189");
+        }
+
 
         [Fact]
         public void A_PackRelease_property_does_not_override_other_command_configuration()

@@ -61,7 +61,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <!-- Enable warning for trying to use PackRelease with a solution if env-var is not set.-->
-    <NETSdkWarning Condition="'$(PackRelease)' != '' and '$(SolutionExt)' == '.sln' and '$(ENABLE_P_RELEASE_SLN)' == ''"
+    <NETSdkWarning Condition="'$(PackRelease)' != '' and '$(SolutionExt)' == '.sln' and '$(DOTNET_CLI_ENABLE_PACK_RELEASE_FOR_SOLUTIONS)' == ''"
                    ResourceName="PReleaseRequiresEnvVarOnSln" />
   </Target>
 

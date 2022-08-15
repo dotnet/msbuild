@@ -4,5 +4,6 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>$(CurrentTargetFramework)</TargetFramework>
     <PublishRelease>true</PublishRelease>
+    <PackRelease>true</PackRelease>
   </PropertyGroup>
 </Project>

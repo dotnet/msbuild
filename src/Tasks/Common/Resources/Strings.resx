@@ -823,7 +823,7 @@ To install these workloads, run the following command: dotnet workload restore</
 You may need to build the project on another operating system or architecture, or update the .NET SDK.</value>
     <comment>{StrBegin="NETSDK1178: "}</comment>
   </data>
-    <data name="SelfContainedOptionShouldBeUsedWithRuntime" xml:space="preserve">
+  <data name="SelfContainedOptionShouldBeUsedWithRuntime" xml:space="preserve">
     <value>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</value>
     <comment>{StrBegin="NETSDK1179: "}</comment>
   </data>
@@ -860,7 +860,7 @@ You may need to build the project on another operating system or architecture, o
     <comment>Error code is NETSDK1188. 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</comment>
   </data>
   <data name="PReleaseRequiresEnvVarOnSln" xml:space="preserve">
-    <value>NETSDK1187: To use PackRelease or PublishRelease in a project in a solution, you must set the environment variable ENABLE_P_RELEASE_SLN to true. Doing so will increase the time required to publish a sln.</value>
-    <comment>{StrBegin="NETSDK1187: "}</comment>
+    <value>NETSDK1189: To use PackRelease or PublishRelease in solution projects, you must set the environment variable DOTNET_CLI_ENABLE_X_RELEASE_FOR_SOLUTIONS to true where X is PUBLISH or PACK. This will increase the time to publish a sln.</value>
+    <comment>{StrBegin="NETSDK1189: "}</comment>
   </data>
 </root>

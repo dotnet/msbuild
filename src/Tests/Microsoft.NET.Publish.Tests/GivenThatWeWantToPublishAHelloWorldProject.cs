@@ -454,7 +454,7 @@ public static class Program
         [Fact]
         public void It_publishes_on_release_if_PublishRelease_property_set_in_sln()
         {
-            Environment.SetEnvironmentVariable("ENABLE_P_RELEASE_SLN", "true");
+            Environment.SetEnvironmentVariable("DOTNET_CLI_ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS", "true");
 
             var slnDir = _testAssetsManager
                .CopyTestAsset("TestAppWithSlnUsingPublishRelease", "PublishReleaseSln")
@@ -472,7 +472,7 @@ public static class Program
                 .Should()
                 .Pass();
 
-            Environment.SetEnvironmentVariable("ENABLE_P_RELEASE_SLN", null);
+            Environment.SetEnvironmentVariable("DOTNET_CLI_ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS", null);
 
             var expectedAssetPath = System.IO.Path.Combine(slnDir, "App", "bin", "Release", ToolsetInfo.CurrentTargetFramework, "publish", "App.dll");
             Assert.True(File.Exists(expectedAssetPath));

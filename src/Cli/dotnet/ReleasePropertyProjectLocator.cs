@@ -55,7 +55,13 @@ namespace Microsoft.DotNet.Cli
         /// in the configuration property to check.</returns>
         public override ProjectInstance GetSlnProject(string slnPath, string slnProjectConfigPropertytoCheck = "")
         {
-            if (Environment.GetEnvironmentVariable("ENABLE_P_RELEASE_SLN") == null) // This has a performance overhead so don't do this unless opted in.
+            // This has a performance overhead so don't do this unless opted in.
+            if (
+                // PublishRelease v
+                (slnProjectConfigPropertytoCheck == PublishCommandParser.customDefaultConfigurationProperty && Environment.GetEnvironmentVariable(PublishCommandParser.enablePublishReleaseSolutionEnvironmentVar) == null)
+                || // PackRelease v
+                (slnProjectConfigPropertytoCheck == PackCommandParser.customDefaultConfigurationProperty && Environment.GetEnvironmentVariable(PackCommandParser.enablePackReleaseSolutionEnvironmentVar) == null)
+                )
                 return null; // The user will be warned if they do not have this set and try this scenario with one of the properties set.
 
             SlnFile sln;
