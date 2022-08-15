@@ -13,7 +13,7 @@
   <PropertyGroup>
     <VersionPrefix>7.0.100</VersionPrefix>
     <PreReleaseVersionLabel>rc</PreReleaseVersionLabel>
-    <PreReleaseVersionIteration>1</PreReleaseVersionIteration>
+    <PreReleaseVersionIteration>2</PreReleaseVersionIteration>
     <!-- Enable to remove prerelease label. -->
     <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">false</StabilizePackageVersion>
     <DotNetFinalVersionKind Condition="'$(StabilizePackageVersion)' == 'true'">release</DotNetFinalVersionKind>
