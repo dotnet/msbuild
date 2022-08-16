@@ -101,13 +101,13 @@ namespace Microsoft.DotNet.Cli
                         return;
                     }
 
-                    string configuration = projectData.GetPropertyValue(slnProjectConfigPropertytoCheck);
-                    if (!string.IsNullOrEmpty(configuration))
+                    string useReleaseConfiguraton = projectData.GetPropertyValue(slnProjectConfigPropertytoCheck);
+                    if (!string.IsNullOrEmpty(useReleaseConfiguraton))
                     {
                         lock (projectDataLock)
                         {
                             configuredProjects.Add(projectData); // we don't care about race conditions here
-                            configValues.Add(configuration);
+                            configValues.Add(useReleaseConfiguraton);
                         }
                     }
                 }
