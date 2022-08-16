@@ -435,7 +435,6 @@ namespace Microsoft.NET.Build.Tests
     <WindowsSdkSupportedTargetPlatformVersion Remove=""@(WindowsSdkSupportedTargetPlatformVersion)"" />
     <WindowsSdkSupportedTargetPlatformVersion Include=""10.0.22621.0"" WindowsSdkPackageVersion=""10.0.22621.26"" MinimumNETVersion=""6.0"" />
     <WindowsSdkSupportedTargetPlatformVersion Include=""10.0.22000.0"" WindowsSdkPackageVersion=""10.0.22000.26"" MinimumNETVersion=""6.0"" />
-j0shuams marked this conversation as resolved.
     <WindowsSdkSupportedTargetPlatformVersion Include=""10.0.22000.0"" WindowsSdkPackageVersion=""10.0.22000.25"" MinimumNETVersion=""5.0"" />
     <WindowsSdkSupportedTargetPlatformVersion Include=""10.0.19041.0"" WindowsSdkPackageVersion=""10.0.19041.25"" MinimumNETVersion=""5.0"" />
   </ItemGroup>");
