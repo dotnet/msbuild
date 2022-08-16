@@ -666,14 +666,14 @@ public static class Program
                });
 
             new BuildCommand(helloWorldAsset)
-           .Execute("--configuration Debug")
+           .Execute()
            .Should()
            .Pass();
 
             var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
 
             publishCommand
-            .Execute()
+            .Execute("--configuration", "Debug")
             .Should()
             .Pass();
 

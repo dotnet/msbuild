@@ -143,7 +143,7 @@ namespace Microsoft.DotNet.Cli
 
             IEnumerable<string> calledArguments = parseResult.Tokens.Select(x => x.ToString());
             IEnumerable<string> slnProjectAndCommandArgs = slnOrProjectArgs.Concat(calledArguments);
-            if (!parseResult.HasOption(configOption) && !userPropertyArgs.Contains("Configuration") && !userPropertyArgs.Contains(defaultedConfigurationProperty))
+            if (!parseResult.HasOption(configOption) && !ArgsContainsProperty(userPropertyArgs, "Configuration") && !ArgsContainsProperty(userPropertyArgs, defaultedConfigurationProperty))
                 // CLI Configuration values take precedence over ones in the project.
                 project = GetTargetedProject(slnProjectAndCommandArgs, defaultedConfigurationProperty);
 
@@ -158,6 +158,18 @@ namespace Microsoft.DotNet.Cli
                     return new List<string> { $"-property:configuration={configurationToUse}" };
             }
             return Enumerable.Empty<string>();
+        }
+
+        /// <returns>Returns true if msbuildargs contains a forwarded property named propertyToCheck.</returns>
+        private bool ArgsContainsProperty(IEnumerable<string> msbuildargs, string propertyToCheck)
+        {
+            var calledProperties = MSBuildPropertyParser.ParseProperties(String.Join(";", msbuildargs));
+            foreach(var calledProperty in calledProperties)
+            {
+                if(calledProperty.value == propertyToCheck)
+                    return true;
+            }
+            return false;
         }
     }
 }
