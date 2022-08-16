@@ -641,8 +641,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1162: "}</note>
       </trans-unit>
       <trans-unit id="PReleaseRequiresEnvVarOnSln">
-        <source>NETSDK1189: To use PackRelease or PublishRelease in solution projects, you must set the environment variable DOTNET_CLI_ENABLE_X_RELEASE_FOR_SOLUTIONS to true where X is PUBLISH or PACK. This will increase the time to publish a sln.</source>
-        <target state="new">NETSDK1189: To use PackRelease or PublishRelease in solution projects, you must set the environment variable DOTNET_CLI_ENABLE_X_RELEASE_FOR_SOLUTIONS to true where X is PUBLISH or PACK. This will increase the time to publish a sln.</target>
+        <source>NETSDK1189: To use '{0}' in solution projects, you must set the environment variable '{1}' (to true). This will increase the time to complete the operation.</source>
+        <target state="new">NETSDK1189: To use '{0}' in solution projects, you must set the environment variable '{1}' (to true). This will increase the time to complete the operation.</target>
         <note>{StrBegin="NETSDK1189: "}</note>
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">

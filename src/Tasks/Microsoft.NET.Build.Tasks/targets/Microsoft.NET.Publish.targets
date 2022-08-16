@@ -114,7 +114,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Enable warning for trying to use PublishRelease or PackRelease with a solution if env-var is not set.-->
     <NETSdkWarning Condition="'$(PublishRelease)' != '' and '$(SolutionExt)' == '.sln' and '$(DOTNET_CLI_ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS)' == ''"
-                   ResourceName="PReleaseRequiresEnvVarOnSln" />
+                   ResourceName="PReleaseRequiresEnvVarOnSln" 
+                   FormatArguments="PublishRelease;DOTNET_CLI_ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS"
+    />
 
     <PropertyGroup>
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
