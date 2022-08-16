@@ -55,6 +55,8 @@ namespace Microsoft.NET.Build.Tasks
             else
             {
                 var normalizedTargetFrameworkVersion = ProcessFrameworkReferences.NormalizeVersion(new Version(TargetFrameworkVersion));
+
+                var matchingKnownFrameworkReferences = new List<(Version minimumNetVersion, TaskItem knownFrameworkReference)>();
                 foreach (var supportedWindowsVersion in WindowsSdkSupportedTargetPlatformVersions)
                 {
                     var windowsSdkPackageVersion = supportedWindowsVersion.GetMetadata("WindowsSdkPackageVersion");
@@ -62,18 +64,25 @@ namespace Microsoft.NET.Build.Tasks
                     if (!string.IsNullOrEmpty(windowsSdkPackageVersion))
                     {
                         var minimumNETVersion = supportedWindowsVersion.GetMetadata("MinimumNETVersion");
+                        Version normalizedMinimumVersion = new Version(0, 0, 0);
                         if (!string.IsNullOrEmpty(minimumNETVersion))
                         {
-                            var normalizedMinimumVersion = ProcessFrameworkReferences.NormalizeVersion(new Version(minimumNETVersion));
+                            normalizedMinimumVersion = ProcessFrameworkReferences.NormalizeVersion(new Version(minimumNETVersion));
                             if (normalizedMinimumVersion > normalizedTargetFrameworkVersion)
                             {
                                 continue;
                             }
                         }
 
-                        knownFrameworkReferences.Add(CreateKnownFrameworkReference(windowsSdkPackageVersion, TargetFrameworkVersion, supportedWindowsVersion.ItemSpec));
+                        matchingKnownFrameworkReferences.Add((normalizedMinimumVersion, CreateKnownFrameworkReference(windowsSdkPackageVersion, TargetFrameworkVersion, supportedWindowsVersion.ItemSpec)));
+                        
                     }
                 }
+
+                //  If there are multiple matching WindowsSdkSupportedTargetPlatformVersion items, choose the one with the highest minimum version.  That way it is possible to
+                //  use older packages when targeting older versions of .NET, and newer packages for newer versions of .NET
+                var highestMinimumVersion = matchingKnownFrameworkReferences.Max(t => t.minimumNetVersion);
+                knownFrameworkReferences.AddRange(matchingKnownFrameworkReferences.Where(t => t.minimumNetVersion == highestMinimumVersion).Select(t => t.knownFrameworkReference));
             }
 
             KnownFrameworkReferences = knownFrameworkReferences.ToArray();
