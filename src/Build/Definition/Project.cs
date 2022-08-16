@@ -600,6 +600,12 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         public IDictionary<string, string> GlobalProperties => implementation.GlobalProperties;
 
+        internal bool GlobalPropertiesContains(string key) => implementation is ProjectImpl projImpl ? projImpl.GlobalPropertiesContains(key) : GlobalProperties.ContainsKey(key);
+
+        internal int GlobalPropertiesCount => implementation is ProjectImpl projImpl ? projImpl.GlobalPropertiesCount() : GlobalProperties.Count;
+
+        internal IEnumerable<KeyValuePair<string, string>> GlobalPropertiesEnumerable => implementation is ProjectImpl projImpl ? projImpl.GlobalPropertiesEnumerable() : GlobalProperties;
+
         /// <summary>
         /// Item types in this project.
         /// This is an ordered collection.
@@ -2085,6 +2091,27 @@ namespace Microsoft.Build.Evaluation
 
                     return false;
                 }
+            }
+
+            public bool GlobalPropertiesContains(string key)
+            {
+                return _data.GlobalPropertiesDictionary.Contains(key);
+            }
+
+            public int GlobalPropertiesCount()
+            {
+                return _data.GlobalPropertiesDictionary.Count;
+            }
+
+            public IEnumerable<KeyValuePair<string, string>> GlobalPropertiesEnumerable()
+            {
+                List<KeyValuePair<string, string>> result = new List<KeyValuePair<string, string>>();
+                foreach (ProjectPropertyInstance property in _data.GlobalPropertiesDictionary)
+                {
+                    result.Add(new KeyValuePair<string, string>(property.Name, ((IProperty)property).EvaluatedValueEscaped));
+                }
+
+                return result;
             }
 
             /// <summary>
