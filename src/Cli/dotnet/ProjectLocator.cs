@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli
             }
             catch (Exception e) // Catch failed file access, or invalid project files that cause errors when read into memory,
             {
-                Reporter.Output.WriteLine(e.Message.Yellow());
+                Reporter.Error.WriteLine(e.Message);
             }
             return null;
         }
