@@ -146,7 +146,7 @@ namespace Microsoft.NET.Build.Tests
             getValuesCommand.Execute()
                 .Should()
                 .Pass();
-            getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { "true" });
+            getValuesCommand.GetValues().Should().BeEquivalentTo(new[] { "true" });
         }
 
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]

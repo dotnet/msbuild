@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             Action a = () => installer.InstallPackage(new PackageLocation(), packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion), targetFramework: _testTargetframework);
 
-            a.ShouldThrow<ToolPackageException>().WithMessage(Tools.Tool.Install.LocalizableStrings.ToolInstallationRestoreFailed);
+            a.Should().Throw<ToolPackageException>().WithMessage(Tools.Tool.Install.LocalizableStrings.ToolInstallationRestoreFailed);
 
             reporter.Lines.Count.Should().Be(1);
             reporter.Lines[0].Should().Contain(TestPackageId.ToString());
@@ -460,7 +460,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                 }
             };
 
-            a.ShouldThrow<ToolPackageException>().WithMessage(Tools.Tool.Install.LocalizableStrings.ToolInstallationRestoreFailed);
+            a.Should().Throw<ToolPackageException>().WithMessage(Tools.Tool.Install.LocalizableStrings.ToolInstallationRestoreFailed);
 
             AssertInstallRollBack(fileSystem, store);
         }
@@ -494,7 +494,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                 }
             };
 
-            a.ShouldThrow<GracefulException>().WithMessage("simulated error");
+            a.Should().Throw<GracefulException>().WithMessage("simulated error");
 
             AssertInstallRollBack(fileSystem, store);
         }
@@ -521,7 +521,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                         versionRange: VersionRange.Parse(TestPackageVersion),
                         targetFramework: _testTargetframework);
 
-                    first.ShouldNotThrow();
+                    first.Should().NotThrow();
 
                     installer.InstallPackage(new PackageLocation(additionalFeeds: new[] { source }),
                         packageId: TestPackageId,
@@ -532,7 +532,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                 }
             };
 
-            a.ShouldThrow<ToolPackageException>().Where(
+            a.Should().Throw<ToolPackageException>().Where(
                 ex => ex.Message ==
                       string.Format(
                           CommonLocalizableStrings.ToolPackageConflictPackageId,
@@ -567,7 +567,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
 
             reporter.Lines.Should().BeEmpty();
 
-            secondCall.ShouldThrow<ToolPackageException>().Where(
+            secondCall.Should().Throw<ToolPackageException>().Where(
                 ex => ex.Message ==
                       string.Format(
                           CommonLocalizableStrings.ToolPackageConflictPackageId,
@@ -821,7 +821,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                     versionRange: VersionRange.Parse(packageVersion),
                     targetFramework: _testTargetframework);
 
-                action.ShouldNotThrow<ToolConfigurationException>();
+                action.Should().NotThrow<ToolConfigurationException>();
 
                 fileSystem.File.Exists(package.Commands[0].Executable.Value).Should().BeTrue($"{package.Commands[0].Executable.Value} should exist");
 

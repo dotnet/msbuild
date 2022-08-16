@@ -180,8 +180,8 @@
   </PropertyGroup>
   <!-- Test Dependencies -->
   <PropertyGroup>
-    <FluentAssertionsVersion>4.19.2</FluentAssertionsVersion>
-    <FluentAssertionsJsonVersion>4.19.0</FluentAssertionsJsonVersion>
+    <FluentAssertionsVersion>6.7.0</FluentAssertionsVersion>
+    <FluentAssertionsJsonVersion>6.1.0</FluentAssertionsJsonVersion>
     <MicrosoftDotNetXUnitExtensionsVersion>7.0.0-beta.22411.2</MicrosoftDotNetXUnitExtensionsVersion>
     <MoqPackageVersion>4.8.2</MoqPackageVersion>
     <MicrosoftDotNetInstallerWindowsSecurityTestDataPackageVersion>6.0.0-beta.22262.1</MicrosoftDotNetInstallerWindowsSecurityTestDataPackageVersion>

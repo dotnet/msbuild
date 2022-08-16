@@ -190,7 +190,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                     .OrderBy(f => f, StringComparer.Ordinal)
                     .ToArray();
 
-                existingFiles.ShouldBeEquivalentTo(expected);
+                existingFiles.Should().BeEquivalentTo(expected);
             }
             else
             {
@@ -250,7 +250,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 existingFiles = existingFiles.Select(f => Regex.Replace(f, DotNetJSHashRegexPattern, DotNetJSHashTemplate)).ToArray();
 
                 var expected = LoadExpectedFilesBaseline(manifest.ManifestType, publishFolder, intermediateOutputPath, suffix, name);
-                existingFiles.ShouldBeEquivalentTo(expected);
+                existingFiles.Should().BeEquivalentTo(expected);
             }
             else
             {
@@ -355,9 +355,9 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 manifest.ReferencedProjectsConfiguration.OrderBy(cm => cm.Identity)
                     .Should()
                     .BeEquivalentTo(expected.ReferencedProjectsConfiguration.OrderBy(cm => cm.Identity));
-                manifest.DiscoveryPatterns.OrderBy(dp => dp.Name).ShouldBeEquivalentTo(expected.DiscoveryPatterns.OrderBy(dp => dp.Name));
+                manifest.DiscoveryPatterns.OrderBy(dp => dp.Name).Should().BeEquivalentTo(expected.DiscoveryPatterns.OrderBy(dp => dp.Name));
                 manifest.Assets.OrderBy(a => a.BasePath).ThenBy(a => a.RelativePath).ThenBy(a => a.AssetKind)
-                    .ShouldBeEquivalentTo(expected.Assets.OrderBy(a => a.BasePath).ThenBy(a => a.RelativePath).ThenBy(a => a.AssetKind));
+                    .Should().BeEquivalentTo(expected.Assets.OrderBy(a => a.BasePath).ThenBy(a => a.RelativePath).ThenBy(a => a.AssetKind));
             }
             else
             {

@@ -628,7 +628,7 @@ class Program
                 .Should()
                 .Pass();
 
-            getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { "7.0" });
+            getValuesCommand.GetValues().Should().BeEquivalentTo(new[] { "7.0" });
         }
 
         private void TestInvalidTargetFramework(string testName, string targetFramework, bool useSolution, string expectedOutput)

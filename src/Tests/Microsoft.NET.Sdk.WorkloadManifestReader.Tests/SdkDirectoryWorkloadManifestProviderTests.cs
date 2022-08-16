@@ -100,7 +100,7 @@ namespace ManifestReaderTests
                 return true;
             }).ToList();
 
-            a.ShouldThrow<FileNotFoundException>();
+            a.Should().Throw<FileNotFoundException>();
         }
 
         [Fact]
