@@ -27,12 +27,12 @@ namespace Microsoft.Build.BackEnd.Client
         public AutoResetEvent PacketReceivedEvent { get; }
 
         /// <summary>
-        /// Set when the packet pump unexpectedly terminates (due to connection problems or because of deserialization issues).
+        /// Set when the packet pump terminates.
         /// </summary>
-        public ManualResetEvent PacketPumpErrorEvent { get; }
+        public ManualResetEvent PacketPumpCompleted { get; }
 
         /// <summary>
-        /// Exception appeared when the packet pump unexpectedly terminates.
+        /// Exception appeared when the packet pump unexpectedly terminates (due to connection problems or because of deserialization issues).
         /// </summary>
         public Exception? PacketPumpException { get; set; }
 
@@ -66,16 +66,24 @@ namespace Microsoft.Build.BackEnd.Client
         /// </summary>
         readonly ITranslator _binaryReadTranslator;
 
+        /// <summary>
+        /// True if this side is gracefully disconnecting.
+        /// In such case we have sent last packet to server side and we expect
+        /// it will soon broke pipe connection - unless client do it first.
+        /// </summary>
+        private bool _isServerDisconnecting;
+
         public MSBuildClientPacketPump(Stream stream)
         {
             ErrorUtilities.VerifyThrowArgumentNull(stream, nameof(stream));
 
             _stream = stream;
+            _isServerDisconnecting = false;
             _packetFactory = new NodePacketFactory();
 
             ReceivedPacketsQueue = new ConcurrentQueue<INodePacket>();
             PacketReceivedEvent = new AutoResetEvent(false);
-            PacketPumpErrorEvent = new ManualResetEvent(false);
+            PacketPumpCompleted = new ManualResetEvent(false);
             _packetPumpShutdownEvent = new ManualResetEvent(false);
 
             _readBufferMemoryStream = new MemoryStream();
@@ -170,7 +178,7 @@ namespace Microsoft.Build.BackEnd.Client
         /// set.
         /// </summary>
         /// <remarks>
-        /// Instead of throwing an exception, puts it in <see cref="PacketPumpException"/> and raises event <see cref="PacketPumpErrorEvent"/>.
+        /// Instead of throwing an exception, puts it in <see cref="PacketPumpException"/> and raises event <see cref="PacketPumpCompleted"/>.
         /// </remarks>
         private void PacketPumpProc()
         {
@@ -229,11 +237,17 @@ namespace Microsoft.Build.BackEnd.Client
                                     // Incomplete read. Abort.
                                     if (headerBytesRead == 0)
                                     {
+                                        if (_isServerDisconnecting)
+                                        {
+                                            continueReading = false;
+                                            break;
+                                        }
+
                                         ErrorUtilities.ThrowInternalError("Server disconnected abruptly");
                                     }
                                     else
                                     {
-                                        ErrorUtilities.ThrowInternalError("Incomplete header read from server.  {0} of {1} bytes read", headerBytesRead, headerByte.Length);
+                                        ErrorUtilities.ThrowInternalError("Incomplete header read.  {0} of {1} bytes read", headerBytesRead, headerByte.Length);
                                     }
                                 }
 
@@ -246,14 +260,18 @@ namespace Microsoft.Build.BackEnd.Client
                                 _readBufferMemoryStream.SetLength(packetLength);
                                 byte[] packetData = _readBufferMemoryStream.GetBuffer();
 
-                                packetBytesRead = localStream.Read(packetData, 0, packetLength);
-                                
-                                if (packetBytesRead != packetLength)
+                                while (packetBytesRead < packetLength)
                                 {
-                                    // Incomplete read.  Abort.
-                                    ErrorUtilities.ThrowInternalError("Incomplete header read from server. {0} of {1} bytes read", headerBytesRead, headerByte.Length);
-                                }
+                                    int bytesRead = localStream.Read(packetData, packetBytesRead, packetLength-packetBytesRead);
+                                    if (bytesRead == 0)
+                                    {
+                                        // Incomplete read.  Abort.
+                                        ErrorUtilities.ThrowInternalError("Incomplete packet read. {0} of {1} bytes read", packetBytesRead, packetLength);
+                                    }
 
+                                    packetBytesRead += bytesRead;
+                                }
+                                
                                 try
                                 {
                                     _packetFactory.DeserializeAndRoutePacket(0, packetType, _binaryReadTranslator);
@@ -292,13 +310,21 @@ namespace Microsoft.Build.BackEnd.Client
             {
                 CommunicationsUtilities.Trace("Exception occurred in the packet pump: {0}", ex);
                 PacketPumpException = ex;
-                PacketPumpErrorEvent.Set();
             }
 
             CommunicationsUtilities.Trace("Ending read loop.");
+            PacketPumpCompleted.Set();
         }
         #endregion
 
         public void Dispose() => Stop();
+
+        /// <summary>
+        /// Signalize that from now on we expect server will break connected named pipe.
+        /// </summary>
+        public void ServerWillDisconnect()
+        {
+            _isServerDisconnecting = true;
+        }
     }
 }

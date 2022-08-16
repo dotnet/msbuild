@@ -102,6 +102,11 @@
         <target state="translated">MSB4257: указанный выходной файл кэша результатов пустой.</target>
         <note />
       </trans-unit>
+      <trans-unit id="EnvironmentDerivedPropertyRead">
+        <source>Property '{0}' with value '{1}' expanded from the environment.</source>
+        <target state="new">Property '{0}' with value '{1}' expanded from the environment.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
         <source>Read environment variable "{0}"</source>
         <target state="translated">Чтение переменной среды "{0}"</target>
@@ -143,9 +148,8 @@
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
-        <source>Loading the following project cache plugin:
-    {0}</source>
-        <target state="translated">Идет загрузка следующего подключаемого модуля кэша проектов:
+        <source>Loading the following project cache plugin: {0}</source>
+        <target state="needs-review-translation">Идет загрузка следующего подключаемого модуля кэша проектов:
     {0}</target>
         <note />
       </trans-unit>
@@ -174,11 +178,6 @@
       <trans-unit id="NoProjectCachePluginFoundInAssembly">
         <source>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</source>
         <target state="translated">MSB4270: не найдены подключаемые модули кэша проектов в сборке "{0}". Должен быть указан один модуль.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NotAllNodesDefineACacheItem">
-        <source>MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</source>
-        <target state="translated">MSB4269: если для какого-либо узла статического графа определен кэш проектов, этот кэш должен быть указан для всех узлов. Следующие проекты не содержат объявление элемента "{0}": {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -219,19 +218,9 @@
         <target state="translated">Метод {0} не может быть вызван с коллекцией, содержащей целевые имена, которые пусты или равны NULL.</target>
         <note />
       </trans-unit>
-      <trans-unit id="OnlyOneCachePluginMustBeSpecified">
-        <source>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</source>
-        <target state="translated">MSB4265: должен быть указан один подключаемый модуль кэша проектов, но найдено несколько: {0}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
         <source>Created an override using task: {0} at {1}</source>
         <target state="translated">Создано переопределение с помощью задачи {0} в {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectCacheBeginBuild">
-        <source>Initializing project cache plugin.</source>
-        <target state="translated">Инициализация подключаемого модуля кэша проекта.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheEndBuild">

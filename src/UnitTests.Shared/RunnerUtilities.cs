@@ -71,15 +71,12 @@ namespace Microsoft.Build.UnitTests.Shared
         /// </summary>
         public static string RunProcessAndGetOutput(string process, string parameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
         {
-            outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:1");
-
             if (shellExecute)
             {
                 // we adjust the psi data manually because on net core using ProcessStartInfo.UseShellExecute throws NotImplementedException
                 AdjustForShellExecution(ref process, ref parameters);
             }
 
-            outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:2");
             var psi = new ProcessStartInfo(process)
             {
                 CreateNoWindow = true,
@@ -92,7 +89,6 @@ namespace Microsoft.Build.UnitTests.Shared
             string output = string.Empty;
             int pid = -1;
 
-            outputHelper?.WriteLine($"{DateTime.Now.ToString("hh:mm:ss tt")}:RunProcessAndGetOutput:3");
             using (var p = new Process { EnableRaisingEvents = true, StartInfo = psi })
             {
                 DataReceivedEventHandler handler = delegate (object sender, DataReceivedEventArgs args)

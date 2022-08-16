@@ -2,79 +2,10 @@
   "version": "1.0",
   "tasks": [
     {
-      "taskType": "trigger",
-      "capabilityId": "AutoMerge",
-      "subCapability": "AutoMerge",
-      "version": "1.0",
-      "id": "_eeVr2w4J",
-      "config": {
-        "taskName": "Automatically squash and  merge PR once CI passes",
-        "label": "auto-merge",
-        "minMinutesOpen": "12",
-        "mergeType": "squash",
-        "deleteBranches": true,
-        "requireAllStatuses": true,
-        "minimumNumberOfCheckRuns": 4,
-        "removeLabelOnPush": true
-      }
-    },
-    {
-      "taskType": "trigger",
-      "capabilityId": "IssueResponder",
-      "subCapability": "PullRequestResponder",
-      "version": "1.0",
-      "id": "0aePnH83s",
-      "config": {
-        "conditions": {
-          "operator": "and",
-          "operands": [
-            {
-              "name": "prTargetsBranch",
-              "parameters": {
-                "branchName": "master"
-              }
-            },
-            {
-              "name": "isAction",
-              "parameters": {
-                "action": "merged"
-              }
-            },
-            {
-              "operator": "not",
-              "operands": [
-                {
-                  "name": "isInMilestone",
-                  "parameters": {}
-                }
-              ]
-            }
-          ]
-        },
-        "eventType": "pull_request",
-        "eventNames": [
-          "pull_request",
-          "issues",
-          "project_card"
-        ],
-        "actions": [
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "current-release"
-            }
-          }
-        ],
-        "taskName": "\"Current\" milestone for merged master PRs"
-      },
-      "disabled": true
-    },
-    {
       "taskType": "scheduled",
       "capabilityId": "ScheduledSearch",
       "subCapability": "ScheduledSearch",
       "version": "1.1",
-      "id": "Vs-iCm9G2_R4ZwMN511fw",
       "config": {
         "frequency": [
           {
@@ -136,12 +67,6 @@
             "name": "hasLabel",
             "parameters": {
               "label": "needs-more-info"
-            }
-          },
-          {
-            "name": "noLabel",
-            "parameters": {
-              "label": "needs-attention"
             }
           },
           {
@@ -207,7 +132,6 @@
       "capabilityId": "ScheduledSearch",
       "subCapability": "ScheduledSearch",
       "version": "1.1",
-      "id": "zyeSRvg_Epub_oXWwaxj3",
       "config": {
         "frequency": [
           {
@@ -298,7 +222,7 @@
           {
             "name": "noLabel",
             "parameters": {
-              "label": "needs-attention"
+              "label": "needs-triage"
             }
           }
         ],
@@ -329,7 +253,6 @@
       "capabilityId": "IssueResponder",
       "subCapability": "IssueCommentResponder",
       "version": "1.0",
-      "id": "WBzbPosGhniXQtQgm8oMm",
       "config": {
         "conditions": {
           "operator": "and",
@@ -372,7 +295,7 @@
           {
             "name": "addLabel",
             "parameters": {
-              "label": "needs-attention"
+              "label": "needs-triage"
             }
           }
         ]
@@ -384,7 +307,6 @@
       "capabilityId": "IssueResponder",
       "subCapability": "IssueCommentResponder",
       "version": "1.0",
-      "id": "GU-AG9bRpCo1aFfE07jUZ",
       "config": {
         "conditions": {
           "operator": "and",
@@ -421,12 +343,12 @@
         "eventNames": [
           "issue_comment"
         ],
-        "taskName": "Apply needs-attention to closed stale issues that get comments",
+        "taskName": "Apply needs-triage to closed stale issues that get comments",
         "actions": [
           {
             "name": "addLabel",
             "parameters": {
-              "label": "needs-attention"
+              "label": "needs-triage"
             }
           }
         ]
@@ -437,7 +359,6 @@
       "capabilityId": "IssueResponder",
       "subCapability": "IssuesOnlyResponder",
       "version": "1.0",
-      "id": "ny85tm-H4saOfDbOgErD3",
       "config": {
         "conditions": {
           "operator": "and",
@@ -475,141 +396,8 @@
     {
       "taskType": "trigger",
       "capabilityId": "IssueResponder",
-      "subCapability": "IssuesOnlyResponder",
-      "version": "1.0",
-      "id": "hpVo319FrpinWBwXVnK8s",
-      "config": {
-        "conditions": {
-          "operator": "and",
-          "operands": [
-            {
-              "name": "addedToMilestone",
-              "parameters": {
-                "milestoneName": "Backlog"
-              }
-            }
-          ]
-        },
-        "eventType": "issue",
-        "eventNames": [
-          "issues",
-          "project_card"
-        ],
-        "taskName": "When added to backlog, remove `needs-triage`",
-        "actions": [
-          {
-            "name": "removeLabel",
-            "parameters": {
-              "label": "needs-triage"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "taskType": "scheduled",
-      "capabilityId": "ScheduledSearch",
-      "subCapability": "ScheduledSearch",
-      "version": "1.1",
-      "id": "0JHwKtkOQj0mLYc7iUySl",
-      "config": {
-        "frequency": [
-          {
-            "weekDay": 0,
-            "hours": [
-              11,
-              12,
-              13
-            ],
-            "timezoneOffset": -7
-          },
-          {
-            "weekDay": 1,
-            "hours": [
-              11,
-              12,
-              13
-            ],
-            "timezoneOffset": -7
-          },
-          {
-            "weekDay": 2,
-            "hours": [
-              11,
-              12,
-              13
-            ],
-            "timezoneOffset": -7
-          },
-          {
-            "weekDay": 3,
-            "hours": [
-              11,
-              12,
-              13
-            ],
-            "timezoneOffset": -7
-          },
-          {
-            "weekDay": 4,
-            "hours": [
-              11,
-              12,
-              13
-            ],
-            "timezoneOffset": -7
-          },
-          {
-            "weekDay": 5,
-            "hours": [
-              11,
-              12,
-              13
-            ],
-            "timezoneOffset": -7
-          },
-          {
-            "weekDay": 6,
-            "hours": [
-              11,
-              12,
-              13
-            ],
-            "timezoneOffset": -7
-          }
-        ],
-        "searchTerms": [
-          {
-            "name": "hasLabel",
-            "parameters": {
-              "label": "bot-test"
-            }
-          },
-          {
-            "name": "created",
-            "parameters": {
-              "operator": "<",
-              "days": 1
-            }
-          }
-        ],
-        "taskName": "Post comment to bot-test",
-        "actions": [
-          {
-            "name": "removeLabel",
-            "parameters": {
-              "label": "bot-test"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "taskType": "trigger",
-      "capabilityId": "IssueResponder",
       "subCapability": "IssueCommentResponder",
       "version": "1.0",
-      "id": "4T-htFPPX7DIas5-BKvde",
       "config": {
         "conditions": {
           "operator": "and",
@@ -639,7 +427,7 @@
           {
             "name": "addLabel",
             "parameters": {
-              "label": "needs-attention"
+              "label": "needs-triage"
             }
           },
           {
@@ -649,7 +437,7 @@
             }
           },
           {
-            "name": "addLabel",
+            "name": "removeLabel",
             "parameters": {
               "label": "needs-more-info"
             }

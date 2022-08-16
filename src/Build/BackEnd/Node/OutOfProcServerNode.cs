@@ -84,9 +84,9 @@ namespace Microsoft.Build.Experimental
         }
 
         #region INode Members
-        
+
         /// <summary>
-        /// Starts up the node and processes messages until the node is requested to shut down.
+        /// Starts up the server node and processes all build requests until the server is requested to shut down.
         /// </summary>
         /// <param name="shutdownException">The exception which caused shutdown, if any.</param> 
         /// <returns>The reason for shutting down.</returns>
@@ -107,12 +107,32 @@ namespace Microsoft.Build.Experimental
                 return NodeEngineShutdownReason.Error;
             }
 
+            while(true)
+            {
+                NodeEngineShutdownReason shutdownReason = RunInternal(out shutdownException, handshake);
+                if (shutdownReason != NodeEngineShutdownReason.BuildCompleteReuse)
+                {
+                    return shutdownReason;
+                }
+
+                // We need to clear cache for two reasons:
+                // - cache file names can collide cross build requests, which would cause stale caching
+                // - we might need to avoid cache builds-up in files system during lifetime of server
+                FileUtilities.ClearCacheDirectory();
+                _shutdownEvent.Reset();
+            }
+
+            // UNREACHABLE
+        }
+
+        private NodeEngineShutdownReason RunInternal(out Exception? shutdownException, ServerNodeHandshake handshake)
+        {
             _nodeEndpoint = new ServerNodeEndpointOutOfProc(GetPipeName(handshake), handshake);
             _nodeEndpoint.OnLinkStatusChanged += OnLinkStatusChanged;
             _nodeEndpoint.Listen(this);
 
             var waitHandles = new WaitHandle[] { _shutdownEvent, _packetReceivedEvent };
-            
+
             // Get the current directory before doing any work. We need this so we can restore the directory when the node shutsdown.
             while (true)
             {
@@ -272,11 +292,27 @@ namespace Microsoft.Build.Experimental
                 case NodePacketType.ServerNodeBuildCommand:
                     HandleServerNodeBuildCommandAsync((ServerNodeBuildCommand)packet);
                     break;
+                case NodePacketType.NodeBuildComplete:
+                    HandleServerShutdownCommand((NodeBuildComplete)packet);
+                    break;
                 case NodePacketType.ServerNodeBuildCancel:
-                    BuildManager.DefaultBuildManager.CancelAllSubmissions();
+                    HandleBuildCancel();
                     break;
             }
         }
+
+        /// <summary>
+        /// NodeBuildComplete is used to signalize that node work is done (including server node)
+        /// and shall recycle or shutdown if PrepareForReuse is false.
+        /// </summary>
+        /// <param name="buildComplete"></param>
+        private void HandleServerShutdownCommand(NodeBuildComplete buildComplete)
+        {
+            _shutdownReason = buildComplete.PrepareForReuse ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
+            _shutdownEvent.Set();
+        }
+
+        private static void HandleBuildCancel() => BuildManager.DefaultBuildManager.CancelAllSubmissions();
 
         private void HandleServerNodeBuildCommandAsync(ServerNodeBuildCommand command)
         {
