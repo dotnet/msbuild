@@ -135,16 +135,19 @@ namespace Microsoft.DotNet.Cli
             ParseResult parseResult,
             string defaultedConfigurationProperty,
             IEnumerable<string> slnOrProjectArgs,
-            Option<string> configOption
+            Option<string> configOption,
+            IEnumerable<string> userPropertyArgs
             )
         {
             ProjectInstance project = null;
 
             IEnumerable<string> calledArguments = parseResult.Tokens.Select(x => x.ToString());
             IEnumerable<string> slnProjectAndCommandArgs = slnOrProjectArgs.Concat(calledArguments);
-            project = GetTargetedProject(slnProjectAndCommandArgs, defaultedConfigurationProperty);
+            if (!parseResult.HasOption(configOption) && !userPropertyArgs.Contains("Configuration") && !userPropertyArgs.Contains(defaultedConfigurationProperty))
+                // CLI Configuration values take precedence over ones in the project.
+                project = GetTargetedProject(slnProjectAndCommandArgs, defaultedConfigurationProperty);
 
-            if (project != null && !parseResult.HasOption(configOption))
+            if (project != null)
             {
                 string configurationToUse = "";
                 string releasePropertyFlag = project.GetPropertyValue(defaultedConfigurationProperty);
