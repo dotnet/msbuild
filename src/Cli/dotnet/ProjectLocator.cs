@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Cli
         /// <returns>A project instance that will be targeted to publish/pack, etc. null if one does not exist.</returns>
         public abstract ProjectInstance GetTargetedProject(IEnumerable<string> slnOrProjectArgs, string slnProjectPropertytoCheck = "");
 
-        /// <returns>The top-level project (first if multiple exist) in a SLN. Returns null if no top level project. Throws exception if two top level projects disagree
+        /// <returns>The executable project (first if multiple exist) in a SLN. Returns null if no executable project. Throws exception if executable projects disagree
         /// in the configuration property to check.</returns>
         public abstract ProjectInstance GetSlnProject(string potentialSlnPath, string slnProjectConfigPropertytoCheck = "");
 

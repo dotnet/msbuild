@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Cli
             return string.IsNullOrEmpty(potentialProject) ? null : TryGetProjectInstance(potentialProject);
         }
 
-        /// <returns>The top-level project (first if multiple exist) in a SLN. Returns null if no top level project. Throws exception if two top level projects disagree
+        /// <returns>The executable project (first if multiple exist) in a SLN. Returns null if no executable project. Throws exception if two executable projects disagree
         /// in the configuration property to check.</returns>
         public override ProjectInstance GetSlnProject(string slnPath, string slnProjectConfigPropertytoCheck = "")
         {
