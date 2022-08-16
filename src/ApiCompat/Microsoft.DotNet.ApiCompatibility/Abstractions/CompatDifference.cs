@@ -10,27 +10,21 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
     /// <summary>
     /// Class representing a difference of compatibility, containing detailed information about it.
     /// </summary>
-    public class CompatDifference : IDiagnostic, IEquatable<CompatDifference>
+    public readonly struct CompatDifference : IDiagnostic, IEquatable<CompatDifference>
     {
-        /// <summary>
-        /// The Diagnostic ID for this difference.
-        /// </summary>
-        public string DiagnosticId { get; }
+        /// <inheritdoc />
+        public readonly string DiagnosticId { get; }
 
         /// <summary>
         /// The <see cref="DifferenceType"/>.
         /// </summary>
-        public DifferenceType Type { get; }
+        public readonly DifferenceType Type { get; }
 
-        /// <summary>
-        /// A diagnostic message for the difference.
-        /// </summary>
-        public virtual string Message { get; }
+        /// <inheritdoc />
+        public readonly string Message { get; }
 
-        /// <summary>
-        /// A unique ID in order to identify the API that the difference was raised for.
-        /// </summary>
-        public string? ReferenceId { get; }
+        /// <inheritdoc />
+        public readonly string? ReferenceId { get; }
 
         /// <summary>
         /// Instantiate a new object representing the compatibility difference.
@@ -65,13 +59,16 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// <returns><see cref="string"/> describing the difference.</returns>
         public override string ToString() => $"{DiagnosticId} : {Message}";
 
-        public bool Equals(CompatDifference? other) => other != null &&
+        /// <inheritdoc />
+        public bool Equals(CompatDifference other) =>
             DiagnosticId.Equals(other.DiagnosticId, StringComparison.InvariantCultureIgnoreCase) &&
             Type.Equals(other.Type) &&
             string.Equals(ReferenceId, other.ReferenceId, StringComparison.InvariantCultureIgnoreCase);
 
+        /// <inheritdoc />
         public override bool Equals(object? obj) => obj is CompatDifference difference && Equals(difference);
 
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             int hashCode = 1447485498;
@@ -84,5 +81,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 
             return hashCode;
         }
+
+        /// <inheritdoc />
+        public static bool operator ==(CompatDifference left, CompatDifference right) => left.Equals(right);
+        
+        /// <inheritdoc />
+        public static bool operator !=(CompatDifference left, CompatDifference right) => !(left == right);
     }
 }

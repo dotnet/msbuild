@@ -35,7 +35,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 // checking for member additions on interfaces is checked on its own rule.
                 if (leftContainingType.TypeKind != TypeKind.Interface && !leftContainingType.IsEffectivelySealed(_settings.IncludeInternalSymbols))
                 {
-                    differences.Add(new CompatDifference(DiagnosticIds.CannotAddAbstractMember, string.Format(Resources.CannotAddAbstractMember, right.ToDisplayString(), rightName, leftName), DifferenceType.Added, right));
+                    differences.Add(new CompatDifference(
+                        DiagnosticIds.CannotAddAbstractMember,
+                        string.Format(Resources.CannotAddAbstractMember, right.ToDisplayString(), rightName, leftName),
+                        DifferenceType.Added,
+                        right));
                 }
             }
         }
