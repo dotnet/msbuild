@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Cli
     internal static class PackCommandParser
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-pack";
-        public static string customDefaultConfigurationProperty = "PackRelease";
+        public static readonly string CustomDefaultConfigurationProperty = "PackRelease";
 
         public static readonly Argument<IEnumerable<string>> SlnOrProjectArgument = new Argument<IEnumerable<string>>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
         {

@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PublishCommandParser.GetCommand()));
             ReleasePropertyProjectLocator projectLocator = new ReleasePropertyProjectLocator();
-            msbuildArgs.AddRange(projectLocator.GetCustomDefaultConfigurationValueIfSpecified(parseResult, PublishCommandParser.customDefaultConfigurationProperty,
+            msbuildArgs.AddRange(projectLocator.GetCustomDefaultConfigurationValueIfSpecified(parseResult, PublishCommandParser.CustomDefaultConfigurationProperty,
                 slnOrProjectArgs, PublishCommandParser.ConfigurationOption) ?? Array.Empty<string>());
             msbuildArgs.AddRange(slnOrProjectArgs ?? Array.Empty<string>());
 

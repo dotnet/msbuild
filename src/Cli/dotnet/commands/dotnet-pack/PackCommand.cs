@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Tools.Pack
 
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PackCommandParser.GetCommand()));
             ReleasePropertyProjectLocator projectLocator = new ReleasePropertyProjectLocator();
-            msbuildArgs.AddRange(projectLocator.GetCustomDefaultConfigurationValueIfSpecified(parseResult, PackCommandParser.customDefaultConfigurationProperty,
+            msbuildArgs.AddRange(projectLocator.GetCustomDefaultConfigurationValueIfSpecified(parseResult, PackCommandParser.CustomDefaultConfigurationProperty,
                 slnOrProjectArgs, PackCommandParser.ConfigurationOption) ?? Array.Empty<string>());
             msbuildArgs.AddRange(slnOrProjectArgs ?? Array.Empty<string>());
 
