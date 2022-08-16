@@ -73,14 +73,12 @@ namespace Microsoft.DotNet.Cli
             object projectDataLock = new object();
 
             bool shouldReturnNull = false;
+            const string executableProjectOutputType = "Exe"; // Note that even on Unix when we don't produce exe this is still an exe, same for ASP
+            const string solutionFolderGuid = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}";
+            const string sharedProjectGuid = "{D954291E-2A0B-460D-934E-DC6B0785DB48}";
 
             Parallel.ForEach(sln.Projects.AsEnumerable(), (project, state) =>
             {
-                const string executableProjectOutputType = "Exe"; // Note that even on Unix when we don't produce exe this is still an exe, same for ASP
-                const string solutionFolderGuid = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}";
-                const string sharedProjectGuid = "{D954291E-2A0B-460D-934E-DC6B0785DB48}";
-
-
                 if (project.TypeGuid == solutionFolderGuid || project.TypeGuid == sharedProjectGuid || !IsValidProjectFilePath(project.FilePath))
                     return;
 
