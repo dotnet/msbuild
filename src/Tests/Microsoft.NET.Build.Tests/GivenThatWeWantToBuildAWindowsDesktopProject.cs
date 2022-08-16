@@ -415,10 +415,11 @@ namespace Microsoft.NET.Build.Tests
             referencedWindowsSdkVersion.Should().Be(expectedWindowsSdkPackageVersion);
         }
 
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData("net5.0-windows10.0.22000.0", "10.0.22000.25")]
         [InlineData("net6.0-windows10.0.22000.0", "10.0.22000.26")]
-        public void ItUsesTheHighestMatchingWindowsSdkPackageVersion2(string targetFramework, string expectedWindowsSdkPackageVersion)
+        [InlineData("net6.0-windows10.0.19041.0", "10.0.19041.25")]
+        public void ItUsesTheHighestMatchingWindowsSdkPackageVersion(string targetFramework, string expectedWindowsSdkPackageVersion)
         {
             var testProject = new TestProject()
             {
@@ -433,8 +434,12 @@ namespace Microsoft.NET.Build.Tests
   <ItemGroup>
     <WindowsSdkSupportedTargetPlatformVersion Remove=""@(WindowsSdkSupportedTargetPlatformVersion)"" />
 
+    <WindowsSdkSupportedTargetPlatformVersion Include=""10.0.22621.0"" WindowsSdkPackageVersion=""10.0.22621.26"" MinimumNETVersion=""6.0"" />
+
     <WindowsSdkSupportedTargetPlatformVersion Include=""10.0.22000.0"" WindowsSdkPackageVersion=""10.0.22000.26"" MinimumNETVersion=""6.0"" />
     <WindowsSdkSupportedTargetPlatformVersion Include=""10.0.22000.0"" WindowsSdkPackageVersion=""10.0.22000.25"" MinimumNETVersion=""5.0"" />
+
+    <WindowsSdkSupportedTargetPlatformVersion Include=""10.0.19041.0"" WindowsSdkPackageVersion=""10.0.19041.25"" MinimumNETVersion=""5.0"" />
   </ItemGroup>");
 
                     project.Root.Add(testItems);
