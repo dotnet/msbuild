@@ -296,8 +296,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="ResolveStaticWebAssetsConfiguration">
     <PropertyGroup>
-      <_StaticWebAssetsManifestBase>$(BaseIntermediateOutputPath)$(Configuration)\</_StaticWebAssetsManifestBase>
-      <_StaticWebAssetsManifestBase Condition="'$(AppendTargetFrameworkToOutputPath)' != 'false'">$(_StaticWebAssetsManifestBase)$(TargetFramework.ToLowerInvariant())\</_StaticWebAssetsManifestBase>
+      <_StaticWebAssetsManifestBase Condition="'$(_StaticWebAssetsManifestBase)' == ''">$(IntermediateOutputPath)</_StaticWebAssetsManifestBase>
       <StaticWebAssetBasePath Condition="'$(StaticWebAssetBasePath)' == ''">_content/$(PackageId)</StaticWebAssetBasePath>
       <StaticWebAssetProjectMode Condition="'$(StaticWebAssetProjectMode)' == ''">Default</StaticWebAssetProjectMode>
       <StaticWebAssetBuildManifestPath>$(_StaticWebAssetsManifestBase)staticwebassets.build.json</StaticWebAssetBuildManifestPath>
