@@ -109,7 +109,7 @@ namespace Microsoft.DotNet.Cli
                         lock (projectDataLock)
                         {
                             configuredProjects.Add(projectData); // we don't care about race conditions here
-                            configValues.Add(useReleaseConfiguraton);
+                            configValues.Add(useReleaseConfiguraton.ToLower());
                         }
                     }
                 }
