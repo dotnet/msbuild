@@ -58,9 +58,9 @@ namespace Microsoft.DotNet.Cli
             // This has a performance overhead so don't do this unless opted in.
             if (
                 // PublishRelease v
-                (slnProjectConfigPropertytoCheck == PublishCommandParser.customDefaultConfigurationProperty && Environment.GetEnvironmentVariable(PublishCommandParser.enablePublishReleaseSolutionEnvironmentVar) == null)
+                (slnProjectConfigPropertytoCheck == PublishCommandParser.CustomDefaultConfigurationProperty && Environment.GetEnvironmentVariable(EnvironmentVariableNames.ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS) == null)
                 || // PackRelease v
-                (slnProjectConfigPropertytoCheck == PackCommandParser.customDefaultConfigurationProperty && Environment.GetEnvironmentVariable(PackCommandParser.enablePackReleaseSolutionEnvironmentVar) == null)
+                (slnProjectConfigPropertytoCheck == PackCommandParser.CustomDefaultConfigurationProperty && Environment.GetEnvironmentVariable(EnvironmentVariableNames.ENABLE_PACK_RELEASE_FOR_SOLUTIONS) == null)
                 )
                 return null; // The user will be warned if they do not have this set and try this scenario with one of the properties set.
 
