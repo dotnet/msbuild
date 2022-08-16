@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,6 +20,11 @@ namespace Microsoft.DotNet.Cli
 {
     class ReleasePropertyProjectLocator : ProjectLocator
     {
+        public ReleasePropertyProjectLocator(bool shouldCheckSolutionsForProjects)
+        {
+            checkSolutions = shouldCheckSolutionsForProjects;
+        }
+
         /// <param name="slnProjectPropertytoCheck">A property to enforce if we are looking into SLN files. If projects disagree on the property, throws exception.</param>
         /// <returns>A project instance that will be targeted to publish/pack, etc. null if one does not exist.</returns>
         public override ProjectInstance GetTargetedProject(IEnumerable<string> slnOrProjectArgs, string slnProjectPropertytoCheck = "")
@@ -56,13 +62,9 @@ namespace Microsoft.DotNet.Cli
         public override ProjectInstance GetSlnProject(string slnPath, string slnProjectConfigPropertytoCheck = "")
         {
             // This has a performance overhead so don't do this unless opted in.
-            if (
-                // PublishRelease v
-                (slnProjectConfigPropertytoCheck == PublishCommandParser.CustomDefaultConfigurationProperty && Environment.GetEnvironmentVariable(EnvironmentVariableNames.ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS) == null)
-                || // PackRelease v
-                (slnProjectConfigPropertytoCheck == PackCommandParser.CustomDefaultConfigurationProperty && Environment.GetEnvironmentVariable(EnvironmentVariableNames.ENABLE_PACK_RELEASE_FOR_SOLUTIONS) == null)
-                )
-                return null; // The user will be warned if they do not have this set and try this scenario with one of the properties set.
+            if (!checkSolutions)
+                return null;
+            Debug.Assert(slnProjectConfigPropertytoCheck == "PublishRelease" || slnProjectConfigPropertytoCheck == "PackRelease", "Only PackRelease or PublishRelease are currently expected");
 
             SlnFile sln;
             try
@@ -115,7 +117,7 @@ namespace Microsoft.DotNet.Cli
 
             if (configuredProjects.Any() && configValues.Count > 1 && !shouldReturnNull)
             {
-                throw new GracefulException(CommonLocalizableStrings.TopLevelPublishConfigurationMismatchError);
+                throw new GracefulException(CommonLocalizableStrings.SolutionExecutableConfigurationMismatchError, slnProjectConfigPropertytoCheck, configuredProjects.First().FullPath);
             }
 
             return shouldReturnNull ? null : configuredProjects.FirstOrDefault();

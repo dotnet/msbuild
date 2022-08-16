@@ -12,6 +12,8 @@ namespace Microsoft.DotNet.Cli
 {
     abstract class ProjectLocator
     {
+        protected bool checkSolutions;
+
         /// <returns>A project instance that will be targeted to publish/pack, etc. null if one does not exist.</returns>
         public abstract ProjectInstance GetTargetedProject(IEnumerable<string> slnOrProjectArgs, string slnProjectPropertytoCheck = "");
 
@@ -42,7 +44,6 @@ namespace Microsoft.DotNet.Cli
         {
             return project.GlobalProperties.ContainsKey("Configuration");
         }
-
 
     }
 }

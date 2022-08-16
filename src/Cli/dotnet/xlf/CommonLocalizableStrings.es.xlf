@@ -192,6 +192,11 @@ El valor predeterminado es "true" si se especifica un identificador de entorno d
         <target state="translated">Solución</target>
         <note />
       </trans-unit>
+      <trans-unit id="SolutionExecutableConfigurationMismatchError">
+        <source>Multiple executable projects in the solution contain conflicting '{0}' values. See '{1}'. To use conflicting configurations, make the values match. Consider using a Directory.build.props file to set all project configurations.</source>
+        <target state="new">Multiple executable projects in the solution contain conflicting '{0}' values. See '{1}'. To use conflicting configurations, make the values match. Consider using a Directory.build.props file to set all project configurations.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SolutionFile">
         <source>Solution file</source>
         <target state="translated">Archivo de solución</target>
@@ -235,11 +240,6 @@ El valor predeterminado es "true" si se especifica un identificador de entorno d
       <trans-unit id="Delete">
         <source>Delete</source>
         <target state="translated">Eliminar</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="TopLevelPublishConfigurationMismatchError">
-        <source>Multiple top-level projects in the given solution contain conflicting PublishRelease or PackRelease values. To use conflicting configurations, leverage a Directory.build.props file instead of setting flags that don't match.</source>
-        <target state="new">Multiple top-level projects in the given solution contain conflicting PublishRelease or PackRelease values. To use conflicting configurations, leverage a Directory.build.props file instead of setting flags that don't match.</target>
         <note />
       </trans-unit>
       <trans-unit id="Update">
