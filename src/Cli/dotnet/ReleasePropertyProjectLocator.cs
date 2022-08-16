@@ -118,7 +118,7 @@ namespace Microsoft.DotNet.Cli
                 throw new GracefulException(CommonLocalizableStrings.TopLevelPublishConfigurationMismatchError);
             }
 
-            return shouldReturnNull || configuredProjects.Count == 0 ? null : configuredProjects.First();
+            return shouldReturnNull ? null : configuredProjects.FirstOrDefault();
         }
 
         /// <summary>
