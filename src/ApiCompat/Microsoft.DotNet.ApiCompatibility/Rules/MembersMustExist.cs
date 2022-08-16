@@ -1,11 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Extensions;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
@@ -33,11 +32,19 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         {
             if (left != null && right == null)
             {
-                differences.Add(CreateDifference(left, DiagnosticIds.TypeMustExist, DifferenceType.Removed, Resources.TypeExistsOnLeft, leftName, rightName));
+                differences.Add(new CompatDifference(
+                    DiagnosticIds.TypeMustExist,
+                    string.Format(Resources.TypeExistsOnLeft, left.ToDisplayString(), leftName, rightName),
+                    DifferenceType.Removed,
+                    left));
             }
             else if (_settings.StrictMode && left == null && right != null)
             {
-                differences.Add(CreateDifference(right, DiagnosticIds.TypeMustExist, DifferenceType.Added, Resources.TypeExistsOnRight, leftName, rightName));
+                differences.Add(new CompatDifference(
+                    DiagnosticIds.TypeMustExist,
+                    string.Format(Resources.TypeExistsOnRight, right.ToDisplayString(), leftName, rightName),
+                    DifferenceType.Added,
+                    right));
             }
         }
 
@@ -52,21 +59,25 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             {
                 if (ShouldReportMissingMember(left, rightContainingType))
                 {
-                    differences.Add(CreateDifference(left, DiagnosticIds.MemberMustExist, DifferenceType.Removed, Resources.MemberExistsOnLeft, leftName, rightName));
+                    differences.Add(new CompatDifference(
+                        DiagnosticIds.MemberMustExist,
+                        string.Format(Resources.MemberExistsOnLeft, left.ToDisplayString(), leftName, rightName),
+                        DifferenceType.Removed,
+                        left));
                 }
             }
             else if (_settings.StrictMode && left == null && right != null)
             {
                 if (ShouldReportMissingMember(right, leftContainingType))
                 {
-                    differences.Add(CreateDifference(right, DiagnosticIds.MemberMustExist, DifferenceType.Added, Resources.MemberExistsOnRight, leftName, rightName));
+                    differences.Add(new CompatDifference(
+                        DiagnosticIds.MemberMustExist,
+                        string.Format(Resources.MemberExistsOnRight, right.ToDisplayString(), leftName, rightName),
+                        DifferenceType.Added,
+                        right));
                 }
             }
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static CompatDifference CreateDifference(ISymbol symbol, string id, DifferenceType type, string format, string leftName, string rightName) =>
-            new(id, string.Format(format, symbol.ToDisplayString(), leftName, rightName), type, symbol);
 
         private static bool ShouldReportMissingMember(ISymbol symbol, ITypeSymbol containingType)
         {
