@@ -426,7 +426,7 @@ namespace Microsoft.NET.Build.Tests
                 TargetFrameworks = targetFramework
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework)
                 .WithProjectChanges(project =>
                 {
                     //  Add items for available SDK versions for test
