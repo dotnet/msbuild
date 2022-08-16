@@ -122,7 +122,7 @@ namespace Microsoft.DotNet.Cli
         }
 
         /// <summary>
-        /// Provide a CLI input to change configuration based on 
+        /// Returns dotnet CLI command-line parameters (or an empty list) to change configuration based on 
         /// a boolean that may or may not exist in the targeted project.
         /// <param name="defaultedConfigurationProperty">The boolean property to check the project for. Ex: PublishRelease</param>
         /// <param name="slnOrProjectArgs">The arguments or solution passed to a dotnet invocation.</param>
