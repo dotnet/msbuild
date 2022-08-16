@@ -403,6 +403,55 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework + useWindowsSDKPreview + windowsSdkPackageVersion);
 
+            string referencedWindowsSdkVersion =  GetReferencedWindowsSdkVersion(testAsset);
+
+            //  The patch version of the Windows SDK Ref pack will change over time, so we use a '*' in the expected version to indicate that and replace it with
+            //  the 4th part of the version number of the resolved package.
+            if (expectedWindowsSdkPackageVersion.Contains('*'))
+            {
+                expectedWindowsSdkPackageVersion = expectedWindowsSdkPackageVersion.Replace("*", new Version(referencedWindowsSdkVersion).Revision.ToString());
+            }
+
+            referencedWindowsSdkVersion.Should().Be(expectedWindowsSdkPackageVersion);
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData("net5.0-windows10.0.22000.0", "10.0.22000.25")]
+        [InlineData("net6.0-windows10.0.22000.0", "10.0.22000.26")]
+        [InlineData("net6.0-windows10.0.19041.0", "10.0.19041.25")]
+        public void ItUsesTheHighestMatchingWindowsSdkPackageVersion(string targetFramework, string expectedWindowsSdkPackageVersion)
+        {
+            var testProject = new TestProject()
+            {
+                TargetFrameworks = targetFramework
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework)
+                .WithProjectChanges(project =>
+                {
+                    //  Add items for available SDK versions for test
+                    var testItems = XElement.Parse(@"
+  <ItemGroup>
+    <WindowsSdkSupportedTargetPlatformVersion Remove=""@(WindowsSdkSupportedTargetPlatformVersion)"" />
+
+    <WindowsSdkSupportedTargetPlatformVersion Include=""10.0.22621.0"" WindowsSdkPackageVersion=""10.0.22621.26"" MinimumNETVersion=""6.0"" />
+
+    <WindowsSdkSupportedTargetPlatformVersion Include=""10.0.22000.0"" WindowsSdkPackageVersion=""10.0.22000.26"" MinimumNETVersion=""6.0"" />
+    <WindowsSdkSupportedTargetPlatformVersion Include=""10.0.22000.0"" WindowsSdkPackageVersion=""10.0.22000.25"" MinimumNETVersion=""5.0"" />
+
+    <WindowsSdkSupportedTargetPlatformVersion Include=""10.0.19041.0"" WindowsSdkPackageVersion=""10.0.19041.25"" MinimumNETVersion=""5.0"" />
+  </ItemGroup>");
+
+                    project.Root.Add(testItems);
+                });
+
+            string referencedWindowsSdkVersion = GetReferencedWindowsSdkVersion(testAsset);
+            referencedWindowsSdkVersion.Should().Be(expectedWindowsSdkPackageVersion);
+
+        }
+
+        private string GetReferencedWindowsSdkVersion(TestAsset testAsset)
+        {
             var getValueCommand = new GetValuesCommand(testAsset, "PackageDownload", GetValuesCommand.ValueType.Item);
             getValueCommand.ShouldRestore = false;
             getValueCommand.DependsOnTargets = "_CheckForInvalidConfigurationAndPlatform;CollectPackageDownloads";
@@ -419,15 +468,7 @@ namespace Microsoft.NET.Build.Tests
             packageDownloadVersion[0].Should().Be('[');
             packageDownloadVersion.Last().Should().Be(']');
 
-            //  The patch version of the Windows SDK Ref pack will change over time, so we use a '*' in the expected version to indicate that and replace it with
-            //  the 4th part of the version number of the resolved package.
-            var trimmedPackageDownloadVersion = packageDownloadVersion.Substring(1, packageDownloadVersion.Length - 2);
-            if (expectedWindowsSdkPackageVersion.Contains('*'))
-            {
-                expectedWindowsSdkPackageVersion = expectedWindowsSdkPackageVersion.Replace("*", new Version(trimmedPackageDownloadVersion).Revision.ToString());
-            }
-
-            trimmedPackageDownloadVersion.Should().Be(expectedWindowsSdkPackageVersion);
+            return packageDownloadVersion.Substring(1, packageDownloadVersion.Length - 2);
         }
 
         private string GetPropertyValue(TestAsset testAsset, string propertyName)
