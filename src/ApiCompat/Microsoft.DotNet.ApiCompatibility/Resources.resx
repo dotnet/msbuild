@@ -132,13 +132,13 @@
   <data name="CannotAddAbstractMember" xml:space="preserve">
     <value>Cannot add abstract member '{0}' to {1} because it does not exist on {2}</value>
   </data>
-  <data name="AssembyCultureDoesNotMatch" xml:space="preserve">
+  <data name="AssemblyCultureDoesNotMatch" xml:space="preserve">
     <value>{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</value>
   </data>
-  <data name="AssembyVersionDoesNotMatch" xml:space="preserve">
+  <data name="AssemblyVersionDoesNotMatch" xml:space="preserve">
     <value>{3} assembly version '{1}' should be equal to {2} version '{0}'.</value>
   </data>
-  <data name="AssembyVersionIsNotCompatible" xml:space="preserve">
+  <data name="AssemblyVersionIsNotCompatible" xml:space="preserve">
     <value>{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</value>
   </data>
   <data name="CouldNotResolveReference" xml:space="preserve">
@@ -183,11 +183,8 @@
   <data name="StreamPositionGreaterThanLength" xml:space="preserve">
     <value>Stream position is greater than it's length, so there are no contents available to read.</value>
   </data>
-  <data name="TypeExistsOnLeft" xml:space="preserve">
+  <data name="TypeMissingOnSide" xml:space="preserve">
     <value>Type '{0}' exists on {1} but not on {2}</value>
-  </data>
-  <data name="TypeExistsOnRight" xml:space="preserve">
-    <value>Type '{0}' exists on {2} but not on {1}</value>
   </data>
   <data name="VisitorRightCountShouldMatchMappersSetSize" xml:space="preserve">
     <value>The provided right count when creating the visitor should match the right set size specified for the mappers.</value>
