@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             context.RegisterOnMemberSymbolAction(RunOnMemberSymbol);
         }
 
-        private void RunOnMemberSymbol(ISymbol? left, ISymbol? right, ITypeSymbol leftContainingType, ITypeSymbol rightContainingType, string leftName, string rightName, IList<CompatDifference> differences)
+        private void RunOnMemberSymbol(ISymbol? left, ISymbol? right, ITypeSymbol leftContainingType, ITypeSymbol rightContainingType, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences)
         {
             // Members must exist
             if (left is null || right is null)
@@ -43,6 +43,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 if (!right.IsVirtual)
                 {
                     differences.Add(new CompatDifference(
+                        leftMetadata,
+                        rightMetadata,
                         DiagnosticIds.CannotRemoveVirtualFromMember,
                         string.Format(Resources.CannotRemoveVirtualFromMember, left),
                         DifferenceType.Removed,
@@ -59,6 +61,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 if (right.IsVirtual)
                 {
                     differences.Add(new CompatDifference(
+                        leftMetadata,
+                        rightMetadata,
                         DiagnosticIds.CannotAddVirtualToMember,
                         string.Format(Resources.CannotAddVirtualToMember, right),
                         DifferenceType.Added,

@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             context.RegisterOnTypeSymbolAction(RunOnTypeSymbol);
         }
 
-        private void RunOnTypeSymbol(ITypeSymbol? left, ITypeSymbol? right, string leftName, string rightName, IList<CompatDifference> differences)
+        private void RunOnTypeSymbol(ITypeSymbol? left, ITypeSymbol? right, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences)
         {
             // Ensure that this rule only runs on enums.
             if (!IsEnum(left) || !IsEnum(right))
@@ -45,6 +45,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             if (!_settings.SymbolComparer.Equals(leftType, rightType))
             {
                 differences.Add(new CompatDifference(
+                    leftMetadata,
+                    rightMetadata,
                     DiagnosticIds.EnumTypesMustMatch,
                     string.Format(Resources.EnumTypesMustMatch, left.Name, leftType, rightType),
                     DifferenceType.Changed,
@@ -75,6 +77,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 if (lEntry.Value.ConstantValue is not object lval || rField.ConstantValue is not object rval || !lval.Equals(rval))
                 {
                     differences.Add(new CompatDifference(
+                        leftMetadata,
+                        rightMetadata,
                         DiagnosticIds.EnumValuesMustMatch,
                         string.Format(Resources.EnumValuesMustMatch, left.Name, lEntry.Key, lEntry.Value.ConstantValue, rField.ConstantValue),
                         DifferenceType.Changed,

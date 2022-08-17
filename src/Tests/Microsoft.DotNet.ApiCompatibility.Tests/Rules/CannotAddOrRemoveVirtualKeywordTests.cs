@@ -29,10 +29,11 @@ namespace CompatTests {{
             var differences = new CompatDifference[args.Length];
             for (int i = 0; i < args.Length; i++)
             {
-                string diagnosticId = args[i].dt == DifferenceType.Removed
-                    ? DiagnosticIds.CannotRemoveVirtualFromMember
-                    : DiagnosticIds.CannotAddVirtualToMember;
-                differences[i] = new CompatDifference(diagnosticId, string.Empty, args[i].dt, args[i].memberId);
+                differences[i] = CompatDifference.CreateWithDefaultMetadata(
+                    args[i].dt == DifferenceType.Removed ? DiagnosticIds.CannotRemoveVirtualFromMember : DiagnosticIds.CannotAddVirtualToMember,
+                    string.Empty,
+                    args[i].dt,
+                    args[i].memberId);
             }
             return differences;
         }
@@ -194,11 +195,11 @@ namespace CompatTests
             // Register CannotAddOrRemoveVirtualKeyword and MemberMustExist rules as this test validates both.
             ApiComparer differ = new(s_ruleFactory.WithRule((settings, context) => new MembersMustExist(settings, context)));
 
-            IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
             CompatDifference[] expected = new[]
             {
-                new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.F"),
+                CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.F"),
             };
             Assert.Equal(expected, differences);
         }

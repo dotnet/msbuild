@@ -27,6 +27,12 @@ namespace Microsoft.DotNet.ApiCompatibility
                     return method.Name;
             }
 
+            if (symbol is IAssemblySymbol assembly)
+            {
+                // When mapping assemblies, we must ignore the version, culture and token.
+                return assembly.Identity.Name;
+            }
+
             return symbol.ToComparisonDisplayString();
         }
     }

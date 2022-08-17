@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             context.RegisterOnTypeSymbolAction(RunOnTypeSymbol);
         }
 
-        private void RunOnTypeSymbol(ITypeSymbol? left, ITypeSymbol? right, string leftName, string rightName, IList<CompatDifference> differences)
+        private void RunOnTypeSymbol(ITypeSymbol? left, ITypeSymbol? right, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences)
         {
             if (left == null || right == null || left.TypeKind == TypeKind.Interface || right.TypeKind == TypeKind.Interface)
                 return;
@@ -29,16 +29,20 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             if (!isLeftSealed && isRightSealed)
             {
                 differences.Add(new CompatDifference(
+                    leftMetadata,
+                    rightMetadata,
                     DiagnosticIds.CannotSealType,
-                    string.Format(GetResourceStringForTypeState(right), right.ToDisplayString(), rightName, leftName),
+                    string.Format(GetResourceStringForTypeState(right), right.ToDisplayString(), rightMetadata, leftMetadata),
                     DifferenceType.Changed,
                     right));
             }
             else if (_settings.StrictMode && !isRightSealed && isLeftSealed)
             {
                 differences.Add(new CompatDifference(
+                    leftMetadata,
+                    rightMetadata,
                     DiagnosticIds.CannotSealType,
-                    string.Format(GetResourceStringForTypeState(left), left.ToDisplayString(), leftName, rightName),
+                    string.Format(GetResourceStringForTypeState(left), left.ToDisplayString(), leftMetadata, rightMetadata),
                     DifferenceType.Changed,
                     left));
             }
