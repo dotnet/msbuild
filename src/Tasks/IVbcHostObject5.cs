@@ -20,7 +20,7 @@ namespace Microsoft.Build.Tasks.Hosting
     {
         IVbcHostObjectFreeThreaded GetFreeThreadedHostObject();
         [PreserveSig]
-        public int CompileAsync(out IntPtr buildSucceededEvent, out IntPtr buildFailedEvent);
+        int CompileAsync(out IntPtr buildSucceededEvent, out IntPtr buildFailedEvent);
         [PreserveSig]
         int EndCompile(bool buildSuccess);
 
