@@ -19,6 +19,7 @@ using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using NuGet.Versioning;
 using Command = System.CommandLine.Command;
@@ -87,7 +88,7 @@ namespace Microsoft.DotNet.Workloads.Workload
                 if (!skipManifestUpdate)
                 {
                     DirectoryPath folderForManifestDownloads;
-                    tempPath = new DirectoryPath(Path.Combine(TempDirectoryPath, "dotnet-manifest-extraction"));
+                    tempPath = new DirectoryPath(FileUtilities.CreateTempPath());
                     string extractedManifestsPath = Path.Combine(tempPath.Value.Value, "manifests");
 
                     if (downloadFolder != null)

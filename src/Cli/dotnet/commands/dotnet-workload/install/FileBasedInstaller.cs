@@ -18,6 +18,7 @@ using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.NET.Build.Tasks;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -51,7 +52,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             _userProfileDir = userProfileDir;
             _dotnetDir = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
-            _tempPackagesDir = new DirectoryPath(tempDirPath ?? Path.GetTempPath());
+            // Security owness of custom temp path is on the user.
+            _tempPackagesDir = new DirectoryPath(tempDirPath ?? FileUtilities.CreateTempPath());
             ILogger logger = verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger();
             _restoreActionConfig = restoreActionConfig;
             _nugetPackageDownloader = nugetPackageDownloader ??
@@ -188,7 +190,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                 Directory.Delete(dir, true);
                             }
                         }
-                    });         
+                    });
             }
         }
 
