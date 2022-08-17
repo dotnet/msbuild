@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.Cli
 
             if (configuredProjects.Any() && configValues.Count > 1 && !shouldReturnNull)
             {
-                throw new GracefulException(CommonLocalizableStrings.SolutionExecutableConfigurationMismatchError, slnProjectConfigPropertytoCheck, configuredProjects.First().FullPath);
+                throw new GracefulException(CommonLocalizableStrings.SolutionExecutableConfigurationMismatchError, slnProjectConfigPropertytoCheck, String.Join("\n", (configuredProjects).Select(x => x.FullPath)));
             }
 
             return shouldReturnNull ? null : configuredProjects.FirstOrDefault();
@@ -164,9 +164,9 @@ namespace Microsoft.DotNet.Cli
         private bool ArgsContainsProperty(IEnumerable<string> msbuildargs, string propertyToCheck)
         {
             var calledProperties = MSBuildPropertyParser.ParseProperties(String.Join(";", msbuildargs));
-            foreach(var calledProperty in calledProperties)
+            foreach (var calledProperty in calledProperties)
             {
-                if(calledProperty.value == propertyToCheck)
+                if (calledProperty.value == propertyToCheck)
                     return true;
             }
             return false;

@@ -542,7 +542,7 @@ public static class Program
         public void It_warns_if_PublishRelease_set_on_sln_but_env_var_not_used()
         {
             var slnDir = _testAssetsManager
-               .CopyTestAsset("TestAppWithSlnUsingPublishRelease", "PublishReleaseSln")
+               .CopyTestAsset("TestAppWithSlnUsingPublishRelease", "PublishReleaseSlnNoEnvVar")
                .WithSource()
                .Path;
 
@@ -594,7 +594,7 @@ public static class Program
         public void PublishRelease_does_not_override_Configuration_on_proj()
         {
             var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld", "PublishReleaseHelloWorldCsProj")
+               .CopyTestAsset("HelloWorld", "PublishReleaseHelloWorldCsProjConfigOverride")
                .WithSource()
                .WithTargetFramework(ToolsetInfo.CurrentTargetFramework)
                .WithProjectChanges(project =>
@@ -625,7 +625,7 @@ public static class Program
         public void PublishRelease_does_not_override_Configuration_property()
         {
             var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld", "PublishReleaseHelloWorldCsProj")
+               .CopyTestAsset("HelloWorld", "PublishReleaseHelloWorldCsProjConfigPropOverride")
                .WithSource()
                .WithTargetFramework(ToolsetInfo.CurrentTargetFramework)
                .WithProjectChanges(project =>
@@ -655,7 +655,7 @@ public static class Program
         public void PublishRelease_does_not_override_Configuration_option()
         {
             var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld", "PublishReleaseHelloWorldCsProj")
+               .CopyTestAsset("HelloWorld", "PublishReleaseHelloWorldCsProjConfigOptionOverride")
                .WithSource()
                .WithTargetFramework(ToolsetInfo.CurrentTargetFramework)
                .WithProjectChanges(project =>
