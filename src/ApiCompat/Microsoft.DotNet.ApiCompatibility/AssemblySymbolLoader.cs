@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
@@ -21,7 +23,8 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// Dictionary that holds the paths to help loading dependencies. Keys will be assembly name and 
         /// value are the containing folder.
         /// </summary>
-        private readonly Dictionary<string, string> _referencePaths = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, string> _referencePathFiles = new(StringComparer.OrdinalIgnoreCase);
+        private readonly HashSet<string> _referencePathDirectories = new(StringComparer.OrdinalIgnoreCase);
         private readonly List<AssemblyLoadWarning> _warnings = new();
         private readonly Dictionary<string, MetadataReference> _loadedAssemblies;
         private readonly bool _resolveReferences;
@@ -37,34 +40,23 @@ namespace Microsoft.DotNet.ApiCompatibility
         }
 
         /// <inheritdoc />
-        public void AddReferenceSearchDirectories(string paths) => AddReferenceSearchDirectories(SplitPaths(paths));
-
-        /// <inheritdoc />
-        public void AddReferenceSearchDirectories(IEnumerable<string> paths)
+        public void AddReferenceSearchPaths(params string[] paths)
         {
-            if (paths == null)
-            {
-                throw new ArgumentNullException(nameof(paths));
-            }
-
             foreach (string path in paths)
             {
-                FileAttributes attr = File.GetAttributes(path);
-
-                if (attr.HasFlag(FileAttributes.Directory))
+                if (Directory.Exists(path))
                 {
-                    if (!_referencePaths.ContainsKey(path))
-                        _referencePaths.Add(path, path);
+                    _referencePathDirectories.Add(path);
                 }
                 else
                 {
                     string assemblyName = Path.GetFileName(path);
-                    if (!_referencePaths.ContainsKey(assemblyName))
+                    if (!_referencePathFiles.ContainsKey(assemblyName))
                     {
                         string? directoryName = Path.GetDirectoryName(path);
                         if (directoryName != null)
                         {
-                            _referencePaths.Add(assemblyName, directoryName);
+                            _referencePathFiles.Add(assemblyName, directoryName);
                         }
                     }
                 }
@@ -72,41 +64,87 @@ namespace Microsoft.DotNet.ApiCompatibility
         }
 
         /// <inheritdoc />
-        public bool HasRoslynDiagnostics(out IEnumerable<Diagnostic> diagnostics)
+        public bool HasRoslynDiagnostics(out IReadOnlyList<Diagnostic> diagnostics)
         {
             diagnostics = _cSharpCompilation.GetDiagnostics();
-            return diagnostics.Any();
+            return diagnostics.Count > 0;
         }
 
-        private static string[] SplitPaths(string paths) =>
-            paths.Split(new char[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
-
         /// <inheritdoc />
-        public bool HasLoadWarnings(out IEnumerable<AssemblyLoadWarning> warnings)
+        public bool HasLoadWarnings(out IReadOnlyList<AssemblyLoadWarning> warnings)
         {
             warnings = _warnings;
             return _warnings.Count > 0;
         }
 
         /// <inheritdoc />
-        public IEnumerable<IAssemblySymbol> LoadAssemblies(string paths) => LoadAssemblies(SplitPaths(paths));
-
-        /// <inheritdoc />
-        public IEnumerable<IAssemblySymbol> LoadAssemblies(IEnumerable<string> paths)
+        public IReadOnlyList<IAssemblySymbol?> LoadAssemblies(params string[] paths)
         {
-            IEnumerable<MetadataReference> assembliesToReturn = LoadFromPaths(paths);
+            // First resolve all assemblies that are passed in and create metadata references out of them.
+            // Reference assemblies of the passed in assemblies that themselves are passed in, will be skipped to be resolved,
+            // as they are resolved as part of the loop below.
+            ImmutableHashSet<string> fileNames = paths.Select(path => Path.GetFileName(path)).ToImmutableHashSet();
+            IReadOnlyList<MetadataReference> assembliesToReturn = LoadFromPaths(paths, fileNames);
 
-            List<IAssemblySymbol> result = new();
-            foreach (MetadataReference metadataReference in assembliesToReturn)
+            // Create IAssemblySymbols out of the MetadataReferences.
+            // Doing this after resolving references to make sure that references are available.
+            IAssemblySymbol?[] assemblySymbols = new IAssemblySymbol[assembliesToReturn.Count];
+            for (int i = 0; i < assembliesToReturn.Count; i++)
             {
+                MetadataReference metadataReference = assembliesToReturn[i];
                 ISymbol? symbol = _cSharpCompilation.GetAssemblyOrModuleSymbol(metadataReference);
-                if (symbol is IAssemblySymbol assemblySymbol)
-                {
-                    result.Add(assemblySymbol);
-                }
+                assemblySymbols[i] = symbol as IAssemblySymbol;
             }
 
-            return result;
+            return assemblySymbols;
+        }
+
+        /// <inheritdoc />
+        public IReadOnlyList<IAssemblySymbol?> LoadAssembliesFromArchive(string archivePath, IReadOnlyList<string> relativePaths)
+        {
+            using FileStream stream = File.OpenRead(archivePath);
+            ZipArchive zipFile = new(stream);
+
+            // First resolve all assemblies that are passed in and create metadata references out of them. Reference assemblies of the
+            // assemblies inside the archive that themselves are part of the archive will be skipped to be resolved, as they are resolved
+            // as part of the loop below.
+            ImmutableHashSet<string> fileNames = relativePaths.Select(relativePath => Path.GetFileName(relativePath)).ToImmutableHashSet();
+            MetadataReference?[] metadataReferences = new MetadataReference[relativePaths.Count];
+            for (int i = 0; i < relativePaths.Count; i++)
+            {
+                ZipArchiveEntry? entry = zipFile.GetEntry(relativePaths[i]);
+                if (entry == null)
+                {
+                    metadataReferences[i] = null;
+                    continue;
+                }
+
+                using MemoryStream memoryStream = new();
+                entry.Open().CopyTo(memoryStream);
+                memoryStream.Seek(0, SeekOrigin.Begin);
+
+                string name = Path.GetFileName(relativePaths[i]);
+                if (!_loadedAssemblies.TryGetValue(name, out MetadataReference? metadataReference))
+                {
+                    metadataReference = CreateAndAddReferenceToCompilation(name, memoryStream, fileNames);
+                }
+
+                metadataReferences[i] = metadataReference;
+            }
+
+            // Create IAssemblySymbols out of the MetadataReferences. At this point, references are resolved
+            // and part of the compilation context.
+            IAssemblySymbol?[] assemblySymbols = new IAssemblySymbol[metadataReferences.Length];
+            for (int i = 0; i < metadataReferences.Length; i++)
+            {
+                MetadataReference? metadataReference = metadataReferences[i];
+
+                assemblySymbols[i] = metadataReference != null ?
+                    _cSharpCompilation.GetAssemblyOrModuleSymbol(metadataReference) as IAssemblySymbol :
+                    null;
+            }
+
+            return assemblySymbols;
         }
 
         /// <inheritdoc />
@@ -210,63 +248,60 @@ namespace Microsoft.DotNet.ApiCompatibility
             return matchingAssemblies;
         }
 
-        private IEnumerable<MetadataReference> LoadFromPaths(IEnumerable<string> paths)
+        private IReadOnlyList<MetadataReference> LoadFromPaths(IEnumerable<string> paths, ImmutableHashSet<string>? referenceAssemblyNamesToIgnore = null)
         {
             List<MetadataReference> result = new();
             foreach (string path in paths)
             {
-                string resolvedPath = Environment.ExpandEnvironmentVariables(path);
                 string? directory = null;
-                if (Directory.Exists(resolvedPath))
+
+                if (Directory.Exists(path))
                 {
-                    directory = resolvedPath;
-                    result.AddRange(LoadAssembliesFromDirectory(resolvedPath));
+                    directory = path;
+                    foreach (string assembly in Directory.EnumerateFiles(path, "*.dll"))
+                    {
+                        result.Add(CreateOrGetMetadataReferenceFromPath(assembly, referenceAssemblyNamesToIgnore));
+                    }
                 }
-                else if (File.Exists(resolvedPath))
+                else if (File.Exists(path))
                 {
-                    directory = Path.GetDirectoryName(resolvedPath);
-                    result.Add(CreateOrGetMetadataReferenceFromPath(resolvedPath));
+                    directory = Path.GetDirectoryName(path);
+                    result.Add(CreateOrGetMetadataReferenceFromPath(path, referenceAssemblyNamesToIgnore));
                 }
                 else
                 {
-                    throw new FileNotFoundException(string.Format(Resources.ProvidedPathToLoadBinariesFromNotFound, resolvedPath));
+                    throw new FileNotFoundException(string.Format(Resources.ProvidedPathToLoadBinariesFromNotFound, path));
                 }
 
-                if (_resolveReferences && !string.IsNullOrEmpty(directory))
-                    _referencePaths.Add(Path.GetFileName(directory), directory);  // Not Sure about this one, we should do something else here.
+                // If a directory is passed in as a path, add that to the reference paths.
+                // Otherwise, if a file is passed in, add its parent directory to the reference paths.
+                if (!string.IsNullOrEmpty(directory))
+                    _referencePathDirectories.Add(directory);
             }
 
             return result;
         }
 
-        private IEnumerable<MetadataReference> LoadAssembliesFromDirectory(string directory)
-        {
-            foreach (string assembly in Directory.EnumerateFiles(directory, "*.dll"))
-            {
-                yield return CreateOrGetMetadataReferenceFromPath(assembly);
-            }
-        }
-
-        private MetadataReference CreateOrGetMetadataReferenceFromPath(string path)
+        private MetadataReference CreateOrGetMetadataReferenceFromPath(string path, ImmutableHashSet<string>? referenceAssemblyNamesToIgnore = null)
         {
             // Roslyn doesn't support having two assemblies as references with the same identity and then getting the symbol for it.
             string name = Path.GetFileName(path);
             if (!_loadedAssemblies.TryGetValue(name, out MetadataReference? metadataReference))
             {
                 using FileStream stream = File.OpenRead(path);
-                metadataReference = CreateAndAddReferenceToCompilation(name, stream);
+                metadataReference = CreateAndAddReferenceToCompilation(name, stream, referenceAssemblyNamesToIgnore);
             }
 
             return metadataReference;
         }
 
-        private MetadataReference CreateAndAddReferenceToCompilation(string name, Stream fileStream)
+        private MetadataReference CreateAndAddReferenceToCompilation(string name, Stream fileStream, ImmutableHashSet<string>? referenceAssemblyNamesToIgnore = null)
         {
             // If we need to resolve references we can't reuse the same stream after creating the metadata
             // reference from it as Roslyn closes it. So instead we use PEReader and get the bytes
             // and create the metadata reference from that.
             using PEReader reader = new(fileStream);
-            
+
             if (!reader.HasMetadata)
             {
                 throw new ArgumentException(string.Format(Resources.ProvidedStreamDoesNotHaveMetadata, name));
@@ -279,51 +314,62 @@ namespace Microsoft.DotNet.ApiCompatibility
 
             if (_resolveReferences)
             {
-                ResolveReferences(reader);
+                ResolveReferences(reader, referenceAssemblyNamesToIgnore);
             }
 
             return metadataReference;
         }
 
-        private void ResolveReferences(PEReader peReader)
+        private void ResolveReferences(PEReader peReader, ImmutableHashSet<string>? referenceAssemblyNamesToIgnore = null)
         {
             MetadataReader reader = peReader.GetMetadataReader();
             foreach (AssemblyReferenceHandle handle in reader.AssemblyReferences)
             {
                 AssemblyReference reference = reader.GetAssemblyReference(handle);
                 string name = $"{reader.GetString(reference.Name)}.dll";
-                bool found = _loadedAssemblies.TryGetValue(name, out MetadataReference _);
-                if (!found)
+
+                // Skip reference assemblies that are loaded later.
+                if (referenceAssemblyNamesToIgnore != null && referenceAssemblyNamesToIgnore.Contains(name))
+                    continue;
+
+
+                // If the assembly reference is already loaded, don't do anything.
+                if (_loadedAssemblies.ContainsKey(name))
+                    continue;
+
+                // First we try to see if a reference path for this specific assembly was passed in directly, and if so
+                // we use that.
+                if (_referencePathFiles.TryGetValue(name, out string? fullReferencePath))
                 {
-                    // First we try to see if a reference path for this specific assembly was passed in directly, and if so
-                    // we use that.
-                    if (_referencePaths.TryGetValue(name, out string? fullReferencePath))
+                    // TODO: add version check and add a warning if it doesn't match?
+                    using FileStream resolvedStream = File.OpenRead(Path.Combine(fullReferencePath, name));
+                    CreateAndAddReferenceToCompilation(name, resolvedStream, referenceAssemblyNamesToIgnore);
+                }
+                // If we can't find a specific reference path for the dependency, then we look in the folders where the
+                // rest of the reference paths are located to see if we can find the dependency there.
+                else
+                {
+                    bool found = false;
+
+                    foreach (string referencePathDirectory in _referencePathDirectories)
                     {
-                        using FileStream resolvedStream = File.OpenRead(Path.Combine(fullReferencePath, name));
-                        CreateAndAddReferenceToCompilation(name, resolvedStream);
-                        found = true;
-                    }
-                    // If we can't find a specific reference path for the dependency, then we look in the folders where the
-                    // rest of the reference paths are located to see if we can find the dependency there.
-                    else
-                    {
-                        foreach (KeyValuePair<string, string> referencePath in _referencePaths)
+                        string potentialPath = Path.Combine(referencePathDirectory, name);
+                        if (File.Exists(potentialPath))
                         {
-                            string potentialPath = Path.Combine(referencePath.Value, name);
-                            if (File.Exists(potentialPath))
-                            {
-                                // TODO: add version check and add a warning if it doesn't match?
-                                using FileStream resolvedStream = File.OpenRead(potentialPath);
-                                CreateAndAddReferenceToCompilation(name, resolvedStream);
-                                found = true;
-                                break;
-                            }
+                            // TODO: add version check and add a warning if it doesn't match?
+                            using FileStream resolvedStream = File.OpenRead(potentialPath);
+                            CreateAndAddReferenceToCompilation(name, resolvedStream, referenceAssemblyNamesToIgnore);
+                            found = true;
+                            break;
                         }
                     }
 
                     if (!found)
                     {
-                        _warnings.Add(new AssemblyLoadWarning(DiagnosticIds.AssemblyReferenceNotFound, name, string.Format(Resources.CouldNotResolveReference, name)));
+                        _warnings.Add(new AssemblyLoadWarning(
+                            DiagnosticIds.AssemblyReferenceNotFound,
+                            name,
+                            string.Format(Resources.CouldNotResolveReference, name)));
                     }
                 }
             }

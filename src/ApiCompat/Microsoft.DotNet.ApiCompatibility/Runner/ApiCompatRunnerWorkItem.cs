@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
         /// <summary>
         /// The metadata information of the left assemblies to compare with the rights.
         /// </summary>
-        public readonly IEnumerable<MetadataInformation> Lefts;
+        public readonly IReadOnlyList<MetadataInformation> Lefts;
 
         /// <summary>
         /// The api compat options to configure the comparison checks.
@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
         /// <summary>
         /// Initializes an api compat work item.
         /// </summary>
-        public ApiCompatRunnerWorkItem(IEnumerable<MetadataInformation> lefts,
+        public ApiCompatRunnerWorkItem(IReadOnlyList<MetadataInformation> lefts,
             ApiCompatRunnerOptions options,
             IEnumerable<MetadataInformation> rights)
         {

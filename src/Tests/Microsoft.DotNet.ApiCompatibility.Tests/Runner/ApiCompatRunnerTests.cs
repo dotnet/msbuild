@@ -35,17 +35,24 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner.Tests
                 .Setup(m => m.IsErrorSuppressed(It.IsAny<Suppression>()))
                 .Returns(false);
 
-            // Mock the assembly symbol loader factory to return a default assembly symbol loader
+            // Mock the assembly symbol loader factory to return a default assembly symbol loader.
+            Mock<IAssemblySymbolLoader> assemblySymbolLoaderMock = new();
+            assemblySymbolLoaderMock
+                .Setup(y => y.LoadAssemblies(It.IsAny<string[]>()))
+                .Returns(new IAssemblySymbol[]
+                {
+                    null
+                });
+
             Mock<IAssemblySymbolLoaderFactory> assemblyLoaderFactoryMock = new();
             assemblyLoaderFactoryMock
                 .Setup(m => m.Create(It.IsAny<bool>()))
-                .Returns(Mock.Of<IAssemblySymbolLoader>());
+                .Returns(assemblySymbolLoaderMock.Object);
 
             return new(Mock.Of<ICompatibilityLogger>(),
                 suppressionEngineMock.Object,
                 apiComparerFactoryMock.Object,
-                assemblyLoaderFactoryMock.Object,
-                Mock.Of<IMetadataStreamProvider>());
+                assemblyLoaderFactoryMock.Object);
         }
 
         [Fact]

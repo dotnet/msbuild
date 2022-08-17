@@ -17,7 +17,6 @@ namespace Microsoft.DotNet.ApiCompat
     [Singleton(typeof(IRuleFactory), Instance = nameof(RuleFactory))]
     [Singleton(typeof(IApiComparerFactory), typeof(ApiComparerFactory))]
     [Singleton(typeof(IAssemblySymbolLoaderFactory), typeof(AssemblySymbolLoaderFactory))]
-    [Singleton(typeof(IMetadataStreamProvider), typeof(MetadataStreamProvider))]
     [Singleton(typeof(IApiCompatRunner), typeof(ApiCompatRunner))]
     internal interface IApiCompatServiceProviderModule
     {

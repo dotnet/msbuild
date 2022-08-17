@@ -31,8 +31,7 @@ namespace Microsoft.DotNet.ApiCompat.IntegrationTests
                 new ApiCompatRunner(log,
                     new SuppressionEngine(),
                     new ApiComparerFactory(new RuleFactory()),
-                    new AssemblySymbolLoaderFactory(),
-                    new MetadataStreamProvider()));
+                    new AssemblySymbolLoaderFactory()));
 
             return (log, validator);
         }
