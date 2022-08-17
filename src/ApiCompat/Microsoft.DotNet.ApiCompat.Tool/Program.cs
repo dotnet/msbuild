@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -38,14 +38,16 @@ namespace Microsoft.DotNet.ApiCompat.Tool
 
             // Root command
             Option<string[]> leftAssembliesOption = new(new string[] { "--left-assembly", "--left", "-l" },
-                "The path to one or more assemblies that serve as the left side to compare.")
+                description: "The path to one or more assemblies that serve as the left side to compare.",
+                parseArgument: ParseAssemblyArgument)
             {
                 AllowMultipleArgumentsPerToken = true,
                 Arity = ArgumentArity.OneOrMore,
                 IsRequired = true
             };
             Option<string[]> rightAssembliesOption = new(new string[] { "--right-assembly", "--right", "-r" },
-                "The path to one or more assemblies that serve as the right side to compare.")
+                description: "The path to one or more assemblies that serve as the right side to compare.",
+                parseArgument: ParseAssemblyArgument)
             {
                 AllowMultipleArgumentsPerToken = true,
                 Arity = ArgumentArity.OneOrMore,
@@ -53,7 +55,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
             };
             Option<bool> strictModeOption = new("--strict-mode",
                 "If true, performs api compatibility checks in strict mode");
-            Option<string[][]?> leftAssembliesReferencesOption = new("--left-assembly-references",
+            Option<string[][]?> leftAssembliesReferencesOption = new(new string[] { "--left-assembly-references", "--lref" },
                 description: "Paths to assembly references or the underlying directories for a given left. Values must be separated by commas: ','.",
                 parseArgument: ParseAssemblyReferenceArgument)
             {
@@ -61,7 +63,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                 Arity = ArgumentArity.ZeroOrMore,
                 ArgumentHelpName = "file1,file2,..."
             };
-            Option<string[][]?> rightAssembliesReferencesOption = new("--right-assembly-references",
+            Option<string[][]?> rightAssembliesReferencesOption = new(new string[] { "--right-assembly-references", "--rref" },
                 description: "Paths to assembly references or the underlying directories for a given right. Values must be separated by commas: ','.",
                 parseArgument: ParseAssemblyReferenceArgument)
             {
@@ -235,12 +237,23 @@ namespace Microsoft.DotNet.ApiCompat.Tool
             return rootCommand.Invoke(args);
         }
 
-        private static string[][]? ParseAssemblyReferenceArgument(ArgumentResult argumentResult)
+        private static string[][] ParseAssemblyReferenceArgument(ArgumentResult argumentResult)
         {
             List<string[]> args = new();
             foreach (Token token in argumentResult.Tokens)
             {
                 args.Add(token.Value.Split(','));
+            }
+
+            return args.ToArray();
+        }
+
+        private static string[] ParseAssemblyArgument(ArgumentResult argumentResult)
+        {
+            List<string> args = new();
+            foreach (Token token in argumentResult.Tokens)
+            {
+                args.AddRange(token.Value.Split(','));
             }
 
             return args.ToArray();
