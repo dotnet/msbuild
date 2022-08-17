@@ -1251,7 +1251,7 @@ namespace Microsoft.Build.Tasks
                     AddResolutionWarning("ResolveSDKReference.MaxPlatformVersionNotSpecified", projectName, DisplayName, Version, targetPlatformIdentifier, targetPlatformVersionFromItem.ToString(), targetPlatformIdentifier, targetPlatformVersion.ToString());
                 }
 
-                if (!String.IsNullOrEmpty(TargetPlatform) && !String.Equals(targetPlatformIdentifier, TargetPlatform))
+                if (!String.IsNullOrEmpty(TargetPlatform) && !String.Equals(targetPlatformIdentifier, TargetPlatform) && (!String.Equals("UAP", TargetPlatform, StringComparison.OrdinalIgnoreCase) || !String.Equals(targetPlatformIdentifier, "windows", StringComparison.OrdinalIgnoreCase)))
                 {
                     AddResolutionErrorOrWarning("ResolveSDKReference.TargetPlatformIdentifierDoesNotMatch", projectName, DisplayName, Version, targetPlatformIdentifier, TargetPlatform);
                 }
