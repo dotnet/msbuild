@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 differences.Add(CreateIdentityDifference(
                     leftMetadata,
                     rightMetadata,
-                    Resources.AssembyCultureDoesNotMatch,
+                    Resources.AssemblyCultureDoesNotMatch,
                     leftAssemblyCulture,
                     rightAssemblyCulture,
                     leftMetadata.DisplayString,
@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 differences.Add(CreateIdentityDifference(
                     leftMetadata,
                     rightMetadata,
-                    Resources.AssembyVersionIsNotCompatible,
+                    Resources.AssemblyVersionIsNotCompatible,
                     rightAssemblyVersion.ToString(),
                     leftAssemblyVersion.ToString(),
                     rightMetadata.DisplayString,
@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 differences.Add(CreateIdentityDifference(
                     leftMetadata,
                     rightMetadata,
-                    Resources.AssembyVersionDoesNotMatch,
+                    Resources.AssemblyVersionDoesNotMatch,
                     leftAssemblyVersion.ToString(),
                     rightAssemblyVersion.ToString(),
                     leftMetadata.DisplayString,

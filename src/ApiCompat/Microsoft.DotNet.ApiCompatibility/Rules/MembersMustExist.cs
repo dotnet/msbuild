@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                     leftMetadata,
                     rightMetadata,
                     DiagnosticIds.TypeMustExist,
-                    string.Format(Resources.TypeExistsOnLeft, left.ToDisplayString(), leftMetadata, rightMetadata),
+                    string.Format(Resources.TypeMissingOnSide, left.ToDisplayString(), leftMetadata, rightMetadata),
                     DifferenceType.Removed,
                     left));
             }
@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                     leftMetadata,
                     rightMetadata,
                     DiagnosticIds.TypeMustExist,
-                    string.Format(Resources.TypeExistsOnRight, right.ToDisplayString(), leftMetadata, rightMetadata),
+                    string.Format(Resources.TypeMissingOnSide, right.ToDisplayString(), rightMetadata, leftMetadata),
                     DifferenceType.Added,
                     right));
             }
