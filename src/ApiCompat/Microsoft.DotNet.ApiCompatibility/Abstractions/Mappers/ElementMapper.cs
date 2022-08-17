@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
     /// </summary>
     public abstract class ElementMapper<T>
     {
-        private IReadOnlyList<IEnumerable<CompatDifference>>? _differences;
+        private IEnumerable<CompatDifference>? _differences;
 
         /// <summary>
         /// Property representing the Left hand side of the mapping.
@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// <returns>A list containing the list of differences for each possible combination of
         /// (<see cref="ElementMapper{T}.Left"/>, <see cref="ElementMapper{T}.Right"/>).
         /// One list of <see cref="CompatDifference"/> per the number of right elements that the <see cref="ElementMapper{T}"/> contains.</returns>
-        public IReadOnlyList<IEnumerable<CompatDifference>> GetDifferences()
+        public IEnumerable<CompatDifference> GetDifferences()
         {
             return _differences ??= RuleRunner.Run(this);
         }

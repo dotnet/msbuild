@@ -1,6 +1,8 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
+using System.IO;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Logging;
 using Microsoft.DotNet.ApiCompatibility.Runner;
@@ -17,16 +19,34 @@ namespace Microsoft.DotNet.PackageValidation
     {
         public static void QueueApiCompatFromContentItem(this IApiCompatRunner apiCompatRunner,
             ICompatibilityLogger log,
-            ContentItem leftItem,
-            ContentItem rightItem,
+            IReadOnlyList<ContentItem> leftContentItems,
+            IReadOnlyList<ContentItem> rightContentItems,
             ApiCompatRunnerOptions options,
             Package leftPackage,
             Package? rightPackage = null)
         {
-            string? displayString = options.IsBaselineComparison ? Resources.Baseline + " " + leftItem.Path : null;
+            // Don't enqueue duplicate items (if no right package is supplied and items match)
+            if (rightPackage == null && ContentItemCollectionEquals(leftContentItems, rightContentItems))
+            {
+                return;
+            }
 
-            MetadataInformation left = GetMetadataInformation(log, leftPackage, leftItem, displayString);
-            MetadataInformation right = GetMetadataInformation(log, rightPackage ?? leftPackage, rightItem);
+            MetadataInformation[] left = new MetadataInformation[leftContentItems.Count];
+            for (int leftIndex = 0; leftIndex < leftContentItems.Count; leftIndex++)
+            {
+                left[leftIndex] = GetMetadataInformation(log,
+                    leftPackage,
+                    leftContentItems[leftIndex],
+                    options.IsBaselineComparison ? Resources.Baseline + " " + leftContentItems[leftIndex].Path : null);
+            }
+
+            MetadataInformation[] right = new MetadataInformation[rightContentItems.Count];
+            for (int rightIndex = 0; rightIndex < rightContentItems.Count; rightIndex++)
+            {
+                right[rightIndex] = GetMetadataInformation(log,
+                    rightPackage ?? leftPackage,
+                    rightContentItems[rightIndex]);
+            }
 
             apiCompatRunner.EnqueueWorkItem(new ApiCompatRunnerWorkItem(left, options, right));
         }
@@ -36,24 +56,47 @@ namespace Microsoft.DotNet.PackageValidation
             ContentItem item,
             string? displayString = null)
         {
-            string targetFramework = ((NuGetFramework)item.Properties["tfm"]).GetShortFolderName();
             displayString ??= item.Path;
-
             string[]? assemblyReferences = null;
-            if (package.AssemblyReferences != null && !package.AssemblyReferences.TryGetValue(targetFramework, out assemblyReferences))
+
+            if (item.Properties.TryGetValue("tfm", out object? tfmObj))
             {
-                log.LogWarning(
-                    new Suppression(DiagnosticIds.SearchDirectoriesNotFoundForTfm)
-                    {
-                        Target = displayString
-                    },
-                    DiagnosticIds.SearchDirectoriesNotFoundForTfm,
-                    Resources.MissingSearchDirectory,
-                    targetFramework,
-                    displayString);
+                string targetFramework = ((NuGetFramework)tfmObj).GetShortFolderName();
+
+                if (package.AssemblyReferences != null && !package.AssemblyReferences.TryGetValue(targetFramework, out assemblyReferences))
+                {
+                    log.LogWarning(
+                        new Suppression(DiagnosticIds.SearchDirectoriesNotFoundForTfm)
+                        {
+                            Target = displayString
+                        },
+                        DiagnosticIds.SearchDirectoriesNotFoundForTfm,
+                        Resources.MissingSearchDirectory,
+                        targetFramework,
+                        displayString);
+                }
             }
 
-            return new MetadataInformation(package.PackageId, item.Path, package.PackagePath, assemblyReferences, displayString);
+            return new MetadataInformation(Path.GetFileName(item.Path), item.Path, package.PackagePath, assemblyReferences, displayString);
+        }
+
+        private static bool ContentItemCollectionEquals(IReadOnlyList<ContentItem> leftContentItems,
+            IReadOnlyList<ContentItem> rightContentItems)
+        {
+            if (leftContentItems.Count != rightContentItems.Count)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < leftContentItems.Count; i++)
+            {
+                if (leftContentItems[i].Path != rightContentItems[i].Path)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

@@ -25,9 +25,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
 
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
-            CompatDifference[] expected = new[]
+            CompatDifference[] expected =
             {
-                new CompatDifference(DiagnosticIds.CannotAddAbstractMember, string.Empty, DifferenceType.Added, "M:CompatTests.First.SecondAbstract")
+                CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.CannotAddAbstractMember, string.Empty, DifferenceType.Added, "M:CompatTests.First.SecondAbstract")
             };
             Assert.Equal(expected, differences);
         }
@@ -95,7 +95,6 @@ namespace CompatTests
   }
 }
 ";
-
             string[] rightSyntaxes = new[]
             { @"
 namespace CompatTests
@@ -144,29 +143,19 @@ namespace CompatTests
   }
 }
 "};
-
-            ElementContainer<IAssemblySymbol> left =
-                new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax), new MetadataInformation(string.Empty, "ref"));
+            ElementContainer<IAssemblySymbol> left = new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax),
+                new MetadataInformation(string.Empty, "ref"));
             IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
             ApiComparer differ = new(s_ruleFactory);
 
-            IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
-                differ.GetDifferences(left, right);
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
-            CompatDifference[][] expectedDiffs =
+            CompatDifference[] expectedDiffs =
             {
-                Array.Empty<CompatDifference>(),
-                new[]
-                {
-                    new CompatDifference(DiagnosticIds.CannotAddAbstractMember, string.Empty, DifferenceType.Added, "M:CompatTests.First.FirstNested.SecondNested.SomeAbstractMethod"),
-                },
-                new[]
-                {
-                    new CompatDifference(DiagnosticIds.CannotAddAbstractMember, string.Empty, DifferenceType.Added, "M:CompatTests.First.FirstNested.FirstNestedAbstract"),
-                },
+                new CompatDifference(left.MetadataInformation, right[1].MetadataInformation, DiagnosticIds.CannotAddAbstractMember, string.Empty, DifferenceType.Added, "M:CompatTests.First.FirstNested.SecondNested.SomeAbstractMethod"),
+                new CompatDifference(left.MetadataInformation, right[2].MetadataInformation, DiagnosticIds.CannotAddAbstractMember, string.Empty, DifferenceType.Added, "M:CompatTests.First.FirstNested.FirstNestedAbstract"),
             };
-
-            AssertExtensions.MultiRightResult(left.MetadataInformation, expectedDiffs, differences);
+            Assert.Equal(expectedDiffs, differences);
         }
 
         public static IEnumerable<object[]> AddedToUnsealedTypeInRightNotReportedData()

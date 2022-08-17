@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.DotNet.ApiCompatibility.Logging;
 using Microsoft.DotNet.ApiCompatibility.Runner;
 using NuGet.ContentModel;
@@ -36,80 +38,89 @@ namespace Microsoft.DotNet.PackageValidation.Validators
 
             ApiCompatRunnerOptions apiCompatOptions = new(options.EnableStrictMode, isBaselineComparison: true);
 
-            // Iterate over all available baseline assets
-            foreach (ContentItem baselineCompileTimeAsset in options.BaselinePackage.RefAssets)
+            // Iterate over all target frameworks in the package.
+            foreach (NuGetFramework baselineTargetFramework in options.BaselinePackage.FrameworksInPackage)
             {
-                // Search for a compatible compile time asset in the latest package
-                NuGetFramework baselineTargetFramework = (NuGetFramework)baselineCompileTimeAsset.Properties["tfm"];
-                ContentItem? latestCompileTimeAsset = options.Package.FindBestCompileAssetForFramework(baselineTargetFramework);
-                if (latestCompileTimeAsset == null)
+                // Retrieve the compile time assets from the baseline package
+                IReadOnlyList<ContentItem>? baselineCompileAssets = options.BaselinePackage.FindBestCompileAssetForFramework(baselineTargetFramework);
+                if (baselineCompileAssets != null)
                 {
-                    _log.LogError(
-                        new Suppression(DiagnosticIds.TargetFrameworkDropped) { Target = baselineTargetFramework.ToString() },
-                        DiagnosticIds.TargetFrameworkDropped,
-                        Resources.MissingTargetFramework,
-                        baselineTargetFramework.ToString());
+                    // Search for compatible compile time assets in the latest package.
+                    IReadOnlyList<ContentItem>? latestCompileAssets = options.Package.FindBestCompileAssetForFramework(baselineTargetFramework);
+                    if (latestCompileAssets == null)
+                    {
+                        _log.LogError(
+                            new Suppression(DiagnosticIds.TargetFrameworkDropped) { Target = baselineTargetFramework.ToString() },
+                            DiagnosticIds.TargetFrameworkDropped,
+                            Resources.MissingTargetFramework,
+                            baselineTargetFramework.ToString());
+                    }
+                    else if (options.EnqueueApiCompatWorkItems)
+                    {
+                        _apiCompatRunner.QueueApiCompatFromContentItem(_log,
+                            baselineCompileAssets,
+                            latestCompileAssets,
+                            apiCompatOptions,
+                            options.BaselinePackage,
+                            options.Package);
+                    }
                 }
-                else if (options.EnqueueApiCompatWorkItems)
-                {
-                    _apiCompatRunner.QueueApiCompatFromContentItem(_log,
-                        baselineCompileTimeAsset,
-                        latestCompileTimeAsset,
-                        apiCompatOptions,
-                        options.BaselinePackage,
-                        options.Package);
-                }
-            }
 
-            // Iterates over both runtime and runtime specific baseline assets and searches for a compatible non runtime
-            // specific asset in the latest package.
-            foreach (ContentItem baselineRuntimeAsset in options.BaselinePackage.RuntimeAssets)
-            {
-                // Search for a compatible runtime asset in the latest package
-                NuGetFramework baselineTargetFramework = (NuGetFramework)baselineRuntimeAsset.Properties["tfm"];
-                ContentItem? latestRuntimeAsset = options.Package.FindBestRuntimeAssetForFramework(baselineTargetFramework);
-                if (latestRuntimeAsset == null)
+                // Retrieve runtime baseline assets and searches for compatible runtime assets in the latest package.
+                IReadOnlyList<ContentItem>? baselineRuntimeAssets = options.BaselinePackage.FindBestRuntimeAssetForFramework(baselineTargetFramework);
+                if (baselineRuntimeAssets != null)
                 {
-                    _log.LogError(
-                        new Suppression(DiagnosticIds.TargetFrameworkDropped) { Target = baselineTargetFramework.ToString() },
-                        DiagnosticIds.TargetFrameworkDropped,
-                        Resources.MissingTargetFramework,
-                        baselineTargetFramework.ToString());
+                    // Search for compatible runtime assets in the latest package.
+                    IReadOnlyList<ContentItem>? latestRuntimeAssets = options.Package.FindBestRuntimeAssetForFramework(baselineTargetFramework);
+                    if (latestRuntimeAssets == null)
+                    {
+                        _log.LogError(
+                            new Suppression(DiagnosticIds.TargetFrameworkDropped) { Target = baselineTargetFramework.ToString() },
+                            DiagnosticIds.TargetFrameworkDropped,
+                            Resources.MissingTargetFramework,
+                            baselineTargetFramework.ToString());
+                    }
+                    else if (options.EnqueueApiCompatWorkItems)
+                    {
+                        _apiCompatRunner.QueueApiCompatFromContentItem(_log,
+                            baselineRuntimeAssets,
+                            latestRuntimeAssets,
+                            apiCompatOptions,
+                            options.BaselinePackage,
+                            options.Package);
+                    }
                 }
-                else if (options.EnqueueApiCompatWorkItems)
-                {
-                    _apiCompatRunner.QueueApiCompatFromContentItem(_log,
-                        baselineRuntimeAsset,
-                        latestRuntimeAsset,
-                        apiCompatOptions,
-                        options.BaselinePackage,
-                        options.Package);
-                }
-            }
 
-            // Compares runtime specific baseline assets against runtime specific latest assets.
-            foreach (ContentItem baselineRuntimeSpecificAsset in options.BaselinePackage.RuntimeSpecificAssets)
-            {
-                NuGetFramework baselineTargetFramework = (NuGetFramework)baselineRuntimeSpecificAsset.Properties["tfm"];
-                string baselineRid = (string)baselineRuntimeSpecificAsset.Properties["rid"];
-                ContentItem? latestRuntimeSpecificAsset = options.Package.FindBestRuntimeAssetForFrameworkAndRuntime(baselineTargetFramework, baselineRid);
-                if (latestRuntimeSpecificAsset == null)
+                // Retrieve runtime specific baseline assets and searches for compatible runtime specific assets in the latest package.
+                IReadOnlyList<ContentItem>? baselineRuntimeSpecificAssets = options.BaselinePackage.FindBestRuntimeSpecificAssetForFramework(baselineTargetFramework);
+                if (baselineRuntimeSpecificAssets != null && baselineRuntimeSpecificAssets.Count > 0)
                 {
-                    _log.LogError(
-                        new Suppression(DiagnosticIds.TargetFrameworkAndRidPairDropped) { Target = baselineTargetFramework.ToString() + "-" + baselineRid },
-                        DiagnosticIds.TargetFrameworkAndRidPairDropped,
-                        Resources.MissingTargetFrameworkAndRid,
-                        baselineTargetFramework.ToString(),
-                        baselineRid);
-                }
-                else if (options.EnqueueApiCompatWorkItems)
-                {
-                    _apiCompatRunner.QueueApiCompatFromContentItem(_log,
-                        baselineRuntimeSpecificAsset,
-                        latestRuntimeSpecificAsset,
-                        apiCompatOptions,
-                        options.BaselinePackage,
-                        options.Package);
+                    IEnumerable<IGrouping<string, ContentItem>> baselineRuntimeSpecificAssetsRidGroupedPerRid = baselineRuntimeSpecificAssets
+                        .Where(t => t.Path.StartsWith("runtimes"))
+                        .GroupBy(t => (string)t.Properties["rid"]);
+
+                    foreach (IGrouping<string, ContentItem> baselineRuntimeSpecificAssetsRidGroup in baselineRuntimeSpecificAssetsRidGroupedPerRid)
+                    {
+                        IReadOnlyList<ContentItem>? latestRuntimeSpecificAssets = options.Package.FindBestRuntimeAssetForFrameworkAndRuntime(baselineTargetFramework, baselineRuntimeSpecificAssetsRidGroup.Key);
+                        if (latestRuntimeSpecificAssets == null)
+                        {
+                            _log.LogError(
+                                new Suppression(DiagnosticIds.TargetFrameworkAndRidPairDropped) { Target = baselineTargetFramework.ToString() + "-" + baselineRuntimeSpecificAssetsRidGroup.Key },
+                                DiagnosticIds.TargetFrameworkAndRidPairDropped,
+                                Resources.MissingTargetFrameworkAndRid,
+                                baselineTargetFramework.ToString(),
+                                baselineRuntimeSpecificAssetsRidGroup.Key);
+                        }
+                        else if (options.EnqueueApiCompatWorkItems)
+                        {
+                            _apiCompatRunner.QueueApiCompatFromContentItem(_log,
+                                baselineRuntimeSpecificAssetsRidGroup.ToArray(),
+                                latestRuntimeSpecificAssets,
+                                apiCompatOptions,
+                                options.BaselinePackage,
+                                options.Package);
+                        }
+                    }
                 }
             }
 

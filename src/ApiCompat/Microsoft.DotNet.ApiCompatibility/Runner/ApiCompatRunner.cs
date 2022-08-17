@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Logging;
@@ -95,24 +96,22 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
                     strictMode: workItem.Options.EnableStrictMode,
                     withReferences: runWithReferences));
 
-                // TODO: Support passing in multiple lefts in ApiComparer: https://github.com/dotnet/sdk/issues/17364.
-
                 // Invoke the api comparer for the work item and operate on the difference result
-                IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
-                    apiComparer.GetDifferences(leftContainerList[0], rightContainerList);
+                IEnumerable<CompatDifference> differences = apiComparer.GetDifferences(leftContainerList, rightContainerList);
+                var differenceGroups = differences.GroupBy((c) => new { c.Left, c.Right });
 
-                foreach ((MetadataInformation Left, MetadataInformation Right, IEnumerable<CompatDifference> differences) diff in differences)
+                foreach (var differenceGroup in differenceGroups)
                 {
                     // Log the difference header only if there are differences and errors aren't baselined.
                     bool logHeader = !_suppressionEngine.BaselineAllErrors;
 
-                    foreach (CompatDifference difference in diff.differences)
+                    foreach (CompatDifference difference in differenceGroup)
                     {
                         Suppression suppression = new(difference.DiagnosticId)
                         {
                             Target = difference.ReferenceId,
-                            Left = diff.Left.AssemblyId,
-                            Right = diff.Right.AssemblyId,
+                            Left = difference.Left.AssemblyId,
+                            Right = difference.Right.AssemblyId,
                             IsBaselineSuppression = workItem.Options.IsBaselineComparison
                         };
 
@@ -125,10 +124,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
                             logHeader = false;
                             _log.LogMessage(MessageImportance.Normal,
                                 Resources.ApiCompatibilityHeader,
-                                diff.Left.AssemblyId,
-                                diff.Right.AssemblyId,
-                                workItem.Options.IsBaselineComparison ? diff.Left.FullPath : "left",
-                                workItem.Options.IsBaselineComparison ? diff.Right.FullPath : "right");
+                                difference.Left.AssemblyId,
+                                difference.Right.AssemblyId,
+                                workItem.Options.IsBaselineComparison ? difference.Left.FullPath : "left",
+                                workItem.Options.IsBaselineComparison ? difference.Right.FullPath : "right");
                         }
 
                         _log.LogError(suppression,
@@ -138,10 +137,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
 
                     _log.LogMessage(MessageImportance.Low,
                         Resources.ApiCompatibilityFooter,
-                        diff.Left.AssemblyId,
-                        diff.Right.AssemblyId,
-                        workItem.Options.IsBaselineComparison ? diff.Left.FullPath : "left",
-                        workItem.Options.IsBaselineComparison ? diff.Right.FullPath : "right");
+                        differenceGroup.Key.Left.AssemblyId,
+                        differenceGroup.Key.Right.AssemblyId,
+                        workItem.Options.IsBaselineComparison ? differenceGroup.Key.Left.FullPath : "left",
+                        workItem.Options.IsBaselineComparison ? differenceGroup.Key.Right.FullPath : "right");
                 }
             }
 

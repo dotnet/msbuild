@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
@@ -16,8 +15,6 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     {
         private readonly IRuleContext _context;
         private readonly IRuleFactory _ruleFactory;
-        private const string DEFAULT_LEFT_NAME = "left";
-        private const string DEFAULT_RIGHT_NAME = "right";
 
         public RuleRunner(IRuleFactory ruleFactory, IRuleContext context)
         {
@@ -33,21 +30,19 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         }
 
         /// <inheritdoc />
-        public IReadOnlyList<IEnumerable<CompatDifference>> Run<T>(ElementMapper<T> mapper)
+        public IEnumerable<CompatDifference> Run<T>(ElementMapper<T> mapper)
         {
-            int rightLength = mapper.Right.Length;
-            List<CompatDifference>[] result = new List<CompatDifference>[rightLength];
-            
+            List<CompatDifference> differences = new();
+
+            int rightLength = mapper.Right.Length;            
             for (int rightIndex = 0; rightIndex < rightLength; rightIndex++)
             {
-                List<CompatDifference> differences = new();
-
                 if (mapper is AssemblyMapper am)
                 {
                     _context.RunOnAssemblySymbolActions(am.Left?.Element,
                         am.Right[rightIndex]?.Element,
-                        GetAssemblyName(am.Left, ElementSide.Left),
-                        GetAssemblyName(am.Right[rightIndex], ElementSide.Right),
+                        am.Left?.MetadataInformation ?? MetadataInformation.DefaultLeft,
+                        am.Right[rightIndex]?.MetadataInformation ?? MetadataInformation.DefaultRight,
                         differences);
                 }
                 else if (mapper is TypeMapper tm)
@@ -56,8 +51,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                     {
                         _context.RunOnTypeSymbolActions(tm.Left,
                             tm.Right[rightIndex],
-                            GetAssemblyName(tm.ContainingNamespace.ContainingAssembly.Left, ElementSide.Left),
-                            GetAssemblyName(tm.ContainingNamespace.ContainingAssembly.Right[rightIndex], ElementSide.Right),
+                            tm.ContainingNamespace.ContainingAssembly.Left?.MetadataInformation ?? MetadataInformation.DefaultLeft,
+                            tm.ContainingNamespace.ContainingAssembly.Right[rightIndex]?.MetadataInformation ?? MetadataInformation.DefaultRight,
                             differences);
                     }
                 }
@@ -74,8 +69,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                             mm.Right[rightIndex],
                             mm.ContainingType.Left!,
                             mm.ContainingType.Right[rightIndex]!,
-                            GetAssemblyName(mm.ContainingType.ContainingNamespace.ContainingAssembly.Left, ElementSide.Left),
-                            GetAssemblyName(mm.ContainingType.ContainingNamespace.ContainingAssembly.Right[rightIndex], ElementSide.Right),
+                            mm.ContainingType.ContainingNamespace.ContainingAssembly.Left?.MetadataInformation ?? MetadataInformation.DefaultLeft,
+                            mm.ContainingType.ContainingNamespace.ContainingAssembly.Right[rightIndex]?.MetadataInformation ?? MetadataInformation.DefaultRight,
                             differences);
                     }
                 }
@@ -83,23 +78,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 {
                     throw new ArgumentOutOfRangeException(nameof(mapper));
                 }
-
-                result[rightIndex] = differences;
             }
 
-            return result;
+            return differences;
         }
-
-        private static string GetAssemblyName(ElementContainer<IAssemblySymbol>? assemblyContainer, ElementSide side) =>
-            side switch
-            {
-                ElementSide.Left => string.IsNullOrEmpty(assemblyContainer?.MetadataInformation.DisplayString) ?
-                    DEFAULT_LEFT_NAME :
-                    assemblyContainer!.MetadataInformation.DisplayString,
-                ElementSide.Right => string.IsNullOrEmpty(assemblyContainer?.MetadataInformation.DisplayString) ?
-                    DEFAULT_RIGHT_NAME :
-                    assemblyContainer!.MetadataInformation.DisplayString,
-                _ => throw new ArgumentOutOfRangeException(nameof(side)),
-            };
     }
 }

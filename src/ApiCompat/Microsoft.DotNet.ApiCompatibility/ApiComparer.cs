@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Rules;
@@ -41,8 +42,8 @@ namespace Microsoft.DotNet.ApiCompatibility
         public IEnumerable<CompatDifference> GetDifferences(IAssemblySymbol left,
             IAssemblySymbol right)
         {
-            return GetDifferences(new ElementContainer<IAssemblySymbol>(left, new MetadataInformation()),
-                new ElementContainer<IAssemblySymbol>(right, new MetadataInformation()));
+            return GetDifferences(new ElementContainer<IAssemblySymbol>(left, MetadataInformation.DefaultLeft),
+                new ElementContainer<IAssemblySymbol>(right, MetadataInformation.DefaultRight));
         }
 
         /// <inheritdoc />
@@ -56,7 +57,7 @@ namespace Microsoft.DotNet.ApiCompatibility
             IDifferenceVisitor visitor = _differenceVisitorFactory.Create();
             visitor.Visit(mapper);
 
-            return visitor.DiagnosticCollections[0];
+            return visitor.CompatDifferences;
         }
 
         /// <inheritdoc />
@@ -70,7 +71,7 @@ namespace Microsoft.DotNet.ApiCompatibility
             IDifferenceVisitor visitor = _differenceVisitorFactory.Create();
             visitor.Visit(mapper);
 
-            return visitor.DiagnosticCollections[0];
+            return visitor.CompatDifferences;
         }
 
         /// <inheritdoc />
@@ -80,20 +81,20 @@ namespace Microsoft.DotNet.ApiCompatibility
             List<ElementContainer<IAssemblySymbol>> transformedLeft = new();
             foreach (IAssemblySymbol assemblySymbol in left)
             {
-                transformedLeft.Add(new ElementContainer<IAssemblySymbol>(assemblySymbol, new MetadataInformation()));
+                transformedLeft.Add(new ElementContainer<IAssemblySymbol>(assemblySymbol, MetadataInformation.DefaultLeft));
             }
 
             List<ElementContainer<IAssemblySymbol>> transformedRight = new();
             foreach (IAssemblySymbol assemblySymbol in right)
             {
-                transformedRight.Add(new ElementContainer<IAssemblySymbol>(assemblySymbol, new MetadataInformation()));
+                transformedRight.Add(new ElementContainer<IAssemblySymbol>(assemblySymbol, MetadataInformation.DefaultRight));
             }
 
             return GetDifferences(transformedLeft, transformedRight);
         }
 
         /// <inheritdoc />
-        public IEnumerable<(MetadataInformation left, MetadataInformation right, IEnumerable<CompatDifference> differences)> GetDifferences(ElementContainer<IAssemblySymbol> left,
+        public IEnumerable<CompatDifference> GetDifferences(ElementContainer<IAssemblySymbol> left,
             IReadOnlyList<ElementContainer<IAssemblySymbol>> right)
         {
             int rightCount = right.Count;
@@ -104,16 +105,29 @@ namespace Microsoft.DotNet.ApiCompatibility
                 mapper.AddElement(right[i], ElementSide.Right, i);
             }
 
-            IDifferenceVisitor visitor = _differenceVisitorFactory.Create(rightCount);
+            IDifferenceVisitor visitor = _differenceVisitorFactory.Create();
             visitor.Visit(mapper);
 
-            var result = new(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)[rightCount];
-            for (int i = 0; i < visitor.DiagnosticCollections.Count; i++)
+            // Sort the compat differences by the order of the passed in rights.
+            return right.Join(visitor.CompatDifferences, i => i.MetadataInformation, d => d.Right, (i, d) => d).ToArray();
+        }
+
+        /// <inheritdoc />
+        public IEnumerable<CompatDifference> GetDifferences(IEnumerable<ElementContainer<IAssemblySymbol>> left,
+            IReadOnlyList<IEnumerable<ElementContainer<IAssemblySymbol>>> right)
+        {
+            var mapper = _elementMapperFactory.CreateAssemblySetMapper(Settings.ToMapperSettings(), right.Count);
+            mapper.AddElement(left, ElementSide.Left);
+            for (int rightIndex = 0; rightIndex < right.Count; rightIndex++)
             {
-                result[i] = (left.MetadataInformation, right[i].MetadataInformation, visitor.DiagnosticCollections[i]);
+                mapper.AddElement(right[rightIndex], ElementSide.Right, rightIndex);
             }
-            
-            return result;
+
+            IDifferenceVisitor visitor = _differenceVisitorFactory.Create();
+            visitor.Visit(mapper);
+
+            // Sort the compat differences by the order of the passed in left assemblies.
+            return left.Join(visitor.CompatDifferences, i => i.MetadataInformation, d => d.Left, (i, d) => d).ToArray();
         }
     }
 }

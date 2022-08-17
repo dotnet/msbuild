@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             }
         }
 
-        private void RunOnMemberMapperAction(ISymbol? left, ISymbol? right, ITypeSymbol leftContainingType, ITypeSymbol rightContainingType, string leftName, string rightName, IList<CompatDifference> differences)
+        private void RunOnMemberMapperAction(ISymbol? left, ISymbol? right, ITypeSymbol leftContainingType, ITypeSymbol rightContainingType, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences)
         {
             if (left == null && right != null && right.IsAbstract)
             {
@@ -36,8 +36,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 if (leftContainingType.TypeKind != TypeKind.Interface && !leftContainingType.IsEffectivelySealed(_settings.IncludeInternalSymbols))
                 {
                     differences.Add(new CompatDifference(
+                        leftMetadata,
+                        rightMetadata,
                         DiagnosticIds.CannotAddAbstractMember,
-                        string.Format(Resources.CannotAddAbstractMember, right.ToDisplayString(), rightName, leftName),
+                        string.Format(Resources.CannotAddAbstractMember, right.ToDisplayString(), rightMetadata, leftMetadata),
                         DifferenceType.Added,
                         right));
                 }
