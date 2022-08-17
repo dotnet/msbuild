@@ -2,12 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Logging;
-using Microsoft.DotNet.ApiCompatibility.Rules;
 
 namespace Microsoft.DotNet.ApiCompatibility.Runner
 {
@@ -21,7 +22,6 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
         private readonly ISuppressionEngine _suppressionEngine;
         private readonly IApiComparerFactory _apiComparerFactory;
         private readonly IAssemblySymbolLoaderFactory _assemblySymbolLoaderFactory;
-        private readonly IMetadataStreamProvider _metadataStreamProvider;
 
         /// <inheritdoc />
         public IReadOnlyCollection<ApiCompatRunnerWorkItem> WorkItems => _workItems;
@@ -29,14 +29,12 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
         public ApiCompatRunner(ICompatibilityLogger log,
             ISuppressionEngine suppressionEngine,
             IApiComparerFactory apiComparerFactory,
-            IAssemblySymbolLoaderFactory assemblySymbolLoaderFactory,
-            IMetadataStreamProvider metadataStreamProvider)
+            IAssemblySymbolLoaderFactory assemblySymbolLoaderFactory)
         {
             _suppressionEngine = suppressionEngine;
             _log = log;
             _apiComparerFactory = apiComparerFactory;
             _assemblySymbolLoaderFactory = assemblySymbolLoaderFactory;
-            _metadataStreamProvider = metadataStreamProvider;
         }
 
         /// <inheritdoc />
@@ -48,43 +46,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
             {
                 bool runWithReferences = true;
 
-                List<ElementContainer<IAssemblySymbol>> leftContainerList = new();
-                foreach (MetadataInformation left in workItem.Lefts)
-                {
-                    IAssemblySymbol? leftAssemblySymbol;
-                    using (Stream leftAssemblyStream = _metadataStreamProvider.GetStream(left))
-                    {
-                        leftAssemblySymbol = GetAssemblySymbolFromStream(leftAssemblyStream, left, workItem.Options, out bool resolvedReferences);
-                        runWithReferences &= resolvedReferences;
-                    }
+                IReadOnlyList<ElementContainer<IAssemblySymbol>> leftContainerList = CreateAssemblySymbols(workItem.Lefts, workItem.Options, out bool resolvedExternallyProvidedAssemblyReferences);
+                runWithReferences &= resolvedExternallyProvidedAssemblyReferences;
 
-                    if (leftAssemblySymbol == null)
-                    {
-                        _log.LogMessage(MessageImportance.High, string.Format(Resources.AssemblyLoadError, left.AssemblyId));
-                        continue;
-                    }
-
-                    leftContainerList.Add(new ElementContainer<IAssemblySymbol>(leftAssemblySymbol, left));
-                }
-
-                List<ElementContainer<IAssemblySymbol>> rightContainerList = new();
-                foreach (MetadataInformation right in workItem.Rights)
-                {
-                    IAssemblySymbol? rightAssemblySymbol;
-                    using (Stream rightAssemblyStream = _metadataStreamProvider.GetStream(right))
-                    {
-                        rightAssemblySymbol = GetAssemblySymbolFromStream(rightAssemblyStream, right, workItem.Options, out bool resolvedReferences);
-                        runWithReferences &= resolvedReferences;
-                    }
-
-                    if (rightAssemblySymbol == null)
-                    {
-                        _log.LogMessage(MessageImportance.High, string.Format(Resources.AssemblyLoadError, right.AssemblyId));
-                        continue;
-                    }
-
-                    rightContainerList.Add(new ElementContainer<IAssemblySymbol>(rightAssemblySymbol, right));
-                }
+                IReadOnlyList<ElementContainer<IAssemblySymbol>> rightContainerList = CreateAssemblySymbols(workItem.Rights.ToImmutableArray(), workItem.Options, out resolvedExternallyProvidedAssemblyReferences);
+                runWithReferences &= resolvedExternallyProvidedAssemblyReferences;
 
                 // There must at least be one left and one right element in the container.
                 // If assemblies symbols failed to load and nothing is to compare, skip this work item.
@@ -147,24 +113,48 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
             _workItems.Clear();
         }
 
-        private IAssemblySymbol? GetAssemblySymbolFromStream(Stream assemblyStream, MetadataInformation assemblyInformation, ApiCompatRunnerOptions options, out bool resolvedReferences)
+        private IReadOnlyList<ElementContainer<IAssemblySymbol>> CreateAssemblySymbols(IReadOnlyList<MetadataInformation> metadataInformation, ApiCompatRunnerOptions options, out bool resolvedExternallyProvidedAssemblyReferences)
         {
-            resolvedReferences = false;
-
             // In order to enable reference support for baseline suppression we need a better way
             // to resolve references for the baseline package. Let's not enable it for now.
-            bool shouldResolveReferences = !options.IsBaselineComparison &&
-                assemblyInformation.References != null;
+            string[] aggregatedReferences = metadataInformation.Where(m => m.References != null).SelectMany(m => m.References!).Distinct().ToArray();
+            resolvedExternallyProvidedAssemblyReferences = !options.IsBaselineComparison && aggregatedReferences.Length > 0;
 
-            // Create the work item specific assembly symbol loader and configure if references should be resolved
-            IAssemblySymbolLoader loader = _assemblySymbolLoaderFactory.Create(shouldResolveReferences);
-            if (shouldResolveReferences)
+            IAssemblySymbolLoader loader = _assemblySymbolLoaderFactory.Create(resolvedExternallyProvidedAssemblyReferences);
+            if (resolvedExternallyProvidedAssemblyReferences)
             {
-                resolvedReferences = true;
-                loader.AddReferenceSearchDirectories(assemblyInformation.References!);
+                loader.AddReferenceSearchPaths(aggregatedReferences);
             }
 
-            return loader.LoadAssembly(assemblyInformation.AssemblyName, assemblyStream);
+            IReadOnlyList<IAssemblySymbol?>? assemblySymbols = null;
+            // TODO: Come up with a better pattern to identify archives.
+            string? archivePath = metadataInformation[0].FullPath.EndsWith(".nupkg") ? metadataInformation[0].FullPath : null;
+            if (archivePath != null)
+            {
+                string[] relativePaths = metadataInformation.Select(add => add.AssemblyId).ToArray();
+                assemblySymbols = loader.LoadAssembliesFromArchive(archivePath, relativePaths);
+            }
+            else
+            {
+                string[] assemblyPaths = metadataInformation.Select(add => add.FullPath).ToArray();
+                assemblySymbols = loader.LoadAssemblies(assemblyPaths);
+            }
+
+            Debug.Assert(assemblySymbols.Count == metadataInformation.Count);
+            List<ElementContainer<IAssemblySymbol>> elementContainerList = new(metadataInformation.Count);
+            for (int i = 0; i < metadataInformation.Count; i++)
+            {
+                IAssemblySymbol? assemblySymbol = assemblySymbols[i];
+                if (assemblySymbol == null)
+                {
+                    _log.LogMessage(MessageImportance.High, string.Format(Resources.AssemblyLoadError, metadataInformation[i].AssemblyId));
+                    continue;
+                }
+
+                elementContainerList.Add(new ElementContainer<IAssemblySymbol>(assemblySymbol, metadataInformation[i]));
+            }
+
+            return elementContainerList;
         }
 
         /// <inheritdoc />
