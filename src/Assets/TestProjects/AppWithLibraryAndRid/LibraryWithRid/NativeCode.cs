@@ -21,6 +21,7 @@ namespace LibraryWithRid
                 case "'ubuntu.16.10-x64'":
                 case "'ubuntu.18.04-x64'":
                 case "'ubuntu.20.04-x64'":
+                case "'ubuntu.22.04-x64'":
                     return Marshal.PtrToStringAnsi(LinuxNativeMethods.sqlite3_libversion());
                 case "'osx.10.10-x64'": 
                 case "'osx.10.11-x64'": 
