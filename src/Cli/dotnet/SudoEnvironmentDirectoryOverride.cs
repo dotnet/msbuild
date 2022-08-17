@@ -6,6 +6,7 @@ using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.NET.Build.Tasks;
@@ -33,12 +34,26 @@ namespace Microsoft.DotNet.Cli
             return false;
         }
 
+
+        [DllImport("libc", SetLastError = true)]
+        public static extern int chown(string username, string path);
+        [DllImport("libc", SetLastError = true)]
+        private static extern int chmod(string pathname, uint mode);
+        private static void OverridePathFromSudoPermToSudoUserPerm(string path)
+        {
+            if (!OperatingSystem.IsWindows() && IsRunningUnderSudo())
+            {
+                chown(Environment.GetEnvironmentVariable("SUDO_USER"), path);
+                chmod(path, 0000700);
+            }
+        }
+
         public static void OverrideEnvironmentVariableToTmp(ParseResult parseResult)
         {
             if (!OperatingSystem.IsWindows() && IsRunningUnderSudo() && IsRunningWorkloadCommand(parseResult))
             {
                 string newProcessHomeDirectory = FileUtilities.CreateTempPath();
-
+                OverridePathFromSudoPermToSudoUserPerm(newProcessHomeDirectory);
                 var homeBeforeOverride = Path.Combine(Environment.GetEnvironmentVariable("HOME"));
                 Environment.SetEnvironmentVariable("HOME", newProcessHomeDirectory);
 
@@ -108,12 +123,12 @@ namespace Microsoft.DotNet.Cli
 
         private static bool OtherUserCannotWrite(StatInterop.FileStatus fileStat)
         {
-            return (fileStat.Mode & (int) StatInterop.Permissions.S_IWOTH) == 0;
+            return (fileStat.Mode & (int)StatInterop.Permissions.S_IWOTH) == 0;
         }
 
         private static bool GroupCannotWrite(StatInterop.FileStatus fileStat)
         {
-            return (fileStat.Mode & (int) StatInterop.Permissions.S_IWGRP) == 0;
+            return (fileStat.Mode & (int)StatInterop.Permissions.S_IWGRP) == 0;
         }
 
         private static bool IsOwnedByRoot(StatInterop.FileStatus fileStat)
