@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using Microsoft.DotNet.Cli;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -46,7 +45,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 int dotnet_version = 7; // Changed in backported code. This can be out of date for .NET 8+ and still be fine.
                 if (dotnet_version < 7)
-                    mkdir(path, 007000);
+                    mkdir(path, 0000700);
                 else
                     Directory.CreateDirectory(path, UnixFileMode.UserWrite | UnixFileMode.UserExecute | UnixFileMode.UserRead);
             }
