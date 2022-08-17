@@ -43,11 +43,7 @@ namespace Microsoft.NET.Build.Tasks
             string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                int dotnet_version = 7; // Changed in backported code. This can be out of date for .NET 8+ and still be fine.
-                if (dotnet_version < 7)
-                    mkdir(path, 0000700);
-                else
-                    Directory.CreateDirectory(path, UnixFileMode.UserWrite | UnixFileMode.UserExecute | UnixFileMode.UserRead);
+                mkdir(path, 0000700);
             }
             else
             {
