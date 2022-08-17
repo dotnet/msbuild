@@ -38,24 +38,28 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         [DllImport("libc", SetLastError = true)]
-        public static extern int mkdir(string pathname, UnixFileMode mode);
+        public static extern int mkdir(string pathname, uint mode);
         public static string CreateTempPath()
         {
             string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                mkdir(path, StatInterop.Permissions.S_IRWXU)
+                int dotnet_version = 7; // Changed in backported code. This can be out of date for .NET 8+ and still be fine.
+                if (dotnet_version < 7)
+                    mkdir(path, 007000);
+                else
+                    Directory.CreateDirectory(path, UnixFileMode.UserWrite | UnixFileMode.UserExecute | UnixFileMode.UserRead);
             }
             else
             {
-                Directory.CreateDirectory(path, StatInterop.Permissions.S_IRWXU);
+                Directory.CreateDirectory(path);
             }
             return path;
         }
 
-        public static string CreateTempFile(string tempDirectory, string extension="")
+        public static string CreateTempFile(string tempDirectory, string extension = "")
         {
-            if(extension == "")
+            if (extension == "")
             {
                 extension = Path.GetExtension(Path.GetRandomFileName());
             }
