@@ -39,22 +39,22 @@
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Error_NoProjectsToAdd">
         <source>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</source>
-        <target state="new">Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</target>
+        <target state="translated">Die Aktion „Projektverweis zur Projektmappe hinzufügen“ ist in der Vorlage nicht ordnungsgemäß konfiguriert. Die hinzuzufügenden Projektdateien können nicht ermittelt werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Error_NoSolutionFile">
         <source>Unable to determine which solution file to add the reference to.</source>
-        <target state="new">Unable to determine which solution file to add the reference to.</target>
+        <target state="translated">Es konnte nicht bestimmt werden, welcher Projektmappendatei der Verweis hinzugefügt werden soll.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Failed">
         <source>Failed to add project(s) to the solution: {0}</source>
-        <target state="new">Failed to add project(s) to the solution: {0}</target>
+        <target state="translated">Fehler beim Hinzufügen von Projekten zur Lösung: {0}</target>
         <note>{0} - the reason why operation failed, normally ends with period</note>
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Failed_NoReason">
         <source>Failed to add project(s) to a solution file.</source>
-        <target state="new">Failed to add project(s) to a solution file.</target>
+        <target state="translated">Projekt(e) konnten nicht zu einer Lösungsdatei hinzugefügt werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Running">
@@ -70,97 +70,97 @@
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Succeeded">
         <source>Successfully added project(s) to a solution file.</source>
-        <target state="new">Successfully added project(s) to a solution file.</target>
+        <target state="translated">Projekt(e) erfolgreich zu einer Projektmappendatei hinzugefügt.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_AddPackageReference">
         <source>Adding a package reference {0} to project file {1}:</source>
-        <target state="new">Adding a package reference {0} to project file {1}:</target>
+        <target state="translated">Hinzufügen einer Paketreferenz {0} zur Projektdatei {1}:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_AddPackageReference_Failed">
         <source>Failed to add package reference: {0}</source>
-        <target state="new">Failed to add package reference: {0}</target>
+        <target state="translated">Fehler beim Hinzufügen des Paketverweises: {0}</target>
         <note>{0} - the reason why operation failed, normally ends with period</note>
       </trans-unit>
       <trans-unit id="PostAction_AddReference_AddPackageReference_WithVersion">
         <source>Adding a package reference {0} (version: {1}) to project file {2}:</source>
-        <target state="new">Adding a package reference {0} (version: {1}) to project file {2}:</target>
+        <target state="translated">Hinzufügen einer Paketreferenz {0} (Version: {1}) zur Projektdatei {2}:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_AddProjectReference">
         <source>Adding a project reference {0} to project file {1}:</source>
-        <target state="new">Adding a project reference {0} to project file {1}:</target>
+        <target state="translated">Hinzufügen einer Projektreferenz {0} zur Projektdatei {1}:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_AddProjectReference_Failed">
         <source>Failed to add project reference: {0}</source>
-        <target state="new">Failed to add project reference: {0}</target>
+        <target state="translated">Fehler beim Hinzufügen des Projektverweises: {0}</target>
         <note>{0} - the reason why operation failed, normally ends with period</note>
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_ActionMisconfigured">
         <source>Add reference action is not configured correctly in the template.</source>
-        <target state="new">Add reference action is not configured correctly in the template.</target>
+        <target state="translated">Die Aktion zum Hinzufügen von Verweisen ist in der Vorlage nicht korrekt konfiguriert.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_FrameworkNotSupported">
         <source>Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</source>
-        <target state="new">Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</target>
+        <target state="translated">Der Framework-Verweis \"{0}\" konnte dem Projekt nicht automatisch hinzugefügt werden. Bearbeiten Sie die Projektdatei manuell, um sie hinzuzufügen.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_ProjFileListHeader">
         <source>Project files found:</source>
-        <target state="new">Project files found:</target>
+        <target state="translated">Gefundene Projektdateien:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_UnresolvedProjFile">
         <source>Unable to determine which project file to add the reference to.</source>
-        <target state="new">Unable to determine which project file to add the reference to.</target>
+        <target state="translated">Es konnte nicht bestimmt werden, welcher Projektdatei der Verweis hinzugefügt werden soll.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_UnsupportedRefType">
         <source>Adding reference type {0} is not supported.</source>
-        <target state="new">Adding reference type {0} is not supported.</target>
+        <target state="translated">Das Hinzufügen des Verweistyps {0} wird nicht unterstützt.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Failed">
         <source>Failed to add a reference to the project file.</source>
-        <target state="new">Failed to add a reference to the project file.</target>
+        <target state="translated">Fehler beim Hinzufügen einer Referenz zur Projektdatei.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Succeeded">
         <source>Successfully added a reference to the project file.</source>
-        <target state="new">Successfully added a reference to the project file.</target>
+        <target state="translated">Der Projektdatei wurde erfolgreich ein Verweis hinzugefügt.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_Restore_Error_FailedToDetermineProjectToRestore">
         <source>Couldn't determine files to restore.</source>
-        <target state="new">Couldn't determine files to restore.</target>
+        <target state="translated">Für die Wiederherstellung konnten keine Dateien ermittelt werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_Restore_Error_NoProjectsToRestore">
         <source>No projects are configured to restore. Check primary outputs configuration in template.json.</source>
-        <target state="new">No projects are configured to restore. Check primary outputs configuration in template.json.</target>
+        <target state="translated">Es sind keine Projekte für die Wiederherstellung konfiguriert. Überprüfen Sie die primäre Ausgabekonfiguration in template.json.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_Restore_Failed">
         <source>Restore failed.</source>
-        <target state="new">Restore failed.</target>
+        <target state="translated">Fehler beim Wiederherstellen.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_Restore_RestoreFailed">
         <source>Failed to perform restore: {0}</source>
-        <target state="new">Failed to perform restore: {0}</target>
+        <target state="translated">Fehler beim Ausführen der Wiederherstellung: {0}</target>
         <note>{0} - the reason why operation failed, normally ends with period</note>
       </trans-unit>
       <trans-unit id="PostAction_Restore_Running">
         <source>Restoring {0}:</source>
-        <target state="new">Restoring {0}:</target>
+        <target state="translated">Wiederherstellung {0}:</target>
         <note>{0} - path to a project to restore</note>
       </trans-unit>
       <trans-unit id="PostAction_Restore_Succeeded">
         <source>Restore succeeded.</source>
-        <target state="new">Restore succeeded.</target>
+        <target state="translated">Wiederherstellung erfolgreich.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCapabilityConstraintFactory_Exception_EvaluationFailed">

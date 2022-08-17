@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="DisableProjectContextEval_OptionDescription">
         <source>Disables evaluating project context using MSBuild.</source>
-        <target state="new">Disables evaluating project context using MSBuild.</target>
+        <target state="translated">禁用使用 MSBuild 评估项目上下文。</target>
         <note />
       </trans-unit>
       <trans-unit id="DisableSdkTemplates_OptionDescription">
@@ -39,22 +39,22 @@
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Error_NoProjectsToAdd">
         <source>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</source>
-        <target state="new">Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</target>
+        <target state="translated">模板中未正确配置将项目引用添加到解决方案操作。无法确定要添加的项目文件。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Error_NoSolutionFile">
         <source>Unable to determine which solution file to add the reference to.</source>
-        <target state="new">Unable to determine which solution file to add the reference to.</target>
+        <target state="translated">无法确定向哪一个解决方案文件添加引用。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Failed">
         <source>Failed to add project(s) to the solution: {0}</source>
-        <target state="new">Failed to add project(s) to the solution: {0}</target>
+        <target state="translated">无法将项目添加到解决方案: {0}</target>
         <note>{0} - the reason why operation failed, normally ends with period</note>
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Failed_NoReason">
         <source>Failed to add project(s) to a solution file.</source>
-        <target state="new">Failed to add project(s) to a solution file.</target>
+        <target state="translated">无法将项目添加到解决方案文件。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Running">
@@ -62,105 +62,105 @@
     project(s): {0}
     to solution file: {1}
     solution folder: {2}</source>
-        <target state="new">Adding
-    project(s): {0}
-    to solution file: {1}
-    solution folder: {2}</target>
+        <target state="translated">添加
+    项目: {0}
+    到解决方案文件: {1}
+    解决方案文件夹: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Succeeded">
         <source>Successfully added project(s) to a solution file.</source>
-        <target state="new">Successfully added project(s) to a solution file.</target>
+        <target state="translated">已成功将项目添加到解决方案文件。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_AddPackageReference">
         <source>Adding a package reference {0} to project file {1}:</source>
-        <target state="new">Adding a package reference {0} to project file {1}:</target>
+        <target state="translated">将包引用 {0} 添加到项目文件 {1}:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_AddPackageReference_Failed">
         <source>Failed to add package reference: {0}</source>
-        <target state="new">Failed to add package reference: {0}</target>
+        <target state="translated">无法添加包引用: {0}</target>
         <note>{0} - the reason why operation failed, normally ends with period</note>
       </trans-unit>
       <trans-unit id="PostAction_AddReference_AddPackageReference_WithVersion">
         <source>Adding a package reference {0} (version: {1}) to project file {2}:</source>
-        <target state="new">Adding a package reference {0} (version: {1}) to project file {2}:</target>
+        <target state="translated">将包引用 {0}(版本: {1})添加到项目文件 {2}:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_AddProjectReference">
         <source>Adding a project reference {0} to project file {1}:</source>
-        <target state="new">Adding a project reference {0} to project file {1}:</target>
+        <target state="translated">将项目引用 {0} 添加到项目文件 {1}:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_AddProjectReference_Failed">
         <source>Failed to add project reference: {0}</source>
-        <target state="new">Failed to add project reference: {0}</target>
+        <target state="translated">无法添加项目引用: {0}</target>
         <note>{0} - the reason why operation failed, normally ends with period</note>
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_ActionMisconfigured">
         <source>Add reference action is not configured correctly in the template.</source>
-        <target state="new">Add reference action is not configured correctly in the template.</target>
+        <target state="translated">模板中未正确配置添加引用操作。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_FrameworkNotSupported">
         <source>Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</source>
-        <target state="new">Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</target>
+        <target state="translated">无法将框架引用 {0} 自动添加到项目中。请手动编辑项目文件以添加它。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_ProjFileListHeader">
         <source>Project files found:</source>
-        <target state="new">Project files found:</target>
+        <target state="translated">已找到项目文件:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_UnresolvedProjFile">
         <source>Unable to determine which project file to add the reference to.</source>
-        <target state="new">Unable to determine which project file to add the reference to.</target>
+        <target state="translated">无法确定哪一个项目文件要添加引用。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_UnsupportedRefType">
         <source>Adding reference type {0} is not supported.</source>
-        <target state="new">Adding reference type {0} is not supported.</target>
+        <target state="translated">不支持添加引用类型 {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Failed">
         <source>Failed to add a reference to the project file.</source>
-        <target state="new">Failed to add a reference to the project file.</target>
+        <target state="translated">无法添加对项目文件的引用。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Succeeded">
         <source>Successfully added a reference to the project file.</source>
-        <target state="new">Successfully added a reference to the project file.</target>
+        <target state="translated">已成功添加对项目文件的引用。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_Restore_Error_FailedToDetermineProjectToRestore">
         <source>Couldn't determine files to restore.</source>
-        <target state="new">Couldn't determine files to restore.</target>
+        <target state="translated">无法确定要还原的文件。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_Restore_Error_NoProjectsToRestore">
         <source>No projects are configured to restore. Check primary outputs configuration in template.json.</source>
-        <target state="new">No projects are configured to restore. Check primary outputs configuration in template.json.</target>
+        <target state="translated">未将任何项目配置为还原。检查 template.json 中的主输出配置。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_Restore_Failed">
         <source>Restore failed.</source>
-        <target state="new">Restore failed.</target>
+        <target state="translated">还原失败。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_Restore_RestoreFailed">
         <source>Failed to perform restore: {0}</source>
-        <target state="new">Failed to perform restore: {0}</target>
+        <target state="translated">无法执行还原: {0}</target>
         <note>{0} - the reason why operation failed, normally ends with period</note>
       </trans-unit>
       <trans-unit id="PostAction_Restore_Running">
         <source>Restoring {0}:</source>
-        <target state="new">Restoring {0}:</target>
+        <target state="translated">正在还原 {0}:</target>
         <note>{0} - path to a project to restore</note>
       </trans-unit>
       <trans-unit id="PostAction_Restore_Succeeded">
         <source>Restore succeeded.</source>
-        <target state="new">Restore succeeded.</target>
+        <target state="translated">已成功还原。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCapabilityConstraintFactory_Exception_EvaluationFailed">

@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="DisableProjectContextEval_OptionDescription">
         <source>Disables evaluating project context using MSBuild.</source>
-        <target state="new">Disables evaluating project context using MSBuild.</target>
+        <target state="translated">MSBuild を使用してプロジェクト コンテキストの評価を無効にします。</target>
         <note />
       </trans-unit>
       <trans-unit id="DisableSdkTemplates_OptionDescription">
@@ -39,22 +39,22 @@
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Error_NoProjectsToAdd">
         <source>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</source>
-        <target state="new">Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</target>
+        <target state="translated">ソリューションへのプロジェクト参照追加のアクションがテンプレートで正しく構成されていません。追加するプロジェクトファイルを特定できません。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Error_NoSolutionFile">
         <source>Unable to determine which solution file to add the reference to.</source>
-        <target state="new">Unable to determine which solution file to add the reference to.</target>
+        <target state="translated">参照の追加先となるソリューション ファイルを特定できませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Failed">
         <source>Failed to add project(s) to the solution: {0}</source>
-        <target state="new">Failed to add project(s) to the solution: {0}</target>
+        <target state="translated">ソリューションにプロジェクトを追加できませんでした: {0}</target>
         <note>{0} - the reason why operation failed, normally ends with period</note>
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Failed_NoReason">
         <source>Failed to add project(s) to a solution file.</source>
-        <target state="new">Failed to add project(s) to a solution file.</target>
+        <target state="translated">プロジェクトをソリューション ファイルに追加できませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Running">
@@ -62,105 +62,105 @@
     project(s): {0}
     to solution file: {1}
     solution folder: {2}</source>
-        <target state="new">Adding
-    project(s): {0}
-    to solution file: {1}
-    solution folder: {2}</target>
+        <target state="translated">
+    プロジェクトの追加 対象: {0}
+    対応するソリューション ファイル: {1}
+    ソリューション フォルダー: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Succeeded">
         <source>Successfully added project(s) to a solution file.</source>
-        <target state="new">Successfully added project(s) to a solution file.</target>
+        <target state="translated">プロジェクトがソリューション ファイルに正常に追加されました。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_AddPackageReference">
         <source>Adding a package reference {0} to project file {1}:</source>
-        <target state="new">Adding a package reference {0} to project file {1}:</target>
+        <target state="translated">パッケージ参照 {0} をプロジェクト ファイル {1} に追加しています:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_AddPackageReference_Failed">
         <source>Failed to add package reference: {0}</source>
-        <target state="new">Failed to add package reference: {0}</target>
+        <target state="translated">パッケージ参照を追加できませんでした: {0}</target>
         <note>{0} - the reason why operation failed, normally ends with period</note>
       </trans-unit>
       <trans-unit id="PostAction_AddReference_AddPackageReference_WithVersion">
         <source>Adding a package reference {0} (version: {1}) to project file {2}:</source>
-        <target state="new">Adding a package reference {0} (version: {1}) to project file {2}:</target>
+        <target state="translated">パッケージ参照 {0} (バージョン: {1}) をプロジェクト ファイル {2} に追加しています:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_AddProjectReference">
         <source>Adding a project reference {0} to project file {1}:</source>
-        <target state="new">Adding a project reference {0} to project file {1}:</target>
+        <target state="translated">プロジェクト参照 {0} をプロジェクト ファイル {1} に追加しています:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_AddProjectReference_Failed">
         <source>Failed to add project reference: {0}</source>
-        <target state="new">Failed to add project reference: {0}</target>
+        <target state="translated">プロジェクト参照を追加できませんでした: {0}</target>
         <note>{0} - the reason why operation failed, normally ends with period</note>
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_ActionMisconfigured">
         <source>Add reference action is not configured correctly in the template.</source>
-        <target state="new">Add reference action is not configured correctly in the template.</target>
+        <target state="translated">参照の追加アクションがテンプレートに正しく構成されていません。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_FrameworkNotSupported">
         <source>Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</source>
-        <target state="new">Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</target>
+        <target state="translated">フレームワーク参照 {0} をプロジェクトに自動的に追加できません。プロジェクト ファイルを手動で編集して追加します。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_ProjFileListHeader">
         <source>Project files found:</source>
-        <target state="new">Project files found:</target>
+        <target state="translated">見つかったプロジェクト ファイル:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_UnresolvedProjFile">
         <source>Unable to determine which project file to add the reference to.</source>
-        <target state="new">Unable to determine which project file to add the reference to.</target>
+        <target state="translated">参照の追加先となるプロジェクト ファイルを特定できませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Error_UnsupportedRefType">
         <source>Adding reference type {0} is not supported.</source>
-        <target state="new">Adding reference type {0} is not supported.</target>
+        <target state="translated">参照型 {0} の追加はサポートされていません。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Failed">
         <source>Failed to add a reference to the project file.</source>
-        <target state="new">Failed to add a reference to the project file.</target>
+        <target state="translated">参照をプロジェクト ファイルに追加できませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddReference_Succeeded">
         <source>Successfully added a reference to the project file.</source>
-        <target state="new">Successfully added a reference to the project file.</target>
+        <target state="translated">参照がプロジェクトファイルに正常に追加されました。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_Restore_Error_FailedToDetermineProjectToRestore">
         <source>Couldn't determine files to restore.</source>
-        <target state="new">Couldn't determine files to restore.</target>
+        <target state="translated">復元するファイルを特定できませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_Restore_Error_NoProjectsToRestore">
         <source>No projects are configured to restore. Check primary outputs configuration in template.json.</source>
-        <target state="new">No projects are configured to restore. Check primary outputs configuration in template.json.</target>
+        <target state="translated">復元するように構成されているプロジェクトはありません。template.json のプライマリ出力構成を確認してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_Restore_Failed">
         <source>Restore failed.</source>
-        <target state="new">Restore failed.</target>
+        <target state="translated">復元に失敗しました。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_Restore_RestoreFailed">
         <source>Failed to perform restore: {0}</source>
-        <target state="new">Failed to perform restore: {0}</target>
+        <target state="translated">復元を実行できませんでした: {0}</target>
         <note>{0} - the reason why operation failed, normally ends with period</note>
       </trans-unit>
       <trans-unit id="PostAction_Restore_Running">
         <source>Restoring {0}:</source>
-        <target state="new">Restoring {0}:</target>
+        <target state="translated">{0} を復元しています:</target>
         <note>{0} - path to a project to restore</note>
       </trans-unit>
       <trans-unit id="PostAction_Restore_Succeeded">
         <source>Restore succeeded.</source>
-        <target state="new">Restore succeeded.</target>
+        <target state="translated">正常に復元されました。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCapabilityConstraintFactory_Exception_EvaluationFailed">
