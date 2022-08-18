@@ -63,7 +63,7 @@
     to solution file: {1}
     solution folder: {2}</source>
         <target state="translated">Přidávání
-    projektů: {0}
+    projektu/ů: {0}
     do souboru řešení: {1}
     složka řešení: {2}</target>
         <note />
