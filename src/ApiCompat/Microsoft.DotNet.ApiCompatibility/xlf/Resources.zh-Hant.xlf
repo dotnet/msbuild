@@ -7,11 +7,6 @@
         <target state="translated">正在執行 {0} 工作項目...</target>
         <note />
       </trans-unit>
-      <trans-unit id="ApiCompatibilityFooter">
-        <source>Performed api validation on '{0}' ({2}) and '{1}' ({3}).</source>
-        <target state="translated">已在 '{0}' ({2}) 與 '{1}' ({3}) 上執行 API 驗證。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ApiCompatibilityHeader">
         <source>API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</source>
         <target state="translated">'{0}' ({2}) 與 '{1}' ({3}) 之間的 API 相容性錯誤:</target>

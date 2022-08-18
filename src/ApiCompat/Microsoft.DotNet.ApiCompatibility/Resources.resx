@@ -219,9 +219,6 @@
   <data name="ApiCompatibilityHeader" xml:space="preserve">
     <value>API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</value>
   </data>
-  <data name="ApiCompatibilityFooter" xml:space="preserve">
-    <value>Performed api validation on '{0}' ({2}) and '{1}' ({3}).</value>
-  </data>
   <data name="ApiCompatRunnerExecutingWorkItems" xml:space="preserve">
     <value>Executing {0} work item(s)...</value>
   </data>

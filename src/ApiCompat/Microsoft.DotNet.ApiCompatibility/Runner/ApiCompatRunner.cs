@@ -100,13 +100,6 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
                             difference.DiagnosticId,
                             difference.Message);
                     }
-
-                    _log.LogMessage(MessageImportance.Low,
-                        Resources.ApiCompatibilityFooter,
-                        differenceGroup.Key.Left.AssemblyId,
-                        differenceGroup.Key.Right.AssemblyId,
-                        workItem.Options.IsBaselineComparison ? differenceGroup.Key.Left.FullPath : "left",
-                        workItem.Options.IsBaselineComparison ? differenceGroup.Key.Right.FullPath : "right");
                 }
             }
 

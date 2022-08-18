@@ -7,11 +7,6 @@
         <target state="translated">{0} 件の作業項目を移動しています...</target>
         <note />
       </trans-unit>
-      <trans-unit id="ApiCompatibilityFooter">
-        <source>Performed api validation on '{0}' ({2}) and '{1}' ({3}).</source>
-        <target state="translated">'{0}' ({2}) と '{1}' ({3}) に API 検証を実行しました。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ApiCompatibilityHeader">
         <source>API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</source>
         <target state="translated">'{0}' ({2}) と '{1}' ({3}) の API 互換性エラーは、以下のとおりです。</target>
