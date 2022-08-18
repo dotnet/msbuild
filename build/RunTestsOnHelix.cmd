@@ -18,3 +18,11 @@ set TestExecutionDirectory=%TEMP%\dotnetSdkTests\%RandomDirectoryName%
 set DOTNET_CLI_HOME=%TestExecutionDirectory%\.dotnet
 mkdir %TestExecutionDirectory%
 robocopy %HELIX_CORRELATION_PAYLOAD%\t\TestExecutionDirectoryFiles %TestExecutionDirectory%
+
+REM call dotnet new so the first run message doesn't interfere with the first test
+dotnet new --debug:ephemeral-hive
+REM avoid potetial cocurrency issues when nuget is creating nuget.config
+dotnet nuget list source
+REM We downloaded a special zip of files to the .nuget folder so add that as a source
+dotnet new nugetconfig
+dotnet nuget add source %DOTNET_ROOT%\.nuget --configfile nuget.config
