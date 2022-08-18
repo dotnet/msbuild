@@ -1,10 +1,12 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable enable
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.NativeWrapper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -39,34 +41,46 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
 
         private string GetRuntimeStatusMessage(NetRuntimeInfo runtime)
         {
-            if (BundleIsEndOfLife(runtime))
+            bool? endOfLife = BundleIsEndOfLife(runtime);
+            bool? isMaintenance = BundleIsMaintenance(runtime);
+            bool? runtimePatchExists = NewerRuntimePatchExists(runtime);
+            if (endOfLife == true)
             {
                 return string.Format(LocalizableStrings.OutOfSupportMessage, $"{runtime.Version.Major}.{runtime.Version.Minor}");
             }
-            else if (BundleIsMaintenance(runtime))
+            else if (isMaintenance == true)
             {
                 return string.Format(LocalizableStrings.MaintenanceMessage, $"{runtime.Version.Major}.{runtime.Version.Minor}");
             }
-            else if (NewerRuntimePatchExists(runtime))
+            else if (runtimePatchExists == true)
             {
                 return string.Format(LocalizableStrings.NewPatchAvailableMessage, NewestRuntimePatchVersion(runtime));
             }
-            else
+            else if (endOfLife == false && isMaintenance == false && runtimePatchExists == false)
             {
                 return LocalizableStrings.BundleUpToDateMessage;
             }
-        }
-        
-        private bool NewerRuntimePatchExists(NetRuntimeInfo bundle)
-        {
-            var newestPatchVesion = NewestRuntimePatchVersion(bundle);
-            return newestPatchVesion> bundle.Version;
+            else
+            {
+                return LocalizableStrings.VersionCheckFailure;
+            }
         }
 
-        private ReleaseVersion NewestRuntimePatchVersion(NetRuntimeInfo bundle)
+        private bool? NewerRuntimePatchExists(NetRuntimeInfo bundle)
         {
-            var product = _productCollection.First(product => product.ProductVersion.Equals($"{bundle.Version.Major}.{bundle.Version.Minor}"));
-            return product.LatestRuntimeVersion;
+            var newestPatchVesion = NewestRuntimePatchVersion(bundle);
+            if (newestPatchVesion == null)
+            {
+                return null;
+            }
+
+            return newestPatchVesion > bundle.Version;
+        }
+
+        private ReleaseVersion? NewestRuntimePatchVersion(NetRuntimeInfo bundle)
+        {
+            var product = _productCollection.FirstOrDefault(product => product.ProductVersion.Equals($"{bundle.Version.Major}.{bundle.Version.Minor}"));
+            return product?.LatestRuntimeVersion;
         }
     }
 }
