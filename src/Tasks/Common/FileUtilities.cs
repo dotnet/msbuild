@@ -59,7 +59,8 @@ namespace Microsoft.NET.Build.Tasks
                 extension = Path.GetExtension(Path.GetRandomFileName());
             }
             string fileName = Path.ChangeExtension(Path.Combine(tempDirectory, Path.GetTempFileName()), extension);
-            File.Create(fileName.ToString());
+            var fstream = File.Create(fileName.ToString());
+            fstream.Close();
             return fileName;
         }
 
