@@ -606,7 +606,38 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                     output.Replace("{TempPath}", "/tmp/");
                     output.Replace(templateLocation, "%template location%");
                 });
-                
+        }
+
+        [Fact]
+        public Task CanSuggestTypoCorrection_Template()
+        {
+            CommandResult commandResult = new DotnetNewCommand(_log, "cnsle")
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute();
+
+            commandResult
+                .Should()
+                .Fail()
+                .And.NotHaveStdOut();
+
+            return Verify(commandResult.StdErr);
+        }
+
+        [Fact]
+        public Task CanSuggestTypoCorrection_Command()
+        {
+            CommandResult commandResult = new DotnetNewCommand(_log, "uninstal")
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute();
+
+            commandResult
+                .Should()
+                .Fail()
+                .And.NotHaveStdOut();
+
+            return Verify(commandResult.StdErr);
         }
 
     }

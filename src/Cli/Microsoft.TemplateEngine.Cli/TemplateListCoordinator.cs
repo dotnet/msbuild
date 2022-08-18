@@ -87,7 +87,7 @@ namespace Microsoft.TemplateEngine.Cli
                 // No templates found matching the following input parameter(s): {0}.
                 Reporter.Error.WriteLine(
                     string.Format(
-                        LocalizableStrings.InstantiateCommand_Info_NoMatchingTemplates,
+                        LocalizableStrings.Generic_Info_NoMatchingTemplates,
                         GetInputParametersString(args/*, appliedParameterMatches*/))
                     .Bold().Red());
 

@@ -11,7 +11,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         public InstantiateCommandArgs(InstantiateCommand command, ParseResult parseResult) : base(command, parseResult)
         {
             RemainingArguments = parseResult.GetValueForArgument(command.RemainingArguments) ?? Array.Empty<string>();
-            ShortName = parseResult.GetValueForArgument(command.ShortNameArgument);
+            ShortName = parseResult.GetValueForArgument(InstantiateCommand.ShortNameArgument);
 
             var tokens = new List<string>();
             if (!string.IsNullOrWhiteSpace(ShortName))

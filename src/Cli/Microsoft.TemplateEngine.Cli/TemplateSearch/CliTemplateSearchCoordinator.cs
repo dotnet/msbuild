@@ -79,7 +79,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                     // No templates found matching the following input parameter(s): {0}.
                     Reporter.Error.WriteLine(
                         string.Format(
-                            LocalizableStrings.InstantiateCommand_Info_NoMatchingTemplates,
+                            LocalizableStrings.Generic_Info_NoMatchingTemplates,
                             GetInputParametersString(commandArgs))
                         .Bold().Red());
                 }

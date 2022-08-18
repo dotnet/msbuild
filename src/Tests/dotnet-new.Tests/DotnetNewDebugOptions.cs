@@ -151,7 +151,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             commandResult
                 .Should()
                 .Fail()
-                .And.HaveStdErrContaining("No templates found matching: 'console'.");
+                .And.HaveStdErrContaining("No templates or subcommands found matching: 'console'.");
         }
     }
 }
