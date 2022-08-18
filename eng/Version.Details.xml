@@ -10,11 +10,11 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>f142128e89b63577a9bbba7e2b760ec82102a7a9</Sha>
     </Dependency>
-    <Dependency Name="VS.Redist.Common.NetCore.SharedFramework.x64.7.0" Version="7.0.0-rc.1.22415.13">
+    <Dependency Name="VS.Redist.Common.NetCore.SharedFramework.x64.8.0" Version="8.0.0-alpha.1.22417.17">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>7d981168a2a2ed7d2190776a08ece88665cba727</Sha>
     </Dependency>
-    <Dependency Name="VS.Redist.Common.NetCore.TargetingPack.x64.7.0" Version="7.0.0-rc.1.22415.13">
+    <Dependency Name="VS.Redist.Common.NetCore.TargetingPack.x64.8.0" Version="8.0.0-alpha.1.22417.17">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>7d981168a2a2ed7d2190776a08ece88665cba727</Sha>
     </Dependency>
@@ -139,7 +139,7 @@
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
       <Sha>d5046afdd2d0e6234ae3fc5bd4ae878594079cc7</Sha>
     </Dependency>
-    <Dependency Name="VS.Redist.Common.WindowsDesktop.SharedFramework.x64.7.0" Version="7.0.0-rc.1.22379.3">
+    <Dependency Name="VS.Redist.Common.WindowsDesktop.SharedFramework.x64.8.0" Version="7.0.0-rc.1.22379.3">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
       <Sha>d5046afdd2d0e6234ae3fc5bd4ae878594079cc7</Sha>
     </Dependency>
@@ -147,7 +147,7 @@
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
       <Sha>d5046afdd2d0e6234ae3fc5bd4ae878594079cc7</Sha>
     </Dependency>
-    <Dependency Name="VS.Redist.Common.WindowsDesktop.TargetingPack.x64.7.0" Version="7.0.0-rc.1.22379.3">
+    <Dependency Name="VS.Redist.Common.WindowsDesktop.TargetingPack.x64.8.0" Version="7.0.0-rc.1.22379.3">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
       <Sha>d5046afdd2d0e6234ae3fc5bd4ae878594079cc7</Sha>
     </Dependency>
@@ -167,7 +167,7 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>3d40b09ba819ed91a6f52fac7e580f2c2cf961a8</Sha>
     </Dependency>
-    <Dependency Name="VS.Redist.Common.AspNetCore.SharedFramework.x64.7.0" Version="7.0.0-rc.1.22412.21">
+    <Dependency Name="VS.Redist.Common.AspNetCore.SharedFramework.x64.8.0" Version="7.0.0-rc.1.22412.21">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>3d40b09ba819ed91a6f52fac7e580f2c2cf961a8</Sha>
       <SourceBuild RepoName="aspnetcore" ManagedOnly="true" />
