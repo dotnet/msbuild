@@ -10,7 +10,6 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Text;
 using System.Threading;
 
 using Microsoft.Build.Shared;
@@ -37,6 +36,8 @@ internal static class NativeMethods
     internal const uint RUNTIME_INFO_DONT_SHOW_ERROR_DIALOG = 0x40;
     internal const uint FILE_TYPE_CHAR = 0x0002;
     internal const Int32 STD_OUTPUT_HANDLE = -11;
+    internal const uint DISABLE_NEWLINE_AUTO_RETURN = 0x0008;
+    internal const uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
     internal const uint RPC_S_CALLPENDING = 0x80010115;
     internal const uint E_ABORT = (uint)0x80004004;
 
@@ -59,6 +60,7 @@ internal static class NativeMethods
     internal static HandleRef NullHandleRef = new HandleRef(null, IntPtr.Zero);
 
     internal static IntPtr NullIntPtr = new IntPtr(0);
+    internal static IntPtr InvalidHandle = new IntPtr(-1);
 
     // As defined in winnt.h:
     internal const ushort PROCESSOR_ARCHITECTURE_INTEL = 0;
@@ -754,6 +756,24 @@ internal static class NativeMethods
     internal static string OSName
     {
         get { return IsWindows ? "Windows_NT" : "Unix"; }
+    }
+
+    /// <summary>
+    /// Framework named as presented to users (for example in version info).
+    /// </summary>
+    internal static string FrameworkName
+    {
+        get
+        {
+#if RUNTIME_TYPE_NETCORE
+            const string frameworkName = ".NET";
+#elif MONO
+            const string frameworkName = "Mono";
+#else
+            const string frameworkName = ".NET Framework";
+#endif
+            return frameworkName;
+        }
     }
 
     /// <summary>
@@ -1499,6 +1519,12 @@ internal static class NativeMethods
     [DllImport("kernel32.dll")]
     [SupportedOSPlatform("windows")]
     internal static extern uint GetFileType(IntPtr hFile);
+    
+    [DllImport("kernel32.dll")]
+    internal static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
+
+    [DllImport("kernel32.dll")]
+    internal static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
 
     [SuppressMessage("Microsoft.Usage", "CA2205:UseManagedEquivalentsOfWin32Api", Justification = "Using unmanaged equivalent for performance reasons")]
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]

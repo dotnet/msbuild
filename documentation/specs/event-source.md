@@ -22,6 +22,7 @@ EventSource is primarily used to profile code. For MSBuild specifically, a major
 | GenerateResourceOverall | Uses resource APIs to transform resource files into strongly-typed resource classes. |
 | LoadDocument | Loads an XMLDocumentWithLocation from a path.
 | MSBuildExe | Executes MSBuild from the command line. |
+| MSBuildServerBuild | Executes a build from the MSBuildServer node. |
 | PacketReadSize | Reports the size of a packet sent between nodes. Note that this does not include time information. |
 | Parse | Parses an XML document into a ProjectRootElement. |
 | ProjectGraphConstruction | Constructs a dependency graph among projects. |

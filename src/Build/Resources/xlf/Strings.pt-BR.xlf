@@ -102,6 +102,11 @@
         <target state="translated">MSB4257: o arquivo de cache do resultado de saída especificado está vazio.</target>
         <note />
       </trans-unit>
+      <trans-unit id="EnvironmentDerivedPropertyRead">
+        <source>Property '{0}' with value '{1}' expanded from the environment.</source>
+        <target state="new">Property '{0}' with value '{1}' expanded from the environment.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
         <source>Read environment variable "{0}"</source>
         <target state="translated">Ler a variável de ambiente "{0}"</target>
@@ -143,9 +148,8 @@
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
-        <source>Loading the following project cache plugin:
-    {0}</source>
-        <target state="translated">Carregando o seguinte plug-in do projeto:
+        <source>Loading the following project cache plugin: {0}</source>
+        <target state="needs-review-translation">Carregando o seguinte plug-in do projeto:
     {0}</target>
         <note />
       </trans-unit>
@@ -174,11 +178,6 @@
       <trans-unit id="NoProjectCachePluginFoundInAssembly">
         <source>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</source>
         <target state="translated">MSB4270: não foi encontrado nenhum plug-in de cache do projeto no assembly "{0}". Era esperado um plug-in.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NotAllNodesDefineACacheItem">
-        <source>MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</source>
-        <target state="translated">MSB4269: quando algum nó de grafo estático define um cache do projeto, todos os nós precisam definir o mesmo cache do projeto. Os seguintes projetos não contêm uma declaração de item "{0}": {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -219,19 +218,9 @@
         <target state="translated">O método {0} não pode ser chamado com uma coleção que contém nomes de destino nulos ou vazios.</target>
         <note />
       </trans-unit>
-      <trans-unit id="OnlyOneCachePluginMustBeSpecified">
-        <source>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</source>
-        <target state="translated">MSB4265: é necessário especificar só um plug-in de cache do projeto, mas foram encontrados vários: {0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
         <source>Created an override using task: {0} at {1}</source>
         <target state="translated">Criou uma substituição usando a tarefa: {0} em {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectCacheBeginBuild">
-        <source>Initializing project cache plugin.</source>
-        <target state="translated">Inicializando o plugin de cache do projeto.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheEndBuild">

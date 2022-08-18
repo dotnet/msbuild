@@ -442,7 +442,8 @@ namespace Microsoft.Build.Tasks
                 taskInfo.CodeType = RoslynCodeTaskFactoryCodeType.Class;
                 taskInfo.SourceCode = File.ReadAllText(sourceAttribute.Value.Trim());
             }
-            else if (typeAttribute != null)
+
+            if (typeAttribute != null)
             {
                 if (String.IsNullOrWhiteSpace(typeAttribute.Value))
                 {
@@ -746,6 +747,12 @@ namespace Microsoft.Build.Tasks
                         _log.LogErrorWithCodeFromResources("CodeTaskFactory.FindSourceFileAt", sourceCodePath);
 
                         return false;
+                    }
+
+                    if (!deleteSourceCodeFile)
+                    {
+                        // Log the location of the code file because MSBUILDLOGCODETASKFACTORYOUTPUT was set.
+                        _log.LogMessageFromResources(MessageImportance.Low, "CodeTaskFactory.FindSourceFileAt", sourceCodePath);
                     }
                 }
 

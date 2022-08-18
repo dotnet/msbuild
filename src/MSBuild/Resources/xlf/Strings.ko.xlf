@@ -505,13 +505,15 @@
                             mode. This logging style is on by default.
                         ForceConsoleColor--Use ANSI console colors even if
                             console does not support it
-                        Verbosity--overrides the -verbosity setting for this
+                        PreferConsoleColor--Use ANSI console colors only if
+                            target console does support it
+                     Verbosity--overrides the -verbosity setting for this
                             logger.
                      Example:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
+        <target state="needs-review-translation">  -consoleLoggerParameters:&lt;parameters&gt;
                      콘솔 로거에 대한 매개 변수입니다. (약식: -clp)
                      사용 가능한 매개 변수는 다음과 같습니다.
                         PerformanceSummary--작업, 대상 및 프로젝트에서 소요된 시간을 

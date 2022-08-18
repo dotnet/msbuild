@@ -2924,7 +2924,7 @@ namespace Microsoft.Build.Evaluation
                     string originalValue = (existing == null) ? String.Empty : ((IProperty)existing).EvaluatedValueEscaped;
 
                     _data.GlobalPropertiesDictionary.Set(ProjectPropertyInstance.Create(name, escapedValue));
-                    _data.Properties.Set(ProjectProperty.Create(Owner, name, escapedValue, true /* is global */, false /* may not be reserved name */));
+                    _data.Properties.Set(ProjectProperty.Create(Owner, name, escapedValue, isGlobalProperty: true, mayBeReserved: false, loggingContext: null));
 
                     ProjectCollection.AfterUpdateLoadedProjectGlobalProperties(Owner);
                     MarkDirty();
@@ -4394,9 +4394,9 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Sets a property which is not derived from Xml.
             /// </summary>
-            public ProjectProperty SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false)
+            public ProjectProperty SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false, BackEnd.Logging.LoggingContext loggingContext = null)
             {
-                ProjectProperty property = ProjectProperty.Create(Project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved);
+                ProjectProperty property = ProjectProperty.Create(Project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, loggingContext);
                 Properties.Set(property);
 
                 AddToAllEvaluatedPropertiesList(property);

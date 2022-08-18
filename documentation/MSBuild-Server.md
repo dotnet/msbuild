@@ -1,6 +1,11 @@
 # MSBuild Server
 
-MSBuild Server is basically an another type of node which can accept build request from clients and utilize worker nodes in current fashion to build projects. Main purpose of the server node is to avoid expensive MSBuild process start during build from tools like .NET SDK.
+MSBuild Server nodes accept build requests from clients and use worker nodes in the current fashion to build projects. The main purpose of the server node is to preserve caches between builds and avoid expensive MSBuild process start operations during build from tools like the .NET SDK.
+
+## Usage
+
+The primary ways to use MSBuild are via Visual Studio and via the CLI using the `dotnet build`/`dotnet msbuild` commands. MSBuild Server is not supported in Visual Studio because Visual Studio itself works like MSBuild Server. For the CLI, the server functionality is enabled by default and can be disabled by setting the `DOTNET_CLI_DO_NOT_USE_MSBUILD_SERVER` environment variable to value `1`.
+To re-enable MSBuild Server, remove the variable or set its value to `0`.
 
 ## Communication protocol
 
@@ -8,12 +13,12 @@ The server node uses same IPC approach as current worker nodes - named pipes. Th
 
 1. Try to connect to server
    - If server is not running, start new instance
-   - If server is busy, fallback to classic build 
+   - If server is busy or the connection is broken, fall back to previous build behavior
 2. Initiate handshake
-2. Issue build command with `EntryNodeCommand` packet
+2. Issue build command with `ServerNodeBuildCommand` packet
 3. Read packets from pipe
-   - When `EntryNodeConsoleWrite` packet type is recieved, write content to appropriate output stream with respected coloring
-   - When `EntryNodeResponse` packet type is recieved, build is done and client writes trace message with exit code
+   - Write content to the appropriate output stream (respecting coloring) with the `ServerNodeConsoleWrite` packet
+   - After the build completes, the `ServerNodeBuildResult` packet indicates the exit code
 
 ### Pipe name convention & handshake
 
@@ -25,7 +30,7 @@ Handshake is a procedure ensuring that client is connecting to a compatible serv
 
 Server requires to introduce new packet types for IPC.
 
-`EntryNodeCommand` contains all of the information necessary for a server to run a build.
+`ServerNodeBuildCommand` contains all of the information necessary for a server to run a build.
 
 | Property name            | Type                         | Description |
 |---|---|---|
@@ -34,21 +39,22 @@ Server requires to introduce new packet types for IPC.
 | BuildProcessEnvironment  | IDictionary<String, String>  | Environment variables for current build |
 | Culture                  | CultureInfo                  | The culture value for current build |
 | UICulture                | CultureInfo                  | The UI culture value for current build |
+| ConsoleConfiguration     | TargetConsoleConfiguration   | Console configuration of target Console at which the output will be rendered |
 
-`EntryNodeConsoleWrite` contains information for console output.
+`ServerNodeConsoleWrite` contains information for console output.
 
 | Property name            | Type          | Description |
 |---|---|---|
 | Text                     | String        | The text that is written to the output stream. It includes ANSI escape codes for formatting. |
 | OutputType               | Byte          | Identification of the output stream (1 = standard output, 2 = error output) |
 
-`EntryNodeResponse` informs about finished build.
+`ServerNodeBuildResult` indicates how the build finished.
 
 | Property name            | Type          | Description |
 |---|---|---|
 | ExitCode                 | Int32         | The exit code of the build |
 | ExitType                 | String        | The exit type of the build |
 
-`EntryNodeCancel` cancels the current build.
+`ServerNodeBuildCancel` cancels the current build.
 
 This type is intentionally empty and properties for build cancelation could be added in future.

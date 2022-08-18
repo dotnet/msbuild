@@ -509,13 +509,15 @@
                             mode. This logging style is on by default.
                         ForceConsoleColor--Use ANSI console colors even if
                             console does not support it
-                        Verbosity--overrides the -verbosity setting for this
+                        PreferConsoleColor--Use ANSI console colors only if
+                            target console does support it
+                     Verbosity--overrides the -verbosity setting for this
                             logger.
                      Example:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="translated">  -consoleLoggerParameters:&lt;parámetros&gt;
+        <target state="needs-review-translation">  -consoleLoggerParameters:&lt;parámetros&gt;
                      Parámetros del registrador de consola. (Forma corta: -clp)
                      Los parámetros disponibles son:
                         PerformanceSummary: muestra el tiempo empleado en tareas, destinos

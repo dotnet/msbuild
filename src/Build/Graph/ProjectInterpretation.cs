@@ -191,8 +191,6 @@ namespace Microsoft.Build.Graph
 
                             if (outerBuildReferencingProject.ProjectReferences.Contains(innerBuild))
                             {
-                                graphBuilder.Edges.TryGetEdge((outerBuildReferencingProject, innerBuild), out var existingEdge);
-
                                 ErrorUtilities.VerifyThrow(
                                     graphBuilder.Edges[(outerBuildReferencingProject, innerBuild)]
                                         .ItemType.Equals(

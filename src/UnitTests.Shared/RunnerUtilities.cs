@@ -1,5 +1,4 @@
 ﻿using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 using System;
 using System.Diagnostics;
 using Xunit.Abstractions;
@@ -18,7 +17,7 @@ namespace Microsoft.Build.UnitTests.Shared
         /// </summary>
         public static string ExecMSBuild(string msbuildParameters, out bool successfulExit, ITestOutputHelper outputHelper = null)
         {
-            return ExecMSBuild(PathToCurrentlyRunningMsBuildExe, msbuildParameters, out successfulExit, false, outputHelper);
+            return ExecMSBuild(PathToCurrentlyRunningMsBuildExe, msbuildParameters, out successfulExit, outputHelper: outputHelper);
         }
 
         /// <summary>
@@ -87,11 +86,12 @@ namespace Microsoft.Build.UnitTests.Shared
                 UseShellExecute = false,
                 Arguments = parameters
             };
-            var output = string.Empty;
+            string output = string.Empty;
+            int pid = -1;
 
             using (var p = new Process { EnableRaisingEvents = true, StartInfo = psi })
             {
-                p.OutputDataReceived += delegate (object sender, DataReceivedEventArgs args)
+                DataReceivedEventHandler handler = delegate (object sender, DataReceivedEventArgs args)
                 {
                     if (args != null)
                     {
@@ -99,13 +99,8 @@ namespace Microsoft.Build.UnitTests.Shared
                     }
                 };
 
-                p.ErrorDataReceived += delegate (object sender, DataReceivedEventArgs args)
-                {
-                    if (args != null)
-                    {
-                        output += args.Data + "\r\n";
-                    }
-                };
+                p.OutputDataReceived += handler;
+                p.ErrorDataReceived += handler;
 
                 outputHelper?.WriteLine("Executing [{0} {1}]", process, parameters);
                 Console.WriteLine("Executing [{0} {1}]", process, parameters);
@@ -114,19 +109,35 @@ namespace Microsoft.Build.UnitTests.Shared
                 p.BeginOutputReadLine();
                 p.BeginErrorReadLine();
                 p.StandardInput.Dispose();
+
+                if (!p.WaitForExit(30_000))
+                {
+                    // Let's not create a unit test for which we need more than 30 sec to execute.
+                    // Please consider carefully if you would like to increase the timeout.
+                    p.KillTree(1000);
+                    throw new TimeoutException($"Test failed due to timeout: process {p.Id} is active for more than 30 sec.");
+                }
+
+                // We need the WaitForExit call without parameters because our processing of output/error streams is not synchronous.
+                // See https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.process.waitforexit?view=net-6.0#system-diagnostics-process-waitforexit(system-int32).
+                // The overload WaitForExit() waits for the error and output to be handled. The WaitForExit(int timeout) overload does not, so we could lose the data.
                 p.WaitForExit();
 
+                pid = p.Id;
                 successfulExit = p.ExitCode == 0;
             }
 
             outputHelper?.WriteLine("==== OUTPUT ====");
             outputHelper?.WriteLine(output);
+            outputHelper?.WriteLine("Process ID is " + pid + "\r\n");
             outputHelper?.WriteLine("==============");
 
             Console.WriteLine("==== OUTPUT ====");
             Console.WriteLine(output);
+            Console.WriteLine("Process ID is " + pid + "\r\n");
             Console.WriteLine("==============");
 
+            output += "Process ID is " + pid + "\r\n";
             return output;
         }
     }

@@ -28,7 +28,7 @@ namespace Microsoft.Build.Shared
                 // mappings on a per-ProjectReference basis.
                 Dictionary<string, string>? projectReferenceLookupTable = ExtractLookupTable(projectReferenceLookupTableMetadata, log);
 
-                HashSet<string> projectReferencePlatforms = new HashSet<string>();
+                HashSet<string> projectReferencePlatforms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 foreach (string s in projectReferencePlatformsMetadata.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
                 {
                     projectReferencePlatforms.Add(s);
