@@ -28,6 +28,8 @@ variables:
       value: ''
     - name: _OfficialBuildArgs
       value: ''
+    - name: "skipComponentGovernanceDetection"
+      value: "true"
   - ${{ if ne(variables['System.TeamProject'], 'public') }}:
     - name: _DotNetPublishToBlobFeed
       value: true
