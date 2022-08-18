@@ -130,7 +130,7 @@ namespace Microsoft.DotNet.ToolPackage
             string verbosity = null)
         {
             var tempDirectoryForAssetJson = FileUtilities.CreateTempPath();
-            File.WriteAllText(Path.Combine(tempDirectoryForAssetJson, "file1.txt"), null);
+            FileUtilities.CreateTempFile(tempDirectoryForAssetJson);
 
             string tempProject = CreateDirectoryWithTempProject(
                 packageId: packageId,
