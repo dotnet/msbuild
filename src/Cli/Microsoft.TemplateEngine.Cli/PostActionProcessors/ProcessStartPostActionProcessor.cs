@@ -8,7 +8,7 @@ using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 {
-    internal class ProcessStartPostActionProcessor : PostActionProcessor2Base
+    internal class ProcessStartPostActionProcessor : PostActionProcessorBase
     {
         internal static readonly Guid ActionProcessorId = new Guid("3A7C4B45-1F5D-4A30-959A-51B88E82B5D2");
 

@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.ApiCompatibility.Rules;
 
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
@@ -28,8 +29,12 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// <param name="settings">The settings used to diff the elements in the mapper.</param>
         /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
         /// <param name="typeforwardsOnly">Indicates if <see cref="GetTypes"/> should only return typeforwards.</param>
-        public NamespaceMapper(ComparingSettings settings, AssemblyMapper containingAssembly, int rightSetSize = 1, bool typeforwardsOnly = false)
-            : base(settings, rightSetSize)
+        public NamespaceMapper(IRuleRunner ruleRunner,
+            AssemblyMapper containingAssembly,
+            MapperSettings settings = default,
+            int rightSetSize = 1,
+            bool typeforwardsOnly = false)
+            : base(ruleRunner, settings, rightSetSize)
         {
             ContainingAssembly = containingAssembly;
             _types = new Dictionary<ITypeSymbol, TypeMapper>(Settings.EqualityComparer);
@@ -97,7 +102,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                 {
                     if (!_types.TryGetValue(type, out TypeMapper? mapper))
                     {
-                        mapper = new TypeMapper(Settings, this, null, Right.Length);
+                        mapper = new TypeMapper(RuleRunner, this, Settings, null, Right.Length);
                         _types.Add(type, mapper);
                     }
 

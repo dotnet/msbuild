@@ -21,23 +21,20 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly IEngineEnvironmentSettings _environmentSettings;
         private readonly ITelemetryLogger _telemetryLogger;
         private readonly Func<string> _inputGetter;
-        private readonly NewCommandCallbacks _callbacks;
         private readonly TemplateCreator _templateCreator;
         private readonly PostActionDispatcher _postActionDispatcher;
 
         internal TemplateInvoker(
             IEngineEnvironmentSettings environment,
             ITelemetryLogger telemetryLogger,
-            Func<string> inputGetter,
-            NewCommandCallbacks callbacks)
+            Func<string> inputGetter)
         {
             _environmentSettings = environment;
             _telemetryLogger = telemetryLogger;
             _inputGetter = inputGetter;
-            _callbacks = callbacks;
 
             _templateCreator = new TemplateCreator(_environmentSettings);
-            _postActionDispatcher = new PostActionDispatcher(_environmentSettings, _callbacks, _inputGetter);
+            _postActionDispatcher = new PostActionDispatcher(_environmentSettings, _inputGetter);
         }
 
         internal async Task<NewCommandStatus> InvokeTemplateAsync(TemplateCommandArgs templateArgs, CancellationToken cancellationToken)

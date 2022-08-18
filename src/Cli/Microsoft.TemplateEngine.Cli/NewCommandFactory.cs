@@ -10,7 +10,7 @@ namespace Microsoft.TemplateEngine.Cli
 {
     public static class NewCommandFactory
     {
-        public static Command Create(string commandName, Func<ParseResult, ITemplateEngineHost> hostBuilder, Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder, NewCommandCallbacks callbacks)
+        public static Command Create(string commandName, Func<ParseResult, ITemplateEngineHost> hostBuilder, Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
         {
             if (string.IsNullOrWhiteSpace(commandName))
             {
@@ -19,9 +19,8 @@ namespace Microsoft.TemplateEngine.Cli
 
             _ = hostBuilder ?? throw new ArgumentNullException(nameof(hostBuilder));
             _ = telemetryLoggerBuilder ?? throw new ArgumentNullException(nameof(telemetryLoggerBuilder));
-            _ = callbacks ?? throw new ArgumentNullException(nameof(callbacks));
 
-            return new NewCommand(commandName, hostBuilder, telemetryLoggerBuilder, callbacks);
+            return new NewCommand(commandName, hostBuilder, telemetryLoggerBuilder);
         }
     }
 }

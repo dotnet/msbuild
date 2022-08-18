@@ -1,26 +1,32 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
+using System.Collections.Generic;
+using System.IO;
+using Microsoft.DotNet.Tools.New.PostActionProcessors;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Cli.PostActionProcessors;
 using Microsoft.TemplateEngine.Mocks;
 using Microsoft.TemplateEngine.TestHelper;
+using Xunit;
 
-namespace Microsoft.TemplateEngine.Cli.UnitTests
+namespace Microsoft.DotNet.Cli.New.Tests
 {
     public class DotnetRestorePostActionTests : IClassFixture<EnvironmentSettingsHelper>
     {
-        private IEngineEnvironmentSettings _engineEnvironmentSettings;
+        private readonly IEngineEnvironmentSettings _engineEnvironmentSettings;
 
         public DotnetRestorePostActionTests(EnvironmentSettingsHelper environmentSettingsHelper)
         {
-            _engineEnvironmentSettings = environmentSettingsHelper.CreateEnvironment(hostIdentifier: this.GetType().Name, virtualize: true);
+            _engineEnvironmentSettings = environmentSettingsHelper.CreateEnvironment(hostIdentifier: GetType().Name, virtualize: true);
         }
 
         [Fact(DisplayName = nameof(DotnetRestoreCanTargetASingleProjectWithAJsonArray))]
         public void DotnetRestoreCanTargetASingleProjectWithAJsonArray()
         {
-            DotnetRestorePostActionProcessor actionProcessor = new DotnetRestorePostActionProcessor();
+            var callback = new MockDotnetRestoreCallback();
+            DotnetRestorePostActionProcessor actionProcessor = new(callback.RestoreProject);
 
             string targetBasePath = _engineEnvironmentSettings.GetNewVirtualizedPath();
             string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
@@ -28,11 +34,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var args = new Dictionary<string, string>() { { "files", "[\"MyApp.csproj\"]" } };
             var postAction = new MockPostAction { ActionId = actionProcessor.Id, Args = args };
 
-            var creationEffects = new MockCreationEffects()
+            MockCreationEffects creationEffects = new MockCreationEffects()
                 .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));
-
-            var callback = new MockDotnetRestoreCallback();
-            actionProcessor.Callbacks = new NewCommandCallbacks { RestoreProject = callback.RestoreProject };
 
             actionProcessor.Process(
                 _engineEnvironmentSettings,
@@ -47,7 +50,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact(DisplayName = nameof(DotnetRestoreCanTargetASingleProjectWithTheProjectName))]
         public void DotnetRestoreCanTargetASingleProjectWithTheProjectName()
         {
-            DotnetRestorePostActionProcessor actionProcessor = new DotnetRestorePostActionProcessor();
+            var callback = new MockDotnetRestoreCallback();
+            DotnetRestorePostActionProcessor actionProcessor = new(callback.RestoreProject);
 
             string targetBasePath = _engineEnvironmentSettings.GetNewVirtualizedPath();
             string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
@@ -55,11 +59,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var args = new Dictionary<string, string>() { { "files", "MyApp.csproj" } };
             var postAction = new MockPostAction { ActionId = actionProcessor.Id, Args = args };
 
-            var creationEffects = new MockCreationEffects()
+            MockCreationEffects creationEffects = new MockCreationEffects()
                 .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));
-
-            var callback = new MockDotnetRestoreCallback();
-            actionProcessor.Callbacks = new NewCommandCallbacks { RestoreProject = callback.RestoreProject };
 
             actionProcessor.Process(
                 _engineEnvironmentSettings,
@@ -77,8 +78,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             public bool RestoreProject(string target)
             {
-                this.Target = target;
-
+                Target = target;
                 return true;
             }
         }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Extensions;
+using Microsoft.DotNet.ApiCompatibility.Rules;
 
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
@@ -33,8 +34,12 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// </summary>
         /// <param name="settings">The settings used to diff the elements in the mapper.</param>
         /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
-        public TypeMapper(ComparingSettings settings, NamespaceMapper containingNamespace, TypeMapper? containingType = null, int rightSetSize = 1)
-            : base(settings, rightSetSize)
+        public TypeMapper(IRuleRunner ruleRunner,
+            NamespaceMapper containingNamespace,
+            MapperSettings settings = default,
+            TypeMapper? containingType = null,
+            int rightSetSize = 1)
+            : base(ruleRunner, settings, rightSetSize)
         {
             ContainingNamespace = containingNamespace;
             ContainingType = containingType;
@@ -110,7 +115,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                         {
                             if (!_nestedTypes.TryGetValue(nestedType, out TypeMapper? mapper))
                             {
-                                mapper = new TypeMapper(Settings, ContainingNamespace, this, Right.Length);
+                                mapper = new TypeMapper(RuleRunner, ContainingNamespace, Settings, this, Right.Length);
                                 _nestedTypes.Add(nestedType, mapper);
                             }
                             mapper.AddElement(nestedType, side, setIndex);
@@ -156,7 +161,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                         {
                             if (!_members.TryGetValue(member, out MemberMapper? mapper))
                             {
-                                mapper = new MemberMapper(Settings, this, Right.Length);
+                                mapper = new MemberMapper(RuleRunner, this, Settings, Right.Length);
                                 _members.Add(member, mapper);
                             }
                             mapper.AddElement(member, side, setIndex);

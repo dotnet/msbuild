@@ -1,19 +1,15 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.IO;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Utils;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 {
-    internal abstract class PostActionProcessor2Base : IPostActionProcessor
+    public abstract class PostActionProcessorBase : IPostActionProcessor
     {
         public abstract Guid Id { get;  }
-
-        protected internal NewCommandCallbacks? Callbacks { get; set; }
 
         public bool Process(
             IEngineEnvironmentSettings environment,
@@ -36,7 +32,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
         protected static IReadOnlyList<string> GetTargetForSource(ICreationEffects2 creationEffects, string sourcePathGlob, string outputBasePath)
         {
             Glob g = Glob.Parse(sourcePathGlob);
-            List<string> results = new List<string>();
+            List<string> results = new();
 
             if (creationEffects.FileChanges != null)
             {
@@ -85,7 +81,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 }
                 else if (config is JArray arr)
                 {
-                    List<string> parts = new List<string>();
+                    List<string> parts = new();
 
                     foreach (JToken token in arr)
                     {
@@ -107,10 +103,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
             IReadOnlyList<string> ProcessPaths(IReadOnlyList<string> paths)
             {
-                if (matchCriteria == null)
-                {
-                    matchCriteria = p => true;
-                }
+                matchCriteria ??= p => true;
                 return paths
                     .SelectMany(t => GetTargetForSource(creationEffects2, t, outputBasePath))
                     .Where(t => matchCriteria(t))

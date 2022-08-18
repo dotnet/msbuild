@@ -13,9 +13,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         public LegacyUninstallCommand(
             NewCommand parentCommand,
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
-            NewCommandCallbacks callbacks)
-            : base(hostBuilder, telemetryLoggerBuilder, callbacks, "--uninstall")
+            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
+            : base(hostBuilder, telemetryLoggerBuilder, "--uninstall")
         {
             this.IsHidden = true;
             this.AddAlias("-u");

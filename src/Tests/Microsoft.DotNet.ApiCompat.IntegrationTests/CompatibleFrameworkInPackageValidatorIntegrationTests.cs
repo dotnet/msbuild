@@ -5,9 +5,10 @@ using System.IO;
 using Microsoft.DotNet.ApiCompatibility;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Logging;
+using Microsoft.DotNet.ApiCompatibility.Rules;
 using Microsoft.DotNet.ApiCompatibility.Runner;
+using Microsoft.DotNet.ApiCompatibility.Tests;
 using Microsoft.DotNet.PackageValidation;
-using Microsoft.DotNet.PackageValidation.Tests;
 using Microsoft.DotNet.PackageValidation.Validators;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Commands;
@@ -29,9 +30,8 @@ namespace Microsoft.DotNet.ApiCompat.IntegrationTests
             CompatibleFrameworkInPackageValidator validator = new(log,
                 new ApiCompatRunner(log,
                     new SuppressionEngine(),
-                    new ApiComparerFactory(),
-                    new AssemblySymbolLoaderFactory(),
-                    new MetadataStreamProvider()));
+                    new ApiComparerFactory(new RuleFactory(log)),
+                    new AssemblySymbolLoaderFactory()));
 
             return (log, validator);
         }

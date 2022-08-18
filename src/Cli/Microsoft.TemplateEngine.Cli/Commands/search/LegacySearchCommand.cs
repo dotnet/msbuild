@@ -10,8 +10,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class LegacySearchCommand : BaseSearchCommand
     {
-        public LegacySearchCommand(NewCommand parentCommand, Func<ParseResult, ITemplateEngineHost> hostBuilder, Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder, NewCommandCallbacks callbacks)
-            : base(parentCommand, hostBuilder, telemetryLoggerBuilder, callbacks, "--search")
+        public LegacySearchCommand(NewCommand parentCommand, Func<ParseResult, ITemplateEngineHost> hostBuilder, Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
+            : base(parentCommand, hostBuilder, telemetryLoggerBuilder, "--search")
         {
             this.IsHidden = true;
             AddValidator(ValidateParentCommandArguments);

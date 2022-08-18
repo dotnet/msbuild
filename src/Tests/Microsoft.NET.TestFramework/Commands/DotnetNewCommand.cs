@@ -15,6 +15,9 @@ namespace Microsoft.NET.TestFramework.Commands
         {
             Arguments.Add("new");
             Arguments.AddRange(args);
+
+            //opt out from telemetry
+            WithEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", "true");
         }
 
         public DotnetNewCommand WithCustomHive(string path)

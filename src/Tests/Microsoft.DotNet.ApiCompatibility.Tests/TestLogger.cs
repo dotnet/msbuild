@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.DotNet.ApiCompatibility.Logging;
 
-namespace Microsoft.DotNet.PackageValidation.Tests
+namespace Microsoft.DotNet.ApiCompatibility.Tests
 {
     internal sealed class TestLogger : ICompatibilityLogger
     {

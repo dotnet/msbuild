@@ -13,7 +13,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jab" Version="$(JabVersion)" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="$(_MicrosoftCodeAnalysisVersion)" />
   </ItemGroup>
 

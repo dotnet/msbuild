@@ -12,6 +12,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
 {
     public class CannotAddMemberToInterfaceTests
     {
+        private static readonly TestRuleFactory s_ruleFactory = new((settings, context) => new CannotAddMemberToInterface(settings, context));
+
         [Fact]
         public void AddedMembersAreReported()
         {
@@ -43,17 +45,16 @@ namespace CompatTests
 ";
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory);
 
-            ApiComparer differ = new();
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
-            CompatDifference[] expected = new[]
+            CompatDifference[] expected =
             {
-                new CompatDifference(DiagnosticIds.CannotAddMemberToInterface, string.Empty, DifferenceType.Added, "M:CompatTests.IFoo.MyMethod"),
-                new CompatDifference(DiagnosticIds.CannotAddMemberToInterface, string.Empty, DifferenceType.Added, "P:CompatTests.IFoo.MyPropertyWithoutDefaultImplementation"),
-                new CompatDifference(DiagnosticIds.CannotAddMemberToInterface, string.Empty, DifferenceType.Added, "E:CompatTests.IFoo.MyEventWithoutImplementation"),
+                CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.CannotAddMemberToInterface, string.Empty, DifferenceType.Added, "M:CompatTests.IFoo.MyMethod"),
+                CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.CannotAddMemberToInterface, string.Empty, DifferenceType.Added, "P:CompatTests.IFoo.MyPropertyWithoutDefaultImplementation"),
+                CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.CannotAddMemberToInterface, string.Empty, DifferenceType.Added, "E:CompatTests.IFoo.MyEventWithoutImplementation"),
             };
-
             Assert.Equal(expected, differences);
         }
 
@@ -63,8 +64,8 @@ namespace CompatTests
         {
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory);
 
-            ApiComparer differ = new();
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
             Assert.Empty(differences);
@@ -102,9 +103,8 @@ namespace CompatTests
 
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: true));
 
-            ApiComparer differ = new();
-            differ.StrictMode = true;
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
             foreach (CompatDifference difference in differences)
@@ -182,29 +182,20 @@ namespace CompatTests
 }
 "};
 
-            ApiComparer differ = new();
+            ApiComparer differ = new(s_ruleFactory);
             ElementContainer<IAssemblySymbol> left =
                 new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax), new MetadataInformation(string.Empty, "ref"));
-
             IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
 
-            IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
-                differ.GetDifferences(left, right);
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
-            CompatDifference[][] expectedDiffs =
+            CompatDifference[] expectedDiffs =
             {
-                Array.Empty<CompatDifference>(),
-                new[]
-                {
-                    new CompatDifference(DiagnosticIds.CannotAddMemberToInterface, string.Empty, DifferenceType.Added, "E:CompatTests.IFoo.MyOtherEvent"),
-                },
-                new[]
-                {
-                    new CompatDifference(DiagnosticIds.CannotAddMemberToInterface, string.Empty, DifferenceType.Added, "M:CompatTests.IFoo.MyOtherMethod"),
-                },
+                new CompatDifference(left.MetadataInformation, right[1].MetadataInformation, DiagnosticIds.CannotAddMemberToInterface, string.Empty, DifferenceType.Added, "E:CompatTests.IFoo.MyOtherEvent"),
+                new CompatDifference(left.MetadataInformation, right[2].MetadataInformation, DiagnosticIds.CannotAddMemberToInterface, string.Empty, DifferenceType.Added, "M:CompatTests.IFoo.MyOtherMethod"),
             };
 
-            AssertExtensions.MultiRightResult(left.MetadataInformation, expectedDiffs, differences);
+            Assert.Equal(expectedDiffs, differences);
         }
 
         public static IEnumerable<object[]> NoDifferencesShouldBeReportedData()

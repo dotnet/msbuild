@@ -11,6 +11,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
 {
     public class EnumsMustMatchTests
     {
+        private static readonly TestRuleFactory s_ruleFactory = new((settings, context) => new EnumsMustMatch(settings, context));
+
         [Fact]
         public static void DifferencesReported()
         {
@@ -25,7 +27,6 @@ namespace CompatTests
   }
 }
 ";
-
             string rightSyntax = @"
 namespace CompatTests
 {
@@ -40,11 +41,13 @@ namespace CompatTests
 ";
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
-            ApiComparer differ = new();
+            ApiComparer differ = new(s_ruleFactory);
+
             IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
+
             CompatDifference[] expected = new[]
             {
-                new CompatDifference(DiagnosticIds.EnumValuesMustMatch, string.Empty, DifferenceType.Changed, "F:CompatTests.First.A"),
+                CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.EnumValuesMustMatch, string.Empty, DifferenceType.Changed, "F:CompatTests.First.A"),
             };
             Assert.Equal(expected, differences);
         }
@@ -64,7 +67,6 @@ namespace CompatTests
   public enum Second {}
 }
 ";
-
             string rightSyntax = @"
 namespace CompatTests
 {
@@ -78,8 +80,11 @@ namespace CompatTests
 ";
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
-            ApiComparer differ = new();
+            // Register EnumMustMatch and MemberMustExist rules as this test validates both.
+            ApiComparer differ = new(s_ruleFactory.WithRule((settings, context) => new MembersMustExist(settings, context)));
+
             IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
+
             Assert.NotEmpty(differences);
         }
 
@@ -97,7 +102,6 @@ namespace CompatTests
   }
 }
 ";
-
             string rightSyntax = @"
 namespace CompatTests
 {
@@ -112,8 +116,10 @@ namespace CompatTests
 ";
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
-            ApiComparer differ = new();
+            ApiComparer differ = new(s_ruleFactory);
+
             IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
+
             Assert.Empty(differences);
         }
 
@@ -131,7 +137,6 @@ namespace CompatTests
   }
 }
 ";
-
             string rightSyntax = @"
 namespace CompatTests
 {
@@ -145,11 +150,13 @@ namespace CompatTests
 ";
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
-            ApiComparer differ = new();
+            ApiComparer differ = new(s_ruleFactory);
+
             IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
+
             CompatDifference[] expected = new[]
             {
-                new CompatDifference(DiagnosticIds.EnumTypesMustMatch, string.Empty, DifferenceType.Changed, "T:CompatTests.First"),
+                CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.EnumTypesMustMatch, string.Empty, DifferenceType.Changed, "T:CompatTests.First"),
             };
             Assert.Equal(expected, differences);
         }

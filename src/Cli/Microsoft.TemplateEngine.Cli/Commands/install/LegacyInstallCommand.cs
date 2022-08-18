@@ -10,8 +10,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class LegacyInstallCommand : BaseInstallCommand
     {
-        public LegacyInstallCommand(NewCommand parentCommand, Func<ParseResult, ITemplateEngineHost> hostBuilder, Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder, NewCommandCallbacks callbacks)
-            : base(parentCommand, hostBuilder, telemetryLoggerBuilder, callbacks, "--install")
+        public LegacyInstallCommand(NewCommand parentCommand, Func<ParseResult, ITemplateEngineHost> hostBuilder, Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
+            : base(parentCommand, hostBuilder, telemetryLoggerBuilder, "--install")
         {
             this.IsHidden = true;
             this.AddAlias("-i");

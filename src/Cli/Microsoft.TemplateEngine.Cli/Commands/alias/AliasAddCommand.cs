@@ -11,9 +11,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         internal AliasAddCommand(
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
-            NewCommandCallbacks callbacks)
-            : base(hostBuilder, telemetryLoggerBuilder, callbacks, "add")
+            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
+            : base(hostBuilder, telemetryLoggerBuilder, "add")
         {
             IsHidden = true;
         }

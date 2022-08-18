@@ -11,9 +11,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         internal LegacyAliasAddCommand(
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
-            NewCommandCallbacks callbacks)
-            : base(hostBuilder, telemetryLoggerBuilder, callbacks, "--alias")
+            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
+            : base(hostBuilder, telemetryLoggerBuilder, "--alias")
         {
             AddAlias("-a");
             IsHidden = true;

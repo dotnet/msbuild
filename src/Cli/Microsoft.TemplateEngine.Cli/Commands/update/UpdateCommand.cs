@@ -12,9 +12,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         public UpdateCommand(
                 NewCommand parentCommand,
                 Func<ParseResult, ITemplateEngineHost> hostBuilder,
-                Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
-                NewCommandCallbacks callbacks)
-            : base(parentCommand, hostBuilder, telemetryLoggerBuilder, callbacks, "update", SymbolStrings.Command_Update_Description)
+                Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
+            : base(parentCommand, hostBuilder, telemetryLoggerBuilder, "update", SymbolStrings.Command_Update_Description)
         {
             parentCommand.AddNoLegacyUsageValidators(this);
             this.AddOption(CheckOnlyOption);

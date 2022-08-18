@@ -13,9 +13,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         public LegacyUpdateCheckCommand(
             NewCommand parentCommand,
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
-            NewCommandCallbacks callbacks)
-            : base(parentCommand, hostBuilder, telemetryLoggerBuilder, callbacks, "--update-check", SymbolStrings.Command_Update_Description)
+            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
+            : base(parentCommand, hostBuilder, telemetryLoggerBuilder, "--update-check", SymbolStrings.Command_Update_Description)
         {
             this.IsHidden = true;
             parentCommand.AddNoLegacyUsageValidators(this, except: new Option[] { InteractiveOption, AddSourceOption });

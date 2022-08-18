@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                                 elevationRequired: !_printDownloadLinkOnly && !_printRollbackDefinitionOnly && string.IsNullOrWhiteSpace(_downloadToCacheOption));
 
             _workloadManifestUpdater = _workloadManifestUpdaterFromConstructor ?? new WorkloadManifestUpdater(Reporter, workloadResolver ?? _workloadResolver, PackageDownloader, _userProfileDir, TempDirectoryPath,
-                _workloadInstaller.GetWorkloadInstallationRecordRepository(), _workloadInstaller, _packageSourceLocation);
+                _workloadInstaller.GetWorkloadInstallationRecordRepository(), _workloadInstaller, _packageSourceLocation, sdkFeatureBand: _sdkFeatureBand);
         }
 
 

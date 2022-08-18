@@ -1,20 +1,33 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
+using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Utils;
-using Newtonsoft.Json.Linq;
+using Microsoft.TemplateEngine.Cli.PostActionProcessors;
 
-namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
+namespace Microsoft.DotNet.Tools.New.PostActionProcessors
 {
-    internal class AddProjectsToSolutionPostAction : PostActionProcessor2Base, IPostActionProcessor
+    internal class DotnetSlnPostActionProcessor : PostActionProcessorBase
     {
-        internal static readonly Guid ActionProcessorId = new Guid("D396686C-DE0E-4DE6-906D-291CD29FC5DE");
+        private readonly Func<string, IReadOnlyList<string>, string?, bool> _addProjToSolutionCallback;
+
+        public DotnetSlnPostActionProcessor(Func<string, IReadOnlyList<string>, string?, bool>? addProjToSolutionCallback = null)
+        {
+            _addProjToSolutionCallback = addProjToSolutionCallback ?? DotnetCommandCallbacks.AddProjectsToSolution;
+        }
 
         public override Guid Id => ActionProcessorId;
+
+        internal static Guid ActionProcessorId { get; } = new Guid("D396686C-DE0E-4DE6-906D-291CD29FC5DE");
 
         internal static IReadOnlyList<string> FindSolutionFilesAtOrAbovePath(IPhysicalFileSystem fileSystem, string outputBasePath)
         {
@@ -25,7 +38,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
         // If any indexes are out of range or non-numeric, this method returns false and projectFiles is set to null.
         internal static bool TryGetProjectFilesToAdd(IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath, [NotNullWhen(true)]out IReadOnlyList<string>? projectFiles)
         {
-            List<string> filesToAdd = new List<string>();
+            List<string> filesToAdd = new();
 
             if ((actionConfig.Args != null) && actionConfig.Args.TryGetValue("primaryOutputIndexes", out string? projectIndexes))
             {
@@ -90,30 +103,34 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
             string solutionFolder = GetSolutionFolder(action);
 
-            bool succeeded = false;
-            if (Callbacks?.AddProjectsToSolution != null)
+            Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostAction_AddProjToSln_Running, string.Join(" ", projectFiles), nearestSlnFilesFound[0], solutionFolder));
+            return AddProjectsToSolution(nearestSlnFilesFound[0], projectFiles, solutionFolder);
+        }
+        
+        private bool AddProjectsToSolution(string solutionPath, IReadOnlyList<string> projectsToAdd, string? solutionFolder)
+        {
+            try
             {
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostAction_AddProjToSln_Running, string.Join(" ", projectFiles), nearestSlnFilesFound[0], solutionFolder));
-                succeeded = Callbacks.AddProjectsToSolution(nearestSlnFilesFound[0], projectFiles, solutionFolder);
-            }
-
-            if (!succeeded)
-            {
-                Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddProjToSln_Failed);
-                if (Callbacks?.AddProjectsToSolution == null)
+                bool succeeded = _addProjToSolutionCallback(solutionPath, projectsToAdd, solutionFolder);
+                if (!succeeded)
                 {
-                    Reporter.Error.WriteLine(LocalizableStrings.Generic_NoCallbackError);
+                    Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddProjToSln_Failed_NoReason);
                 }
-                return false;
+                else
+                {
+                    Reporter.Output.WriteLine(LocalizableStrings.PostAction_AddProjToSln_Succeeded);
+                }
+                return succeeded;
+
             }
-            else
+            catch (Exception e)
             {
-                Reporter.Output.WriteLine(LocalizableStrings.PostAction_AddProjToSln_Succeeded);
-                return true;
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.PostAction_AddProjToSln_Failed, e.Message));
+                return false;
             }
         }
 
-        private string GetSolutionFolder(IPostAction actionConfig)
+        private static string GetSolutionFolder(IPostAction actionConfig)
         {
             if (actionConfig.Args != null && actionConfig.Args.TryGetValue("solutionFolder", out string? solutionFolder))
             {

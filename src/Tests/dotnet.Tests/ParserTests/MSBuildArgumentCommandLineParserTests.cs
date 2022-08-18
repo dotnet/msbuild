@@ -49,6 +49,9 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
         [InlineData(new string[] { "-p:teamcity_buildConfName=\"Build, Test and Publish\"" }, new string[] { "--property:teamcity_buildConfName=\"Build, Test and Publish\"" })]
         [InlineData(new string[] { "-p:prop1=true", "-p:prop2=false" }, new string[] { "--property:prop1=true", "--property:prop2=false" })]
         [InlineData(new string[] { "-p:prop1=\".;/opt/usr\"" }, new string[] { "--property:prop1=\".%3B/opt/usr\"" })]
+        [InlineData(new string[] { "-p:prop1=true;prop2=false;prop3=\"wut\";prop4=\"1;2;3\"" }, new string[]{ "--property:prop1=true", "--property:prop2=false", "--property:prop3=\"wut\"", "--property:prop4=\"1%3B2%3B3\""})]
+        [InlineData(new string[] { "-p:prop4=\"1;2;3\"" }, new string[]{ "--property:prop4=\"1%3B2%3B3\""})]
+        [InlineData(new string[] { "-p:prop4=\"1 ;2 ;3 \"" }, new string[]{ "--property:prop4=\"1 %3B2 %3B3 \""})]
         public void Can_pass_msbuild_properties_safely(string[] tokens, string[] forwardedTokens) {
             var forwardingFunction = (CommonOptions.PropertiesOption as ForwardedOption<string[]>).GetForwardingFunction();
             var result = CommonOptions.PropertiesOption.Parse(tokens);

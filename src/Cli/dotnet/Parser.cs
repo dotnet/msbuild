@@ -130,6 +130,8 @@ namespace Microsoft.DotNet.Cli
                                 return line.Substring(0, hashPos).Trim();
                             }
                         })
+                        // trim leading/trailing whitespace to not pass along dead spaces
+                        .Select(x => x.Trim())
                         // Remove empty lines
                         .Where(line => line.Length > 0);
                 replacementTokens = trimmedLines.ToArray();

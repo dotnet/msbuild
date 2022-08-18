@@ -173,7 +173,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal async Task<NewCommandStatus> InvokeAsync(ParseResult parseResult, ITelemetryLogger telemetryLogger, CancellationToken cancellationToken)
         {
             TemplateCommandArgs args = new TemplateCommandArgs(this, _instantiateCommand, parseResult);
-            TemplateInvoker invoker = new TemplateInvoker(_environmentSettings, telemetryLogger, () => Console.ReadLine() ?? string.Empty, _instantiateCommand.Callbacks);
+            TemplateInvoker invoker = new TemplateInvoker(_environmentSettings, telemetryLogger, () => Console.ReadLine() ?? string.Empty);
             TemplatePackageCoordinator packageCoordinator = new TemplatePackageCoordinator(telemetryLogger, _environmentSettings, _templatePackageManager);
             TemplateConstraintManager constraintManager = new TemplateConstraintManager(_environmentSettings);
 

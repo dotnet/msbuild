@@ -28,6 +28,9 @@ using LocalizableStrings = Microsoft.DotNet.Tools.New.LocalizableStrings;
 using Microsoft.TemplateEngine.MSBuildEvaluation;
 using Microsoft.TemplateEngine.Abstractions.Constraints;
 using System.IO;
+using NuGet.Packaging;
+using Microsoft.TemplateEngine.Cli.PostActionProcessors;
+using Microsoft.DotNet.Tools.New.PostActionProcessors;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -35,12 +38,12 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-new";
         public const string CommandName = "new";
-        private const string EnableProjectContextEvaluationEnvVar = "DOTNET_CLI_ENABLE_PROJECT_EVAL";
+        private const string EnableProjectContextEvaluationEnvVar = "DOTNET_CLI_DISABLE_PROJECT_EVAL";
 
         private const string HostIdentifier = "dotnetcli";
         private static readonly Option<bool> _disableSdkTemplates = new Option<bool>("--debug:disable-sdk-templates", () => false, LocalizableStrings.DisableSdkTemplates_OptionDescription).Hide();
 
-        private static readonly Option<bool> _enableProjectContextEvaluation = new Option<bool>("--debug:enable-project-context", () => false, LocalizableStrings.EnableProjectContextEval_OptionDescription).Hide();
+        private static readonly Option<bool> _disableProjectContextEvaluation = new Option<bool>("--debug:disable-project-context", () => false, LocalizableStrings.DisableProjectContextEval_OptionDescription).Hide();
 
         internal static Option<FileInfo> ProjectPathOption { get; } = new Option<FileInfo>("--project", LocalizableStrings.ProjectPath_OptionDescription).ExistingOnly().Hide();
 
@@ -73,46 +76,46 @@ namespace Microsoft.DotNet.Cli
                 return logger;
             };
 
-            var callbacks = new Microsoft.TemplateEngine.Cli.NewCommandCallbacks()
-            {
-                RestoreProject = RestoreProject,
-                AddPackageReference = AddPackageReference,
-                AddProjectReference = AddProjectReference,
-                AddProjectsToSolution = AddProjectsToSolution
-            };
-
             var getEngineHost = (ParseResult parseResult) => {
                 bool disableSdkTemplates = parseResult.GetValueForOption(_disableSdkTemplates);
-                bool enableProjectContext = parseResult.GetValueForOption(_enableProjectContextEvaluation)
+                bool disableProjectContext = parseResult.GetValueForOption(_disableProjectContextEvaluation)
                     || Env.GetEnvironmentVariableAsBool(EnableProjectContextEvaluationEnvVar);
                 FileInfo? projectPath = parseResult.GetValueForOption(ProjectPathOption);
 
                 //TODO: read and pass output directory
-                return CreateHost(disableSdkTemplates, enableProjectContext, projectPath);
+                return CreateHost(disableSdkTemplates, disableProjectContext, projectPath);
             };
 
-            var command = Microsoft.TemplateEngine.Cli.NewCommandFactory.Create(CommandName, getEngineHost, getLogger, callbacks);
+            var command = Microsoft.TemplateEngine.Cli.NewCommandFactory.Create(CommandName, getEngineHost, getLogger);
 
             // adding this option lets us look for its bound value during binding in a typed way
             command.AddGlobalOption(_disableSdkTemplates);
-            command.AddGlobalOption(_enableProjectContextEvaluation);
+            command.AddGlobalOption(_disableProjectContextEvaluation);
             command.AddGlobalOption(ProjectPathOption);
             return command;
         }
 
-        private static ITemplateEngineHost CreateHost(bool disableSdkTemplates, bool enableProjectContext, FileInfo? projectPath)
+        private static ITemplateEngineHost CreateHost(bool disableSdkTemplates, bool disableProjectContext, FileInfo? projectPath)
         {
             var builtIns = new List<(Type InterfaceType, IIdentifiedComponent Instance)>();
             builtIns.AddRange(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Components.AllComponents);
             builtIns.AddRange(Microsoft.TemplateEngine.Edge.Components.AllComponents);
             builtIns.AddRange(Microsoft.TemplateEngine.Cli.Components.AllComponents);
             builtIns.AddRange(Microsoft.TemplateSearch.Common.Components.AllComponents);
+
+            //post actions
+            builtIns.AddRange(new (Type, IIdentifiedComponent)[]
+            {
+                (typeof(IPostActionProcessor), new DotnetAddPostActionProcessor()),
+                (typeof(IPostActionProcessor), new DotnetSlnPostActionProcessor()),
+                (typeof(IPostActionProcessor), new DotnetRestorePostActionProcessor()),
+            });
             if (!disableSdkTemplates)
             {
                 builtIns.Add((typeof(ITemplatePackageProviderFactory), new BuiltInTemplatePackageProviderFactory()));
                 builtIns.Add((typeof(ITemplatePackageProviderFactory), new OptionalWorkloadProviderFactory()));
             }
-            if (enableProjectContext)
+            if (!disableProjectContext)
             {
                 builtIns.Add((typeof(IBindSymbolSource), new ProjectContextSymbolSource()));
                 builtIns.Add((typeof(ITemplateConstraintFactory), new ProjectCapabilityConstraintFactory()));
@@ -135,76 +138,6 @@ namespace Microsoft.DotNet.Cli
             return new DefaultTemplateEngineHost(HostIdentifier, "v" + Product.Version, preferences, builtIns);
         }
 
-        private static bool RestoreProject(string pathToRestore)
-        {
-            try
-            {
-                PathUtility.EnsureAllPathsExist(new[] { pathToRestore }, CommonLocalizableStrings.FileNotFound, allowDirectories: true);
-                return RestoreCommand.Run(new string[] { pathToRestore }) == 0;
-            }
-            catch (Exception e)
-            {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.RestoreCallback_Failed, e.Message));
-                return false;
-            }
-        }
 
-        private static bool AddPackageReference(string projectPath, string packageName, string? version)
-        {
-            try
-            {
-                PathUtility.EnsureAllPathsExist(new[] { projectPath }, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
-                IEnumerable<string> commandArgs = new [] { "add", projectPath, "package", packageName };
-                if (!string.IsNullOrWhiteSpace(version))
-                {
-                    commandArgs = commandArgs.Append(AddPackageParser.VersionOption.Aliases.First()).Append(version);
-                }
-                var addPackageReferenceCommand = new AddPackageReferenceCommand(AddCommandParser.GetCommand().Parse(commandArgs.ToArray()));
-                return addPackageReferenceCommand.Execute() == 0;
-            }
-            catch (Exception e)
-            {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.AddPackageReferenceCallback_Failed, e.Message));
-                return false;
-            }
-        }
-
-        private static bool AddProjectReference(string projectPath, IReadOnlyList<string> projectsToAdd)
-        {
-            try
-            {
-                PathUtility.EnsureAllPathsExist(new[] { projectPath }, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
-                PathUtility.EnsureAllPathsExist(projectsToAdd, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
-                IEnumerable<string> commandArgs = new[] { "add", projectPath, "reference", }.Concat(projectsToAdd);
-                var addProjectReferenceCommand = new AddProjectToProjectReferenceCommand(AddCommandParser.GetCommand().Parse(commandArgs.ToArray()));
-                return addProjectReferenceCommand.Execute() == 0;
-            }
-            catch (Exception e)
-            {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.AddProjectReferenceCallback_Failed, e.Message));
-                return false;
-            }
-        }
-
-        private static bool AddProjectsToSolution(string solutionPath, IReadOnlyList<string> projectsToAdd, string? solutionFolder)
-        {
-            try
-            {
-                PathUtility.EnsureAllPathsExist(new[] { solutionPath }, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
-                PathUtility.EnsureAllPathsExist(projectsToAdd, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
-                IEnumerable<string> commandArgs = new[] { "sln", solutionPath, "add" }.Concat(projectsToAdd);
-                if (!string.IsNullOrWhiteSpace(solutionFolder))
-                {
-                    commandArgs = commandArgs.Append(SlnAddParser.SolutionFolderOption.Aliases.First()).Append(solutionFolder);
-                }
-                var addProjectToSolutionCommand = new AddProjectToSolutionCommand(SlnCommandParser.GetCommand().Parse(commandArgs.ToArray()));
-                return addProjectToSolutionCommand.Execute() == 0;
-            }
-            catch (Exception e)
-            {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.AddProjectsToSolutionCallback_Failed, e.Message));
-                return false;
-            }
-        }
     }
 }

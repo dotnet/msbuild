@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using System.IO;
 using Microsoft.DotNet.ApiCompatibility.Logging;
 
 namespace Microsoft.DotNet.ApiCompat.Tool
@@ -34,18 +35,20 @@ namespace Microsoft.DotNet.ApiCompat.Tool
             };
             Option<MessageImportance> verbosityOption = new(new string[] { "--verbosity", "-v" },
                 "Controls the log level verbosity. Allowed values are high, normal, and low.");
-            verbosityOption.SetDefaultValue(MessageImportance.Normal);
+            verbosityOption.SetDefaultValue(MessageImportance.High);
 
             // Root command
             Option<string[]> leftAssembliesOption = new(new string[] { "--left-assembly", "--left", "-l" },
-                "The path to one or more assemblies that serve as the left side to compare.")
+                description: "The path to one or more assemblies that serve as the left side to compare.",
+                parseArgument: ParseAssemblyArgument)
             {
                 AllowMultipleArgumentsPerToken = true,
                 Arity = ArgumentArity.OneOrMore,
                 IsRequired = true
             };
             Option<string[]> rightAssembliesOption = new(new string[] { "--right-assembly", "--right", "-r" },
-                "The path to one or more assemblies that serve as the right side to compare.")
+                description: "The path to one or more assemblies that serve as the right side to compare.",
+                parseArgument: ParseAssemblyArgument)
             {
                 AllowMultipleArgumentsPerToken = true,
                 Arity = ArgumentArity.OneOrMore,
@@ -53,7 +56,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
             };
             Option<bool> strictModeOption = new("--strict-mode",
                 "If true, performs api compatibility checks in strict mode");
-            Option<string[][]?> leftAssembliesReferencesOption = new("--left-assembly-references",
+            Option<string[][]?> leftAssembliesReferencesOption = new(new string[] { "--left-assembly-references", "--lref" },
                 description: "Paths to assembly references or the underlying directories for a given left. Values must be separated by commas: ','.",
                 parseArgument: ParseAssemblyReferenceArgument)
             {
@@ -61,7 +64,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                 Arity = ArgumentArity.ZeroOrMore,
                 ArgumentHelpName = "file1,file2,..."
             };
-            Option<string[][]?> rightAssembliesReferencesOption = new("--right-assembly-references",
+            Option<string[][]?> rightAssembliesReferencesOption = new(new string[] { "--right-assembly-references", "--rref" },
                 description: "Paths to assembly references or the underlying directories for a given right. Values must be separated by commas: ','.",
                 parseArgument: ParseAssemblyReferenceArgument)
             {
@@ -107,11 +110,10 @@ namespace Microsoft.DotNet.ApiCompat.Tool
 
             rootCommand.SetHandler((InvocationContext context) =>
             {
-                string? roslynAssembliesPath = context.ParseResult.GetValueForOption(roslynAssembliesPathOption);
-                if (roslynAssembliesPath != null)
-                {
-                    RoslynResolver.Register(roslynAssembliesPath);
-                }
+                // If a roslyn assemblies path isn't provided, use the compiled against version from a subfolder.
+                string roslynAssembliesPath = context.ParseResult.GetValueForOption(roslynAssembliesPathOption) ??
+                    Path.Combine(AppContext.BaseDirectory, "codeanalysis");
+                RoslynResolver roslynResolver = RoslynResolver.Register(roslynAssembliesPath);
 
                 MessageImportance verbosity = context.ParseResult.GetValueForOption(verbosityOption);
                 bool generateSuppressionFile = context.ParseResult.GetValueForOption(generateSuppressionFileOption);
@@ -139,6 +141,8 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                     createWorkItemPerAssembly,
                     leftAssembliesTransformationPattern,
                     rightAssembliesTransformationPattern);
+
+                roslynResolver.Unregister();
             });
 
             // Package command
@@ -195,11 +199,10 @@ namespace Microsoft.DotNet.ApiCompat.Tool
             packageCommand.AddOption(baselinePackageAssemblyReferencesOption);
             packageCommand.SetHandler((InvocationContext context) =>
             {
-                string? roslynAssembliesPath = context.ParseResult.GetValueForOption(roslynAssembliesPathOption);
-                if (roslynAssembliesPath != null)
-                {
-                    RoslynResolver.Register(roslynAssembliesPath);
-                }
+                // If a roslyn assemblies path isn't provided, use the compiled against version from a subfolder.
+                string roslynAssembliesPath = context.ParseResult.GetValueForOption(roslynAssembliesPathOption) ??
+                    Path.Combine(AppContext.BaseDirectory, "codeanalysis");
+                RoslynResolver roslynResolver = RoslynResolver.Register(roslynAssembliesPath);
 
                 MessageImportance verbosity = context.ParseResult.GetValueForOption(verbosityOption);
                 bool generateSuppressionFile = context.ParseResult.GetValueForOption(generateSuppressionFileOption);
@@ -229,18 +232,31 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                     runtimeGraph,
                     packageAssemblyReferences,
                     baselinePackageAssemblyReferences);
+
+                roslynResolver.Unregister();
             });
             
             rootCommand.AddCommand(packageCommand);
             return rootCommand.Invoke(args);
         }
 
-        private static string[][]? ParseAssemblyReferenceArgument(ArgumentResult argumentResult)
+        private static string[][] ParseAssemblyReferenceArgument(ArgumentResult argumentResult)
         {
             List<string[]> args = new();
             foreach (Token token in argumentResult.Tokens)
             {
                 args.Add(token.Value.Split(','));
+            }
+
+            return args.ToArray();
+        }
+
+        private static string[] ParseAssemblyArgument(ArgumentResult argumentResult)
+        {
+            List<string> args = new();
+            foreach (Token token in argumentResult.Tokens)
+            {
+                args.AddRange(token.Value.Split(','));
             }
 
             return args.ToArray();

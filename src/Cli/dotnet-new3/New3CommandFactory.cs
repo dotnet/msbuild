@@ -26,14 +26,7 @@ namespace Dotnet_new3
             Command newCommand = NewCommandFactory.Create(
                 CommandName,
                 (ParseResult parseResult) => HostFactory.CreateHost(parseResult.GetValueForOption(_debugDisableBuiltInTemplatesOption)),
-                (ParseResult parseResult) => new TelemetryLogger(null, parseResult.GetValueForOption(_debugEmitTelemetryOption)),
-                new NewCommandCallbacks()
-                {
-                    RestoreProject = (projectPath) => ExecuteDotnetCommand(Dotnet.Restore(projectPath)),
-                    AddProjectReference = (projectPath, references) => ExecuteDotnetCommand(Dotnet.AddProjectToProjectReference(projectPath, references.ToArray())),
-                    AddPackageReference = (projectPath, package, version) => ExecuteDotnetCommand(Dotnet.AddPackageReference(projectPath, package, version)),
-                    AddProjectsToSolution = (solutionPath, projects, solutionFolder) => ExecuteDotnetCommand(Dotnet.AddProjectsToSolution(solutionPath, projects, solutionFolder)),
-                });
+                (ParseResult parseResult) => new TelemetryLogger(null, parseResult.GetValueForOption(_debugEmitTelemetryOption)));
 
             newCommand.AddGlobalOption(_debugEmitTelemetryOption);
             newCommand.AddGlobalOption(_debugDisableBuiltInTemplatesOption);

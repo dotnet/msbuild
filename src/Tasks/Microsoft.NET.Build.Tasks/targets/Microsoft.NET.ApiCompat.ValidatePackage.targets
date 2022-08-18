@@ -27,10 +27,15 @@ Copyright (c) .NET Foundation. All rights reserved.
       <PackageValidationBaselinePath Condition="'$(PackageValidationBaselinePath)' == '' and '$(PackageValidationBaselineVersion)' != ''">$([MSBuild]::NormalizePath('$(NuGetPackageRoot)', '$(PackageValidationBaselineName.ToLower())', '$(PackageValidationBaselineVersion)', '$(PackageValidationBaselineName.ToLower()).$(PackageValidationBaselineVersion).nupkg'))</PackageValidationBaselinePath>
       <_packageValidationBaselinePath Condition="'$(DisablePackageBaselineValidation)' != 'true'">$(PackageValidationBaselinePath)</_packageValidationBaselinePath>
     </PropertyGroup>
+    
+    <ItemGroup>
+      <_PackageTargetPath Include="@(NuGetPackOutput->WithMetadataValue('Extension', '.nupkg'))"
+                          Condition="!$([System.String]::new('%(Identity)').EndsWith('.symbols.nupkg'))" />
+    </ItemGroup>
 
     <!-- PackageTargetPath isn't exposed by NuGet: https://github.com/NuGet/Home/issues/6671. -->
     <Microsoft.DotNet.ApiCompat.Task.ValidatePackageTask
-      PackageTargetPath="$([MSBuild]::ValueOrDefault('$(PackageTargetPath)', '$([MSBuild]::NormalizePath('$(PackageOutputPath)', '$(PackageId).$(PackageVersion).nupkg'))'))"
+      PackageTargetPath="@(_PackageTargetPath)"
       RuntimeGraph="$(RuntimeIdentifierGraphPath)"
       NoWarn="$(NoWarn)"
       RunApiCompat="$(RunApiCompat)"

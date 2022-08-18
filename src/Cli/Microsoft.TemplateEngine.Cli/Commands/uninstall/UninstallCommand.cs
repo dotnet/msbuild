@@ -12,9 +12,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         public UninstallCommand(
             NewCommand parentCommand,
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
-            NewCommandCallbacks callbacks)
-            : base(hostBuilder, telemetryLoggerBuilder, callbacks, "uninstall")
+            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
+            : base(hostBuilder, telemetryLoggerBuilder, "uninstall")
         {
             parentCommand.AddNoLegacyUsageValidators(this);
         }

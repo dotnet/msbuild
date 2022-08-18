@@ -1,36 +1,36 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Jab;
-using Microsoft.DotNet.ApiCompatibility;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Logging;
+using Microsoft.DotNet.ApiCompatibility.Rules;
 using Microsoft.DotNet.ApiCompatibility.Runner;
 
 namespace Microsoft.DotNet.ApiCompat
 {
-    [ServiceProvider]
-    [Singleton(typeof(ISuppressionEngine), Factory = nameof(SuppressionEngineFactory))]
-    [Singleton(typeof(ICompatibilityLogger), Factory = nameof(LogFactory))]
-    [Singleton(typeof(IApiComparerFactory), typeof(ApiComparerFactory))]
-    [Singleton(typeof(IAssemblySymbolLoaderFactory), typeof(AssemblySymbolLoaderFactory))]
-    [Singleton(typeof(IMetadataStreamProvider), typeof(MetadataStreamProvider))]
-    [Singleton(typeof(IApiCompatRunner), typeof(ApiCompatRunner))]
-    internal partial class ValidateAssembliesServiceProvider
+    [ServiceProvider(RootServices = new[] { typeof(IEnumerable<IRule>) })]
+    [Import(typeof(IApiCompatServiceProviderModule))]
+    internal partial class ValidateAssembliesServiceProvider : IApiCompatServiceProviderModule
     {
         public Func<ICompatibilityLogger> LogFactory { get; }
 
         public Func<ISuppressionEngine> SuppressionEngineFactory { get; }
 
+        public Func<IRuleFactory> RuleFactory { get; }
+
         public ValidateAssembliesServiceProvider(Func<ISuppressionEngine, ICompatibilityLogger> logFactory,
-            Func<ISuppressionEngine> suppressionEngineFactory)
+            Func<ISuppressionEngine> suppressionEngineFactory,
+            Func<ICompatibilityLogger, IRuleFactory> ruleFactory)
         {
             // It's important to use GetService<T> here instead of directly invoking the factory
-            // to avoid two suppression engine being created.
+            // to avoid two instances being created when retrieving a singleton.
             LogFactory = () => logFactory(GetService<ISuppressionEngine>());
             SuppressionEngineFactory = suppressionEngineFactory;
+            RuleFactory = () => ruleFactory(GetService<ICompatibilityLogger>());
         }
     }
 
@@ -51,10 +51,11 @@ namespace Microsoft.DotNet.ApiCompat
         {
             // Configure the suppression engine. Ignore the passed in suppression file if it should be generated and doesn't yet exist.
             string? suppressionFileForEngine = generateSuppressionFile && !File.Exists(suppressionFile) ? null : suppressionFile;
-            Func<ISuppressionEngine> suppressionEngineFactory = () => new SuppressionEngine(suppressionFileForEngine, noWarn, generateSuppressionFile);
 
             // Initialize the service provider
-            ValidateAssembliesServiceProvider serviceProvider = new(logFactory, suppressionEngineFactory);
+            ValidateAssembliesServiceProvider serviceProvider = new(logFactory,
+                () => new SuppressionEngine(suppressionFileForEngine, noWarn, generateSuppressionFile),
+                (log) => new RuleFactory(log));
 
             IApiCompatRunner apiCompatRunner = serviceProvider.GetService<IApiCompatRunner>();
             ApiCompatRunnerOptions apiCompatOptions = new(enableStrictMode);
@@ -72,8 +73,8 @@ namespace Microsoft.DotNet.ApiCompat
 
                 for (int i = 0; i < leftAssemblies.Length; i++)
                 {
-                    MetadataInformation leftMetadataInformation = GetMetadataInformation(leftAssemblies, leftAssembliesReferences, leftAssembliesStringTransformer, i);
-                    MetadataInformation rightMetadataInformation = GetMetadataInformation(rightAssemblies, rightAssembliesReferences, rightAssembliesStringTransformer, i);
+                    IReadOnlyList<MetadataInformation> leftMetadataInformation = GetMetadataInformation(leftAssemblies[i], GetAssemblyReferences(leftAssembliesReferences, i), leftAssembliesStringTransformer);
+                    IReadOnlyList<MetadataInformation> rightMetadataInformation = GetMetadataInformation(rightAssemblies[i], GetAssemblyReferences(rightAssembliesReferences, i), rightAssembliesStringTransformer);
 
                     // Enqueue the work item
                     ApiCompatRunnerWorkItem workItem = new(leftMetadataInformation, apiCompatOptions, rightMetadataInformation);
@@ -83,17 +84,16 @@ namespace Microsoft.DotNet.ApiCompat
             else
             {
                 // Create the work item that corresponds to the passed in left assembly.
-                var leftAssembliesMetadataInformation = new MetadataInformation[leftAssemblies.Length];
+                List<MetadataInformation> leftAssembliesMetadataInformation = new(leftAssemblies.Length);
                 for (int i = 0; i < leftAssemblies.Length; i++)
                 {
-                    leftAssembliesMetadataInformation[i] = GetMetadataInformation(leftAssemblies, leftAssembliesReferences, leftAssembliesStringTransformer, i);
+                    leftAssembliesMetadataInformation.AddRange(GetMetadataInformation(leftAssemblies[i], GetAssemblyReferences(leftAssembliesReferences, i), leftAssembliesStringTransformer));
                 }
 
-                var rightAssembliesMetadataInformation = new MetadataInformation[rightAssemblies.Length];
+                List<MetadataInformation> rightAssembliesMetadataInformation = new(rightAssemblies.Length);
                 for (int i = 0; i < rightAssemblies.Length; i++)
                 {
-                    string rightAssembly = rightAssemblies[i];
-                    rightAssembliesMetadataInformation[i] = GetMetadataInformation(rightAssemblies, rightAssembliesReferences, rightAssembliesStringTransformer, i);
+                    rightAssembliesMetadataInformation.AddRange(GetMetadataInformation(rightAssemblies[i], GetAssemblyReferences(rightAssembliesReferences, i), rightAssembliesStringTransformer));
                 }
 
                 // Enqueue the work item
@@ -127,18 +127,53 @@ namespace Microsoft.DotNet.ApiCompat
             return assemblyReferences[0];
         }
 
-        private static MetadataInformation GetMetadataInformation(string[] assemblies,
-            string[][]? assemblyReferences,
-            RegexStringTransformer? regexStringTransformer,
-            int counter)
+        private static IReadOnlyList<MetadataInformation> GetMetadataInformation(string path,
+            IEnumerable<string>? assemblyReferences,
+            RegexStringTransformer? regexStringTransformer)
         {
-            string assembly = assemblies[counter];
+            List<MetadataInformation> metadataInformation = new();
+            foreach (string assembly in GetFilesFromPath(path))
+            {
+                metadataInformation.Add(new MetadataInformation(
+                    assemblyName: Path.GetFileNameWithoutExtension(assembly),
+                    assemblyId: regexStringTransformer?.Transform(assembly) ?? assembly,
+                    fullPath: assembly,
+                    references: assemblyReferences));
+            }
 
-            return new MetadataInformation(
-                assemblyName: Path.GetFileNameWithoutExtension(assembly),
-                assemblyId: regexStringTransformer?.Transform(assembly) ?? assembly,
-                fullPath: assembly,
-                references: GetAssemblyReferences(assemblyReferences, counter));
+            return metadataInformation;
+        }
+
+        private static IEnumerable<string> GetFilesFromPath(string path)
+        {
+            // Check if the given path is a directory
+            if (Directory.Exists(path))
+            {
+                return Directory.EnumerateFiles(path, "*.dll");
+            }
+
+            // If the path isn't a directory, see if it's a glob expression.
+            string filename = Path.GetFileName(path);
+#if NETCOREAPP
+            if (filename.Contains('*'))
+#else
+            if (filename.Contains("*"))
+#endif
+            {
+                string? directoryName = Path.GetDirectoryName(path);
+                if (directoryName != null)
+                {
+                    try
+                    {
+                        return Directory.EnumerateFiles(directoryName, filename);
+                    }
+                    catch (ArgumentException)
+                    {
+                    }
+                }
+            }
+
+            return new string[] { path };
         }
     }
 }

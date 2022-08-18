@@ -75,7 +75,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var templatePackageManager = new TemplatePackageManager(engineEnvironmentSettings);
             engineEnvironmentSettings.Components.AddComponent(typeof(ITemplateSearchProviderFactory), new NuGetMetadataSearchProviderFactory());
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => engineEnvironmentSettings.Host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => engineEnvironmentSettings.Host, _ => new TelemetryLogger(null, false));
             var parseResult = myCommand.Parse($"new search foo");
             SearchCommandArgs args = new SearchCommandArgs((SearchCommand)parseResult.CommandResult.Command, parseResult);
 
@@ -120,7 +120,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var templatePackageManager = new TemplatePackageManager(engineEnvironmentSettings);
             engineEnvironmentSettings.Components.AddComponent(typeof(ITemplateSearchProviderFactory), new NuGetMetadataSearchProviderFactory());
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => engineEnvironmentSettings.Host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => engineEnvironmentSettings.Host, _ => new TelemetryLogger(null, false));
             var parseResult = myCommand.Parse($"new search foo --framework netcoreapp2.0");
             SearchCommandArgs args = new SearchCommandArgs((SearchCommand)parseResult.CommandResult.Command, parseResult);
 
@@ -162,7 +162,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var templatePackageManager = new TemplatePackageManager(engineEnvironmentSettings);
             engineEnvironmentSettings.Components.AddComponent(typeof(ITemplateSearchProviderFactory), new NuGetMetadataSearchProviderFactory());
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => engineEnvironmentSettings.Host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => engineEnvironmentSettings.Host, _ => new TelemetryLogger(null, false));
             var parseResult = myCommand.Parse($"new search foo --tfm netcoreapp2.0");
             SearchCommandArgs args = new SearchCommandArgs((SearchCommand)parseResult.CommandResult.Command, parseResult);
 
@@ -201,7 +201,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var templatePackageManager = new TemplatePackageManager(engineEnvironmentSettings);
             engineEnvironmentSettings.Components.AddComponent(typeof(ITemplateSearchProviderFactory), new NuGetMetadataSearchProviderFactory());
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => engineEnvironmentSettings.Host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => engineEnvironmentSettings.Host, _ => new TelemetryLogger(null, false));
             var parseResult = myCommand.Parse($"new search bar --language F#");
             SearchCommandArgs args = new SearchCommandArgs((SearchCommand)parseResult.CommandResult.Command, parseResult);
 
@@ -245,7 +245,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var templatePackageManager = new TemplatePackageManager(engineEnvironmentSettings);
             engineEnvironmentSettings.Components.AddComponent(typeof(ITemplateSearchProviderFactory), new NuGetMetadataSearchProviderFactory());
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => engineEnvironmentSettings.Host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => engineEnvironmentSettings.Host, _ => new TelemetryLogger(null, false));
             var parseResult = myCommand.Parse($"new search {commandTemplate} --author {commandAuthor}");
             SearchCommandArgs args = new SearchCommandArgs((SearchCommand)parseResult.CommandResult.Command, parseResult);
 
@@ -286,7 +286,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var templatePackageManager = new TemplatePackageManager(engineEnvironmentSettings);
             engineEnvironmentSettings.Components.AddComponent(typeof(ITemplateSearchProviderFactory), new NuGetMetadataSearchProviderFactory());
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => engineEnvironmentSettings.Host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => engineEnvironmentSettings.Host, _ => new TelemetryLogger(null, false));
             var parseResult = myCommand.Parse($"new search {commandTemplate} --type {commandType}");
             SearchCommandArgs args = new SearchCommandArgs((SearchCommand)parseResult.CommandResult.Command, parseResult);
 
@@ -328,7 +328,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var templatePackageManager = new TemplatePackageManager(engineEnvironmentSettings);
             engineEnvironmentSettings.Components.AddComponent(typeof(ITemplateSearchProviderFactory), new NuGetMetadataSearchProviderFactory());
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => engineEnvironmentSettings.Host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => engineEnvironmentSettings.Host, _ => new TelemetryLogger(null, false));
             var parseResult = myCommand.Parse($"new search {commandTemplate} --package {commandPackage}");
             SearchCommandArgs args = new SearchCommandArgs((SearchCommand)parseResult.CommandResult.Command, parseResult);
 
@@ -375,7 +375,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var templatePackageManager = new TemplatePackageManager(engineEnvironmentSettings);
             engineEnvironmentSettings.Components.AddComponent(typeof(ITemplateSearchProviderFactory), new NuGetMetadataSearchProviderFactory());
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => engineEnvironmentSettings.Host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => engineEnvironmentSettings.Host, _ => new TelemetryLogger(null, false));
             var parseResult = myCommand.Parse($"new search {commandTemplate} --tag {commandTag}");
             SearchCommandArgs args = new SearchCommandArgs((SearchCommand)parseResult.CommandResult.Command, parseResult);
 
@@ -417,7 +417,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var templatePackageManager = new TemplatePackageManager(engineEnvironmentSettings);
             engineEnvironmentSettings.Components.AddComponent(typeof(ITemplateSearchProviderFactory), new NuGetMetadataSearchProviderFactory());
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => engineEnvironmentSettings.Host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => engineEnvironmentSettings.Host, _ => new TelemetryLogger(null, false));
             var parseResult = myCommand.Parse($"new search bar --language VB");
             SearchCommandArgs args = new SearchCommandArgs((SearchCommand)parseResult.CommandResult.Command, parseResult);
 
@@ -455,7 +455,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             engineEnvironmentSettings.Components.AddComponent(typeof(ITemplateSearchProviderFactory), new NuGetMetadataSearchProviderFactory());
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => engineEnvironmentSettings.Host, _ => new TelemetryLogger(null, false), new NewCommandCallbacks());
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => engineEnvironmentSettings.Host, _ => new TelemetryLogger(null, false));
             var parseResult = myCommand.Parse($"new search --unknown");
             SearchCommandArgs args = new SearchCommandArgs((SearchCommand)parseResult.CommandResult.Command, parseResult);
 

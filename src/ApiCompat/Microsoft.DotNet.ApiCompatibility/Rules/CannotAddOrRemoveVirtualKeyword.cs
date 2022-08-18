@@ -15,13 +15,13 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     {
         private readonly RuleSettings _settings;
 
-        public CannotAddOrRemoveVirtualKeyword(RuleSettings settings, RuleRunnerContext context)
+        public CannotAddOrRemoveVirtualKeyword(RuleSettings settings, IRuleRegistrationContext context)
         {
             _settings = settings;
             context.RegisterOnMemberSymbolAction(RunOnMemberSymbol);
         }
 
-        private void RunOnMemberSymbol(ISymbol? left, ISymbol? right, ITypeSymbol leftContainingType, ITypeSymbol rightContainingType, string leftName, string rightName, IList<CompatDifference> differences)
+        private void RunOnMemberSymbol(ISymbol? left, ISymbol? right, ITypeSymbol leftContainingType, ITypeSymbol rightContainingType, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences)
         {
             // Members must exist
             if (left is null || right is null)
@@ -43,8 +43,12 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 if (!right.IsVirtual)
                 {
                     differences.Add(new CompatDifference(
-                    DiagnosticIds.CannotRemoveVirtualFromMember, string.Format(
-                        Resources.CannotRemoveVirtualFromMember, left), DifferenceType.Removed, right));
+                        leftMetadata,
+                        rightMetadata,
+                        DiagnosticIds.CannotRemoveVirtualFromMember,
+                        string.Format(Resources.CannotRemoveVirtualFromMember, left),
+                        DifferenceType.Removed,
+                        right));
                 }
             }
             // If the left member is not virtual, ensure that we're in strict mode.
@@ -57,8 +61,12 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 if (right.IsVirtual)
                 {
                     differences.Add(new CompatDifference(
-                    DiagnosticIds.CannotAddVirtualToMember, string.Format(
-                        Resources.CannotAddVirtualToMember, right), DifferenceType.Added, right));
+                        leftMetadata,
+                        rightMetadata,
+                        DiagnosticIds.CannotAddVirtualToMember,
+                        string.Format(Resources.CannotAddVirtualToMember, right),
+                        DifferenceType.Added,
+                        right));
                 }
             }
         }

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 
@@ -10,89 +9,104 @@ namespace Microsoft.DotNet.ApiCompatibility
     /// <summary>
     /// The visitor that traverses the mappers' tree and gets it's differences in a <see cref="DiagnosticBag{CompatDifference}"/>.
     /// </summary>
-    public class DifferenceVisitor : MapperVisitor
+    public class DifferenceVisitor : IDifferenceVisitor
     {
-        private readonly HashSet<CompatDifference>[] _diagnostics;
+        private readonly HashSet<CompatDifference> _compatDifferences = new();
 
-        /// <summary>
-        /// A list of <see cref="DiagnosticBag{CompatDifference}"/>.
-        /// One per element compared in the right hand side.
-        /// </summary>
-        public IReadOnlyList<IReadOnlyCollection<CompatDifference>> DiagnosticCollections => _diagnostics;
+        /// <inheritdoc />
+        public IEnumerable<CompatDifference> CompatDifferences => _compatDifferences;
 
-        /// <summary>
-        /// Instantiates the visitor with the desired settings.
-        /// </summary>
-        /// <param name="rightCount">Represents the number of elements that the mappers contain on the right hand side.</param>
-        public DifferenceVisitor(int rightCount = 1)
+        /// <inheritdoc />
+        public void Visit<T>(ElementMapper<T> mapper)
         {
-            if (rightCount < 1)
+            if (mapper is AssemblySetMapper assemblySetMapper)
             {
-                throw new ArgumentOutOfRangeException(nameof(rightCount));
+                Visit(assemblySetMapper);
             }
-
-            _diagnostics = new HashSet<CompatDifference>[rightCount];
-            for (int i = 0; i < rightCount; i++)
+            else if (mapper is AssemblyMapper assemblyMapper)
             {
-                _diagnostics[i] = new HashSet<CompatDifference>();
+                Visit(assemblyMapper);
+            }
+            else if (mapper is NamespaceMapper nsMapper)
+            {
+                Visit(nsMapper);
+            }
+            else if (mapper is TypeMapper typeMapper)
+            {
+                Visit(typeMapper);
+            }
+            else if (mapper is MemberMapper memberMapper)
+            {
+                Visit(memberMapper);
             }
         }
 
-        /// <summary>
-        /// Visits an <see cref="AssemblyMapper"/> and adds it's differences to the <see cref="DiagnosticBag{CompatDifference}"/>.
-        /// </summary>
-        /// <param name="assembly">The mapper to visit.</param>
-        public override void Visit(AssemblyMapper assembly)
+        /// <inheritdoc />
+        public void Visit(AssemblySetMapper mapper)
+        {
+            foreach (AssemblyMapper assembly in mapper.GetAssemblies())
+            {
+                Visit(assembly);
+            }
+        }
+
+        /// <inheritdoc />
+        public void Visit(AssemblyMapper assembly)
         {
             AddDifferences(assembly);
-            base.Visit(assembly);
+
+            foreach (NamespaceMapper @namespace in assembly.GetNamespaces())
+            {
+                Visit(@namespace);
+            }
+
             // After visiting the assembly, the assembly mapper will contain any assembly load errors that happened
             // when trying to resolve typeforwarded types. If there were any, we add them to the diagnostic bag next.
-            AddToDiagnosticCollections(assembly.AssemblyLoadErrors);
+            foreach (CompatDifference item in assembly.AssemblyLoadErrors)
+            {
+                _compatDifferences.Add(item);
+            }
         }
 
-        /// <summary>
-        /// Visits an <see cref="TypeMapper"/> and adds it's differences to the <see cref="DiagnosticBag{CompatDifference}"/>.
-        /// </summary>
-        /// <param name="type">The mapper to visit.</param>
-        public override void Visit(TypeMapper type)
+        /// <inheritdoc />
+        public void Visit(NamespaceMapper @namespace)
+        {
+            foreach (TypeMapper type in @namespace.GetTypes())
+            {
+                Visit(type);
+            }
+        }
+
+        /// <inheritdoc />
+        public void Visit(TypeMapper type)
         {
             AddDifferences(type);
 
             if (type.ShouldDiffMembers)
             {
-                base.Visit(type);
+                foreach (TypeMapper nestedType in type.GetNestedTypes())
+                {
+                    Visit(nestedType);
+                }
+
+                foreach (MemberMapper member in type.GetMembers())
+                {
+                    Visit(member);
+                }
             }
         }
 
-        /// <summary>
-        /// Visits an <see cref="MemberMapper"/> and adds it's differences to the <see cref="DiagnosticBag{CompatDifference}"/>.
-        /// </summary>
-        /// <param name="member">The mapper to visit.</param>
-        public override void Visit(MemberMapper member)
+        /// <inheritdoc />
+        public void Visit(MemberMapper member)
         {
             AddDifferences(member);
         }
 
         private void AddDifferences<T>(ElementMapper<T> mapper)
         {
-            IReadOnlyList<IEnumerable<CompatDifference>> differences = mapper.GetDifferences();
-            AddToDiagnosticCollections(differences);
-        }
-
-        private void AddToDiagnosticCollections(IReadOnlyList<IEnumerable<CompatDifference>> diagnosticsToAdd)
-        {
-            if (_diagnostics.Length != diagnosticsToAdd.Count)
+            foreach (CompatDifference item in mapper.GetDifferences())
             {
-                throw new InvalidOperationException(Resources.VisitorRightCountShouldMatchMappersSetSize);
-            }
-
-            for (int i = 0; i < diagnosticsToAdd.Count; i++)
-            {
-                foreach (CompatDifference item in diagnosticsToAdd[i])
-                {
-                    _diagnostics[i].Add(item);
-                }
+                _compatDifferences.Add(item);
             }
         }
     }

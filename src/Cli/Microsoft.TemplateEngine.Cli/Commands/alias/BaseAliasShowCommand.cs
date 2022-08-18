@@ -13,9 +13,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal BaseAliasShowCommand(
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
             Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
-            NewCommandCallbacks callbacks,
             string commandName)
-            : base(hostBuilder, telemetryLoggerBuilder, callbacks, commandName, SymbolStrings.Command_AliasShow_Description) { }
+            : base(hostBuilder, telemetryLoggerBuilder, commandName, SymbolStrings.Command_AliasShow_Description) { }
 
         protected override Task<NewCommandStatus> ExecuteAsync(
             AliasShowCommandArgs args,

@@ -1,17 +1,31 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
-using Newtonsoft.Json.Linq;
+using Microsoft.TemplateEngine.Cli.PostActionProcessors;
 
-namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
+namespace Microsoft.DotNet.Tools.New.PostActionProcessors
 {
-    internal class DotnetRestorePostActionProcessor : PostActionProcessor2Base
+    internal class DotnetRestorePostActionProcessor : PostActionProcessorBase
     {
-        private static readonly Guid ActionProcessorId = new Guid("210D431B-A78B-4D2F-B762-4ED3E3EA9025");
+        
+        private readonly Func<string, bool> _restoreCallback;
+
+        public DotnetRestorePostActionProcessor(Func<string, bool>? restoreCallback = null)
+        {
+            _restoreCallback = restoreCallback ?? DotnetCommandCallbacks.RestoreProject;
+        }
 
         public override Guid Id => ActionProcessorId;
+
+        internal static Guid ActionProcessorId { get; } = new Guid("210D431B-A78B-4D2F-B762-4ED3E3EA9025");
 
         protected override bool ProcessInternal(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationEffects creationEffects, ICreationResult templateCreationResult, string outputBasePath)
         {
@@ -37,31 +51,32 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
             foreach (string pathToRestore in targetFiles)
             {
-                //do not check for file existance. The restore will fail in case file doesn't exist.
+                allSucceeded &= RestoreProject(pathToRestore);
+            }
+            return allSucceeded;
+        }
+
+        private bool RestoreProject(string pathToRestore)
+        {
+            try
+            {
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostAction_Restore_Running, pathToRestore));
-
-                // Prefer to restore the project in-proc vs. creating a new process.
-                bool succeeded = false;
-                if (Callbacks?.RestoreProject != null)
-                {
-                    succeeded = Callbacks.RestoreProject(pathToRestore);
-                }
-
+                bool succeeded = _restoreCallback(pathToRestore);
                 if (!succeeded)
                 {
                     Reporter.Error.WriteLine(LocalizableStrings.PostAction_Restore_Failed);
-                    if (Callbacks?.RestoreProject == null)
-                    {
-                        Reporter.Error.WriteLine(LocalizableStrings.Generic_NoCallbackError);
-                    }
-                    allSucceeded = false;
                 }
                 else
                 {
                     Reporter.Output.WriteLine(LocalizableStrings.PostAction_Restore_Succeeded);
                 }
+                return succeeded;
             }
-            return allSucceeded;
+            catch (Exception e)
+            {
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.PostAction_Restore_RestoreFailed, e.Message));
+                return false;
+            }
         }
     }
 }

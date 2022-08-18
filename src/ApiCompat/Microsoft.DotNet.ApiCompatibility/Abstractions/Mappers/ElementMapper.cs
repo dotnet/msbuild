@@ -3,15 +3,16 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.DotNet.ApiCompatibility.Rules;
 
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
     /// <summary>
     /// Class that represents a mapping in between two objects of type <see cref="T"/>.
     /// </summary>
-    public class ElementMapper<T>
+    public abstract class ElementMapper<T>
     {
-        private IReadOnlyList<IEnumerable<CompatDifference>>? _differences;
+        private IEnumerable<CompatDifference>? _differences;
 
         /// <summary>
         /// Property representing the Left hand side of the mapping.
@@ -24,20 +25,28 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         public T?[] Right { get; private set; }
 
         /// <summary>
-        /// The <see cref="ComparingSettings"/> used to diff <see cref="Left"/> and <see cref="Right"/>.
+        /// The <see cref="MapperSettings"/> used to diff <see cref="Left"/> and <see cref="Right"/>.
         /// </summary>
-        public ComparingSettings Settings { get; }
+        public MapperSettings Settings { get; }
+
+        /// <summary>
+        /// The rule runner to perform api comparison checks.
+        /// </summary>
+        protected IRuleRunner RuleRunner { get; }
 
         /// <summary>
         /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
         /// </summary>
         /// <param name="settings">The settings used to diff the elements in the mapper.</param>
         /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
-        public ElementMapper(ComparingSettings settings, int rightSetSize)
+        public ElementMapper(IRuleRunner ruleRunner,
+            MapperSettings settings = default,
+            int rightSetSize = 1)
         {
             if (rightSetSize < 1)
                 throw new ArgumentOutOfRangeException(nameof(rightSetSize), Resources.ShouldBeGreaterThanZero);
 
+            RuleRunner = ruleRunner;
             Settings = settings;
             Right = new T[rightSetSize];
         }
@@ -85,9 +94,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// <returns>A list containing the list of differences for each possible combination of
         /// (<see cref="ElementMapper{T}.Left"/>, <see cref="ElementMapper{T}.Right"/>).
         /// One list of <see cref="CompatDifference"/> per the number of right elements that the <see cref="ElementMapper{T}"/> contains.</returns>
-        public IReadOnlyList<IEnumerable<CompatDifference>> GetDifferences()
+        public IEnumerable<CompatDifference> GetDifferences()
         {
-            return _differences ??= Settings.RuleRunnerFactory.GetRuleRunner().Run(this);
+            return _differences ??= RuleRunner.Run(this);
         }
     }
 }

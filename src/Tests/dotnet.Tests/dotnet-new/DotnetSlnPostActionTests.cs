@@ -1,21 +1,26 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Microsoft.DotNet.Tools.New.PostActionProcessors;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Cli.PostActionProcessors;
 using Microsoft.TemplateEngine.Mocks;
 using Microsoft.TemplateEngine.TestHelper;
 using Xunit;
 
-namespace Microsoft.TemplateEngine.Cli.UnitTests
+namespace Microsoft.DotNet.Cli.New.Tests
 {
-    public class AddProjectsToSolutionPostActionTests : IClassFixture<EnvironmentSettingsHelper>
+    public class DotnetSlnPostActionTests : IClassFixture<EnvironmentSettingsHelper>
     {
-        private IEngineEnvironmentSettings _engineEnvironmentSettings;
+        private readonly IEngineEnvironmentSettings _engineEnvironmentSettings;
 
-        public AddProjectsToSolutionPostActionTests(EnvironmentSettingsHelper environmentSettingsHelper)
+        public DotnetSlnPostActionTests(EnvironmentSettingsHelper environmentSettingsHelper)
         {
-            _engineEnvironmentSettings = environmentSettingsHelper.CreateEnvironment(hostIdentifier: this.GetType().Name, virtualize: true);
+            _engineEnvironmentSettings = environmentSettingsHelper.CreateEnvironment(hostIdentifier: GetType().Name, virtualize: true);
         }
 
         [Fact(DisplayName = nameof(AddProjectToSolutionPostActionFindSolutionFileAtOutputPath))]
@@ -25,7 +30,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             string solutionFileFullPath = Path.Combine(targetBasePath, "MySln.sln");
             _engineEnvironmentSettings.Host.FileSystem.WriteAllText(solutionFileFullPath, string.Empty);
 
-            IReadOnlyList<string> solutionFiles = AddProjectsToSolutionPostAction.FindSolutionFilesAtOrAbovePath(_engineEnvironmentSettings.Host.FileSystem, targetBasePath);
+            IReadOnlyList<string> solutionFiles = DotnetSlnPostActionProcessor.FindSolutionFilesAtOrAbovePath(_engineEnvironmentSettings.Host.FileSystem, targetBasePath);
             Assert.Equal(1, solutionFiles.Count);
             Assert.Equal(solutionFileFullPath, solutionFiles[0]);
         }
@@ -36,7 +41,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             string outputBasePath = FileSystemHelpers.GetNewVirtualizedPath(_engineEnvironmentSettings);
             IPostAction postAction = new MockPostAction()
             {
-                ActionId = AddProjectsToSolutionPostAction.ActionProcessorId,
+                ActionId = DotnetSlnPostActionProcessor.ActionProcessorId,
                 Args = new Dictionary<string, string>()
                 {
                     { "primaryOutputIndexes", "0" }
@@ -45,7 +50,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             ICreationResult creationResult = new MockCreationResult(primaryOutputs: new[] { new MockCreationPath(Path.GetFullPath("outputProj1.csproj")) });
 
-            Assert.True(AddProjectsToSolutionPostAction.TryGetProjectFilesToAdd( postAction, creationResult, outputBasePath, out IReadOnlyList<string>? foundProjectFiles));
+            Assert.True(DotnetSlnPostActionProcessor.TryGetProjectFilesToAdd( postAction, creationResult, outputBasePath, out IReadOnlyList<string>? foundProjectFiles));
             Assert.Equal(1, foundProjectFiles?.Count);
             Assert.Equal(creationResult.PrimaryOutputs[0].Path, foundProjectFiles?[0]);
         }
@@ -56,7 +61,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             string outputBasePath = FileSystemHelpers.GetNewVirtualizedPath(_engineEnvironmentSettings);
             IPostAction postAction = new MockPostAction()
             {
-                ActionId = AddProjectsToSolutionPostAction.ActionProcessorId,
+                ActionId = DotnetSlnPostActionProcessor.ActionProcessorId,
                 Args = new Dictionary<string, string>()
                 {
                     { "primaryOutputIndexes", "0; 2" }
@@ -71,7 +76,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                     new MockCreationPath(Path.GetFullPath("outputProj2.csproj"))
                 });
 
-            Assert.True(AddProjectsToSolutionPostAction.TryGetProjectFilesToAdd( postAction, creationResult, outputBasePath, out IReadOnlyList<string>? foundProjectFiles));
+            Assert.True(DotnetSlnPostActionProcessor.TryGetProjectFilesToAdd( postAction, creationResult, outputBasePath, out IReadOnlyList<string>? foundProjectFiles));
             Assert.Equal(2, foundProjectFiles?.Count);
             Assert.Contains(creationResult.PrimaryOutputs[0].Path, foundProjectFiles?.ToList());
             Assert.Contains(creationResult.PrimaryOutputs[2].Path, foundProjectFiles?.ToList());
@@ -84,7 +89,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         {
             IPostAction postAction = new MockPostAction()
             {
-                ActionId = AddProjectsToSolutionPostAction.ActionProcessorId,
+                ActionId = DotnetSlnPostActionProcessor.ActionProcessorId,
                 Args = new Dictionary<string, string>()
                 {
                     { "primaryOutputIndexes", "1" }
@@ -93,7 +98,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             ICreationResult creationResult = new MockCreationResult(primaryOutputs: new[] { new MockCreationPath("outputProj1.csproj") });
 
-            Assert.False(AddProjectsToSolutionPostAction.TryGetProjectFilesToAdd( postAction, creationResult, string.Empty, out IReadOnlyList<string>? foundProjectFiles));
+            Assert.False(DotnetSlnPostActionProcessor.TryGetProjectFilesToAdd( postAction, creationResult, string.Empty, out IReadOnlyList<string>? foundProjectFiles));
             Assert.Null(foundProjectFiles);
         }
 
@@ -104,7 +109,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             IPostAction postAction = new MockPostAction()
             {
-                ActionId = AddProjectsToSolutionPostAction.ActionProcessorId,
+                ActionId = DotnetSlnPostActionProcessor.ActionProcessorId,
                 Args = new Dictionary<string, string>()
                 {
                     { "primaryOutputIndexes", "0; 2" }
@@ -122,7 +127,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             string dontFindMeFullPath1 = Path.Combine(outputBasePath, creationResult.PrimaryOutputs[1].Path);
             string outputFileFullPath2 = Path.Combine(outputBasePath, creationResult.PrimaryOutputs[2].Path);
 
-            Assert.True(AddProjectsToSolutionPostAction.TryGetProjectFilesToAdd( postAction, creationResult, outputBasePath, out IReadOnlyList<string>? foundProjectFiles));
+            Assert.True(DotnetSlnPostActionProcessor.TryGetProjectFilesToAdd( postAction, creationResult, outputBasePath, out IReadOnlyList<string>? foundProjectFiles));
             Assert.Equal(2, foundProjectFiles?.Count);
             Assert.Contains(outputFileFullPath0, foundProjectFiles?.ToList());
             Assert.Contains(outputFileFullPath2, foundProjectFiles?.ToList());
@@ -137,7 +142,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             IPostAction postAction = new MockPostAction()
             {
-                ActionId = AddProjectsToSolutionPostAction.ActionProcessorId,
+                ActionId = DotnetSlnPostActionProcessor.ActionProcessorId,
                 Args = new Dictionary<string, string>()
             };
 
@@ -150,7 +155,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             string outputFileFullPath0 = Path.Combine(outputBasePath, creationResult.PrimaryOutputs[0].Path);
             string outputFileFullPath1 = Path.Combine(outputBasePath, creationResult.PrimaryOutputs[1].Path);
 
-            Assert.True(AddProjectsToSolutionPostAction.TryGetProjectFilesToAdd( postAction, creationResult, outputBasePath, out IReadOnlyList<string>? foundProjectFiles));
+            Assert.True(DotnetSlnPostActionProcessor.TryGetProjectFilesToAdd( postAction, creationResult, outputBasePath, out IReadOnlyList<string>? foundProjectFiles));
             Assert.Equal(2, foundProjectFiles?.Count);
             Assert.Contains(outputFileFullPath0, foundProjectFiles?.ToList());
             Assert.Contains(outputFileFullPath1, foundProjectFiles?.ToList());
@@ -159,7 +164,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact(DisplayName = nameof(AddProjectToSolutionCanTargetASingleProjectWithAJsonArray))]
         public void AddProjectToSolutionCanTargetASingleProjectWithAJsonArray()
         {
-            var actionProcessor = new AddProjectsToSolutionPostAction();
+            var callback = new MockAddProjectToSolutionCallback();
+            var actionProcessor = new DotnetSlnPostActionProcessor(callback.AddProjectToSolution);
 
             string targetBasePath = _engineEnvironmentSettings.GetNewVirtualizedPath();
             string slnFileFullPath = Path.Combine(targetBasePath, "MyApp.sln");
@@ -168,13 +174,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             _engineEnvironmentSettings.Host.FileSystem.WriteAllText(slnFileFullPath, "");
 
             var args = new Dictionary<string, string>() { { "projectFiles", "[\"MyApp.csproj\"]" } };
-            var postAction = new MockPostAction { ActionId = AddProjectsToSolutionPostAction.ActionProcessorId, Args = args };
+            var postAction = new MockPostAction { ActionId = DotnetSlnPostActionProcessor.ActionProcessorId, Args = args };
 
-            var creationEffects = new MockCreationEffects()
+            MockCreationEffects creationEffects = new MockCreationEffects()
                 .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));
-
-            var callback = new MockAddProjectToSolutionCallback();
-            actionProcessor.Callbacks = new NewCommandCallbacks { AddProjectsToSolution = callback.AddProjectToSolution };
 
             actionProcessor.Process(
                 _engineEnvironmentSettings,
@@ -190,7 +193,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact(DisplayName = nameof(AddProjectToSolutionCanTargetASingleProjectWithTheProjectName))]
         public void AddProjectToSolutionCanTargetASingleProjectWithTheProjectName()
         {
-            var actionProcessor = new AddProjectsToSolutionPostAction();
+            var callback = new MockAddProjectToSolutionCallback();
+            var actionProcessor = new DotnetSlnPostActionProcessor(callback.AddProjectToSolution);
 
             string targetBasePath = _engineEnvironmentSettings.GetNewVirtualizedPath();
             string slnFileFullPath = Path.Combine(targetBasePath, "MyApp.sln");
@@ -199,13 +203,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             _engineEnvironmentSettings.Host.FileSystem.WriteAllText(slnFileFullPath, "");
 
             var args = new Dictionary<string, string>() { { "projectFiles", "MyApp.csproj" } };
-            var postAction = new MockPostAction { ActionId = AddProjectsToSolutionPostAction.ActionProcessorId, Args = args };
+            var postAction = new MockPostAction { ActionId = DotnetSlnPostActionProcessor.ActionProcessorId, Args = args };
 
-            var creationEffects = new MockCreationEffects()
+            MockCreationEffects creationEffects = new MockCreationEffects()
                 .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));
-
-            var callback = new MockAddProjectToSolutionCallback();
-            actionProcessor.Callbacks = new NewCommandCallbacks { AddProjectsToSolution = callback.AddProjectToSolution };
 
             actionProcessor.Process(
                 _engineEnvironmentSettings,
@@ -226,8 +227,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             public bool AddProjectToSolution(string solution, IReadOnlyList<string?> projects, string? targetFolder)
             {
-                this.Solution = solution;
-                this.Projects = projects;
+                Solution = solution;
+                Projects = projects;
 
                 return true;
             }

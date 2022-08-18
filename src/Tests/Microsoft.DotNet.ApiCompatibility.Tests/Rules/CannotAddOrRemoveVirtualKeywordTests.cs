@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
 {
     public class CannotAddOrRemoveVirtualKeywordTests
     {
-        private static readonly bool IsNetFramework = RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase);
+        private static readonly TestRuleFactory s_ruleFactory = new((settings, context) => new CannotAddOrRemoveVirtualKeyword(settings, context));
 
         private static string CreateType(string s, params object[] args) => string.Format(@"
 namespace CompatTests {{
@@ -29,10 +29,11 @@ namespace CompatTests {{
             var differences = new CompatDifference[args.Length];
             for (int i = 0; i < args.Length; i++)
             {
-                string diagnosticId = args[i].dt == DifferenceType.Removed
-                    ? DiagnosticIds.CannotRemoveVirtualFromMember
-                    : DiagnosticIds.CannotAddVirtualToMember;
-                differences[i] = new CompatDifference(diagnosticId, string.Empty, args[i].dt, args[i].memberId);
+                differences[i] = CompatDifference.CreateWithDefaultMetadata(
+                    args[i].dt == DifferenceType.Removed ? DiagnosticIds.CannotRemoveVirtualFromMember : DiagnosticIds.CannotAddVirtualToMember,
+                    string.Empty,
+                    args[i].dt,
+                    args[i].memberId);
             }
             return differences;
         }
@@ -163,9 +164,10 @@ namespace CompatTests {{
         {
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
-            ApiComparer differ = new();
-            differ.StrictMode = strictMode;
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: strictMode));
+
             IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
+
             Assert.Equal(expected, differences);
         }
 
@@ -190,11 +192,14 @@ namespace CompatTests
 ";
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
-            ApiComparer differ = new();
-            IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
+            // Register CannotAddOrRemoveVirtualKeyword and MemberMustExist rules as this test validates both.
+            ApiComparer differ = new(s_ruleFactory.WithRule((settings, context) => new MembersMustExist(settings, context)));
+
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
+
             CompatDifference[] expected = new[]
             {
-                new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.F"),
+                CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.F"),
             };
             Assert.Equal(expected, differences);
         }

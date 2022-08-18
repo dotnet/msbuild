@@ -24,9 +24,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             NewCommand parentCommand,
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
             Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
-            NewCommandCallbacks callbacks,
             string commandName)
-            : base(hostBuilder, telemetryLoggerBuilder, callbacks, commandName, SymbolStrings.Command_List_Description)
+            : base(hostBuilder, telemetryLoggerBuilder, commandName, SymbolStrings.Command_List_Description)
         {
             ParentCommand = parentCommand;
             Filters = SetupFilterOptions(SupportedFilters);
