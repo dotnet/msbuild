@@ -221,11 +221,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             if (templateArgs.IsForceFlagSpecified)
             {
-                reporter.WriteLine(string.Format(LocalizableStrings.TemplateCommand_DisplayConstraintResults_Warning, templateArgs.Template.Name));
+                reporter.WriteLine(LocalizableStrings.TemplateCommand_DisplayConstraintResults_Warning, templateArgs.Template.Name);
             }
             else
             {
-                reporter.WriteLine(string.Format(LocalizableStrings.TemplateCommand_DisplayConstraintResults_Error, templateArgs.Template.Name));
+                reporter.WriteLine(LocalizableStrings.TemplateCommand_DisplayConstraintResults_Error, templateArgs.Template.Name);
             }
 
             foreach (var constraint in constraintResults.Where(cr => cr.EvaluationStatus != TemplateConstraintResult.Status.Allowed))
@@ -236,7 +236,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             if (!templateArgs.IsForceFlagSpecified)
             {
-                reporter.WriteLine(string.Format(LocalizableStrings.TemplateCommand_DisplayConstraintResults_Hint, SharedOptions.ForceOption.Aliases.First()));
+                reporter.WriteLine(LocalizableStrings.TemplateCommand_DisplayConstraintResults_Hint, SharedOptions.ForceOption.Aliases.First());
                 reporter.WriteCommand(Example.FromExistingTokens(templateArgs.ParseResult).WithOption(SharedOptions.ForceOption));
             }
             else

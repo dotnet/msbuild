@@ -108,7 +108,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             if (returnCode != NewCommandStatus.Success)
             {
                 Reporter.Error.WriteLine();
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.BaseCommand_ExitCodeHelp, (int)returnCode));
+                Reporter.Error.WriteLine(LocalizableStrings.BaseCommand_ExitCodeHelp, (int)returnCode);
             }
 
             return (int)returnCode;

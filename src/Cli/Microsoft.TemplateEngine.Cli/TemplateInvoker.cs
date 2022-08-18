@@ -185,7 +185,7 @@ namespace Microsoft.TemplateEngine.Cli
                 case CreationResultStatus.Success:
                     if (!templateArgs.IsDryRun)
                     {
-                        Reporter.Output.WriteLine(string.Format(LocalizableStrings.CreateSuccessful, resultTemplateName));
+                        Reporter.Output.WriteLine(LocalizableStrings.CreateSuccessful, resultTemplateName);
                     }
                     else
                     {
@@ -201,7 +201,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                     if (!string.IsNullOrEmpty(templateArgs.Template.ThirdPartyNotices))
                     {
-                        Reporter.Output.WriteLine(string.Format(LocalizableStrings.ThirdPartyNotices, templateArgs.Template.ThirdPartyNotices));
+                        Reporter.Output.WriteLine(LocalizableStrings.ThirdPartyNotices, templateArgs.Template.ThirdPartyNotices);
                     }
 
                     return HandlePostActions(instantiateResult, templateArgs);
