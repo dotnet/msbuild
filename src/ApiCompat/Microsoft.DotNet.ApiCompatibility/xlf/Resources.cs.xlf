@@ -7,11 +7,6 @@
         <target state="translated">Spouští se pracovní položky ({0})...</target>
         <note />
       </trans-unit>
-      <trans-unit id="ApiCompatibilityFooter">
-        <source>Performed api validation on '{0}' ({2}) and '{1}' ({3}).</source>
-        <target state="translated">Provedlo se ověření rozhraní API pro {0} ({2}) a {1} ({3}).</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ApiCompatibilityHeader">
         <source>API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</source>
         <target state="translated">Chyby kompatibility rozhraní API mezi {0} ({2}) a {1} ({3}):</target>

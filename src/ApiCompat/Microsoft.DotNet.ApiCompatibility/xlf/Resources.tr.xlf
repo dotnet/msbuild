@@ -7,11 +7,6 @@
         <target state="translated">{0} iş öğesi yürütülüyor...</target>
         <note />
       </trans-unit>
-      <trans-unit id="ApiCompatibilityFooter">
-        <source>Performed api validation on '{0}' ({2}) and '{1}' ({3}).</source>
-        <target state="translated">'{0}' ({2}) ve '{1}' ({3}) üzerinde API doğrulaması gerçekleştirildi.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ApiCompatibilityHeader">
         <source>API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</source>
         <target state="translated">'{0}' ({2}) ile '{1}' ({3}) arasında API uyumluluğu hataları var:</target>

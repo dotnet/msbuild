@@ -7,11 +7,6 @@
         <target state="translated">Executando {0} item(ns) de trabalho...</target>
         <note />
       </trans-unit>
-      <trans-unit id="ApiCompatibilityFooter">
-        <source>Performed api validation on '{0}' ({2}) and '{1}' ({3}).</source>
-        <target state="translated">Validação de API realizada em '{0}' ({2}) e ​​'{1}' ({3}).</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ApiCompatibilityHeader">
         <source>API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</source>
         <target state="translated">Erros de compatibilidade de API entre '{0}' ({2}) e ​​'{1}' ({3}):</target>
