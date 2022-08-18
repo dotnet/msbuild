@@ -15,6 +15,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         private Dictionary<IAssemblySymbol, AssemblyMapper>? _assemblies;
 
         /// <summary>
+        /// The number of assemblies mapped.
+        /// </summary>
+        public int AssemblyCount => _assemblies != null ? _assemblies.Count : 0;
+
+        /// <summary>
         /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
         /// </summary>
         /// <param name="settings">The settings used to diff the elements in the mapper.</param>

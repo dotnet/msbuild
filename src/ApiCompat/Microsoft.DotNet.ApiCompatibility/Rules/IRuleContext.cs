@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         /// Registers a callback to invoke when two <see cref="IAssemblySymbol"/> are compared.
         /// </summary>
         /// <param name="action">The action to invoke.</param>
-        void RegisterOnAssemblySymbolAction(Action<IAssemblySymbol?, IAssemblySymbol?, MetadataInformation, MetadataInformation, IList<CompatDifference>> action);
+        void RegisterOnAssemblySymbolAction(Action<IAssemblySymbol?, IAssemblySymbol?, MetadataInformation, MetadataInformation, bool, IList<CompatDifference>> action);
 
         /// <summary>
         /// Registers a callback to invoke when two <see cref="ITypeSymbol"/> are compared.
@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     /// </summary>
     public interface IRuleRunnerContext
     {
-        void RunOnAssemblySymbolActions(IAssemblySymbol? left, IAssemblySymbol? right, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences);
+        void RunOnAssemblySymbolActions(IAssemblySymbol? left, IAssemblySymbol? right, MetadataInformation leftMetadata, MetadataInformation rightMetadata, bool isSingleAssembly, IList<CompatDifference> differences);
 
         void RunOnTypeSymbolActions(ITypeSymbol? left, ITypeSymbol? right, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences);
 

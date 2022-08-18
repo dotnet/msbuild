@@ -13,13 +13,13 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     /// </summary>
     public class RuleContext : IRuleContext
     {
-        private readonly List<Action<IAssemblySymbol?, IAssemblySymbol?, MetadataInformation, MetadataInformation, IList<CompatDifference>>> _onAssemblySymbolActions = new();
+        private readonly List<Action<IAssemblySymbol?, IAssemblySymbol?, MetadataInformation, MetadataInformation, bool, IList<CompatDifference>>> _onAssemblySymbolActions = new();
         private readonly List<Action<ITypeSymbol?, ITypeSymbol?, MetadataInformation, MetadataInformation, IList<CompatDifference>>> _onTypeSymbolActions = new();
         private readonly List<Action<ISymbol?, ISymbol?, MetadataInformation, MetadataInformation, IList<CompatDifference>>> _onMemberSymbolActions = new();
         private readonly List<Action<ISymbol?, ISymbol?, ITypeSymbol, ITypeSymbol, MetadataInformation, MetadataInformation, IList<CompatDifference>>> _onMemberSymbolWithContainingTypeActions = new();
 
         /// <inheritdoc> />
-        public void RegisterOnAssemblySymbolAction(Action<IAssemblySymbol?, IAssemblySymbol?, MetadataInformation, MetadataInformation, IList<CompatDifference>> action)
+        public void RegisterOnAssemblySymbolAction(Action<IAssemblySymbol?, IAssemblySymbol?, MetadataInformation, MetadataInformation, bool, IList<CompatDifference>> action)
         {
             _onAssemblySymbolActions.Add(action);
         }
@@ -43,11 +43,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         }
 
         /// <inheritdoc> />
-        public void RunOnAssemblySymbolActions(IAssemblySymbol? left, IAssemblySymbol? right, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences)
+        public void RunOnAssemblySymbolActions(IAssemblySymbol? left, IAssemblySymbol? right, MetadataInformation leftMetadata, MetadataInformation rightMetadata, bool singleAssembly, IList<CompatDifference> differences)
         {
-            foreach (Action<IAssemblySymbol?, IAssemblySymbol?, MetadataInformation, MetadataInformation, IList<CompatDifference>> action in _onAssemblySymbolActions)
+            foreach (Action<IAssemblySymbol?, IAssemblySymbol?, MetadataInformation, MetadataInformation, bool, IList<CompatDifference>> action in _onAssemblySymbolActions)
             {
-                action(left, right, leftMetadata, rightMetadata, differences);
+                action(left, right, leftMetadata, rightMetadata, singleAssembly, differences);
             }
         }
 

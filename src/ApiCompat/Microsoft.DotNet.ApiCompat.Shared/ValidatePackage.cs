@@ -24,17 +24,17 @@ namespace Microsoft.DotNet.ApiCompat
 
         public Func<ISuppressionEngine> SuppressionEngineFactory { get; }
 
-        public RuleFactory RuleFactory { get; }
+        public Func<IRuleFactory> RuleFactory { get; }
 
         public ValidatePackageServiceProvider(Func<ISuppressionEngine, ICompatibilityLogger> logFactory,
             Func<ISuppressionEngine> suppressionEngineFactory,
-            RuleFactory ruleFactory)
+            Func<ICompatibilityLogger, IRuleFactory> ruleFactory)
         {
             // It's important to use GetService<T> here instead of directly invoking the factory
             // to avoid two instances being created when retrieving a singleton.
             LogFactory = () => logFactory(GetService<ISuppressionEngine>());
             SuppressionEngineFactory = suppressionEngineFactory;
-            RuleFactory = ruleFactory;
+            RuleFactory = () => ruleFactory(GetService<ICompatibilityLogger>());
         }
     }
 
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.ApiCompat
             // Initialize the service provider
             ValidatePackageServiceProvider serviceProvider = new(logFactory,
                 () => new SuppressionEngine(suppressionFileForEngine, noWarn, generateSuppressionFile),
-                new RuleFactory());
+                (log) => new RuleFactory(log));
 
             // If a runtime graph is provided, parse and use it for asset selection during the in-memory package construction.
             if (runtimeGraph != null)

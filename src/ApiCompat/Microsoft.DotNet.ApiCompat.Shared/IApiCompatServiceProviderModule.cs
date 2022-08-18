@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.ApiCompat
     [ServiceProviderModule]
     [Singleton(typeof(ISuppressionEngine), Factory = nameof(SuppressionEngineFactory))]
     [Singleton(typeof(ICompatibilityLogger), Factory = nameof(LogFactory))]
-    [Singleton(typeof(IRuleFactory), Instance = nameof(RuleFactory))]
+    [Singleton(typeof(IRuleFactory), Factory = nameof(RuleFactory))]
     [Singleton(typeof(IApiComparerFactory), typeof(ApiComparerFactory))]
     [Singleton(typeof(IAssemblySymbolLoaderFactory), typeof(AssemblySymbolLoaderFactory))]
     [Singleton(typeof(IApiCompatRunner), typeof(ApiCompatRunner))]
@@ -24,6 +24,6 @@ namespace Microsoft.DotNet.ApiCompat
 
         Func<ICompatibilityLogger> LogFactory { get; }
 
-        RuleFactory RuleFactory { get; }
+        Func<IRuleFactory> RuleFactory { get; }
     }
 }

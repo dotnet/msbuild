@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
 {
     public class AssemblyIdentityMustMatchTests
     {
-        private static readonly TestRuleFactory s_ruleFactory = new((settings, context) => new AssemblyIdentityMustMatch(settings, context));
+        private static readonly TestRuleFactory s_ruleFactory = new((settings, context) => new AssemblyIdentityMustMatch(new TestLogger(), settings, context));
 
         private static readonly byte[] _publicKey = new byte[]
         { 
