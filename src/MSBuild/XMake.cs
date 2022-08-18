@@ -2366,6 +2366,11 @@ namespace Microsoft.Build.CommandLine
                         out enableProfiler
                         );
 
+                    if (Traits.Instance.DebugEngine)
+                    {
+                        verbosity = LoggerVerbosity.Diagnostic;
+                    }
+
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.DetailedSummary))
                     {
                         detailedSummary = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.DetailedSummary], defaultValue: true, resourceName: "InvalidDetailedSummaryValue");

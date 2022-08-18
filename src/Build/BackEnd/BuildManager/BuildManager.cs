@@ -466,6 +466,12 @@ namespace Microsoft.Build.Execution
 
             _previousLowPriority = parameters.LowPriority;
 
+            if (Traits.Instance.DebugEngine)
+            {
+                parameters.DetailedSummary = true;
+                parameters.LogTaskInputs = true;
+            }
+
             lock (_syncLock)
             {
                 AttachDebugger();
