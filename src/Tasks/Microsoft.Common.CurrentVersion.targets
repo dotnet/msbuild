@@ -1850,6 +1850,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                          Condition="'$(ReferringTargetFrameworkForProjectReferences)' == '' or
                                     ('$(EnableDynamicPlatformResolution)' == 'true' and '%(_ProjectReferenceTargetFrameworkPossibilities.IsVcxOrNativeProj)' == 'true')" />
 
+    </ItemGroup>
+
+    <!-- IsRidAgnostic metadata is used to determine whether global properties such as RuntimeIdentifier and SelfContained flow to a referenced project.
+         However, for multi-targeted projects there may be a different IsRidAgnostic value for each TargetFramework.  In that case, this task selects
+         the IsRidAgnostic value for the NearestTargetFramework for the project. -->
+    <SetRidAgnosticValueForProjects Projects="@(AnnotatedProjects)">
+      <Output ItemName="UpdatedAnnotatedProjects" TaskParameter="UpdatedProjects" />
+    </SetRidAgnosticValueForProjects>
+    
+    <ItemGroup>
+      <AnnotatedProjects Remove="@(AnnotatedProjects)" />
+      <AnnotatedProjects Include="@(UpdatedAnnotatedProjects)" />
+      <UpdatedAnnotatedProjects Remove="@(UpdatedAnnotatedProjects)" />
+
       <!-- If the NearestTargetFramework property was set and the project multi-targets, SetTargetFramework must be set. -->
       <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.NearestTargetFramework)' != '' and '%(AnnotatedProjects.HasSingleTargetFramework)' != 'true'">
         <SetTargetFramework>TargetFramework=%(AnnotatedProjects.NearestTargetFramework)</SetTargetFramework>
@@ -1864,9 +1878,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </AnnotatedProjects>
 
       <!-- Add RuntimeIdentifier and SelfContained to the list of global properties that should not flow to the referenced project,
-           unless the project is expecting those properties to flow.
-           We include SelfContained together with RuntimeIdentifier, because otherwise a referenced project could try to build with
-           SelfContained set to true but no RuntimeIdentifier set, which causes an error (for Exe projects). -->
+           unless the project is expecting those properties to flow. -->
       <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.IsRidAgnostic)' != 'false'">
         <UndefineProperties>%(AnnotatedProjects.UndefineProperties);RuntimeIdentifier;SelfContained</UndefineProperties>
       </AnnotatedProjects>
