@@ -25,17 +25,20 @@
             <ContainerWorkingDirectory Condition="'$(ContainerWorkingDirectory)' == ''">/app</ContainerWorkingDirectory>
             <!-- Could be semicolon-delimited -->
         </PropertyGroup>
-        
-        <ItemGroup>
-            <ContainerLabel Condition="@(ContainerLabel) == ''"></ContainerLabel>
+
+        <ItemGroup Label="Entrypoint Assignment">
             <!-- For non-apphosts, we need to invoke `dotnet` `workingdir/app` as separate args -->
             <ContainerEntrypoint Condition="'$(ContainerEntrypoint)' == '' and '$(UseAppHost)' != 'true'" Include="dotnet;$(ContainerWorkingDirectory)/$(TargetFileName)" />
             <!-- For apphosts, we need to invoke `workingdir/app` as a single arg -->
             <ContainerEntrypoint Condition="'$(ContainerEntrypoint)' == '' and '$(UseAppHost)' == 'true'" Include="$(ContainerWorkingDirectory)/$(AssemblyName)$(_NativeExecutableExtension)" />
         </ItemGroup>
 
+        <ItemGroup Label="Conventional Label assignment">
+            <ContainerLabel Include="org.opencontainers.image.created" Value="$([System.DateTime]::UtcNow.ToString('o'))" />
+        </ItemGroup>
+
         <!-- Asp.NET defaults -->
-        <ItemGroup Condition="'$(_IsAspNet)' == 'true'">
+        <ItemGroup Label="ASP.NET port forwarding" Condition="'$(_IsAspNet)' == 'true'">
             <ContainerPort Include="80" Type="tcp" Condition="@(ContainerPort->WithMetadataValue('Identity', '80')->AnyHaveMetadataValue('Type', 'tcp')) == ''" />
 
             <ContainerEnvironmentVariable Include="ASPNETCORE_URLS" Value="http://localhost:5000;https://localhost:5001"
@@ -72,6 +75,7 @@
                         PublishDirectory="$(PublishDir)"
                         WorkingDirectory="$(ContainerWorkingDirectory)"
                         Entrypoint="@(ContainerEntrypoint)"
-                        EntrypointArgs="@(ContainerEntrypointArgs)"/>
+                        EntrypointArgs="@(ContainerEntrypointArgs)"
+						Labels="@(ContainerLabel)"/>
     </Target>
 </Project>

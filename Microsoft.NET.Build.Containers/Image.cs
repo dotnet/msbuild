@@ -5,6 +5,8 @@ using System.Text.Json.Nodes;
 
 namespace Microsoft.NET.Build.Containers;
 
+record Label(string name, string value);
+
 public class Image
 {
     public JsonNode manifest;
@@ -15,12 +17,16 @@ public class Image
 
     internal List<Layer> newLayers = new();
 
+    private HashSet<Label> labels;
+
     public Image(JsonNode manifest, JsonNode config, string name, Registry? registry)
     {
         this.manifest = manifest;
         this.config = config;
         this.OriginatingName = name;
         this.originatingRegistry = registry;
+        // labels are inherited from the parent image, so we need to seed our new image with them.
+        this.labels = ReadLabelsFromConfig(config);
     }
 
     public IEnumerable<Descriptor> LayerDescriptors
@@ -61,7 +67,39 @@ public class Image
         manifest["config"]!["digest"] = GetDigest(config);
     }
 
-    static JsonArray ToJsonArray(string[] items) => new JsonArray(items.Where(s => !string.IsNullOrEmpty(s)).Select(s =>(JsonValue) s).ToArray());
+    private static HashSet<Label> ReadLabelsFromConfig(JsonNode inputConfig)
+    {
+        if (inputConfig is JsonObject config && config["Labels"] is JsonObject labelsJson)
+        {
+            // read label mappings from object
+            var labels = new HashSet<Label>();
+            foreach (var property in labelsJson)
+            {
+                if (property.Key is { } propertyName && property.Value is JsonValue propertyValue)
+                {
+                    labels.Add(new(propertyName, propertyValue.ToString()));
+                }
+            }
+            return labels;
+        }
+        else
+        {
+            // initialize and empty labels map
+            return new HashSet<Label>();
+        }
+    }
+
+    private JsonObject CreateLabelMap()
+    {
+        var container = new JsonObject();
+        foreach (var label in labels)
+        {
+            container.Add(label.name, label.value);
+        }
+        return container;
+    }
+
+    static JsonArray ToJsonArray(string[] items) => new JsonArray(items.Where(s => !string.IsNullOrEmpty(s)).Select(s => (JsonValue)s).ToArray());
 
     public void SetEntrypoint(string[] executableArgs, string[]? args = null)
     {
@@ -86,12 +124,21 @@ public class Image
         RecalculateDigest();
     }
 
-    public string WorkingDirectory {
-        get => (string?)manifest["config"]!["WorkingDir"] ?? "";
-        set {
+    public string WorkingDirectory
+    {
+        get => (string?)config["config"]!["WorkingDir"] ?? "";
+        set
+        {
             config["config"]!["WorkingDir"] = value;
             RecalculateDigest();
         }
+    }
+
+    public void Label(string name, string value)
+    {
+        labels.Add(new(name, value));
+        config["config"]!["Labels"] = CreateLabelMap();
+        RecalculateDigest();
     }
 
     public string GetDigest(JsonNode json)

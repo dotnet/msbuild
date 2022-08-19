@@ -66,6 +66,11 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
     /// </summary>
     public ITaskItem[] EntrypointArgs { get; set; }
 
+    /// <summary>
+    /// Labels that the image configuration will include in metadata
+    /// </summary>
+    public ITaskItem[] Labels { get; set; }
+
     public CreateNewImage()
     {
         BaseRegistry = "";
@@ -78,6 +83,7 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
         WorkingDirectory = "";
         Entrypoint = Array.Empty<ITaskItem>();
         EntrypointArgs = Array.Empty<ITaskItem>();
+        Labels = Array.Empty<ITaskItem>();
     }
 
 
@@ -112,6 +118,11 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
         image.WorkingDirectory = WorkingDirectory;
         image.SetEntrypoint(Entrypoint.Select(i => i.ItemSpec).ToArray(), EntrypointArgs.Select(i => i.ItemSpec).ToArray());
 
+        foreach (var label in Labels)
+        {
+            image.Label(label.ItemSpec, label.GetMetadata("Value"));
+        }
+        
         if (OutputRegistry.StartsWith("docker://"))
         {
             try
