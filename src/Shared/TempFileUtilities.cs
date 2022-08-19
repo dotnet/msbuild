@@ -28,7 +28,7 @@ namespace Microsoft.Build.Shared
 
                 return tempFileDirectory;
             }
-        }// Path.GetDirectoryName(GetTemporaryFile());
+        }
 
         /// <summary>
         /// Generates a unique directory name in the temporary folder.
@@ -73,7 +73,6 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Generates a unique temporary file name with a given extension in the temporary folder.
-        /// If no extension is provided, uses ".tmp".
         /// File is guaranteed to be unique.
         /// Caller must delete it when finished.
         /// </summary>
@@ -110,12 +109,25 @@ namespace Microsoft.Build.Shared
             {
                 directory ??= TempFileDirectory;
 
+                // If the extension needs a dot prepended, do so.
+                if (extension is null)
+                {
+                    extension = string.Empty;
+                }
+                else if (extension.Length > 0 && extension[0] != '.')
+                {
+                    extension = '.' + extension;
+                }
+
+                // If the fileName is null, use tmp{Guid}; otherwise use fileName.
+                if (string.IsNullOrEmpty(fileName))
+                {
+                    fileName = $"tmp{Guid.NewGuid():N}";
+                }
+
                 Directory.CreateDirectory(directory);
 
-                // If the fileName is null, use tmp{Guid}; otherwise use fileName. If the extension needs a dot prepended, do so.
-                string file = Path.Combine(directory, fileName is null ? extension.Length > 0 && extension[0] != '.' ?
-                    $"tmp{Guid.NewGuid():N}.{extension}" : $"tmp{Guid.NewGuid():N}{extension}" :
-                    extension.Length > 0 && extension[0] != '.' ? $"{fileName}.{extension}" : $"{fileName}{extension}");
+                string file = Path.Combine(directory, $"{fileName}{extension}");
 
                 ErrorUtilities.VerifyThrow(!FileSystems.Default.FileExists(file), "Guid should be unique");
 
