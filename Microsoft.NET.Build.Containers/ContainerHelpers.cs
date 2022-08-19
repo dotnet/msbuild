@@ -5,14 +5,14 @@ using System.Text.RegularExpressions;
 
 public static class ContainerHelpers
 {
-    private static Regex imageTagRegex = new Regex("^[a-zA-Z0-9_][a-zA-Z0-9._-]{0,127}$");
+    private static Regex imageTagRegex = new Regex(@"^[a-zA-Z0-9_][a-zA-Z0-9._-]{0,127}$");
 
-    private static Regex imageNameRegex = new Regex("^[a-z0-9]+([._-][a-z0-9]+)*(/[a-z0-9]+([._-][a-z0-9]+)*)*$");
+    private static Regex imageNameRegex = new Regex(@"^[a-z0-9]+([._-][a-z0-9]+)*(/[a-z0-9]+([._-][a-z0-9]+)*)*$");
 
     /// <summary>
     /// Matches if the string is not lowercase or numeric, or ., _, or -.
     /// </summary>
-    private static Regex imageNameCharacters = new Regex("[^a-zA-Z0-9._-]");
+    private static Regex imageNameCharacters = new Regex(@"[^a-z0-9._\-/]");
 
     /// <summary>
     /// Given some "fully qualified" image name (e.g. mcr.microsoft.com/dotnet/runtime), return
@@ -133,13 +133,11 @@ public static class ContainerHelpers
         }
         else
         {
-            if (Char.IsUpper(containerImageName, 0))
-            {
-                containerImageName = Char.ToLowerInvariant(containerImageName[0]) + containerImageName[1..];
-            } else if (!Char.IsLetterOrDigit(containerImageName, 0)) {
+            if (!Char.IsLetterOrDigit(containerImageName, 0)) {
                 throw new ArgumentException("The first character of the image name must be a lowercase letter or a digit.");
             }
-            normalizedImageName = imageNameCharacters.Replace(containerImageName, "-");
+            var loweredImageName = containerImageName.ToLowerInvariant();
+            normalizedImageName = imageNameCharacters.Replace(loweredImageName, "-");
             return false;
         }
     }
