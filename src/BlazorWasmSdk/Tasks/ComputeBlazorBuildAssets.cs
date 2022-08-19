@@ -118,28 +118,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         assetCandidates.Add(newDotNetJs);
                         continue;
                     }
-                    else if (candidate.GetMetadata("FileName") == "dotnet-crypto-worker" && candidate.GetMetadata("Extension") == ".js")
-                    {
-                        var itemHash = FileHasher.GetFileHash(candidate.ItemSpec);
-                        var cacheBustedDotNetCryptoWorkerJSFileName = $"dotnet-crypto-worker.{candidate.GetMetadata("NuGetPackageVersion")}.{itemHash}.js";
-
-                        var originalFileFullPath = Path.GetFullPath(candidate.ItemSpec);
-                        var originalFileDirectory = Path.GetDirectoryName(originalFileFullPath);
-
-                        var cacheBustedDotNetCryptoWorkerJSFullPath = Path.Combine(originalFileDirectory, cacheBustedDotNetCryptoWorkerJSFileName);
-
-                        var newDotnetCryptoWorkerJs = new TaskItem(cacheBustedDotNetCryptoWorkerJSFullPath, candidate.CloneCustomMetadata());
-                        newDotnetCryptoWorkerJs.SetMetadata("OriginalItemSpec", candidate.ItemSpec);
-
-                        var newRelativePath = $"_framework/{cacheBustedDotNetCryptoWorkerJSFileName}";
-                        newDotnetCryptoWorkerJs.SetMetadata("RelativePath", newRelativePath);
-
-                        newDotnetCryptoWorkerJs.SetMetadata("AssetTraitName", "BlazorWebAssemblyResource");
-                        newDotnetCryptoWorkerJs.SetMetadata("AssetTraitValue", "js-module-crypto");
-
-                        assetCandidates.Add(newDotnetCryptoWorkerJs);
-                        continue;
-                    }
                     else if (string.IsNullOrEmpty(destinationSubPath))
                     {
                         var relativePath = candidate.GetMetadata("FileName") + candidate.GetMetadata("Extension");
@@ -303,7 +281,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 ".json" when fromMonoPackage && (fileName == "emcc-props" || fileName == "package") => $"{fileName}{extension} is not used by Blazor",
                 ".ts" when fromMonoPackage && fileName == "dotnet.d" => "dotnet type definition is not used by Blazor",
                 ".ts" when fromMonoPackage && fileName == "dotnet-legacy.d" => "dotnet type definition is not used by Blazor",
-                ".js" when assetType == "native" && fileName != "dotnet" && fileName != "dotnet-crypto-worker" => $"{fileName}{extension} is not used by Blazor",
+                ".js" when assetType == "native" && fileName != "dotnet" => $"{fileName}{extension} is not used by Blazor",
                 ".pdb" when !copySymbols => "copying symbols is disabled",
                 ".symbols" when fromMonoPackage => "extension .symbols is not required.",
                 _ => null
