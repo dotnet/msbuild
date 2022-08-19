@@ -18,8 +18,10 @@ using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Cli
 {
-    class ReleasePropertyProjectLocator : ProjectLocator
+    class ReleasePropertyProjectLocator
     {
+        private bool checkSolutions;
+
         public ReleasePropertyProjectLocator(bool shouldCheckSolutionsForProjects)
         {
             checkSolutions = shouldCheckSolutionsForProjects;
@@ -27,7 +29,7 @@ namespace Microsoft.DotNet.Cli
 
         /// <param name="slnProjectPropertytoCheck">A property to enforce if we are looking into SLN files. If projects disagree on the property, throws exception.</param>
         /// <returns>A project instance that will be targeted to publish/pack, etc. null if one does not exist.</returns>
-        public override ProjectInstance GetTargetedProject(IEnumerable<string> slnOrProjectArgs, string slnProjectPropertytoCheck = "")
+        public ProjectInstance GetTargetedProject(IEnumerable<string> slnOrProjectArgs, string slnProjectPropertytoCheck = "")
         {
             string potentialProject = "";
 
@@ -59,12 +61,12 @@ namespace Microsoft.DotNet.Cli
 
         /// <returns>The executable project (first if multiple exist) in a SLN. Returns null if no executable project. Throws exception if two executable projects disagree
         /// in the configuration property to check.</returns>
-        public override ProjectInstance GetSlnProject(string slnPath, string slnProjectConfigPropertytoCheck = "")
+        public ProjectInstance GetSlnProject(string slnPath, string slnProjectConfigPropertytoCheck = "")
         {
             // This has a performance overhead so don't do this unless opted in.
             if (!checkSolutions)
                 return null;
-            Debug.Assert(slnProjectConfigPropertytoCheck == "PublishRelease" || slnProjectConfigPropertytoCheck == "PackRelease", "Only PackRelease or PublishRelease are currently expected");
+            Debug.Assert(slnProjectConfigPropertytoCheck == MSBuildPropertyNames.PUBLISH_RELEASE || slnProjectConfigPropertytoCheck == MSBuildPropertyNames.PACK_RELEASE, "Only PackRelease or PublishRelease are currently expected");
 
             SlnFile sln;
             try
@@ -81,7 +83,7 @@ namespace Microsoft.DotNet.Cli
             object projectDataLock = new object();
 
             bool shouldReturnNull = false;
-            const string executableProjectOutputType = "Exe"; // Note that even on Unix when we don't produce exe this is still an exe, same for ASP
+            string executableProjectOutputType = MSBuildPropertyNames.OUTPUT_TYPE_EXECUTABLE; // Note that even on Unix when we don't produce exe this is still an exe, same for ASP
             const string solutionFolderGuid = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}";
             const string sharedProjectGuid = "{D954291E-2A0B-460D-934E-DC6B0785DB48}";
 
@@ -94,7 +96,7 @@ namespace Microsoft.DotNet.Cli
                 if (projectData == null)
                     return;
 
-                if (projectData.GetPropertyValue("OutputType") == executableProjectOutputType)
+                if (projectData.GetPropertyValue(MSBuildPropertyNames.OUTPUT_TYPE) == executableProjectOutputType)
                 {
                     if (ProjectHasUserCustomizedConfiguration(projectData))
                     {
@@ -143,7 +145,7 @@ namespace Microsoft.DotNet.Cli
 
             IEnumerable<string> calledArguments = parseResult.Tokens.Select(x => x.ToString());
             IEnumerable<string> slnProjectAndCommandArgs = slnOrProjectArgs.Concat(calledArguments);
-            if (!parseResult.HasOption(configOption) && !ArgsContainsProperty(userPropertyArgs, "Configuration") && !ArgsContainsProperty(userPropertyArgs, defaultedConfigurationProperty))
+            if (!parseResult.HasOption(configOption) && !ArgsContainsProperty(userPropertyArgs, MSBuildPropertyNames.CONFIGURATION) && !ArgsContainsProperty(userPropertyArgs, defaultedConfigurationProperty))
                 // CLI Configuration values take precedence over ones in the project.
                 project = GetTargetedProject(slnProjectAndCommandArgs, defaultedConfigurationProperty);
 
@@ -152,12 +154,26 @@ namespace Microsoft.DotNet.Cli
                 string configurationToUse = "";
                 string releasePropertyFlag = project.GetPropertyValue(defaultedConfigurationProperty);
                 if (!string.IsNullOrEmpty(releasePropertyFlag))
-                    configurationToUse = releasePropertyFlag.Equals("true", StringComparison.OrdinalIgnoreCase) ? "Release" : "";
+                    configurationToUse = releasePropertyFlag.Equals("true", StringComparison.OrdinalIgnoreCase) ? MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE : "";
 
                 if (!ProjectHasUserCustomizedConfiguration(project) && !string.IsNullOrEmpty(configurationToUse))
-                    return new List<string> { $"-property:configuration={configurationToUse}" };
+                    return new List<string> { $"-property:{MSBuildPropertyNames.CONFIGURATION}={configurationToUse}" };
             }
             return Enumerable.Empty<string>();
+        }
+
+        /// <returns>Creates a ProjectInstance if the project is valid, elsewise, fails..</returns>
+        protected static ProjectInstance TryGetProjectInstance(string projectPath)
+        {
+            try
+            {
+                return new ProjectInstance(projectPath);
+            }
+            catch (Exception e) // Catch failed file access, or invalid project files that cause errors when read into memory,
+            {
+                Reporter.Error.WriteLine(e.Message);
+            }
+            return null;
         }
 
         /// <returns>Returns true if msbuildargs contains a forwarded property named propertyToCheck.</returns>
@@ -170,6 +186,15 @@ namespace Microsoft.DotNet.Cli
                     return true;
             }
             return false;
+        }
+        protected static bool IsValidProjectFilePath(string path)
+        {
+            return File.Exists(path) && Path.GetExtension(path).EndsWith("proj");
+        }
+
+        protected static bool ProjectHasUserCustomizedConfiguration(ProjectInstance project)
+        {
+            return project.GlobalProperties.ContainsKey(MSBuildPropertyNames.CONFIGURATION);
         }
     }
 }
