@@ -18,3 +18,6 @@ cp -a $HELIX_CORRELATION_PAYLOAD/t/TestExecutionDirectoryFiles/. $TestExecutionD
 dotnet new --debug:ephemeral-hive
 # avoid potetial concurrency issues when nuget is creating nuget.config
 dotnet nuget list source
+# We downloaded a special zip of files to the .nuget folder so add that as a source
+dotnet new nugetconfig
+dotnet nuget add source %DOTNET_ROOT%\.nuget --configfile nuget.config
