@@ -107,7 +107,9 @@ namespace Microsoft.DotNet.ShellShim
                         {
                             using (var tempPath = File.OpenWrite(FileUtilities.CreateTempFile()))
                             {
-                                Stream oldFile = _fileSystem.File.OpenRead(file.Value);
+                                if (!File.Exists(file.Value))
+                                    continue;
+                                Stream oldFile = new FileStream(file.Value, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
                                 oldFile.Seek(0, SeekOrigin.Begin);
                                 oldFile.CopyTo(tempPath);
                                 oldFile.Dispose();
