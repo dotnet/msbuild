@@ -193,8 +193,10 @@ La valeur par défaut est 'true' si un identificateur de runtime est spécifié.
         <note />
       </trans-unit>
       <trans-unit id="SolutionExecutableConfigurationMismatchError">
-        <source>Multiple executable projects in the solution contain conflicting '{0}' values. See '{1}'. Make the values match. Consider using a Directory.build.props file to set all project configurations.</source>
-        <target state="new">Multiple executable projects in the solution contain conflicting '{0}' values. See '{1}'. Make the values match. Consider using a Directory.build.props file to set all project configurations.</target>
+        <source>Multiple executable projects in the solution contain conflicting '{0}' values. Make the values match. Consider using a Directory.build.props file to set all project configurations.  Conflicting projects:
+{1}</source>
+        <target state="new">Multiple executable projects in the solution contain conflicting '{0}' values. Make the values match. Consider using a Directory.build.props file to set all project configurations.  Conflicting projects:
+{1}</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">
