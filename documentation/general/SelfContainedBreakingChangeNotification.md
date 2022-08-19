@@ -19,7 +19,7 @@ If `SelfContained` was specified on the command line, it would always flow to re
 
 ## New Behavior
 
-Both `SelfContained` and `RuntimeIdentifier` will flow a referenced project if any of the following are true for the referenced project:
+Both `SelfContained` and `RuntimeIdentifier` will flow to a referenced project if any of the following are true for the referenced project:
 
 - The `IsRidAgnostic` property is set to `false`
 - The `OutputType` is `Exe` or `WinExe`
