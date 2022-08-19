@@ -14,6 +14,18 @@
 
   <PropertyGroup>
     <FullFrameworkTFM>net472</FullFrameworkTFM>
+    
+    <!-- 
+        When updating the version of .NET Core for MSBuild, this property is the 'source of truth'.
+        Other locations to update the version number:
+          global.json
+          eng/cibuild_bootstrapped_msbuild.ps1
+          eng/cibuild_bootstrapped_msbuild.sh
+          scripts/Deploy-MSBuild.ps1
+          src/Framework/README.md
+          src/Utilities/README.md
+     -->
+    <LatestDotNetCoreForMSBuild>net7.0</LatestDotNetCoreForMSBuild>
   </PropertyGroup>
 
   <PropertyGroup>

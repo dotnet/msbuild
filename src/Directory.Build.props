@@ -30,8 +30,8 @@
     <Platforms>AnyCPU;x64;arm64</Platforms>
 
     <!-- Defaults for target frameworks and architecture -->
-    <LibraryTargetFrameworks>$(FullFrameworkTFM);net7.0;netstandard2.0</LibraryTargetFrameworks>
-    <LibraryTargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">net7.0;netstandard2.0</LibraryTargetFrameworks>
+    <LibraryTargetFrameworks>$(FullFrameworkTFM);$(LatestDotNetCoreForMSBuild);netstandard2.0</LibraryTargetFrameworks>
+    <LibraryTargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">$(LatestDotNetCoreForMSBuild);netstandard2.0</LibraryTargetFrameworks>
     <LibraryTargetFrameworks Condition="'$(MonoBuild)'=='true'">$(FullFrameworkTFM);netstandard2.0</LibraryTargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
 
