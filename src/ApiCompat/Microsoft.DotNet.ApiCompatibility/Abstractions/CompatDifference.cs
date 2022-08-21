@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// Instantiate a new object representing the compatibility difference.
         /// </summary>
         /// <param name="left">The metadata information of the left comparison side.</param>
-        /// <param name="right">The metadata information of the right comparision side.</param>
+        /// <param name="right">The metadata information of the right comparison side.</param>
         /// <param name="id"><see cref="string"/> representing the diagnostic ID.</param>
         /// <param name="message"><see cref="string"/> message describing the difference.</param>
         /// <param name="type"><see cref="DifferenceType"/> to describe the type of the difference.</param>
@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// Instantiate a new object representing the compatibility difference.
         /// </summary>
         /// <param name="left">The metadata information of the left comparison side.</param>
-        /// <param name="right">The metadata information of the right comparision side.</param>
+        /// <param name="right">The metadata information of the right comparison side.</param>
         /// <param name="id"><see cref="string"/> representing the diagnostic ID.</param>
         /// <param name="message"><see cref="string"/> message describing the difference.</param>
         /// <param name="type"><see cref="DifferenceType"/> to describe the type of the difference.</param>
