@@ -3,18 +3,12 @@
 
 #nullable enable
 
-using FluentAssertions;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Commands;
-using Xunit;
-using Xunit.Abstractions;
-using Microsoft.NET.TestFramework.Assertions;
-using System.IO;
+using System;
 using System.Collections.Generic;
 using Microsoft.TemplateEngine.MSBuildEvaluation;
-using System;
+using Xunit;
 
-namespace Microsoft.DotNet.New.Tests
+namespace Microsoft.DotNet.Cli.New.Tests
 {
     public class CapabilityExpressionEvaluationTests 
     {
