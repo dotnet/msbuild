@@ -75,7 +75,7 @@ namespace Microsoft.NET.Build.Tests
             return arguments;
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("17.4.0.41702")]
         [InlineData(true, true)]
         [InlineData(true, false)]
         [InlineData(false, true)]
@@ -90,7 +90,7 @@ namespace Microsoft.NET.Build.Tests
             ValidateProperties(testAsset, _referencedProject, expectSelfContained: false, expectRuntimeIdentifier: false);
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("17.4.0.41702")]
         [InlineData(true, true)]
         [InlineData(true, false)]
         [InlineData(false, true)]
@@ -108,7 +108,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("17.4.0.41702")]
         [InlineData(true, true)]
         [InlineData(true, false)]
         [InlineData(false, true)]
@@ -145,7 +145,7 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("17.4.0.41702")]
         [InlineData(true, true)]
         [InlineData(true, false)]
         [InlineData(false, true)]
@@ -166,7 +166,7 @@ namespace Microsoft.NET.Build.Tests
                 expectedRuntimeIdentifier: buildingSelfContained ? "" : _referencedProject.RuntimeIdentifier);
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("17.4.0.41702")]
         [InlineData(true, true)]
         [InlineData(true, false)]
         [InlineData(false, true)]
@@ -196,7 +196,7 @@ namespace Microsoft.NET.Build.Tests
                 targetFramework: "net7.0");
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("17.4.0.41702")]
         [InlineData(true, true)]
         [InlineData(true, false)]
         [InlineData(false, true)]
