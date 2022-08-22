@@ -3532,23 +3532,6 @@
       "OriginalItemSpec": "${RestorePath}\\microsoft.codeanalysis.common\\[[CustomPackageVersion]]\\lib\\netstandard2.0\\de\\Microsoft.CodeAnalysis.resources.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\dotnet-crypto-worker.${RuntimeVersion}.[[hash]].js",
-      "SourceId": "blazorwasm",
-      "SourceType": "Computed",
-      "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
-      "BasePath": "/",
-      "RelativePath": "_framework/dotnet-crypto-worker.${RuntimeVersion}.[[hash]].js",
-      "AssetKind": "Build",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
-      "AssetTraitValue": "js-module-crypto",
-      "CopyToOutputDirectory": "PreserveNewest",
-      "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.netcore.app.runtime.mono.browser-wasm\\${RuntimeVersion}\\runtimes\\browser-wasm\\native\\dotnet-crypto-worker.js"
-    },
-    {
       "Identity": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js",
       "SourceId": "blazorwasm",
       "SourceType": "Computed",
@@ -7542,23 +7525,6 @@
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\de\\Microsoft.CodeAnalysis.resources.dll"
-    },
-    {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\[[_framework/dotnet-crypto-worker.${RuntimeVersion}.[[hash]].js.gz]]",
-      "SourceId": "blazorwasm",
-      "SourceType": "Computed",
-      "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
-      "BasePath": "/",
-      "RelativePath": "_framework/dotnet-crypto-worker.${RuntimeVersion}.[[hash]].js.gz",
-      "AssetKind": "Build",
-      "AssetMode": "All",
-      "AssetRole": "Alternative",
-      "RelatedAsset": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\dotnet-crypto-worker.${RuntimeVersion}.[[hash]].js",
-      "AssetTraitName": "Content-Encoding",
-      "AssetTraitValue": "gzip",
-      "CopyToOutputDirectory": "PreserveNewest",
-      "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\dotnet-crypto-worker.${RuntimeVersion}.[[hash]].js"
     },
     {
       "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\[[_framework/dotnet.${RuntimeVersion}.[[hash]].js.gz]]",
