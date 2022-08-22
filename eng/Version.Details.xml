@@ -97,7 +97,7 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>6a3f8725fc6d03b6b5c599ddf438dc00f24c38cc</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.4.0-preview.1.50">
+    <Dependency Name="NuGet.Build.Tasks" Version="6.4.0-preview.1.51">
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>745617ea6fc239737c80abb424e13faca4249bf1</Sha>
     </Dependency>
