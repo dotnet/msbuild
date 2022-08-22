@@ -410,7 +410,7 @@ namespace Microsoft.NET.Build.Tests
 
             var compileItems = getCompileItemsCommand.GetValues();
             RemoveGeneratedCompileItems(compileItems);
-            compileItems.ShouldBeEquivalentTo(new[] { testProject.Name + ".cs", testProject.Name + "Program.cs" });
+            compileItems.Should().BeEquivalentTo(new[] { testProject.Name + ".cs", testProject.Name + "Program.cs" });
 
             // Validate None items.
             var getNoneItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "None", GetValuesCommand.ValueType.Item);
