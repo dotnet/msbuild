@@ -9,6 +9,8 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAndUnification.Prerequisite
 {
     public sealed class StronglyNamedDependency : ResolveAssemblyReferenceTestFixture

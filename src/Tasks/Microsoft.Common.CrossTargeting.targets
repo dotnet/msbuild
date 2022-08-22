@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 Microsoft.Common.CrossTargeting.targets
 
@@ -9,8 +9,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
-
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build">
 
   <PropertyGroup>
     <BuildInParallel Condition="'$(BuildInParallel)' == ''">true</BuildInParallel>
@@ -43,9 +42,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetPlatformMonikers>@(_TargetFrameworkInfo->'%(TargetPlatformMonikers)')</TargetPlatformMonikers>
         <AdditionalPropertiesFromProject>$(_AdditionalPropertiesFromProject)</AdditionalPropertiesFromProject>
         <HasSingleTargetFramework>false</HasSingleTargetFramework>
-        <!-- indicate to caller that project is RID agnostic so that a global property RuntimeIdentifier value can be removed -->
-        <IsRidAgnostic>false</IsRidAgnostic>
-        <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
+        <IsRidAgnostic>@(_TargetFrameworkInfo->'%(IsRidAgnostic)')</IsRidAgnostic>
+        <!-- Extract necessary information for SetPlatform negotiation -->
+        <!-- This target does not run for cpp projects. -->
+        <IsVcxOrNativeProj>false</IsVcxOrNativeProj>
+        <Platform Condition="$([MSBuild]::AreFeaturesEnabled('17.4'))">$(Platform)</Platform>
+        <Platforms>$(Platforms)</Platforms>
       </_ThisProjectBuildMetadata>
     </ItemGroup>
 
@@ -165,7 +167,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   -->
   <PropertyGroup>
     <MSBuildUseVisualStudioDirectoryLayout Condition="'$(MSBuildUseVisualStudioDirectoryLayout)'==''">$([MSBuild]::IsRunningFromVisualStudio())</MSBuildUseVisualStudioDirectoryLayout>
-    <NuGetRestoreTargets Condition="'$(NuGetRestoreTargets)'=='' and '$(MSBuildUseVisualStudioDirectoryLayout)'=='true'">$(MSBuildToolsPath32)\..\..\..\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.targets</NuGetRestoreTargets>
+    <NuGetRestoreTargets Condition="'$(NuGetRestoreTargets)'=='' and '$(MSBuildUseVisualStudioDirectoryLayout)'=='true'">$([MSBuild]::GetToolsDirectory32())\..\..\..\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.targets</NuGetRestoreTargets>
     <NuGetRestoreTargets Condition="'$(NuGetRestoreTargets)'==''">$(MSBuildToolsPath)\NuGet.targets</NuGetRestoreTargets>
   </PropertyGroup>
 
@@ -215,9 +217,5 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <Import Project="$(DirectoryBuildTargetsPath)" Condition="'$(ImportDirectoryBuildTargets)' == 'true' and exists('$(DirectoryBuildTargetsPath)')"/>
-
-  <!-- TODO: https://github.com/Microsoft/msbuild/issues/1062: Remove this temporary hook when possible. -->
-  <Import Project="$(CoreCrossTargetingTargetsPath)"
-          Condition="'$(CoreCrossTargetingTargetsPath)' != '' and Exists('$(CoreCrossTargetingTargetsPath)')" />
 
 </Project>

@@ -6,6 +6,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     internal static class ITaskItemExtensions

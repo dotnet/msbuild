@@ -401,7 +401,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    if(Directory.Exists(Path.Combine(Environment.CurrentDirectory, "tempura")))
+                    if (Directory.Exists(Path.Combine(Environment.CurrentDirectory, "tempura")))
                     {
                         File.Delete(Path.Combine(Environment.CurrentDirectory, "tempura\\mylogfile1.log"));
                         Directory.Delete(Path.Combine(Environment.CurrentDirectory, "tempura"));

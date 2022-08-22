@@ -7,6 +7,8 @@ using System.Xml;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <summary>
@@ -163,7 +165,6 @@ namespace Microsoft.Build.Construction
             _reader = null;
         }
 
-#if FEATURE_XML_LOADPATH
         /// <summary>
         /// Grab the path to the file, for use in our location information.
         /// </summary>
@@ -178,7 +179,6 @@ namespace Microsoft.Build.Construction
                 this.Load(xtr.Reader);
             }
         }
-#endif
 
         /// <summary>
         /// Called during load, to add an element.
@@ -279,7 +279,6 @@ namespace Microsoft.Build.Construction
             base.Save(outStream);
         }
 
-#if FEATURE_XML_LOADPATH
         /// <summary>
         /// Override Save to verify file was not loaded as readonly
         /// </summary>
@@ -288,7 +287,6 @@ namespace Microsoft.Build.Construction
             VerifyThrowNotReadOnly();
             base.Save(filename);
         }
-#endif
 
         /// <summary>
         /// Override Save to verify file was not loaded as readonly
@@ -352,24 +350,17 @@ namespace Microsoft.Build.Construction
                     // Only files from Microsoft
                     if (Path.GetFileName(fullPath).StartsWith("Microsoft.", StringComparison.OrdinalIgnoreCase))
                     {
-                        // If we are loading devdiv targets, we're in razzle
-                        if (Path.GetFileName(fullPath).StartsWith("Microsoft.DevDiv", StringComparison.OrdinalIgnoreCase))
+                        // Load read-only if they're in program files or windows directories
+                        ErrorUtilities.VerifyThrow(Path.IsPathRooted(fullPath), "should be full path");
+                        string directory = Path.GetDirectoryName(fullPath);
+
+                        string windowsFolder = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+
+                        if ((!String.IsNullOrEmpty(windowsFolder) && directory.StartsWith(windowsFolder, StringComparison.OrdinalIgnoreCase)) ||
+                            (!String.IsNullOrEmpty(FrameworkLocationHelper.programFiles32) && directory.StartsWith(FrameworkLocationHelper.programFiles32, StringComparison.OrdinalIgnoreCase)) ||
+                            (!String.IsNullOrEmpty(FrameworkLocationHelper.programFiles64) && directory.StartsWith(FrameworkLocationHelper.programFiles64, StringComparison.OrdinalIgnoreCase)))
                         {
                             _loadAsReadOnly = true;
-                        }
-                        else // Else, only load if they're in program files or windows directories
-                        {
-                            ErrorUtilities.VerifyThrow(Path.IsPathRooted(fullPath), "should be full path");
-                            string directory = Path.GetDirectoryName(fullPath);
-
-                            string windowsFolder = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
-
-                            if ((!String.IsNullOrEmpty(windowsFolder) && directory.StartsWith(windowsFolder, StringComparison.OrdinalIgnoreCase)) ||
-                                (!String.IsNullOrEmpty(FrameworkLocationHelper.programFiles32) && directory.StartsWith(FrameworkLocationHelper.programFiles32, StringComparison.OrdinalIgnoreCase)) ||
-                                (!String.IsNullOrEmpty(FrameworkLocationHelper.programFiles64) && directory.StartsWith(FrameworkLocationHelper.programFiles64, StringComparison.OrdinalIgnoreCase)))
-                            {
-                                _loadAsReadOnly = true;
-                            }
                         }
                     }
                 }

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../Strings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.resx">
     <body>
       <trans-unit id="AppConfig.BindingRedirectMissingOldVersion">
         <source>BindingRedirect is missing required field 'oldVersion'.</source>
@@ -513,6 +513,11 @@
         <source>MSB3667: There is already a file at "{0}". If you are trying to create a precomputed cache, ensure that you are building a single project that depends on your assemblies rather than building your assemblies themselves. If you are running the ResolveAssemblyReference task normally, do not set the "AssemblyInformationCacheOutputPath" parameter of the ResolveAssemblyReference task.</source>
         <target state="translated">MSB3667: "{0}" 上已有檔案。若要嘗試建立預先計算的快取，請務必建立一個需要使用組件的專案，而非建立組件本身。若是正常執行 ResolveAssemblyReference 工作，請勿為 ResolveAssemblyReference 工作設定 "AssemblyInformationCacheOutputPath" 參數。</target>
         <note>{StrBegin="MSB3667: "}</note>
+      </trans-unit>
+      <trans-unit id="General.TaskRequiresWindows">
+        <source>MSB3096: Task "{0}" is only supported when building on Windows.</source>
+        <target state="translated">MSB3096: 只有在 Windows 上建置時，才支援工作 "{0}"。</target>
+        <note>{StrBegin="MSB3096: "}</note>
       </trans-unit>
       <trans-unit id="General.UndefineProperties">
         <source>Removing Properties:</source>
@@ -1326,6 +1331,51 @@
         <target state="translated">MSB3441: 無法取得 "{0}" 的組件名稱。{1}</target>
         <note>{StrBegin="MSB3441: "}</note>
       </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.AnyCPUDefault">
+        <source>Choosing AnyCPU by default.</source>
+        <target state="translated">預設會選擇 AnyCPU。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.DisplayChosenPlatform">
+        <source>Project '{0}' will build with platform: '{1}'.</source>
+        <target state="translated">專案 '{0}' 將使用平台: '{1}' 建置。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.FoundMappingInTable">
+        <source>Found mapping '{0}'='{1}' in given lookup table: '{2}'.</source>
+        <target state="translated">在指定的查閱資料表: '{2}' 中找到對應 '{0}'='{1}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.InvalidLookupTableFormat">
+        <source>MSB3983: The PlatformLookupTable '{0}' is in an invalid format and won't be used. The format should be 'A=B;C=D'.</source>
+        <target state="translated">MSB3983: PlatformLookupTable '{0}' 的格式無效，因此不會使用。格式應為 'A=B;C=D'。</target>
+        <note>{StrBegin="MSB3983: "}</note>
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.LookupTableParsed">
+        <source>Parsed lookup table:'{0}'.</source>
+        <target state="translated">剖析的查閱資料表: '{0}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.NoCompatiblePlatformFound">
+        <source>MSB3981: Could not determine what '{0}' should be built as. The project will be built without the Platform property set.</source>
+        <target state="translated">MSB3981: 無法判斷應該將 '{0}' 建置為何。將在沒有設定 Platform 屬性的情況下建置專案。</target>
+        <note>{StrBegin="MSB3981: "}</note>
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.NoPlatformsListed">
+        <source>MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</source>
+        <target state="new">MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</target>
+        <note>{StrBegin="MSB3982: "}</note>
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform">
+        <source>Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</source>
+        <target state="new">Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.SamePlatform">
+        <source>ProjectReference and current project have the same platform.</source>
+        <target state="translated">ProjectReference 和目前的專案有相同的平台。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="GetFrameworkSdkPath.CouldNotFindSDK">
         <source>Could not locate the expected version of the Microsoft Windows SDK. Looked for a location specified in the "{0}" value of the registry key "{1}". If your build process does not need the SDK then this can be ignored. Otherwise you can solve the problem by doing one of the following:  1) Install the Microsoft Windows SDK.  2) Install Visual Studio 2010.  3) Manually set the above registry key to the correct location.</source>
         <target state="translated">找不到預期的 Microsoft Windows SDK 版本。已在登錄機碼 "{1}" 的 "{0}" 值中指定的位置尋找。如果您的建置程序不需要這個 SDK，您可以忽略此訊息。否則，您可以執行下列其中一個動作以解決此問題:  1) 安裝 Microsoft Windows SDK。2) 安裝 Visual Studio 2010。  3) 手動將上方登錄機碼設為正確位置。</target>
@@ -1502,6 +1552,11 @@
         <target state="translated">MSB3216: 無法註冊組件 "{0}" - 存取遭拒。請確認您以系統管理員身分執行此應用程式。{1}</target>
         <note>{StrBegin="MSB3216: "}</note>
       </trans-unit>
+      <trans-unit id="RemoveDir.EmptyPath">
+        <source>MSB3232: An empty directory was passed to RemoveDir and was ignored.</source>
+        <target state="new">MSB3232: An empty directory was passed to RemoveDir and was ignored.</target>
+        <note>{StrBegin="MSB3232: "}</note>
+      </trans-unit>
       <trans-unit id="RemoveDir.Error">
         <source>MSB3231: Unable to remove directory "{0}". {1}</source>
         <target state="translated">MSB3231: 無法移除目錄 "{0}"。{1}</target>
@@ -1612,8 +1667,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName">
-        <source>Considered "{0}", which existed but didn't have a valid identity. This may not be an assembly.</source>
-        <target state="translated">已考慮 "{0}"，它雖然存在但沒有有效的識別。這可能不是組件。</target>
+        <source>Considered "{0}", which existed but did not appear to be a valid .NET assembly.</source>
+        <target state="translated">已考慮 "{0}"，但似乎不是有效的 .NET 元件。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch">
@@ -2557,27 +2612,27 @@
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotConvertToInferredType">
         <source>Could not convert the value for parameter "{0}" to the inferred type "{1}". The value will be treated as a string. {2}</source>
-        <target state="new">Could not convert the value for parameter "{0}" to the inferred type "{1}". The value will be treated as a string. {2}</target>
+        <target state="translated">無法將參數 "{0}" 的值轉換為推斷的類型 "{1}"。 該值將被視為字串。{2}</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotConvertValue">
         <source>MSB3716: The parameter value "{0}" could not be converted to "{1}". {2}</source>
-        <target state="new">MSB3716: The parameter value "{0}" could not be converted to "{1}". {2}</target>
+        <target state="translated">MSB3716: 無法將參數值 "{0}" 轉換為 "{1}"。{2}</target>
         <note>{StrBegin="MSB3716: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotInferParameterType">
         <source>Could not infer the type of parameter "{0}" because the attribute type is unknown. The value will be treated as a string.</source>
-        <target state="new">Could not infer the type of parameter "{0}" because the attribute type is unknown. The value will be treated as a string.</target>
+        <target state="translated">由於屬性類型未知，因此無法推斷 "{0}" 的參數類型。該值將被視為字串。</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteCodeFragment.MultipleConstructorsFound">
         <source>Multiple attribute constructors were found for type inferencing.</source>
-        <target state="new">Multiple attribute constructors were found for type inferencing.</target>
+        <target state="translated">找到類型推斷的多屬性建構函式。</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteCodeFragment.ParameterTypeNotFound">
         <source>MSB3715: The type "{0}" was not found.</source>
-        <target state="new">MSB3715: The type "{0}" was not found.</target>
+        <target state="translated">MSB3715: 無法找到 "{0}" 類型。</target>
         <note>{StrBegin="MSB3715: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">

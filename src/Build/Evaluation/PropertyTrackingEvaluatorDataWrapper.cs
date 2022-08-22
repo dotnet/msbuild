@@ -5,13 +5,15 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared.FileSystem;
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Components.Logging;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -77,10 +79,10 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Sets a property which does not come from the Xml.
         /// </summary>
-        public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false)
+        public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false, BackEnd.Logging.LoggingContext loggingContext = null)
         {
             P originalProperty = _wrapped.GetProperty(name);
-            P newProperty = _wrapped.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, isEnvironmentVariable);
+            P newProperty = _wrapped.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, isEnvironmentVariable, loggingContext);
 
             this.TrackPropertyWrite(
                 originalProperty,
@@ -135,7 +137,7 @@ namespace Microsoft.Build.Evaluation
         public ItemDictionary<I> Items => _wrapped.Items;
         public List<ProjectItemElement> EvaluatedItemElements => _wrapped.EvaluatedItemElements;
         public PropertyDictionary<ProjectPropertyInstance> EnvironmentVariablePropertiesDictionary => _wrapped.EnvironmentVariablePropertiesDictionary;
-        public void InitializeForEvaluation(IToolsetProvider toolsetProvider, IFileSystem fileSystem) => _wrapped.InitializeForEvaluation(toolsetProvider, fileSystem);
+        public void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext) => _wrapped.InitializeForEvaluation(toolsetProvider, evaluationContext);
         public void FinishEvaluation() => _wrapped.FinishEvaluation();
         public void AddItem(I item) => _wrapped.AddItem(item);
         public void AddItemIgnoringCondition(I item) => _wrapped.AddItemIgnoringCondition(item);

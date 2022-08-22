@@ -4,6 +4,8 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.Logging
 {
     /// <summary>
@@ -211,6 +213,12 @@ namespace Microsoft.Build.BackEnd.Logging
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
             _loggingService.LogFatalError(_eventContext, exception, file, messageResourceName, messageArgs);
             _hasLoggedErrors = true;
+        }
+
+        internal void LogWarning(string messageResourceName, params object[] messageArgs)
+        {
+            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
+            _loggingService.LogWarning(_eventContext, null, BuildEventFileInfo.Empty, messageResourceName, messageArgs);
         }
 
         /// <summary>

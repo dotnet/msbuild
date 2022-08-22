@@ -11,11 +11,6 @@ namespace Microsoft.Build.Shared
         public static bool Is64BitProcess => Marshal.SizeOf<IntPtr>() == 8;
 
         public static bool Is64BitOperatingSystem =>
-#if FEATURE_64BIT_ENVIRONMENT_QUERY
             Environment.Is64BitOperatingSystem;
-#else
-            RuntimeInformation.OSArchitecture == Architecture.Arm64 ||
-            RuntimeInformation.OSArchitecture == Architecture.X64;
-#endif
     }
 }

@@ -1,9 +1,10 @@
-﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build">
   <!-- Import the repo root props -->
   <Import Project="..\Directory.Build.props"/>
 
   <PropertyGroup>
       <LangVersion>latest</LangVersion>
+      <Nullable>enable</Nullable>
       <DiscoverEditorConfigFiles>true</DiscoverEditorConfigFiles>
   </PropertyGroup>
 
@@ -14,6 +15,9 @@
     <!-- Ensure that compiler errors emit full paths so that files
          can be correctly annotated in GitHub. -->
     <GenerateFullPaths>true</GenerateFullPaths>
+    
+    <!-- https://github.com/NuGet/Home/issues/8684 -->
+    <NoWarn>$(NoWarn);NU5131</NoWarn>
 
     <!-- Do not mangle paths for test assemblies, because Shoudly assertions want actual on-disk paths. -->
     <DeterministicSourcePaths Condition="'$(IsTestProject)' == 'true'">false</DeterministicSourcePaths>
@@ -23,24 +27,21 @@
     <!-- Set up BeforeCommon.targets -->
     <CustomBeforeMicrosoftCommonTargets>$(MSBuildThisFileDirectory)Directory.BeforeCommon.targets</CustomBeforeMicrosoftCommonTargets>
 
-    <Platforms>AnyCPU;x64</Platforms>
+    <Platforms>AnyCPU;x64;arm64</Platforms>
 
     <!-- Defaults for target frameworks and architecture -->
-    <LibraryTargetFrameworks>$(FullFrameworkTFM);netstandard2.0</LibraryTargetFrameworks>
-    <LibraryTargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">netstandard2.0</LibraryTargetFrameworks>
-    <LibraryTargetFrameworks Condition="'$(MonoBuild)'=='true'">$(FullFrameworkTFM)</LibraryTargetFrameworks>
+    <LibraryTargetFrameworks>$(FullFrameworkTFM);net6.0;netstandard2.0</LibraryTargetFrameworks>
+    <LibraryTargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">net6.0;netstandard2.0</LibraryTargetFrameworks>
+    <LibraryTargetFrameworks Condition="'$(MonoBuild)'=='true'">$(FullFrameworkTFM);netstandard2.0</LibraryTargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
 
     <!-- Target frameworks for Exe and unit test projects (ie projects with runtime output) -->
-    <RuntimeOutputTargetFrameworks>net5.0</RuntimeOutputTargetFrameworks>
-    <RuntimeOutputTargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows')) and '$(DotNetBuildFromSource)' != 'true'">$(FullFrameworkTFM);$(RuntimeOutputTargetFrameworks)</RuntimeOutputTargetFrameworks>
+    <RuntimeOutputTargetFrameworks>net6.0</RuntimeOutputTargetFrameworks>
+    <RuntimeOutputTargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(FullFrameworkTFM);$(RuntimeOutputTargetFrameworks)</RuntimeOutputTargetFrameworks>
     <RuntimeOutputTargetFrameworks Condition="'$(MonoBuild)' == 'true'">$(FullFrameworkTFM)</RuntimeOutputTargetFrameworks>
 
     <!-- Don't automatically append target framework to output path, since we want to put the Platform Target beforehand, if it's not AnyCPU -->
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-
-    <!-- Create English satellite assemblies (which shouldn't be required, but preserves previous build behavior) -->
-    <XlfLanguages>en;cs;de;es;fr;it;ja;ko;pl;pt-BR;ru;tr;zh-Hans;zh-Hant</XlfLanguages>
 
     <ErrorOnOutOfDateXlf>true</ErrorOnOutOfDateXlf>
 
@@ -51,15 +52,11 @@
     <GenerateSatelliteAssembliesForCore>true</GenerateSatelliteAssembliesForCore>
 
     <!-- Work around issue where bootstrapped TaskHostTask seems to be loading the wrong assemblies.
-         https://github.com/Microsoft/msbuild/issues/2865-->
+         https://github.com/dotnet/msbuild/issues/2865-->
     <GenerateResourceMSBuildArchitecture>CurrentArchitecture</GenerateResourceMSBuildArchitecture>
     <GenerateResourceMSBuildRuntime>CurrentRuntime</GenerateResourceMSBuildRuntime>
 
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-
-    <GenAPIAdditionalParameters>$(GenAPIAdditionalParameters) --exclude-api-list:&quot;$(RepoRoot)ref\ExcludeAPIList.txt&quot;</GenAPIAdditionalParameters>
-    <GenAPIAdditionalParameters>$(GenAPIAdditionalParameters) --exclude-attributes-list:&quot;$(RepoRoot)ref\ExcludeAttributeList.txt&quot;</GenAPIAdditionalParameters>
-    <GenAPIAdditionalParameters>$(GenAPIAdditionalParameters) --header-file:&quot;$(RepoRoot)ref\LicenseHeader.txt&quot;</GenAPIAdditionalParameters>
 
     <PackageLicenseUrl Condition="'$(PackageLicenseExpression)' == ''">http://go.microsoft.com/fwlink/?LinkId=329770</PackageLicenseUrl>
     <PackageProjectUrl>http://go.microsoft.com/fwlink/?LinkId=624683</PackageProjectUrl>
@@ -78,4 +75,34 @@
     <!-- When targeting .NET Core, Exe and unit tests projects always use AnyCPU architecture -->
     <RuntimeOutputPlatformTarget>AnyCPU</RuntimeOutputPlatformTarget>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificContentInPackage);ShipRefAssembliesToNuGetPackage</TargetsForTfmSpecificBuildOutput>
+  </PropertyGroup>
+
+  <!-- Produce ONLY reference assemblies and SKIP roslyn analyzers for netstandard2.0 builds. -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0' and '$(MSBuildProjectFile)' != 'PortableTask.csproj'">
+    <!-- ProduceOnlyReferenceAssembly and ProduceReferenceAssembly are mutually exclusive compiler flags. -->
+    <ProduceOnlyReferenceAssembly>true</ProduceOnlyReferenceAssembly>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <RunAnalyzers>false</RunAnalyzers>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificContentInPackage);ShipRefAssembliesToNuGetPackage</TargetsForTfmSpecificBuildOutput>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <!-- pdb publishing fails builds for reference-only assemblies. -->
+    <!-- https://github.com/dotnet/msbuild/pull/6148. -->
+    <PublishWindowsPdb>false</PublishWindowsPdb>
+  </PropertyGroup>
+
+  <!-- Ensure ref assemblies are placed under `ref/$(TargetFramework)` in the NuGet package -->
+  <Target Name="ShipRefAssembliesToNuGetPackage" BeforeTargets="Pack" Condition="$(IsInnerBuild) == true">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(TargetRefPath);@(FinalDocFile)">
+          <PackagePath>ref\$(TargetFramework)</PackagePath>
+      </TfmSpecificPackageFile>
+      <!-- ns2.0 builds use `BuiltProjectOutputGroupOutput` for output ref assemblies -->
+      <TfmSpecificPackageFile Include="@(BuiltProjectOutputGroupOutput)" Condition="'$(TargetFramework)' == 'netstandard2.0'">
+          <PackagePath>ref\$(TargetFramework)</PackagePath>
+      </TfmSpecificPackageFile>
+    </ItemGroup>
+  </Target>
 </Project>

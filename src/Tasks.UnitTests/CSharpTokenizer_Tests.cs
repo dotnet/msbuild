@@ -7,6 +7,8 @@ using System.IO;
 using Microsoft.Build.Shared.LanguageParser;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class CSharpTokenizerTests
@@ -444,6 +446,3 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
-
-
-

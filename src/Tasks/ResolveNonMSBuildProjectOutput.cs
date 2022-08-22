@@ -8,6 +8,8 @@ using System.Xml;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <remarks>
@@ -178,4 +180,3 @@ namespace Microsoft.Build.Tasks
         #endregion
     }
 }
-

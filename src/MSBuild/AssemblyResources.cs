@@ -5,6 +5,8 @@ using System.Resources;
 using System.Reflection;
 using System.Globalization;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

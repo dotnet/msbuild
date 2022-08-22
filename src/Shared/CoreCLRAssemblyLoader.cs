@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.
 
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using System;
@@ -8,6 +9,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -23,14 +26,7 @@ namespace Microsoft.Build.Shared
 
         private bool _resolvingHandlerHookedUp = false;
 
-        private static readonly string _msbuildDirPath;
         private static readonly Version _currentAssemblyVersion = new Version(Microsoft.Build.Shared.MSBuildConstants.CurrentAssemblyVersion);
-
-        static CoreClrAssemblyLoader()
-        {
-            _msbuildDirPath = FileUtilities.NormalizePath(typeof(CoreClrAssemblyLoader).Assembly.Location);
-            _msbuildDirPath = Path.GetDirectoryName(_msbuildDirPath);
-        }
 
         public void AddDependencyLocation(string fullPath)
         {
@@ -59,12 +55,7 @@ namespace Microsoft.Build.Shared
             // folders in a NuGet package).
             fullPath = FileUtilities.NormalizePath(fullPath);
 
-            // If the requested load comes from the same directory as MSBuild, assume that
-            // the load is part of the platform, and load it using the Default ALC.
-            string assemblyDir = Path.GetDirectoryName(fullPath);
-
-            if (Traits.Instance.EscapeHatches.UseSingleLoadContext ||
-                FileUtilities.ComparePathsNoThrow(assemblyDir, _msbuildDirPath, string.Empty))
+            if (Traits.Instance.EscapeHatches.UseSingleLoadContext)
             {
                 return LoadUsingLegacyDefaultContext(fullPath);
             }
@@ -165,26 +156,23 @@ namespace Microsoft.Build.Shared
             {
                 foreach (var searchPath in searchPaths)
                 {
-                    foreach (var extension in MSBuildLoadContext.Extensions)
+                    var candidatePath = Path.Combine(searchPath,
+                        cultureSubfolder,
+                        $"{assemblyName.Name}.dll");
+
+                    if (IsAssemblyAlreadyLoaded(candidatePath) ||
+                        !FileSystems.Default.FileExists(candidatePath))
                     {
-                        var candidatePath = Path.Combine(searchPath,
-                            cultureSubfolder,
-                            $"{assemblyName.Name}.{extension}");
-
-                        if (IsAssemblyAlreadyLoaded(candidatePath) ||
-                            !FileSystems.Default.FileExists(candidatePath))
-                        {
-                            continue;
-                        }
-
-                        AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
-                        if (candidateAssemblyName.Version != assemblyName.Version)
-                        {
-                            continue;
-                        }
-
-                        return LoadAndCache(context, candidatePath);
+                        continue;
                     }
+
+                    AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
+                    if (candidateAssemblyName.Version != assemblyName.Version)
+                    {
+                        continue;
+                    }
+
+                    return LoadAndCache(context, candidatePath);
                 }
             }
 

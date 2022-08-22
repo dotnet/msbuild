@@ -142,6 +142,9 @@
   <data name="WaitingForEndOfBuild" xml:space="preserve">
     <value>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</value>
   </data>
+  <data name="EnvironmentDerivedPropertyRead">
+    <value>Property '{0}' with value '{1}' expanded from the environment.</value>
+  </data>
   <data name="SubmissionAlreadyComplete" xml:space="preserve">
     <value>The operation cannot be completed because the submission has already been executed.</value>
   </data>
@@ -332,6 +335,13 @@
   <data name="TryingExtensionsPath" xml:space="preserve">
     <value>Trying to import {0} using extensions path {1}</value>
   </data>
+  <data name="DuplicateOverrideUsingTaskElement" xml:space="preserve">
+    <value>MSB4275: Attempted to create multiple overrides of the same task: {0}</value>
+    <comment>{StrBegin="MSB4275: "}</comment>
+  </data>
+  <data name="OverrideUsingTaskElementCreated" xml:space="preserve">
+    <value>Created an override using task: {0} at {1}</value>
+  </data>
   <data name="OverrideTasksFileFailure" xml:space="preserve">
     <value>MSB4194: The override tasks file could not be successfully loaded. {0}</value>
     <comment>
@@ -462,6 +472,10 @@
   <data name="FailedToReceiveTaskThreadStatus" xml:space="preserve">
     <value>MSB4187: Failed to receive a response from the task thread in the timeout period "{0}" ms. Shutting down.</value>
     <comment>{StrBegin="MSB4187: "}</comment>
+  </data>
+  <data name="UnhandledMSBuildError" xml:space="preserve">
+    <value>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled.
+    {0}</value>
   </data>
   <data name="IllFormedCondition" xml:space="preserve">
     <value>MSB4088: Condition "{0}" is improperly constructed.</value>
@@ -1285,13 +1299,15 @@
     <value>MSB4244: The SDK resolver assembly "{0}" could not be loaded. {1}</value>
     <comment>{StrBegin="MSB4244: "}</comment>
   </data>
-  <data name="CouldNotRunSdkResolver" xml:space="preserve">
-    <value>MSB4242: The SDK resolver "{0}" failed to run. {1}</value>
+  <data name="SDKResolverCriticalFailure" xml:space="preserve">
+    <value>MSB4242: SDK Resolver Failure: "{0}"</value>
     <comment>{StrBegin="MSB4242: "}</comment>
   </data>
+  <data name="SDKResolverFailed" xml:space="preserve">
+    <value>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</value>
+  </data>
   <data name="CouldNotRunNuGetSdkResolver" xml:space="preserve">
-    <value>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</value>
-    <comment>{StrBegin="MSB4243: "}</comment>
+    <value>The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</value>
   </data>
   <data name="SdkResolverManifestInvalid" xml:space="preserve">
     <value>MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</value>
@@ -1353,7 +1369,7 @@
     <comment>{StrBegin="MSB4209: "}</comment>
   </data>
   <data name="AffinityConflict" xml:space="preserve">
-    <value>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for this project.</value>
+    <value>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for project {2} with global properties {3}</value>
     <comment>{StrBegin="MSB4213: "}</comment>
   </data>
   <data name="UnableToCreateNode" xml:space="preserve">
@@ -1540,7 +1556,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Project has not been given a path to save to.</value>
   </data>
   <data name="OM_MustSetRecordDuplicateInputs" xml:space="preserve">
-    <value>Project was not loaded with the ProjectLoadSettings.RecordDuplicateImports flag.</value>
+    <value>Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</value>
   </data>
   <data name="OM_CannotSaveFileLoadedAsReadOnly" xml:space="preserve">
     <value>Project or targets file "{0}" was loaded in read-only mode, and cannot be saved.</value>
@@ -1864,14 +1880,10 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</value>
   </data>
   <data name="LoadingProjectCachePlugin" xml:space="preserve">
-    <value>Loading the following project cache plugin:
-    {0}</value>
+    <value>Loading the following project cache plugin: {0}</value>
   </data>
   <data name="SolutionPathPropertyMustBeSetOnVSSubmissions" xml:space="preserve">
     <value>"MSB4264: Invalid $(SolutionPath) property: {0}"</value>
-  </data>
-  <data name="OnlyOneCachePluginMustBeSpecified" xml:space="preserve">
-    <value>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</value>
   </data>
   <data name="ProjectCacheInitializationFailed" xml:space="preserve">
     <value>MSB4266: Failed to initialize the project cache.</value>
@@ -1882,9 +1894,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="ProjectCacheShutdownFailed" xml:space="preserve">
     <value>MSB4268: The project cache failed to shut down properly.</value>
   </data>
-  <data name="NotAllNodesDefineACacheItem" xml:space="preserve">
-    <value>MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</value>
-  </data>
   <data name="NoProjectCachePluginFoundInAssembly" xml:space="preserve">
     <value>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</value>
   </data>
@@ -1893,5 +1902,65 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="KillingProcessWithPid" xml:space="preserve">
     <value>Killing process with pid = {0}.</value>
+  </data>
+  <data name="ProxyRequestNotScheduledOnInprocNode" xml:space="preserve">
+    <value>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</value>
+  </data>
+  <data name="ProjectCacheEndBuild" xml:space="preserve">
+    <value>Shutting down project cache plugin.</value>
+  </data>
+  <data name="ProjectCacheQueryStartedWithDefaultTargets" xml:space="preserve">
+    <value>Querying project cache for "{0}" (default targets):</value>
+    <comment>
+      LOCALIZATION: {0} is a file path.
+    </comment>
+  </data>
+  <data name="ProjectCacheQueryStartedWithTargetNames" xml:space="preserve">
+    <value>Querying project cache for "{0}" (targets: {1}):</value>
+    <comment>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </comment>
+  </data>
+  <data name="ProjectCacheHitWithDefaultTargets" xml:space="preserve">
+    <value>Project cache hit for "{0}" (default targets).</value>
+    <comment>
+      LOCALIZATION: {0} is a file path.
+    </comment>
+  </data>
+  <data name="ProjectCacheHitWithTargetNames" xml:space="preserve">
+    <value>Project cache hit for "{0}" ({1} target(s)).</value>
+    <comment>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </comment>
+  </data>
+  <data name="ProjectCacheHitWithOutputs" xml:space="preserve">
+    <value>{0} -> Cache Hit</value>
+    <comment>
+      {StrBegin="{0} -> "}LOCALIZATION: This string is used to indicate progress and matches the format for a log message from Microsoft.Common.CurrentVersion.targets. {0} is a project name.
+    </comment>
+  </data>
+  <data name="ProjectCacheMissWithDefaultTargets" xml:space="preserve">
+    <value>Project cache miss for "{0}" (default targets).</value>
+    <comment>
+      LOCALIZATION: {0} is a file path.
+    </comment>
+  </data>
+  <data name="ProjectCacheMissWithTargetNames" xml:space="preserve">
+    <value>Project cache miss for "{0}" ({1} target(s)).</value>
+    <comment>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </comment>
+  </data>
+  <data name="ProjectCacheNotApplicableWithDefaultTargets" xml:space="preserve">
+    <value>Project cache not applicable for "{0}" (default targets).</value>
+    <comment>
+      LOCALIZATION: {0} is a file path.
+    </comment>
+  </data>
+  <data name="ProjectCacheNotApplicableWithTargetNames" xml:space="preserve">
+    <value>Project cache not applicable for "{0}" ({1} target(s)).</value>
+    <comment>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </comment>
   </data>
 </root>

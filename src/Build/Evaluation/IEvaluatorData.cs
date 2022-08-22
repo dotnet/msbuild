@@ -8,7 +8,9 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Collections;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.SdkResolution;
-using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Evaluation.Context;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -210,7 +212,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Prepares the data block for a new evaluation pass
         /// </summary>
-        void InitializeForEvaluation(IToolsetProvider toolsetProvider, IFileSystem fileSystem);
+        void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext);
 
         /// <summary>
         /// Indicates to the data block that evaluation has completed,
@@ -265,7 +267,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Sets a property which does not come from the Xml.
         /// </summary>
-        P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false);
+        P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false, BackEnd.Logging.LoggingContext loggingContext = null);
 
         /// <summary>
         /// Sets a property which comes from the Xml.

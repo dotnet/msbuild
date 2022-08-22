@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -52,9 +54,9 @@ namespace Microsoft.Build.Tasks
         )
         {
             // If there is newline or white space `FileUtilities.NormalizePath` will get garbage result(throw on fullframework).
-            // Adding FileUtilities.NormalizePath (https://github.com/microsoft/msbuild/pull/4414) caused https://github.com/microsoft/msbuild/issues/4593
+            // Adding FileUtilities.NormalizePath (https://github.com/dotnet/msbuild/pull/4414) caused https://github.com/dotnet/msbuild/issues/4593
             // It is fixed by adding skip when the path is not valid
-            // However, we should consider Trim() the hintpath https://github.com/microsoft/msbuild/issues/4603
+            // However, we should consider Trim() the hintpath https://github.com/dotnet/msbuild/issues/4603
             if (!string.IsNullOrEmpty(hintPath) && !FileUtilities.PathIsInvalid(hintPath))
             {
                 if (ResolveAsFile(FileUtilities.NormalizePath(hintPath), assemblyName, isPrimaryProjectReference, wantSpecificVersion, true, assembliesConsideredAndRejected))

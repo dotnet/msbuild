@@ -17,10 +17,14 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+#if FEATURE_WIN32_REGISTRY
 using Microsoft.Win32;
+#endif
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using ObjectModel = System.Collections.ObjectModel;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -485,7 +489,7 @@ namespace Microsoft.Build.Evaluation
                         return Constants.Dev10SubToolsetValue;
                     }
 
-                    // 2) Otherwise, just pick the highest available. 
+                    // 2) Otherwise, just pick the highest available.
                     SortedDictionary<Version, string> subToolsetsWithVersion = new SortedDictionary<Version, string>();
                     List<string> additionalSubToolsetNames = new List<string>();
 
@@ -499,7 +503,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         else
                         {
-                            // if it doesn't parse to an actual version number, shrug and just add it to the end. 
+                            // if it doesn't parse to an actual version number, shrug and just add it to the end.
                             additionalSubToolsetNames.Add(subToolsetName);
                         }
                     }
@@ -538,11 +542,11 @@ namespace Microsoft.Build.Evaluation
                 {
                     try
                     {
-                        // Figure out whether Dev10 is currently installed using the following heuristic: 
-                        // - Check whether the overall key (installed if any version of Dev10 is installed) is there. 
-                        //   - If it's not, no version of Dev10 exists or has ever existed on this machine, so return 'false'. 
-                        //   - If it is, we know that some version of Dev10 has been installed at some point, but we don't know 
-                        //     for sure whether it's still there or not.  Check the inndividual keys for {Pro, Premium, Ultimate, 
+                        // Figure out whether Dev10 is currently installed using the following heuristic:
+                        // - Check whether the overall key (installed if any version of Dev10 is installed) is there.
+                        //   - If it's not, no version of Dev10 exists or has ever existed on this machine, so return 'false'.
+                        //   - If it is, we know that some version of Dev10 has been installed at some point, but we don't know
+                        //     for sure whether it's still there or not.  Check the inndividual keys for {Pro, Premium, Ultimate,
                         //     C# Express, VB Express, C++ Express, VWD Express, LightSwitch} 2010
                         //     - If even one of them exists, return 'true'.
                         //     - Otherwise, return 'false.
@@ -568,13 +572,8 @@ namespace Microsoft.Build.Evaluation
                             s_dev10IsInstalled = false;
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (!ExceptionHandling.NotExpectedRegistryException(e))
                     {
-                        if (ExceptionHandling.NotExpectedRegistryException(e))
-                        {
-                            throw;
-                        }
-
                         // if it's a registry exception, just shrug, eat it, and move on with life on the assumption that whatever
                         // went wrong, it's pretty clear that Dev10 probably isn't installed.
                         s_dev10IsInstalled = false;
@@ -804,7 +803,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            // Next, try the toolset environment properties 
+            // Next, try the toolset environment properties
             if (_environmentProperties != null)
             {
                 ProjectPropertyInstance visualStudioVersionProperty = _environmentProperties[Constants.SubToolsetVersionPropertyName];
@@ -823,8 +822,8 @@ namespace Microsoft.Build.Evaluation
                 subToolsetVersion = SubToolsets.Keys.FirstOrDefault(version => visualStudioVersionFromSolutionAsVersion.Equals(VersionUtilities.ConvertToVersion(version)));
             }
 
-            // Solution version also didn't work out, so fall back to default. 
-            // If subToolsetVersion is null, there simply wasn't a matching solution version. 
+            // Solution version also didn't work out, so fall back to default.
+            // If subToolsetVersion is null, there simply wasn't a matching solution version.
             return subToolsetVersion ?? (DefaultSubToolsetVersion);
         }
 
@@ -920,12 +919,23 @@ namespace Microsoft.Build.Evaluation
                     reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion, mayBeReserved: true));
                     reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild, mayBeReserved: true));
 
-                    // Add one for the subtoolset version property -- it may or may not be set depending on whether it has already been set by the 
-                    // environment or global properties, but it's better to create a dictionary that's one too big than one that's one too small.  
+                    reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.msbuildRuntimeType,
+#if RUNTIME_TYPE_NETCORE
+                        Traits.Instance.ForceEvaluateAsFullFramework ? "Full" : "Core",
+#elif MONO
+                        NativeMethodsShared.IsMono ? "Mono" : "Full");
+#else
+                        "Full",
+#endif
+                        mayBeReserved: true));
+
+
+                    // Add one for the subtoolset version property -- it may or may not be set depending on whether it has already been set by the
+                    // environment or global properties, but it's better to create a dictionary that's one too big than one that's one too small.
                     int count = _environmentProperties.Count + reservedProperties.Count + Properties.Values.Count + _globalProperties.Count + 1;
 
-                    // GenerateSubToolsetVersion checks the environment and global properties, so it's safe to go ahead and gather the 
-                    // subtoolset properties here without fearing that we'll have somehow come up with the wrong subtoolset version. 
+                    // GenerateSubToolsetVersion checks the environment and global properties, so it's safe to go ahead and gather the
+                    // subtoolset properties here without fearing that we'll have somehow come up with the wrong subtoolset version.
                     string subToolsetVersion = this.GenerateSubToolsetVersion();
                     SubToolset subToolset;
                     ICollection<ProjectPropertyInstance> subToolsetProperties = null;
@@ -941,10 +951,10 @@ namespace Microsoft.Build.Evaluation
 
                     _propertyBag = new PropertyDictionary<ProjectPropertyInstance>(count);
 
-                    // Should be imported in the same order as in the evaluator:  
+                    // Should be imported in the same order as in the evaluator:
                     // - Environment
                     // - Toolset
-                    // - Subtoolset (if any) 
+                    // - Subtoolset (if any)
                     // - Global
                     _propertyBag.ImportProperties(_environmentProperties);
 
@@ -1087,7 +1097,7 @@ namespace Microsoft.Build.Evaluation
                 catch (XmlException e)
                 {
                     // handle XML errors in the default tasks file
-                    ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(false, new BuildEventFileInfo(defaultTasksFile, e), taskFileError, e.Message);
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(defaultTasksFile, e), taskFileError, e.Message);
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {

@@ -12,6 +12,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class BuildEventArgsSerializationTests
@@ -22,9 +24,12 @@ namespace Microsoft.Build.UnitTests
             _ = ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix;
         }
 
-        [Fact]
-        public void RoundtripBuildStartedEventArgs()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void RoundtripBuildStartedEventArgs(bool serializeAllEnvironmentVariables)
         {
+            Traits.LogAllEnvironmentVariables = serializeAllEnvironmentVariables;
             var args = new BuildStartedEventArgs(
                 "Message",
                 "HelpKeyword",
@@ -39,13 +44,15 @@ namespace Microsoft.Build.UnitTests
                 null,
                 new Dictionary<string, string>
                 {
-                    { "SampleName", "SampleValue" }
+                { "SampleName", "SampleValue" }
                 });
             Roundtrip(args,
-                e => TranslationHelpers.ToString(e.BuildEnvironment),
+                e => serializeAllEnvironmentVariables ? TranslationHelpers.ToString(e.BuildEnvironment) : null,
                 e => e.HelpKeyword,
                 e => e.ThreadId.ToString(),
                 e => e.SenderName);
+
+            Traits.LogAllEnvironmentVariables = false;
         }
 
         [Fact]
@@ -160,11 +167,26 @@ namespace Microsoft.Build.UnitTests
                 projectFile: "C:\\project.proj",
                 taskFile: "C:\\common.targets",
                 taskName: "Csc");
+            args.LineNumber = 42;
+            args.ColumnNumber = 999;
 
             Roundtrip(args,
                 e => e.ProjectFile,
                 e => e.TaskFile,
-                e => e.TaskName);
+                e => e.TaskName,
+                e => e.LineNumber.ToString(),
+                e => e.ColumnNumber.ToString());
+        }
+
+        [Fact]
+        public void RoundtripEnvironmentVariableReadEventArgs()
+        {
+            EnvironmentVariableReadEventArgs args = new("VarName", "VarValue");
+            args.BuildEventContext = new BuildEventContext(4, 5, 6, 7);
+            Roundtrip(args,
+                e => e.Message,
+                e => e.EnvironmentVariableName,
+                e => e.BuildEventContext.ToString());
         }
 
         [Fact]
@@ -185,8 +207,10 @@ namespace Microsoft.Build.UnitTests
                 e => e.ThreadId.ToString());
         }
 
-        [Fact]
-        public void RoundtripBuildErrorEventArgs()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void RoundtripBuildErrorEventArgs(bool useArguments)
         {
             var args = new BuildErrorEventArgs(
                 "Subcategory",
@@ -196,9 +220,11 @@ namespace Microsoft.Build.UnitTests
                 2,
                 3,
                 4,
-                "Message",
+                "Message with arguments: '{0}'",
                 "Help",
-                "SenderName");
+                "SenderName",
+                DateTime.Parse("9/1/2021 12:02:07 PM"),
+                useArguments ? new object[] { "argument0" } : null);
 
             Roundtrip(args,
                 e => e.Code,
@@ -209,11 +235,14 @@ namespace Microsoft.Build.UnitTests
                 e => e.LineNumber.ToString(),
                 e => e.Message,
                 e => e.ProjectFile,
-                e => e.Subcategory);
+                e => e.Subcategory,
+                e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
         }
 
-        [Fact]
-        public void RoundtripBuildWarningEventArgs()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void RoundtripBuildWarningEventArgs(bool useArguments)
         {
             var args = new BuildWarningEventArgs(
                 "Subcategory",
@@ -223,9 +252,11 @@ namespace Microsoft.Build.UnitTests
                 2,
                 3,
                 4,
-                "Message",
+                "Message with arguments: '{0}'",
                 "Help",
-                "SenderName");
+                "SenderName",
+                DateTime.Parse("9/1/2021 12:02:07 PM"),
+                useArguments ? new object[] { "argument0" } : null);
 
             Roundtrip(args,
                 e => e.Code,
@@ -236,11 +267,14 @@ namespace Microsoft.Build.UnitTests
                 e => e.LineNumber.ToString(),
                 e => e.Message,
                 e => e.ProjectFile,
-                e => e.Subcategory);
+                e => e.Subcategory,
+                e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
         }
 
-        [Fact]
-        public void RoundtripBuildMessageEventArgs()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void RoundtripBuildMessageEventArgs(bool useArguments)
         {
             var args = new BuildMessageEventArgs(
                 "Subcategory",
@@ -254,7 +288,8 @@ namespace Microsoft.Build.UnitTests
                 "Help",
                 "SenderName",
                 MessageImportance.High,
-                DateTime.Parse("12/12/2015 06:11:56 PM"));
+                DateTime.Parse("12/12/2015 06:11:56 PM"),
+                useArguments ? new object[] { "argument0" } : null);
 
             Roundtrip(args,
                 e => e.Code,
@@ -266,7 +301,8 @@ namespace Microsoft.Build.UnitTests
                 e => e.Message,
                 e => e.Importance.ToString(),
                 e => e.ProjectFile,
-                e => e.Subcategory);
+                e => e.Subcategory,
+                e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
         }
 
         [Fact]
@@ -327,11 +363,15 @@ namespace Microsoft.Build.UnitTests
                 new TaskItemData("ItemSpec2", Enumerable.Range(1,3).ToDictionary(i => i.ToString(), i => i.ToString() + "value"))
             };
             var args = new TaskParameterEventArgs(TaskParameterMessageKind.TaskOutput, "ItemName", items, true, DateTime.MinValue);
+            args.LineNumber = 265;
+            args.ColumnNumber = 6;
 
             Roundtrip(args,
                 e => e.Kind.ToString(),
                 e => e.ItemType,
                 e => e.LogItemMetadata.ToString(),
+                e => e.LineNumber.ToString(),
+                e => e.ColumnNumber.ToString(),
                 e => TranslationHelpers.GetItemsString(e.Items));
         }
 
@@ -443,20 +483,31 @@ namespace Microsoft.Build.UnitTests
                 ProjectFile = "foo.csproj",
                 TargetName = "target",
                 ParentTarget = "bar",
-                BuildReason = TargetBuiltReason.DependsOn
+                BuildReason = TargetBuiltReason.DependsOn,
+                SkipReason = TargetSkipReason.PreviouslyBuiltSuccessfully,
+                Condition = "$(condition) == true",
+                EvaluatedCondition = "true == true",
+                OriginalBuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7),
+                OriginallySucceeded = false,
+                TargetFile = "foo.csproj"
             };
 
             Roundtrip(args,
+                e => e.BuildEventContext.ToString(),
                 e => e.ParentTarget,
                 e => e.Importance.ToString(),
                 e => e.LineNumber.ToString(),
                 e => e.ColumnNumber.ToString(),
-                e => e.LineNumber.ToString(),
                 e => e.Message,
                 e => e.ProjectFile,
                 e => e.TargetFile,
                 e => e.TargetName,
-                e => e.BuildReason.ToString());
+                e => e.BuildReason.ToString(),
+                e => e.SkipReason.ToString(),
+                e => e.Condition,
+                e => e.EvaluatedCondition,
+                e => e.OriginalBuildEventContext.ToString(),
+                e => e.OriginallySucceeded.ToString());
         }
 
         [Fact]

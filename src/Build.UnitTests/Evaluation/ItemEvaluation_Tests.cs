@@ -11,6 +11,8 @@ using System.Text;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Evaluation
 {
     /// <summary>
@@ -110,12 +112,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 {"m1", "m1_contents"},
                 {"m2", "m2_contents"}
             };
-            
+
             var itemsForI = items.Where(i => i.ItemType == "i").ToList();
             ObjectModelHelpers.AssertItems(new[] { "a", "b", "c" }, itemsForI, expectedMetadata);
 
             var itemsForI2 = items.Where(i => i.ItemType == "i2").ToList();
-            ObjectModelHelpers.AssertItems(new string[0], itemsForI2);
+            ObjectModelHelpers.AssertItems(Array.Empty<string>(), itemsForI2);
         }
 
         [Fact]
@@ -490,7 +492,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 {"m", "i1"}
             };
 
-            //i1 items: i1_1; i1_3; i1_4; i1_6
+            // i1 items: i1_1; i1_3; i1_4; i1_6
             var i1Metadata = new Dictionary<string, string>[]
             {
                 i1BaseMetadata,
@@ -502,13 +504,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var i1Items = items.Where(i => i.ItemType == "i1").ToList();
             ObjectModelHelpers.AssertItems(new[] { "i1_1", "i1_3", "i1_4", "i1_6" }, i1Items, i1Metadata);
 
-            //i2 items: i1_1; i1_2; i1_3
+            // i2 items: i1_1; i1_2; i1_3
             var i2Metadata = new Dictionary<string, string>[]
             {
                 new Dictionary<string, string>
                 {
                     {"m", "i2"}
-                }, 
+                },
                 i1BaseMetadata,
                 i1BaseMetadata
             };
@@ -516,7 +518,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var i2Items = items.Where(i => i.ItemType == "i2").ToList();
             ObjectModelHelpers.AssertItems(new[] { "i1_1", "i1_2", "i1_3" }, i2Items, i2Metadata);
 
-            //i3 items: i1_1; i1_2; i1_4
+            // i3 items: i1_1; i1_2; i1_4
             var i3Items = items.Where(i => i.ItemType == "i3").ToList();
             ObjectModelHelpers.AssertItems(new[] { "i1_1", "i1_2", "i1_4" }, i3Items, i1BaseMetadata);
 
@@ -528,9 +530,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void LongIncludeChain()
         {
             const int INCLUDE_COUNT = 10000;
-            
-            //  This was about the minimum count needed to repro a StackOverflowException
-            //const int INCLUDE_COUNT = 4000;
+
+            // This was about the minimum count needed to repro a StackOverflowException
+            // const int INCLUDE_COUNT = 4000;
 
             StringBuilder content = new StringBuilder();
             for (int i = 0; i < INCLUDE_COUNT; i++)
@@ -543,7 +545,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(INCLUDE_COUNT, items.Count);
         }
 
-        // see https://github.com/Microsoft/msbuild/issues/2069
+        // see https://github.com/dotnet/msbuild/issues/2069
         [Fact]
         public void ImmutableListBuilderBug()
         {
@@ -605,7 +607,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 }
 
                 Assert.Equal(expectedItems, project.GetConcatenatedItemsOfType("i2"));
-                
+
                 var fullPathItems = project.GetConcatenatedItemsOfType("FullPath");
                 Assert.Contains("a.cs", fullPathItems);
                 Assert.Contains("b.cs", fullPathItems);
@@ -658,7 +660,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        // see https://github.com/Microsoft/msbuild/issues/3460
+        // see https://github.com/dotnet/msbuild/issues/3460
         [Fact]
         public void MetadataPropertyFunctionBug()
         {

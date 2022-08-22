@@ -2,7 +2,7 @@
 name: 🐞 Bug Report
 about: Report a bug to help us improve MSBuild.
 title: ''
-labels: bug, untriaged
+labels: bug, needs-triage
 ---
 
 <!-- This is a template that helps us provide quicker feedback. Please use any relevant sections and delete anything you don't need. -->
@@ -20,6 +20,12 @@ labels: bug, untriaged
 * Your zipped project.
 * IDE / CLI steps to create the project and reproduce the behaviour.
 * Your command line invocation
+
+If providing steps to reproduce the issue proves difficult, consider attaching a binlog:
+[Details on sharing binary logs](https://aka.ms/msbuild/binlog)
+[More information on binary logs](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md)
+NOTE: Binary logs capture environment information. Ensure it does not include any information you don't want to be public before you attach one.
+If you want to share one just with Microsoft, you can [report a problem through Visual Studio](https://developercommunity.visualstudio.com/report) and share it privately with Microsoft.
 -->
 
 ### Expected Behavior
@@ -45,14 +51,4 @@ labels: bug, untriaged
 
 * Post any other relevant configuration settings here.
 *   OS, architecture, etc.
--->
-
-### Attach a binlog
-<!--
-* If providing us a project that reproduces the issue proves difficult, consider including a binlog.
-* Click [here](https://aka.ms/msbuild/binlog) for details on sharing binary logs.
-* Click [here](https://github.com/microsoft/msbuild/blob/master/documentation/wiki/Binary-Log.md) for more information on binary logs.
-    NOTE: Binlogs can contain sensitive information. Don't attach anything you don't want to be public.
-
-*   To view the contents of the binlogs yourself, you may wish to use a tool like https://msbuildlog.com/.
 -->

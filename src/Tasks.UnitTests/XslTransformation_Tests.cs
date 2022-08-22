@@ -13,7 +13,10 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml.Xsl;
 using System.Xml;
+using Shouldly;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -63,6 +66,8 @@ namespace Microsoft.Build.UnitTests
         /// The contents of xsl document for tests.
         /// </summary>
         private readonly string _xslDocument = "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:msxsl=\"urn:schemas-microsoft-com:xslt\" exclude-result-prefixes=\"msxsl\"><xsl:output method=\"xml\" indent=\"yes\"/><xsl:template match=\"@* | node()\"><surround><xsl:copy><xsl:apply-templates select=\"@* | node()\"/></xsl:copy></surround></xsl:template></xsl:stylesheet>";
+
+
 #if FEATURE_COMPILED_XSL
         /// <summary>
         /// The contents of another xsl document for tests
@@ -386,7 +391,7 @@ namespace Microsoft.Build.UnitTests
         /// Setting correct "Parameter" parameters for Xsl.
         /// </summary>
         [Fact]
-        public void XsltParamatersCorrect()
+        public void XsltParametersCorrect()
         {
             string dir;
             TaskItem[] xmlPaths;
@@ -781,6 +786,39 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// The files are not kept locked by the task
+        /// </summary>
+        [Fact]
+        public void InputFilesDontLock()
+        {
+            string dir;
+            TaskItem[] xmlPaths;
+            TaskItem xslPath;
+            TaskItem[] outputPaths;
+            MockEngine engine;
+            Prepare(out dir, out xmlPaths, out xslPath, out _, out outputPaths, out _, out _, out engine);
+
+            // Test with files
+            {
+                XslTransformation t = new XslTransformation();
+                t.BuildEngine = engine;
+                t.XmlInputPaths = xmlPaths;
+                t.XslInputPath = xslPath;
+                t.OutputPaths = outputPaths;
+
+                t.Execute().ShouldBeTrue();
+                string xmlInputPath = xmlPaths[0].ItemSpec;
+                File.Delete(xmlInputPath); // this should succeed (file not locked by task)
+                File.Exists(xmlInputPath).ShouldBeFalse();
+                string xslInputPath = xslPath.ItemSpec;
+                File.Delete(xslInputPath); // this should succeed (file not locked by task)
+                File.Exists(xslInputPath).ShouldBeFalse();
+            }
+
+            CleanUp(dir);
+        }
+
+        /// <summary>
         /// XslDocument that throws runtime exception.
         /// </summary>
         [Fact]
@@ -812,6 +850,55 @@ namespace Microsoft.Build.UnitTests
             CleanUp(dir);
         }
 
+        /// <summary>
+        /// Xslt PreserveWhitespace = true
+        /// </summary>
+        [Fact]
+        public void XsltPreserveWhitespace()
+        {
+            string dir;
+            TaskItem[] xmlPaths;
+            TaskItem xslPath;
+            TaskItem[] outputPaths;
+            MockEngine engine;
+
+            Prepare(out dir, out _, out _, out _, out outputPaths, out _, out _, out engine);
+
+            var testingDocsDir = Path.Combine("TestDocuments", "Fdl2Proto");
+
+            xmlPaths = new TaskItem[] { new TaskItem(Path.Combine(testingDocsDir, "sila.xml")) };
+            xslPath = new TaskItem(Path.Combine(testingDocsDir, "fdl2proto.xsl"));
+
+            // load transformed xsl and assert it is well formatted
+            {
+                XslTransformation t = new XslTransformation();
+                
+                t.BuildEngine = engine;
+                t.XslInputPath = xslPath;
+                t.XmlInputPaths = xmlPaths;
+                t.OutputPaths = outputPaths;
+                t.UseTrustedSettings = true;
+                t.PreserveWhitespace = true;
+
+                t.Execute();
+                Console.WriteLine(engine.Log);
+
+                string expectedOutput;
+                using (StreamReader sr = new StreamReader(Path.Combine(testingDocsDir, "expected.proto")))
+                {
+                    expectedOutput = sr.ReadToEnd();
+                }
+
+                using (StreamReader sr = new StreamReader(t.OutputPaths[0].ItemSpec))
+                {
+                    string fileContents = sr.ReadToEnd();
+                    Assert.Equal(expectedOutput, fileContents);
+                }
+            }
+
+            CleanUp(dir);
+        }
+
 #if FEATURE_COMPILED_XSL
         /// <summary>
         /// Passing a dll that has two types to XsltCompiledDll parameter without specifying a type.
@@ -829,24 +916,24 @@ namespace Microsoft.Build.UnitTests
 
             CompileDoubleType(doubleTypePath);
 
+            XslTransformation t = new()
             {
-                XslTransformation t = new XslTransformation();
-                t.BuildEngine = engine;
-                t.OutputPaths = outputPaths;
-                t.XmlContent = _xmlDocument;
-                t.XslCompiledDllPath = new TaskItem(doubleTypePath);
-                try
-                {
-                    t.Execute();
-                    Console.WriteLine(engine.Log);
-                }
-                catch (Exception e)
-                {
-                    Assert.Contains("error?", e.Message);
-                }
-
-                System.Diagnostics.Debug.WriteLine(engine.Log);
+                BuildEngine = engine,
+                OutputPaths = outputPaths,
+                XmlContent = _xmlDocument,
+                XslCompiledDllPath = new TaskItem(doubleTypePath),
+            };
+            try
+            {
+                t.Execute();
+                Console.WriteLine(engine.Log);
             }
+            catch (Exception e)
+            {
+                Assert.Contains("error?", e.Message);
+            }
+
+            System.Diagnostics.Debug.WriteLine(engine.Log);
 
             CleanUp(dir);
         }
@@ -876,7 +963,6 @@ namespace Microsoft.Build.UnitTests
             // outputPaths have one output path, lets duplicate it
             TaskItem[] outputMultiPaths = new TaskItem[] { new TaskItem(outputPaths[0].ItemSpec + ".1.xml"),
                 new TaskItem(outputPaths[0].ItemSpec + ".2.xml"), new TaskItem(outputPaths[0].ItemSpec + ".3.xml"), new TaskItem(outputPaths[0].ItemSpec + ".4.xml") };
-
             {
                 XslTransformation t = new XslTransformation();
                 t.BuildEngine = engine;
@@ -1107,7 +1193,7 @@ namespace Microsoft.Build.UnitTests
 
             // Add custom attribute to assembly marking it as security transparent so that Assert will not be allowed
             // and link demands will be converted to full demands.
-            asmBldr.SetCustomAttribute(new CustomAttributeBuilder(typeof(System.Security.SecurityTransparentAttribute).GetConstructor(Type.EmptyTypes), new object[] { }));
+            asmBldr.SetCustomAttribute(new CustomAttributeBuilder(typeof(System.Security.SecurityTransparentAttribute).GetConstructor(Type.EmptyTypes), Array.Empty<object>()));
 
             // Mark the assembly with GeneratedCodeAttribute to improve profiling experience
             asmBldr.SetCustomAttribute(new CustomAttributeBuilder(typeof(GeneratedCodeAttribute).GetConstructor(new Type[] { typeof(string), typeof(string) }), new object[] { "XsltCompiler", "2.0.0.0" }));

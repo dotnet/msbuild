@@ -3,11 +3,12 @@
 
 using System;
 using System.IO;
-using System.Text;
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -114,7 +115,7 @@ namespace Microsoft.Build.Tasks
                 info.culture = culture;
             }
 
-            var manifestName = new StringBuilder();
+            var manifestName = StringBuilderCache.Acquire();
             if (binaryStream != null)
             {
                 // Resource depends on a form. Now, get the form's class name fully 
@@ -212,7 +213,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            return manifestName.ToString();
+            return StringBuilderCache.GetStringAndRelease(manifestName);
         }
 
         /// <summary>

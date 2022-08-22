@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
@@ -133,7 +135,7 @@ namespace Microsoft.Build.Utilities
                             {
                                 ApiContract.ReadContractsElement(childElement, ApiContracts);
                             }
-                            else if(ApiContract.IsVersionedContentElement(childElement.Name))
+                            else if (ApiContract.IsVersionedContentElement(childElement.Name))
                             {
                                 bool.TryParse(childElement.InnerText, out bool versionedContent);
                                 VersionedContent = versionedContent;
@@ -150,13 +152,8 @@ namespace Microsoft.Build.Utilities
                     ReadErrorMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("PlatformManifest.MissingPlatformXml", platformManifestPath);
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 ReadErrorMessage = e.Message;
             }
         }

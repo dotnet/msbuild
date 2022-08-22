@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -21,6 +22,8 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 #if MSBUILDENABLEVSPROFILING 
 using Microsoft.VisualStudio.Profiler;
 #endif
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -350,11 +353,15 @@ namespace Microsoft.Build.BackEnd
                 _target.ConditionLocation,
                 projectLoggingContext.LoggingService,
                 projectLoggingContext.BuildEventContext,
-                FileSystems.Default);
+                FileSystems.Default,
+                loggingContext: projectLoggingContext);
 
             if (!condition)
             {
-                _targetResult = new TargetResult(Array.Empty<TaskItem>(), new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null));
+                _targetResult = new TargetResult(
+                    Array.Empty<TaskItem>(),
+                    new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null),
+                    projectLoggingContext.BuildEventContext);
                 _state = TargetEntryState.Completed;
 
                 if (!projectLoggingContext.LoggingService.OnlyLogCriticalEvents)
@@ -375,6 +382,7 @@ namespace Microsoft.Build.BackEnd
                         TargetFile = _target.Location.File,
                         ParentTarget = ParentEntry?.Target?.Name,
                         BuildReason = BuildReason,
+                        SkipReason = TargetSkipReason.ConditionWasFalse,
                         Condition = _target.Condition,
                         EvaluatedCondition = expanded
                     };
@@ -385,7 +393,7 @@ namespace Microsoft.Build.BackEnd
                 return new List<TargetSpecification>();
             }
 
-            var dependencies = _expander.ExpandIntoStringListLeaveEscaped(_target.DependsOnTargets, ExpanderOptions.ExpandPropertiesAndItems, _target.DependsOnTargetsLocation);
+            var dependencies = _expander.ExpandIntoStringListLeaveEscaped(_target.DependsOnTargets, ExpanderOptions.ExpandPropertiesAndItems, _target.DependsOnTargetsLocation, projectLoggingContext);
             List<TargetSpecification> dependencyTargets = new List<TargetSpecification>();
             foreach (string escapedDependency in dependencies)
             {
@@ -403,13 +411,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal async Task ExecuteTarget(ITaskBuilder taskBuilder, BuildRequestEntry requestEntry, ProjectLoggingContext projectLoggingContext, CancellationToken cancellationToken)
         {
-#if MSBUILDENABLEVSPROFILING 
-            try
-            {
-                string beginTargetBuild = String.Format(CultureInfo.CurrentCulture, "Build Target {0} in Project {1} - Start", this.Name, projectFullPath);
-                DataCollection.CommentMarkProfile(8800, beginTargetBuild);
-#endif 
-
             try
             {
                 VerifyState(_state, TargetEntryState.Execution);
@@ -460,8 +461,10 @@ namespace Microsoft.Build.BackEnd
                         Lookup lookupForExecution;
 
                         // UNDONE: (Refactor) Refactor TargetUpToDateChecker to take a logging context, not a logging service.
+                        MSBuildEventSource.Log.TargetUpToDateStart();
                         TargetUpToDateChecker dependencyAnalyzer = new TargetUpToDateChecker(requestEntry.RequestConfiguration.Project, _target, targetLoggingContext.LoggingService, targetLoggingContext.BuildEventContext);
                         DependencyAnalysisResult dependencyResult = dependencyAnalyzer.PerformDependencyAnalysis(bucket, out changedTargetInputs, out upToDateTargetInputs);
+                        MSBuildEventSource.Log.TargetUpToDateStop((int)dependencyResult);
 
                         switch (dependencyResult)
                         {
@@ -640,14 +643,11 @@ namespace Microsoft.Build.BackEnd
                 }
                 finally
                 {
-                       
-                    
-                        // log the last target finished since we now have the target outputs. 
-                        targetLoggingContext?.LogTargetBatchFinished(projectFullPath, targetSuccess, targetOutputItems?.Count > 0 ? targetOutputItems : null);
-                    
+                    // log the last target finished since we now have the target outputs. 
+                    targetLoggingContext?.LogTargetBatchFinished(projectFullPath, targetSuccess, targetOutputItems?.Count > 0 ? targetOutputItems : null);
                 }
 
-                _targetResult = new TargetResult(targetOutputItems.ToArray(), aggregateResult);
+                _targetResult = new TargetResult(targetOutputItems.ToArray(), aggregateResult, targetLoggingContext?.BuildEventContext);
 
                 if (aggregateResult.ResultCode == WorkUnitResultCode.Failed && aggregateResult.ActionCode == WorkUnitActionCode.Stop)
                 {
@@ -662,14 +662,6 @@ namespace Microsoft.Build.BackEnd
             {
                 _isExecuting = false;
             }
-#if MSBUILDENABLEVSPROFILING 
-            }
-            finally
-            {
-                string endTargetBuild = String.Format(CultureInfo.CurrentCulture, "Build Target {0} in Project {1} - End", this.Name, projectFullPath);
-                DataCollection.CommentMarkProfile(8801, endTargetBuild);
-            }
-#endif
         }
 
         /// <summary>

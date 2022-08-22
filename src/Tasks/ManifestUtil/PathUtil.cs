@@ -5,6 +5,8 @@ using Microsoft.Build.Shared;
 using System;
 using System.IO;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     internal static class PathUtil
@@ -33,7 +35,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return path.Split(MSBuildConstants.DirectorySeparatorChar);
         }
 
-        //Resolves the path, and if path is a url also canonicalizes it.
+        // Resolves the path, and if path is a url also canonicalizes it.
         public static string Format(string path)
         {
             if (String.IsNullOrEmpty(path)) return path;
@@ -125,8 +127,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return !u.IsUnc && !String.IsNullOrEmpty(u.Host);
         }
 
-        //If path is a url and starts with "localhost", resolves to machine name.
-        //If path is a relative path, resolves to a full path.
+        // If path is a url and starts with "localhost", resolves to machine name.
+        // If path is a relative path, resolves to a full path.
         public static string Resolve(string path)
         {
             if (String.IsNullOrEmpty(path)) return path;
@@ -138,7 +140,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 var u = new Uri(path);
                 if (String.Equals(u.Host, localHost, StringComparison.OrdinalIgnoreCase))
                 {
-                    // Unfortunatly Uri.Host is read-only, so we need to reconstruct it manually...
+                    // Unfortunately Uri.Host is read-only, so we need to reconstruct it manually...
                     int i = path.IndexOf(localHost, StringComparison.OrdinalIgnoreCase);
                     return i >= 0 ? path.Substring(0, i) + Environment.MachineName.ToLowerInvariant() + path.Substring(i + localHost.Length) : path;
                 }

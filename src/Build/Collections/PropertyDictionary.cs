@@ -8,6 +8,8 @@ using System.Diagnostics;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
 
+#nullable disable
+
 namespace Microsoft.Build.Collections
 {
     /// <summary>
@@ -203,12 +205,11 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Returns an enumerable which clones the properties 
+        /// Returns an enumerable which copies the underlying data on read.
         /// </summary>
-        /// <returns>Returns a cloning enumerable.</returns>
-        public IEnumerable<T> GetCopyOnReadEnumerable()
+        public IEnumerable<TResult> GetCopyOnReadEnumerable<TResult>(Func<T, TResult> selector)
         {
-            return new CopyOnReadEnumerable<T>(this, _properties);
+            return new CopyOnReadEnumerable<T, TResult>(this, _properties, selector);
         }
 
         /// <summary>
@@ -519,6 +520,23 @@ namespace Microsoft.Build.Collections
                     keyValueCallback(kvp.Key, EscapingUtilities.UnescapeAll(kvp.EscapedValue));
                 }
             }
+        }
+
+        internal IEnumerable<TResult> Filter<TResult>(Func<T, bool> filter, Func<T, TResult> selector)
+        {
+            List<TResult> result = new();
+            lock (_properties)
+            {
+                foreach (T property in _properties)
+                {
+                    if (filter(property))
+                    {
+                        result.Add(selector(property));
+                    }
+                }
+            }
+
+            return result;
         }
     }
 }

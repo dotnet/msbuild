@@ -25,7 +25,7 @@ namespace Microsoft.Build.Framework
         private readonly int _targetId;
 
         /// <summary>
-        ///The node-unique project request context the event was in
+        /// The node-unique project request context the event was in
         /// </summary>
         private readonly int _projectContextId;
 
@@ -95,7 +95,7 @@ namespace Microsoft.Build.Framework
             int targetId,
             int taskId
         )
-            :this(submissionId, nodeId, InvalidEvaluationId, projectInstanceId, projectContextId, targetId, taskId)
+            : this(submissionId, nodeId, InvalidEvaluationId, projectInstanceId, projectContextId, targetId, taskId)
         {
         }
 
@@ -129,7 +129,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Returns a default invalid BuildEventContext
         /// </summary>
-        public static BuildEventContext Invalid => new BuildEventContext(InvalidNodeId, InvalidTargetId, InvalidProjectContextId, InvalidTaskId);
+        public static BuildEventContext Invalid { get; } = new BuildEventContext(InvalidNodeId, InvalidTargetId, InvalidProjectContextId, InvalidTaskId);
 
         /// <summary>
         /// Retrieves the Evaluation id.
@@ -215,7 +215,7 @@ namespace Microsoft.Build.Framework
         {
             var hash = 17;
             // submission ID does not contribute to equality
-            //hash = hash * 31 + _submissionId;
+            // hash = hash * 31 + _submissionId;
             hash = (hash * 31) + _nodeId;
             hash = (hash * 31) + _evaluationId;
             hash = (hash * 31) + _targetId;
@@ -235,7 +235,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             // If the references are the same no need to do any more comparing
             if (ReferenceEquals(this, obj))
@@ -263,7 +263,7 @@ namespace Microsoft.Build.Framework
         /// <param name="left">Left hand side operand</param>
         /// <param name="right">Right hand side operand</param>
         /// <returns>True if the object values are identical, false if they are not identical</returns>
-        public static bool operator ==(BuildEventContext left, BuildEventContext right)
+        public static bool operator ==(BuildEventContext? left, BuildEventContext? right)
         {
             if (ReferenceEquals(left, right))
             {
@@ -285,7 +285,7 @@ namespace Microsoft.Build.Framework
         /// <param name="left">Left hand side operand</param>
         /// <param name="right">Right hand side operand</param>
         /// <returns>True if the object values are not identical, false if they are identical</returns>
-        public static bool operator !=(BuildEventContext left, BuildEventContext right)
+        public static bool operator !=(BuildEventContext? left, BuildEventContext? right)
         {
             return !(left == right);
         }
@@ -306,5 +306,9 @@ namespace Microsoft.Build.Framework
         }
         #endregion
 
+        public override string ToString()
+        {
+            return $"Node={NodeId} Submission={SubmissionId} ProjectContext={ProjectContextId} ProjectInstance={ProjectInstanceId} Eval={EvaluationId} Target={TargetId} Task={TaskId}";
+        }
     }
 }

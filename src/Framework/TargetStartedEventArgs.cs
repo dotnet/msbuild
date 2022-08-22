@@ -5,6 +5,8 @@ using System;
 using System.IO;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -182,32 +184,26 @@ namespace Microsoft.Build.Framework
             {
                 if (RawMessage == null)
                 {
-                    lock (locker)
+                    if (string.Equals(projectFile, targetFile, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (RawMessage == null)
+                        if (!string.IsNullOrEmpty(parentTarget))
                         {
-                            if (string.Equals(projectFile, targetFile, StringComparison.OrdinalIgnoreCase))
-                            {
-                                if (!string.IsNullOrEmpty(parentTarget))
-                                {
-                                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TargetStartedProjectDepends", targetName, projectFile, parentTarget);
-                                }
-                                else
-                                {
-                                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TargetStartedProjectEntry", targetName, projectFile);
-                                }
-                            }
-                            else
-                            {
-                                if (!string.IsNullOrEmpty(parentTarget))
-                                {
-                                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TargetStartedFileProjectDepends", targetName, targetFile, projectFile, parentTarget);
-                                }
-                                else
-                                {
-                                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TargetStartedFileProjectEntry", targetName, targetFile, projectFile);
-                                }
-                            }
+                            RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TargetStartedProjectDepends", targetName, projectFile, parentTarget);
+                        }
+                        else
+                        {
+                            RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TargetStartedProjectEntry", targetName, projectFile);
+                        }
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(parentTarget))
+                        {
+                            RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TargetStartedFileProjectDepends", targetName, targetFile, projectFile, parentTarget);
+                        }
+                        else
+                        {
+                            RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TargetStartedFileProjectEntry", targetName, targetFile, projectFile);
                         }
                     }
                 }

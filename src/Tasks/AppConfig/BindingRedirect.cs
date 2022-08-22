@@ -5,6 +5,8 @@ using System;
 using System.Xml;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -54,14 +56,9 @@ namespace Microsoft.Build.Tasks
                     OldVersionHigh = new Version(oldVersion);
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
-                ErrorUtilities.VerifyThrowArgument(false, e, "AppConfig.InvalidOldVersionAttribute", e.Message);
+                ErrorUtilities.ThrowArgument(e, "AppConfig.InvalidOldVersionAttribute", e.Message);
             }
 
             string newVersionAttribute = reader.GetAttribute("newVersion");
@@ -73,14 +70,9 @@ namespace Microsoft.Build.Tasks
             {
                 NewVersion = new Version(newVersionAttribute);
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
-                ErrorUtilities.VerifyThrowArgument(false, e, "AppConfig.InvalidNewVersionAttribute", e.Message);
+                ErrorUtilities.ThrowArgument(e, "AppConfig.InvalidNewVersionAttribute", e.Message);
             }
         }
     }

@@ -12,6 +12,8 @@ using System.Linq;
 using Microsoft.Build.Evaluation;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
@@ -48,7 +50,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1'>
                                 <m Condition='c' XX='YY'/>
@@ -70,7 +72,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1'>
                                 <" + "\u03A3" + @"/>
@@ -86,14 +88,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1' " + "\u03A3" + @"='v1' />
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i " + "\u03A3" + @"='v1' />
                         </ItemDefinitionGroup>
@@ -117,7 +119,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1'>
                                 <Filename/>
@@ -133,14 +135,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1' Filename='v1'/>
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i Filename='v1'/>
                         </ItemDefinitionGroup>
@@ -164,7 +166,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1'>
                                 <PropertyGroup/>
@@ -183,14 +185,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1' PropertyGroup='v1' />
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i PropertyGroup='v1' />
                         </ItemDefinitionGroup>
@@ -288,14 +290,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i1 Include='i' />
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i1 Include='i' />
@@ -324,7 +326,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void AddMetadataAsAttributeToItemDefinitionIllegalName()
         {
             string project = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i1/>
                         </ItemDefinitionGroup>
@@ -381,7 +383,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i>
                                 <m1>@(x)</m1>
@@ -401,7 +403,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadValidItemExpressionInMetadata()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1'>
                                 <m1>@(x)</m1>
@@ -416,14 +418,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i1 Include='i' m1='v1' />
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i1 Include='i' m1='v1' />
@@ -451,7 +453,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadMetadataAsAttributeOnItemDefinition()
         {
             string project = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i1 m1='v1' />
                         </ItemDefinitionGroup>
@@ -473,14 +475,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i1 Include='i' m1='&lt;&amp;>""' />
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i1 Include='i' m1='&lt;&amp;>""' />
@@ -508,7 +510,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadMetadataAsAttributeOnItemDefinitionWithSpecialCharacters()
         {
             var project = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i1 m1='&lt;&amp;>""' />
                         </ItemDefinitionGroup>
@@ -530,19 +532,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <ItemGroup>
                             <i1 Include=`i` m1=`v1` />
                         </ItemGroup>
                     </Project>",
                 @"
-                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Project>
                         <ItemGroup>
                             <i1 Include=`i` m1=`v2` />
                         </ItemGroup>
                     </Project>")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i1 Include=`i` m1=`v1` />
@@ -550,7 +552,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </Target>
                     </Project>",
                 @"
-                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Project>
                         <Target Name=`t`>
                             <ItemGroup>
                                 <i1 Include=`i` m1=`v2` />
@@ -596,7 +598,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void UpdateMetadataValueAsAttributeOnItemDefinition()
         {
             var projectContents = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <ItemDefinitionGroup>
                             <i1 m1=`v1` />
                         </ItemDefinitionGroup>
@@ -629,7 +631,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             string expected = @"<?xml version=""1.0"" encoding=""utf-16""?>" +
                               ObjectModelHelpers.CleanupFileContents(@"
-                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Project>
                         <ItemDefinitionGroup>
                             <i1 m1=`v2` />
                         </ItemDefinitionGroup>
@@ -639,25 +641,25 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        //  NOTE: When https://github.com/Microsoft/msbuild/issues/362 is fixed, then the expected value in XML may be:
+        // NOTE: When https://github.com/dotnet/msbuild/issues/362 is fixed, then the expected value in XML may be:
         //      &lt;&amp;>"
         //  instead of:
         //      &lt;&amp;&gt;&quot;
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <ItemGroup>
                             <i1 Include=`i` m1=`v1` />
                         </ItemGroup>
                     </Project>",
                 @"
-                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Project>
                         <ItemGroup>
                             <i1 Include=`i` m1=`&lt;&amp;&gt;&quot;` />
                         </ItemGroup>
                     </Project>")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i1 Include=`i` m1=`v1` />
@@ -665,7 +667,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </Target>
                     </Project>",
                 @"
-                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Project>
                         <Target Name=`t`>
                             <ItemGroup>
                                 <i1 Include=`i` m1=`&lt;&amp;&gt;&quot;` />
@@ -711,7 +713,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void UpdateMetadataValueAsAttributeOnItemDefinitionWithSpecialCharacters()
         {
             var projectContents = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <ItemDefinitionGroup>
                             <i1 m1=`v1` />
                         </ItemDefinitionGroup>
@@ -744,7 +746,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             string expected = @"<?xml version=""1.0"" encoding=""utf-16""?>" +
                               ObjectModelHelpers.CleanupFileContents(@"
-                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Project>
                         <ItemDefinitionGroup>
                             <i1 m1=`&lt;&amp;&gt;&quot;` />
                         </ItemDefinitionGroup>
@@ -756,7 +758,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <ItemGroup>
                             <i1 Include='i'>
                               <m1>v1</m1>
@@ -764,25 +766,25 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </ItemGroup>
                     </Project>",
                 @"
-                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Project>
                         <ItemGroup>
                             <i1 Include=`i` m1=`v1` />
                         </ItemGroup>
                     </Project>")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <ItemGroup>
                             <i1 Include='i'><m1>v1</m1></i1>
                         </ItemGroup>
                     </Project>",
                 @"
-                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Project>
                         <ItemGroup>
                             <i1 Include=`i` m1=`v1` />
                         </ItemGroup>
                     </Project>")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i1 Include='i'>
@@ -792,7 +794,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </Target>
                     </Project>",
                 @"
-                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Project>
                         <Target Name=`t`>
                             <ItemGroup>
                                 <i1 Include=`i` m1=`v1` />
@@ -835,7 +837,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <ItemDefinitionGroup>
                             <i1>
                               <m1>v1</m1>
@@ -843,19 +845,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </ItemDefinitionGroup>
                     </Project>",
         @"
-                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Project>
                         <ItemDefinitionGroup>
                             <i1 m1=`v1` />
                         </ItemDefinitionGroup>
                     </Project>")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <ItemDefinitionGroup>
                             <i1><m1>v1</m1></i1>
                         </ItemDefinitionGroup>
                     </Project>",
         @"
-                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Project>
                         <ItemDefinitionGroup>
                             <i1 m1=`v1` />
                         </ItemDefinitionGroup>
@@ -896,13 +898,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <ItemGroup>
                             <i1 Include='i' m1='v1' />
                         </ItemGroup>
                     </Project>",
                     @"
-                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Project>
                         <ItemGroup>
                             <i1 Include=`i`>
                               <m1>v1</m1>
@@ -910,7 +912,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </ItemGroup>
                     </Project>")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i1 Include='i' m1='v1' />
@@ -918,7 +920,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </Target>
                     </Project>",
                     @"
-                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Project>
                         <Target Name=`t`>
                             <ItemGroup>
                                 <i1 Include=`i`>
@@ -965,7 +967,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ChangeAttributeToMetadataOnItemDefinition()
         {
             var projectContents = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <ItemDefinitionGroup>
                             <i1 m1='v1'/>
                         </ItemDefinitionGroup>
@@ -997,7 +999,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             string expected = @"<?xml version=""1.0"" encoding=""utf-16""?>" +
                 ObjectModelHelpers.CleanupFileContents(@"
-                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Project>
                         <ItemDefinitionGroup>
                             <i1>
                               <m1>v1</m1>
@@ -1011,19 +1013,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <ItemGroup>
                             <i1 Include='i' />
                         </ItemGroup>
                     </Project>",
         @"
-                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Project>
                         <ItemGroup>
                             <i1 Include=`i` m1=`v1` />
                         </ItemGroup>
                     </Project>")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i1 Include='i' />
@@ -1031,7 +1033,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </Target>
                     </Project>",
         @"
-                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Project>
                         <Target Name=`t`>
                             <ItemGroup>
                                 <i1 Include=`i` m1=`v1` />
@@ -1073,7 +1075,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void AddMetadataAsAttributeToItemDefinition()
         {
             var projectContents = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <ItemDefinitionGroup>
                             <i1/>
                         </ItemDefinitionGroup>
@@ -1102,7 +1104,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             string expected = @"<?xml version=""1.0"" encoding=""utf-16""?>" +
                               ObjectModelHelpers.CleanupFileContents(@"
-                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Project>
                         <ItemDefinitionGroup>
                             <i1 m1=`v1` />
                         </ItemDefinitionGroup>
@@ -1114,13 +1116,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <ItemGroup>
                             <i1 Include='i' />
                         </ItemGroup>
                     </Project>",
         @"
-                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Project>
                         <ItemGroup>
                             <i1 Include=`i` m1=`v1`>
                               <m2>v2</m2>
@@ -1128,7 +1130,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </ItemGroup>
                     </Project>")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i1 Include='i' />
@@ -1136,7 +1138,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </Target>
                     </Project>",
         @"
-                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Project>
                         <Target Name=`t`>
                             <ItemGroup>
                                 <i1 Include=`i` m1=`v1`>
@@ -1187,7 +1189,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void AddMetadataToItemDefinitionAsAttributeAndAsElement()
         {
             var projectContents = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <ItemDefinitionGroup>
                             <i1/>
                         </ItemDefinitionGroup>
@@ -1223,7 +1225,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             string expected = @"<?xml version=""1.0"" encoding=""utf-16""?>" +
                               ObjectModelHelpers.CleanupFileContents(@"
-                    <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                    <Project>
                         <ItemDefinitionGroup>
                             <i1 m1=`v1`>
                               <m2>v2</m2>
@@ -1241,7 +1243,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         private static ProjectMetadataElement GetMetadataXml()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <ItemGroup>
                             <i Include='i1'>
                                 <m Condition='c'>m1</m>

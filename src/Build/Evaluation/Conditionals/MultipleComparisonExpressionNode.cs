@@ -1,7 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -34,7 +37,7 @@ namespace Microsoft.Build.Evaluation
         /// Order in which comparisons are attempted is numeric, boolean, then string.
         /// Updates conditioned properties table.
         /// </summary>
-        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
+        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext)
         {
             ProjectErrorUtilities.VerifyThrowInvalidProject
                 (LeftChild != null && RightChild != null,
@@ -48,36 +51,41 @@ namespace Microsoft.Build.Evaluation
             // and we know which do, then we already have enough information to evaluate this expression.
             // That means we don't have to fully expand a condition like " '@(X)' == '' " 
             // which is a performance advantage if @(X) is a huge item list.
-            if (LeftChild.EvaluatesToEmpty(state) || RightChild.EvaluatesToEmpty(state))
+            bool leftEmpty = LeftChild.EvaluatesToEmpty(state, loggingContext);
+            bool rightEmpty = RightChild.EvaluatesToEmpty(state, loggingContext);
+            if (leftEmpty || rightEmpty)
             {
                 UpdateConditionedProperties(state);
 
-                return Compare(LeftChild.EvaluatesToEmpty(state), RightChild.EvaluatesToEmpty(state));
+                return Compare(leftEmpty, rightEmpty);
             }
-
-            if (LeftChild.CanNumericEvaluate(state) && RightChild.CanNumericEvaluate(state))
+            else if (LeftChild.TryNumericEvaluate(state, out double leftNumericValue) && RightChild.TryNumericEvaluate(state, out double rightNumericValue))
             {
-                return Compare(LeftChild.NumericEvaluate(state), RightChild.NumericEvaluate(state));
+                // The left child evaluating to a number and the right child not evaluating to a number
+                // is insufficient to say they are not equal because $(MSBuildToolsVersion) evaluates to
+                // the string "Current" most of the time but when doing numeric comparisons, is treated
+                // as a version and returns "17.0" (or whatever the current tools version is). This means
+                // that if '$(MSBuildToolsVersion)' is "equal" to BOTH '17.0' and 'Current' (if 'Current'
+                // is 17.0).
+                return Compare(leftNumericValue, rightNumericValue);
             }
-            else if (LeftChild.CanBoolEvaluate(state) && RightChild.CanBoolEvaluate(state))
+            else if (LeftChild.TryBoolEvaluate(state, out bool leftBoolValue, loggingContext) && RightChild.TryBoolEvaluate(state, out bool rightBoolValue, loggingContext))
             {
-                return Compare(LeftChild.BoolEvaluate(state), RightChild.BoolEvaluate(state));
+                return Compare(leftBoolValue, rightBoolValue);
             }
-            else // string comparison
-            {
-                string leftExpandedValue = LeftChild.GetExpandedValue(state);
-                string rightExpandedValue = RightChild.GetExpandedValue(state);
 
-                ProjectErrorUtilities.VerifyThrowInvalidProject
-                    (leftExpandedValue != null && rightExpandedValue != null,
-                     state.ElementLocation,
-                     "IllFormedCondition",
-                     state.Condition);
+            string leftExpandedValue = LeftChild.GetExpandedValue(state, loggingContext);
+            string rightExpandedValue = RightChild.GetExpandedValue(state, loggingContext);
 
-                UpdateConditionedProperties(state);
+            ProjectErrorUtilities.VerifyThrowInvalidProject
+                (leftExpandedValue != null && rightExpandedValue != null,
+                    state.ElementLocation,
+                    "IllFormedCondition",
+                    state.Condition);
 
-                return Compare(leftExpandedValue, rightExpandedValue);
-            }
+            UpdateConditionedProperties(state);
+
+            return Compare(leftExpandedValue, rightExpandedValue);
         }
 
         /// <summary>

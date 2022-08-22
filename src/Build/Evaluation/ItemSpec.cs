@@ -4,9 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -85,6 +88,11 @@ namespace Microsoft.Build.Evaluation
                 return ReferencedItems.Any(v => v.ItemAsValueFragment.IsMatch(itemToMatch));
             }
 
+            public override IEnumerable<string> GetReferencedItems()
+            {
+                return ReferencedItems.Select(v => EscapingUtilities.UnescapeAll(v.ItemAsValueFragment.TextFragment));
+            }
+
             public override IMSBuildGlob ToMSBuildGlob()
             {
                 return MsBuildGlob;
@@ -92,7 +100,13 @@ namespace Microsoft.Build.Evaluation
 
             protected override IMSBuildGlob CreateMsBuildGlob()
             {
-                return new CompositeGlob(ReferencedItems.Select(i => i.ItemAsValueFragment.ToMSBuildGlob()));
+                if (ReferencedItems.Count == 1)
+                {
+                    // Optimize the common case, avoiding allocation of enumerable/enumerator.
+                    return ReferencedItems[0].ItemAsValueFragment.ToMSBuildGlob();
+                }
+
+                return CompositeGlob.Create(ReferencedItems.Select(i => i.ItemAsValueFragment.ToMSBuildGlob()));
             }
 
             private bool InitReferencedItemsIfNecessary()
@@ -143,23 +157,25 @@ namespace Microsoft.Build.Evaluation
         /// <param name="itemSpecLocation">The xml location the itemspec comes from</param>
         /// <param name="projectDirectory">The directory that the project is in.</param>
         /// <param name="expandProperties">Expand properties before breaking down fragments. Defaults to true</param>
+        /// <param name="loggingContext">Context in which to log</param>
         public ItemSpec(
             string itemSpec,
             Expander<P, I> expander,
             IElementLocation itemSpecLocation,
             string projectDirectory,
-            bool expandProperties = true)
+            bool expandProperties = true,
+            LoggingContext loggingContext = null)
         {
             ItemSpecString = itemSpec;
             Expander = expander;
             ItemSpecLocation = itemSpecLocation;
 
-            Fragments = BuildItemFragments(itemSpecLocation, projectDirectory, expandProperties);
+            Fragments = BuildItemFragments(itemSpecLocation, projectDirectory, expandProperties, loggingContext);
         }
 
-        private List<ItemSpecFragment> BuildItemFragments(IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties)
+        private List<ItemSpecFragment> BuildItemFragments(IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties, LoggingContext loggingContext)
         {
-            //  Code corresponds to Evaluator.CreateItemsFromInclude
+            // Code corresponds to Evaluator.CreateItemsFromInclude
             var evaluatedItemspecEscaped = ItemSpecString;
 
             if (string.IsNullOrEmpty(evaluatedItemspecEscaped))
@@ -173,7 +189,8 @@ namespace Microsoft.Build.Evaluation
                 evaluatedItemspecEscaped = Expander.ExpandIntoStringLeaveEscaped(
                     ItemSpecString,
                     ExpanderOptions.ExpandProperties,
-                    itemSpecLocation);
+                    itemSpecLocation,
+                    loggingContext);
             }
 
             var semicolonCount = 0;
@@ -210,7 +227,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         // The expression is not of the form "@(X)". Treat as string
 
-                        //  Code corresponds to EngineFileUtilities.GetFileList
+                        // Code corresponds to EngineFileUtilities.GetFileList
                         if (!FileMatcher.HasWildcards(splitEscaped))
                         {
                             // No real wildcards means we just return the original string.  Don't even bother
@@ -222,7 +239,7 @@ namespace Microsoft.Build.Evaluation
                         else if (EscapingUtilities.ContainsEscapedWildcards(splitEscaped))
                         {
                             // '*' is an illegal character to have in a filename.
-                            // todo: file-system assumption on legal path characters: https://github.com/Microsoft/msbuild/issues/781
+                            // todo: file-system assumption on legal path characters: https://github.com/dotnet/msbuild/issues/781
                             // Just return the original string.
                             fragments.Add(new ValueFragment(splitEscaped, projectDirectory));
                         }
@@ -248,7 +265,7 @@ namespace Microsoft.Build.Evaluation
         {
             isItemListExpression = false;
 
-            //  Code corresponds to Expander.ExpandSingleItemVectorExpressionIntoItems
+            // Code corresponds to Expander.ExpandSingleItemVectorExpressionIntoItems
             if (expression.Length == 0)
             {
                 return null;
@@ -317,11 +334,59 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Returns a list of normalized paths that are common between this itemspec and keys of the given dictionary.
+        /// </summary>
+        /// <param name="itemsByNormalizedValue">The dictionary to match this itemspec against.</param>
+        /// <returns>The keys of <paramref name="itemsByNormalizedValue"/> that are also referenced by this itemspec.</returns>
+        public IList<string> IntersectsWith(IReadOnlyDictionary<string, ItemDataCollectionValue<I>> itemsByNormalizedValue)
+        {
+            IList<string> matches = null;
+
+            foreach (var fragment in Fragments)
+            {
+                IEnumerable<string> referencedItems = fragment.GetReferencedItems();
+                if (referencedItems != null)
+                {
+                    // The fragment can enumerate its referenced items, we can do dictionary lookups.
+                    foreach (var spec in referencedItems)
+                    {
+                        string key = FileUtilities.NormalizePathForComparisonNoThrow(spec, fragment.ProjectDirectory);
+                        if (itemsByNormalizedValue.TryGetValue(key, out var multiValue))
+                        {
+                            matches ??= new List<string>();
+                            matches.Add(key);
+                        }
+                    }
+                }
+                else
+                {
+                    // The fragment cannot enumerate its referenced items. Iterate over the dictionary and test each item.
+                    foreach (var kvp in itemsByNormalizedValue)
+                    {
+                        if (fragment.IsMatchNormalized(kvp.Key))
+                        {
+                            matches ??= new List<string>();
+                            matches.Add(kvp.Key);
+                        }
+                    }
+                }
+            }
+
+            return matches ?? Array.Empty<string>();
+        }
+
+        /// <summary>
         ///     Return an MSBuildGlob that represents this ItemSpec.
         /// </summary>
         public IMSBuildGlob ToMSBuildGlob()
         {
-            return new CompositeGlob(Fragments.Select(f => f.ToMSBuildGlob()));
+            if (Fragments.Count == 1)
+            {
+                // Optimize the common case, avoiding allocation of enumerable/enumerator.
+                return Fragments[0].ToMSBuildGlob();
+            }
+
+            return CompositeGlob.Create(Fragments.Select(f => f.ToMSBuildGlob()));
         }
 
         /// <summary>
@@ -415,6 +480,16 @@ namespace Microsoft.Build.Evaluation
             return FileMatcher.IsMatch(itemToMatch);
         }
 
+        public virtual bool IsMatchNormalized(string normalizedItemToMatch)
+        {
+            return FileMatcher.IsMatchNormalized(normalizedItemToMatch);
+        }
+
+        public virtual IEnumerable<string> GetReferencedItems()
+        {
+            return Enumerable.Repeat(EscapingUtilities.UnescapeAll(TextFragment), 1);
+        }
+
         public virtual IMSBuildGlob ToMSBuildGlob()
         {
             return MsBuildGlob;
@@ -446,6 +521,12 @@ namespace Microsoft.Build.Evaluation
         {
         }
 
+        public override IEnumerable<string> GetReferencedItems()
+        {
+            // This fragment cannot efficiently enumerate its referenced items.
+            return null;
+        }
+
         /// <summary>
         /// True if TextFragment starts with /**/ or a variation thereof with backslashes.
         /// </summary>
@@ -462,7 +543,7 @@ namespace Microsoft.Build.Evaluation
     /// on multiple metadata. If one item specifies NotTargetFramework to be net46 and TargetFramework to
     /// be netcoreapp3.1, we wouldn't want to match that to an item with TargetFramework 46 and
     /// NotTargetFramework netcoreapp3.1.
-    /// 
+    ///
     /// Implementing this as a list of sets where each metadatum key has its own set also would not work
     /// because different items could match on different metadata, and we want to check to see if any
     /// single item matches on all the metadata. As an example, consider this scenario:
@@ -474,10 +555,10 @@ namespace Microsoft.Build.Evaluation
     /// should match none of them because Forgind doesn't match all three metadata of any of the items.
     /// With a list of sets, Forgind would match Baby on BadAt, Child on GoodAt, and Adolescent on OkAt,
     /// and Forgind would be erroneously removed.
-    /// 
+    ///
     /// With a Trie as below, Items specify paths in the tree, so going to any child node eliminates all
     /// items that don't share that metadatum. This ensures the match is proper.
-    /// 
+    ///
     /// Todo: Tries naturally can have different shapes depending on in what order the metadata are considered.
     /// Specifically, if all the items share a single metadata value for the one metadatum and have different
     /// values for a second metadatum, it will have only one node more than the number of items if the first

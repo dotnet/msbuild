@@ -1,16 +1,3 @@
-- [Summary](#summary)
-- [Motivation](#motivation)
-- [Plugin requirements](#plugin-requirements)
-- [High-level design](#high-level-design)
-- [APIs and calling patterns](#apis-and-calling-patterns)
-  - [From BuildManager API users who have a project dependency graph at hand and want to manually issue builds for each graph node in reverse topo sort order.](#from-buildmanager-api-users-who-have-a-project-dependency-graph-at-hand-and-want-to-manually-issue-builds-for-each-graph-node-in-reverse-topo-sort-order)
-  - [From command line](#from-command-line)
-  - [From Visual Studio, a temporary workaround](#from-visual-studio-a-temporary-workaround)
-- [Details](#details)
-- [Caveats](#caveats)
-- [Future work](#future-work)
-- [Potential work of dubious value](#potential-work-of-dubious-value)
-
 # Summary
 
 Project cache is a new assembly-based plugin extension point in MSBuild which determines whether a build request (a project) can be skipped during build. The main expected benefit is reduced build times via [caching and/or distribution](https://github.com/dotnet/msbuild/blob/master/documentation/specs/static-graph.md#weakness-of-the-old-model-caching-and-distributability).

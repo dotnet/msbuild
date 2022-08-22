@@ -12,8 +12,11 @@ The opt-out comes in the form of setting the environment variable `MSBuildDisabl
 ## Choosing a Change Wave for a New Feature
 This is determined on a case by case basis and should be discussed with the MSBuild team. A safe bet would be to check our [currently active Change Waves](ChangeWaves.md#change-waves-&-associated-features) and pick the version after the latest MSBuild version. This version corresponds to the latest version of Visual Studio.
 
+### Change Wave Versioning
+Change Wave features should match the LTS version of VS they were released with. Any feature requiring a changewave during a non-LTS release of VS should use the **NEXT** version number.
+
 # Developing With Change Waves in Mind
-For the purpose of providing an example, the rest of this document assumes we're developing a feature for MSBuild version **17.4**.
+For the purpose of providing an example, the rest of this document assumes we're developing a feature for MSBuild version **17.3**.
 
 The Process:
 1. Develop your feature.
@@ -32,7 +35,7 @@ public static readonly Version Wave17_4 = new Version(17, 4);
 3. You may need to delete the lowest wave as new waves get added.
 4. Update the AllWaves array appropriately.
 ```c#
-public static readonly Version[] AllWaves = { Wave16_10, Wave17_0, Wave17_4 };
+public static readonly Version[] AllWaves = { Wave17_0, Wave17_2, Wave17_4 };
 ```
 
 ## Condition Your Feature On A Change Wave

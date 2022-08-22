@@ -13,6 +13,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -52,6 +54,8 @@ namespace Microsoft.Build.Tasks
         // if signing manifests is on and not all app files are included, then the project can't be published.
         private bool _canPublish;
         private Dictionary<string, ITaskItem> _runtimePackAssets;
+        // map of satellite assemblies that are included in References
+        private SatelliteRefAssemblyMap _satelliteAssembliesPassedAsReferences = new SatelliteRefAssemblyMap();
         #endregion
 
         #region Properties
@@ -284,7 +288,7 @@ namespace Microsoft.Build.Tasks
                 // .NETCore Launcher.exe based deployment: If the file is apphost.exe, we need to set 'TargetPath' metadata
                 // to {assemblyname}.exe so that the file gets published as {assemblyname}.exe and not apphost.exe.
                 //
-                if (LauncherBasedDeployment && 
+                if (LauncherBasedDeployment &&
                     targetPath.Equals(Constants.AppHostExe, StringComparison.InvariantCultureIgnoreCase) &&
                     !String.IsNullOrEmpty(AssemblyName))
                 {
@@ -380,6 +384,29 @@ namespace Microsoft.Build.Tasks
                 {
                     if (!IsFiltered(item))
                     {
+                        // ClickOnce for .NET 4.X should not publish duplicate satellite assemblies.
+                        // This will cause ClickOnce install to fail. This can happen if some package
+                        // decides to publish the en-us resource assemblies for other locales also.
+                        if (!LauncherBasedDeployment && _satelliteAssembliesPassedAsReferences.ContainsItem(item))
+                        {
+                            continue;
+                        }
+
+                        // Apply the culture publishing rules to include or exclude satellite assemblies
+                        AssemblyIdentity identity = AssemblyIdentity.FromManagedAssembly(item.ItemSpec);
+                        if (identity != null && !String.Equals(identity.Culture, "neutral", StringComparison.Ordinal))
+                        {
+                            CultureInfo satelliteCulture = new CultureInfo(identity.Culture);
+                            item.SetMetadata("Culture", identity.Culture);
+                            if (PublishFlags.IsSatelliteIncludedByDefault(satelliteCulture, _targetCulture, _includeAllSatellites))
+                            {
+                                _satelliteAssembliesPassedAsReferences.Add(item);
+                            }
+                            else
+                            {
+                                continue;
+                            }
+                        }
                         item.SetMetadata("AssemblyType", "Managed");
                         assemblyMap.Add(item);
                     }
@@ -574,6 +601,10 @@ namespace Microsoft.Build.Tasks
                 foreach (ITaskItem item in _satelliteAssemblies)
                 {
                     item.SetMetadata("AssemblyType", "Satellite");
+                    if (_satelliteAssembliesPassedAsReferences.ContainsItem(item))
+                    {
+                        continue;
+                    }
                     satelliteMap.Add(item, true);
                 }
             }
@@ -722,7 +753,7 @@ namespace Microsoft.Build.Tasks
             if (item.ItemSpec.EndsWith(".dll") && identity == null && !isDotNetCore)
             {
                 // It is possible that a native dll gets passed in here that was declared as a content file
-                // in a referenced nuget package, which will yield null here. We just need to ignore those 
+                // in a referenced nuget package, which will yield null here. We just need to ignore those
                 // for .NET FX case since those aren't actually references we care about. For .NET Core, native
                 // dll can be passed as a reference so we won't ignore it if isDotNetCore is true.
                 return true;
@@ -838,7 +869,7 @@ namespace Microsoft.Build.Tasks
                 int i = fusionName.IndexOf(',');
                 if (i > 0)
                 {
-                    string simpleName = fusionName.Substring(0, i); //example: "ClassLibrary1, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" -> "ClassLibrary1"
+                    string simpleName = fusionName.Substring(0, i); // example: "ClassLibrary1, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" -> "ClassLibrary1"
                     key = simpleName.ToLowerInvariant();
                     // If there are multiple with same simple name then we'll take the first one and ignore the rest, which is not an unreasonable thing to do
                     if (!_simpleNameDictionary.ContainsKey(key))
@@ -847,13 +878,61 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            
+
             IEnumerator IEnumerable.GetEnumerator()
             {
                 return _dictionary.Values.GetEnumerator();
             }
         }
         #endregion
+
+        #region SatelliteRefAssemblyMap
+        private class SatelliteRefAssemblyMap : IEnumerable
+        {
+            private readonly Dictionary<string, MapEntry> _dictionary = new Dictionary<string, MapEntry>(StringComparer.InvariantCultureIgnoreCase);
+
+            public MapEntry this[string fusionName]
+            {
+                get
+                {
+                    _dictionary.TryGetValue(fusionName, out MapEntry entry);
+                    return entry;
+                }
+            }
+
+            public bool ContainsItem(ITaskItem item)
+            {
+                AssemblyIdentity identity = AssemblyIdentity.FromManagedAssembly(item.ItemSpec);
+                if (identity != null)
+                {
+                    return _dictionary.ContainsKey(identity.ToString());
+                }
+                return false;
+            }
+
+            public void Add(ITaskItem item)
+            {
+                var entry = new MapEntry(item, true);
+                AssemblyIdentity identity = AssemblyIdentity.FromManagedAssembly(item.ItemSpec);
+                if (identity != null && !String.Equals(identity.Culture, "neutral", StringComparison.Ordinal))
+                {
+                    // Use satellite assembly strong name signature as key
+                    string key = identity.ToString();
+                    Debug.Assert(!_dictionary.ContainsKey(key), String.Format(CultureInfo.CurrentCulture, "Two or more items with same key '{0}' detected", key));
+                    if (!_dictionary.ContainsKey(key))
+                    {
+                        _dictionary.Add(key, entry);
+                    }
+                }
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return _dictionary.Values.GetEnumerator();
+            }
+        }
+        #endregion
+
 
         #region FileMap
         private class FileMap : IEnumerable
@@ -1036,7 +1115,7 @@ namespace Microsoft.Build.Tasks
 
             public bool IsPublished { get; }
 
-            private static bool IsSatelliteIncludedByDefault(CultureInfo satelliteCulture, CultureInfo targetCulture, bool includeAllSatellites)
+            public static bool IsSatelliteIncludedByDefault(CultureInfo satelliteCulture, CultureInfo targetCulture, bool includeAllSatellites)
             {
                 // If target culture not specified then satellite is not included by default...
                 if (targetCulture == null)

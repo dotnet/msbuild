@@ -7,6 +7,8 @@ using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>
@@ -48,6 +50,22 @@ namespace Microsoft.Build.Execution
             propertyInfo.GetCustomAttributes(typeof(RequiredAttribute), true).Any())
         {
             _propertyInfo = propertyInfo;
+        }
+
+        /// <summary>
+        /// Initializes a new <see cref="ReflectableTaskPropertyInfo"/> with three precomputed parameters. This is specifically
+        /// used with MetadataLoadContext, as these parameters cannot be computed for the property type passed in directly but
+        /// rather the relevant base type.
+        /// </summary>
+        internal ReflectableTaskPropertyInfo(PropertyInfo propertyInfo, bool output, bool required, bool isAssignableToITaskItemType)
+            : base(
+            propertyInfo.Name,
+            propertyInfo.PropertyType,
+            output,
+            required)
+        {
+            _propertyInfo = propertyInfo;
+            IsAssignableToITask = isAssignableToITaskItemType;
         }
 
         /// <summary>

@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
-    
     <IsPackable>false</IsPackable>
     <AssemblyName>Microsoft.Build.Engine.UnitTests</AssemblyName>
 
@@ -18,6 +17,7 @@
   <ItemGroup>
     <PackageReference Include="System.Configuration.ConfigurationManager" />
     <PackageReference Include="Shouldly" />
+    <PackageReference Include="System.Net.Http" />
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" />
     <PackageReference Include="NuGet.Frameworks" >
       <PrivateAssets>all</PrivateAssets>
@@ -36,22 +36,18 @@
     <ProjectReference Include="..\Samples\TaskWithDependency\TaskWithDependency.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="TaskWithDependencyResolvedProjectReferencePath">
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">TargetFramework=$(FullFrameworkTFM)</SetTargetFramework>
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MonoBuild)' == 'true'">TargetFramework=$(FullFrameworkTFM)</SetTargetFramework>
-      <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">TargetFramework=netstandard2.0</SetTargetFramework>
+      <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">TargetFramework=net6.0</SetTargetFramework>
     </ProjectReference>
-    <ProjectReference Include="..\Samples\PortableTask\PortableTask.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="PortableTaskResolvedProjectReferencePath" SetTargetFramework="TargetFramework=netstandard1.3" />
+    <ProjectReference Include="..\Samples\PortableTask\PortableTask.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="PortableTaskResolvedProjectReferencePath" />
 
     <ProjectReference Include="..\Samples\ProjectCachePlugin\ProjectCachePlugin.csproj" Private="false" ReferenceOutputAssembly="false">
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">TargetFramework=$(FullFrameworkTFM)</SetTargetFramework>
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MonoBuild)' == 'true'">TargetFramework=$(FullFrameworkTFM)</SetTargetFramework>
-      <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">TargetFramework=net5.0</SetTargetFramework>
+      <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">TargetFramework=net6.0</SetTargetFramework>
     </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-
     <Compile Include="..\Shared\UnitTests\BuildEventArgsExtension.cs">
       <!-- Extension methods -->
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -113,12 +109,14 @@
       <Link>TaskParameter_Tests.cs</Link>
     </Compile>
     <Compile Include="..\Shared\UnitTests\ObjectModelHelpers.cs" />
-    <Compile Include="..\Shared\UnitTests\CopyOnWriteDictionary_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\CopyOnWriteDictionary_Tests.cs">
+      <Link>Collections\CopyOnWriteDictionary_Tests.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\UnitTests\TestData\GlobbingTestData.cs">
       <Link>TestData\GlobbingTestData.cs</Link>
     </Compile>
     <Compile Include="..\Shared\UnitTests\ImmutableDictionary_Tests.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MSBuildRuntimeType)' == 'Full' and '$(MonoBuild)' != 'true'">
-      <Link>ImmutableDictionary_Tests.cs</Link>
+      <Link>Collections\ImmutableDictionary_Tests.cs</Link>
     </Compile>
 
     <None Include="..\Shared\UnitTests\App.config">

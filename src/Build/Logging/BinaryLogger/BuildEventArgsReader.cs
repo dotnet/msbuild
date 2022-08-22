@@ -13,6 +13,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Logging
 {
     /// <summary>
@@ -51,13 +53,11 @@ namespace Microsoft.Build.Logging
             typeof(BuildEventArgs).GetField("threadId", BindingFlags.Instance | BindingFlags.NonPublic);
         private static FieldInfo buildEventArgsFieldSenderName =
             typeof(BuildEventArgs).GetField("senderName", BindingFlags.Instance | BindingFlags.NonPublic);
-        private static FieldInfo buildEventArgsFieldTimestamp =
-            typeof(BuildEventArgs).GetField("timestamp", BindingFlags.Instance | BindingFlags.NonPublic);
 
         /// <summary>
-        /// Initializes a new instance of BuildEventArgsReader using a BinaryReader instance
+        /// Initializes a new instance of <see cref="BuildEventArgsReader"/> using a <see cref="BinaryReader"/> instance.
         /// </summary>
-        /// <param name="binaryReader">The BinaryReader to read BuildEventArgs from</param>
+        /// <param name="binaryReader">The <see cref="BinaryReader"/> to read <see cref="BuildEventArgs"/> from.</param>
         /// <param name="fileFormatVersion">The file format version of the log file being read.</param>
         public BuildEventArgsReader(BinaryReader binaryReader, int fileFormatVersion)
         {
@@ -81,8 +81,12 @@ namespace Microsoft.Build.Logging
         internal event Action<BinaryLogRecordKind, byte[]> OnBlobRead;
 
         /// <summary>
-        /// Reads the next log record from the binary reader. If there are no more records, returns null.
+        /// Reads the next log record from the <see cref="BinaryReader"/>.
         /// </summary>
+        /// <returns>
+        /// The next <see cref="BuildEventArgs"/>.
+        /// If there are no more records, returns <see langword="null"/>.
+        /// </returns>
         public BuildEventArgs Read()
         {
             BinaryLogRecordKind recordKind = (BinaryLogRecordKind)ReadInt32();
@@ -297,14 +301,29 @@ namespace Microsoft.Build.Logging
             string condition = null;
             string evaluatedCondition = null;
             bool originallySucceeded = false;
+            TargetSkipReason skipReason = TargetSkipReason.None;
+            BuildEventContext originalBuildEventContext = null;
             if (fileFormatVersion >= 13)
             {
                 condition = ReadOptionalString();
                 evaluatedCondition = ReadOptionalString();
                 originallySucceeded = ReadBoolean();
+
+                // Attempt to infer skip reason from the data we have
+                skipReason = condition != null ?
+                    TargetSkipReason.ConditionWasFalse // condition expression only stored when false
+                    : originallySucceeded ?
+                        TargetSkipReason.PreviouslyBuiltSuccessfully
+                        : TargetSkipReason.PreviouslyBuiltUnsuccessfully;
             }
 
             var buildReason = (TargetBuiltReason)ReadInt32();
+
+            if (fileFormatVersion >= 14)
+            {
+                skipReason = (TargetSkipReason)ReadInt32();
+                originalBuildEventContext = binaryReader.ReadOptionalBuildEventContext();
+            }
 
             var e = new TargetSkippedEventArgs(
                 fields.Message,
@@ -320,6 +339,8 @@ namespace Microsoft.Build.Logging
             e.Condition = condition;
             e.EvaluatedCondition = evaluatedCondition;
             e.OriginallySucceeded = originallySucceeded;
+            e.SkipReason = skipReason;
+            e.OriginalBuildEventContext = originalBuildEventContext;
 
             return e;
         }
@@ -535,6 +556,8 @@ namespace Microsoft.Build.Logging
                 taskFile,
                 taskName,
                 fields.Timestamp);
+            e.LineNumber = fields.LineNumber;
+            e.ColumnNumber = fields.ColumnNumber;
             SetCommonFields(e, fields);
             return e;
         }
@@ -658,7 +681,9 @@ namespace Microsoft.Build.Logging
                 itemType,
                 items,
                 logItemMetadata: true,
-                fields.Timestamp);
+                fields.Timestamp,
+                fields.LineNumber,
+                fields.ColumnNumber);
             e.ProjectFile = fields.ProjectFile;
             return e;
         }

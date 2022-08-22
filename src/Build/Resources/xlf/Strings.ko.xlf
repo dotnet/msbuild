@@ -92,9 +92,19 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="DuplicateOverrideUsingTaskElement">
+        <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
+        <target state="translated">MSB4275: 동일한 작업의 여러 재정의를 만들려고 했습니다. {0}</target>
+        <note>{StrBegin="MSB4275: "}</note>
+      </trans-unit>
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
         <target state="translated">MSB4257: 지정한 출력 결과 캐시 파일이 비어 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentDerivedPropertyRead">
+        <source>Property '{0}' with value '{1}' expanded from the environment.</source>
+        <target state="new">Property '{0}' with value '{1}' expanded from the environment.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
@@ -138,10 +148,9 @@
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
-        <source>Loading the following project cache plugin:
-    {0}</source>
-        <target state="needs-review-translation">"다음 프로젝트 캐시 플러그 인을 로드하는 중:
-    {0}"</target>
+        <source>Loading the following project cache plugin: {0}</source>
+        <target state="needs-review-translation">다음 프로젝트 캐시 플러그 인을 로드하는 중:
+    {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
@@ -169,11 +178,6 @@
       <trans-unit id="NoProjectCachePluginFoundInAssembly">
         <source>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</source>
         <target state="translated">MSB4270: "{0}" 어셈블리에서 프로젝트 캐시 플러그 인을 찾을 수 없습니다. 1개가 필요합니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NotAllNodesDefineACacheItem">
-        <source>MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</source>
-        <target state="translated">MSB4269: 정적 그래프 노드에서 프로젝트 캐시를 정의할 때 모든 노드는 같은 프로젝트 캐시를 정의해야 합니다. {1} 프로젝트에는 "{0}" 항목 선언이 포함되어 있지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -214,25 +218,93 @@
         <target state="translated">null 또는 빈 대상 이름을 포함하는 컬렉션을 사용하여 {0} 메서드를 호출할 수 없습니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="OnlyOneCachePluginMustBeSpecified">
-        <source>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</source>
-        <target state="translated">MSB4265: 단일 프로젝트 캐시 플러그 인이 지정되어야 하지만, {0}에서 여러 개를 찾았습니다.</target>
+      <trans-unit id="OverrideUsingTaskElementCreated">
+        <source>Created an override using task: {0} at {1}</source>
+        <target state="translated">다음 작업을 사용하여 재정의를 만들었습니다. {1}의 {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheEndBuild">
+        <source>Shutting down project cache plugin.</source>
+        <target state="translated">프로젝트 캐시 플러그인을 종료합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheException">
         <source>MSB4273: The project cache threw an unhandled exception from the {0} method.</source>
-        <target state="new">MSB4273: The project cache threw an unhandled exception from the {0} method.</target>
+        <target state="translated">MSB4273: 프로젝트 캐시는 {0} 메서드에서 처리되지 않은 예외를 발생시켰습니다.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithDefaultTargets">
+        <source>Project cache hit for "{0}" (default targets).</source>
+        <target state="translated">"{0}"(기본 대상)에 대한 프로젝트 캐시 적중입니다.</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithOutputs">
+        <source>{0} -&gt; Cache Hit</source>
+        <target state="translated">{0} -&gt; 캐시 적중</target>
+        <note>
+      {StrBegin="{0} -&gt; "}LOCALIZATION: This string is used to indicate progress and matches the format for a log message from Microsoft.Common.CurrentVersion.targets. {0} is a project name.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithTargetNames">
+        <source>Project cache hit for "{0}" ({1} target(s)).</source>
+        <target state="translated">"{0}"({1} 대상)에 대한 프로젝트 캐시 적중입니다.</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
       </trans-unit>
       <trans-unit id="ProjectCacheInitializationFailed">
         <source>MSB4266: Failed to initialize the project cache.</source>
         <target state="translated">MSB4266: 프로젝트 캐시를 초기화하지 못했습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheMissWithDefaultTargets">
+        <source>Project cache miss for "{0}" (default targets).</source>
+        <target state="translated">"{0}"(기본 대상)에 대한 프로젝트 캐시 누락입니다.</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheMissWithTargetNames">
+        <source>Project cache miss for "{0}" ({1} target(s)).</source>
+        <target state="translated">"{0}"({1}개 대상)에 대한 프로젝트 캐시 누락입니다.</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheNotApplicableWithDefaultTargets">
+        <source>Project cache not applicable for "{0}" (default targets).</source>
+        <target state="translated">프로젝트 캐시는 "{0}"(기본 대상)에 적용할 수 없습니다.</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheNotApplicableWithTargetNames">
+        <source>Project cache not applicable for "{0}" ({1} target(s)).</source>
+        <target state="translated">프로젝트 캐시는 "{0}"({1} 대상)에 적용할 수 없습니다.</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectCacheQueryFailed">
         <source>MSB4267: The project cache failed while being queried for the following project: {0}. The cache is queried in parallel for multiple projects so this specific project might not be the cause.</source>
         <target state="translated">MSB4267: {0} 프로젝트에 대해 쿼리되는 동안 프로젝트 캐시가 실패했습니다. 캐시는 여러 프로젝트에 대해 병렬로 쿼리되므로 이 특정 프로젝트가 원인이 아닐 수 있습니다.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheQueryStartedWithDefaultTargets">
+        <source>Querying project cache for "{0}" (default targets):</source>
+        <target state="translated">"{0}"(기본 대상)에 대한 프로젝트 캐시 쿼리 중:</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheQueryStartedWithTargetNames">
+        <source>Querying project cache for "{0}" (targets: {1}):</source>
+        <target state="translated">"{0}"에 대한 프로젝트 캐시 쿼리(대상: {1}):</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
       </trans-unit>
       <trans-unit id="ProjectCacheShutdownFailed">
         <source>MSB4268: The project cache failed to shut down properly.</source>
@@ -255,6 +327,21 @@
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">속성 초기 값: $({0})="{1}" 소스: {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
+        <source>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</source>
+        <target state="translated">MSB4274: 프록시 빌드 요청을 내보내는 프로젝트 캐시 플러그 인을 사용할 때 inproc 노드를 사용하지 않도록 설정하면 성능이 저하됩니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverCriticalFailure">
+        <source>MSB4242: SDK Resolver Failure: "{0}"</source>
+        <target state="translated">MSB4242: SDK 해결 프로그램 오류: "{0}"</target>
+        <note>{StrBegin="MSB4242: "}</note>
+      </trans-unit>
+      <trans-unit id="SDKResolverFailed">
+        <source>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</source>
+        <target state="translated">SDK "{1}"을(를) 확인하는 동안 SDK 확인자 "{0}"이(가) 실패했습니다. 예외: "{2}"</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -305,17 +392,17 @@
       </trans-unit>
       <trans-unit id="TaskAcquiredCores">
         <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
-        <target state="new">Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</target>
+        <target state="translated">"{0}" 작업에서 코어 {1}개를 요청했고 코어 {2}개를 획득했으며 지금 총 {3}개의 코어를 보유하고 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
-        <target state="new">Task "{0}" released {1} cores and now holds {2} cores total.</target>
+        <target state="translated">"{0}" 작업에서 코어 {1}개를 해제했고 지금 총 {2}개의 코어를 보유하고 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCoresWarning">
         <source>Task "{0}" asked to release {1} cores while holding only {2} and now holds {3} cores total.</source>
-        <target state="new">Task "{0}" asked to release {1} cores while holding only {2} and now holds {3} cores total.</target>
+        <target state="translated">"{0}" 작업에서 코어 {2}개만 보유하고 있는 동안 코어 {1}개를 해제하도록 요청했고 지금 총 {3}개의 코어를 보유하고 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReturnedFalseButDidNotLogError">
@@ -330,6 +417,13 @@
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
     </note>
+      </trans-unit>
+      <trans-unit id="UnhandledMSBuildError">
+        <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled.
+    {0}</source>
+        <target state="translated">MSBuild에서 처리되지 않은 예외입니다. https://aka.ms/msbuild/unhandled에서 기존 문제에 찬성 투표하거나 새 문제를 제출하세요.
+ {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="UninitializedPropertyRead">
         <source>Read uninitialized property "{0}"</source>
@@ -1785,8 +1879,8 @@
         <note>{StrBegin="MSB4209: "}</note>
       </trans-unit>
       <trans-unit id="AffinityConflict">
-        <source>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for this project.</source>
-        <target state="translated">MSB4213: 지정한 요청 선호도 {0}이(가) 이 프로젝트에 대해 이전에 지정한 선호도 {1}과(와) 충돌합니다.</target>
+        <source>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for project {2} with global properties {3}</source>
+        <target state="translated">MSB4213: 지정된 요청 선호도 {0}이(가) 전역 속성이 {3}인 프로젝트 {2}에 대해 지정된 이전 선호도 {1}와(과) 충돌합니다.</target>
         <note>{StrBegin="MSB4213: "}</note>
       </trans-unit>
       <trans-unit id="UnableToCreateNode">
@@ -2064,8 +2158,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <note />
       </trans-unit>
       <trans-unit id="OM_MustSetRecordDuplicateInputs">
-        <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateImports flag.</source>
-        <target state="translated">프로젝트가 ProjectLoadSettings.RecordDuplicateImports 플래그가 지정된 상태에서 로드되지 않았습니다.</target>
+        <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</source>
+        <target state="translated">ProjectLoadSettings.RecordDuplicateButNotCircularImports 플래그와 함께 프로젝트가 로드되지 않았습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_CannotSaveFileLoadedAsReadOnly">
@@ -2374,15 +2468,10 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <target state="translated">MSB4244: SDK 확인자 어셈블리 "{0}"을(를) 로드할 수 없습니다. {1}</target>
         <note>{StrBegin="MSB4244: "}</note>
       </trans-unit>
-      <trans-unit id="CouldNotRunSdkResolver">
-        <source>MSB4242: The SDK resolver "{0}" failed to run. {1}</source>
-        <target state="translated">MSB4242: SDK 확인자 "{0}"을(를) 실행하지 못했습니다. {1}</target>
-        <note>{StrBegin="MSB4242: "}</note>
-      </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">
-        <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
-        <target state="translated">MSB4243: NuGet 어셈블리를 찾을 수 없어 NuGet 기반 SDK 확인자를 실행하지 못했습니다. MSBuild 설치를 확인하거나 환경 변수 "{0}"을(를) 필요한 NuGet 어셈블리가 포함된 폴더로 설정하세요. {1}</target>
-        <note>{StrBegin="MSB4243: "}</note>
+        <source>The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
+        <target state="translated">NuGet 어셈블리를 찾을 수 없어 NuGet 기반 SDK 확인자를 실행하지 못했습니다. MSBuild 설치를 확인하거나 환경 변수 "{0}"을(를) 필요한 NuGet 어셈블리가 포함된 폴더로 설정하세요. {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedInvalidFile">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</source>

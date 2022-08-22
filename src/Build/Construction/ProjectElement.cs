@@ -10,6 +10,8 @@ using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <summary>
@@ -415,7 +417,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Hook for subclasses to specify whether the given <param name="attribute"></param> should be cloned or not
+        /// Hook for subclasses to specify whether the given <paramref name="attribute"></paramref> should be cloned or not
         /// </summary>
         protected virtual bool ShouldCloneXmlAttribute(XmlAttribute attribute) => true;
 

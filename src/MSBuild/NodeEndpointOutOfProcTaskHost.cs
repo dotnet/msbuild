@@ -4,6 +4,8 @@
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Internal;
 
+#nullable disable
+
 namespace Microsoft.Build.CommandLine
 {
     /// <summary>
@@ -16,10 +18,9 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Instantiates an endpoint to act as a client
         /// </summary>
-        /// <param name="pipeName">The name of the pipe to which we should connect.</param>
-        internal NodeEndpointOutOfProcTaskHost(string pipeName)
+        internal NodeEndpointOutOfProcTaskHost()
         {
-            InternalConstruct(pipeName);
+            InternalConstruct();
         }
 
         #endregion // Constructors and Factories

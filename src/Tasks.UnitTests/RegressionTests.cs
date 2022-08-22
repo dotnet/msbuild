@@ -9,6 +9,8 @@ using Microsoft.Build.UnitTests;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.UnitTests
 {
     public sealed class RegressionTests
@@ -23,7 +25,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Verifies that when a user overrides the BaseIntermediateOutputPath that the build still works.
         /// </summary>
-        /// <remarks>This was written because of regression https://github.com/Microsoft/msbuild/issues/1509. </remarks>
+        /// <remarks>This was written because of regression https://github.com/dotnet/msbuild/issues/1509. </remarks>
         [Fact]
         public void OverrideBaseIntermediateOutputPathSucceeds()
         {
@@ -47,18 +49,21 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         /// <summary>
-        /// Tests fix for https://github.com/microsoft/msbuild/issues/1479.
+        /// Tests fix for https://github.com/dotnet/msbuild/issues/1479.
         /// </summary>
         [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsWindows))]
         public void AssemblyAttributesLocation()
         {
-            var expectedCompileItems = "a.cs;" + Path.Combine("obj", "Debug", ".NETFramework,Version=v4.0.AssemblyAttributes.cs");
+            var expectedCompileItems = "a.cs;" + Path.Combine("obj", "Debug", ".NETFramework,Version=v4.8.AssemblyAttributes.cs");
 
             var project = ObjectModelHelpers.CreateInMemoryProject($@"
 <Project>
   <Import Project=""$(MSBuildToolsPath)\Microsoft.Common.props"" />
+  <PropertyGroup>
+    <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
+  </PropertyGroup>
   <ItemGroup>
-    <Compile Include=""a.cs""/>       
+    <Compile Include=""a.cs""/>
   </ItemGroup>
   <Import Project=""$(MSBuildToolsPath)\Microsoft.CSharp.targets"" />
 

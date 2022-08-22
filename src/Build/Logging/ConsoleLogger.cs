@@ -3,12 +3,15 @@
 
 using System;
 
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 using BaseConsoleLogger = Microsoft.Build.BackEnd.Logging.BaseConsoleLogger;
 using SerialConsoleLogger = Microsoft.Build.BackEnd.Logging.SerialConsoleLogger;
 using ParallelConsoleLogger = Microsoft.Build.BackEnd.Logging.ParallelConsoleLogger;
+
+#nullable disable
 
 namespace Microsoft.Build.Logging
 {
@@ -107,6 +110,7 @@ namespace Microsoft.Build.Logging
             bool useMPLogger = false;
             bool disableConsoleColor = false;
             bool forceConsoleColor = false;
+            bool preferConsoleColor = false;
             if (!string.IsNullOrEmpty(_parameters))
             {
                 string[] parameterComponents = _parameters.Split(BaseConsoleLogger.parameterDelimiters);
@@ -130,10 +134,15 @@ namespace Microsoft.Build.Logging
                     {
                         forceConsoleColor = true;
                     }
+                    if (string.Equals(param, "PREFERCONSOLECOLOR", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Use ansi color codes if current target console do support it
+                        preferConsoleColor = ConsoleConfiguration.AcceptAnsiColorCodes;
+                    }
                 }
             }
 
-            if (forceConsoleColor)
+            if (forceConsoleColor || (!disableConsoleColor && preferConsoleColor))
             {
                 _colorSet = BaseConsoleLogger.SetColorAnsi;
                 _colorReset = BaseConsoleLogger.ResetColorAnsi;
@@ -163,8 +172,6 @@ namespace Microsoft.Build.Logging
                 _consoleLogger.Parameters = _parameters;
                 _parameters = null;
             }
-
-            
 
             _consoleLogger.SkipProjectStartedText = _skipProjectStartedText;
         }
@@ -475,6 +482,31 @@ namespace Microsoft.Build.Logging
             InitializeBaseConsoleLogger(); // for compat: see DDB#136924
 
             _consoleLogger.CustomEventHandler(sender, e);
+        }
+
+        /// <summary>
+        /// Returns the minimum importance of messages logged by this logger.
+        /// </summary>
+        /// <returns>
+        /// The minimum message importance corresponding to this logger's verbosity or (MessageImportance.High - 1)
+        /// if this logger does not log messages of any importance.
+        /// </returns>
+        internal MessageImportance GetMinimumMessageImportance()
+        {
+            if (Verbosity >= BaseConsoleLogger.ImportanceToMinimumVerbosity(MessageImportance.Low, out _))
+            {
+                return MessageImportance.Low;
+            }
+            else if (Verbosity >= BaseConsoleLogger.ImportanceToMinimumVerbosity(MessageImportance.Normal, out _))
+            {
+                return MessageImportance.Normal;
+            }
+            else if (Verbosity >= BaseConsoleLogger.ImportanceToMinimumVerbosity(MessageImportance.High, out _))
+            {
+                return MessageImportance.High;
+            }
+            // The logger does not log messages of any importance.
+            return MessageImportance.High - 1;
         }
 
         #endregion

@@ -14,6 +14,11 @@ using Microsoft.Build.Utilities;
 using Microsoft.Build.Tasks;
 using Xunit;
 using Microsoft.Build.Shared;
+using System.IO;
+using Microsoft.Build.BackEnd;
+using Shouldly;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -55,6 +60,29 @@ namespace Microsoft.Build.UnitTests
         {
             var task = new ResolveComReference();
             Assert.NotNull(task.GetResolvedAssemblyReferenceItemSpecs());
+        }
+
+        [Fact]
+        public void TestSerializationAndDeserialization()
+        {
+            ResolveComReferenceCache cache = new("path1", "path2");
+            cache.componentTimestamps = new()
+            {
+                { "first", DateTime.Now },
+                { "second", DateTime.FromBinary(10000) },
+            };
+            ResolveComReferenceCache cache2 = null;
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFile file = env.CreateFile();
+                cache.SerializeCache(file.Path, null);
+                cache2 = StateFileBase.DeserializeCache(file.Path, null, typeof(ResolveComReferenceCache)) as ResolveComReferenceCache;
+            }
+
+            cache2.tlbImpLocation.ShouldBe(cache.tlbImpLocation);
+            cache2.axImpLocation.ShouldBe(cache.axImpLocation);
+            cache2.componentTimestamps.Count.ShouldBe(cache.componentTimestamps.Count);
+            cache2.componentTimestamps["second"].ShouldBe(cache.componentTimestamps["second"]);
         }
 
         /*
@@ -727,7 +755,12 @@ namespace Microsoft.Build.UnitTests
             CheckAxReferenceRCWTlbExists(RcwStyle.PreexistingPia /* pass in the PIA reference */, true /* include version in the interop name */);
         }
 
-        private enum RcwStyle { GenerateTlb, PreexistingTlb, PreexistingPia };
+        private enum RcwStyle
+        {
+            GenerateTlb,
+            PreexistingTlb,
+            PreexistingPia,
+        }
 
         /// <summary>
         /// Helper method that will new up an AX and matching TLB reference, and verify that the AX reference
@@ -787,7 +820,7 @@ namespace Microsoft.Build.UnitTests
                         includeVersionInInteropName,
                         tlbRefInfo.attr.wMajorVerNum,
                         tlbRefInfo.attr.wMinorVerNum
-                        )); //                     "Expected Ax reference's RCW name to match the new TLB"
+                        )); // "Expected Ax reference's RCW name to match the new TLB"
         }
     }
 }

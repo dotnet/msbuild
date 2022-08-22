@@ -2,10 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Linq;
 using System.Reflection;
 
 using Microsoft.Build.Framework;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -35,11 +36,7 @@ namespace Microsoft.Build.Shared
         internal static bool IsTaskClass(Type type, object unused)
         {
             return type.GetTypeInfo().IsClass && !type.GetTypeInfo().IsAbstract && (
-#if FEATURE_TYPE_GETINTERFACE
                 type.GetTypeInfo().GetInterface("Microsoft.Build.Framework.ITask") != null);
-#else
-                type.GetInterfaces().Any(interfaceType => interfaceType.FullName == "Microsoft.Build.Framework.ITask"));
-#endif
         }
 
         /// <summary>
@@ -56,7 +53,7 @@ namespace Microsoft.Build.Shared
             )
         {
 #if FEATURE_APPDOMAIN
-            bool separateAppDomain = loadedType.HasLoadInSeparateAppDomainAttribute();
+            bool separateAppDomain = loadedType.HasLoadInSeparateAppDomainAttribute;
             s_resolverLoadedType = null;
             taskAppDomain = null;
             ITask taskInstanceInOtherAppDomain = null;
@@ -67,7 +64,7 @@ namespace Microsoft.Build.Shared
 #if FEATURE_APPDOMAIN
                 if (separateAppDomain)
                 {
-                    if (!loadedType.Type.GetTypeInfo().IsMarshalByRef)
+                    if (!loadedType.IsMarshalByRef)
                     {
                         logError
                         (
@@ -110,13 +107,11 @@ namespace Microsoft.Build.Shared
 
                         if (loadedType.LoadedAssembly != null)
                         {
-                            taskAppDomain.Load(loadedType.LoadedAssembly.GetName());
+                            taskAppDomain.Load(loadedType.LoadedAssemblyName);
                         }
 
-#if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
                         // Hook up last minute dumping of any exceptions 
                         taskAppDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
-#endif
                     }
                 }
                 else
@@ -181,13 +176,9 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static Assembly AssemblyResolver(object sender, ResolveEventArgs args)
         {
-            if ((s_resolverLoadedType?.LoadedAssembly != null))
+            if (args.Name.Equals(s_resolverLoadedType.LoadedAssemblyName.FullName, StringComparison.OrdinalIgnoreCase))
             {
-                // Match the name being requested by the resolver with the FullName of the assembly we have loaded
-                if (args.Name.Equals(s_resolverLoadedType.LoadedAssembly.FullName, StringComparison.Ordinal))
-                {
-                    return s_resolverLoadedType.LoadedAssembly;
-                }
+                return s_resolverLoadedType.LoadedAssembly ?? Assembly.Load(s_resolverLoadedType.Path);
             }
 
             return null;

@@ -11,6 +11,8 @@ using Microsoft.Build.Framework.XamlTypes;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Xaml
 {
     /// <summary>
@@ -256,7 +258,7 @@ namespace Microsoft.Build.Tasks.Xaml
                     break;
                 default:
                     // should never reach this point - if it does, there's a bug somewhere.
-                    ErrorUtilities.VerifyThrow(false, "InternalError");
+                    ErrorUtilities.ThrowInternalError("InternalError");
                     break;
             }
         }

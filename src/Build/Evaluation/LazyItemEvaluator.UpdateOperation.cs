@@ -4,9 +4,12 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Framework;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -39,7 +42,7 @@ namespace Microsoft.Build.Evaluation
 
             delegate MatchResult ItemSpecMatchesItem(ItemSpec<P, I> itemSpec, I itemToMatch);
 
-            protected override void ApplyImpl(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 if (!_conditionResult)
                 {

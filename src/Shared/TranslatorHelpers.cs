@@ -8,6 +8,8 @@ using System.Globalization;
 using System.Reflection;
 using AssemblyHashAlgorithm = System.Configuration.Assemblies.AssemblyHashAlgorithm;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -261,9 +263,6 @@ namespace Microsoft.Build.BackEnd
                     HashAlgorithm = hashAlgorithm,
                     VersionCompatibility = versionCompatibility,
                     CodeBase = codeBase,
-                    // AssemblyName.KeyPair is not used anywhere, additionally StrongNameKeyPair is not supported in .net core 5-
-                    // and throws platform not supported exception when serialized or deserialized
-                    KeyPair = null,
                 };
 
                 assemblyName.SetPublicKey(publicKey);

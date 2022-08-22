@@ -22,6 +22,9 @@ using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using System.Threading;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -53,9 +56,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /*********************************************************************************
-         * 
+         *
          *                                  OUTPUT PARAMS
-         * 
+         *
          *********************************************************************************/
 
         /// <summary>
@@ -69,7 +72,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                       <Target Name='t'>
                          <NonExistantTask Condition=""'1'=='1'""/>
-                         <Message Text='Made it'/>                    
+                         <Message Text='Made it'/>
                       </Target>
                       </Project>");
 
@@ -95,7 +98,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                       <Target Name='t'>
                          <NonExistantTask Condition=""'1'=='2'""/>
-                         <Message Text='Made it'/>                    
+                         <Message Text='Made it'/>
                       </Target>
                       </Project>");
 
@@ -105,6 +108,63 @@ namespace Microsoft.Build.UnitTests.BackEnd
             project.Build("t", loggers);
 
             logger.AssertLogContains("Made it");
+        }
+
+        [Fact]
+        public void CanceledTasksDoNotLogMSB4181()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_testOutput))
+            {
+                BuildManager manager = new BuildManager();
+                ProjectCollection collection = new ProjectCollection();
+
+                string contents = @"
+                    <Project ToolsVersion ='Current'>
+                     <Target Name='test'>
+                        <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
+                     </Target>
+                    </Project>";
+
+                MockLogger logger = new MockLogger(_testOutput);
+
+                var project = new Project(XmlReader.Create(new StringReader(contents)), null, MSBuildConstants.CurrentToolsVersion, collection)
+                {
+                    FullPath = env.CreateFile().Path
+                };
+
+                var _parameters = new BuildParameters
+                {
+                    ShutdownInProcNodeOnBuildFinish = true,
+                    Loggers = new ILogger[] { logger },
+                    EnableNodeReuse = false
+                };
+                ;
+
+                BuildRequestData data = new BuildRequestData(project.CreateProjectInstance(), new string[] { "test" }, collection.HostServices);
+                manager.BeginBuild(_parameters);
+                BuildSubmission asyncResult = manager.PendBuildRequest(data);
+                asyncResult.ExecuteAsync(null, null);
+                Thread.Sleep(500);
+                manager.CancelAllSubmissions();
+                asyncResult.WaitHandle.WaitOne();
+                BuildResult result = asyncResult.BuildResult;
+                manager.EndBuild();
+
+                // No errors from cancelling a build.
+                logger.ErrorCount.ShouldBe(0);
+                // Warn because the task is being cancelled.
+                // NOTE: This assertion will fail when debugging into it because "waiting on exec to cancel" warning will be logged.
+                logger.WarningCount.ShouldBe(1);
+                // Build failed because it was cancelled.
+                result.OverallResult.ShouldBe(BuildResultCode.Failure);
+                // Should log "Cmd being cancelled because build was cancelled" warning
+                logger.AssertLogContains("MSB5021");
+                // Should NOT log "exec failed without logging error"
+                logger.AssertLogDoesntContain("MSB4181");
+
+                collection.Dispose();
+                manager.Dispose();
+            }
         }
 
         /// <summary>
@@ -132,7 +192,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                                          Condition=""'%(LogicalName)' != '' "">
                              <Output TaskParameter=""Value"" PropertyName=""LinkSwitches""/>
                          </CreateProperty>
-                         <Message Text='final:[$(LinkSwitches)]'/>                    
+                         <Message Text='final:[$(LinkSwitches)]'/>
                       </Target>
                       </Project>");
 
@@ -163,7 +223,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                       <ItemGroup>
                         <i Include='" + files[0] + "'><output>" + files[1] + @"</output></i>
-                      </ItemGroup> 
+                      </ItemGroup>
                       <ItemGroup>
                          <EmbeddedResource Include='a.resx'>
                         <LogicalName>foo</LogicalName>
@@ -176,7 +236,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         </EmbeddedResource>
                         </ItemGroup>
                       <Target Name='t2' DependsOnTargets='t'>
-                        <Message Text='final:[$(LinkSwitches)]'/>   
+                        <Message Text='final:[$(LinkSwitches)]'/>
                       </Target>
                       <Target Name='t' Inputs='%(i.Identity)' Outputs='%(i.Output)'>
                         <Message Text='start:[Hello]'/>
@@ -184,7 +244,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                                          Condition=""'%(LogicalName)' != '' "">
                              <Output TaskParameter=""Value"" PropertyName=""LinkSwitches""/>
                         </CreateProperty>
-                        <Message Text='end:[hello]'/>                    
+                        <Message Text='end:[hello]'/>
                     </Target>
                     </Project>");
 
@@ -228,17 +288,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Target Name='Build'>
                         <CreateProperty Value=""@(TaskParameterItem)"">
                             <Output TaskParameter=""Value"" PropertyName=""Property1""/>
-                        </CreateProperty> 
+                        </CreateProperty>
                         <Message Text='Property1=[$(Property1)]' />
 
                         <CreateProperty Value=""@(TaskParameterItem)"">
                             <Output TaskParameter=""%(TaskParameterItem.ParameterName)"" PropertyName=""Property2""/>
-                        </CreateProperty> 
+                        </CreateProperty>
                         <Message Text='Property2=[$(Property2)]' />
 
                         <CreateProperty Value=""@(TaskParameterItem)"">
                             <Output TaskParameter=""Value"" PropertyName=""%(TaskParameterItem.PropertyName)""/>
-                        </CreateProperty> 
+                        </CreateProperty>
                         <Message Text='MetadataProperty=[$(MetadataProperty)]' />
 
                         <CreateItem Include=""@(TaskParameterItem)"">
@@ -288,9 +348,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         <Copy SourceFiles='|' DestinationFolder='c:\' ContinueOnError='true' />
         <PropertyGroup>
            <p>$(MSBuildLastTaskResult)</p>
-        </PropertyGroup>                 
-        <Message Text='[1:$(MSBuildLastTaskResult)]'/> <!-- Should be false: propertygroup did not reset it -->   
-        <Message Text='[p:$(p)]'/> <!-- Should be false as stored earlier -->   
+        </PropertyGroup>
+        <Message Text='[1:$(MSBuildLastTaskResult)]'/> <!-- Should be false: propertygroup did not reset it -->
+        <Message Text='[p:$(p)]'/> <!-- Should be false as stored earlier -->
         <Message Text='[2:$(MSBuildLastTaskResult)]'/> <!-- Message succeeded, should now be true -->
     </Target>
     <Target Name='t2' DependsOnTargets='t'>
@@ -514,7 +574,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Regression test for https://github.com/microsoft/msbuild/issues/5080
+        /// Regression test for https://github.com/dotnet/msbuild/issues/5080
         /// </summary>
         [Fact]
         public void SameAssemblyFromDifferentRelativePathsSharesAssemblyLoadContext()
@@ -589,7 +649,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// If an item being output from a task has null metadata, we shouldn't crash.
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/6521")]
         [Trait("Category", "non-mono-tests")]
         public void NullMetadataOnLegacyOutputItems_InlineTask()
         {
@@ -790,11 +850,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         #endregion
 
-/*********************************************************************************
- * 
- *                                     Helpers
- * 
- *********************************************************************************/
+        /*********************************************************************************
+         *
+         *                                     Helpers
+         *
+         *********************************************************************************/
 
         /// <summary>
         /// Helper method for validating the setting of defining project metadata on items
@@ -811,7 +871,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Import Project=`b.proj` />
 
                     <Target Name=`Run`>
-                      <ItemCreationTask 
+                      <ItemCreationTask
                         InputItemsToPassThrough=`@(PassThrough)`
                         InputItemsToCopy=`@(Copy)`>
                           <Output TaskParameter=`OutputString` ItemName=`A` />
@@ -820,10 +880,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                           <Output TaskParameter=`CopiedOutputItems` ItemName=`D` />
                       </ItemCreationTask>
 
-                      <Warning Text=`A is wrong: EXPECTED: [a] ACTUAL: [%(A.DefiningProjectName)]` Condition=`'%(A.DefiningProjectName)' != 'a'` />    
-                      <Warning Text=`B is wrong: EXPECTED: [a] ACTUAL: [%(B.DefiningProjectName)]` Condition=`'%(B.DefiningProjectName)' != 'a'` />    
-                      <Warning Text=`C is wrong: EXPECTED: [a] ACTUAL: [%(C.DefiningProjectName)]` Condition=`'%(C.DefiningProjectName)' != 'a'` />    
-                      <Warning Text=`D is wrong: EXPECTED: [a] ACTUAL: [%(D.DefiningProjectName)]` Condition=`'%(D.DefiningProjectName)' != 'a'` />    
+                      <Warning Text=`A is wrong: EXPECTED: [a] ACTUAL: [%(A.DefiningProjectName)]` Condition=`'%(A.DefiningProjectName)' != 'a'` />
+                      <Warning Text=`B is wrong: EXPECTED: [a] ACTUAL: [%(B.DefiningProjectName)]` Condition=`'%(B.DefiningProjectName)' != 'a'` />
+                      <Warning Text=`C is wrong: EXPECTED: [a] ACTUAL: [%(C.DefiningProjectName)]` Condition=`'%(C.DefiningProjectName)' != 'a'` />
+                      <Warning Text=`D is wrong: EXPECTED: [a] ACTUAL: [%(D.DefiningProjectName)]` Condition=`'%(D.DefiningProjectName)' != 'a'` />
                     </Target>
                 </Project>
 ";
@@ -945,6 +1005,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 @"
 using System;
 using Microsoft.Build.Framework;
+
 namespace ClassLibrary2
 {" + (requireSTA ? "[RunInSTA]" : String.Empty) + @"
     public class ThreadTask : ITask
@@ -1031,11 +1092,11 @@ namespace ClassLibrary2
                     <Target Name='Skip' Inputs='testProject.proj' Outputs='testProject.proj' />
 
                     <Target Name='Error' >
-                        <ErrorTask1 ContinueOnError='True'/>                    
-                        <ErrorTask2 ContinueOnError='False'/>  
-                        <ErrorTask3 /> 
-                        <OnError ExecuteTargets='Foo'/>                  
-                        <OnError ExecuteTargets='Bar'/>                  
+                        <ErrorTask1 ContinueOnError='True'/>
+                        <ErrorTask2 ContinueOnError='False'/>
+                        <ErrorTask3 />
+                        <OnError ExecuteTargets='Foo'/>
+                        <OnError ExecuteTargets='Bar'/>
                     </Target>
 
                     <Target Name='Foo' Inputs='foo.cpp' Outputs='foo.o'>
@@ -1073,7 +1134,7 @@ namespace ClassLibrary2
                 ");
 
             IConfigCache cache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
-            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("testfile", new Dictionary<string, string>(), "3.5", new string[0], null), "2.0");
+            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("testfile", new Dictionary<string, string>(), "3.5", Array.Empty<string>(), null), "2.0");
             Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
             config.Project = project.CreateProjectInstance();
             cache.AddConfiguration(config);
@@ -1086,7 +1147,7 @@ namespace ClassLibrary2
         /// </summary>
         private class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
         {
-#region IBuildComponentHost Members
+            #region IBuildComponentHost Members
 
             /// <summary>
             /// The config cache
@@ -1224,9 +1285,9 @@ namespace ClassLibrary2
             {
             }
 
-#endregion
+            #endregion
 
-#region IBuildComponent Members
+            #region IBuildComponent Members
 
             /// <summary>
             /// Sets the component host
@@ -1245,7 +1306,7 @@ namespace ClassLibrary2
                 throw new NotImplementedException();
             }
 
-#endregion
+            #endregion
         }
     }
 }

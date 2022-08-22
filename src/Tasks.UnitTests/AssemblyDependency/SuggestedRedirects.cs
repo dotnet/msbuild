@@ -11,6 +11,8 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
     /// <summary>
@@ -464,7 +466,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(0, e.Warnings); // "Should only be no warning about suggested redirects."
         }
 
-        // It is hard to write a test that will fail with the root cause of https://github.com/Microsoft/msbuild/issues/4002
+        // It is hard to write a test that will fail with the root cause of https://github.com/dotnet/msbuild/issues/4002
         // because it requires reading real files from disk and we mock GetAssemblyName in RAR tests.
         //
         // So to add some coverage, simply check that we get a Culture=neutral when enumerating references of this test

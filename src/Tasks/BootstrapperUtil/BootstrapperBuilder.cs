@@ -17,13 +17,19 @@ using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
 using Microsoft.Build.Shared.FileSystem;
+using System.Runtime.Versioning;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {
     /// <summary>
     /// This class is the top-level object for the bootstrapper system.
     /// </summary>
-    [ComVisible(true), Guid("1D9FE38A-0226-4b95-9C6B-6DFFA2236270"), ClassInterface(ClassInterfaceType.None)]
+    [ComVisible(true)]
+    [Guid("1D9FE38A-0226-4b95-9C6B-6DFFA2236270")]
+    [ClassInterface(ClassInterfaceType.None)]
+    [SupportedOSPlatform("windows")]
     public class BootstrapperBuilder : IBootstrapperBuilder
     {
         private static readonly bool s_logging = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSPLOG"));
@@ -1639,7 +1645,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             // the .NET Framework we are targeting.  In ideal situations, bootstrapper files will be
             // pre-signed anwyay; this is a fallback in case we ever encounter a bootstrapper that is
             // not signed.  
-            System.Security.Cryptography.SHA256CryptoServiceProvider sha = new System.Security.Cryptography.SHA256CryptoServiceProvider();
+            System.Security.Cryptography.SHA256 sha = System.Security.Cryptography.SHA256.Create("System.Security.Cryptography.SHA256CryptoServiceProvider");
 
             using (Stream s = fi.OpenRead())
             {
@@ -1902,7 +1908,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     XmlElement filesNode = applicationElement.OwnerDocument.CreateElement("Files");
                     XmlElement fileNode = filesNode.OwnerDocument.CreateElement("File");
                     AddAttribute(fileNode, "Name", settings.ApplicationFile);
-                    AddAttribute(fileNode, URLNAME_ATTRIBUTE, Uri.EscapeUriString(settings.ApplicationFile));
+                    AddAttribute(fileNode, URLNAME_ATTRIBUTE, Uri.EscapeDataString(settings.ApplicationFile));
                     filesNode.AppendChild(fileNode);
                     applicationElement.AppendChild(filesNode);
                 }
@@ -2091,7 +2097,10 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     }
 
                     // If the public key in the file doesn't match the public key on disk, issue a build warning
-                    if (publicKey?.Equals(publicKeyAttribute.Value, StringComparison.OrdinalIgnoreCase) == false)
+                    // Skip this check if the public key attribute is "0", as this means we're expecting the public key
+                    // comparison to be skipped at install time because the file is signed by an MS trusted cert.
+                    if (publicKeyAttribute.Value.Equals("0", StringComparison.OrdinalIgnoreCase) == false &&
+                        publicKey?.Equals(publicKeyAttribute.Value, StringComparison.OrdinalIgnoreCase) == false)
                     {
                         results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.DifferingPublicKeys", PUBLICKEY_ATTRIBUTE, builder.Name, fileSource));
                     }

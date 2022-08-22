@@ -4,6 +4,8 @@
 using System.Collections.Generic;
 using Microsoft.Build.Construction;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

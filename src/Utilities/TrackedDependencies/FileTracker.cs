@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if FEATURE_FILE_TRACKER
+
 using System;
 
 using System.Collections.Generic;
@@ -13,44 +15,54 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
-#if FEATURE_FILE_TRACKER
+#nullable disable
 
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
-    /// Enumeration to express the type of executable being wrapped by Tracker.exe
+    /// Enumeration to express the type of executable being wrapped by Tracker.exe.
     /// </summary>
     public enum ExecutableType
     {
         /// <summary>
-        /// 32-bit native executable
+        /// 32-bit native executable.
         /// </summary>
         Native32Bit = 0,
 
         /// <summary>
-        /// 64-bit native executable 
+        /// 64-bit native executable.
         /// </summary>
         Native64Bit = 1,
 
         /// <summary>
-        /// A managed executable without a specified bitness
+        /// A managed executable without a specified bitness.
         /// </summary>
         ManagedIL = 2,
 
         /// <summary>
-        /// A managed executable specifically marked as 32-bit
+        /// A managed executable specifically marked as 32-bit.
         /// </summary>
         Managed32Bit = 3,
 
         /// <summary>
-        /// A managed executable specifically marked as 64-bit
+        /// A managed executable specifically marked as 64-bit.
         /// </summary>
         Managed64Bit = 4,
 
         /// <summary>
         /// Use the same bitness as the currently running executable. 
         /// </summary>
-        SameAsCurrentProcess = 5
+        SameAsCurrentProcess = 5,
+
+        /// <summary>
+        /// 64-bit native ARM64 executable.
+        /// </summary>
+        NativeARM64 = 6,
+
+        /// <summary>
+        /// 64-bit managed ARM64 executable.
+        /// </summary>
+        ManagedARM64 = 7
     }
 
     /// <summary>
@@ -58,7 +70,7 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     public static class FileTracker
     {
-        #region Static Member Data
+#region Static Member Data
 
         // The default path to temp, used to create explicitly short and long paths
         private static readonly string s_tempPath = Path.GetTempPath();
@@ -83,14 +95,14 @@ namespace Microsoft.Build.Utilities
         // Is equal to C:\Documents and Settings\All Users\Application Data on XP, and C:\ProgramData on Vista+.
         // But for backward compatibility, the paths "C:\Documents and Settings\All Users\Application Data" and "C:\Users\All Users\Application Data" are still accessible via Junction point on Vista+.
         // Thus this list is created to store all possible common application data paths to cover more cases as possible.
-        private static readonly List<string> s_commonApplicationDataPaths;
+        private static readonly List<string> s_commonApplicationDataPaths = InitializeCommonApplicationDataPaths();
 
         // The name of the standalone tracker tool.
-        private static readonly string s_TrackerFilename = "Tracker.exe";
+        private const string s_TrackerFilename = "Tracker.exe";
 
         // The name of the assembly that is injected into the executing process.
         // Detours handles picking between FileTracker{32,64}.dll so only mention one.
-        private static readonly string s_FileTrackerFilename = "FileTracker32.dll";
+        private const string s_FileTrackerFilename = "FileTracker32.dll";
 
         // The name of the PATH environment variable.
         private const string pathEnvironmentVariableName = "PATH";
@@ -101,36 +113,38 @@ namespace Microsoft.Build.Utilities
         // Static cache of the path separator character in an array for use in String.Split.
         private static readonly string pathSeparator = Path.PathSeparator.ToString();
 
-        #endregion
+#endregion
 
-        #region Static constructor
+#region Static Member Initializers
 
-        static FileTracker()
+        static List<string> InitializeCommonApplicationDataPaths()
         {
-            s_commonApplicationDataPaths = new List<string>();
+            List<string> commonApplicationDataPaths = new();
 
             string defaultCommonApplicationDataPath = FileUtilities.EnsureTrailingSlash(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData).ToUpperInvariant());
-            s_commonApplicationDataPaths.Add(defaultCommonApplicationDataPath);
+            commonApplicationDataPaths.Add(defaultCommonApplicationDataPath);
 
             string defaultRootDirectory = Path.GetPathRoot(defaultCommonApplicationDataPath);
             string alternativeCommonApplicationDataPath1 = FileUtilities.EnsureTrailingSlash(Path.Combine(defaultRootDirectory, @"Documents and Settings\All Users\Application Data").ToUpperInvariant());
 
             if (!alternativeCommonApplicationDataPath1.Equals(defaultCommonApplicationDataPath, StringComparison.Ordinal))
             {
-                s_commonApplicationDataPaths.Add(alternativeCommonApplicationDataPath1);
+                commonApplicationDataPaths.Add(alternativeCommonApplicationDataPath1);
             }
 
             string alternativeCommonApplicationDataPath2 = FileUtilities.EnsureTrailingSlash(Path.Combine(defaultRootDirectory, @"Users\All Users\Application Data").ToUpperInvariant());
 
             if (!alternativeCommonApplicationDataPath2.Equals(defaultCommonApplicationDataPath, StringComparison.Ordinal))
             {
-                s_commonApplicationDataPaths.Add(alternativeCommonApplicationDataPath2);
+                commonApplicationDataPaths.Add(alternativeCommonApplicationDataPath2);
             }
+
+            return commonApplicationDataPaths;
         }
 
-        #endregion
+#endregion
 
-        #region Native method wrappers
+#region Native method wrappers
 
         /// <summary>
         /// Stops tracking file accesses.  
@@ -195,9 +209,9 @@ namespace Microsoft.Build.Utilities
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "TLogs", Justification = "Has now shipped as public API; plus it's unclear whether 'Tlog' or 'TLog' is the preferred casing")]
         public static void WriteContextTLogs(string intermediateDirectory, string taskName) => InprocTrackingNativeMethods.WriteContextTLogs(intermediateDirectory, taskName);
 
-        #endregion // Native method wrappers
+#endregion // Native method wrappers
 
-        #region Methods
+#region Methods
 
         /// <summary>
         /// Test to see if the specified file is excluded from tracked dependencies
@@ -366,8 +380,8 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Searches %PATH% for the location of Tracker.exe, and returns the first 
         /// path that matches. 
-        /// <returns>Matching full path to Tracker.exe or null if a matching path is not found.</returns>
         /// </summary>
+        /// <returns>The full path to Tracker.exe, or <see langword="null" /> if a matching path is not found.</returns>
         public static string FindTrackerOnPath()
         {
             string[] paths = Environment.GetEnvironmentVariable(pathEnvironmentVariableName).Split(pathSeparatorArray, StringSplitOptions.RemoveEmptyEntries);
@@ -626,7 +640,7 @@ namespace Microsoft.Build.Utilities
         public static string TrackerArguments(string command, string arguments, string dllName, string intermediateDirectory, string rootFiles, string cancelEventName)
             => TrackerResponseFileArguments(dllName, intermediateDirectory, rootFiles, cancelEventName) + TrackerCommandArguments(command, arguments);
 
-        #region StartProcess methods
+#region StartProcess methods
 
         /// <summary>
         /// Start the process; tracking the command.  
@@ -693,7 +707,7 @@ namespace Microsoft.Build.Utilities
         public static Process StartProcess(string command, string arguments, ExecutableType toolType)
             => StartProcess(command, arguments, toolType, null, null, null, null);
 
-        #endregion // StartProcess methods
+#endregion // StartProcess methods
 
         /// <summary>
         /// Logs a message of the given importance using the specified resource string. To the specified Log.
@@ -743,7 +757,7 @@ namespace Microsoft.Build.Utilities
             Log?.LogWarningWithCodeFromResources(messageResourceName, messageArgs);
         }
 
-        #endregion
+#endregion
     }
 
     /// <summary>

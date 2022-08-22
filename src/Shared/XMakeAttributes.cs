@@ -3,6 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+#if !CLR2COMPATIBILITY
+using System.Runtime.InteropServices;
+#endif
+using System.Runtime.CompilerServices;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -28,6 +34,7 @@ namespace Microsoft.Build.Shared
         internal const string update = "Update";
         internal const string matchOnMetadata = "MatchOnMetadata";
         internal const string matchOnMetadataOptions = "MatchOnMetadataOptions";
+        internal const string overrideUsingTask = "Override";
         internal const string keepMetadata = "KeepMetadata";
         internal const string removeMetadata = "RemoveMetadata";
         internal const string keepDuplicates = "KeepDuplicates";
@@ -76,6 +83,7 @@ namespace Microsoft.Build.Shared
             internal const string clr2 = "CLR2";
             internal const string clr4 = "CLR4";
             internal const string currentRuntime = "CurrentRuntime";
+            internal const string net = "NET";
             internal const string any = "*";
         }
 
@@ -83,6 +91,7 @@ namespace Microsoft.Build.Shared
         {
             internal const string x86 = "x86";
             internal const string x64 = "x64";
+            internal const string arm64 = "arm64";
             internal const string currentArchitecture = "CurrentArchitecture";
             internal const string any = "*";
         }
@@ -99,9 +108,9 @@ namespace Microsoft.Build.Shared
 
         private static readonly HashSet<string> KnownBatchingTargetAttributes = new HashSet<string> { name, condition, dependsOnTargets, beforeTargets, afterTargets };
 
-        private static readonly HashSet<string> ValidMSBuildRuntimeValues = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { MSBuildRuntimeValues.clr2, MSBuildRuntimeValues.clr4, MSBuildRuntimeValues.currentRuntime, MSBuildRuntimeValues.any };
+        private static readonly HashSet<string> ValidMSBuildRuntimeValues = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { MSBuildRuntimeValues.clr2, MSBuildRuntimeValues.clr4, MSBuildRuntimeValues.currentRuntime, MSBuildRuntimeValues.net, MSBuildRuntimeValues.any };
 
-        private static readonly HashSet<string> ValidMSBuildArchitectureValues = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { MSBuildArchitectureValues.x86, MSBuildArchitectureValues.x64, MSBuildArchitectureValues.currentArchitecture, MSBuildArchitectureValues.any };
+        private static readonly HashSet<string> ValidMSBuildArchitectureValues = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { MSBuildArchitectureValues.x86, MSBuildArchitectureValues.x64, MSBuildArchitectureValues.arm64, MSBuildArchitectureValues.currentArchitecture, MSBuildArchitectureValues.any };
 
         /// <summary>
         /// Returns true if and only if the specified attribute is one of the attributes that the engine specifically recognizes
@@ -179,10 +188,10 @@ namespace Microsoft.Build.Shared
                 return true;
             }
 
-            if ((runtimeA.Equals(MSBuildRuntimeValues.currentRuntime, StringComparison.OrdinalIgnoreCase) && runtimeB.Equals(MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase)) ||
-                (runtimeA.Equals(MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase) && runtimeB.Equals(MSBuildRuntimeValues.currentRuntime, StringComparison.OrdinalIgnoreCase)))
+            if ((runtimeA.Equals(MSBuildRuntimeValues.currentRuntime, StringComparison.OrdinalIgnoreCase) && runtimeB.Equals(GetCurrentMSBuildRuntime(), StringComparison.OrdinalIgnoreCase)) ||
+                (runtimeA.Equals(GetCurrentMSBuildRuntime(), StringComparison.OrdinalIgnoreCase) && runtimeB.Equals(MSBuildRuntimeValues.currentRuntime, StringComparison.OrdinalIgnoreCase)))
             {
-                // CLR4 is the current runtime, so this is also a match. 
+                // Matches the current runtime, so match.
                 return true;
             }
 
@@ -216,13 +225,15 @@ namespace Microsoft.Build.Shared
                 runtimeB = MSBuildRuntimeValues.any;
             }
 
+            string actualCurrentRuntime = GetCurrentMSBuildRuntime();
+
             // if they're equal, then there's no problem -- just return the equivalent runtime.  
             if (runtimeA.Equals(runtimeB, StringComparison.OrdinalIgnoreCase))
             {
                 if (runtimeA.Equals(MSBuildRuntimeValues.currentRuntime, StringComparison.OrdinalIgnoreCase) ||
                     runtimeA.Equals(MSBuildRuntimeValues.any, StringComparison.OrdinalIgnoreCase))
                 {
-                    mergedRuntime = MSBuildRuntimeValues.clr4;
+                    mergedRuntime = actualCurrentRuntime;
                 }
                 else
                 {
@@ -232,21 +243,22 @@ namespace Microsoft.Build.Shared
                 return true;
             }
 
-            // if both A and B are one of CLR4, don't care, or current, then the end result will be CLR4 no matter what.  
+            // if both A and B are one of actual-current-runtime, don't care or current,
+            // then the end result will be current-runtime no matter what.  
             if (
                 (
-                 runtimeA.Equals(MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase) ||
+                 runtimeA.Equals(actualCurrentRuntime, StringComparison.OrdinalIgnoreCase) ||
                  runtimeA.Equals(MSBuildRuntimeValues.currentRuntime, StringComparison.OrdinalIgnoreCase) ||
                  runtimeA.Equals(MSBuildRuntimeValues.any, StringComparison.OrdinalIgnoreCase)
                 ) &&
                 (
-                 runtimeB.Equals(MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase) ||
+                 runtimeB.Equals(actualCurrentRuntime, StringComparison.OrdinalIgnoreCase) ||
                  runtimeB.Equals(MSBuildRuntimeValues.currentRuntime, StringComparison.OrdinalIgnoreCase) ||
                  runtimeB.Equals(MSBuildRuntimeValues.any, StringComparison.OrdinalIgnoreCase)
                 )
                )
             {
-                mergedRuntime = MSBuildRuntimeValues.clr4;
+                mergedRuntime = actualCurrentRuntime;
                 return true;
             }
 
@@ -320,8 +332,8 @@ namespace Microsoft.Build.Shared
                 MSBuildRuntimeValues.any.Equals(runtime, StringComparison.OrdinalIgnoreCase) ||
                 MSBuildRuntimeValues.currentRuntime.Equals(runtime, StringComparison.OrdinalIgnoreCase))
             {
-                // Default to CLR4.
-                return MSBuildRuntimeValues.clr4;
+                // Default to current.
+                return GetCurrentMSBuildRuntime();
             }
             else
             {
@@ -421,8 +433,42 @@ namespace Microsoft.Build.Shared
         /// </comments>
         internal static string GetCurrentMSBuildArchitecture()
         {
+#if !CLR2COMPATIBILITY
+            string currentArchitecture = string.Empty;
+            switch (RuntimeInformation.ProcessArchitecture)
+            {
+                case Architecture.X86:
+                    currentArchitecture = MSBuildArchitectureValues.x86;
+                    break;
+                case Architecture.X64:
+                    currentArchitecture = MSBuildArchitectureValues.x64;
+                    break;
+                case Architecture.Arm64:
+                    currentArchitecture = MSBuildArchitectureValues.arm64;
+                    break;
+                default:
+                    // We're not sure what the architecture is, default to original 32/64bit logic.
+                    // This allows architectures like s390x to continue working.
+                    // https://github.com/dotnet/msbuild/issues/7729
+                    currentArchitecture = (IntPtr.Size == sizeof(Int64)) ? MSBuildArchitectureValues.x64 : MSBuildArchitectureValues.x86;
+                    break;
+            }
+#else
             string currentArchitecture = (IntPtr.Size == sizeof(Int64)) ? MSBuildArchitectureValues.x64 : MSBuildArchitectureValues.x86;
+#endif
             return currentArchitecture;
+        }
+
+        /// <summary>
+        /// Returns the MSBuildRuntime value corresponding to the current process' runtime. 
+        /// </summary>
+        internal static string GetCurrentMSBuildRuntime()
+        {
+#if NET40_OR_GREATER
+            return MSBuildRuntimeValues.clr4;
+#else
+            return MSBuildRuntimeValues.net;
+#endif
         }
 
         /// <summary>

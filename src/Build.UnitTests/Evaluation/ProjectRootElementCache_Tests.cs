@@ -6,10 +6,13 @@ using System;
 using System.IO;
 
 using Microsoft.Build.Construction;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
 
 
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Evaluation
 {
@@ -79,9 +82,9 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// Tests that a strong reference is held to a single item
         /// </summary>
         [Fact]
-        //  This test fails on .NET Core and Mono: https://github.com/Microsoft/msbuild/issues/282
+        // This test fails on .NET Core and Mono: https://github.com/dotnet/msbuild/issues/282
         [Trait("Category", "non-mono-tests")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/Microsoft/msbuild/issues/282")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/msbuild/issues/282")]
         public void AddEntryStrongReference()
         {
             string projectPath = NativeMethodsShared.IsUnixLike ? "/foo" : "c:\\foo";
@@ -99,7 +102,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             GC.Collect();
 
             Assert.Null(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.TryGet(projectPath));
-        }   
+        }
 
         /// <summary>
         /// Cache should not return a ProjectRootElement if the file it was loaded from has since changed -

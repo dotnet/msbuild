@@ -13,6 +13,8 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
     /// <summary>
@@ -1154,7 +1156,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting))]
         public void RenameThrowsWhenItemElementSplittingIsDisabled(string projectContents, int itemIndex, SetupProject setupProject)
         {
-            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => {i.Rename("foo");});
+            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => {i.Rename("foo"); });
         }
 
         /// <summary>

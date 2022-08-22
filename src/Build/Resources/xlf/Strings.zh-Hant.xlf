@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../Strings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.resx">
     <body>
       <trans-unit id="AmbiguousTaskParameterError">
         <source>MSB4001: The "{0}" task has more than one parameter called "{1}".</source>
@@ -92,9 +92,19 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="DuplicateOverrideUsingTaskElement">
+        <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
+        <target state="translated">MSB4275: 已嘗試建立相同工作的多個覆寫: {0}</target>
+        <note>{StrBegin="MSB4275: "}</note>
+      </trans-unit>
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
         <target state="translated">MSB4257: 指定的輸出結果快取檔案是空的。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentDerivedPropertyRead">
+        <source>Property '{0}' with value '{1}' expanded from the environment.</source>
+        <target state="new">Property '{0}' with value '{1}' expanded from the environment.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
@@ -138,10 +148,9 @@
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
-        <source>Loading the following project cache plugin:
-    {0}</source>
-        <target state="needs-review-translation">"正在載入下列專案快取外掛程式:
-    {0}"</target>
+        <source>Loading the following project cache plugin: {0}</source>
+        <target state="needs-review-translation">正在載入下列專案快取外掛程式:
+    {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
@@ -169,11 +178,6 @@
       <trans-unit id="NoProjectCachePluginFoundInAssembly">
         <source>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</source>
         <target state="translated">MSB4270: 在組件 "{0}" 中找不到任何專案快取外掛程式，但應該要有一個外掛程式。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NotAllNodesDefineACacheItem">
-        <source>MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</source>
-        <target state="translated">MSB4269: 當任何靜態圖表節點定義了專案快取時，所有節點都必須定義相同的專案快取。下列專案不包含 "{0}" 項目宣告: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -214,25 +218,93 @@
         <target state="translated">無法使用內含 null 或空白目標名稱的集合呼叫方法 {0}。</target>
         <note />
       </trans-unit>
-      <trans-unit id="OnlyOneCachePluginMustBeSpecified">
-        <source>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</source>
-        <target state="translated">MSB4265: 只可指定單一專案快取外掛程式，但發現多個指定項目: {0}</target>
+      <trans-unit id="OverrideUsingTaskElementCreated">
+        <source>Created an override using task: {0} at {1}</source>
+        <target state="translated">已使用下列工作建立覆寫: 於 {1} 的 {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheEndBuild">
+        <source>Shutting down project cache plugin.</source>
+        <target state="translated">正在關閉專案快取外掛程式。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheException">
         <source>MSB4273: The project cache threw an unhandled exception from the {0} method.</source>
-        <target state="new">MSB4273: The project cache threw an unhandled exception from the {0} method.</target>
+        <target state="translated">MSB4273: 專案快取從 {0} 方法擲回未處理的例外狀況。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithDefaultTargets">
+        <source>Project cache hit for "{0}" (default targets).</source>
+        <target state="translated">"{0}" 的專案快取命中 (預設目標)。</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithOutputs">
+        <source>{0} -&gt; Cache Hit</source>
+        <target state="translated">{0} -&gt; 快取命中</target>
+        <note>
+      {StrBegin="{0} -&gt; "}LOCALIZATION: This string is used to indicate progress and matches the format for a log message from Microsoft.Common.CurrentVersion.targets. {0} is a project name.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithTargetNames">
+        <source>Project cache hit for "{0}" ({1} target(s)).</source>
+        <target state="translated">"{0}" 的專案快取命中 ({1} 個目標)。</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
       </trans-unit>
       <trans-unit id="ProjectCacheInitializationFailed">
         <source>MSB4266: Failed to initialize the project cache.</source>
         <target state="translated">MSB4266: 無法將專案快取初始化。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheMissWithDefaultTargets">
+        <source>Project cache miss for "{0}" (default targets).</source>
+        <target state="translated">"{0}" 的專案快取遺漏 (預設目標)。</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheMissWithTargetNames">
+        <source>Project cache miss for "{0}" ({1} target(s)).</source>
+        <target state="translated">"{0}" 的專案快取遺漏 ({1} 個目標)。</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheNotApplicableWithDefaultTargets">
+        <source>Project cache not applicable for "{0}" (default targets).</source>
+        <target state="translated">不適用於 "{0}" 的專案快取 (預設目標)。</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheNotApplicableWithTargetNames">
+        <source>Project cache not applicable for "{0}" ({1} target(s)).</source>
+        <target state="translated">不適用於 "{0}" 的專案快取 ({1} 個目標)。</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectCacheQueryFailed">
         <source>MSB4267: The project cache failed while being queried for the following project: {0}. The cache is queried in parallel for multiple projects so this specific project might not be the cause.</source>
         <target state="translated">MSB4267: 查詢下列專案時，專案快取失敗: {0}。查詢多個專案時，會平行查詢快取，因此這個特定專案可能不是失敗原因。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheQueryStartedWithDefaultTargets">
+        <source>Querying project cache for "{0}" (default targets):</source>
+        <target state="translated">"{0}" 的查詢專案快取 (預設目標):</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheQueryStartedWithTargetNames">
+        <source>Querying project cache for "{0}" (targets: {1}):</source>
+        <target state="translated">"{0}" 的查詢專案快取 (目標: {1})。</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
       </trans-unit>
       <trans-unit id="ProjectCacheShutdownFailed">
         <source>MSB4268: The project cache failed to shut down properly.</source>
@@ -255,6 +327,21 @@
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">屬性初始值: $({0})="{1}" 來源: {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
+        <source>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</source>
+        <target state="translated">MSB4274: 停用 inproc 節點會在使用可發出 proxy 組建要求的專案快取外掛程式時，導致效能降低。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverCriticalFailure">
+        <source>MSB4242: SDK Resolver Failure: "{0}"</source>
+        <target state="translated">MSB4242: SDK 解析程式失敗: "{0}"</target>
+        <note>{StrBegin="MSB4242: "}</note>
+      </trans-unit>
+      <trans-unit id="SDKResolverFailed">
+        <source>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</source>
+        <target state="translated">SDK 解析程式 "{0}" 在嘗試解析 SDK "{1}" 時失敗。例外狀況: "{2}"</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -305,17 +392,17 @@
       </trans-unit>
       <trans-unit id="TaskAcquiredCores">
         <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
-        <target state="new">Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</target>
+        <target state="translated">工作 "{0}" 已要求 {1} 個核心、已取得 {2} 個核心，現在共保留 {3} 個核心。</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
-        <target state="new">Task "{0}" released {1} cores and now holds {2} cores total.</target>
+        <target state="translated">工作 "{0}" 已發行 {1} 個核心，現在共保留 {2} 個核心。</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCoresWarning">
         <source>Task "{0}" asked to release {1} cores while holding only {2} and now holds {3} cores total.</source>
-        <target state="new">Task "{0}" asked to release {1} cores while holding only {2} and now holds {3} cores total.</target>
+        <target state="translated">工作 "{0}" 要求在僅保留 {2} 個核心的情況下發行 {1} 個核心，現在共保留 {3} 個核心。</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReturnedFalseButDidNotLogError">
@@ -330,6 +417,13 @@
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
     </note>
+      </trans-unit>
+      <trans-unit id="UnhandledMSBuildError">
+        <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled.
+    {0}</source>
+        <target state="translated">這是 MSBuild 中未處理的例外狀況 -- 請針對現有的問題附議，或在 https://aka.ms/msbuild/unhandled 提交新的問題。
+    {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="UninitializedPropertyRead">
         <source>Read uninitialized property "{0}"</source>
@@ -1785,8 +1879,8 @@
         <note>{StrBegin="MSB4209: "}</note>
       </trans-unit>
       <trans-unit id="AffinityConflict">
-        <source>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for this project.</source>
-        <target state="translated">MSB4213: 指定的要求親和性 {0} 與先前為這個專案指定的親和性 {1} 衝突。</target>
+        <source>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for project {2} with global properties {3}</source>
+        <target state="translated">MSB4213: 指定的要求親和性 {0} 與先前為專案 {2} 指定、具有全域屬性 {3} 的親和性 {1} 衝突。</target>
         <note>{StrBegin="MSB4213: "}</note>
       </trans-unit>
       <trans-unit id="UnableToCreateNode">
@@ -2064,8 +2158,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <note />
       </trans-unit>
       <trans-unit id="OM_MustSetRecordDuplicateInputs">
-        <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateImports flag.</source>
-        <target state="translated">專案並未以 ProjectLoadSettings.RecordDuplicateImports 旗標載入。</target>
+        <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</source>
+        <target state="translated">專案並未和 ProjectLoadSettings.RecordDuplicateImports 旗標一起載入。</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_CannotSaveFileLoadedAsReadOnly">
@@ -2374,15 +2468,10 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <target state="translated">MSB4244: 無法載入 SDK 解析程式組件 "{0}"。{1}</target>
         <note>{StrBegin="MSB4244: "}</note>
       </trans-unit>
-      <trans-unit id="CouldNotRunSdkResolver">
-        <source>MSB4242: The SDK resolver "{0}" failed to run. {1}</source>
-        <target state="translated">MSB4242: SDK 解析程式 "{0}" 無法執行。{1}</target>
-        <note>{StrBegin="MSB4242: "}</note>
-      </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">
-        <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
-        <target state="translated">MSB4243: 因為找不到 NuGet 組件，所以 NuGet 型 SDK 解析程式無法執行。請檢查您的 MSBuild 安裝，或將環境變數 "{0}" 設定為包含必要 NuGet 組件的資料夾。{1}</target>
-        <note>{StrBegin="MSB4243: "}</note>
+        <source>The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
+        <target state="translated">因為找不到 NuGet 組件，NuGet 型 SDK 解析程式無法執行。請檢查您的 MSBuild 安裝，或將環境變數 "{0}" 設定為包含必要 NuGet 組件的資料夾。{1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedInvalidFile">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</source>

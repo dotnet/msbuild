@@ -4,6 +4,8 @@
 using System;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -22,8 +24,8 @@ namespace Microsoft.Build.Tasks
         ///             Output TaskParameter="Value" PropertyName="MyTargetsToBuild"
         ///         /CreateProperty
         /// 
-        /// We need to respect the semicolon that he put in the value, and need to treat
-        /// this exactly as if he had done:
+        /// We need to respect the semicolon that they put in the value, and need to treat
+        /// this exactly as if they had done:
         /// 
         ///         PropertyGroup
         ///             MyTargetsToBuild="Clean;Build"

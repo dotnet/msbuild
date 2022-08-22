@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -462,6 +464,8 @@ namespace Microsoft.Build.BackEnd
 
             ErrorUtilities.ThrowInternalError("State {0} is not one of the expected states.", _state);
         }
+
+        public bool IsProxyBuildRequest() => BuildRequest.IsProxyBuildRequest();
 
         /// <summary>
         /// Change to the specified state.  Update internal counters.

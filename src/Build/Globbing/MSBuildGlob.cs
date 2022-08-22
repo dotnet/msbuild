@@ -6,8 +6,12 @@ using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 using Microsoft.NET.StringTools;
+
+#nullable disable
 
 namespace Microsoft.Build.Globbing
 {
@@ -126,9 +130,12 @@ namespace Microsoft.Build.Globbing
                 normalizedInput,
                 _state.Value.Regex,
                 out bool isMatch,
-                out string fixedDirectoryPart,
                 out string wildcardDirectoryPart,
                 out string filenamePart);
+
+            // We don't capture the fixed directory part in the regex but we can infer it from the other two.
+            int fixedDirectoryPartLength = normalizedInput.Length - wildcardDirectoryPart.Length - filenamePart.Length;
+            string fixedDirectoryPart = normalizedInput.Substring(0, fixedDirectoryPartLength);
 
             return new MatchInfoResult(isMatch, fixedDirectoryPart, wildcardDirectoryPart, filenamePart);
         }
@@ -202,8 +209,20 @@ namespace Microsoft.Build.Globbing
 
                     if (regex == null)
                     {
+                        RegexOptions regexOptions = FileMatcher.DefaultRegexOptions;
                         // compile the regex since it's expected to be used multiple times
-                        Regex newRegex = new Regex(matchFileExpression, FileMatcher.DefaultRegexOptions | RegexOptions.Compiled);
+                        // For the kind of regexes used here, compilation on .NET Framework tends to be expensive and not worth the small
+                        // run-time boost so it's enabled only on .NET Core by default.
+#if RUNTIME_TYPE_NETCORE
+                        bool compileRegex = true;
+#else
+                        bool compileRegex = !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0);
+#endif
+                        if (compileRegex)
+                        {
+                            regexOptions |= RegexOptions.Compiled;
+                        }
+                        Regex newRegex = new Regex(matchFileExpression, regexOptions);
                         lock (s_regexCache)
                         {
                             if (!s_regexCache.TryGetValue(matchFileExpression, out regex))
@@ -244,7 +263,7 @@ namespace Microsoft.Build.Globbing
         /// <summary>
         ///     Return type of <see cref="MSBuildGlob.MatchInfo" />
         /// </summary>
-        public struct MatchInfoResult
+        public readonly struct MatchInfoResult
         {
             /// <summary>
             ///     Whether the <see cref="MSBuildGlob.MatchInfo" /> argument was matched against the glob

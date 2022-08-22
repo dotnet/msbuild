@@ -9,6 +9,8 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Logging
 {
     /// <summary>
@@ -153,15 +155,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public override void Shutdown()
         {
-            try
-            {
-                // Do, or do not, there is no try.
-            }
-            finally
-            {
-                // Keep FxCop happy by closing in a Finally.
-                _fileWriter?.Dispose();
-            }
+            _fileWriter?.Dispose();
         }
 
         /// <summary>

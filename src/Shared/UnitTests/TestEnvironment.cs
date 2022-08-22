@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -17,7 +18,8 @@ using Xunit.Abstractions;
 
 using TempPaths = System.Collections.Generic.Dictionary<string, string>;
 using CommonWriterType = System.Action<string, string, System.Collections.Generic.IEnumerable<string>>;
-using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -178,7 +180,7 @@ namespace Microsoft.Build.UnitTests
         public TransientTempPath CreateNewTempPathWithSubfolder(string subfolder)
         {
             var folder = CreateFolder(null, true, subfolder);
-            return SetTempPath(folder.Path, true);
+            return WithTransientTestState(SetTempPath(folder.Path, true));
         }
 
         /// <summary>
@@ -190,10 +192,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public TransientTempPath SetTempPath(string tempPath, bool deleteTempDirectory = false)
         {
-            var transientTempPath = new TransientTempPath(tempPath, deleteTempDirectory);
-            _variants.Add(transientTempPath);
-
-            return transientTempPath;
+            return WithTransientTestState(new TransientTempPath(tempPath, deleteTempDirectory));
         }
 
         /// <summary>
@@ -202,7 +201,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="extension">Extensions of the file (defaults to '.tmp')</param>
         public TransientTestFile CreateFile(string extension = ".tmp")
         {
-            return WithTransientTestState(new TransientTestFile(extension, createFile:true, expectedAsOutput:false));
+            return WithTransientTestState(new TransientTestFile(extension, createFile: true, expectedAsOutput: false));
         }
 
         public TransientTestFile CreateFile(string fileName, string contents = "")
@@ -258,17 +257,6 @@ namespace Microsoft.Build.UnitTests
         public TransientTestFile ExpectFile(string extension = ".tmp")
         {
             return WithTransientTestState(new TransientTestFile(extension, createFile: false, expectedAsOutput: true));
-        }
-
-        /// <summary>
-        /// Create a temp file name under a specific temporary folder. The file is expected to exist when the test completes.
-        /// </summary>
-        /// <param name="transientTestFolder">Temp folder</param>
-        /// <param name="extension">Extension of the file (defaults to '.tmp')</param>
-        /// <returns></returns>
-        public TransientTestFile ExpectFile(TransientTestFolder transientTestFolder, string extension = ".tmp")
-        {
-            return WithTransientTestState(new TransientTestFile(transientTestFolder.Path, extension, createFile: false, expectedAsOutput: true));
         }
 
         /// <summary>
@@ -330,6 +318,15 @@ namespace Microsoft.Build.UnitTests
             return WithTransientTestState(new TransientWorkingDirectory(newWorkingDirectory));
         }
 
+        /// <summary>
+        /// Register process ID to be finished/killed after tests ends.
+        /// </summary>
+        public TransientTestProcess WithTransientProcess(int processId)
+        {
+            TransientTestProcess transientTestProcess = new(processId);
+            return WithTransientTestState(transientTestProcess);
+        }
+
         #endregion
 
         private class DefaultOutput : ITestOutputHelper
@@ -387,7 +384,7 @@ namespace Microsoft.Build.UnitTests
         {
             var currentValue = _accessorFunc();
 
-            //  Something like the following might be preferrable, but the assertion method truncates the values leaving us without
+            // Something like the following might be preferrable, but the assertion method truncates the values leaving us without
             //  useful information.  So use Assert.True instead
             //  Assert.Equal($"{_name}: {_originalValue}", $"{_name}: {_accessorFunc()}");
 
@@ -415,7 +412,7 @@ namespace Microsoft.Build.UnitTests
             {
                 foreach (var key in subset.Keys)
                 {
-                    // workaround for https://github.com/Microsoft/msbuild/pull/3866
+                    // workaround for https://github.com/dotnet/msbuild/pull/3866
                     // if the initial environment had empty keys, then MSBuild will accidentally remove them via Environment.SetEnvironmentVariable
                     if (operation != "removed" || !string.IsNullOrEmpty((string) subset[key]))
                     {
@@ -558,6 +555,31 @@ namespace Microsoft.Build.UnitTests
             if (_deleteTempDirectory)
             {
                 FileUtilities.DeleteDirectoryNoThrow(TempPath, recursive: true);
+            }
+        }
+    }
+
+    public class TransientTestProcess : TransientTestState
+    {
+        private readonly int _processId;
+
+        public TransientTestProcess(int processId)
+        {
+            _processId = processId;
+        }
+
+        public override void Revert()
+        {
+            if (_processId > -1)
+            {
+                try
+                {
+                    Process.GetProcessById(_processId).KillTree(1000);
+                }
+                catch
+                {
+                    // ignore if process is already dead
+                }
             }
         }
     }

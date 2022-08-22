@@ -3,11 +3,15 @@
 
 using System;
 using System.Collections.Concurrent;
+#if !FEATURE_THREAD_CULTURE
+using System.Globalization;
+#endif
 using System.Threading;
 using Microsoft.Build.Shared;
 
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
-using System.Globalization;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -217,6 +221,12 @@ namespace Microsoft.Build.BackEnd
                 EnqueuePacket(packet);
             }
         }
+
+        public void ClientWillDisconnect()
+        {
+            // We do not need to do anything here for InProc node.
+        }
+
         #endregion
 
         #region Internal Methods
@@ -345,7 +355,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_THREAD_CULTURE
                 _packetPump = new Thread(PacketPumpProc);
 #else
-                //  In .NET Core, we need to set the current culture from inside the new thread
+                // In .NET Core, we need to set the current culture from inside the new thread
                 CultureInfo culture = _componentHost.BuildParameters.Culture;
                 CultureInfo uiCulture = _componentHost.BuildParameters.UICulture;
                 _packetPump = new Thread(() =>

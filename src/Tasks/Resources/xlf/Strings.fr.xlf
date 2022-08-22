@@ -514,6 +514,11 @@
         <target state="translated">MSB3667: il existe déjà un fichier sur "{0}". Si vous essayez de créer un cache précalculé, vérifiez que vous générez un seul projet qui dépend de vos assemblys au lieu de générer les assemblys eux-mêmes. Si vous exécutez la tâche ResolveAssemblyReference normalement, ne définissez pas le paramètre "AssemblyInformationCacheOutputPath" de la tâche ResolveAssemblyReference.</target>
         <note>{StrBegin="MSB3667: "}</note>
       </trans-unit>
+      <trans-unit id="General.TaskRequiresWindows">
+        <source>MSB3096: Task "{0}" is only supported when building on Windows.</source>
+        <target state="translated">MSB3096: La tâche "{0}" n’est prise en charge que lors de la génération sur Windows.</target>
+        <note>{StrBegin="MSB3096: "}</note>
+      </trans-unit>
       <trans-unit id="General.UndefineProperties">
         <source>Removing Properties:</source>
         <target state="translated">Suppression des propriétés :</target>
@@ -1326,6 +1331,51 @@
         <target state="translated">MSB3441: Impossible d'obtenir le nom d'assembly de "{0}". {1}</target>
         <note>{StrBegin="MSB3441: "}</note>
       </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.AnyCPUDefault">
+        <source>Choosing AnyCPU by default.</source>
+        <target state="translated">Choisissez AnyCPU par défaut.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.DisplayChosenPlatform">
+        <source>Project '{0}' will build with platform: '{1}'.</source>
+        <target state="translated">Le projet «{0}» sera généré avec la plateforme : «{1}».</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.FoundMappingInTable">
+        <source>Found mapping '{0}'='{1}' in given lookup table: '{2}'.</source>
+        <target state="translated">Mappage trouvé '{0}' = '{1}’ dans la table de correspondances spécifiée : '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.InvalidLookupTableFormat">
+        <source>MSB3983: The PlatformLookupTable '{0}' is in an invalid format and won't be used. The format should be 'A=B;C=D'.</source>
+        <target state="translated">MSB3983: Le format de PlatformLookupTable «{0}» n’est pas valide et ne sera pas utilisé. Le format doit être 'A=B;C=D'.</target>
+        <note>{StrBegin="MSB3983: "}</note>
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.LookupTableParsed">
+        <source>Parsed lookup table:'{0}'.</source>
+        <target state="translated">Table de recherche connexes : '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.NoCompatiblePlatformFound">
+        <source>MSB3981: Could not determine what '{0}' should be built as. The project will be built without the Platform property set.</source>
+        <target state="translated">MSB3981: Impossible de déterminer le type de «{0}» devrait être généré. Le projet sera généré sans la propriété Platform définie.</target>
+        <note>{StrBegin="MSB3981: "}</note>
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.NoPlatformsListed">
+        <source>MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</source>
+        <target state="new">MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</target>
+        <note>{StrBegin="MSB3982: "}</note>
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform">
+        <source>Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</source>
+        <target state="new">Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.SamePlatform">
+        <source>ProjectReference and current project have the same platform.</source>
+        <target state="translated">ProjectReference et le projet actuel ont la même plateforme.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="GetFrameworkSdkPath.CouldNotFindSDK">
         <source>Could not locate the expected version of the Microsoft Windows SDK. Looked for a location specified in the "{0}" value of the registry key "{1}". If your build process does not need the SDK then this can be ignored. Otherwise you can solve the problem by doing one of the following:  1) Install the Microsoft Windows SDK.  2) Install Visual Studio 2010.  3) Manually set the above registry key to the correct location.</source>
         <target state="translated">Impossible de trouver la version attendue du SDK Microsoft Windows. Recherche d'un emplacement indiqué dans la valeur "{0}" de la clé de Registre "{1}". Si votre processus de génération n'a pas besoin du SDK, cette erreur peut être ignorée. Sinon, essayez de résoudre le problème de l'une des manières suivantes : 1) Installez le SDK Microsoft Windows.  2) Installez Visual Studio 2010. 3) Indiquez l'emplacement approprié dans la clé de Registre ci-dessus.</target>
@@ -1502,6 +1552,11 @@
         <target state="translated">MSB3216: Impossible d'inscrire l'assembly "{0}", car l'accès est refusé. Assurez-vous d'exécuter l'application comme administrateur. {1}</target>
         <note>{StrBegin="MSB3216: "}</note>
       </trans-unit>
+      <trans-unit id="RemoveDir.EmptyPath">
+        <source>MSB3232: An empty directory was passed to RemoveDir and was ignored.</source>
+        <target state="new">MSB3232: An empty directory was passed to RemoveDir and was ignored.</target>
+        <note>{StrBegin="MSB3232: "}</note>
+      </trans-unit>
       <trans-unit id="RemoveDir.Error">
         <source>MSB3231: Unable to remove directory "{0}". {1}</source>
         <target state="translated">MSB3231: Impossible de supprimer le répertoire "{0}". {1}</target>
@@ -1612,8 +1667,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName">
-        <source>Considered "{0}", which existed but didn't have a valid identity. This may not be an assembly.</source>
-        <target state="translated">"{0}" existe et a été envisagé, mais il ne comporte aucune identité valide. Il ne s'agit peut-être pas d'un assembly.</target>
+        <source>Considered "{0}", which existed but did not appear to be a valid .NET assembly.</source>
+        <target state="translated">Considéré comme "{0}", qui existait mais ne semblait pas être un assembly .NET valide.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch">
@@ -2557,27 +2612,27 @@
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotConvertToInferredType">
         <source>Could not convert the value for parameter "{0}" to the inferred type "{1}". The value will be treated as a string. {2}</source>
-        <target state="new">Could not convert the value for parameter "{0}" to the inferred type "{1}". The value will be treated as a string. {2}</target>
+        <target state="translated">Impossible de convertir la valeur du paramètre « {0} » en type différé « {1} ». La valeur est traitée comme une chaîne. {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotConvertValue">
         <source>MSB3716: The parameter value "{0}" could not be converted to "{1}". {2}</source>
-        <target state="new">MSB3716: The parameter value "{0}" could not be converted to "{1}". {2}</target>
+        <target state="translated">MSB3716: la valeur du paramètre « {0} » ne peut pas être convertie en « {1} ». {2}</target>
         <note>{StrBegin="MSB3716: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotInferParameterType">
         <source>Could not infer the type of parameter "{0}" because the attribute type is unknown. The value will be treated as a string.</source>
-        <target state="new">Could not infer the type of parameter "{0}" because the attribute type is unknown. The value will be treated as a string.</target>
+        <target state="translated">Impossible d’inférer le type de paramètre « {0} », car le type d’attribut est inconnu. La valeur sera considérée comme une chaîne.</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteCodeFragment.MultipleConstructorsFound">
         <source>Multiple attribute constructors were found for type inferencing.</source>
-        <target state="new">Multiple attribute constructors were found for type inferencing.</target>
+        <target state="translated">Plusieurs constructeurs d’attributs ont été trouvées pour l’inférence de type.</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteCodeFragment.ParameterTypeNotFound">
         <source>MSB3715: The type "{0}" was not found.</source>
-        <target state="new">MSB3715: The type "{0}" was not found.</target>
+        <target state="translated">MSB3715: le type « {0} » est introuvable.</target>
         <note>{StrBegin="MSB3715: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">

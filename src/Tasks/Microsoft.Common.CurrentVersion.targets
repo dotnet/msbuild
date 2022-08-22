@@ -13,8 +13,7 @@ Visual Basic, and Visual C#.
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
-
-<Project DefaultTargets="Build" TreatAsLocalProperty="OutDir" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" TreatAsLocalProperty="OutDir">
 
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="'$(MicrosoftCommonPropsHasBeenImported)' != 'true' and Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
 
@@ -179,6 +178,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_DebugSymbolsProduced Condition="'$(DebugType)'=='full'">true</_DebugSymbolsProduced>
     <_DebugSymbolsProduced Condition="'$(DebugType)'=='portable'">true</_DebugSymbolsProduced>
     <_DebugSymbolsProduced Condition="'$(DebugType)'=='embedded'">false</_DebugSymbolsProduced>
+    <_DebugSymbolsProduced Condition="'$(ProduceOnlyReferenceAssembly)'=='true'">false</_DebugSymbolsProduced>
 
     <!-- Whether or not a .xml file is produced. -->
     <_DocumentationFileProduced>true</_DocumentationFileProduced>
@@ -323,7 +323,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Example, C:\MyProjects\MyProject\bin\Debug\MyAssembly.dll -->
     <TargetPath Condition=" '$(TargetPath)' == '' ">$(TargetDir)$(TargetFileName)</TargetPath>
 
-    <TargetRefPath Condition=" '$(TargetRefPath)' == '' and '$(ProduceReferenceAssembly)' == 'true' ">$([MSBuild]::NormalizePath($(TargetDir), 'ref', $(TargetFileName)))</TargetRefPath>
+    <TargetRefPath Condition=" '$(TargetRefPath)' == '' and '$(ProduceReferenceAssembly)' == 'true' and ('$(ProduceReferenceAssemblyInOutDir)' == 'true' or '$([MSBuild]::AreFeaturesEnabled(17.0))' != 'true' ) ">$([MSBuild]::NormalizePath($(TargetDir), 'ref', $(TargetFileName)))</TargetRefPath>
+    <TargetRefPath Condition=" '$(TargetRefPath)' == '' and '$(ProduceReferenceAssembly)' == 'true' ">$([MSBuild]::NormalizePath($(MSBuildProjectDirectory), $(IntermediateOutputPath), 'ref', $(TargetFileName)))</TargetRefPath>
 
     <!-- Example, C:\MyProjects\MyProject\ -->
     <ProjectDir Condition=" '$(ProjectDir)' == '' ">$([MSBuild]::EnsureTrailingSlash($(MSBuildProjectDirectory)))</ProjectDir>
@@ -392,9 +393,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </ItemGroup>
 
   <ItemGroup Condition="'$(ProduceReferenceAssembly)' == 'true'">
-    <IntermediateRefAssembly Include="$(IntermediateOutputPath)ref\$(TargetName)$(TargetExt)" Condition="'@(IntermediateRefAssembly)' == ''" />
+    <IntermediateRefAssembly Include="$(IntermediateOutputPath)refint\$(TargetName)$(TargetExt)" Condition="'@(IntermediateRefAssembly)' == ''" />
     <CreateDirectory Include="@(IntermediateRefAssembly->'%(RootDir)%(Directory)')" />
-    <CreateDirectory Include="$(OutDir)ref" />
+    <CreateDirectory Include="$(OutDir)ref" Condition=" '$(ProduceReferenceAssemblyInOutDir)' == 'true'" />
+    <CreateDirectory Include="$(IntermediateOutputPath)ref" Condition=" '$(ProduceReferenceAssemblyInOutDir)' != 'true'" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(_DebugSymbolsProduced)' == 'true'">
@@ -486,6 +488,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PublishDir Condition="'$(PublishDir)'==''">$(OutputPath)app.publish\</PublishDir>
   </PropertyGroup>
 
+  <!-- 
+    ClickOncePublishDir property is the output location used by all ClickOnce publish targets. This should be same as PublishDir except 
+    for a trailing slash. PublishDir when specified as a global property on the command line cannot be changed to add a trailing slash.
+  -->
+  <PropertyGroup>
+    <ClickOncePublishDir>$(PublishDir)</ClickOncePublishDir>
+    <ClickOncePublishDir Condition="!HasTrailingSlash('$(ClickOncePublishDir)')">$(ClickOncePublishDir)\</ClickOncePublishDir>
+  </PropertyGroup>
+
   <!--
     ProcessorArchitecture is the target processor architecture.
     -->
@@ -572,35 +583,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <AssemblyFoldersSuffix Condition=" '$(AssemblyFoldersSuffix)' == '' ">AssemblyFoldersEx</AssemblyFoldersSuffix>
     <FrameworkRegistryBase Condition=" '$(FrameworkRegistryBase)' == '' ">Software\Microsoft\$(TargetFrameworkIdentifier)</FrameworkRegistryBase>
     <TargetPlatformRegistryBase Condition="'$(TargetPlatformRegistryBase)' == ''">Software\Microsoft\Microsoft SDKs\$(TargetPlatformIdentifier)</TargetPlatformRegistryBase>
-    <AssemblyFoldersConfigFile Condition="'$(AssemblyFoldersConfigFile)' == ''">$(MSBuildToolsPath32)\AssemblyFolders.config</AssemblyFoldersConfigFile>
+    <AssemblyFoldersConfigFile Condition="'$(AssemblyFoldersConfigFile)' == ''">$([MSBuild]::GetToolsDirectory32())\AssemblyFolders.config</AssemblyFoldersConfigFile>
     <AssemblyFoldersConfigFileSearchPath Condition="Exists('$(AssemblyFoldersConfigFile)')">{AssemblyFoldersFromConfig:$(AssemblyFoldersConfigFile),$(TargetFrameworkVersion)};</AssemblyFoldersConfigFileSearchPath>
-    <!--
-        The SearchPaths property is set to find assemblies in the following order:
-
-            (1) Files from current project - indicated by {CandidateAssemblyFiles}
-            (2) $(ReferencePath) - the reference path property, which comes from the .USER file.
-            (3) The hintpath from the referenced item itself, indicated by {HintPathFromItem}.
-            (4) The directory of MSBuild's "target" runtime from GetFrameworkPath.
-                The "target" runtime folder is the folder of the runtime that MSBuild is a part of.
-            (5) Registered assembly folders, indicated by {Registry:*,*,*}
-            (6) Assembly folders from AssemblyFolders.config file (provided by Visual Studio Dev15+).
-            (7) Legacy registered assembly folders, indicated by {AssemblyFolders}
-            (8) Resolve to the GAC.
-            (9) Treat the reference's Include as if it were a real file name.
-            (10) Look in the application's output folder (like bin\debug)
-        -->
-    <AssemblySearchPaths Condition=" '$(AssemblySearchPaths)' == ''">
-      {CandidateAssemblyFiles};
-      $(ReferencePath);
-      {HintPathFromItem};
-      {TargetFrameworkDirectory};
-      $(AssemblyFoldersConfigFileSearchPath)
-      {Registry:$(FrameworkRegistryBase),$(TargetFrameworkVersion),$(AssemblyFoldersSuffix)$(AssemblyFoldersExConditions)};
-      {AssemblyFolders};
-      {GAC};
-      {RawFileName};
-      $(OutDir)
-    </AssemblySearchPaths>
 
     <!--
         These are the extensions that assembly reference resolution will consider for resolution.
@@ -633,6 +617,34 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <FullReferenceAssemblyNames Condition="'$(FullReferenceAssemblyNames)' == ''">Full</FullReferenceAssemblyNames>
   </PropertyGroup>
 
+  <PropertyGroup Condition="$(AssemblySearchPaths) == ''">
+    <!--
+        The SearchPaths property is set to find assemblies in the following order:
+
+            (1) Files from current project - indicated by {CandidateAssemblyFiles}
+            (2) $(ReferencePath) - the reference path property, which comes from the .USER file.
+            (3) The hintpath from the referenced item itself, indicated by {HintPathFromItem}.
+            (4) The directory of MSBuild's "target" runtime from GetFrameworkPath.
+                The "target" runtime folder is the folder of the runtime that MSBuild is a part of.
+            (5) Assembly folders from AssemblyFolders.config file (provided by Visual Studio Dev15+).
+            (6) Registered assembly folders, indicated by {Registry:*,*,*}
+            (7) Legacy registered assembly folders, indicated by {AssemblyFolders}
+            (8) Resolve to the GAC.
+            (9) Treat the reference's Include as if it were a real file name.
+            (10) Look in the application's output folder (like bin\debug)
+        -->
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseCandidateAssemblyFiles)' != 'false'">{CandidateAssemblyFiles}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseReferencePath)' != 'false'">$(AssemblySearchPaths);$(ReferencePath)</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseHintPathFromItem)' != 'false'">$(AssemblySearchPaths);{HintPathFromItem}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseTargetFrameworkDirectory)' != 'false'">$(AssemblySearchPaths);{TargetFrameworkDirectory}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseAssemblyFoldersConfigFileSearchPath)' != 'false'">$(AssemblySearchPaths);$(AssemblyFoldersConfigFileSearchPath)</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseRegistry)' != 'false'">$(AssemblySearchPaths);{Registry:$(FrameworkRegistryBase),$(TargetFrameworkVersion),$(AssemblyFoldersSuffix)$(AssemblyFoldersExConditions)}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseAssemblyFolders)' != 'false'">$(AssemblySearchPaths);{AssemblyFolders}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseGAC)' != 'false'">$(AssemblySearchPaths);{GAC}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseRawFileName)' != 'false'">$(AssemblySearchPaths);{RawFileName}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseOutDir)' != 'false'">$(AssemblySearchPaths);$(OutDir)</AssemblySearchPaths>
+  </PropertyGroup>
+
   <!-- ContinueOnError takes 3 values:  WarnAndContinue (true), ErrorAndStop (false), and ErrorAndContinue.
          Default to ErrorAndStop, since that matches the behaviour in previous versions, and what users
          typically expect -->
@@ -641,9 +653,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <!-- Users familiar with how some other repos work try to use NoWarn with MSBuild in place of MSBuildWarningsAsMessages. -->
-  <PropertyGroup Condition="$([MSBuild]::AreFeaturesEnabled('16.8'))">
+  <PropertyGroup>
     <MSBuildWarningsAsMessages Condition="'$(MSBuildWarningsAsMessages)'==''">$(NoWarn)</MSBuildWarningsAsMessages>
     <MSBuildWarningsAsErrors Condition="'$(MSBuildWarningsAsErrors)'==''">$(WarningsAsErrors)</MSBuildWarningsAsErrors>
+    <MSBuildWarningsNotAsErrors Condition="'$(MSBuildWarningsNotAsErrors)'==''">$(WarningsNotAsErrors)</MSBuildWarningsNotAsErrors>
   </PropertyGroup>
 
   <!-- Common Project System support -->
@@ -1604,6 +1617,82 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
     ====================================================================================
+                                        _GetProjectReferencePlatformProperties
+
+    If a project is opted in via $(EnableDynamicPlatformResolution), this target calls the
+    GetCompatiblePlatform task on all ProjectReference items to determine the most compatible
+    platform for each project. It then sets SetPlatform metadata on each ProjectReference.
+    This prevents overbuilding a project when 'AnyCPU' is available.
+
+    ======================================================================================
+  -->
+
+  <PropertyGroup>
+    <UseDefaultPlatformLookupTables Condition="'$(UseDefaultPlatformLookupTables)' == ''">true</UseDefaultPlatformLookupTables>
+  </PropertyGroup>
+
+  <!-- This target skips VS builds because they already supply Platform and
+       Configuration information. -->
+  <Target Name="_GetProjectReferencePlatformProperties"
+          Condition="'$(EnableDynamicPlatformResolution)' == 'true'
+                     and '$(BuildingInsideVisualStudio)' != 'true'
+                     and '@(_MSBuildProjectReferenceExistent)' != ''">
+
+    <!-- Allow preset SetPlatform to override this operation -->
+    <ItemGroup>
+      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SetPlatform)' != ''">
+        <SkipGetPlatformProperties>true</SkipGetPlatformProperties>
+      </_MSBuildProjectReferenceExistent>
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ProjectReferencePlatformPossibilities Include="@(_MSBuildProjectReferenceExistent)"
+                                              Condition="'%(_MSBuildProjectReferenceExistent.SkipGetPlatformProperties)' != 'true'"/>
+    </ItemGroup>
+
+    <!-- Assign default PlatformLookupTables when doing Managed <-> Unmanaged hops -->
+    <ItemGroup>
+      <!-- If we're looking at a c++ project from a managed project, map managed platforms to native platforms. -->
+      <_ProjectReferencePlatformPossibilities Condition="'$(MSBuildProjectExtension)' != '.vcxproj' and '$(MSBuildProjectExtension)' != '.nativeproj' and '%(_ProjectReferencePlatformPossibilities.IsVcxOrNativeProj)' == 'true'">
+        <!-- Taken from https://docs.microsoft.com/visualstudio/msbuild/assignprojectconfiguration-task -->
+        <PlatformLookupTable Condition="'$(UseDefaultPlatformLookupTables)' == 'true' and '$(PlatformLookupTable)' == ''">x86=Win32</PlatformLookupTable>
+      </_ProjectReferencePlatformPossibilities>
+
+      <!-- If we're looking at a managed project from a cpp project, map native to managed platforms. -->
+      <_ProjectReferencePlatformPossibilities Condition="('$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj') and '%(_ProjectReferencePlatformPossibilities.IsVcxOrNativeProj)' != 'true'">
+        <PlatformLookupTable Condition="'$(UseDefaultPlatformLookupTables)' == 'true' and '$(PlatformLookupTable)' == ''">Win32=x86</PlatformLookupTable>
+      </_ProjectReferencePlatformPossibilities>
+    </ItemGroup>
+
+    <GetCompatiblePlatform AnnotatedProjects="@(_ProjectReferencePlatformPossibilities)"
+                           CurrentProjectPlatform="$(Platform)"
+                           PlatformLookupTable="$(PlatformLookupTable)"
+                           Condition="'@(_ProjectReferencePlatformPossibilities)' != ''">
+      <Output ItemName="_ProjectsWithPlatformAssignment" TaskParameter="AssignedProjectsWithPlatform" />
+    </GetCompatiblePlatform>
+
+    <!-- If GetCompatiblePlatform didn't run, @(ProjectsWithPlatformAssignment) will be empty.
+         Don't do anything in this case. Ex: A project references many projects
+         that can't multiplatform.  -->
+    <ItemGroup Condition="'@(_ProjectsWithPlatformAssignment)' != ''">
+      <ProjectsWithNearestPlatform Include="@(_ProjectsWithPlatformAssignment)"/>
+      <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' != ''">
+        <SetPlatform>Platform=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
+      </ProjectsWithNearestPlatform>
+
+      <!-- When GetCompatiblePlatform fails to assign NearestPlatform, undefine Platform and let that project build "on its own" -->
+      <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' == ''">
+        <UndefineProperties>%(ProjectsWithNearestPlatform.UndefineProperties);Platform</UndefineProperties>
+      </ProjectsWithNearestPlatform>
+
+      <_MSBuildProjectReferenceExistent Remove="@(_MSBuildProjectReferenceExistent)" Condition="'%(_MSBuildProjectReferenceExistent.SkipGetPlatformProperties)' != 'true'"/>
+      <_MSBuildProjectReferenceExistent Include="@(ProjectsWithNearestPlatform)"/>
+    </ItemGroup>
+
+  </Target>
+
+  <!--
+    ====================================================================================
                                         _GetProjectReferenceTargetFrameworkProperties
 
     Builds the GetTargetFrameworks target of all existent project references to get a list
@@ -1657,7 +1746,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
    -->
    <ItemGroup>
       <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' == '' and ('%(Extension)' == '.vcxproj' or '%(Extension)' == '.nativeproj')">
-        <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
+        <!--
+          Platform negotiation requires the MSBuild task call to GetTargetFrameworks.
+          Don't skip when opted into the feature.
+        -->
+        <SkipGetTargetFrameworkProperties Condition="'$(EnableDynamicPlatformResolution)' != 'true'">true</SkipGetTargetFrameworkProperties>
         <UndefineProperties>%(_MSBuildProjectReferenceExistent.UndefineProperties);TargetFramework</UndefineProperties>
       </_MSBuildProjectReferenceExistent>
    </ItemGroup>
@@ -1675,7 +1768,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
     <ItemGroup>
       <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SetTargetFramework)' != ''">
-        <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
+        <!--
+          Platform negotiation requires the MSBuild task call to GetTargetFrameworks.
+          Don't skip when opted into the feature.
+        -->
+        <SkipGetTargetFrameworkProperties Condition="'$(EnableDynamicPlatformResolution)' != 'true'">true</SkipGetTargetFrameworkProperties>
       </_MSBuildProjectReferenceExistent>
     </ItemGroup>
 
@@ -1691,8 +1788,24 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         BuildInParallel="$(BuildInParallel)"
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform)"
         ContinueOnError="!$(BuildingProject)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier$(_GlobalPropertiesToRemoveFromProjectReferences)"
-        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true'"
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier;SelfContained;$(_GlobalPropertiesToRemoveFromProjectReferences)"
+        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true' and '$(EnableDynamicPlatformResolution)' != 'true'"
+        SkipNonexistentTargets="true">
+      <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetFrameworkPossibilities" />
+    </MSBuild>
+    
+    <!--
+       SetPlatform negotiation requires the 'GetTargetFrameworks' MSBuild call to NOT pass global properties. This is to verify
+       whether or not the referenced project would build as the same platform as the current project by default. The above
+       MSBuild call is kept for legacy scenarios that may depend on passing %(SetConfiguration) and %(SetPlatform).
+    -->
+    <MSBuild
+        Projects="@(_MSBuildProjectReferenceExistent)"
+        Targets="GetTargetFrameworks"
+        BuildInParallel="$(BuildInParallel)"
+        ContinueOnError="!$(BuildingProject)"
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier;SelfContained;Platform;Configuration;$(_GlobalPropertiesToRemoveFromProjectReferences)"
+        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true' and '$(EnableDynamicPlatformResolution)' == 'true'"
         SkipNonexistentTargets="true">
       <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetFrameworkPossibilities" />
     </MSBuild>
@@ -1719,8 +1832,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                             CurrentProjectTargetPlatform="$(TargetPlatformMoniker)"
                                             CurrentProjectName="$(MSBuildProjectName)"
                                             FallbackTargetFrameworks="$(AssetTargetFallback)"
-                                            Condition="'@(_ProjectReferenceTargetFrameworkPossibilities->Count())' != '0' and '$(ReferringTargetFrameworkForProjectReferences)' != ''
-                                                        And '$(GetReferenceNearestTargetFrameworkTaskSupportsTargetPlatformParameter)' == 'true'">
+                                            Condition="'@(_ProjectReferenceTargetFrameworkPossibilities)' != '' and '$(ReferringTargetFrameworkForProjectReferences)' != ''
+                                                        And '$(GetReferenceNearestTargetFrameworkTaskSupportsTargetPlatformParameter)' == 'true' and '%(_ProjectReferenceTargetFrameworkPossibilities.IsVcxOrNativeProj)' != 'true'">
       <Output ItemName="AnnotatedProjects" TaskParameter="AssignedProjects" />
     </GetReferenceNearestTargetFrameworkTask>
 
@@ -1728,8 +1841,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                             CurrentProjectTargetFramework="$(ReferringTargetFrameworkForProjectReferences)"
                                             CurrentProjectName="$(MSBuildProjectName)"
                                             FallbackTargetFrameworks="$(AssetTargetFallback)"
-                                            Condition="'@(_ProjectReferenceTargetFrameworkPossibilities->Count())' != '0' and '$(ReferringTargetFrameworkForProjectReferences)' != ''
-                                                        And '$(GetReferenceNearestTargetFrameworkTaskSupportsTargetPlatformParameter)' != 'true'">
+                                            Condition="'@(_ProjectReferenceTargetFrameworkPossibilities)' != '' and '$(ReferringTargetFrameworkForProjectReferences)' != ''
+                                                        And '$(GetReferenceNearestTargetFrameworkTaskSupportsTargetPlatformParameter)' != 'true' and '%(_ProjectReferenceTargetFrameworkPossibilities.IsVcxOrNativeProj)' != 'true'">
       <Output ItemName="AnnotatedProjects" TaskParameter="AssignedProjects" />
     </GetReferenceNearestTargetFrameworkTask>
 
@@ -1738,9 +1851,28 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          If the task was skipped or the current TargetFramework is empty, AnnotatedProjects will be empty.
          In this case, copy _ProjectReferenceTargetFrameworkPossibilities as is. See:
             https://github.com/dotnet/sdk/issues/416
+
+        Furthermore, if we're referencing a .vcxproj or .nativeproj, those items won't be populated into `AnnotatedProjects`
+        by `GetReferenceNearestTargetFrameworkTask`, so let them flow when `EnableDynamicPlatformResolution` is set.
       -->
       <AnnotatedProjects Include="@(_ProjectReferenceTargetFrameworkPossibilities)"
-                         Condition="'$(ReferringTargetFrameworkForProjectReferences)' == ''" />
+                         Condition="'$(ReferringTargetFrameworkForProjectReferences)' == '' or
+                                    ('$(EnableDynamicPlatformResolution)' == 'true' and '%(_ProjectReferenceTargetFrameworkPossibilities.IsVcxOrNativeProj)' == 'true')" />
+
+    </ItemGroup>
+
+    <!-- IsRidAgnostic metadata is used to determine whether global properties such as RuntimeIdentifier and SelfContained flow to a referenced project.
+         However, for multi-targeted projects there may be a different IsRidAgnostic value for each TargetFramework.  In that case, this task selects
+         the IsRidAgnostic value for the NearestTargetFramework for the project. -->
+    <SetRidAgnosticValueForProjects Projects="@(AnnotatedProjects)">
+      <Output ItemName="UpdatedAnnotatedProjects" TaskParameter="UpdatedProjects" />
+    </SetRidAgnosticValueForProjects>
+    
+    <ItemGroup>
+      <AnnotatedProjects Remove="@(AnnotatedProjects)" />
+      <AnnotatedProjects Include="@(UpdatedAnnotatedProjects)" />
+      <UpdatedAnnotatedProjects Remove="@(UpdatedAnnotatedProjects)" />
+
       <!-- If the NearestTargetFramework property was set and the project multi-targets, SetTargetFramework must be set. -->
       <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.NearestTargetFramework)' != '' and '%(AnnotatedProjects.HasSingleTargetFramework)' != 'true'">
         <SetTargetFramework>TargetFramework=%(AnnotatedProjects.NearestTargetFramework)</SetTargetFramework>
@@ -1754,9 +1886,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <UndefineProperties>%(AnnotatedProjects.UndefineProperties);TargetFramework</UndefineProperties>
       </AnnotatedProjects>
 
-      <!-- If the project is RID agnostic, undefine the RuntimeIdentifier property to avoid another evaluation. -->
-      <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.IsRidAgnostic)' == 'true'">
-        <UndefineProperties>%(AnnotatedProjects.UndefineProperties);RuntimeIdentifier</UndefineProperties>
+      <!-- Add RuntimeIdentifier and SelfContained to the list of global properties that should not flow to the referenced project,
+           unless the project is expecting those properties to flow. -->
+      <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.IsRidAgnostic)' != 'false'">
+        <UndefineProperties>%(AnnotatedProjects.UndefineProperties);RuntimeIdentifier;SelfContained</UndefineProperties>
       </AnnotatedProjects>
 
       <!--
@@ -1789,9 +1922,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetPlatformMonikers>@(_TargetFrameworkInfo->'%(TargetPlatformMonikers)')</TargetPlatformMonikers>
         <AdditionalPropertiesFromProject>$(_AdditionalPropertiesFromProject)</AdditionalPropertiesFromProject>
         <HasSingleTargetFramework>true</HasSingleTargetFramework>
-        <!-- indicate to caller that project is RID agnostic so that a global property RuntimeIdentifier value can be removed -->
-        <IsRidAgnostic>false</IsRidAgnostic>
-        <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
+        <IsRidAgnostic>@(_TargetFrameworkInfo->'%(IsRidAgnostic)')</IsRidAgnostic>
+        <!-- Extract necessary information for SetPlatform negotiation -->
+        <IsVcxOrNativeProj Condition="'$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj'">true</IsVcxOrNativeProj>
+        <Platform Condition="$([MSBuild]::AreFeaturesEnabled('17.4'))">$(Platform)</Platform>
+        <Platforms>$(Platforms)</Platforms>
+        <!-- .vcxproj and .nativeproj contain a `ProjectConfiguration` item that have `Platform` metadata within.
+             Build the `Platforms` property from that. -->
+        <Platforms Condition="'$(UsePlatformFromProjectConfiguration)' != 'false' and '@(ProjectConfiguration)' != '' and ('$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj')">@(ProjectConfiguration->'%(Platform)'->Distinct())</Platforms>
       </_ThisProjectBuildMetadata>
     </ItemGroup>
 
@@ -1806,9 +1944,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </_AdditionalTargetFrameworkInfoPropertyWithValue>
     </ItemGroup>
 
+    <PropertyGroup>
+      <_UseAttributeForTargetFrameworkInfoPropertyNames Condition="'$(_UseAttributeForTargetFrameworkInfoPropertyNames)' == ''">false</_UseAttributeForTargetFrameworkInfoPropertyNames>
+    </PropertyGroup>
+
     <CombineTargetFrameworkInfoProperties
         RootElementName="$(TargetFramework)"
-        PropertiesAndValues="@(_AdditionalTargetFrameworkInfoPropertyWithValue)">
+        PropertiesAndValues="@(_AdditionalTargetFrameworkInfoPropertyWithValue)"
+        UseAttributeForTargetFrameworkInfoPropertyNames="$(_UseAttributeForTargetFrameworkInfoPropertyNames)">
       <Output TaskParameter="Result"
               PropertyName="_AdditionalTargetFrameworkInfoProperties"/>
     </CombineTargetFrameworkInfoProperties>
@@ -1820,6 +1963,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetPlatformMonikers>$(TargetPlatformMoniker)</TargetPlatformMonikers>
         <TargetPlatformMonikers Condition="'$(TargetPlatformMoniker)' == ''">None</TargetPlatformMonikers>
         <AdditionalPropertiesFromProject>$(_AdditionalTargetFrameworkInfoProperties)</AdditionalPropertiesFromProject>
+
+        <!-- Determine whether a project is "RID agnostic" for each TargetFramework.  "RID agnostic" means that global properties such as SelfContained and RuntimeIdentifier should
+             not flow across project references.
+
+             Generally this value will come from the IsRidAgnostic property set by the .NET SDK.  If that's not set, then the fallback logic here will be that the project
+             is RID agnostic if it doesn't have RuntimeIdentifier or RuntimeIdentifiers properties set. -->
+        <IsRidAgnostic>$(IsRidAgnostic)</IsRidAgnostic>
+        <IsRidAgnostic Condition=" '$(IsRidAgnostic)' == '' and '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
+        <IsRidAgnostic Condition=" '$(IsRidAgnostic)' == ''">false</IsRidAgnostic>
+
       </_TargetFrameworkInfo>
     </ItemGroup>
 
@@ -1829,13 +1982,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
                                     GetTargetFrameworkProperties
 
-    Overrridden by cross-targeting projects to return the set of
-    properties (in the form "key1=value1;...keyN=valueN") needed
-    to build it with the best target for the referring project's
-    target framework.
-
-    The referring project's $(TargetFrameworkMoniker) is passed
-    in as $(ReferringTargetFramework)
+    OBSOLETE: present only for theoretical backward compatibility.
   -->
   <Target Name="GetTargetFrameworkProperties" />
 
@@ -1859,7 +2006,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PrepareProjectReferencesDependsOn>
       AssignProjectConfiguration;
       _SplitProjectReferencesByFileExistence;
-      _GetProjectReferenceTargetFrameworkProperties
+      _GetProjectReferenceTargetFrameworkProperties;
+      _GetProjectReferencePlatformProperties
     </PrepareProjectReferencesDependsOn>
   </PropertyGroup>
 
@@ -2314,9 +2462,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ====================================================================================================
   -->
   <Target Name="GenerateBindingRedirects"
-    Inputs="$(MSBuildAllProjects);@(AppConfigFile);$(ResolveAssemblyReferencesStateFile);$(IntermediateOutputPath);@(SuggestedBindingRedirects)"
+    Inputs="$(MSBuildAllProjects);@(AppConfigFile);$(ResolveAssemblyReferencesStateFile);$(SuggestedBindingRedirectsCacheFile)"
     Outputs="$(_GenerateBindingRedirectsIntermediateAppConfig)"
-    Condition="'$(AutoGenerateBindingRedirects)' == 'true' and '$(GenerateBindingRedirectsOutputType)' == 'true'">
+    Condition="'$(AutoGenerateBindingRedirects)' == 'true' and '$(GenerateBindingRedirectsOutputType)' == 'true'"
+    DependsOnTargets="_GenerateSuggestedBindingRedirectsCache">
 
     <GenerateBindingRedirects
       AppConfigFile="@(AppConfigWithTargetPath)"
@@ -3518,6 +3667,33 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
     ============================================================
+                                        _GenerateSuggestedBindingRedirectsCache
+    Generate a file used to track whether suggested binding redirects changed between builds.
+    @(SuggestedBindingRedirects) never contains a file on disk, so create a file
+    that contains a hash of the items to prevent `GenerateBindingRedirects`
+    from running every build.
+
+    See https://github.com/dotnet/msbuild/issues/5943 for details.
+    ============================================================
+    -->
+  <Target Name="_GenerateSuggestedBindingRedirectsCache" Condition="'$(DesignTimeBuild)' != 'true' and '$(BuildingProject)' == 'true'" DependsOnTargets="ResolveAssemblyReferences">
+    <PropertyGroup>
+      <SuggestedBindingRedirectsCacheFile>$(IntermediateOutputPath)$(MSBuildProjectFile).SuggestedBindingRedirects.cache</SuggestedBindingRedirectsCacheFile>
+    </PropertyGroup>
+
+      <Hash ItemsToHash="@(SuggestedBindingRedirects)">
+        <Output TaskParameter="HashResult" PropertyName="SuggestedBindingRedirectsHash"/>
+      </Hash>
+
+      <WriteLinesToFile Lines="$(SuggestedBindingRedirectsHash)" File="$(SuggestedBindingRedirectsCacheFile)" Overwrite="true" WriteOnlyWhenDifferent="true"/>
+
+      <ItemGroup>
+        <FileWrites Include="$(SuggestedBindingRedirectsCacheFile)"/>
+      </ItemGroup>
+  </Target>
+
+  <!--
+    ============================================================
                                         _GenerateCompileDependencyCache
 
     Generate a file used to track compiler dependencies between incremental build
@@ -3736,8 +3912,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           Condition="'@(_SatelliteAssemblyResourceInputs)' != '' and '$(GenerateSatelliteAssembliesForCore)' != 'true'">
 
     <PropertyGroup>
-      <_ALExeToolPath>$(TargetFrameworkSDKToolsDirectory)</_ALExeToolPath>
-      <_ALExeToolPath Condition="'$(PlatformTarget)' == 'x64'">$(TargetFrameworkSDKToolsDirectory)$(PlatformTarget)\</_ALExeToolPath>
+      <_ALExeToolPath Condition="'$(_ALExeToolPath)' == ''">$(TargetFrameworkSDKToolsDirectory)</_ALExeToolPath>
     </PropertyGroup>
 
     <MakeDir
@@ -3772,7 +3947,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Title="$(Satellite_Title)"
         ToolPath="$(AlToolPath)"
         ToolExe ="$(AlToolExe)"
-        SdkToolsPath="$(SdkToolsPathMaybeWithx64Architecture)"
+        SdkToolsPath="$(_ALExeToolPath)"
         Trademark="$(Satellite_Trademark)"
         Version="$(Satellite_Version)"
         Win32Icon="$(Satellite_Win32Icon)"
@@ -4061,7 +4236,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       use the built DLL as the entry point
     -->
     <ItemGroup Condition="'$(UseAppHost)' == 'true' and '$(_IsExecutable)' == 'true' and exists('$(AppHostIntermediatePath)')">
-      <EntryPointForLauncher Include="$(AppHostIntermediatePath)"/>
+      <EntryPointForLauncher Include="$(AppHostIntermediatePath)" TargetPath="$(AssemblyName).exe"/>
       <ContentWithTargetPath Include="@(EntryPointForLauncher)"/>
     </ItemGroup>
     <ItemGroup Condition="'$(EntryPointForLauncher)'==''">
@@ -4228,10 +4403,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_ClickOnceFiles Include="@(ContentWithTargetPath);@(_DeploymentManifestIconFile);@(AppConfigWithTargetPath);@(NetCoreRuntimeJsonFilesForClickOnce);@(_ClickOnceRuntimeCopyLocalItems)"/>
     </ItemGroup>
 
-    <!-- For single file publish, we need to include the SF bundle EXE and files excluded from the bundle EXE in the clickonce manifest -->
+    <!-- For single file publish, we need to include the SF bundle EXE, application icon file and files excluded from the bundle EXE in the clickonce manifest -->
     <ItemGroup Condition="'$(PublishSingleFile)' == 'true'">
-      <_ClickOnceFiles Include="$(PublishedSingleFilePath)"/>
+      <_ClickOnceFiles Include="$(PublishedSingleFilePath);@(_DeploymentManifestIconFile)"/>
       <_ClickOnceFiles Include="@(_FilesExcludedFromBundle)"/>
+
+      <!-- Include file association icons from Content as loose files -->
+      <_FileAssociationIcons Include="%(FileAssociation.DefaultIcon)"/>
+      <_ClickOnceFiles Include="@(ContentWithTargetPath)" Condition="'%(Identity)'=='@(_FileAssociationIcons)'"/>
     </ItemGroup>
 
     <!-- For single file publish in .net core app, sign the SF EXE if signing is enabled -->
@@ -4269,7 +4448,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     This is being done to avoid Windows Forms designer memory issues that can arise while operating directly on files located in Obj directory. -->
     <Copy
       SourceFiles="@(_DeploymentManifestEntryPoint)"
-      DestinationFolder="$(PublishDir)">
+      DestinationFolder="$(ClickOncePublishDir)">
 
       <Output TaskParameter="DestinationFiles" ItemName="_DeploymentClickOnceApplicationExecutable" />
     </Copy>
@@ -4689,6 +4868,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWritesShareable"/>
       <Output TaskParameter="CopiedFiles" ItemName="ReferencesCopiedInThisBuild"/>
+      <Output TaskParameter="WroteAtLeastOneFile" PropertyName="WroteAtLeastOneFile"/>
 
     </Copy>
 
@@ -4697,10 +4877,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          not be considered up to date, so touch this marker file that is considered an
          input to projects that reference this one. -->
     <Touch Files="@(CopyUpToDateMarker)"
-           AlwaysCreate="true"
-           Condition="'@(ReferencesCopiedInThisBuild)' != ''">
-        <Output TaskParameter="TouchedFiles" ItemName="FileWrites" />
-    </Touch>
+      AlwaysCreate="true"
+      Condition="'@(ReferencesCopiedInThisBuild)' != '' and '$(WroteAtLeastOneFile)' == 'true'" />
+
+    <ItemGroup>
+      <FileWrites Include="@(CopyUpToDateMarker)" />
+    </ItemGroup>
 
   </Target>
 
@@ -4720,24 +4902,23 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                         GetCopyToOutputDirectoryItems
 
     Get all project items that may need to be transferred to the output directory.
-    This includes baggage items from transitively referenced projects. It would appear
-    that this target computes full transitive closure of content items for all referenced
-    projects; however that is not the case. It only collects the content items from its
-    immediate children and not children of children. The reason this happens is that
-    the ProjectReferenceWithConfiguration list that is consumed by _SplitProjectReferencesByFileExistence
-    is only populated in the current project and is empty in the children. The empty list
-    causes _MSBuildProjectReferenceExistent to be empty and terminates the recursion.
+    This includes baggage items from transitively referenced projects.
+
+    As of 17.0, content items are copied transitively by default.
+    Set `MSBuildCopyContentTransitively` to false to opt out.
+    See https://github.com/dotnet/msbuild/pull/6622 for more info.
     ============================================================
     -->
   <PropertyGroup>
     <_TargetsThatPrepareProjectReferences>_SplitProjectReferencesByFileExistence</_TargetsThatPrepareProjectReferences>
     <!--
-      GetCopyToOutputDirectoryItems depends on an unspecified dependency _SplitProjectReferencesByFileExistence -> AssignProjectConfiguration (https://github.com/microsoft/msbuild/issues/4677).
+      GetCopyToOutputDirectoryItems depends on an unspecified dependency _SplitProjectReferencesByFileExistence -> AssignProjectConfiguration (https://github.com/dotnet/msbuild/issues/4677).
       When the unspecified dependency does not happen by accident, content copying is only 1 level deep instead of transitive.
       This target enforces the dependency.
-
-      TODO: make transitive content copying the default when the breaking change is acceptable.
     -->
+
+    <MSBuildCopyContentTransitively Condition=" '$(MSBuildCopyContentTransitively)' == '' and $([MSBuild]::AreFeaturesEnabled('17.0'))">true</MSBuildCopyContentTransitively>
+
     <_TargetsThatPrepareProjectReferences Condition=" '$(MSBuildCopyContentTransitively)' == 'true' ">
       AssignProjectConfiguration;
       _SplitProjectReferencesByFileExistence
@@ -4751,10 +4932,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </GetCopyToOutputDirectoryItemsDependsOn>
 
     <!--
-      Mitigation for https://github.com/microsoft/msbuild/issues/4677
+      Mitigation for https://github.com/dotnet/msbuild/issues/4677
       When MSBuildCopyContentTransitively == true, all content copying is transitive.
       When MSBuildCopyContentTransitively == false, content copying is 1 level deep.
-      When MSBuildCopyContentTransitively != {true, false}, the legacy behaviour in https://github.com/microsoft/msbuild/issues/4677 manifests.
+      When MSBuildCopyContentTransitively != {true, false}, the legacy behaviour in https://github.com/dotnet/msbuild/issues/4677 manifests.
      -->
     <_RecursiveTargetForContentCopying>GetCopyToOutputDirectoryItems</_RecursiveTargetForContentCopying>
     <!-- Enforce 1 level deep content copying by replacing the recursive content target with the target that retrieves the content for the current project only. -->
@@ -5530,8 +5711,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="CleanPublishFolder">
 
     <RemoveDir
-        Directories="$(PublishDir)"
-        Condition="'$(PublishDir)'=='$(OutputPath)app.publish\' and Exists('$(PublishDir)')"/>
+        Directories="$(ClickOncePublishDir)"
+        Condition="'$(ClickOncePublishDir)'=='$(OutputPath)app.publish\' and Exists('$(ClickOncePublishDir)')"/>
 
   </Target>
 
@@ -5723,7 +5904,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <PropertyGroup>
       <_DeploymentApplicationFolderName>Application Files\$(AssemblyName)_$(_DeploymentApplicationVersionFragment)</_DeploymentApplicationFolderName>
-      <_DeploymentApplicationDir>$(PublishDir)$(_DeploymentApplicationFolderName)\</_DeploymentApplicationDir>
+      <_DeploymentApplicationDir>$(ClickOncePublishDir)$(_DeploymentApplicationFolderName)\</_DeploymentApplicationDir>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -5829,7 +6010,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         ComponentsUrl="$(_DeploymentFormattedComponentsUrl)"
         Culture="$(TargetCulture)"
         FallbackCulture="$(FallbackCulture)"
-        OutputPath="$(PublishDir)"
+        OutputPath="$(ClickOncePublishDir)"
         SupportUrl="$(_DeploymentFormattedSupportUrl)"
         Path="$(GenerateBootstrapperSdkPath)"
         VisualStudioVersion="$(VisualStudioVersion)"
@@ -5852,6 +6033,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         SigningTarget="$(_DeploymentApplicationDir)$(_DeploymentTargetApplicationManifestFileName)"
         TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
         TargetFrameworkVersion="$(TargetFrameworkVersion)"
+        DisallowMansignTimestampFallback="$(DisallowMansignTimestampFallback)"
         Condition="'$(_DeploymentSignClickOnceManifests)'=='true'" />
 
     <!-- Update entry point path in deploy manifest -->
@@ -5860,7 +6042,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         TargetFrameworkVersion="$(_DeploymentManifestTargetFrameworkVersion)"
         ApplicationManifest="$(_DeploymentApplicationDir)$(_DeploymentTargetApplicationManifestFileName)"
         InputManifest="$(OutDir)$(TargetDeployManifestFileName)"
-        OutputManifest="$(PublishDir)$(TargetDeployManifestFileName)">
+        OutputManifest="$(ClickOncePublishDir)$(TargetDeployManifestFileName)">
 
       <Output TaskParameter="OutputManifest" ItemName="PublishedDeployManifest"/>
 
@@ -5869,15 +6051,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <SignFile
         CertificateThumbprint="$(_DeploymentResolvedManifestCertificateThumbprint)"
         TimestampUrl="$(ManifestTimestampUrl)"
-        SigningTarget="$(PublishDir)$(TargetDeployManifestFileName)"
+        SigningTarget="$(ClickOncePublishDir)$(TargetDeployManifestFileName)"
         TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
         TargetFrameworkVersion="$(TargetFrameworkVersion)"
+        DisallowMansignTimestampFallback="$(DisallowMansignTimestampFallback)"
         Condition="'$(_DeploymentSignClickOnceManifests)'=='true'" />
 
     <SignFile
         CertificateThumbprint="$(_DeploymentResolvedManifestCertificateThumbprint)"
         TimestampUrl="$(ManifestTimestampUrl)"
-        SigningTarget="$(PublishDir)\setup.exe"
+        SigningTarget="$(ClickOncePublishDir)setup.exe"
         Condition="'$(BootstrapperEnabled)'=='true' and '$(_DeploymentSignClickOnceManifests)'=='true'" />
 
   </Target>
@@ -5976,7 +6159,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- This item represents the native manifest, example: WindowsApplication1.exe.manifest or Native.ClassLibrary1.manifest -->
     <ItemGroup>
-      <_BuiltProjectOutputGroupOutputIntermediate Include="$(OutDir)$(_DeploymentTargetApplicationManifestFileName)" Condition="'@(NativeReference)'!='' or '@(_IsolatedComReference)'!=''">
+      <_BuiltProjectOutputGroupOutputIntermediate Include="$(OutDir)$(_DeploymentTargetApplicationManifestFileName)" Condition="('@(NativeReference)'!='' or '@(_IsolatedComReference)'!='') And Exists('$(OutDir)$(_DeploymentTargetApplicationManifestFileName)')">
         <TargetPath>$(_DeploymentTargetApplicationManifestFileName)</TargetPath>
         <!-- For compatibility with 2.0 -->
         <OriginalItemSpec>$(OutDir)$(_DeploymentTargetApplicationManifestFileName)</OriginalItemSpec>
@@ -6524,7 +6707,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <!-- Import NuGet.targets (required for GetReferenceNearestTargetFrameworkTask and used for Restore functionality) -->
   <PropertyGroup>
     <MSBuildUseVisualStudioDirectoryLayout Condition="'$(MSBuildUseVisualStudioDirectoryLayout)'==''">$([MSBuild]::IsRunningFromVisualStudio())</MSBuildUseVisualStudioDirectoryLayout>
-    <NuGetRestoreTargets Condition="'$(NuGetRestoreTargets)'=='' and '$(MSBuildUseVisualStudioDirectoryLayout)'=='true'">$(MSBuildToolsPath32)\..\..\..\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.targets</NuGetRestoreTargets>
+    <NuGetRestoreTargets Condition="'$(NuGetRestoreTargets)'=='' and '$(MSBuildUseVisualStudioDirectoryLayout)'=='true'">$([MSBuild]::GetToolsDirectory32())\..\..\..\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.targets</NuGetRestoreTargets>
     <NuGetRestoreTargets Condition="'$(NuGetRestoreTargets)'==''">$(MSBuildToolsPath)\NuGet.targets</NuGetRestoreTargets>
   </PropertyGroup>
 

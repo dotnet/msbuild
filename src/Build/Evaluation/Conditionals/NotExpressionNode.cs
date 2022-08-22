@@ -1,7 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Shared;
 using System.Diagnostics;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -15,14 +19,19 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Evaluate as boolean
         /// </summary>
-        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
+        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
         {
-            return !LeftChild.BoolEvaluate(state);
-        }
+            if (!LeftChild.TryBoolEvaluate(state, out bool boolValue, loggingContext))
+            {
+                ProjectErrorUtilities.ThrowInvalidProject(
+                    state.ElementLocation,
+                    "ExpressionDoesNotEvaluateToBoolean",
+                    LeftChild.GetUnexpandedValue(state),
+                    LeftChild.GetExpandedValue(state),
+                    state.Condition);
+            }
 
-        internal override bool CanBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
-        {
-            return LeftChild.CanBoolEvaluate(state);
+            return !boolValue;
         }
 
         /// <summary>
@@ -36,9 +45,9 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Returns expanded value with '!' prepended. Useful for error messages.
         /// </summary>
-        internal override string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state)
+        internal override string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
         {
-            return "!" + LeftChild.GetExpandedValue(state);
+            return "!" + LeftChild.GetExpandedValue(state, loggingContext);
         }
 
         internal override string DebuggerDisplay => $"(not {LeftChild.DebuggerDisplay})";

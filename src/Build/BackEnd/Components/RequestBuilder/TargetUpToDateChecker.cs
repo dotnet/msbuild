@@ -15,6 +15,8 @@ using Microsoft.Build.Shared;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
@@ -26,8 +28,8 @@ namespace Microsoft.Build.BackEnd
     // For instance, if items were generated from an expression @(Foo->'%(Filename).obj'), then
     // the inner dictionary would have a key of "@(Foo->'%(Filename).obj')", in which would be 
     // contained a list of the items which were created/transformed using that pattern.    
-    using ItemVectorPartitionCollection = Dictionary<string, Dictionary<string, IList<ProjectItemInstance>>>;
-    using ItemVectorPartition = Dictionary<string, IList<ProjectItemInstance>>;
+    using ItemVectorPartitionCollection = System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, System.Collections.Generic.IList<Microsoft.Build.Execution.ProjectItemInstance>>>;
+    using ItemVectorPartition = System.Collections.Generic.Dictionary<string, System.Collections.Generic.IList<Microsoft.Build.Execution.ProjectItemInstance>>;
 
     /// <summary>
     /// Enumeration of the results of target dependency analysis.
@@ -233,9 +235,17 @@ namespace Microsoft.Build.BackEnd
 
                 if (result == DependencyAnalysisResult.SkipUpToDate)
                 {
-                    _loggingService.LogComment(_buildEventContext, MessageImportance.Normal,
-                        "SkipTargetBecauseOutputsUpToDate",
-                        TargetToAnalyze.Name);
+                    var skippedTargetEventArgs = new TargetSkippedEventArgs(message: null)
+                    {
+                        BuildEventContext = _buildEventContext,
+                        TargetName = TargetToAnalyze.Name,
+                        BuildReason = TargetBuiltReason.None,
+                        SkipReason = TargetSkipReason.OutputsUpToDate,
+                        OriginallySucceeded = true,
+                        Importance = MessageImportance.Normal
+                    };
+
+                    _loggingService.LogBuildEvent(skippedTargetEventArgs);
 
                     // Log the target inputs & outputs
                     if (!_loggingService.OnlyLogCriticalEvents)
@@ -337,7 +347,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Extract only the unique inputs and outputs from all the inputs and outputs gathered
-        /// during depedency analysis
+        /// during dependency analysis
         /// </summary>
         private void LogUniqueInputsAndOutputs()
         {

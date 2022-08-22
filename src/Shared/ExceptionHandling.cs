@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable disable
+
 #if BUILDINGAPPXTASKS
 namespace Microsoft.Build.AppxPackage.Shared
 #else
@@ -19,6 +21,10 @@ using System.Xml;
 using Microsoft.Build.Shared.FileSystem;
 using System.Xml.Schema;
 using System.Runtime.Serialization;
+#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+using Microsoft.Build.Shared.Debugging;
+#endif
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared
 #endif
@@ -28,12 +34,7 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class ExceptionHandling
     {
-        private static readonly string s_debugDumpPath;
-
-        static ExceptionHandling()
-        {
-            s_debugDumpPath = GetDebugDumpPath();
-        }
+        private static readonly string s_debugDumpPath = GetDebugDumpPath();
 
         /// <summary>
         /// Gets the location of the directory used for diagnostic log files.
@@ -41,7 +42,16 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         private static string GetDebugDumpPath()
         {
-            string debugPath = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+            string debugPath =
+// Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+#if CLR2COMPATIBILITY || MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+                        Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+#else
+                ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
+                    ? DebugUtils.DebugPath
+                    : Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+#endif
+
             return !string.IsNullOrEmpty(debugPath)
                     ? debugPath
                     : Path.GetTempPath();
@@ -287,7 +297,6 @@ namespace Microsoft.Build.Shared
             return true;
         }
 
-#if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
         /// <summary>
         /// Dump any unhandled exceptions to a file so they can be diagnosed
         /// </summary>
@@ -297,14 +306,13 @@ namespace Microsoft.Build.Shared
             Exception ex = (Exception)e.ExceptionObject;
             DumpExceptionToFile(ex);
         }
-#endif
 
         /// <summary>
         /// Dump the exception information to a file
         /// </summary>
         internal static void DumpExceptionToFile(Exception ex)
         {
-            //  Locking on a type is not recommended.  However, we are doing it here to be extra cautious about compatibility because
+            // Locking on a type is not recommended.  However, we are doing it here to be extra cautious about compatibility because
             //  this method previously had a [MethodImpl(MethodImplOptions.Synchronized)] attribute, which does lock on the type when
             //  applied to a static method.
             lock (typeof(ExceptionHandling))
@@ -315,12 +323,9 @@ namespace Microsoft.Build.Shared
 
                     // For some reason we get Watson buckets because GetTempPath gives us a folder here that doesn't exist.
                     // Either because %TMP% is misdefined, or because they deleted the temp folder during the build.
-                    if (!FileSystems.Default.DirectoryExists(DebugDumpPath))
-                    {
-                        // If this throws, no sense catching it, we can't log it now, and we're here
-                        // because we're a child node with no console to log to, so die
-                        Directory.CreateDirectory(DebugDumpPath);
-                    }
+                    // If this throws, no sense catching it, we can't log it now, and we're here
+                    // because we're a child node with no console to log to, so die
+                    Directory.CreateDirectory(DebugDumpPath);
 
                     var pid = Process.GetCurrentProcess().Id;
                     // This naming pattern is assumed in ReadAnyExceptionFromFile
@@ -358,7 +363,7 @@ namespace Microsoft.Build.Shared
                 {
                     builder.Append(Environment.NewLine);
                     builder.Append(file);
-                    builder.Append(":");
+                    builder.Append(':');
                     builder.Append(Environment.NewLine);
                     builder.Append(File.ReadAllText(file));
                     builder.Append(Environment.NewLine);

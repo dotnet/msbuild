@@ -1,31 +1,30 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable disable
+
 namespace Microsoft.Build.Globbing.Visitor
 {
     internal abstract class GlobVisitor
     {
         public void Visit(IMSBuildGlob glob)
         {
-            var msbuildGlob = glob as MSBuildGlob;
-            if (msbuildGlob != null)
+            if (glob is MSBuildGlob msbuildGlob)
             {
                 VisitMSBuildGlob(msbuildGlob);
             }
 
-            var compositGlob = glob as CompositeGlob;
-            if (compositGlob != null)
+            if (glob is CompositeGlob compositeGlob)
             {
-                VisitCompositeGlob(compositGlob);
+                VisitCompositeGlob(compositeGlob);
 
-                foreach (var globPart in compositGlob.Globs)
+                foreach (var globPart in compositeGlob.Globs)
                 {
                     Visit(globPart);
                 }
             }
 
-            var globWithGaps = glob as MSBuildGlobWithGaps;
-            if (globWithGaps != null)
+            if (glob is MSBuildGlobWithGaps globWithGaps)
             {
                 VisitGlobWithGaps(globWithGaps);
 
@@ -37,7 +36,7 @@ namespace Microsoft.Build.Globbing.Visitor
         {
         }
 
-        protected virtual void VisitCompositeGlob(CompositeGlob compositGlob)
+        protected virtual void VisitCompositeGlob(CompositeGlob compositeGlob)
         {
         }
 

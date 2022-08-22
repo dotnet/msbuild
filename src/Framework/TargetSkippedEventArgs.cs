@@ -5,8 +5,41 @@ using System;
 using System.IO;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
+    /// <summary>
+    /// A reason why a target was skipped.
+    /// </summary>
+    public enum TargetSkipReason
+    {
+        /// <summary>
+        /// The target was not skipped or the skip reason was unknown.
+        /// </summary>
+        None,
+
+        /// <summary>
+        /// The target previously built successfully.
+        /// </summary>
+        PreviouslyBuiltSuccessfully,
+
+        /// <summary>
+        /// The target previously built unsuccessfully.
+        /// </summary>
+        PreviouslyBuiltUnsuccessfully,
+
+        /// <summary>
+        /// All the target outputs were up-to-date with respect to their inputs.
+        /// </summary>
+        OutputsUpToDate,
+
+        /// <summary>
+        /// The condition on the target was evaluated as false.
+        /// </summary>
+        ConditionWasFalse
+    }
+
     /// <summary>
     /// Arguments for the target skipped event.
     /// </summary>
@@ -46,6 +79,11 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
+        /// The reason why the target was skipped.
+        /// </summary>
+        public TargetSkipReason SkipReason { get; set; }
+
+        /// <summary>
         /// Gets or sets the name of the target being skipped.
         /// </summary>
         public string TargetName { get; set; }
@@ -65,10 +103,24 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public TargetBuiltReason BuildReason { get; set; }
 
+        /// <summary>
+        /// Whether the target succeeded originally.
+        /// </summary>
         public bool OriginallySucceeded { get; set; }
 
+        /// <summary>
+        /// <see cref="BuildEventContext"/> describing the original build of the target, or null if not available.
+        /// </summary>
+        public BuildEventContext OriginalBuildEventContext { get; set; }
+
+        /// <summary>
+        /// The condition expression on the target declaration.
+        /// </summary>
         public string Condition { get; set; }
 
+        /// <summary>
+        /// The value of the condition expression as it was evaluated.
+        /// </summary>
         public string EvaluatedCondition { get; set; }
 
         internal override void WriteToStream(BinaryWriter writer)
@@ -81,7 +133,9 @@ namespace Microsoft.Build.Framework
             writer.WriteOptionalString(Condition);
             writer.WriteOptionalString(EvaluatedCondition);
             writer.Write7BitEncodedInt((int)BuildReason);
+            writer.Write7BitEncodedInt((int)SkipReason);
             writer.Write(OriginallySucceeded);
+            writer.WriteOptionalBuildEventContext(OriginalBuildEventContext);
         }
 
         internal override void CreateFromStream(BinaryReader reader, int version)
@@ -94,7 +148,9 @@ namespace Microsoft.Build.Framework
             Condition = reader.ReadOptionalString();
             EvaluatedCondition = reader.ReadOptionalString();
             BuildReason = (TargetBuiltReason)reader.Read7BitEncodedInt();
+            SkipReason = (TargetSkipReason)reader.Read7BitEncodedInt();
             OriginallySucceeded = reader.ReadBoolean();
+            OriginalBuildEventContext = reader.ReadOptionalBuildEventContext();
         }
 
         public override string Message
@@ -103,28 +159,29 @@ namespace Microsoft.Build.Framework
             {
                 if (RawMessage == null)
                 {
-                    lock (locker)
+                    RawMessage = SkipReason switch
                     {
-                        if (RawMessage == null)
-                        {
-                            if (Condition != null)
-                            {
-                                RawMessage = FormatResourceStringIgnoreCodeAndKeyword(
-                                    "TargetSkippedFalseCondition",
-                                    TargetName,
-                                    Condition,
-                                    EvaluatedCondition);
-                            }
-                            else
-                            {
-                                RawMessage = FormatResourceStringIgnoreCodeAndKeyword(
-                                    OriginallySucceeded
-                                    ? "TargetAlreadyCompleteSuccess"
-                                    : "TargetAlreadyCompleteFailure",
-                                    TargetName);
-                            }
-                        }
-                    }
+                        TargetSkipReason.PreviouslyBuiltSuccessfully or TargetSkipReason.PreviouslyBuiltUnsuccessfully =>
+                            FormatResourceStringIgnoreCodeAndKeyword(
+                                OriginallySucceeded
+                                ? "TargetAlreadyCompleteSuccess"
+                                : "TargetAlreadyCompleteFailure",
+                                TargetName),
+
+                        TargetSkipReason.ConditionWasFalse =>
+                            FormatResourceStringIgnoreCodeAndKeyword(
+                                "TargetSkippedFalseCondition",
+                                TargetName,
+                                Condition,
+                                EvaluatedCondition),
+
+                        TargetSkipReason.OutputsUpToDate =>
+                            FormatResourceStringIgnoreCodeAndKeyword(
+                                "SkipTargetBecauseOutputsUpToDate",
+                                TargetName),
+
+                        _ => SkipReason.ToString()
+                    };
                 }
 
                 return RawMessage;

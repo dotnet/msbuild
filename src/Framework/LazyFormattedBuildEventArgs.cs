@@ -4,7 +4,6 @@
 using System;
 using System.Globalization;
 using System.IO;
-using System.Runtime.Serialization;
 
 namespace Microsoft.Build.Framework
 {
@@ -17,33 +16,23 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Stores the message arguments.
         /// </summary>
-        private object[] arguments;
+        private volatile object? argumentsOrFormattedMessage;
 
         /// <summary>
         /// Exposes the underlying arguments field to serializers.
         /// </summary>
-        internal object[] RawArguments
+        internal object[]? RawArguments
         {
-            get => arguments;
-            set => arguments = value;
+            get => (argumentsOrFormattedMessage is object[] arguments) ? arguments : null;
         }
 
         /// <summary>
-        /// Stores the original culture for String.Format.
+        /// Exposes the formatted message string to serializers.
         /// </summary>
-        private string originalCultureName;
-
-        /// <summary>
-        /// Non-serializable CultureInfo object
-        /// </summary>
-        [NonSerialized]
-        private CultureInfo originalCultureInfo;
-
-        /// <summary>
-        /// Lock object.
-        /// </summary>
-        [NonSerialized]
-        protected Object locker;
+        private protected override string? FormattedMessage
+        {
+            get => (argumentsOrFormattedMessage is string formattedMessage) ? formattedMessage : base.FormattedMessage;
+        }
 
         /// <summary>
         /// This constructor allows all event data to be initialized.
@@ -53,9 +42,9 @@ namespace Microsoft.Build.Framework
         /// <param name="senderName">name of event sender.</param>
         public LazyFormattedBuildEventArgs
         (
-            string message,
-            string helpKeyword,
-            string senderName
+            string? message,
+            string? helpKeyword,
+            string? senderName
         )
             : this(message, helpKeyword, senderName, DateTime.Now, null)
         {
@@ -71,18 +60,15 @@ namespace Microsoft.Build.Framework
         /// <param name="messageArgs">Message arguments.</param>
         public LazyFormattedBuildEventArgs
         (
-            string message,
-            string helpKeyword,
-            string senderName,
+            string? message,
+            string? helpKeyword,
+            string? senderName,
             DateTime eventTimestamp,
-            params object[] messageArgs
+            params object[]? messageArgs
         )
             : base(message, helpKeyword, senderName, eventTimestamp)
         {
-            arguments = messageArgs;
-            originalCultureName = CultureInfo.CurrentCulture.Name;
-            originalCultureInfo = CultureInfo.CurrentCulture;
-            locker = new Object();
+            argumentsOrFormattedMessage = messageArgs;
         }
 
         /// <summary>
@@ -91,28 +77,26 @@ namespace Microsoft.Build.Framework
         protected LazyFormattedBuildEventArgs()
             : base()
         {
-            locker = new Object();
         }
 
         /// <summary>
         /// Gets the formatted message.
         /// </summary>
-        public override string Message
+        public override string? Message
         {
             get
             {
-                lock (locker)
+                object? argsOrMessage = argumentsOrFormattedMessage;
+                if (argsOrMessage is string formattedMessage)
                 {
-                    if (arguments?.Length > 0)
-                    {
-                        if (originalCultureInfo == null)
-                        {
-                            originalCultureInfo = new CultureInfo(originalCultureName);
-                        }
+                    return formattedMessage;
+                }
 
-                        base.Message = FormatString(originalCultureInfo, base.Message, arguments);
-                        arguments = null;
-                    }
+                if (argsOrMessage is object[] arguments && arguments.Length > 0 && base.Message is not null)
+                {
+                    formattedMessage = FormatString(base.Message, arguments);
+                    argumentsOrFormattedMessage = formattedMessage;
+                    return formattedMessage;
                 }
 
                 return base.Message;
@@ -125,36 +109,24 @@ namespace Microsoft.Build.Framework
         /// <param name="writer">Binary writer which is attached to the stream the event will be serialized into.</param>
         internal override void WriteToStream(BinaryWriter writer)
         {
-            // Locking is needed here as this is invoked on the serialization thread,
-            // whereas a local logger (a distributed logger) may concurrently invoke this.Message
-            // which will trigger formatting and thus the exception below
-            lock (locker)
+            object? argsOrMessage = argumentsOrFormattedMessage;
+            if (argsOrMessage is object[] arguments && arguments.Length > 0)
             {
-                bool hasArguments = arguments != null;
-                base.WriteToStream(writer);
+                base.WriteToStreamWithExplicitMessage(writer, base.Message);
+                writer.Write(arguments.Length);
 
-                if (hasArguments && arguments == null)
+                foreach (object argument in arguments)
                 {
-                    throw new InvalidOperationException("BuildEventArgs has formatted message while serializing!");
+                    // Arguments may be ints, etc, so explicitly convert
+                    // Convert.ToString returns String.Empty when it cannot convert, rather than throwing
+                    // It returns null if the input is null.
+                    writer.Write(Convert.ToString(argument, CultureInfo.CurrentCulture) ?? "");
                 }
-
-                if (arguments != null)
-                {
-                    writer.Write(arguments.Length);
-
-                    foreach (object argument in arguments)
-                    {
-                        // Arguments may be ints, etc, so explicitly convert
-                        // Convert.ToString returns String.Empty when it cannot convert, rather than throwing
-                        writer.Write(Convert.ToString(argument, CultureInfo.CurrentCulture));
-                    }
-                }
-                else
-                {
-                    writer.Write(-1);
-                }
-
-                writer.Write(originalCultureName);
+            }
+            else
+            {
+                base.WriteToStreamWithExplicitMessage(writer, (argsOrMessage is string formattedMessage) ? formattedMessage : base.Message);
+                writer.Write(-1);
             }
         }
 
@@ -169,7 +141,7 @@ namespace Microsoft.Build.Framework
 
             if (version > 20)
             {
-                string[] messageArgs = null;
+                string[]? messageArgs = null;
                 int numArguments = reader.ReadInt32();
 
                 if (numArguments >= 0)
@@ -182,9 +154,7 @@ namespace Microsoft.Build.Framework
                     }
                 }
 
-                arguments = messageArgs;
-
-                originalCultureName = reader.ReadString();
+                argumentsOrFormattedMessage = messageArgs;
             }
         }
 
@@ -195,11 +165,10 @@ namespace Microsoft.Build.Framework
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
         /// </summary>
         /// <remarks>This method is thread-safe.</remarks>
-        /// <param name="culture">The culture info for formatting the message.</param>
         /// <param name="unformatted">The string to format.</param>
         /// <param name="args">Optional arguments for formatting the given string.</param>
         /// <returns>The formatted string.</returns>
-        private static string FormatString(CultureInfo culture, string unformatted, params object[] args)
+        private static string FormatString(string unformatted, params object[] args)
         {
             // Based on the one in Shared/ResourceUtilities.
             string formatted = unformatted;
@@ -217,7 +186,7 @@ namespace Microsoft.Build.Framework
                     // another one, add it here.
                     if (param != null && param.ToString() == param.GetType().FullName)
                     {
-                        throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, "Invalid type for message formatting argument, was {0}", param.GetType().FullName));
+                        throw new InvalidOperationException(string.Format("Invalid type for message formatting argument, was {0}", param.GetType().FullName));
                     }
                 }
 #endif
@@ -225,7 +194,7 @@ namespace Microsoft.Build.Framework
                 // NOTE: all String methods are thread-safe
                 try
                 {
-                    formatted = String.Format(culture, unformatted, args);
+                    formatted = string.Format(unformatted, args);
                 }
                 catch (FormatException ex)
                 {
@@ -237,27 +206,16 @@ namespace Microsoft.Build.Framework
                     //       Task "Crash"
                     //          (16,14):  error : "This message logged from a task {1} has too few formatting parameters."
                     //             at System.Text.StringBuilder.AppendFormat(IFormatProvider provider, String format, Object[] args)
-                    //             at System.String.Format(IFormatProvider provider, String format, Object[] args)
-                    //             at Microsoft.Build.Framework.LazyFormattedBuildEventArgs.FormatString(CultureInfo culture, String unformatted, Object[] args) in d:\W8T_Refactor\src\vsproject\xmake\Framework\LazyFormattedBuildEventArgs.cs:line 263
+                    //             at System.String.Format(String format, Object[] args)
+                    //             at Microsoft.Build.Framework.LazyFormattedBuildEventArgs.FormatString(String unformatted, Object[] args) in d:\W8T_Refactor\src\vsproject\xmake\Framework\LazyFormattedBuildEventArgs.cs:line 263
                     //          Done executing task "Crash".
                     //
                     // T
-                    formatted = String.Format(CultureInfo.CurrentCulture, "\"{0}\"\n{1}", unformatted, ex.ToString());
+                    formatted = string.Format("\"{0}\"\n{1}", unformatted, ex.ToString());
                 }
             }
 
             return formatted;
-        }
-
-        /// <summary>
-        /// Deserialization does not call any constructors, not even
-        /// the parameterless constructor. Therefore since we do not serialize
-        /// this field, we must populate it here.
-        /// </summary>
-        [OnDeserialized]
-        private void OnDeserialized(StreamingContext context)
-        {
-            locker = new Object();
         }
     }
 }

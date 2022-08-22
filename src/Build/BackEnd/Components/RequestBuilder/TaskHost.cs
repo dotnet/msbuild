@@ -23,6 +23,8 @@ using Microsoft.Build.BackEnd.Components.Caching;
 using System.Reflection;
 using Microsoft.Build.Eventing;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -33,12 +35,12 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IBuildEngine9
+        IBuildEngine10
     {
         /// <summary>
         /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set.
         /// </summary>
-        private static bool s_onlyUseOutOfProcNodes = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
+        private static bool s_disableInprocNodeByEnvironmentVariable = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
 
         /// <summary>
         /// Help diagnose tasks that log after they return.
@@ -104,6 +106,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private int _yieldThreadId = -1;
 
+        private bool _disableInprocNode;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -123,7 +127,11 @@ namespace Microsoft.Build.BackEnd
             _targetBuilderCallback = targetBuilderCallback;
             _continueOnError = false;
             _activeProxy = true;
-            _callbackMonitor = new Object();
+            _callbackMonitor = new object();
+            _disableInprocNode = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
+                ? s_disableInprocNodeByEnvironmentVariable || host.BuildParameters.DisableInProcNode
+                : s_disableInprocNodeByEnvironmentVariable;
+            EngineServices = new EngineServicesImpl(this);
         }
 
         /// <summary>
@@ -137,7 +145,7 @@ namespace Microsoft.Build.BackEnd
             get
             {
                 VerifyActiveProxy();
-                return _host.BuildParameters.MaxNodeCount > 1 || s_onlyUseOutOfProcNodes;
+                return _host.BuildParameters.MaxNodeCount > 1 || _disableInprocNode;
             }
         }
 
@@ -448,8 +456,9 @@ namespace Microsoft.Build.BackEnd
                 {
                     e.BuildEventContext = _taskLoggingContext.BuildEventContext;
                     _taskLoggingContext.LoggingService.LogBuildEvent(e);
-                    _taskLoggingContext.HasLoggedErrors = true;
                 }
+                
+                 _taskLoggingContext.HasLoggedErrors = true;
             }
         }
 
@@ -695,12 +704,32 @@ namespace Microsoft.Build.BackEnd
             get
             {
                 // Test compatibility
-                if(_taskLoggingContext == null)
+                if (_taskLoggingContext == null)
                 {
                     return null;
                 }
 
                 return _warningsAsErrors ??= _taskLoggingContext.GetWarningsAsErrors();
+            }
+        }
+
+        private ICollection<string> _warningsNotAsErrors;
+
+        /// <summary>
+        /// Contains all warnings that should be logged as errors.
+        /// Non-null empty set when all warnings should be treated as errors.
+        /// </summary>
+        private ICollection<string> WarningsNotAsErrors
+        {
+            get
+            {
+                // Test compatibility
+                if (_taskLoggingContext == null)
+                {
+                    return null;
+                }
+
+                return _warningsNotAsErrors ??= _taskLoggingContext.GetWarningsNotAsErrors();
             }
         }
 
@@ -738,7 +767,12 @@ namespace Microsoft.Build.BackEnd
             }
 
             // An empty set means all warnings are errors.
-            return WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningCode);
+            return (WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningCode)) || WarningsAsErrors.Contains(warningCode);
+        }
+
+        private bool WarningAsErrorNotOverriden(string warningCode)
+        {
+            return WarningsNotAsErrors?.Contains(warningCode) != true;
         }
 
         #endregion
@@ -865,6 +899,41 @@ namespace Microsoft.Build.BackEnd
                 ReleaseCores(coresToRelease);
             }
         }
+
+        #endregion
+
+        #region IBuildEngine10 Members
+
+        [Serializable]
+        private sealed class EngineServicesImpl : EngineServices
+        {
+            private readonly TaskHost _taskHost;
+
+            internal EngineServicesImpl(TaskHost taskHost)
+            {
+                _taskHost = taskHost;
+            }
+
+            /// <inheritdoc/>
+            public override bool LogsMessagesOfImportance(MessageImportance importance)
+            {
+#if FEATURE_APPDOMAIN
+                if (RemotingServices.IsTransparentProxy(_taskHost))
+                {
+                    // If the check would be a cross-domain call, chances are that it wouldn't be worth it.
+                    // Simply disable the optimization in such a case.
+                    return true;
+                }
+#endif
+                MessageImportance minimumImportance = _taskHost._taskLoggingContext?.LoggingService.MinimumRequiredMessageImportance ?? MessageImportance.Low;
+                return importance <= minimumImportance;
+            }
+
+            /// <inheritdoc/>
+            public override bool IsTaskInputLoggingEnabled => _taskHost._host.BuildParameters.LogTaskInputs;
+        }
+
+        public EngineServices EngineServices { get; }
 
         #endregion
 

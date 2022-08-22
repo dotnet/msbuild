@@ -6,6 +6,8 @@ using System.Xml;
 
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -25,7 +27,7 @@ namespace Microsoft.Build.Tasks
                 var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
 
                 // it's important to normalize the path as it may contain two slashes
-                // see https://github.com/microsoft/msbuild/issues/4335 for details.
+                // see https://github.com/dotnet/msbuild/issues/4335 for details.
                 appConfigFile = FileUtilities.NormalizePath(appConfigFile);
 
                 reader = XmlReader.Create(appConfigFile, readerSettings);

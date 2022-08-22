@@ -10,6 +10,8 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Xunit;
 using Microsoft.Build.Engine.UnitTests.TestComparers;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
@@ -23,7 +25,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestConstructorNoItems()
         {
-            TargetResult result = new TargetResult(new TaskItem[] { }, BuildResultUtilities.GetStopWithErrorResult());
+            TargetResult result = new TargetResult(Array.Empty<TaskItem>(), BuildResultUtilities.GetStopWithErrorResult());
             Assert.Empty(result.Items);
             Assert.Null(result.Exception);
             Assert.Equal(TargetResultCode.Failure, result.ResultCode);
@@ -89,8 +91,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
             item.SetMetadata("a", "b");
+            var buildEventContext = new Framework.BuildEventContext(1, 2, 3, 4, 5, 6, 7);
 
-            TargetResult result = new TargetResult(new TaskItem[] { item }, BuildResultUtilities.GetStopWithErrorResult());
+            TargetResult result = new TargetResult(
+                new TaskItem[] { item },
+                BuildResultUtilities.GetStopWithErrorResult(),
+                buildEventContext);
 
             ((ITranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());
             TargetResult deserializedResult = TargetResult.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
@@ -98,6 +104,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(result.ResultCode, deserializedResult.ResultCode);
             Assert.True(TranslationHelpers.CompareCollections(result.Items, deserializedResult.Items, TaskItemComparer.Instance));
             Assert.True(TranslationHelpers.CompareExceptions(result.Exception, deserializedResult.Exception));
+            Assert.Equal(result.OriginalBuildEventContext, deserializedResult.OriginalBuildEventContext);
         }
 
         /// <summary>

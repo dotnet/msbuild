@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Shouldly" />
+    <PackageReference Include="System.Net.Http" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,12 +25,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="..\Shared\RegistryDelegates.cs">
       <Link>RegistryDelegates.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\ProcessExtensions.cs" />
     <Compile Include="..\Shared\RegistryHelper.cs">
       <Link>RegistryHelper.cs</Link>
     </Compile>
@@ -74,10 +73,4 @@
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
 
-  <Target Name="CreateTaskDir" AfterTargets="Build" Condition="'$(TargetFrameworkIdentifier)' != ''">
-    <ItemGroup>
-      <OutputAssemblyList Include="$(TargetDir)Microsoft.Build.CommandLine.UnitTests.dll" />
-    </ItemGroup>
-    <Copy SourceFiles="@(OutputAssemblyList)" DestinationFolder="$(TargetDir)Task" />
-  </Target>
 </Project>

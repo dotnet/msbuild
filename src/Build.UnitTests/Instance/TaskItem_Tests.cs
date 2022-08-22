@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
@@ -9,8 +10,14 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using System.Xml;
 using Microsoft.Build.Framework;
 using System.IO;
+using System.Linq;
 using Xunit;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Execution;
+using Shouldly;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
@@ -19,6 +26,25 @@ namespace Microsoft.Build.UnitTests.OM.Instance
     /// </summary>
     public class TaskItem_Tests
     {
+        internal static readonly string[] s_builtInMetadataNames =
+        {
+            "FullPath",
+            "RootDir",
+            "Filename",
+            "Extension",
+            "RelativeDir",
+            "Directory",
+            "RecursiveDir",
+            "Identity",
+            "ModifiedTime",
+            "CreatedTime",
+            "AccessedTime",
+            "DefiningProjectFullPath",
+            "DefiningProjectDirectory",
+            "DefiningProjectName",
+            "DefiningProjectExtension"
+        };
+
         /// <summary>
         /// Test serialization
         /// </summary>
@@ -59,7 +85,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             TaskItem right = new TaskItem("foo", "bar.proj");
 
             Assert.Equal(left, right);
-            Assert.Equal(left, right);
+            Assert.Equal(right, left);
         }
 
         /// <summary>
@@ -74,7 +100,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             right.SetMetadata("a", "b");
 
             Assert.Equal(left, right);
-            Assert.Equal(left, right);
+            Assert.Equal(right, left);
         }
 
         /// <summary>
@@ -89,7 +115,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             right.SetMetadata("a", "c");
 
             Assert.NotEqual(left, right);
-            Assert.NotEqual(left, right);
+            Assert.NotEqual(right, left);
         }
 
         /// <summary>
@@ -104,7 +130,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             right.SetMetadata("b", "b");
 
             Assert.NotEqual(left, right);
-            Assert.NotEqual(left, right);
+            Assert.NotEqual(right, left);
         }
 
         /// <summary>
@@ -118,7 +144,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             TaskItem right = new TaskItem("foo", "bar.proj");
 
             Assert.NotEqual(left, right);
-            Assert.NotEqual(left, right);
+            Assert.NotEqual(right, left);
         }
 
         /// <summary>
@@ -134,7 +160,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             right.SetMetadata("c", "d");
 
             Assert.NotEqual(left, right);
-            Assert.NotEqual(left, right);
+            Assert.NotEqual(right, left);
         }
 
         /// <summary>
@@ -149,7 +175,63 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             TaskItem clone = parent.DeepClone();
             Assert.True(parent.Equals(clone)); // "The parent and the clone should be equal"
+            Assert.True(clone.Equals(parent)); // "The parent and the clone should be equal"
             Assert.False(object.ReferenceEquals(parent, clone)); // "The parent and the child should not be the same object"
+        }
+
+        /// <summary>
+        /// Validate the presentation of metadata on a TaskItem, both of direct values and those inherited from
+        /// item definitions.
+        /// </summary>
+        [Fact]
+        public void Metadata()
+        {
+            TaskItem item = BuildItem(
+                definitions: new[] { ("a", "base"), ("b", "base") },
+                metadata: new[] { ("a", "override") });
+
+            item.MetadataNames.Cast<string>().ShouldBeSetEquivalentTo(new[] { "a", "b" }.Concat(s_builtInMetadataNames));
+            item.MetadataCount.ShouldBe(s_builtInMetadataNames.Length + 2);
+            item.DirectMetadataCount.ShouldBe(1);
+
+            CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = item.MetadataCollection;
+            metadata.Count.ShouldBe(2);
+            metadata["a"].EvaluatedValue.ShouldBe("override");
+            metadata["b"].EvaluatedValue.ShouldBe("base");
+
+            item.EnumerateMetadata().ShouldBeSetEquivalentTo(new KeyValuePair<string, string>[] { new("a", "override"), new("b", "base") });
+
+            ((Dictionary<string, string>)item.CloneCustomMetadata()).ShouldBeSetEquivalentTo(new KeyValuePair<string, string>[] { new("a", "override"), new("b", "base") });
+
+            static TaskItem BuildItem(
+                IEnumerable<(string Name, string Value)> definitions = null,
+                IEnumerable<(string Name, string Value)> metadata = null)
+            {
+                List<ProjectItemDefinitionInstance> itemDefinitions = new();
+                if (definitions is not null)
+                {
+                    Project project = new();
+
+                    foreach ((string name, string value) in definitions)
+                    {
+                        ProjectItemDefinition projectItemDefinition = new ProjectItemDefinition(project, "MyItem");
+                        projectItemDefinition.SetMetadataValue(name, value);
+                        ProjectItemDefinitionInstance itemDefinition = new(projectItemDefinition);
+                        itemDefinitions.Add(itemDefinition);
+                    }
+                }
+
+                CopyOnWritePropertyDictionary<ProjectMetadataInstance> directMetadata = new();
+                if (metadata is not null)
+                {
+                    foreach ((string name, string value) in metadata)
+                    {
+                        directMetadata.Set(new(name, value));
+                    }
+                }
+
+                return new TaskItem("foo", "foo", directMetadata, itemDefinitions, "dir", immutable: false, "bar.proj");
+            }
         }
 
         /// <summary>
@@ -196,7 +278,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();
-            project.Build("Build", new ILogger[] { logger });
+            project.Build("Build", new ILogger[] { logger }).ShouldBeTrue();
 
             logger.AssertLogContains("[i1m1]");
             logger.AssertLogContains("[i1m2]");
@@ -253,7 +335,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();
-            project.Build("Build", new ILogger[] { logger });
+            project.Build("Build", new ILogger[] { logger }).ShouldBeTrue();
 
             logger.AssertLogContains("[i1m1]");
             logger.AssertLogContains("[i1m2]");
@@ -291,7 +373,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();
-            project.Build("Build", new ILogger[] { logger });
+            project.Build("Build", new ILogger[] { logger }).ShouldBeTrue();
 
             logger.AssertLogContains("i1%2ai2");
         }

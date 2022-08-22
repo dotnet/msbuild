@@ -6,6 +6,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared.FileSystem
 {
     internal class CachingFileSystemWrapper : IFileSystem
@@ -19,9 +21,9 @@ namespace Microsoft.Build.Shared.FileSystem
             _fileSystem = fileSystem;
         }
 
-        public bool DirectoryEntryExists(string path)
+        public bool FileOrDirectoryExists(string path)
         {
-            return CachedExistenceCheck(path, p => _fileSystem.DirectoryEntryExists(p));
+            return CachedExistenceCheck(path, p => _fileSystem.FileOrDirectoryExists(p));
         }
 
         public FileAttributes GetAttributes(string path)

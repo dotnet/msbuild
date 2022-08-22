@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Xml;
 
@@ -31,6 +32,8 @@ using Xunit;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
@@ -366,7 +369,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExpandItemVectorFunctionsChainedProject1()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
-<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+<Project ToolsVersion=`msbuilddefaulttoolsversion`>
 
     <ItemGroup>
         <Compile Include=`a.cpp`>
@@ -391,7 +394,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         </Compile>
     </ItemGroup>
 
-    <Target Name=`Build`>      
+    <Target Name=`Build`>
         <Message Text=`DirChain0: @(Compile->'%(SomeMeta)'->'%(Directory)'->Distinct())`/>
         <Message Text=`DirChain1: @(Compile->'%(SomeMeta)'->'%(Directory)'->Distinct(), '%(A)')`/>
         <Message Text=`DirChain2: @(Compile->'%(SomeMeta)'->'%(Directory)'->Distinct(), '%(A)%(B)')`/>
@@ -414,8 +417,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExpandItemVectorFunctionsCount1()
         {
             string content = @"
- <Project DefaultTargets=`t` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
- 
+ <Project DefaultTargets=`t`>
+
         <Target Name=`t`>
             <ItemGroup>
                 <I Include=`foo;bar`/>
@@ -436,8 +439,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExpandItemVectorFunctionsCount2()
         {
             string content = @"
- <Project DefaultTargets=`t` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
- 
+ <Project DefaultTargets=`t`>
+
         <Target Name=`t`>
             <ItemGroup>
                 <I Include=`foo;bar`/>
@@ -459,8 +462,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExpandItemVectorFunctionsCountOperatingOnEmptyResult1()
         {
             string content = @"
- <Project DefaultTargets=`t` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
- 
+ <Project DefaultTargets=`t`>
+
         <Target Name=`t`>
             <ItemGroup>
                 <I Include=`foo;bar`/>
@@ -481,8 +484,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExpandItemVectorFunctionsCountOperatingOnEmptyResult2()
         {
             string content = @"
- <Project DefaultTargets=`t` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
- 
+ <Project DefaultTargets=`t`>
+
         <Target Name=`t`>
             <ItemGroup>
                 <I Include=`foo;bar`/>
@@ -504,8 +507,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExpandItemVectorFunctionsBuiltIn1()
         {
             string content = @"
- <Project DefaultTargets=`t` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
- 
+ <Project DefaultTargets=`t`>
+
         <Target Name=`t`>
             <ItemGroup>
                 <I Include=`foo;bar`/>
@@ -526,8 +529,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExpandItemVectorFunctionsBuiltIn2()
         {
             string content = @"
- <Project DefaultTargets=`t` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
- 
+ <Project DefaultTargets=`t`>
+
         <Target Name=`t`>
             <ItemGroup>
                 <I Include=`foo;bar`/>
@@ -548,8 +551,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExpandItemVectorFunctionsBuiltIn3()
         {
             string content = @"
- <Project DefaultTargets=`t` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
- 
+ <Project DefaultTargets=`t`>
+
         <Target Name=`t`>
             <ItemGroup>
                 <I Include=`foo;bar;foo;bar;foo`/>
@@ -570,8 +573,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExpandItemVectorFunctionsBuiltIn4()
         {
             string content = @"
- <Project DefaultTargets=`t` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
- 
+ <Project DefaultTargets=`t`>
+
         <Target Name=`t`>
             <ItemGroup>
                 <I Include=`foo;bar;foo;bar;foo`/>
@@ -589,12 +592,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/microsoft/msbuild/issues/4363")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/msbuild/issues/4363")]
         public void ExpandItemVectorFunctionsBuiltIn_PathTooLongError()
         {
             string content = @"
- <Project DefaultTargets=`t` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
- 
+ <Project DefaultTargets=`t`>
+
         <Target Name=`t`>
             <ItemGroup>
                 <I Include=`fooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo`/>
@@ -619,8 +622,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
 
             string content = @"
- <Project DefaultTargets=`t` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
- 
+ <Project DefaultTargets=`t`>
+
         <Target Name=`t`>
             <ItemGroup>
                 <I Include=`aaa|||bbb\ccc.txt`/>
@@ -814,7 +817,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ZeroItemsInProjectExpandsToEmpty()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
 
                     <Target Name=`Build` Condition=`'@(foo)'!=''` >
                         <Message Text=`This target should NOT run.`/>
@@ -826,7 +829,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogDoesntContain("This target should NOT run.");
 
             logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
 
                     <ItemGroup>
                         <foo Include=`abc` Condition=` '@(foo)' == '' ` />
@@ -846,7 +849,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ItemIncludeContainsMultipleItemReferences()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
-                <Project DefaultTarget=`ShowProps` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"" >
+                <Project DefaultTarget=`ShowProps` ToolsVersion=`msbuilddefaulttoolsversion` >
                     <PropertyGroup>
                         <OutputType>Library</OutputType>
                     </PropertyGroup>
@@ -878,7 +881,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void InvalidPathAndMetadataItemFunctionPathTooLong()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
-                <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                <Project DefaultTargets='Build'>
                     <ItemGroup>
                         <x Include='" + new string('x', 250) + @"'/>
                     </ItemGroup>
@@ -900,7 +903,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void InvalidPathAndMetadataItemFunctionInvalidWindowsPathChars()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
-                <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                <Project DefaultTargets='Build'>
                     <ItemGroup>
                         <x Include='" + ":|?*" + @"'/>
                     </ItemGroup>
@@ -919,7 +922,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void InvalidMetadataName()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
-                <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                <Project DefaultTargets='Build'>
                     <ItemGroup>
                         <x Include='x'/>
                     </ItemGroup>
@@ -940,7 +943,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void InvalidPathAndMetadataItemFunctionPathTooLong2()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
-                <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                <Project DefaultTargets='Build'>
                     <ItemGroup>
                         <x Include='" + new string('x', 250) + @"'/>
                     </ItemGroup>
@@ -962,7 +965,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void InvalidPathAndMetadataItemFunctionInvalidWindowsPathChars2()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
-                <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                <Project DefaultTargets='Build'>
                     <ItemGroup>
                         <x Include='" + ":|?*" + @"'/>
                     </ItemGroup>
@@ -981,7 +984,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void InvalidMetadataName2()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
-                <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                <Project DefaultTargets='Build'>
                     <ItemGroup>
                         <x Include='x'/>
                     </ItemGroup>
@@ -1002,7 +1005,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void InvalidPathAndMetadataItemFunctionPathTooLong3()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
-                <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                <Project DefaultTargets='Build'>
                     <ItemGroup>
                         <x Include='" + new string('x', 250) + @"'/>
                     </ItemGroup>
@@ -1024,7 +1027,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void InvalidPathAndMetadataItemInvalidWindowsPathChars3()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
-                <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                <Project DefaultTargets='Build'>
                     <ItemGroup>
                         <x Include='" + ":|?*" + @"'/>
                     </ItemGroup>
@@ -1042,7 +1045,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void InvalidPathInDirectMetadata()
         {
             var logger = Helpers.BuildProjectContentUsingBuildManagerExpectResult(
-                @"<Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                @"<Project DefaultTargets='Build'>
                     <ItemGroup>
                         <x Include=':|?*'>
                             <m>%(FullPath)</m>
@@ -1060,7 +1063,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void PathTooLongInDirectMetadata()
         {
             var logger = Helpers.BuildProjectContentUsingBuildManagerExpectResult(
-                @"<Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                @"<Project DefaultTargets='Build'>
                     <ItemGroup>
                         <x Include='" + new string('x', 250) + @"'>
                             <m>%(FullPath)</m>
@@ -1079,7 +1082,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void InvalidMetadataName3()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
-                <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                <Project DefaultTargets='Build'>
                     <ItemGroup>
                         <x Include='x'/>
                     </ItemGroup>
@@ -1098,7 +1101,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void HasMetadata()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
-<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+<Project ToolsVersion=""msbuilddefaulttoolsversion"">
 
   <ItemGroup>
     <_Item Include=""One"">
@@ -1147,7 +1150,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                   <Target Name=`Build`>
                     <Message Importance=`high` Text=`QualifiedNotMatchCase %(Foo.FileName)=%(Foo.sensitive)`/>
                     <Message Importance=`high` Text=`QualifiedMatchCase %(Foo.FileName)=%(Foo.SENSITIVE)`/>
-                    
+
                     <Message Importance=`high` Text=`UnqualifiedNotMatchCase %(Foo.FileName)=%(sensitive)`/>
                     <Message Importance=`high` Text=`UnqualifiedMatchCase %(Foo.FileName)=%(SENSITIVE)`/>
                   </Target>
@@ -1176,7 +1179,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                   <Target Name=`Build`>
                     <Message Importance=`high` Text=`QualifiedNotMatchCase %(Foo.FileName)=%(Foo.sensitive)`/>
                     <Message Importance=`high` Text=`QualifiedMatchCase %(Foo.FileName)=%(Foo.SENSITIVE)`/>
-                    
+
                     <Message Importance=`high` Text=`UnqualifiedNotMatchCase %(Foo.FileName)=%(sensitive)`/>
                     <Message Importance=`high` Text=`UnqualifiedMatchCase %(Foo.FileName)=%(SENSITIVE)`/>
                   </Target>
@@ -1200,7 +1203,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                   <Target Name=`Build`>
                     <Message Importance=`high` Text=`QualifiedNotMatchCase %(Foo.Identity)=%(Foo.FILENAME)`/>
                     <Message Importance=`high` Text=`QualifiedMatchCase %(Foo.Identity)=%(Foo.FileName)`/>
-                    
+
                     <Message Importance=`high` Text=`UnqualifiedNotMatchCase %(Foo.Identity)=%(FILENAME)`/>
                     <Message Importance=`high` Text=`UnqualifiedMatchCase %(Foo.Identity)=%(FileName)`/>
                   </Target>
@@ -1222,7 +1225,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             try
             {
                 Helpers.BuildProjectWithNewOMExpectFailure(@"
-                <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                <Project DefaultTargets='Build'>
                     <PropertyGroup>
                         <Function>$([System.IO.Path]::Combine(null,''))</Function>
                     </PropertyGroup>
@@ -1249,7 +1252,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             try
             {
                 Helpers.BuildProjectWithNewOMExpectFailure(@"
-                <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                <Project DefaultTargets='Build'>
                     <PropertyGroup>
                         <Function>$(System.IO.Path::Combine('a','b'))</Function>
                     </PropertyGroup>
@@ -1513,7 +1516,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
             var lookup = new Lookup(projectItemGroups, pg);
             lookup.EnterScope("x");
-            lookup.PopulateWithItems("ManySpacesItem", new []
+            lookup.PopulateWithItems("ManySpacesItem", new[]
             {
                 new ProjectItemInstance (project, "ManySpacesItem", "Foo", project.FullPath),
                 new ProjectItemInstance (project, "ManySpacesItem", manySpaces, project.FullPath),
@@ -1548,76 +1551,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Exercises ExpandIntoStringAndUnescape and ExpanderOptions.Truncate
-        /// </summary>
-        [Fact]
-        public void ExpandAllIntoStringNotTruncated()
-        {
-            using (TestEnvironment env = TestEnvironment.Create())
-            {
-                ChangeWaves.ResetStateForTests();
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave16_8.ToString());
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-                ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
-                var manySpaces = "".PadLeft(2000);
-                var pg = new PropertyDictionary<ProjectPropertyInstance>();
-                pg.Set(ProjectPropertyInstance.Create("ManySpacesProperty", manySpaces));
-                var itemMetadataTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "ManySpacesMetadata", manySpaces }
-                };
-                var itemMetadata = new StringMetadataTable(itemMetadataTable);
-                var projectItemGroups = new ItemDictionary<ProjectItemInstance>();
-                var itemGroup = new List<ProjectItemInstance>();
-                StringBuilder longFileName = new StringBuilder();
-                StringBuilder longMetadataName = new StringBuilder();
-                for (int i = 0; i < 50; i++)
-                {
-                    var item = new ProjectItemInstance(project, "ManyItems", $"ThisIsAFairlyLongFileName_{i}.bmp", project.FullPath);
-                    item.SetMetadata("Foo", $"ThisIsAFairlyLongMetadataValue_{i}");
-                    longFileName.Append($"ThisIsAFairlyLongFileName_{i}.bmp" + (i == 49 ? string.Empty : ";"));
-                    longMetadataName.Append($"ThisIsAFairlyLongMetadataValue_{i}" + (i == 49 ? string.Empty : ";"));
-                    itemGroup.Add(item);
-                }
-                var lookup = new Lookup(projectItemGroups, pg);
-                lookup.EnterScope("x");
-                lookup.PopulateWithItems("ManySpacesItem", new[]
-                {
-                    new ProjectItemInstance (project, "ManySpacesItem", "Foo", project.FullPath),
-                    new ProjectItemInstance (project, "ManySpacesItem", manySpaces, project.FullPath),
-                    new ProjectItemInstance (project, "ManySpacesItem", "Bar", project.FullPath),
-                });
-                lookup.PopulateWithItems("Exactly1024", new[]
-                {
-                    new ProjectItemInstance (project, "Exactly1024", "".PadLeft(1024), project.FullPath),
-                    new ProjectItemInstance (project, "Exactly1024", "Foo", project.FullPath),
-                });
-                lookup.PopulateWithItems("ManyItems", itemGroup);
-
-                Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(lookup, lookup, itemMetadata, FileSystems.Default);
-
-                XmlAttribute xmlattribute = (new XmlDocument()).CreateAttribute("dummy");
-                xmlattribute.Value = "'%(ManySpacesMetadata)' != '' and '$(ManySpacesProperty)' != '' and '@(ManySpacesItem)' != '' and '@(Exactly1024)' != '' and '@(ManyItems)' != '' and '@(ManyItems->'%(Foo)')' != '' and '@(ManyItems->'%(Nonexistent)')' != ''";
-
-                var expected =
-                    $"'{"",2000}' != '' and " +
-                    $"'{"",2000}' != '' and " +
-                    $"'Foo;{"",2000};Bar' != '' and " +
-                    $"'{"",1024};Foo' != '' and " +
-                    $"'{longFileName}' != '' and " +
-                    $"'{longMetadataName}' != '' and " +
-                    "';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;' != ''";
-                var actual = expander.ExpandIntoStringAndUnescape(xmlattribute.Value, ExpanderOptions.ExpandAll | ExpanderOptions.Truncate, MockElementLocation.Instance);
-                // NOTE: semicolons in the last part are *weird* because they don't actually mean anything and you get logging like
-                //     Target "Build" skipped, due to false condition; ( '@(I->'%(nonexistent)')' == '' ) was evaluated as ( ';' == '' ).
-                // but that goes back to MSBuild 4.something so I'm codifying it in this test. If you're here because you cleaned it up
-                // and want to fix the test my current opinion is that's fine.
-                actual.ShouldBe(expected);
-                ChangeWaves.ResetStateForTests();
-            }
-        }
-
-        /// <summary>
         /// Exercises ExpandAllIntoString with a string that does not need expanding.
         /// In this case the expanded string should be reference identical to the passed in string.
         /// </summary>
@@ -1639,11 +1572,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
             xmlattribute.Value = "abc123" + new Random().Next();
             string expandedString = expander.ExpandIntoStringLeaveEscaped(xmlattribute.Value, ExpanderOptions.ExpandAll, MockElementLocation.Instance);
 
-#if FEATURE_STRING_INTERN
             // Verify neither string got interned, so that this test is meaningful
             Assert.Null(string.IsInterned(xmlattribute.Value));
             Assert.Null(string.IsInterned(expandedString));
-#endif
 
             // Finally verify Expander indeed didn't create a new string.
             Assert.True(Object.ReferenceEquals(xmlattribute.Value, expandedString));
@@ -1782,8 +1713,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
            );
         }
-#if FEATURE_WIN32_REGISTRY
+
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void RegistryPropertyString()
         {
             try
@@ -1805,6 +1738,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void RegistryPropertyBinary()
         {
             try
@@ -1829,6 +1764,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void RegistryPropertyDWord()
         {
             try
@@ -1850,6 +1787,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void RegistryPropertyExpandString()
         {
             try
@@ -1872,6 +1811,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void RegistryPropertyQWord()
         {
             try
@@ -1893,6 +1834,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void RegistryPropertyMultiString()
         {
             try
@@ -1912,13 +1855,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Registry.CurrentUser.DeleteSubKey(@"Software\Microsoft\MSBuild_test");
             }
         }
-#endif
 
         [Fact]
         public void TestItemSpecModiferEscaping()
         {
             string content = @"
- <Project DefaultTargets=""Build"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+ <Project DefaultTargets=""Build"">
 
         <Target Name=""Build"">
             <WriteLinesToFile Overwrite=""true"" File=""unittest.%28msbuild%29.file"" Lines=""Nothing much here""/>
@@ -1944,19 +1886,19 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Trait("Category", "mono-osx-failing")]
         public void TestGetPathToReferenceAssembliesAsFunction()
         {
-            if (ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version45) == null)
+            if (ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version48) == null)
             {
                 // if there aren't any reference assemblies installed on the machine in the first place, of course
                 // we're not going to find them. :)
                 return;
             }
 
-            string content = @"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+            string content = $@"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
 
                     <PropertyGroup>
                         <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
-                        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                         <TargetFrameworkProfile></TargetFrameworkProfile>
                         <TargetFrameworkMoniker>$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)</TargetFrameworkMoniker>
                     </PropertyGroup>
@@ -1998,7 +1940,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-            string result = expander.ExpandIntoStringLeaveEscaped("$([System.Convert]::ChangeType('null',$(SomeStuff.GetType())))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+            string result = expander.ExpandIntoStringLeaveEscaped("$([System.Convert]::ChangeType('null',$(SomeStuff.GetTypeCode())))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
             Assert.Equal("null", result);
         }
@@ -2010,13 +1952,16 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void PropertyFunctionNullReturn()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
-            pg.Set(ProjectPropertyInstance.Create("SomeStuff", "This IS SOME STUff"));
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-            string result = expander.ExpandIntoStringLeaveEscaped("$([System.Convert]::ChangeType(,$(SomeStuff.GetType())))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-
+            // The null-returning function is the only thing in the expression.
+            string result = expander.ExpandIntoStringLeaveEscaped("$([System.Environment]::GetEnvironmentVariable(`_NonExistentVar`))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             Assert.Equal("", result);
+
+            // The result of the null-returning function is concatenated with a non-empty string.
+            result = expander.ExpandIntoStringLeaveEscaped("prefix_$([System.Environment]::GetEnvironmentVariable(`_NonExistentVar`))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+            Assert.Equal("prefix_", result);
         }
 
         /// <summary>
@@ -2703,7 +2648,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
             string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.IO.Path]::Combine(`" +
-                Path.Combine(s_rootPathPrefix, "foo goo")  + "`, `$(File)`))",
+                Path.Combine(s_rootPathPrefix, "foo goo") + "`, `$(File)`))",
                 ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
             Assert.Equal(Path.Combine(s_rootPathPrefix, "foo goo", "foo goo", "file.txt"), result);
@@ -2919,7 +2864,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void StringIndexOfTests(string propertyName, string properyValue, string propertyFunction, string expectedExpansion)
         {
             var pg = new PropertyDictionary<ProjectPropertyInstance>
-                {[propertyName] = ProjectPropertyInstance.Create(propertyName, properyValue)};
+            { [propertyName] = ProjectPropertyInstance.Create(propertyName, properyValue) };
 
             var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
@@ -2981,9 +2926,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var pg = new PropertyDictionary<ProjectPropertyInstance>();
             var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-            AssertSuccess(expander, expectedSign >  0, $"$([MSBuild]::VersionGreaterThan('{a}', '{b}'))");
+            AssertSuccess(expander, expectedSign > 0, $"$([MSBuild]::VersionGreaterThan('{a}', '{b}'))");
             AssertSuccess(expander, expectedSign >= 0, $"$([MSBuild]::VersionGreaterThanOrEquals('{a}', '{b}'))");
-            AssertSuccess(expander, expectedSign <  0, $"$([MSBuild]::VersionLessThan('{a}', '{b}'))");
+            AssertSuccess(expander, expectedSign < 0, $"$([MSBuild]::VersionLessThan('{a}', '{b}'))");
             AssertSuccess(expander, expectedSign <= 0, $"$([MSBuild]::VersionLessThanOrEquals('{a}', '{b}'))");
             AssertSuccess(expander, expectedSign == 0, $"$([MSBuild]::VersionEquals('{a}', '{b}'))");
             AssertSuccess(expander, expectedSign != 0, $"$([MSBuild]::VersionNotEquals('{a}', '{b}'))");
@@ -3538,8 +3483,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(String.Empty, result);
         }
 
-#if FEATURE_WIN32_REGISTRY
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void PropertyFunctionGetRegitryValue()
         {
             try
@@ -3563,6 +3509,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void PropertyFunctionGetRegitryValueDefault()
         {
             try
@@ -3586,6 +3534,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void PropertyFunctionGetRegistryValueFromView1()
         {
             try
@@ -3609,6 +3559,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SupportedOSPlatform("windows")]
         public void PropertyFunctionGetRegistryValueFromView2()
         {
             try
@@ -3630,7 +3582,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Registry.CurrentUser.DeleteSubKey(@"Software\Microsoft\MSBuild_test");
             }
         }
-#endif
 
         /// <summary>
         /// Expand a property function that references item metadata
@@ -3713,6 +3664,44 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
+        [Theory]
+        [InlineData("easycase")]
+        [InlineData("")]
+        [InlineData("\"\n()\tsdfIR$%#*;==")]
+        public void TestBase64Conversion(string testCase)
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new();
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new(pg, FileSystems.Default);
+            string intermediate = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertToBase64('{testCase}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
+            intermediate.Trim('=').All(c => char.IsLetterOrDigit(c) || c == '+' || c == '/').ShouldBeTrue();
+            string original = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertFromBase64('{intermediate}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
+            original.ShouldBe(testCase);
+        }
+
+        [Theory]
+        [InlineData("easycase", "ZWFzeWNhc2U=")]
+        [InlineData("", "")]
+        [InlineData("\"\n()\tsdfIR$%#*;==", "IgooKQlzZGZJUiQlIyo7PT0=")]
+        public void TestExplicitToBase64Conversion(string plaintext, string base64)
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new();
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new(pg, FileSystems.Default);
+            string intermediate = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertToBase64('{plaintext}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
+            intermediate.ShouldBe(base64);
+        }
+
+        [Theory]
+        [InlineData("easycase", "ZWFzeWNhc2U=")]
+        [InlineData("", "")]
+        [InlineData("\"\n()\tsdfIR$%#*;==", "IgooKQlzZGZJUiQlIyo7PT0=")]
+        public void TestExplicitFromBase64Conversion(string plaintext, string base64)
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new();
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new(pg, FileSystems.Default);
+            string original = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertFromBase64('{base64}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
+            original.ShouldBe(plaintext);
+        }
+
         /// <summary>
         /// A whole bunch error check tests
         /// </summary>
@@ -3792,7 +3781,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 new string[] {"$(Reg:AAA)", ""}
                                    };
 
-            var errorTests = new List<string>{
+            var errorTests = new List<string> {
             "$(input[)",
             "$(input.ToString()])",
             "$(input.ToString()[)",
@@ -3805,25 +3794,25 @@ namespace Microsoft.Build.UnitTests.Evaluation
             "$(listofthings.Split(';')[-1])",
             "$([]::())",
                                                       @"
- 
+
 $(
- 
+
 $(
- 
+
 [System.IO]::Path.GetDirectory('c:\foo\bar\baz.txt')
- 
+
 ).Substring(
- 
+
 '$([System.IO]::Path.GetPathRoot(
- 
+
 '$([System.IO]::Path.GetDirectory('c:\foo\bar\baz.txt'))'
- 
+
 ).Length)'
- 
- 
- 
+
+
+
 )
- 
+
 ",
                 "$([Microsoft.VisualBasic.FileIO.FileSystem]::CurrentDirectory)", // not allowed
                 "$(e.Length..ToString())",
@@ -3930,18 +3919,16 @@ $(
             }
 #endif
 
-#if FEATURE_WIN32_REGISTRY
             if (NativeMethodsShared.IsWindows)
             {
                 errorTests.Add("$(Registry:X)");
             }
-#endif
 
             if (!NativeMethodsShared.IsWindows)
             {
                 // If no registry or not running on windows, this gets expanded to the empty string
                 // example: xplat build running on OSX
-                validTests.Add(new string[]{"$(Registry:X)", ""});
+                validTests.Add(new string[] { "$(Registry:X)", "" });
             }
 
             string result;
@@ -4044,6 +4031,12 @@ $(
             TestPropertyFunction("$(prop.LastIndexOf('y'))", "prop", "x-x-y-y-y-z", "8");
 
             TestPropertyFunction("$(prop.LastIndexOf('y', 7))", "prop", "x-x-y-y-y-z", "6");
+        }
+
+        [Fact]
+        public void PropertyFunctionStringLastIndexOfAny()
+        {
+            TestPropertyFunction("$(prop.LastIndexOfAny('xy'))", "prop", "x-x-y-y-y-z", "8");
         }
 
         [Fact]
@@ -4211,7 +4204,7 @@ $(
             TestPropertyFunction("$(prop.TrimEnd('a'))", "prop", "netaa", "net");
         }
 
-        // https://github.com/Microsoft/msbuild/issues/2882
+        // https://github.com/dotnet/msbuild/issues/2882
         [Fact]
         public void PropertyFunctionMathMaxOverflow()
         {
@@ -4266,7 +4259,7 @@ $(
         [Fact]
         public void PropertyFunctionMSBuildDivide()
         {
-            TestPropertyFunction("$([MSBuild]::Divide($(X), 10000))", "X", "65536", "6.5536");
+            TestPropertyFunction("$([MSBuild]::Divide($(X), 10000))", "X", "65536", (6.5536).ToString());
         }
 
         [Fact]

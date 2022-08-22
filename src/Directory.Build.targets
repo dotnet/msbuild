@@ -1,4 +1,4 @@
-﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build">
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -55,6 +55,16 @@
     <PackageReference Include="xunit.core" />
     <PackageReference Include="xunit.assert" />
 
+    <!-- Force updated reference to this package because xunit and shouldly
+         are netstandard1.6 and transitively bring in an old reference -->
+    <PackageReference Include="System.Security.Cryptography.X509Certificates" />
+
+    <!-- As of 17.3, one TF of Microsoft.NET.Test.Sdk depends on Newtonsoft.Json
+         9.0.1, causing it to be downloaded and flagged by component governance -->
+    <PackageReference Include="Newtonsoft.Json" />
+
+    <PackageReference Include="Microsoft.DotNet.XUnitExtensions" />
+
     <!-- Don't localize unit test projects -->
     <PackageReference Remove="XliffTasks" />
 
@@ -67,26 +77,26 @@
          PrivateAssets to keep this reference (auto-added when targeting netcoreapp*)
          from making it into our NuGet packages. -->
     <PackageReference Update="Microsoft.NETCore.App" PrivateAssets="All" />
+
+    <!-- Configure analyzer to forbid certain API calls -->
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
   </ItemGroup>
 
-  <!-- GenAPI settings -->
-  <PropertyGroup Condition="'$(MonoBuild)' == 'true'">
-    <!-- Disable reference assembly source when building for Mono, as some APIs are excluded when compiling for Mono -->
-    <GenerateReferenceAssemblySource>false</GenerateReferenceAssemblySource>
+  <PropertyGroup Condition="'$(GenerateReferenceAssemblySource)' == 'true'">
+    <PublicApiTfm Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETFramework'">net</PublicApiTfm>
+    <PublicApiTfm Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETFramework' and $([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')) == '3.5'">net35</PublicApiTfm>
+    <PublicApiTfm Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETStandard'">netstandard</PublicApiTfm>
+    <PublicApiTfm Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETCoreApp'">netstandard</PublicApiTfm>
+
+    <GenAPIFolderPath>$(RepoRoot)ref\$(GenAPIAssemblyName)\$(GenAPIShortFrameworkIdentifier)\</GenAPIFolderPath>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(GenerateReferenceAssemblySource)' == 'true' and $([MSBuild]::IsOSPlatform('windows'))">
-    <GenAPIAssemblyName>$(AssemblyName)</GenAPIAssemblyName>
-    <GenAPIAssemblyName Condition="'$(GenAPIAssemblyName)' == ''">$(MSBuildProjectName)</GenAPIAssemblyName>
-    <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('net4'))">net</GenAPIShortFrameworkIdentifier>
-    <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('netstandard'))">netstandard</GenAPIShortFrameworkIdentifier>
-    <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('netcoreapp'))">netstandard</GenAPIShortFrameworkIdentifier>
-    <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('net5'))">netstandard</GenAPIShortFrameworkIdentifier>
-    <GenAPITargetPath>$(RepoRoot)ref\$(GenAPIAssemblyName)\$(GenAPIShortFrameworkIdentifier)\$(GenAPIAssemblyName).cs</GenAPITargetPath>
-  </PropertyGroup>
+  <ItemGroup Condition="'$(GenerateReferenceAssemblySource)' == 'true'">
+    <!-- Ensure API stability for shipping packages -->
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" Condition="'$(DotNetBuildFromSource)' != 'true'" />
 
-  <ItemGroup Condition="'$(GenerateReferenceAssemblySource)' == 'true' and $([MSBuild]::IsOSPlatform('windows'))">
-    <PackageReference Include="Microsoft.DotNet.GenAPI" PrivateAssets="All" />
+    <AdditionalFiles Include="PublicAPI/$(PublicApiTfm)/PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="PublicAPI/$(PublicApiTfm)/PublicAPI.Unshipped.txt" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsUnitTestProject)' == 'true' And '$(TargetFrameworkIdentifier)' != '.NETFramework' ">
@@ -100,8 +110,18 @@
              Visible="false" Pack="false"/>
   </ItemGroup>
 
+  <Target Name="SetResourceProperties" BeforeTargets="_GetEmbeddedResourcesWithSourceGeneration">
+    <ItemGroup>
+      <EmbeddedResource Update="@(EmbeddedResource)" Condition="'%(EmbeddedResource.NuGetPackageId)' == 'Microsoft.CodeAnalysis.Collections' AND '%(FileName)' == 'Strings'">
+        <GenerateSource>true</GenerateSource>
+        <Generator>MSBuild:_GenerateResxSource</Generator>
+        <ClassName>Microsoft.CodeAnalysis.Collections.SR</ClassName>
+      </EmbeddedResource>
+    </ItemGroup>
+  </Target>
+
   <!-- Override in-box GenerateSatelliteAssemblies, as we are using CoreGenerateSatelliteAssemblies instead.
-       With https://github.com/Microsoft/msbuild/pull/2726 this is no longer necessary, but that change is not
+       With https://github.com/dotnet/msbuild/pull/2726 this is no longer necessary, but that change is not
        in VS 15.5 (which is what we use for Jenkins right now). -->
   <Target Name="GenerateSatelliteAssemblies" />
 

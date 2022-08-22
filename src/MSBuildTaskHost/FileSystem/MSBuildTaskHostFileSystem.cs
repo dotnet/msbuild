@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared.FileSystem
 {
     /// <summary>
@@ -16,7 +18,7 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public static MSBuildTaskHostFileSystem Singleton() => Instance;
 
-        public bool DirectoryEntryExists(string path)
+        public bool FileOrDirectoryExists(string path)
         {
             return NativeMethodsShared.FileOrDirectoryExists(path);
         }

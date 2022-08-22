@@ -17,6 +17,8 @@ using Xunit;
 using StringToolsNet35::Microsoft.NET.StringTools;
 #endif
 
+#nullable disable
+
 namespace Microsoft.NET.StringTools.Tests
 {
     public class WeakStringCache_Tests : IDisposable
@@ -84,8 +86,8 @@ namespace Microsoft.NET.StringTools.Tests
 
             for (int i = 0; i < numberOfStrings; i++)
             {
-                string strPart2 = "1" + String.Concat(Enumerable.Repeat("4428939786", i));
-                hashCodes[i] = AddString("Random string ", strPart2, (string cachedString) =>
+                string strPart2 = string.Concat(Enumerable.Repeat("100570862200", i + 2));
+                hashCodes[i] = AddString(string.Empty, strPart2, (string cachedString) =>
                 {
                     _cache.GetDebugInfo().ShouldBe(new WeakStringCache.DebugInfo()
                     {

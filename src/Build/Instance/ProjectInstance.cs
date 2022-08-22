@@ -29,6 +29,8 @@ using ObjectModel = System.Collections.ObjectModel;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     using Utilities = Microsoft.Build.Internal.Utilities;
@@ -469,6 +471,21 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="ProjectInstance"/> class directly.
+        /// No intermediate Project object is created.
+        /// This is ideal if the project is simply going to be built, and not displayed or edited.
+        /// Global properties may be null.
+        /// Tools version may be null.
+        /// Used by SolutionProjectGenerator so that it can explicitly pass the vsVersionFromSolution in for use in
+        /// determining the sub-toolset version.
+        /// </summary>
+        internal ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, ILoggingService loggingService, int visualStudioVersionFromSolution, ProjectCollection projectCollection, ISdkResolverService sdkResolverService, int submissionId)
+        {
+            BuildEventContext buildEventContext = new BuildEventContext(0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+            Initialize(xml, globalProperties, toolsVersion, null, visualStudioVersionFromSolution, new BuildParameters(projectCollection), loggingService, buildEventContext, sdkResolverService, submissionId);
+        }
+
+        /// <summary>
         /// Creates a mutable ProjectInstance directly, using the specified logging service.
         /// Assumes the project path is already normalized.
         /// Used by the RequestBuilder.
@@ -564,8 +581,7 @@ namespace Microsoft.Build.Execution
             _hostServices = that._hostServices;
             _isImmutable = isImmutable;
             _evaluationId = that.EvaluationId;
-
-            TranslateEntireState = that.TranslateEntireState;
+            _translateEntireState = that._translateEntireState;
 
             if (filter == null)
             {
@@ -849,23 +865,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public bool TranslateEntireState
         {
-            get
-            {
-                return Traits.Instance.EscapeHatches.ProjectInstanceTranslation switch
-                {
-                    EscapeHatches.ProjectInstanceTranslationMode.Full => true,
-                    EscapeHatches.ProjectInstanceTranslationMode.Partial => false,
-                    _ => _translateEntireState,
-                };
-            }
-
-            set
-            {
-                if (Traits.Instance.EscapeHatches.ProjectInstanceTranslation == null)
-                {
-                    _translateEntireState = value;
-                }
-            }
+            get => _translateEntireState;
+            set => _translateEntireState = value;
         }
 
         /// <summary>
@@ -899,8 +900,7 @@ namespace Microsoft.Build.Execution
         public string FullPath
         {
             [DebuggerStepThrough]
-            get
-            { return _projectFileLocation.File; }
+            get => _projectFileLocation?.File ?? string.Empty;
         }
 
         /// <summary>
@@ -981,8 +981,14 @@ namespace Microsoft.Build.Execution
         {
             [DebuggerStepThrough]
             get
-            { return TaskRegistry; }
-            set { TaskRegistry = value; }
+            {
+                return TaskRegistry;
+            }
+
+            set
+            {
+                TaskRegistry = value;
+            }
         }
 
         /// <summary>
@@ -1089,8 +1095,14 @@ namespace Microsoft.Build.Execution
         {
             [DebuggerStepThrough]
             get
-            { return InitialTargets; }
-            set { InitialTargets = value; }
+            {
+                return InitialTargets;
+            }
+
+            set
+            {
+                InitialTargets = value;
+            }
         }
 
         /// <summary>
@@ -1101,8 +1113,14 @@ namespace Microsoft.Build.Execution
         {
             [DebuggerStepThrough]
             get
-            { return DefaultTargets; }
-            set { DefaultTargets = value; }
+            {
+                return DefaultTargets;
+            }
+
+            set
+            {
+                DefaultTargets = value;
+            }
         }
 
         /// <summary>
@@ -1364,7 +1382,7 @@ namespace Microsoft.Build.Execution
         /// Only called during evaluation, so does not check for immutability.
         /// </summary>
         void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.
-            InitializeForEvaluation(IToolsetProvider toolsetProvider, IFileSystem fileSystem)
+            InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext)
         {
             // All been done in the constructor.  We don't allow re-evaluation of project instances.
         }
@@ -1472,10 +1490,10 @@ namespace Microsoft.Build.Execution
         /// immutable if we are immutable.
         /// Only called during evaluation, so does not check for immutability.
         /// </summary>
-        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable)
+        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable, LoggingContext loggingContext)
         {
             // Mutability not verified as this is being populated during evaluation
-            ProjectPropertyInstance property = ProjectPropertyInstance.Create(name, evaluatedValueEscaped, mayBeReserved, _isImmutable);
+            ProjectPropertyInstance property = ProjectPropertyInstance.Create(name, evaluatedValueEscaped, mayBeReserved, _isImmutable, isEnvironmentVariable, loggingContext);
             _properties.Set(property);
             return property;
         }
@@ -2019,15 +2037,42 @@ namespace Microsoft.Build.Execution
         /// </summary>
         void ITranslatable.Translate(ITranslator translator)
         {
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                // When serializing into stream apply Traits.Instance.EscapeHatches.ProjectInstanceTranslation if defined.
+                MaybeForceTranslateEntireStateMode();
+            }
+
             translator.Translate(ref _translateEntireState);
 
-            if (TranslateEntireState)
+            if (_translateEntireState)
             {
                 TranslateAllState(translator);
             }
             else
             {
                 TranslateMinimalState(translator);
+            }
+        }
+
+        private void MaybeForceTranslateEntireStateMode()
+        {
+            var forcedProjectInstanceTranslationMode = Traits.Instance.EscapeHatches.ProjectInstanceTranslation;
+            if (forcedProjectInstanceTranslationMode != null)
+            {
+                switch (forcedProjectInstanceTranslationMode)
+                {
+                    case EscapeHatches.ProjectInstanceTranslationMode.Full:
+                        _translateEntireState = true;
+                        break;
+                    case EscapeHatches.ProjectInstanceTranslationMode.Partial:
+                        _translateEntireState = false;
+                        break;
+                    default:
+                        // if EscapeHatches.ProjectInstanceTranslation has an unexpected value, do not force TranslateEntireStateMode.
+                        // Just leave it as is.
+                        break;
+                }
             }
         }
 
@@ -2567,19 +2612,8 @@ namespace Microsoft.Build.Execution
                         clearedVariables.Add(environmentVariable);
                     }
                 }
-#if (!STANDALONEBUILD)
-                wrapperProjectXml = Microsoft.Build.BuildEngine.SolutionWrapperProject.Generate(projectFile, toolsVersion, projectBuildEventContext);
-#else
                 wrapperProjectXml = "";
-#endif
             }
-#if (!STANDALONEBUILD)
-            catch (Microsoft.Build.BuildEngine.InvalidProjectFileException ex)
-            {
-                // Whenever calling the old engine, we must translate its exception types into ours
-                throw new InvalidProjectFileException(ex.ProjectFile, ex.LineNumber, ex.ColumnNumber, ex.EndLineNumber, ex.EndColumnNumber, ex.Message, ex.ErrorSubcategory, ex.ErrorCode, ex.HelpKeyword, ex.InnerException);
-            }
-#endif
             finally
             {
                 // Set the cleared environment variables back to what they were.
@@ -2751,6 +2785,7 @@ namespace Microsoft.Build.Execution
 
             Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Evaluate(
                 this,
+                null,
                 xml,
                 projectLoadSettings ?? buildParameters.ProjectLoadSettings, /* Use override ProjectLoadSettings if specified */
                 buildParameters.MaxNodeCount,
@@ -2801,7 +2836,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void CreateImportsSnapshot(IList<ResolvedImport> importClosure, IList<ResolvedImport> importClosureWithDuplicates)
         {
-            _importPaths = new List<string>(importClosure.Count - 1 /* outer project */);
+            _importPaths = new List<string>(Math.Max(0, importClosure.Count - 1) /* outer project */);
             foreach (var resolvedImport in importClosure)
             {
                 // Exclude outer project itself
@@ -2813,7 +2848,7 @@ namespace Microsoft.Build.Execution
 
             ImportPaths = _importPaths.AsReadOnly();
 
-            _importPathsIncludingDuplicates = new List<string>(importClosureWithDuplicates.Count - 1 /* outer project */);
+            _importPathsIncludingDuplicates = new List<string>(Math.Max(0, importClosureWithDuplicates.Count - 1) /* outer project */);
             foreach (var resolvedImport in importClosureWithDuplicates)
             {
                 // Exclude outer project itself
@@ -2898,7 +2933,7 @@ namespace Microsoft.Build.Execution
 
                 if (item.DirectMetadata != null)
                 {
-                    directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(item.DirectMetadataCount);
+                    directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
                     foreach (ProjectMetadata directMetadatum in item.DirectMetadata)
                     {
                         ProjectMetadataInstance directMetadatumInstance = new ProjectMetadataInstance(directMetadatum);
@@ -2946,7 +2981,7 @@ namespace Microsoft.Build.Execution
             {
                 // Allow reserved property names, since this is how they are added to the project instance. 
                 // The caller has prevented users setting them themselves.
-                ProjectPropertyInstance instance = ProjectPropertyInstance.Create(property.Name, ((IProperty)property).EvaluatedValueEscaped, true /* MAY be reserved name */, isImmutable);
+                ProjectPropertyInstance instance = ProjectPropertyInstance.Create(property.Name, ((IProperty)property).EvaluatedValueEscaped, true /* MAY be reserved name */, isImmutable, property.IsEnvironmentProperty);
                 _properties.Set(instance);
             }
         }

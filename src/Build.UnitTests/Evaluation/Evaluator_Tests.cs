@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 
 using Microsoft.Build.Collections;
@@ -21,6 +22,8 @@ using Shouldly;
 using Xunit;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
@@ -629,7 +632,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                      <PropertyGroup>
                                          <Foo>$(baz) $(bar)</Foo>
                                          <bar>Something</bar>
-                                         <baz>Something</baz>   
+                                         <baz>Something</baz>
                                      </PropertyGroup>
 
                                   <Target Name=""Test""/>
@@ -675,7 +678,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                          <Foo1>$(baz) $(bar)</Foo1>
                                          <Foo>$(baz) $(bar)</Foo>
                                          <bar>Something</bar>
-                                         <baz>Something</baz>   
+                                         <baz>Something</baz>
                                      </PropertyGroup>
 
                                   <Target Name=""Test""/>
@@ -1860,12 +1863,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         <Choose>
                           <When Condition='false'>
                             <ItemGroup>
-                              <i Include='i4'/>                     
+                              <i Include='i4'/>
                             </ItemGroup>
                           </When>
                           <When Condition='true'>
                             <ItemGroup>
-                              <i Include='i1'>                     
+                              <i Include='i1'>
                                 <m>m2</m>
                               </i>
                             </ItemGroup>
@@ -1876,7 +1879,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                           <When Condition='false'/>
                           <Otherwise>
                             <ItemGroup>
-                              <i Include='i5'/>                     
+                              <i Include='i5'/>
                             </ItemGroup>
                           </Otherwise>
                         </Choose>
@@ -1886,7 +1889,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-                Assert.Equal(6, project.AllEvaluatedItems.Count());
+                Assert.Equal(6, project.AllEvaluatedItems.Count);
                 Assert.Equal("i1", project.AllEvaluatedItems.ElementAt(0).EvaluatedInclude);
                 Assert.Equal(String.Empty, project.AllEvaluatedItems.ElementAt(0).GetMetadataValue("m"));
                 Assert.Equal("j1", project.AllEvaluatedItems.ElementAt(1).EvaluatedInclude);
@@ -1902,12 +1905,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 project.AddItem("i", "i7");
                 project.RemoveItem(project.AllEvaluatedItems.ElementAt(1));
 
-                Assert.Equal(6, project.AllEvaluatedItems.Count());
+                Assert.Equal(6, project.AllEvaluatedItems.Count);
 
                 project.MarkDirty();
                 project.ReevaluateIfNecessary();
 
-                Assert.Equal(7, project.AllEvaluatedItems.Count());
+                Assert.Equal(7, project.AllEvaluatedItems.Count);
             }
             finally
             {
@@ -2002,15 +2005,15 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-            int initial = project.AllEvaluatedProperties.Count();
+            int initial = project.AllEvaluatedProperties.Count;
 
             project.SetProperty("p", "1");
 
-            Assert.Equal(initial, project.AllEvaluatedProperties.Count());
+            Assert.Equal(initial, project.AllEvaluatedProperties.Count);
 
             project.ReevaluateIfNecessary();
 
-            Assert.Equal(initial + 1, project.AllEvaluatedProperties.Count());
+            Assert.Equal(initial + 1, project.AllEvaluatedProperties.Count);
         }
 
         /// <summary>
@@ -2038,13 +2041,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-            Assert.Equal(4, project.AllEvaluatedItemDefinitionMetadata.Count());
+            Assert.Equal(4, project.AllEvaluatedItemDefinitionMetadata.Count);
 
             Assert.Equal("2", project.AllEvaluatedItemDefinitionMetadata.ElementAt(1).EvaluatedValue);
             Assert.Equal("1;2", project.AllEvaluatedItemDefinitionMetadata.ElementAt(3).EvaluatedValue);
 
             // Verify lists are cleared on reevaluation
-            Assert.Equal(4, project.AllEvaluatedItemDefinitionMetadata.Count());
+            Assert.Equal(4, project.AllEvaluatedItemDefinitionMetadata.Count);
         }
 
         /// <summary>
@@ -2587,6 +2590,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Project project = new Project(xml);
 
             string msbuildVersionProperty = project.GetPropertyValue("MSBuildVersion");
+            string msbuildFileVersionProperty = project.GetPropertyValue("MSBuildFileVersion");
+            string msbuildSemanticVersionProperty = project.GetPropertyValue("MSBuildSemanticVersion");
 
             Version.TryParse(msbuildVersionProperty, out Version msbuildVersionAsVersion).ShouldBeTrue();
 
@@ -2596,9 +2601,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
             // Version parses missing elements into -1, and this property should be Major.Minor.Patch only
             msbuildVersionAsVersion.Revision.ShouldBe(-1);
 
+            msbuildFileVersionProperty.ShouldBe(ProjectCollection.Version.ToString());
             ProjectCollection.Version.ToString().ShouldStartWith(msbuildVersionProperty,
                 "ProjectCollection.Version should match the property MSBuildVersion, but can contain another version part");
 
+            msbuildSemanticVersionProperty.ShouldBe(ProjectCollection.DisplayVersion);
             ProjectCollection.DisplayVersion.ShouldStartWith(msbuildVersionProperty,
                 "DisplayVersion is semver2 while MSBuildVersion is Major.Minor.Build but should be a prefix match");
         }
@@ -3666,7 +3673,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// based on the default sub-toolset version -- base toolset if Dev10 is installed, or lowest (numerically
         /// sorted) toolset if it's not.
         /// </summary>
-        [Fact(Skip = "https://github.com/microsoft/msbuild/issues/4363")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/4363")]
         public void VerifyDefaultSubToolsetPropertiesAreEvaluated()
         {
             if (NativeMethodsShared.IsUnixLike)
@@ -4237,7 +4244,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// If DTD processing is disabled, the server should not receive any connection request.
         /// </summary>
         [Fact]
-        public void VerifyDTDProcessingIsDisabled2()
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7623")]
+        public async void VerifyDTDProcessingIsDisabled2()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-8""?>
                                 <!DOCTYPE Project [
@@ -4252,9 +4260,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                     </Target>
                                 </Project>");
 
-            string projectDirectory = Path.Combine(Path.GetTempPath(), "VerifyDTDProcessingIsDisabled");
+            string projectDirectory = Path.Combine(Path.GetTempPath(), "VerifyDTDProcessingIsDisabled2");
 
-            Thread t = new Thread(HttpServerThread);
+            Thread t = new(HttpServerThread);
             t.IsBackground = true;
             t.Start();
 
@@ -4262,7 +4270,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 if (Directory.Exists(projectDirectory))
                 {
-                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
+                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, recursive: true);
                 }
 
                 Directory.CreateDirectory(projectDirectory);
@@ -4271,18 +4279,20 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 File.WriteAllText(projectFilename, projectContents);
 
-                Project project = new Project(projectFilename);
+                Project project = new(projectFilename);
 
-                MockLogger logger = new MockLogger();
+                MockLogger logger = new();
                 project.Build(logger);
             }
             finally
             {
-                Thread.Sleep(500);
+                await Task.Delay(500);
+                t.IsAlive.ShouldBeTrue();
+                t.Abort();
+                await Task.Delay(500);
 
                 // Expect server to be alive and hung up unless a request originating from DTD processing was sent
                 _httpListenerThreadException.ShouldBeNull();
-                t.IsAlive.ShouldBeTrue();
             }
         }
 #endif
@@ -4333,14 +4343,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Test regression reported at https://github.com/Microsoft/msbuild/issues/2228
+        /// Test regression reported at https://github.com/dotnet/msbuild/issues/2228
         /// </summary>
         [Fact]
         public void ThrownInvalidProjectExceptionProperlyHandled()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"
                              <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace'>
-                                
+
                                 <Import Project=""import.proj"" />
 
                             </Project>");
@@ -4392,10 +4402,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Tests that an import, target, or task with a condition that contains an error but is short-circuited does not fail the build.  This can happen when you have a condition like:
         /// 'true' == 'false' AND '$([MSBuild]::GetDirectoryNameOfFileAbove($(NonExistentProperty), init.props))' != ''
-        /// 
+        ///
         /// The first condition is false so the second condition is not evaluated.  But in some cases we double evaluate the condition to log it.  The second evaluation will fail because it evaluates the whole string.
-        /// 
-        /// https://github.com/Microsoft/msbuild/issues/2259
+        ///
+        /// https://github.com/dotnet/msbuild/issues/2259
         /// </summary>
         [Theory]
         [InlineData("<Target Name=\"Build\" /><Import Project=\"$(NonExistentProperty)\" Condition=\"\'true\' == \'false\' And \'$([MSBuild]::GetDirectoryNameOfFileAbove($(NonExistentProperty), init.props))\' != \'\'\" />")]
@@ -4512,7 +4522,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void VerifyPropertyTrackingLoggingDefault()
         {
-            // Having nothing defined should default to nothing being logged.
+            // Having just environment variables defined should default to nothing being logged except one environment variable read.
             this.VerifyPropertyTrackingLoggingScenario(
                 null,
                 logger =>
@@ -4525,7 +4535,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldBeEmpty();
+                        .ShouldHaveSingleItem()
+                        .EnvironmentVariableName
+                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents
@@ -4554,7 +4566,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldBeEmpty();
+                        .ShouldHaveSingleItem()
+                        .EnvironmentVariableName
+                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents
@@ -4583,7 +4597,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldBeEmpty();
+                        .ShouldHaveSingleItem()
+                        .EnvironmentVariableName
+                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents
@@ -4612,7 +4628,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldBeEmpty();
+                        .ShouldHaveSingleItem()
+                        .EnvironmentVariableName
+                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents
@@ -4696,7 +4714,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldBeEmpty();
+                        .ShouldHaveSingleItem()
+                        .EnvironmentVariableName
+                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents
@@ -4763,6 +4783,23 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     propertyInitialValueMap["Prop2"].PropertySource.ShouldBe("Xml");
                     propertyInitialValueMap["Prop2"].PropertyValue.ShouldBe("Value1");
                 });
+        }
+
+        [Fact]
+        public void VerifyGetTypeEvaluationBlocked()
+        {
+            string projectContents = ObjectModelHelpers.CleanupFileContents(@"
+                             <Project>
+                               <PropertyGroup>
+                                 <TestProp>$(MSBuildRuntimeType.GetType())</TestProp>
+                               </PropertyGroup>
+                             </Project>");
+
+            ProjectCollection fakeProjectCollection =
+                GetProjectCollectionWithFakeToolset(null /* no global properties */);
+
+            Should.Throw<InvalidProjectFileException>(() =>
+                new Project(XmlReader.Create(new StringReader(projectContents)), null, "Fake", fakeProjectCollection));
         }
 
         private void VerifyPropertyTrackingLoggingScenario(string envVarValue, Action<MockLogger> loggerEvaluatorAction)

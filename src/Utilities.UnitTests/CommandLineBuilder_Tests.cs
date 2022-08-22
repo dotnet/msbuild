@@ -2,11 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Globalization;
 using System.IO;
+using System.Threading;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -50,6 +54,24 @@ namespace Microsoft.Build.UnitTests
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchIfNotNull("/animal:", "dog and pony");
             c.ShouldBe("/animal:\"dog and pony\"");
+        }
+
+        [Fact]
+        public void AppendSwitchWithIShouldNotNeedQuotingInTurkishLocale()
+        {
+            var currentCulture = Thread.CurrentThread.CurrentCulture;
+            try
+            {
+                Thread.CurrentThread.CurrentCulture = new CultureInfo("tr-TR"); // Turkish
+
+                CommandLineBuilder c = new CommandLineBuilder();
+                c.AppendSwitchIfNotNull("/i:", "iI");
+                c.ShouldBe("/i:iI");
+            }
+            finally
+            {
+                Thread.CurrentThread.CurrentCulture = currentCulture;
+            }
         }
 
         /// <summary>
@@ -412,7 +434,7 @@ namespace Microsoft.Build.UnitTests
         public void AppendSwitchWithOddNumberOfLiteralQuotesInParameter()
         {
             CommandLineBuilder c = new CommandLineBuilder();
-            c.AppendSwitchIfNotNull("/D", @"A='""'");     //   /DA='"'
+            c.AppendSwitchIfNotNull("/D", @"A='""'");     // /DA='"'
             c.ShouldBe(@"/D""A='\""'"""); //   /D"A='\"'"
         }
 
@@ -465,7 +487,6 @@ namespace Microsoft.Build.UnitTests
             }
            );
         }
-        
     }
 
     internal static class CommandLineBuilderExtensionMethods

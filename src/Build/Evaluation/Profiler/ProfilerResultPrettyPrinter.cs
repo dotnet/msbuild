@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using Microsoft.Build.Framework.Profiler;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

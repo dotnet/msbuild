@@ -2,19 +2,23 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Text;
+
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using System.Collections;
-using System.Globalization;
-using System.IO;
 
 using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
-using Microsoft.Build.Exceptions;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -24,37 +28,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
     internal abstract class BaseConsoleLogger : INodeLogger
     {
-        /// <summary>
-        /// When set, we'll try reading background color.
-        /// </summary>
-        private static bool _supportReadingBackgroundColor = true;
-
         #region Properties
-
-        /// <summary>
-        /// Some platforms do not allow getting current background color. There
-        /// is not way to check, but not-supported exception is thrown. Assume
-        /// black, but don't crash.
-        /// </summary>
-        internal static ConsoleColor BackgroundColor
-        {
-            get
-            {
-                if (_supportReadingBackgroundColor)
-                {
-                    try
-                    {
-                        return Console.BackgroundColor;
-                    }
-                    catch (PlatformNotSupportedException)
-                    {
-                        _supportReadingBackgroundColor = false;
-                    }
-                }
-
-                return ConsoleColor.Black;
-            }
-        }
 
         /// <summary>
         /// Gets or sets the level of detail to show in the event log.
@@ -119,6 +93,10 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <remarks>Uses CurrentCulture for display purposes</remarks>
         internal class DictionaryEntryKeyComparer : IComparer<DictionaryEntry>
         {
+            public static DictionaryEntryKeyComparer Instance { get; } = new();
+
+            private DictionaryEntryKeyComparer() { }
+
             public int Compare(DictionaryEntry a, DictionaryEntry b)
             {
                 return string.Compare((string) a.Key, (string) b.Key, StringComparison.CurrentCultureIgnoreCase);
@@ -310,16 +288,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (NativeMethodsShared.IsWindows)
             {
-                // Get the std out handle
-                IntPtr stdHandle = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
-
-                if (stdHandle != NativeMethods.InvalidHandle)
-                {
-                    uint fileType = NativeMethodsShared.GetFileType(stdHandle);
-
-                    // The std out is a char type(LPT or Console)
-                    runningWithCharacterFileType = (fileType == NativeMethodsShared.FILE_TYPE_CHAR);
-                }
+                runningWithCharacterFileType = ConsoleConfiguration.OutputIsScreen;
             }
         }
 
@@ -330,13 +299,40 @@ namespace Microsoft.Build.BackEnd.Logging
         internal bool IsVerbosityAtLeast(LoggerVerbosity checkVerbosity) => Verbosity >= checkVerbosity;
 
         /// <summary>
+        /// Returns the minimum logger verbosity required to log a message with the given importance.
+        /// </summary>
+        /// <param name="importance">The message importance.</param>
+        /// <param name="lightenText">True if the message should be rendered using lighter colored text.</param>
+        /// <returns>The logger verbosity required to log a message of the given <paramref name="importance"/>.</returns>
+        internal static LoggerVerbosity ImportanceToMinimumVerbosity(MessageImportance importance, out bool lightenText)
+        {
+            switch (importance)
+            {
+                case MessageImportance.High:
+                    lightenText = false;
+                    return LoggerVerbosity.Minimal;
+                case MessageImportance.Normal:
+                    lightenText = true;
+                    return LoggerVerbosity.Normal;
+                case MessageImportance.Low:
+                    lightenText = true;
+                    return LoggerVerbosity.Detailed;
+
+                default:
+                    ErrorUtilities.ThrowInternalError("Impossible");
+                    lightenText = false;
+                    return LoggerVerbosity.Detailed;
+            }
+        }
+
+        /// <summary>
         /// Sets foreground color to color specified
         /// </summary>
         internal static void SetColor(ConsoleColor c)
         {
             try
             {
-                Console.ForegroundColor = TransformColor(c, BackgroundColor);
+                Console.ForegroundColor = TransformColor(c, ConsoleConfiguration.BackgroundColor);
             }
             catch (IOException)
             {
@@ -410,7 +406,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="background">current background</param>
         internal static ConsoleColor TransformColor(ConsoleColor foreground, ConsoleColor background)
         {
-            ConsoleColor result = foreground; //typically do nothing ...
+            ConsoleColor result = foreground; // typically do nothing ...
 
             if (foreground == background)
             {
@@ -449,7 +445,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             try
             {
-                ConsoleColor c = BackgroundColor;
+                ConsoleColor c = ConsoleConfiguration.BackgroundColor;
             }
             catch (IOException)
             {
@@ -528,9 +524,9 @@ namespace Microsoft.Build.BackEnd.Logging
             // Gather a sorted list of all the properties.
             var list = new List<DictionaryEntry>(properties.FastCountOrZero());
 
-            Internal.Utilities.EnumerateProperties(properties, kvp => list.Add(new DictionaryEntry(kvp.Key, kvp.Value)));
+            Internal.Utilities.EnumerateProperties(properties, list, static (list, kvp) => list.Add(new DictionaryEntry(kvp.Key, kvp.Value)));
 
-            list.Sort(new DictionaryEntryKeyComparer());
+            list.Sort(DictionaryEntryKeyComparer.Instance);
             return list;
         }
 
@@ -642,40 +638,54 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal virtual void OutputItems(string itemType, ArrayList itemTypeList)
         {
-            // Write each item, one per line
-            bool haveWrittenItemType = false;
-            setColor(ConsoleColor.DarkGray);
-            foreach (ITaskItem item in itemTypeList)
+            WriteItemType(itemType);
+
+            foreach (var item in itemTypeList)
             {
-                if (!haveWrittenItemType)
+                string itemSpec = item switch
                 {
-                    setColor(ConsoleColor.Gray);
-                    WriteLinePretty(itemType);
-                    haveWrittenItemType = true;
-                    setColor(ConsoleColor.DarkGray);
-                }
-                WriteLinePretty("    "  /* indent slightly*/ + item.ItemSpec);
+                    ITaskItem taskItem => taskItem.ItemSpec,
+                    IItem iitem => iitem.EvaluatedInclude,
+                    { } misc => Convert.ToString(misc),
+                    null => "null"
+                };
 
-                IDictionary metadata = item.CloneCustomMetadata();
+                WriteItemSpec(itemSpec);
 
-                foreach (DictionaryEntry metadatum in metadata)
+                var metadata = item switch
                 {
-                    string valueOrError;
-                    try
-                    {
-                        valueOrError = item.GetMetadata(metadatum.Key as string);
-                    }
-                    catch (InvalidProjectFileException e)
-                    {
-                        valueOrError = e.Message;
-                    }
+                    IMetadataContainer metadataContainer => metadataContainer.EnumerateMetadata(),
+                    IItem<ProjectMetadata> iitem => iitem.Metadata?.Select(m => new KeyValuePair<string, string>(m.Name, m.EvaluatedValue)),
+                    _ => null
+                };
 
-                    // A metadatum's "value" is its escaped value, since that's how we represent them internally.
-                    // So unescape before returning to the world at large.
-                    WriteLinePretty("        " + metadatum.Key + " = " + valueOrError);
+                if (metadata != null)
+                {
+                    foreach (var metadatum in metadata)
+                    {
+                        WriteMetadata(metadatum.Key, metadatum.Value);
+                    }
                 }
             }
+
             resetColor();
+        }
+
+        protected virtual void WriteItemType(string itemType)
+        {
+            setColor(ConsoleColor.Gray);
+            WriteLinePretty(itemType);
+            setColor(ConsoleColor.DarkGray);
+        }
+
+        protected virtual void WriteItemSpec(string itemSpec)
+        {
+            WriteLinePretty("    " + itemSpec);
+        }
+
+        protected virtual void WriteMetadata(string name, string value)
+        {
+            WriteLinePretty("        " + name + " = " + value);
         }
 
         /// <summary>
@@ -782,7 +792,11 @@ namespace Microsoft.Build.BackEnd.Logging
             /// </summary>
             internal bool InScope
             {
-                get { return inScope; }
+                get
+                {
+                    return inScope;
+                }
+
                 set
                 {
                     if (!reenteredScope)
@@ -891,7 +905,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         public virtual void Shutdown()
         {
-            // do nothing
+            Traits.LogAllEnvironmentVariables = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES")) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4);
         }
 
         internal abstract void ResetConsoleLoggerState();
@@ -959,6 +973,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 eventSource.MessageRaised += MessageHandler;
                 eventSource.CustomEventRaised += CustomEventHandler;
                 eventSource.StatusEventRaised += StatusEventHandler;
+
+                bool logPropertiesAndItemsAfterEvaluation = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation ?? true;
+                if (logPropertiesAndItemsAfterEvaluation && eventSource is IEventSource4 eventSource4)
+                {
+                    eventSource4.IncludeEvaluationPropertiesAndItems();
+                }
             }
         }
 
@@ -995,6 +1015,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     return true;
                 case "SHOWENVIRONMENT":
                     showEnvironment = true;
+                    Traits.LogAllEnvironmentVariables = true;
                     return true;
                 case "SHOWPROJECTFILE":
                     if (parameterValue == null)

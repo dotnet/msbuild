@@ -7,9 +7,10 @@ using System.Collections.Generic;
 using System.Threading;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.FileSystem;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation.Context
 {
@@ -43,27 +44,22 @@ namespace Microsoft.Build.Evaluation.Context
 
         internal ISdkResolverService SdkResolverService { get; }
         internal IFileSystem FileSystem { get; }
-        internal EngineFileUtilities EngineFileUtilities { get; }
+        internal FileMatcher FileMatcher { get; }
 
         /// <summary>
         /// Key to file entry list. Example usages: cache glob expansion and intermediary directory expansions during glob expansion.
         /// </summary>
         private ConcurrentDictionary<string, IReadOnlyList<string>> FileEntryExpansionCache { get; }
 
-        private EvaluationContext(SharingPolicy policy, IFileSystem fileSystem)
+        private EvaluationContext(SharingPolicy policy, IFileSystem fileSystem, ISdkResolverService sdkResolverService = null,
+            ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache = null)
         {
-            // Unsupported case: isolated context with non null file system.
-            // Isolated means caches aren't reused, but the given file system might cache.
-            ErrorUtilities.VerifyThrowArgument(
-                policy == SharingPolicy.Shared || fileSystem == null,
-                "IsolatedContextDoesNotSupportFileSystem");
-
             Policy = policy;
 
-            SdkResolverService = new CachingSdkResolverService();
-            FileEntryExpansionCache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
+            SdkResolverService = sdkResolverService ?? new CachingSdkResolverService();
+            FileEntryExpansionCache = fileEntryExpansionCache ?? new ConcurrentDictionary<string, IReadOnlyList<string>>();
             FileSystem = fileSystem ?? new CachingFileSystemWrapper(FileSystems.Default);
-            EngineFileUtilities = new EngineFileUtilities(new FileMatcher(FileSystem, FileEntryExpansionCache));
+            FileMatcher = new FileMatcher(FileSystem, FileEntryExpansionCache);
         }
 
         /// <summary>
@@ -89,9 +85,15 @@ namespace Microsoft.Build.Evaluation.Context
         /// </param>
         public static EvaluationContext Create(SharingPolicy policy, MSBuildFileSystemBase fileSystem)
         {
+            // Unsupported case: isolated context with non null file system.
+            // Isolated means caches aren't reused, but the given file system might cache.
+            ErrorUtilities.VerifyThrowArgument(
+                policy == SharingPolicy.Shared || fileSystem == null,
+                "IsolatedContextDoesNotSupportFileSystem");
+
             var context = new EvaluationContext(
                 policy,
-                fileSystem == null ? null : new MSBuildFileSystemAdapter(fileSystem));
+                fileSystem);
 
             TestOnlyHookOnCreate?.Invoke(context);
 
@@ -123,6 +125,20 @@ namespace Microsoft.Build.Evaluation.Context
                     ErrorUtilities.ThrowInternalErrorUnreachable();
                     return null;
             }
+        }
+
+        /// <summary>
+        /// Creates a copy of this <see cref="EvaluationContext"/> with a given <see cref="IFileSystem"/> swapped in.
+        /// </summary>
+        /// <param name="fileSystem">The file system to use by the new evaluation context.</param>
+        /// <returns>The new evaluation context.</returns>
+        internal EvaluationContext ContextWithFileSystem(IFileSystem fileSystem)
+        {
+            var newContext = new EvaluationContext(this.Policy, fileSystem, this.SdkResolverService, this.FileEntryExpansionCache)
+            {
+                _used = 1
+            };
+            return newContext;
         }
     }
 }

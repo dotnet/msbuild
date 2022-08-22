@@ -12,7 +12,6 @@ using System.Runtime.Remoting;
 #endif
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
@@ -21,10 +20,12 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Task = System.Threading.Tasks.Task;
+using System.Linq;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -160,7 +161,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Finalizer
+        /// Finalizes an instance of the <see cref="TaskExecutionHost"/> class.
         /// </summary>
         ~TaskExecutionHost()
         {
@@ -256,12 +257,12 @@ namespace Microsoft.Build.BackEnd
 
             TaskRequirements requirements = TaskRequirements.None;
 
-            if (_taskFactoryWrapper.TaskFactoryLoadedType.HasSTAThreadAttribute())
+            if (_taskFactoryWrapper.TaskFactoryLoadedType.HasSTAThreadAttribute)
             {
                 requirements |= TaskRequirements.RequireSTAThread;
             }
 
-            if (_taskFactoryWrapper.TaskFactoryLoadedType.HasLoadInSeparateAppDomainAttribute())
+            if (_taskFactoryWrapper.TaskFactoryLoadedType.HasLoadInSeparateAppDomainAttribute)
             {
                 requirements |= TaskRequirements.RequireSeparateAppDomain;
 
@@ -343,13 +344,8 @@ namespace Microsoft.Build.BackEnd
                 {
                     success = SetTaskParameter(parameter.Key, parameter.Value.Item1, parameter.Value.Item2, requiredParameters.ContainsKey(parameter.Key), out taskParameterSet);
                 }
-                catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+                catch (Exception e) when (!ExceptionHandling.NotExpectedReflectionException(e))
                 {
-                    if (ExceptionHandling.NotExpectedReflectionException(e))
-                    {
-                        throw;
-                    }
-
                     // Reflection related exception
                     _taskLoggingContext.LogError(new BuildEventFileInfo(_taskLocation), "TaskParametersError", _taskName, e.Message);
 
@@ -404,6 +400,14 @@ namespace Microsoft.Build.BackEnd
             try
             {
                 TaskPropertyInfo parameter = _taskFactoryWrapper.GetProperty(parameterName);
+                foreach (TaskPropertyInfo prop in _taskFactoryWrapper.TaskFactoryLoadedType.Properties)
+                {
+                    if (prop.Name.Equals(parameterName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        parameter = prop;
+                        break;
+                    }
+                }
 
                 // flag an error if we find a parameter that has no .NET property equivalent
                 ProjectErrorUtilities.VerifyThrowInvalidProject
@@ -425,26 +429,22 @@ namespace Microsoft.Build.BackEnd
                     _taskName
                 );
 
-                // grab the outputs from the task's designated output parameter (which is a .NET property)
-                Type type = parameter.PropertyType;
-
                 EnsureParameterInitialized(parameter, _batchBucket.Lookup);
 
-                if (TaskParameterTypeVerifier.IsAssignableToITask(type))
+                if (parameter.IsAssignableToITask)
                 {
                     ITaskItem[] outputs = GetItemOutputs(parameter);
                     GatherTaskItemOutputs(outputTargetIsItem, outputTargetName, outputs, parameterLocation, parameter);
                 }
-                else if (TaskParameterTypeVerifier.IsValueTypeOutputParameter(type))
+                else if (parameter.IsValueTypeOutputParameter)
                 {
                     string[] outputs = GetValueOutputs(parameter);
                     GatherArrayStringAndValueOutputs(outputTargetIsItem, outputTargetName, outputs, parameterLocation, parameter);
                 }
                 else
                 {
-                    ProjectErrorUtilities.VerifyThrowInvalidProject
+                    ProjectErrorUtilities.ThrowInvalidProject
                     (
-                        false,
                         parameterLocation,
                         "UnsupportedTaskParameterTypeError",
                         parameter.PropertyType.FullName,
@@ -482,9 +482,8 @@ namespace Microsoft.Build.BackEnd
 
                 // We do not recover from a task exception while getting outputs,
                 // so do not merely set gatheredGeneratedOutputsSuccessfully = false; here
-                ProjectErrorUtilities.VerifyThrowInvalidProject
+                ProjectErrorUtilities.ThrowInvalidProject
                 (
-                    false,
                     parameterLocation,
                     "FailedToRetrieveTaskOutputs",
                     _taskName,
@@ -492,17 +491,10 @@ namespace Microsoft.Build.BackEnd
                     e.InnerException?.Message
                 );
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.NotExpectedReflectionException(e))
             {
-                // Catching Exception, but rethrowing unless it's a well-known exception.
-                if (ExceptionHandling.NotExpectedReflectionException(e))
-                {
-                    throw;
-                }
-
-                ProjectErrorUtilities.VerifyThrowInvalidProject
+                ProjectErrorUtilities.ThrowInvalidProject
                 (
-                    false,
                     parameterLocation,
                     "FailedToRetrieveTaskOutputs",
                     _taskName,
@@ -644,36 +636,24 @@ namespace Microsoft.Build.BackEnd
                 {
                     cancellableTask.Cancel();
                 }
-                catch (Exception e)
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    if (ExceptionHandling.IsCriticalException(e))
-                    {
-                        throw;
-                    }
-
                     try
                     {
                         _taskLoggingContext.LogFatalTaskError(e, new BuildEventFileInfo(_taskLocation), ((ProjectTaskInstance)_taskLoggingContext.Task).Name);
                     }
-                    catch (InternalErrorException)
+
+                    // If this fails it could be due to the task logging context no longer being valid due to a race condition where the task completes while we
+                    // are in this method.  In that case we simply ignore the exception and carry on since we can't log anything anyhow.
+                    catch (InternalErrorException) when (!_taskLoggingContext.IsValid)
                     {
-                        // If this fails it could be due to the task logging context no longer being valid due to a race condition where the task completes while we
-                        // are in this method.  In that case we simply ignore the exception and carry on since we can't log anything anyhow.
-                        if (_taskLoggingContext.IsValid)
-                        {
-                            throw;
-                        }
                     }
                 }
             }
 
             // Let the task finish now.  If cancellation worked, hopefully it finishes sooner than it would have otherwise.
             // If the task builder crashed, this could have already been disposed
-#if FEATURE_HANDLE_SAFEWAITHANDLE
             if (!_taskExecutionIdle.SafeWaitHandle.IsClosed)
-#else
-            if (!_taskExecutionIdle.GetSafeWaitHandle().IsClosed)
-#endif
             {
                 // Kick off a task to log the message so that we don't block the calling thread.
                 Task.Run(async delegate
@@ -923,12 +903,14 @@ namespace Microsoft.Build.BackEnd
                 // Map to an intrinsic task, if necessary.
                 if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.MSBuild", StringComparison.OrdinalIgnoreCase))
                 {
-                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(MSBuild)), new LoadedType(typeof(MSBuild), AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null)), _taskName, null);
+                    Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).GetTypeInfo().Assembly;
+                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(MSBuild)), new LoadedType(typeof(MSBuild), AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)), _taskName, null);
                     _intrinsicTasks[_taskName] = returnClass;
                 }
                 else if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.CallTarget", StringComparison.OrdinalIgnoreCase))
                 {
-                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(CallTarget)), new LoadedType(typeof(CallTarget), AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null)), _taskName, null);
+                    Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).GetTypeInfo().Assembly;
+                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(CallTarget)), new LoadedType(typeof(CallTarget), AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)), _taskName, null);
                     _intrinsicTasks[_taskName] = returnClass;
                 }
             }
@@ -1000,13 +982,8 @@ namespace Microsoft.Build.BackEnd
                     Environment.NewLine + e.InnerException
                 );
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 // Reflection related exception
                 _taskLoggingContext.LogError
                 (
@@ -1039,12 +1016,43 @@ namespace Microsoft.Build.BackEnd
             try
             {
                 // check if the task has a .NET property corresponding to the parameter
-                TaskPropertyInfo parameter = _taskFactoryWrapper.GetProperty(parameterName);
+                LoadedType loadedType = _taskFactoryWrapper.TaskFactoryLoadedType;
+                int indexOfParameter = -1;
+                for (int i = 0; i < loadedType.Properties.Length; i++)
+                {
+                    if (loadedType.Properties[i].Name.Equals(parameterName))
+                    {
+                        indexOfParameter = i;
+                        break;
+                    }
+                }
+
+                // For most tasks, finding the parameter in our list of known properties is equivalent to
+                // saying the task was properly invoked, as far as this parameter is concerned. However,
+                // that is not true for CodeTaskFactories like RoslynCodeTaskFactory. In that case, they
+                // will often have a list of parameters under the UsingTask declaration. Fortunately, if
+                // your TaskFactory is RoslynCodeTaskFactory, it isn't TaskHostFactory, which means the
+                // types are fully loaded at this stage, and we can access them as we had in the past.
+                TaskPropertyInfo parameter = null;
+                Type parameterType = null;
+                if (indexOfParameter != -1)
+                {
+                    parameter = loadedType.Properties[indexOfParameter];
+                    parameterType = Type.GetType(
+                        loadedType.PropertyAssemblyQualifiedNames?[indexOfParameter] ??
+                        parameter.PropertyType.AssemblyQualifiedName);
+                }
+                else
+                {
+                    parameter = _taskFactoryWrapper.GetProperty(parameterName);
+                    if (parameter != null)
+                    {
+                        parameterType = Type.GetType(parameter.PropertyType.AssemblyQualifiedName);
+                    }
+                }
 
                 if (parameter != null)
                 {
-                    Type parameterType = parameter.PropertyType;
-
                     EnsureParameterInitialized(parameter, _batchBucket.Lookup);
 
                     // try to set the parameter
@@ -1099,30 +1107,15 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     // flag an error if we find a parameter that has no .NET property equivalent
-                    if (_taskFactoryWrapper.TaskFactoryLoadedType.LoadedAssembly is null)
-                    {
-                        _taskLoggingContext.LogError
-                            (
-                            new BuildEventFileInfo( parameterLocation ),
-                            "UnexpectedTaskAttribute",
-                            parameterName,
-                            _taskName,
-                            _taskFactoryWrapper.TaskFactoryLoadedType.Type.Assembly.FullName,
-                            _taskFactoryWrapper.TaskFactoryLoadedType.Type.Assembly.Location
-                            );
-                    }
-                    else
-                    {
-                        _taskLoggingContext.LogError
-                            (
-                            new BuildEventFileInfo( parameterLocation ),
-                            "UnexpectedTaskAttribute",
-                            parameterName,
-                            _taskName,
-                            _taskFactoryWrapper.TaskFactoryLoadedType.LoadedAssembly.FullName,
-                            _taskFactoryWrapper.TaskFactoryLoadedType.LoadedAssembly.Location
-                            );
-                    }
+                    _taskLoggingContext.LogError
+                        (
+                        new BuildEventFileInfo( parameterLocation ),
+                        "UnexpectedTaskAttribute",
+                        parameterName,
+                        _taskName,
+                        _taskFactoryWrapper.TaskFactoryLoadedType.LoadedAssemblyName.FullName,
+                        _taskFactoryWrapper.TaskFactoryLoadedType.Path
+                        );
                 }
             }
             catch (AmbiguousMatchException)
@@ -1183,11 +1176,9 @@ namespace Microsoft.Build.BackEnd
                         {
                             // We only allow a single item to be passed into a parameter of ITaskItem.
 
-                            // Some of the computation (expansion) here is expensive, so don't make the above
-                            // "if" statement directly part of the first param to VerifyThrowInvalidProject.
-                            ProjectErrorUtilities.VerifyThrowInvalidProject
+                            // Some of the computation (expansion) here is expensive, so don't switch to VerifyThrowInvalidProject.
+                            ProjectErrorUtilities.ThrowInvalidProject
                                 (
-                                false,
                                 parameterLocation,
                                 "CannotPassMultipleItemsIntoScalarParameter",
                                 _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, ExpanderOptions.ExpandAll, parameterLocation),
@@ -1207,7 +1198,7 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     // Expand out all the metadata, properties, and item vectors in the string.
-                    string expandedParameterValue = _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, ExpanderOptions.ExpandAll, parameterLocation);
+                    string expandedParameterValue = _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, ExpanderOptions.ExpandAll, parameterLocation, _targetLoggingContext);
 
                     if (expandedParameterValue.Length == 0)
                     {
@@ -1375,17 +1366,6 @@ namespace Microsoft.Build.BackEnd
                 _taskFactoryWrapper.SetPropertyValue(TaskInstance, parameter, parameterValue);
                 success = true;
             }
-            catch (LoggerException)
-            {
-                // if a logger has failed, abort immediately
-                // Polite logger failure
-                throw;
-            }
-            catch (InternalLoggerException)
-            {
-                // Logger threw arbitrary exception
-                throw;
-            }
             catch (TargetInvocationException e)
             {
                 // handle any exception thrown by the task's setter itself
@@ -1401,14 +1381,10 @@ namespace Microsoft.Build.BackEnd
                     new BuildEventFileInfo(_taskLocation),
                     _taskName);
             }
-            catch (Exception e)
+            // If a logger has failed, abort immediately. This is the polite LoggerException.
+            // InternalLoggerException is an arbitrary logger exception.
+            catch (Exception e) when (e is not LoggerException && e is not InternalLoggerException && !ExceptionHandling.NotExpectedReflectionException(e))
             {
-                // Catching Exception, but rethrowing unless it's a well-known exception.
-                if (ExceptionHandling.NotExpectedReflectionException(e))
-                {
-                    throw;
-                }
-
                 _taskLoggingContext.LogFatalTaskError
                 (
                     e,
@@ -1620,13 +1596,8 @@ namespace Microsoft.Build.BackEnd
             {
                 requiredParameters = _taskFactoryWrapper.GetNamesOfPropertiesWithRequiredAttribute;
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (!ExceptionHandling.NotExpectedReflectionException(e))
             {
-                if (ExceptionHandling.NotExpectedReflectionException(e))
-                {
-                    throw;
-                }
-
                 // Reflection related exception
                 _targetLoggingContext.LogError(new BuildEventFileInfo(_taskLocation), "AttributeTypeLoadError", _taskName, e.Message);
 
@@ -1646,14 +1617,10 @@ namespace Microsoft.Build.BackEnd
             {
                 _taskLoggingContext.LogWarningFromText(null, warningCode, helpKeyword, new BuildEventFileInfo(_taskLocation), message);
             }
-            catch (InternalErrorException) // BUGBUG, should never catch this
+            catch (InternalErrorException) when (!_taskLoggingContext.IsValid)
             {
                 // We can get an exception from this when we encounter a race between a task finishing and a cancel occurring.  In this situation
                 // if the task logging context is no longer valid, we choose to eat the exception because we can't log the message anyway.
-                if (_taskLoggingContext.IsValid)
-                {
-                    throw;
-                }
             }
         }
     }

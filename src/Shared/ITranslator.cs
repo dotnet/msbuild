@@ -7,6 +7,8 @@ using System.Globalization;
 using System.IO;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -62,7 +64,7 @@ namespace Microsoft.Build.BackEnd
     ///    that by ensuring a single Translate method on a given object can handle both reads and
     ///    writes without referencing any field more than once.
     /// </remarks>
-    internal interface ITranslator
+    internal interface ITranslator : IDisposable
     {
         /// <summary>
         /// Returns the current serialization mode.
@@ -125,6 +127,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="value">The value to be translated.</param>
         void Translate(ref int value);
+
+        /// <summary>
+        /// Translates an <see langword="int"/> array.
+        /// </summary>
+        /// <param name="array">The array to be translated.</param>
+        void Translate(ref int[] array);
 
         /// <summary>
         /// Translates a long.
@@ -233,7 +241,8 @@ namespace Microsoft.Build.BackEnd
         /// can you simply pass as ref Enum, because an enum instance doesn't match that function signature.
         /// Finally, converting the enum to an int assumes that we always want to transport enums as ints.  This
         /// works in all of our current cases, but certainly isn't perfectly generic.</remarks>
-        void TranslateEnum<T>(ref T value, int numericValue);
+        void TranslateEnum<T>(ref T value, int numericValue)
+            where T : struct, Enum;
 
         /// <summary>
         /// Translates a value using the .Net binary formatter.
@@ -300,6 +309,8 @@ namespace Microsoft.Build.BackEnd
         void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer);
 
         void TranslateDictionary(ref IDictionary<string, string> dictionary, NodePacketCollectionCreator<IDictionary<string, string>> collectionCreator);
+
+        void TranslateDictionary(ref Dictionary<string, DateTime> dictionary, StringComparer comparer);
 
         void TranslateDictionary<K, V>(ref IDictionary<K, V> dictionary, ObjectTranslator<K> keyTranslator, ObjectTranslator<V> valueTranslator, NodePacketCollectionCreator<IDictionary<K, V>> dictionaryCreator);
 

@@ -9,6 +9,8 @@ using Microsoft.Build.Shared;
 
 using Microsoft.Build.Construction;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>
@@ -16,7 +18,7 @@ namespace Microsoft.Build.Execution
     /// Immutable.
     /// </summary>
     [DebuggerDisplay("{_itemType} Include={_include} Exclude={_exclude} Remove={_remove} Condition={_condition}")]
-    public class ProjectItemGroupTaskItemInstance: ITranslatable
+    public class ProjectItemGroupTaskItemInstance : ITranslatable
     {
         /// <summary>
         /// Item type, for example "Compile"
@@ -195,7 +197,6 @@ namespace Microsoft.Build.Execution
 
         private ProjectItemGroupTaskItemInstance()
         {
-
         }
 
         /// <summary>
@@ -459,6 +460,8 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _keepMetadataLocation, ElementLocation.FactoryForDeserialization);
             translator.Translate(ref _removeMetadataLocation, ElementLocation.FactoryForDeserialization);
             translator.Translate(ref _keepDuplicatesLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _matchOnMetadataLocation, ElementLocation.FactoryForDeserialization);
+            translator.Translate(ref _matchOnMetadataOptionsLocation, ElementLocation.FactoryForDeserialization);
             translator.Translate(ref _conditionLocation, ElementLocation.FactoryForDeserialization);
             translator.Translate(ref _metadata, ProjectItemGroupTaskMetadataInstance.FactoryForDeserialization);
         }

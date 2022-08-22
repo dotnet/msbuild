@@ -10,12 +10,28 @@ trigger:
 #   SignType: real
 #   SkipApplyOptimizationData: false
 
+parameters:
+- name: OptProfDropName
+  displayName: Optional OptProfDrop Override
+  type: string
+  default: 'default'
+
 variables:
+  # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
+  - name: OptProfDrop
+    value: ''
   - name: SourceBranch
     value: $(IbcSourceBranchName)
-  - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/') }}:
+  # If we're not on a vs* branch, use main as our optprof collection branch
+  - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
     - name: SourceBranch
       value: main
+  # if OptProfDropName is set as a parameter, set OptProfDrop to the parameter and unset SourceBranch
+  - ${{ if ne(parameters.OptProfDropName, 'default') }}:
+    - name: OptProfDrop
+      value: ${{parameters.OptProfDropName}}
+    - name: SourceBranch
+      value: ''
   - name: _DotNetArtifactsCategory
     value: .NETCore
   - name: _DotNetValidationArtifactsCategory
@@ -26,15 +42,17 @@ stages:
   displayName: Build
 
   jobs:
-  - template: /eng/common/templates/job/onelocbuild.yml
-    parameters:
-      CreatePr: false
-      LclSource: lclFilesfromPackage
-      LclPackageId: 'LCL-JUNO-PROD-MSBUILD'
+  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}: # should track next-release's active dev branch
+    - template: /eng/common/templates/job/onelocbuild.yml
+      parameters:
+        LclSource: lclFilesfromPackage
+        LclPackageId: 'LCL-JUNO-PROD-MSBUILD'
+        MirrorRepo: 'msbuild'
+        MirrorBranch: 'main' # should match condition above
 
   - job: Windows_NT
     pool:
-      name: VSEng-MicroBuildVS2019
+      name: VSEngSS-MicroBuild2022-1ES
       demands:
       - agent.os -equals Windows_NT
 
@@ -47,7 +65,7 @@ stages:
     - name: TeamName
       value: MSBuild
     - name: VisualStudio.MajorVersion
-      value: 16
+      value: 17
     - name: VisualStudio.ChannelName
       value: 'int.main'
     - name: VisualStudio.DropName
@@ -73,13 +91,16 @@ stages:
         zipSources: false
       condition: and(succeeded(), in(variables['SignType'], 'test', 'real'))
 
-    - task: ms-vseng.MicroBuildTasks.965C8DC6-1483-45C9-B384-5AC75DA1F1A4.MicroBuildOptProfPlugin@1
+    - task: MicroBuildOptProfPlugin@6
       inputs:
-        skipRunOptimize: true
+        ProfilingInputsDropName: '$(VisualStudio.DropName)'
+        ShouldSkipOptimize: true
+        AccessToken: '$(System.AccessToken)'
+        feedSource: 'https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json'
       displayName: 'Install OptProf Plugin'
 
     # Required by MicroBuildBuildVSBootstrapper
-    - task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
+    - task: MicroBuildSwixPlugin@4
       inputs:
         dropName: $(VisualStudio.DropName)
 
@@ -100,9 +121,12 @@ stages:
                 /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
                 /p:TeamName=MSBuild
                 /p:DotNetPublishUsingPipelines=true
-                /p:VisualStudioIbcDrop=$(OptProfDropName)
+                /p:VisualStudioIbcDrop=$(OptProfDrop)
       displayName: Build
       condition: succeeded()
+
+    # Required by Microsoft policy
+    - template: eng\common\templates\steps\generate-sbom.yml
 
     # Publish OptProf configuration files
     - task: ms-vscs-artifact.build-tasks.artifactDropTask-1.artifactDropTask@0
@@ -111,18 +135,19 @@ stages:
         buildNumber: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
         sourcePath: '$(Build.SourcesDirectory)\artifacts\OptProf\$(BuildConfiguration)\Data'
         toLowerCase: false
-        usePat: false
+        usePat: true
       displayName: 'OptProf - Publish to Artifact Services - ProfilingInputs'
       condition: succeeded()
 
     # Build VS bootstrapper
     # Generates $(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
-    - task: ms-vseng.MicroBuildTasks.0e9d0d4d-71ec-4e4e-ae40-db9896f1ae74.MicroBuildBuildVSBootstrapper@2
+    - task: MicroBuildBuildVSBootstrapper@2
       inputs:
         vsMajorVersion: $(VisualStudio.MajorVersion)
         channelName: $(VisualStudio.ChannelName)
         manifests: $(VisualStudio.SetupManifestList)
         outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+        bootstrapperCoreVersion: 
       displayName: 'OptProf - Build VS bootstrapper'
       condition: succeeded()
 
@@ -162,11 +187,14 @@ stages:
 
     # Publishes setup VSIXes to a drop.
     # Note: The insertion tool looks for the display name of this task in the logs.
-    - task: ms-vseng.MicroBuildTasks.4305a8de-ba66-4d8b-b2d1-0dc4ecbbf5e8.MicroBuildUploadVstsDropFolder@1
+    - task: MicroBuildUploadVstsDropFolder@2
       displayName: Upload VSTS Drop
       inputs:
         DropName: $(VisualStudio.DropName)
         DropFolder: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+        AccessToken: '$(System.AccessToken)'
+        DropServiceUri: 'https://devdiv.artifacts.visualstudio.com'
+        VSDropServiceUri: 'https://vsdrop.corp.microsoft.com/file/v1'
       condition: succeeded()
 
     # Publish an artifact that the RoslynInsertionTool is able to find by its name.
@@ -215,14 +243,21 @@ stages:
       displayName: Execute cleanup tasks
       condition: succeededOrFailed()
 
+  - template: /eng/common/templates/job/source-build.yml
+    parameters:
+      platform:
+        name: 'Managed'
+        container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7-3e800f1-20190501005343'
+
   - template: /eng/common/templates/job/publish-build-assets.yml
     parameters:
       enablePublishBuildArtifacts: true
       publishUsingPipelines: true
       dependsOn:
         - Windows_NT
+        - Source_Build_Managed
       pool:
-        vmImage: vs2017-win2016
+        vmImage: windows-latest
 
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: eng\common\templates\post-build\post-build.yml

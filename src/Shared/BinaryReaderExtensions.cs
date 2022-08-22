@@ -11,7 +11,7 @@ namespace Microsoft.Build.Shared
     internal static class BinaryReaderExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string ReadOptionalString(this BinaryReader reader)
+        public static string? ReadOptionalString(this BinaryReader reader)
         {
             return reader.ReadByte() == 0 ? null : reader.ReadString();
         }
@@ -51,7 +51,7 @@ namespace Microsoft.Build.Shared
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static BuildEventContext ReadOptionalBuildEventContext(this BinaryReader reader)
+        public static BuildEventContext? ReadOptionalBuildEventContext(this BinaryReader reader)
         {
             if (reader.ReadByte() == 0)
             {

@@ -201,12 +201,12 @@ namespace Microsoft.Build.Framework
         }
 
         [OptionalField(VersionAdded = 2)]
-        private BuildEventContext parentProjectBuildEventContext;
+        private BuildEventContext? parentProjectBuildEventContext;
 
         /// <summary>
         /// Event context information, where the event was fired from in terms of the build location
         /// </summary>
-        public BuildEventContext ParentProjectBuildEventContext
+        public BuildEventContext? ParentProjectBuildEventContext
         {
             get
             {
@@ -217,12 +217,12 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// The name of the project file
         /// </summary>
-        private string projectFile;
+        private string? projectFile;
 
         /// <summary>
         /// Project name
         /// </summary>
-        public string ProjectFile
+        public string? ProjectFile
         {
             get
             {
@@ -233,12 +233,12 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Targets that we will build in the project
         /// </summary>
-        private string targetNames;
+        private string? targetNames;
 
         /// <summary>
         /// Targets that we will build in the project
         /// </summary>
-        public string TargetNames
+        public string? TargetNames
         {
             get
             {
@@ -250,12 +250,12 @@ namespace Microsoft.Build.Framework
         /// Gets the set of global properties used to evaluate this project.
         /// </summary>
         [OptionalField(VersionAdded = 2)]
-        private IDictionary<string, string> globalProperties;
+        private IDictionary<string, string>? globalProperties;
 
         /// <summary>
         /// Gets the set of global properties used to evaluate this project.
         /// </summary>
-        public IDictionary<string, string> GlobalProperties
+        public IDictionary<string, string>? GlobalProperties
         {
             get
             {
@@ -269,12 +269,12 @@ namespace Microsoft.Build.Framework
         }
 
         [OptionalField(VersionAdded = 2)]
-        private string toolsVersion;
+        private string? toolsVersion;
 
         /// <summary>
         /// Gets the tools version used to evaluate this project.
         /// </summary>
-        public string ToolsVersion
+        public string? ToolsVersion
         {
             get
             {
@@ -291,12 +291,12 @@ namespace Microsoft.Build.Framework
         // (a) this event will not be thrown by tasks, so it should not generally cross AppDomain boundaries
         // (b) this event still makes sense when this field is "null"
         [NonSerialized]
-        private IEnumerable properties;
+        private IEnumerable? properties;
 
         /// <summary>
         /// List of properties in this project. This is a live, read-only list.
         /// </summary>
-        public IEnumerable Properties
+        public IEnumerable? Properties
         {
             get
             {
@@ -316,12 +316,12 @@ namespace Microsoft.Build.Framework
         // (a) this event will not be thrown by tasks, so it should not generally cross AppDomain boundaries
         // (b) this event still makes sense when this field is "null"
         [NonSerialized]
-        private IEnumerable items;
+        private IEnumerable? items;
 
         /// <summary>
         /// List of items in this project. This is a live, read-only list.
         /// </summary>
-        public IEnumerable Items
+        public IEnumerable? Items
         {
             get
             {
@@ -365,7 +365,7 @@ namespace Microsoft.Build.Framework
             writer.WriteOptionalString(projectFile);
 
             // TargetNames cannot be null as per the constructor
-            writer.Write(targetNames);
+            writer.Write(targetNames!);
 
             // If no properties were added to the property list 
             // then we have nothing to create when it is deserialized
@@ -389,7 +389,7 @@ namespace Microsoft.Build.Framework
                 foreach (var propertyPair in validProperties)
                 {
                     writer.Write((string)propertyPair.Key);
-                    writer.Write((string)propertyPair.Value);
+                    writer.Write((string?)propertyPair.Value ?? "");
                 }
             }
         }
@@ -489,24 +489,18 @@ namespace Microsoft.Build.Framework
             {
                 if (RawMessage == null)
                 {
-                    lock (locker)
-                    {
-                        if (RawMessage == null)
-                        {
-                            string projectFilePath = Path.GetFileName(ProjectFile);
+                    string? projectFilePath = Path.GetFileName(ProjectFile);
 
-                            // Check to see if the there are any specific target names to be built.
-                            // If targetNames is null or empty then we will be building with the 
-                            // default targets.
-                            if (!string.IsNullOrEmpty(TargetNames))
-                            {
-                                RawMessage = FormatResourceStringIgnoreCodeAndKeyword("ProjectStartedPrefixForTopLevelProjectWithTargetNames", projectFilePath, TargetNames);
-                            }
-                            else
-                            {
-                                RawMessage = FormatResourceStringIgnoreCodeAndKeyword("ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", projectFilePath);
-                            }
-                        }
+                    // Check to see if the there are any specific target names to be built.
+                    // If targetNames is null or empty then we will be building with the
+                    // default targets.
+                    if (!string.IsNullOrEmpty(TargetNames))
+                    {
+                        RawMessage = FormatResourceStringIgnoreCodeAndKeyword("ProjectStartedPrefixForTopLevelProjectWithTargetNames", projectFilePath, TargetNames!);
+                    }
+                    else
+                    {
+                        RawMessage = FormatResourceStringIgnoreCodeAndKeyword("ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", projectFilePath);
                     }
                 }
 

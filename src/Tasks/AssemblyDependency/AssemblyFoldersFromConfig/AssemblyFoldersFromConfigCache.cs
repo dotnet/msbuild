@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
 {
     /// <summary>

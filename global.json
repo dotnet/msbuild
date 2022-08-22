@@ -1,17 +1,15 @@
 {
+  "sdk": {
+    "allowPrerelease": true
+  },
   "tools": {
-    "dotnet": "5.0.102",
-    "runtimes": {
-      "dotnet/x64": [
-        "2.1.7"
-      ]
-    },
+    "dotnet": "6.0.200",
     "vs": {
-      "version": "16.0"
+      "version": "17.0"
     }
   },
   "msbuild-sdks": {
     "Microsoft.Build.CentralPackageVersions": "2.0.1",
-    "Microsoft.DotNet.Arcade.Sdk": "5.0.0-beta.21226.1"
+    "Microsoft.DotNet.Arcade.Sdk": "6.0.0-beta.22371.4"
   }
 }

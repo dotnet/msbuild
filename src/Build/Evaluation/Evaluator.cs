@@ -3,9 +3,7 @@
 
 using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using ObjectModel = System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -20,19 +18,23 @@ using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.ProjectCache;
+using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using static Microsoft.Build.Execution.ProjectPropertyInstance;
 using Constants = Microsoft.Build.Internal.Constants;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
+using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using ObjectModel = System.Collections.ObjectModel;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
-using SdkReferencePropertyExpansionMode = Microsoft.Build.Utilities.EscapeHatches.SdkReferencePropertyExpansionMode;
+using SdkReferencePropertyExpansionMode = Microsoft.Build.Framework.EscapeHatches.SdkReferencePropertyExpansionMode;
+using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -144,6 +146,9 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private readonly int _submissionId;
 
+        /// <summary>
+        /// The evaluation context to use.
+        /// </summary>
         private readonly EvaluationContext _evaluationContext;
 
         /// <summary>
@@ -189,6 +194,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private Evaluator(
             IEvaluatorData<P, I, M, D> data,
+            Project project,
             ProjectRootElement projectRootElement,
             ProjectLoadSettings loadSettings,
             int maxNodeCount,
@@ -206,6 +212,7 @@ namespace Microsoft.Build.Evaluation
         {
             ErrorUtilities.VerifyThrowInternalNull(data, nameof(data));
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, nameof(projectRootElementCache));
+            ErrorUtilities.VerifyThrowInternalNull(evaluationContext, nameof(evaluationContext));
             ErrorUtilities.VerifyThrowInternalNull(loggingService, nameof(loggingService));
             ErrorUtilities.VerifyThrowInternalNull(buildEventContext, nameof(buildEventContext));
 
@@ -220,12 +227,20 @@ namespace Microsoft.Build.Evaluation
                 // Wrap the IEvaluatorData<> object passed in.
                 data = new PropertyTrackingEvaluatorDataWrapper<P, I, M, D>(data, _evaluationLoggingContext, Traits.Instance.LogPropertyTracking);
             }
-            _evaluationContext = evaluationContext ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
+
+            // If the host wishes to provide a directory cache for this evaluation, create a new EvaluationContext with the right file system.
+            _evaluationContext = evaluationContext;
+            IDirectoryCache directoryCache = project?.GetDirectoryCacheForEvaluation(_evaluationLoggingContext.BuildEventContext.EvaluationId);
+            if (directoryCache is not null)
+            {
+                IFileSystem fileSystem = new DirectoryCacheFileSystemWrapper(evaluationContext.FileSystem, directoryCache);
+                _evaluationContext = evaluationContext.ContextWithFileSystem(fileSystem);
+            }
 
             // Create containers for the evaluation results
-            data.InitializeForEvaluation(toolsetProvider, _evaluationContext.FileSystem);
+            data.InitializeForEvaluation(toolsetProvider, _evaluationContext);
 
-            _expander = new Expander<P, I>(data, data, _evaluationContext.FileSystem);
+            _expander = new Expander<P, I>(data, data, _evaluationContext);
 
             // This setting may change after the build has started, therefore if the user has not set the property to true on the build parameters we need to check to see if it is set to true on the environment variable.
             _expander.WarnForUninitializedProperties = BuildParameters.WarnOnUninitializedProperty || Traits.Instance.EscapeHatches.WarnOnUninitializedProperty;
@@ -284,6 +299,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal static void Evaluate(
             IEvaluatorData<P, I, M, D> data,
+            Project project,
             ProjectRootElement root,
             ProjectLoadSettings loadSettings,
             int maxNodeCount,
@@ -295,13 +311,14 @@ namespace Microsoft.Build.Evaluation
             BuildEventContext buildEventContext,
             ISdkResolverService sdkResolverService,
             int submissionId,
-            EvaluationContext evaluationContext = null,
+            EvaluationContext evaluationContext,
             bool interactive = false)
         {
             MSBuildEventSource.Log.EvaluateStart(root.ProjectFileLocation.File);
             var profileEvaluation = (loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 || loggingService.IncludeEvaluationProfile;
             var evaluator = new Evaluator<P, I, M, D>(
                 data,
+                project,
                 root,
                 loadSettings,
                 maxNodeCount,
@@ -325,7 +342,7 @@ namespace Microsoft.Build.Evaluation
         /// Helper that creates a list of ProjectItem's given an unevaluated Include and a ProjectRootElement.
         /// Used by both Evaluator.EvaluateItemElement and by Project.AddItem.
         /// </summary>
-        internal static List<I> CreateItemsFromInclude(string rootDirectory, ProjectItemElement itemElement, IItemFactory<I, I> itemFactory, string unevaluatedIncludeEscaped, Expander<P, I> expander)
+        internal static List<I> CreateItemsFromInclude(string rootDirectory, ProjectItemElement itemElement, IItemFactory<I, I> itemFactory, string unevaluatedIncludeEscaped, Expander<P, I> expander, ILoggingService loggingService, string buildEventFileInfoFullPath, BuildEventContext buildEventContext)
         {
             ErrorUtilities.VerifyThrowArgumentLength(unevaluatedIncludeEscaped, nameof(unevaluatedIncludeEscaped));
 
@@ -357,7 +374,16 @@ namespace Microsoft.Build.Evaluation
                     else
                     {
                         // The expression is not of the form "@(X)". Treat as string
-                        string[] includeSplitFilesEscaped = EngineFileUtilities.Default.GetFileListEscaped(rootDirectory, includeSplitEscaped);
+                        string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
+                            rootDirectory,
+                            includeSplitEscaped,
+                            excludeSpecsEscaped: null,
+                            forceEvaluate: false,
+                            fileMatcher: expander.EvaluationContext?.FileMatcher,
+                            loggingMechanism: loggingService,
+                            includeLocation: itemElement.IncludeLocation,
+                            buildEventFileInfoFullPath: buildEventFileInfoFullPath,
+                            buildEventContext: buildEventContext);
 
                         if (includeSplitFilesEscaped.Length > 0)
                         {
@@ -627,7 +653,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 _data.InitialTargets = initialTargets;
-                MSBuildEventSource.Log.EvaluatePass1Stop(projectFile, _projectRootElement.Properties.Count, _projectRootElement.Imports.Count);
+                MSBuildEventSource.Log.EvaluatePass1Stop(projectFile);
                 // Pass2: evaluate item definitions
                 // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
                 MSBuildEventSource.Log.EvaluatePass2Start(projectFile);
@@ -641,7 +667,7 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
                 }
-                MSBuildEventSource.Log.EvaluatePass2Stop(projectFile, _itemDefinitionGroupElements.Count);
+                MSBuildEventSource.Log.EvaluatePass2Stop(projectFile);
                 LazyItemEvaluator<P, I, M, D> lazyEvaluator = null;
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Items))
                 {
@@ -684,7 +710,7 @@ namespace Microsoft.Build.Evaluation
                     lazyEvaluator = null;
                 }
 
-                MSBuildEventSource.Log.EvaluatePass3Stop(projectFile, _itemGroupElements.Count);
+                MSBuildEventSource.Log.EvaluatePass3Stop(projectFile);
 
                 // Pass4: evaluate using-tasks
                 MSBuildEventSource.Log.EvaluatePass4Start(projectFile);
@@ -696,7 +722,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                // If there was no DefaultTargets attribute found in the depth first pass, 
+                // If there was no DefaultTargets attribute found in the depth first pass,
                 // use the name of the first target. If there isn't any target, don't error until build time.
 
                 if (_data.DefaultTargets == null)
@@ -714,7 +740,7 @@ namespace Microsoft.Build.Evaluation
                 Dictionary<string, List<TargetSpecification>> targetsWhichRunAfterByTarget = new Dictionary<string, List<TargetSpecification>>(StringComparer.OrdinalIgnoreCase);
                 LinkedList<ProjectTargetElement> activeTargetsByEvaluationOrder = new LinkedList<ProjectTargetElement>();
                 Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets = new Dictionary<string, LinkedListNode<ProjectTargetElement>>(StringComparer.OrdinalIgnoreCase);
-                MSBuildEventSource.Log.EvaluatePass4Stop(projectFile, _usingTaskElements.Count);
+                MSBuildEventSource.Log.EvaluatePass4Stop(projectFile);
 
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Targets))
                 {
@@ -742,13 +768,13 @@ namespace Microsoft.Build.Evaluation
 
                     if (BuildEnvironmentHelper.Instance.RunningInVisualStudio)
                     {
-                        // TODO: Remove this when VS gets updated to setup project cache plugins.
+                        // TODO: Figure out a more elegant way to do this. See the comment on BuildManager.ProjectCacheDescriptors for explanation.
                         CollectProjectCachePlugins();
                     }
 
                     if (Traits.Instance.EscapeHatches.DebugEvaluation)
                     {
-                        // This is so important for VS performance it's worth always tracing; accidentally having 
+                        // This is so important for VS performance it's worth always tracing; accidentally having
                         // inconsistent sets of global properties will cause reevaluations, which are wasteful and incorrect
                         if (_projectRootElement.Count > 0) // VB/C# will new up empty projects; they aren't worth recording
                         {
@@ -773,7 +799,7 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     _data.FinishEvaluation();
-                    MSBuildEventSource.Log.EvaluatePass5Stop(projectFile, targetElementsCount);
+                    MSBuildEventSource.Log.EvaluatePass5Stop(projectFile);
                 }
             }
 
@@ -786,24 +812,38 @@ namespace Microsoft.Build.Evaluation
             if (this._evaluationLoggingContext.LoggingService.IncludeEvaluationPropertiesAndItems)
             {
                 globalProperties = _data.GlobalPropertiesDictionary;
-                properties = _data.Properties;
+                properties = Traits.LogAllEnvironmentVariables ? _data.Properties : FilterOutEnvironmentDerivedProperties(_data.Properties);
                 items = _data.Items;
             }
 
             _evaluationLoggingContext.LogProjectEvaluationFinished(globalProperties, properties, items, _evaluationProfiler.ProfiledResult);
         }
 
+        private IEnumerable FilterOutEnvironmentDerivedProperties(PropertyDictionary<P> dictionary)
+        {
+            List<P> list = new(dictionary.Count);
+            foreach (P p in dictionary)
+            {
+                if (p is EnvironmentDerivedProjectPropertyInstance ||
+                    (p is ProjectProperty pp && pp.IsEnvironmentProperty))
+                {
+                    continue;
+                }
+
+                list.Add(p);
+            }
+
+            return list;
+        }
+
         private void CollectProjectCachePlugins()
         {
             foreach (var item in _data.GetItems(ItemTypeNames.ProjectCachePlugin))
             {
-                var metadataDictionary = item.Metadata.ToDictionary(m => m.Key, m => m.EscapedValue);
-
-                var pluginPath = Path.Combine(_data.Directory, item.EvaluatedInclude);
-
-                var projectCacheItem = new ProjectCacheItem(pluginPath, metadataDictionary);
-
-                BuildManager.ProjectCacheItems[pluginPath] = projectCacheItem;
+                string pluginPath = FileUtilities.NormalizePath(_data.Directory, item.EvaluatedInclude);
+                var pluginSettings = item.Metadata.ToDictionary(m => m.Key, m => m.EscapedValue);
+                var projectCacheItem = ProjectCacheDescriptor.FromAssemblyPath(pluginPath, pluginSettings);
+                BuildManager.ProjectCacheDescriptors.TryAdd(projectCacheItem, projectCacheItem);
             }
         }
 
@@ -817,12 +857,12 @@ namespace Microsoft.Build.Evaluation
             using (_evaluationProfiler.TrackFile(currentProjectOrImport.FullPath))
             {
                 // We accumulate InitialTargets from the project and each import
-                var initialTargets = _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.InitialTargets, ExpanderOptions.ExpandProperties, currentProjectOrImport.InitialTargetsLocation);
+                var initialTargets = _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.InitialTargets, ExpanderOptions.ExpandProperties, currentProjectOrImport.InitialTargetsLocation, _evaluationLoggingContext);
                 _initialTargetsList.AddRange(initialTargets);
 
                 if (!Traits.Instance.EscapeHatches.IgnoreTreatAsLocalProperty)
                 {
-                    foreach (string propertyName in _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.TreatAsLocalProperty, ExpanderOptions.ExpandProperties, currentProjectOrImport.TreatAsLocalPropertyLocation))
+                    foreach (string propertyName in _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.TreatAsLocalProperty, ExpanderOptions.ExpandProperties, currentProjectOrImport.TreatAsLocalPropertyLocation, _evaluationLoggingContext))
                     {
                         XmlUtilities.VerifyThrowProjectValidElementName(propertyName, currentProjectOrImport.Location);
                         _data.GlobalPropertiesToTreatAsLocal.Add(propertyName);
@@ -1002,7 +1042,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void ReadTargetElement(ProjectTargetElement targetElement, LinkedList<ProjectTargetElement> activeTargetsByEvaluationOrder, Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets)
         {
-            // If we already have read a target instance for this element, use that. 
+            // If we already have read a target instance for this element, use that.
             ProjectTargetInstance targetInstance = targetElement.TargetInstance ?? ReadNewTargetElement(targetElement, _projectSupportsReturnsAttribute[(ProjectRootElement)targetElement.Parent], _evaluationProfiler);
 
             string targetName = targetElement.Name;
@@ -1026,8 +1066,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void AddBeforeAndAfterTargetMappings(ProjectTargetElement targetElement, Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets, Dictionary<string, List<TargetSpecification>> targetsWhichRunBeforeByTarget, Dictionary<string, List<TargetSpecification>> targetsWhichRunAfterByTarget)
         {
-            var beforeTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.BeforeTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.BeforeTargetsLocation);
-            var afterTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.AfterTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.AfterTargetsLocation);
+            var beforeTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.BeforeTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.BeforeTargetsLocation, _evaluationLoggingContext);
+            var afterTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.AfterTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.AfterTargetsLocation, _evaluationLoggingContext);
 
             foreach (string beforeTarget in beforeTargets)
             {
@@ -1091,6 +1131,8 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
+        private static readonly string CachedFileVersion = ProjectCollection.Version.ToString();
+
         /// <summary>
         /// Set the built-in properties, most of which are read-only
         /// </summary>
@@ -1106,6 +1148,8 @@ namespace Microsoft.Build.Evaluation
             SetBuiltInProperty(ReservedPropertyNames.programFiles32, FrameworkLocationHelper.programFiles32);
             SetBuiltInProperty(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion);
             SetBuiltInProperty(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild);
+            SetBuiltInProperty(ReservedPropertyNames.fileVersion, CachedFileVersion);
+            SetBuiltInProperty(ReservedPropertyNames.semanticVersion, ProjectCollection.DisplayVersion);
 
             ValidateChangeWaveState();
 
@@ -1119,7 +1163,8 @@ namespace Microsoft.Build.Evaluation
             }
 
 #if RUNTIME_TYPE_NETCORE
-            SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType, "Core");
+            SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType,
+                Traits.Instance.ForceEvaluateAsFullFramework ? "Full" : "Core");
 #elif MONO
             SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType,
                                                         NativeMethodsShared.IsMono ? "Mono" : "Full");
@@ -1167,7 +1212,7 @@ namespace Microsoft.Build.Evaluation
         {
             foreach (ProjectPropertyInstance environmentProperty in _environmentProperties)
             {
-                _data.SetProperty(environmentProperty.Name, ((IProperty)environmentProperty).EvaluatedValueEscaped, isGlobalProperty: false, mayBeReserved: false, isEnvironmentVariable: true);
+                _data.SetProperty(environmentProperty.Name, ((IProperty)environmentProperty).EvaluatedValueEscaped, isGlobalProperty: false, mayBeReserved: false, isEnvironmentVariable: true, loggingContext: _evaluationLoggingContext);
             }
         }
 
@@ -1192,9 +1237,9 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                // Make the subtoolset version itself available as a property -- but only if it's not already set. 
+                // Make the subtoolset version itself available as a property -- but only if it's not already set.
                 // Because some people may be depending on this value even if there isn't a matching sub-toolset,
-                // set the property even if there is no matching sub-toolset.  
+                // set the property even if there is no matching sub-toolset.
                 if (!_data.Properties.Contains(Constants.SubToolsetVersionPropertyName))
                 {
                     _data.SetProperty(Constants.SubToolsetVersionPropertyName, _data.SubToolsetVersion, false /* NOT global property */, false /* may NOT be a reserved name */);
@@ -1208,7 +1253,6 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
             }
-
         }
 
         /// <summary>
@@ -1249,8 +1293,8 @@ namespace Microsoft.Build.Evaluation
             using (_evaluationProfiler.TrackElement(propertyElement))
             {
                 // Global properties cannot be overridden.  We silently ignore them if we try.  Legacy behavior.
-                // That is, unless this global property has been explicitly labeled as one that we want to treat as overridable for the duration 
-                // of this project (or import). 
+                // That is, unless this global property has been explicitly labeled as one that we want to treat as overridable for the duration
+                // of this project (or import).
                 if (
                         ((IDictionary<string, ProjectPropertyInstance>)_data.GlobalPropertiesDictionary).ContainsKey(propertyElement.Name) &&
                         !_data.GlobalPropertiesToTreatAsLocal.Contains(propertyElement.Name)
@@ -1269,7 +1313,7 @@ namespace Microsoft.Build.Evaluation
                 // it is the same as what we are setting the value on. Note: This needs to be set before we expand the property we are currently setting.
                 _expander.UsedUninitializedProperties.CurrentlyEvaluatingPropertyElementName = propertyElement.Name;
 
-                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(propertyElement.Value, ExpanderOptions.ExpandProperties, propertyElement.Location);
+                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(propertyElement.Value, ExpanderOptions.ExpandProperties, propertyElement.Location, _evaluationLoggingContext);
 
                 // If we are going to set a property to a value other than null or empty we need to check to see if it has been used
                 // during evaluation.
@@ -1411,11 +1455,14 @@ namespace Microsoft.Build.Evaluation
             {
                 List<ProjectRootElement> importedProjectRootElements = ExpandAndLoadImports(directoryOfImportingFile, importElement, out var sdkResult);
 
-                foreach (ProjectRootElement importedProjectRootElement in importedProjectRootElements)
+                if (importedProjectRootElements != null)
                 {
-                    _data.RecordImport(importElement, importedProjectRootElement, importedProjectRootElement.Version, sdkResult);
+                    foreach (ProjectRootElement importedProjectRootElement in importedProjectRootElements)
+                    {
+                        _data.RecordImport(importElement, importedProjectRootElement, importedProjectRootElement.Version, sdkResult);
 
-                    PerformDepthFirstPass(importedProjectRootElement);
+                        PerformDepthFirstPass(importedProjectRootElement);
+                    }
                 }
             }
         }
@@ -1624,7 +1671,10 @@ namespace Microsoft.Build.Evaluation
                         return projects;
                     }
 
-                    allProjects.AddRange(projects);
+                    if (projects != null)
+                    {
+                        allProjects.AddRange(projects);
+                    }
                 }
 
                 if (result == LoadImportsResult.FoundFilesToImportButIgnored)
@@ -1639,7 +1689,10 @@ namespace Microsoft.Build.Evaluation
                         return projects;
                     }
 
-                    allProjects.AddRange(projects);
+                    if (projects != null)
+                    {
+                        allProjects.AddRange(projects);
+                    }
                 }
 
                 if (result == LoadImportsResult.TriedToImportButFileNotFound)
@@ -1684,6 +1737,7 @@ namespace Microsoft.Build.Evaluation
             out SdkResult sdkResult,
             bool throwOnFileNotExistsError = true)
         {
+            projects = null;
             sdkResult = null;
 
             if (!EvaluateConditionCollectingConditionedProperties(importElement, ExpanderOptions.ExpandProperties,
@@ -1712,7 +1766,7 @@ namespace Microsoft.Build.Evaluation
 
                     _evaluationLoggingContext.LogBuildEvent(eventArgs);
                 }
-                projects = new List<ProjectRootElement>();
+                
                 return;
             }
 
@@ -1781,11 +1835,19 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // Combine SDK path with the "project" relative path
-                sdkResult = _sdkResolverService.ResolveSdk(_submissionId, sdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive, _isRunningInVisualStudio);
+                try
+                {
+                    sdkResult = _sdkResolverService.ResolveSdk(_submissionId, sdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive, _isRunningInVisualStudio);
+                }
+                catch (SdkResolverException e)
+                {
+                    // We throw using e.Message because e.Message already contains the stack trace
+                    // https://github.com/dotnet/msbuild/pull/6763
+                    ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "SDKResolverCriticalFailure", e.Message);
+                }
 
                 if (!sdkResult.Success)
                 {
-                    // Ignore the missing import if IgnoreMissingImports is set unless FailOnUnresolvedSdk is also set
                     if (_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports) && !_loadSettings.HasFlag(ProjectLoadSettings.FailOnUnresolvedSdk))
                     {
                         ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
@@ -1803,31 +1865,35 @@ namespace Microsoft.Build.Evaluation
 
                         _evaluationLoggingContext.LogBuildEvent(eventArgs);
 
-                        projects = new List<ProjectRootElement>();
-
                         return;
                     }
 
                     ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "CouldNotResolveSdk", sdkReference.ToString());
                 }
-
-                if (sdkResult.Path == null)
-                {
-                    projects = new List<ProjectRootElement>();
-                }
-                else
+                List<ProjectRootElement> projectList = null;
+                if (sdkResult.Path != null)
                 {
                     ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, Path.Combine(sdkResult.Path, project),
                         throwOnFileNotExistsError, out projects);
 
+                    if (projects?.Count > 0)
+                    {
+                        projectList = new List<ProjectRootElement>(projects);
+                    }
+
                     if (sdkResult.AdditionalPaths != null)
                     {
+
                         foreach (var additionalPath in sdkResult.AdditionalPaths)
                         {
                             ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, Path.Combine(additionalPath, project),
                                 throwOnFileNotExistsError, out var additionalProjects);
 
-                            projects.AddRange(additionalProjects);
+                            if (additionalProjects?.Count > 0)
+                            {
+                                projectList ??= new List<ProjectRootElement>();
+                                projectList.AddRange(additionalProjects);
+                            }
                         }
                     }
                 }
@@ -1835,10 +1901,14 @@ namespace Microsoft.Build.Evaluation
                 if ((sdkResult.PropertiesToAdd?.Any() == true) ||
                     (sdkResult.ItemsToAdd?.Any() == true))
                 {
-                    //  Inserting at the beginning will mean that the properties or items from the SdkResult will be evaluated before
+                    projectList ??= new List<ProjectRootElement>();
+
+                    // Inserting at the beginning will mean that the properties or items from the SdkResult will be evaluated before
                     //  any projects from paths returned by the SDK Resolver.
-                    projects.Insert(0, CreateProjectForSdkResult(sdkResult));
+                    projectList.Insert(0, CreateProjectForSdkResult(sdkResult));
                 }
+
+                projects = projectList;
             }
             else
             {
@@ -1847,7 +1917,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        //  Creates a project to set the properties and include the items from an SdkResult
+        // Creates a project to set the properties and include the items from an SdkResult
         private ProjectRootElement CreateProjectForSdkResult(SdkResult sdkResult)
         {
             int propertiesAndItemsHash;
@@ -1890,7 +1960,7 @@ namespace Microsoft.Build.Evaluation
             propertiesAndItemsHash = hash.ToHashCode();
 #endif
 
-            //  Generate a unique filename for the generated project for each unique set of properties and items.
+            // Generate a unique filename for the generated project for each unique set of properties and items.
             string projectPath = _projectRootElement.FullPath + ".SdkResolver." + propertiesAndItemsHash + ".proj";
 
             ProjectRootElement InnerCreate(string _, ProjectRootElementCacheBase __)
@@ -1927,8 +1997,6 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                _projectRootElementCache.AddEntry(project);
-
                 return project;
             }
 
@@ -1948,9 +2016,9 @@ namespace Microsoft.Build.Evaluation
         private LoadImportsResult ExpandAndLoadImportsFromUnescapedImportExpression(string directoryOfImportingFile, ProjectImportElement importElement, string unescapedExpression,
                                             bool throwOnFileNotExistsError, out List<ProjectRootElement> imports)
         {
-            imports = new List<ProjectRootElement>();
+            imports = null;
 
-            string importExpressionEscaped = _expander.ExpandIntoStringLeaveEscaped(unescapedExpression, ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
+            string importExpressionEscaped = _expander.ExpandIntoStringLeaveEscaped(unescapedExpression, ExpanderOptions.ExpandProperties, importElement.ProjectLocation, _evaluationLoggingContext);
             ElementLocation importLocationInProject = importElement.Location;
 
             if (String.IsNullOrWhiteSpace(importExpressionEscaped))
@@ -1999,7 +2067,13 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     // Expand the wildcards and provide an alphabetical order list of import statements.
-                    importFilesEscaped = _evaluationContext.EngineFileUtilities.GetFileListEscaped(directoryOfImportingFile, importExpressionEscapedItem, forceEvaluate: true);
+                    importFilesEscaped = EngineFileUtilities.GetFileListEscaped(
+                        directoryOfImportingFile,
+                        importExpressionEscapedItem,
+                        forceEvaluate: true,
+                        fileMatcher: _evaluationContext.FileMatcher,
+                        loggingMechanism: _evaluationLoggingContext,
+                        importLocation: importLocationInProject);
                 }
                 catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
@@ -2114,11 +2188,7 @@ namespace Microsoft.Build.Evaluation
                         // clearing the weak cache (and therefore setting explicitload=false) for projects the project system never
                         // was directly interested in (i.e. the ones that were reached for purposes of building a P2P.)
                         bool explicitlyLoaded = importElement.ContainingProject.IsExplicitlyLoaded;
-                        importedProjectElement = _projectRootElementCache.Get(
-                            importFileUnescaped,
-                            (p, c) =>
-                            {
-                                return ProjectRootElement.OpenProjectOrSolution(
+                        importedProjectElement = ProjectRootElement.OpenProjectOrSolution(
                                     importFileUnescaped,
                                     new ReadOnlyConvertingDictionary<string, ProjectPropertyInstance, string>(
                                         _data.GlobalPropertiesDictionary,
@@ -2126,10 +2196,6 @@ namespace Microsoft.Build.Evaluation
                                     _data.ExplicitToolsVersion,
                                     _projectRootElementCache,
                                     explicitlyLoaded);
-                            },
-                            explicitlyLoaded,
-                            // don't care about formatting, reuse whatever is there
-                            preserveFormatting: null);
 
                         if (duplicateImport)
                         {
@@ -2146,6 +2212,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         else
                         {
+                            imports ??= new List<ProjectRootElement>();
                             imports.Add(importedProjectElement);
 
                             if (_lastModifiedProject == null || importedProjectElement.LastWriteTimeWhenRead > _lastModifiedProject.LastWriteTimeWhenRead)
@@ -2279,14 +2346,14 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
 
-                    // Because these expressions will never be expanded again, we 
-                    // can store the unescaped value. The only purpose of escaping is to 
+                    // Because these expressions will never be expanded again, we
+                    // can store the unescaped value. The only purpose of escaping is to
                     // avoid undesired splitting or expansion.
                     _importsSeen.Add(importFileUnescaped, importElement);
                 }
             }
 
-            if (imports.Count > 0)
+            if (imports?.Count > 0)
             {
                 return LoadImportsResult.ProjectsImported;
             }
@@ -2376,7 +2443,8 @@ namespace Microsoft.Build.Evaluation
                     element.ConditionLocation,
                     _evaluationLoggingContext.LoggingService,
                     _evaluationLoggingContext.BuildEventContext,
-                    _evaluationContext.FileSystem
+                    _evaluationContext.FileSystem,
+                    loggingContext: _evaluationLoggingContext
                     );
 
                 return result;

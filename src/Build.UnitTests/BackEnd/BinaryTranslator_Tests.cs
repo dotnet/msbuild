@@ -11,6 +11,8 @@ using System.Reflection;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
@@ -25,11 +27,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializationMode()
         {
             MemoryStream stream = new MemoryStream();
-            ITranslator translator = BinaryTranslator.GetReadTranslator(stream, null);
-            Assert.Equal(TranslationDirection.ReadFromStream, translator.Mode);
+            using ITranslator readTranslator = BinaryTranslator.GetReadTranslator(stream, null);
+            Assert.Equal(TranslationDirection.ReadFromStream, readTranslator.Mode);
 
-            translator = BinaryTranslator.GetWriteTranslator(stream);
-            Assert.Equal(TranslationDirection.WriteToStream, translator.Mode);
+            using ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(stream);
+            Assert.Equal(TranslationDirection.WriteToStream, writeTranslator.Mode);
         }
 
         /// <summary>
@@ -125,7 +127,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSerializeStringArray()
         {
-            HelperTestArray(new string[] { }, StringComparer.Ordinal);
+            HelperTestArray(Array.Empty<string>(), StringComparer.Ordinal);
             HelperTestArray(new string[] { "foo", "bar" }, StringComparer.Ordinal);
             HelperTestArray(null, StringComparer.Ordinal);
         }
@@ -545,7 +547,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 HashAlgorithm = System.Configuration.Assemblies.AssemblyHashAlgorithm.SHA256,
                 VersionCompatibility = AssemblyVersionCompatibility.SameMachine,
                 CodeBase = "C:\\src",
-                KeyPair = new StrongNameKeyPair(new byte[] { 4, 3, 2, 1 }),
                 ContentType = AssemblyContentType.WindowsRuntime,
                 CultureName = "zh-HK",
             };

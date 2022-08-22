@@ -22,6 +22,8 @@ using System.Security.Principal;
 using System.Threading.Tasks;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -31,7 +33,7 @@ namespace Microsoft.Build.BackEnd
     {
 #region Private Data
 
-#if NETCOREAPP2_1 || MONO
+#if NETCOREAPP2_1_OR_GREATER || MONO
         /// <summary>
         /// The amount of time to wait for the client to connect to the host.
         /// </summary>
@@ -42,11 +44,6 @@ namespace Microsoft.Build.BackEnd
         /// The size of the buffers to use for named pipes
         /// </summary>
         private const int PipeBufferSize = 131072;
-
-        /// <summary>
-        /// Flag indicating if we should debug communications or not.
-        /// </summary>
-        private bool _debugCommunications = false;
 
         /// <summary>
         /// The current communication status of the node.
@@ -74,6 +71,13 @@ namespace Microsoft.Build.BackEnd
         /// Set when the asynchronous packet pump should terminate
         /// </summary>
         private AutoResetEvent _terminatePacketPump;
+
+        /// <summary>
+        /// True if this side is gracefully disconnecting.
+        /// In such case we have sent last packet to client side and we expect
+        /// client will soon broke pipe connection - unless server do it first.
+        /// </summary>
+        private bool _isClientDisconnecting;
 
         /// <summary>
         /// The thread which runs the asynchronous packet pump
@@ -181,6 +185,14 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        /// <summary>
+        /// Called when we are about to send last packet to finalize graceful disconnection with client.
+        /// </summary>
+        public void ClientWillDisconnect()
+        {
+            _isClientDisconnecting = true;
+        }
+
 #endregion
 
 #region Construction
@@ -188,19 +200,16 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Instantiates an endpoint to act as a client
         /// </summary>
-        /// <param name="pipeName">The name of the pipe to which we should connect.</param>
-        internal void InternalConstruct(string pipeName)
+        internal void InternalConstruct(string pipeName = null)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(pipeName, nameof(pipeName));
-
-            _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
-
             _status = LinkStatus.Inactive;
             _asyncDataMonitor = new object();
             _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
 
             _packetStream = new MemoryStream();
             _binaryWriter = new BinaryWriter(_packetStream);
+
+            pipeName ??= NamedPipeUtil.GetPlatformSpecificPipeName();
 
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
             if (!NativeMethodsShared.IsMono)
@@ -317,6 +326,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_asyncDataMonitor)
             {
+                _isClientDisconnecting = false;
                 _packetPump = new Thread(PacketPumpProc);
                 _packetPump.IsBackground = true;
                 _packetPump.Name = "OutOfProc Endpoint Packet Pump";
@@ -386,7 +396,7 @@ namespace Microsoft.Build.BackEnd
                         for (int i = 0; i < handshakeComponents.Length; i++)
                         {
                             int handshakePart = _pipeServer.ReadIntForHandshake(i == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
-#if NETCOREAPP2_1 || MONO
+#if NETCOREAPP2_1_OR_GREATER || MONO
                             , ClientConnectTimeout /* wait a long time for the handshake from this side */
 #endif
                             );
@@ -403,7 +413,7 @@ namespace Microsoft.Build.BackEnd
                         if (gotValidConnection)
                         {
                             // To ensure that our handshake and theirs have the same number of bytes, receive and send a magic number indicating EOS.
-#if NETCOREAPP2_1 || MONO
+#if NETCOREAPP2_1_OR_GREATER || MONO
                             _pipeServer.ReadEndOfHandshakeSignal(false, ClientConnectTimeout); /* wait a long time for the handshake from this side */
 #else
                             _pipeServer.ReadEndOfHandshakeSignal(false);
@@ -455,13 +465,8 @@ namespace Microsoft.Build.BackEnd
 
                     ChangeLinkStatus(LinkStatus.Active);
                 }
-                catch (Exception e)
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    if (ExceptionHandling.IsCriticalException(e))
-                    {
-                        throw;
-                    }
-
                     CommunicationsUtilities.Trace("Client connection failed.  Exiting comm thread. {0}", e);
                     if (localPipeServer.IsConnected)
                     {
@@ -558,14 +563,25 @@ namespace Microsoft.Build.BackEnd
                                 // Incomplete read.  Abort.
                                 if (bytesRead == 0)
                                 {
-                                    CommunicationsUtilities.Trace("Parent disconnected abruptly");
+                                    if (_isClientDisconnecting)
+                                    {
+                                        CommunicationsUtilities.Trace("Parent disconnected gracefully.");
+                                        // Do not change link status to failed as this could make node think connection has failed
+                                        // and recycle node, while this is perfectly expected and handled race condition
+                                        // (both client and node is about to close pipe and client can be faster).
+                                    }
+                                    else
+                                    {
+                                        CommunicationsUtilities.Trace("Parent disconnected abruptly.");
+                                        ChangeLinkStatus(LinkStatus.Failed);
+                                    }
                                 }
                                 else
                                 {
                                     CommunicationsUtilities.Trace("Incomplete header read from server.  {0} of {1} bytes read", bytesRead, headerByte.Length);
+                                    ChangeLinkStatus(LinkStatus.Failed);
                                 }
 
-                                ChangeLinkStatus(LinkStatus.Failed);
                                 exitLoop = true;
                                 break;
                             }

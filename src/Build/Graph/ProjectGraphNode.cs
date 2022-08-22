@@ -7,6 +7,8 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Graph
 {
     /// <summary>
@@ -54,8 +56,7 @@ namespace Microsoft.Build.Graph
             _projectReferences.Add(reference);
             reference._referencingProjects.Add(this);
 
-            // First edge wins, in accordance with vanilla msbuild behaviour when multiple msbuild tasks call into the same logical project
-            edges[(this, reference)] = projectReferenceItem;
+            edges.AddOrUpdateEdge((this, reference), projectReferenceItem);
         }
 
         internal void RemoveReference(ProjectGraphNode reference, GraphBuilder.GraphEdges edges)

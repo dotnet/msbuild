@@ -2,7 +2,7 @@
 name: 😵 My Build is Broken
 about: Use this template for helping figure out what's wrong with your build.
 title: ''
-labels: untriaged
+labels: needs-triage
 ---
 
 <!-- NOTE: The MSBuild team receives a lot of issues and we need to prioritize them accordingly. Please understand that we may not get to your issue for some time. -->
@@ -28,6 +28,12 @@ labels: untriaged
 * Your zipped project.
 * IDE / CLI steps to create the project and reproduce the behaviour.
 * Your command line invocation
+
+If providing steps to reproduce the issue proves difficult, consider attaching a binlog:
+[Details on sharing binary logs](https://aka.ms/msbuild/binlog)
+[More information on binary logs](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md)
+NOTE: Binary logs capture environment information. Ensure it does not include any information you don't want to be public before you attach one.
+If you want to share one just with Microsoft, you can [report a problem through Visual Studio](https://developercommunity.visualstudio.com/report) and share it privately with Microsoft.
 -->
 
 ### Expected Behavior

@@ -15,6 +15,9 @@ using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingCont
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+using System.Linq;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -143,24 +146,15 @@ namespace Microsoft.Build.BackEnd
             foreach (string targetName in targetNames)
             {
                 var targetExists = _projectInstance.Targets.TryGetValue(targetName, out ProjectTargetInstance targetInstance);
-                
-                if (!targetExists)
+                if (!targetExists && entry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.SkipNonexistentTargets))
                 {
-                    // Ignore the missing target if:
-                    //  SkipNonexistentTargets is set
-                    //  -or-
-                    //  SkipNonexistentNonEntryTargets and the target is is not a top level target
-                    if (entry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.SkipNonexistentTargets)
-                        || entry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.SkipNonexistentNonEntryTargets) && !entry.Request.Targets.Contains(targetName))
-                    {
-                        _projectLoggingContext.LogComment(Framework.MessageImportance.Low,
-                            "TargetSkippedWhenSkipNonexistentTargets", targetName);
-
-                        continue;
-                    }
+                    _projectLoggingContext.LogComment(Framework.MessageImportance.Low,
+                        "TargetSkippedWhenSkipNonexistentTargets", targetName);
                 }
-
-                targets.Add(new TargetSpecification(targetName, targetExists ? targetInstance.Location : _projectInstance.ProjectFileLocation));
+                else
+                {
+                    targets.Add(new TargetSpecification(targetName, targetExists ? targetInstance.Location : _projectInstance.ProjectFileLocation));
+                }
             }
 
             // Push targets onto the stack.  This method will reverse their push order so that they
@@ -412,7 +406,7 @@ namespace Microsoft.Build.BackEnd
                 (
                 !_cancellationToken.IsCancellationRequested &&
                 !stopProcessingStack &&
-                !_targetsToBuild.IsEmpty
+                _targetsToBuild.Any()
                 )
             {
                 TargetEntry currentTargetEntry = _targetsToBuild.Peek();
@@ -564,6 +558,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // If we've already dealt with this target and it didn't skip, let's log appropriately
                     // Otherwise we don't want anything more to do with it.
+                    bool success = targetResult.ResultCode == TargetResultCode.Success;
                     var skippedTargetEventArgs = new TargetSkippedEventArgs(message: null)
                     {
                         BuildEventContext = _projectLoggingContext.BuildEventContext,
@@ -571,7 +566,9 @@ namespace Microsoft.Build.BackEnd
                         TargetFile = currentTargetEntry.Target.Location.File,
                         ParentTarget = currentTargetEntry.ParentEntry?.Target.Name,
                         BuildReason = currentTargetEntry.BuildReason,
-                        OriginallySucceeded = targetResult.ResultCode == TargetResultCode.Success
+                        OriginallySucceeded = success,
+                        SkipReason = success ? TargetSkipReason.PreviouslyBuiltSuccessfully : TargetSkipReason.PreviouslyBuiltUnsuccessfully,
+                        OriginalBuildEventContext = targetResult.OriginalBuildEventContext
                     };
 
                     _projectLoggingContext.LogBuildEvent(skippedTargetEventArgs);
@@ -617,7 +614,7 @@ namespace Microsoft.Build.BackEnd
                 // Pop down to our parent, since any other dependencies our parent had should no longer
                 // execute.  If we encounter an error target on the way down, also stop since the failure
                 // of one error target in a set declared in OnError should not cause the others to stop running.
-                while ((!_targetsToBuild.IsEmpty) && (_targetsToBuild.Peek() != topEntry.ParentEntry) && !_targetsToBuild.Peek().ErrorTarget)
+                while ((_targetsToBuild.Any()) && (_targetsToBuild.Peek() != topEntry.ParentEntry) && !_targetsToBuild.Peek().ErrorTarget)
                 {
                     TargetEntry entry = _targetsToBuild.Pop();
                     entry.LeaveLegacyCallTargetScopes();

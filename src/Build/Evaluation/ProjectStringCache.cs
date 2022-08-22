@@ -9,6 +9,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <summary>
@@ -57,6 +59,20 @@ namespace Microsoft.Build.Construction
                 lock (_locker)
                 {
                     return _strings.Count;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Obtain the number of documents contained in the cache.
+        /// </summary>
+        internal int DocumentCount
+        {
+            get
+            {
+                lock (_locker)
+                {
+                    return _documents.Count;
                 }
             }
         }

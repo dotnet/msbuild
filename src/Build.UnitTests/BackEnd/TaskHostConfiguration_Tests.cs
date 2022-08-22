@@ -16,6 +16,8 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
@@ -55,9 +57,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     continueOnError: _continueOnErrorDefault,
                     taskName: null,
                     taskLocation: @"c:\my tasks\mytask.dll",
+                    isTaskInputLoggingEnabled: false,
                     taskParameters: null,
                     globalParameters: null,
                     warningsAsErrors: null,
+                    warningsNotAsErrors: null,
                     warningsAsMessages: null);
             }
            );
@@ -89,9 +93,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     continueOnError: _continueOnErrorDefault,
                     taskName: String.Empty,
                     taskLocation: @"c:\my tasks\mytask.dll",
+                    isTaskInputLoggingEnabled: false,
                     taskParameters: null,
                     globalParameters: null,
                     warningsAsErrors: null,
+                    warningsNotAsErrors: null,
                     warningsAsMessages: null);
             }
            );
@@ -123,9 +129,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     continueOnError: _continueOnErrorDefault,
                     taskName: "TaskName",
                     taskLocation: null,
+                    isTaskInputLoggingEnabled: false,
                     taskParameters: null,
                     globalParameters: null,
                     warningsAsErrors: null,
+                    warningsNotAsErrors: null,
                     warningsAsMessages: null);
             }
            );
@@ -159,9 +167,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     continueOnError: _continueOnErrorDefault,
                     taskName: "TaskName",
                     taskLocation: String.Empty,
+                    isTaskInputLoggingEnabled: false,
                     taskParameters: null,
                     globalParameters: null,
                     warningsAsErrors: null,
+                    warningsNotAsErrors: null,
                     warningsAsMessages: null);
             }
            );
@@ -193,9 +203,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 continueOnError: _continueOnErrorDefault,
                 taskName: "TaskName",
                 taskLocation: @"c:\MyTasks\MyTask.dll",
+                isTaskInputLoggingEnabled: false,
                 taskParameters: null,
                 globalParameters: null,
                 warningsAsErrors: null,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
 
             TaskHostConfiguration config2 = new TaskHostConfiguration(
@@ -217,9 +229,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 continueOnError: _continueOnErrorDefault,
                 taskName: "TaskName",
                 taskLocation: @"c:\MyTasks\MyTask.dll",
+                isTaskInputLoggingEnabled: false,
                 taskParameters: null,
                 globalParameters: null,
                 warningsAsErrors: null,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
 
             IDictionary<string, object> parameters = new Dictionary<string, object>();
@@ -242,9 +256,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 continueOnError: _continueOnErrorDefault,
                 taskName: "TaskName",
                 taskLocation: @"c:\MyTasks\MyTask.dll",
+                isTaskInputLoggingEnabled: false,
                 taskParameters: parameters,
                 globalParameters: null,
                 warningsAsErrors: null,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
 
             IDictionary<string, object> parameters2 = new Dictionary<string, object>();
@@ -272,9 +288,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 continueOnError: _continueOnErrorDefault,
                 taskName: "TaskName",
                 taskLocation: @"c:\MyTasks\MyTask.dll",
+                isTaskInputLoggingEnabled: false,
                 taskParameters: parameters2,
                 globalParameters: null,
                 warningsAsErrors: null,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
 
             HashSet<string> WarningsAsErrors = new HashSet<string>();
@@ -302,9 +320,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 continueOnError: _continueOnErrorDefault,
                 taskName: "TaskName",
                 taskLocation: @"c:\MyTasks\MyTask.dll",
+                isTaskInputLoggingEnabled: false,
                 taskParameters: parameters2,
                 globalParameters: null,
                 warningsAsErrors: WarningsAsErrors,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
         }
 
@@ -339,9 +359,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 continueOnError: _continueOnErrorDefault,
                 taskName: "TaskName",
                 taskLocation: @"c:\MyTasks\MyTask.dll",
+                isTaskInputLoggingEnabled: false,
                 taskParameters: null,
                 globalParameters: expectedGlobalProperties,
                 warningsAsErrors: null,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
@@ -383,9 +405,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 continueOnError: _continueOnErrorDefault,
                 taskName: "TaskName",
                 taskLocation: @"c:\MyTasks\MyTask.dll",
+                isTaskInputLoggingEnabled: false,
                 taskParameters: new Dictionary<string, object>(),
                 globalParameters: new Dictionary<string, string>(),
                 warningsAsErrors: null,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
@@ -432,9 +456,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 continueOnError: _continueOnErrorDefault,
                 taskName: "TaskName",
                 taskLocation: @"c:\MyTasks\MyTask.dll",
+                isTaskInputLoggingEnabled: false,
                 taskParameters: parameters,
                 globalParameters: null,
                 warningsAsErrors: null,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
@@ -479,9 +505,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 continueOnError: _continueOnErrorDefault,
                 taskName: "TaskName",
                 taskLocation: @"c:\MyTasks\MyTask.dll",
+                isTaskInputLoggingEnabled: false,
                 taskParameters: parameters,
                 globalParameters: null,
                 warningsAsErrors: null,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
@@ -525,9 +553,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 continueOnError: _continueOnErrorDefault,
                 taskName: "TaskName",
                 taskLocation: @"c:\MyTasks\MyTask.dll",
+                isTaskInputLoggingEnabled: false,
                 taskParameters: parameters,
                 globalParameters: null,
                 warningsAsErrors: null,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
@@ -578,9 +608,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 continueOnError: _continueOnErrorDefault,
                 taskName: "TaskName",
                 taskLocation: @"c:\MyTasks\MyTask.dll",
+                isTaskInputLoggingEnabled: false,
                 taskParameters: null,
                 globalParameters: null,
                 warningsAsErrors: WarningsAsErrors,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
@@ -594,7 +626,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
             Assert.NotNull(deserializedConfig.WarningsAsErrors);
             config.WarningsAsErrors.SequenceEqual(deserializedConfig.WarningsAsErrors, StringComparer.Ordinal).ShouldBeTrue();
-
         }
 
         /// <summary>
@@ -627,9 +658,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 continueOnError: _continueOnErrorDefault,
                 taskName: "TaskName",
                 taskLocation: @"c:\MyTasks\MyTask.dll",
+                isTaskInputLoggingEnabled: false,
                 taskParameters: null,
                 globalParameters: null,
                 warningsAsErrors: null,
+                warningsNotAsErrors: null,
                 warningsAsMessages: WarningsAsMessages);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());

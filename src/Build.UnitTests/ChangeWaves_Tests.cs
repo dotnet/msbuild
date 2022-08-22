@@ -3,12 +3,15 @@
 
 using Xunit;
 using Shouldly;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.UnitTests;
 using Xunit.Abstractions;
 using System;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Engine.UnitTests
 {

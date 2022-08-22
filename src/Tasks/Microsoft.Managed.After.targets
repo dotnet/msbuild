@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
           created a backup copy.  Incorrect changes to this file will make it
@@ -10,62 +10,64 @@ It is imported after the common targets have been imported.
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
-
 <Project>
 
-   <!-- Define crosstargeting for static graph, so it can identify inner and outer build graph nodes -->
-   <PropertyGroup>
-      <InnerBuildProperty>TargetFramework</InnerBuildProperty>
-      <InnerBuildPropertyValues>TargetFrameworks</InnerBuildPropertyValues>
-   </PropertyGroup>
+  <!-- Define crosstargeting for static graph, so it can identify inner and outer build graph nodes -->
+  <PropertyGroup>
+    <InnerBuildProperty>TargetFramework</InnerBuildProperty>
+    <InnerBuildPropertyValues>TargetFrameworks</InnerBuildPropertyValues>
+  </PropertyGroup>
 
-   <PropertyGroup Condition="'$(IsGraphBuild)' == 'true'">
-      <AddTransitiveProjectReferencesInStaticGraph Condition="'$(AddTransitiveProjectReferencesInStaticGraph)' == '' and '$(UsingMicrosoftNETSdk)' == 'true' and '$(DisableTransitiveProjectReferences)' != 'true'">true</AddTransitiveProjectReferencesInStaticGraph>
-   </PropertyGroup>
+  <PropertyGroup Condition="'$(IsGraphBuild)' == 'true'">
+    <AddTransitiveProjectReferencesInStaticGraph Condition="'$(AddTransitiveProjectReferencesInStaticGraph)' == '' and '$(UsingMicrosoftNETSdk)' == 'true' and '$(DisableTransitiveProjectReferences)' != 'true'">true</AddTransitiveProjectReferencesInStaticGraph>
+  </PropertyGroup>
 
-   <ItemGroup Condition="'$(IsGraphBuild)' == 'true'">
-      <!-- WPF projects generate a project with a random name at build time and then build the project via the IBuildEngine callbacks.
-           Detect WPF, and exclude the generated project from static graph isolation constraint checking.
-           Escape the item to avoid eager evaluation of the wildcards.
-      -->
-      <GraphIsolationExemptReference
-         Condition="'$(UseWPF)' == 'true' or '@(Page)' != '' or '@(ApplicationDefinition)' != '' or '@(XamlPage)' != '' or '@(XamlAppDef)' != ''"
-         Include="$([MSBuild]::Escape('$(MSBuildProjectDirectory)\$(MSBuildProjectName)*_wpftmp$(MSBuildProjectExtension)'))" />
-   </ItemGroup>
+  <ItemGroup Condition="'$(IsGraphBuild)' == 'true'">
+    <!-- WPF projects generate a project with a random name at build time and then build the project via the IBuildEngine callbacks.
+        Detect WPF, and exclude the generated project from static graph isolation constraint checking.
+        Escape the item to avoid eager evaluation of the wildcards.
+    -->
+    <GraphIsolationExemptReference
+        Condition="'$(UseWPF)' == 'true' or '@(Page)' != '' or '@(ApplicationDefinition)' != '' or '@(XamlPage)' != '' or '@(XamlAppDef)' != ''"
+        Include="$([MSBuild]::Escape('$(MSBuildProjectDirectory)\$(MSBuildProjectName)*_wpftmp$(MSBuildProjectExtension)'))" />
+  </ItemGroup>
 
   <!--
-    Properties for extension of ProjectReferenceTargets.
-    Append any current value which may have been provided in a Directory.Build.props since the intent was likely to append, not prepend.
+      Properties for extension of ProjectReferenceTargets.
+      Append any current value which may have been provided in a Directory.Build.props since the intent was likely to append, not prepend.
   -->
   <PropertyGroup Condition="'$(IsGraphBuild)' == 'true'">
     <!-- Empty case is for outer builds which do not import the target files that set BuildProjectReferences -->
-    <_MainReferenceTarget Condition="'$(BuildProjectReferences)' == '' or '$(BuildProjectReferences)' == 'true'">.projectReferenceTargetsOrDefaultTargets</_MainReferenceTarget>
-    <_MainReferenceTarget Condition="'$(_MainReferenceTarget)' == ''">GetTargetPath</_MainReferenceTarget>
+    <_MainReferenceTargetForBuild Condition="'$(BuildProjectReferences)' == '' or '$(BuildProjectReferences)' == 'true'">.projectReferenceTargetsOrDefaultTargets</_MainReferenceTargetForBuild>
+    <_MainReferenceTargetForBuild Condition="'$(_MainReferenceTargetForBuild)' == ''">GetTargetPath</_MainReferenceTargetForBuild>
 
     <ProjectReferenceTargetsForBuildInOuterBuild>GetTargetFrameworks;$(ProjectReferenceTargetsForBuildInOuterBuild)</ProjectReferenceTargetsForBuildInOuterBuild>
-    <ProjectReferenceTargetsForBuild>$(_MainReferenceTarget);GetNativeManifest;$(_RecursiveTargetForContentCopying);GetTargetFrameworksWithPlatformForSingleTargetFramework;$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
+    <ProjectReferenceTargetsForBuild>$(_MainReferenceTargetForBuild);GetNativeManifest;$(_RecursiveTargetForContentCopying);GetTargetFrameworksWithPlatformForSingleTargetFramework;$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
 
     <ProjectReferenceTargetsForCleanInOuterBuild>GetTargetFrameworks;$(ProjectReferenceTargetsForCleanInOuterBuild)</ProjectReferenceTargetsForCleanInOuterBuild>
     <ProjectReferenceTargetsForClean>Clean;GetTargetFrameworksWithPlatformForSingleTargetFramework;$(ProjectReferenceTargetsForClean)</ProjectReferenceTargetsForClean>
 
-    <ProjectReferenceTargetsForRebuildInOuterBuild>$(ProjectReferenceTargetsForCleanInOuterBuild);$(ProjectReferenceTargetsForBuildInOuterBuild);$(ProjectReferenceTargetsForRebuildInOuterBuild)</ProjectReferenceTargetsForRebuildInOuterBuild>
     <ProjectReferenceTargetsForRebuild>$(ProjectReferenceTargetsForClean);$(ProjectReferenceTargetsForBuild);$(ProjectReferenceTargetsForRebuild)</ProjectReferenceTargetsForRebuild>
 
-    <ProjectReferenceTargetsForPublish>GetCopyToPublishDirectoryItems;$(ProjectReferenceTargetsForPublish)</ProjectReferenceTargetsForPublish>
+    <!-- Publish has the same logic as Build for the main reference target except it also takes $(NoBuild) into account. -->
+    <_MainReferenceTargetForPublish Condition="'$(NoBuild)' == 'true'">GetTargetPath</_MainReferenceTargetForPublish>
+    <_MainReferenceTargetForPublish Condition="'$(NoBuild)' != 'true'">$(_MainReferenceTargetForBuild)</_MainReferenceTargetForPublish>
+    <ProjectReferenceTargetsForPublish>GetTargetFrameworks;$(_MainReferenceTargetForPublish);GetNativeManifest;GetCopyToPublishDirectoryItems;$(ProjectReferenceTargetsForPublish)</ProjectReferenceTargetsForPublish>
+
     <ProjectReferenceTargetsForGetCopyToPublishDirectoryItems>GetCopyToPublishDirectoryItems;$(ProjectReferenceTargetsForGetCopyToPublishDirectoryItems)</ProjectReferenceTargetsForGetCopyToPublishDirectoryItems>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(IsGraphBuild)' == 'true'">
-    <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuildInOuterBuild)" Condition=" '$(ProjectReferenceTargetsForBuildInOuterBuild)' != '' " OuterBuild="true"/>
+    <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuildInOuterBuild)" Condition=" '$(ProjectReferenceTargetsForBuildInOuterBuild)' != '' " OuterBuild="true" />
     <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuild)" Condition=" '$(ProjectReferenceTargetsForBuild)' != '' " />
 
-    <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForCleanInOuterBuild)" Condition=" '$(ProjectReferenceTargetsForCleanInOuterBuild)' != '' " OuterBuild="true"/>
+    <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForCleanInOuterBuild)" Condition=" '$(ProjectReferenceTargetsForCleanInOuterBuild)' != '' " OuterBuild="true" />
     <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForClean)" Condition=" '$(ProjectReferenceTargetsForClean)' != '' " />
 
-    <ProjectReferenceTargets Include="Rebuild" Targets="$(ProjectReferenceTargetsForRebuildInOuterBuild)" Condition=" '$(ProjectReferenceTargetsForRebuildInOuterBuild)' != '' " />
     <ProjectReferenceTargets Include="Rebuild" Targets="$(ProjectReferenceTargetsForRebuild)" Condition=" '$(ProjectReferenceTargetsForRebuild)' != '' " />
 
     <ProjectReferenceTargets Include="Publish" Targets="$(ProjectReferenceTargetsForPublish)" Condition=" '$(ProjectReferenceTargetsForPublish)' != '' " />
+
     <ProjectReferenceTargets Include="GetCopyToPublishDirectoryItems" Targets="$(ProjectReferenceTargetsForGetCopyToPublishDirectoryItems)" Condition=" '$(ProjectReferenceTargetsForGetCopyToPublishDirectoryItems)' != '' " />
   </ItemGroup>
 

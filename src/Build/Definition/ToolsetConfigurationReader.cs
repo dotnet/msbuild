@@ -8,10 +8,14 @@ using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Utilities;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -40,6 +44,13 @@ namespace Microsoft.Build.Evaluation
         /// the config file
         /// </summary>
         private static readonly char[] s_separatorForExtensionsPathSearchPaths = MSBuildConstants.SemicolonChar;
+
+        /// <summary>
+        /// Caching MSBuild exe configuration.
+        /// Used only by ReadApplicationConfiguration factory function (default) as oppose to unit tests config factory functions
+        /// which must not cache configs.
+        /// </summary>
+        private static readonly Lazy<Configuration> s_configurationCache = new Lazy<Configuration>(ReadOpenMappedExeConfiguration);
 
         /// <summary>
         /// Cached values of tools version -> project import search paths table
@@ -127,8 +138,8 @@ namespace Microsoft.Build.Evaluation
                     }
                     catch (ConfigurationException ex)
                     {
-                        // ConfigurationException is obsolete, but we catch it rather than 
-                        // ConfigurationErrorsException (which is what we throw below) because it is more 
+                        // ConfigurationException is obsolete, but we catch it rather than
+                        // ConfigurationErrorsException (which is what we throw below) because it is more
                         // general and we don't want to miss catching some other derived exception.
                         InvalidToolsetDefinitionException.Throw(ex, "ConfigFileReadError", ElementLocation.Create(ex.Source, ex.Line, 0).LocationString, ex.BareMessage);
                     }
@@ -232,7 +243,7 @@ namespace Microsoft.Build.Evaluation
                     continue;
                 }
 
-                //FIXME: handle ; in path on Unix
+                // FIXME: handle ; in path on Unix
                 var paths = property.Value
                     .Split(s_separatorForExtensionsPathSearchPaths, StringSplitOptions.RemoveEmptyEntries)
                     .Distinct()
@@ -250,6 +261,18 @@ namespace Microsoft.Build.Evaluation
         /// Unit tests wish to avoid reading (nunit.exe) application configuration file.
         /// </summary>
         private static Configuration ReadApplicationConfiguration()
+        {
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
+            {
+                return s_configurationCache.Value;
+            }
+            else
+            {
+                return ReadOpenMappedExeConfiguration();
+            }
+        }
+
+        private static Configuration ReadOpenMappedExeConfiguration()
         {
             // When running from the command-line or from VS, use the msbuild.exe.config file.
             if (BuildEnvironmentHelper.Instance.Mode != BuildEnvironmentMode.None &&

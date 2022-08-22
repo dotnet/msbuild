@@ -11,6 +11,8 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using ProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
 {
     /// <summary>

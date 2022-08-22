@@ -4,6 +4,8 @@
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -22,6 +24,8 @@ namespace Microsoft.Build.BackEnd
 
         private readonly bool _lowPriority;
 
+        internal bool LowPriority { get { return _lowPriority; } }
+
         #endregion
 
         #region Constructors and Factories
@@ -29,12 +33,10 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Instantiates an endpoint to act as a client
         /// </summary>
-        /// <param name="pipeName">The name of the pipe to which we should connect.</param>
         /// <param name="host">The component host.</param>
         /// <param name="enableReuse">Whether this node may be reused for a later build.</param>
         /// <param name="lowPriority">Whether this node is low priority.</param>
         internal NodeEndpointOutOfProc(
-            string pipeName, 
             IBuildComponentHost host,
             bool enableReuse,
             bool lowPriority)
@@ -44,7 +46,7 @@ namespace Microsoft.Build.BackEnd
             _enableReuse = enableReuse;
             _lowPriority = lowPriority;
 
-            InternalConstruct(pipeName);
+            InternalConstruct();
         }
 
         #endregion
@@ -54,7 +56,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         protected override Handshake GetHandshake()
         {
-            return new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, is64Bit: EnvironmentUtilities.Is64BitProcess, nodeReuse: _enableReuse, lowPriority: _lowPriority));
+            return new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse: _enableReuse, lowPriority: _lowPriority));
         }
 
         #region Structs

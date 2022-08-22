@@ -15,6 +15,8 @@ using Microsoft.Build.Shared;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
@@ -935,7 +937,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [MemberData(nameof(InsertMetadataElemenetBeforeSiblingsTestData))]
         public void InsertMetadataElementBeforeSiblings(AddMetadata addMetadata, int position, string expectedItem)
         {
-            Action<ProjectItemElement, ProjectMetadataElement, ProjectMetadataElement> act = (i, c, r) => { i.InsertBeforeChild(c, r);};
+            Action<ProjectItemElement, ProjectMetadataElement, ProjectMetadataElement> act = (i, c, r) => { i.InsertBeforeChild(c, r); };
 
             AssertMetadataConstruction(addMetadata, position, expectedItem, act);
         }
@@ -1012,7 +1014,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
         }
 
-        [Theory(Skip= "https://github.com/Microsoft/msbuild/issues/1253")]
+        [Theory(Skip= "https://github.com/dotnet/msbuild/issues/1253")]
         [MemberData(nameof(InsertMetadataAttributeAfterSiblingsTestData))]
         public void InsertMetadataAttributeAfterSiblings(AddMetadata addMetadata, int position, string expectedItem)
         {
@@ -1076,7 +1078,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
         }
 
-        [Theory(Skip= "https://github.com/Microsoft/msbuild/issues/1253")]
+        [Theory(Skip= "https://github.com/dotnet/msbuild/issues/1253")]
         [MemberData(nameof(InsertMetadataAttributeBeforeSiblingsTestData))]
         public void InsertMetadataAttributeBeforeSiblings(AddMetadata addMetadata, int position, string expectedItem)
         {
@@ -3131,7 +3133,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
 
         [Fact]
-        // Exposed https://github.com/Microsoft/msbuild/issues/1210
+        // Exposed https://github.com/dotnet/msbuild/issues/1210
         public void AddMetadataAsAttributeAndAsElement()
         {
             var project = ProjectRootElement.Create();

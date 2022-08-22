@@ -5,6 +5,8 @@ using System;
 using System.Xml;
 using System.Diagnostics;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <summary>
@@ -72,7 +74,7 @@ namespace Microsoft.Build.Construction
             {
                 // Caching the element location object saves significant memory
                 XmlDocumentWithLocation ownerDocumentWithLocation = (XmlDocumentWithLocation)OwnerDocument;
-                if (!String.Equals(_elementLocation.File, ownerDocumentWithLocation.FullPath, StringComparison.OrdinalIgnoreCase))
+                if (!String.Equals(_elementLocation.File, ownerDocumentWithLocation.FullPath ?? String.Empty, StringComparison.OrdinalIgnoreCase))
                 {
                     _elementLocation = ElementLocation.Create(ownerDocumentWithLocation.FullPath, _elementLocation.Line, _elementLocation.Column);
                 }

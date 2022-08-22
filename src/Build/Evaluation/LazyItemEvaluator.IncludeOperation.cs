@@ -3,13 +3,17 @@
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+using Microsoft.CodeAnalysis.Collections;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -18,10 +22,10 @@ namespace Microsoft.Build.Evaluation
         class IncludeOperation : LazyItemOperation
         {
             readonly int _elementOrder;
-            
+
             readonly string _rootDirectory;
 
-            readonly ImmutableList<string> _excludes;
+            readonly ImmutableSegmentedList<string> _excludes;
 
             readonly ImmutableList<ProjectMetadataElement> _metadata;
 
@@ -35,7 +39,7 @@ namespace Microsoft.Build.Evaluation
                 _metadata = builder.Metadata.ToImmutable();
             }
 
-            protected override ImmutableList<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            protected override ImmutableList<I> SelectItems(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 var itemsToAdd = ImmutableList.CreateBuilder<I>();
 
@@ -92,7 +96,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         // If this item is behind a false condition and represents a full drive/filesystem scan, expanding it is
                         // almost certainly undesired. It should be skipped to avoid evaluation taking an excessive amount of time.
-                        bool skipGlob = !_conditionResult && globFragment.IsFullFileSystemScan && !Traits.Instance.EscapeHatches.AlwaysEvaluateDangerousGlobs && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_8);
+                        bool skipGlob = !_conditionResult && globFragment.IsFullFileSystemScan && !Traits.Instance.EscapeHatches.AlwaysEvaluateDangerousGlobs;
                         if (!skipGlob)
                         {
                             string glob = globFragment.TextFragment;
@@ -107,14 +111,19 @@ namespace Microsoft.Build.Evaluation
                             {
                                 MSBuildEventSource.Log.ExpandGlobStart(_rootDirectory, glob, string.Join(", ", excludePatternsForGlobs));
                             }
+
                             using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
                             {
                                 includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
                                     _rootDirectory,
                                     glob,
-                                    excludePatternsForGlobs
-                                );
+                                    excludePatternsForGlobs,
+                                    fileMatcher: FileMatcher,
+                                    loggingMechanism: _lazyEvaluator._loggingContext,
+                                    includeLocation: _itemElement.IncludeLocation,
+                                    excludeLocation: _itemElement.ExcludeLocation);
                             }
+
                             if (MSBuildEventSource.Log.IsEnabled())
                             {
                                 MSBuildEventSource.Log.ExpandGlobStop(_rootDirectory, glob, string.Join(", ", excludePatternsForGlobs));
@@ -153,7 +162,7 @@ namespace Microsoft.Build.Evaluation
                 DecorateItemsWithMetadata(items.Select(i => new ItemBatchingContext(i)), _metadata);
             }
 
-            protected override void SaveItems(ImmutableList<I> items, ImmutableList<ItemData>.Builder listBuilder)
+            protected override void SaveItems(ImmutableList<I> items, OrderedItemDataCollection.Builder listBuilder)
             {
                 foreach (var item in items)
                 {
@@ -167,7 +176,7 @@ namespace Microsoft.Build.Evaluation
             public int ElementOrder { get; set; }
             public string RootDirectory { get; set; }
 
-            public ImmutableList<string>.Builder Excludes { get; } = ImmutableList.CreateBuilder<string>();
+            public ImmutableSegmentedList<string>.Builder Excludes { get; } = ImmutableSegmentedList.CreateBuilder<string>();
 
             public IncludeOperationBuilder(ProjectItemElement itemElement, bool conditionResult) : base(itemElement, conditionResult)
             {

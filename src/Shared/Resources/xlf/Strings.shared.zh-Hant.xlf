@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../Strings.shared.resx">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.shared.resx">
     <body>
       <trans-unit id="BuildAborted">
         <source>MSB4188: Build was canceled.</source>
@@ -307,6 +307,12 @@
         <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
         <target state="translated">指派值為 "{1}" 的參數 "{0}" 不得具有無效的路徑或檔案字元。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="WildcardResultsInDriveEnumeration">
+        <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined.</source>
+        <target state="new">MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined.</target>
+        <note>{StrBegin="MSB5029: "}UE: This is a generic message that is displayed when we find a project element that has a drive enumerating wildcard value for one of its
+      attributes e.g. &lt;Compile Include="$(NotAlwaysDefined)\**\*.cs"&gt; -- if the property is undefined, the value of Include should not result in enumerating all files on drive.</note>
       </trans-unit>
     </body>
   </file>

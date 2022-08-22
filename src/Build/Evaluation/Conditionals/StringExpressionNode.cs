@@ -3,8 +3,10 @@
 
 using System;
 using System.Diagnostics;
-
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -29,60 +31,35 @@ namespace Microsoft.Build.Evaluation
             _expandable = expandable;
         }
 
-        /// <summary>
-        /// Evaluate as boolean
-        /// </summary>
-        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
+        internal override bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result, LoggingContext loggingContext = null)
         {
-            return ConversionUtilities.ConvertStringToBool(GetExpandedValue(state));
+            return ConversionUtilities.TryConvertStringToBool(GetExpandedValue(state, loggingContext), out result);
         }
 
-        /// <summary>
-        /// Evaluate as numeric
-        /// </summary>
-        internal override double NumericEvaluate(ConditionEvaluator.IConditionEvaluationState state)
+        internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result, LoggingContext loggingContext = null)
         {
-            if (ShouldBeTreatedAsVisualStudioVersion(state))
+            if (ShouldBeTreatedAsVisualStudioVersion(state, loggingContext))
             {
-                return ConversionUtilities.ConvertDecimalOrHexToDouble(MSBuildConstants.CurrentVisualStudioVersion);
-            }
-
-            return ConversionUtilities.ConvertDecimalOrHexToDouble(GetExpandedValue(state));
-        }
-
-        internal override Version VersionEvaluate(ConditionEvaluator.IConditionEvaluationState state)
-        {
-            if (ShouldBeTreatedAsVisualStudioVersion(state))
-            {
-                return Version.Parse(MSBuildConstants.CurrentVisualStudioVersion);
-            }
-
-            return Version.Parse(GetExpandedValue(state));
-        }
-
-        internal override bool CanBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
-        {
-            return ConversionUtilities.CanConvertStringToBool(GetExpandedValue(state));
-        }
-
-        internal override bool CanNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state)
-        {
-            if (ShouldBeTreatedAsVisualStudioVersion(state))
-            {
+                result = ConversionUtilities.ConvertDecimalOrHexToDouble(MSBuildConstants.CurrentVisualStudioVersion);
                 return true;
             }
-
-            return ConversionUtilities.ValidDecimalOrHexNumber(GetExpandedValue(state));
+            else
+            {
+                return ConversionUtilities.TryConvertDecimalOrHexToDouble(GetExpandedValue(state, loggingContext), out result);
+            }
         }
 
-        internal override bool CanVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state)
+        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result, LoggingContext loggingContext = null)
         {
-            if (ShouldBeTreatedAsVisualStudioVersion(state))
+            if (ShouldBeTreatedAsVisualStudioVersion(state, loggingContext))
             {
+                result = Version.Parse(MSBuildConstants.CurrentVisualStudioVersion);
                 return true;
             }
-
-            return Version.TryParse(GetExpandedValue(state), out _);
+            else
+            {
+                return Version.TryParse(GetExpandedValue(state, loggingContext), out result);
+            }
         }
 
         /// <summary>
@@ -92,13 +69,32 @@ namespace Microsoft.Build.Evaluation
         /// to empty than to fully evaluate it.
         /// Implementations should cache the result so that calls after the first are free.
         /// </summary>
-        internal override bool EvaluatesToEmpty(ConditionEvaluator.IConditionEvaluationState state)
+        internal override bool EvaluatesToEmpty(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
         {
             if (_cachedExpandedValue == null)
             {
                 if (_expandable)
                 {
-                    string expandBreakEarly = state.ExpandIntoStringBreakEarly(_value);
+                    switch (_value.Length)
+                    {
+                        case 0:
+                            _cachedExpandedValue = String.Empty;
+                            return true;
+                        // If the length is 1 or 2, it can't possibly be a property, item, or metadata, and it isn't empty.
+                        case 1:
+                        case 2:
+                            _cachedExpandedValue = _value;
+                            return false;
+                        default:
+                            if (_value[1] != '(' || (_value[0] != '$' && _value[0] != '%' && _value[0] != '@') || _value[_value.Length - 1] != ')')
+                            {
+                                // This isn't just a property, item, or metadata value, and it isn't empty.
+                                return false;
+                            }
+                            break;
+                    }
+
+                    string expandBreakEarly = state.ExpandIntoStringBreakEarly(_value, loggingContext);
 
                     if (expandBreakEarly == null)
                     {
@@ -134,13 +130,13 @@ namespace Microsoft.Build.Evaluation
         /// Value after any item and property expressions are expanded
         /// </summary>
         /// <returns></returns>
-        internal override string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state)
+        internal override string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
         {
             if (_cachedExpandedValue == null)
             {
                 if (_expandable)
                 {
-                    _cachedExpandedValue = state.ExpandIntoString(_value);
+                    _cachedExpandedValue = state.ExpandIntoString(_value, loggingContext);
                 }
                 else
                 {
@@ -171,9 +167,9 @@ namespace Microsoft.Build.Evaluation
         /// Needed to provide a compat shim for numeric/version comparisons
         /// on MSBuildToolsVersion, which were fine when it was a number
         /// but now cause the project to throw InvalidProjectException when
-        /// ToolsVersion is "Current". https://github.com/Microsoft/msbuild/issues/4150
+        /// ToolsVersion is "Current". https://github.com/dotnet/msbuild/issues/4150
         /// </remarks>
-        private bool ShouldBeTreatedAsVisualStudioVersion(ConditionEvaluator.IConditionEvaluationState state)
+        private bool ShouldBeTreatedAsVisualStudioVersion(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
         {
             if (!_shouldBeTreatedAsVisualStudioVersion.HasValue)
             {
@@ -181,7 +177,7 @@ namespace Microsoft.Build.Evaluation
 
                 // Do this check first, because if it's not (common) we can early-out and the next
                 // expansion will be cheap because this will populate the cached expanded value.
-                if (string.Equals(GetExpandedValue(state), MSBuildConstants.CurrentToolsVersion, StringComparison.Ordinal))
+                if (string.Equals(GetExpandedValue(state, loggingContext), MSBuildConstants.CurrentToolsVersion, StringComparison.Ordinal))
                 {
                     // and it is just an expansion of MSBuildToolsVersion
                     _shouldBeTreatedAsVisualStudioVersion = string.Equals(_value, "$(MSBuildToolsVersion)", StringComparison.OrdinalIgnoreCase);

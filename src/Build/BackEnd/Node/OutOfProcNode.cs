@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Globalization;
@@ -18,6 +17,9 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.SdkResolution;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
+using System.Diagnostics;
+
+#nullable disable
 
 namespace Microsoft.Build.Execution
 {
@@ -119,11 +121,6 @@ namespace Microsoft.Build.Execution
         private Exception _shutdownException;
 
         /// <summary>
-        /// Flag indicating if we should debug communications or not.
-        /// </summary>
-        private readonly bool _debugCommunications;
-
-        /// <summary>
         /// Data for the use of LegacyThreading semantics.
         /// </summary>
         private readonly LegacyThreadingData _legacyThreadingData;
@@ -139,8 +136,6 @@ namespace Microsoft.Build.Execution
         public OutOfProcNode()
         {
             s_isOutOfProcNode = true;
-
-            _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
 
             _receivedPackets = new ConcurrentQueue<INodePacket>();
             _packetReceivedEvent = new AutoResetEvent(false);
@@ -246,9 +241,8 @@ namespace Microsoft.Build.Execution
         public NodeEngineShutdownReason Run(bool enableReuse, bool lowPriority, out Exception shutdownException)
         {
             // Console.WriteLine("Run called at {0}", DateTime.Now);
-            string pipeName = NamedPipeUtil.GetPipeNameOrPath("MSBuild" + Process.GetCurrentProcess().Id);
 
-            _nodeEndpoint = new NodeEndpointOutOfProc(pipeName, this, enableReuse, lowPriority);
+            _nodeEndpoint = new NodeEndpointOutOfProc(this, enableReuse, lowPriority);
             _nodeEndpoint.OnLinkStatusChanged += OnLinkStatusChanged;
             _nodeEndpoint.Listen(this);
 
@@ -766,13 +760,8 @@ namespace Microsoft.Build.Execution
                     _loggingService.InitializeNodeLoggers(configuration.LoggerDescriptions, sink, configuration.NodeId);
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
             {
-                if (ExceptionHandling.IsCriticalException(ex))
-                {
-                    throw;
-                }
-
                 OnEngineException(ex);
             }
 
@@ -821,6 +810,32 @@ namespace Microsoft.Build.Execution
         private void HandleNodeBuildComplete(NodeBuildComplete buildComplete)
         {
             _shutdownReason = buildComplete.PrepareForReuse ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
+            if (_shutdownReason == NodeEngineShutdownReason.BuildCompleteReuse)
+            {
+                ProcessPriorityClass priorityClass = Process.GetCurrentProcess().PriorityClass;
+                if (priorityClass != ProcessPriorityClass.Normal && priorityClass != ProcessPriorityClass.BelowNormal)
+                {
+                    // This isn't a priority class known by MSBuild. We should avoid connecting to this node.
+                    _shutdownReason = NodeEngineShutdownReason.BuildComplete;
+                }
+                else
+                {
+                    bool lowPriority = priorityClass == ProcessPriorityClass.BelowNormal;
+                    if (_nodeEndpoint.LowPriority != lowPriority)
+                    {
+                        if (!lowPriority || NativeMethodsShared.IsWindows)
+                        {
+                            Process.GetCurrentProcess().PriorityClass = lowPriority ? ProcessPriorityClass.Normal : ProcessPriorityClass.BelowNormal;
+                        }
+                        else
+                        {
+                            // On *nix, we can't adjust the priority up, so to avoid using this node at the wrong priority, we should not be reused.
+                            _shutdownReason = NodeEngineShutdownReason.BuildComplete;
+                        }
+                    }
+                }
+            }
+            
             _shutdownEvent.Set();
         }
     }

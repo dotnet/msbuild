@@ -6,6 +6,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -93,7 +95,7 @@ namespace Microsoft.Build.Tasks
                     // there is no disk in drive A:, please insert one.  We don't want that. 
                     // SetErrorMode will let us disable this, but we should set the error
                     // mode back, since this may have wide-ranging effects.
-                    oldMode = NativeMethodsShared.SetErrorMode(1 /* ErrorModes.SEM_FAILCRITICALERRORS */);
+                    NativeMethodsShared.SetThreadErrorMode(1 /* ErrorModes.SEM_FAILCRITICALERRORS */, out oldMode);
                 }
 
                 try
@@ -174,7 +176,7 @@ namespace Microsoft.Build.Tasks
                     // Reset the error mode on Windows
                     if (NativeMethodsShared.IsWindows)
                     {
-                        NativeMethodsShared.SetErrorMode(oldMode);
+                        NativeMethodsShared.SetThreadErrorMode(oldMode, out _);
                     }
                 }
             }

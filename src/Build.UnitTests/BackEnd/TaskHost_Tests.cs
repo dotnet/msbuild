@@ -17,6 +17,8 @@ using System.Threading.Tasks;
 using Xunit;
 using Shouldly;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
@@ -71,7 +73,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _elementLocation = ElementLocation.Create("MockFile", 5, 5);
 
             BuildRequest buildRequest = new BuildRequest(1 /* submissionId */, 1, 1, new List<string>(), null, BuildEventContext.Invalid, null);
-            BuildRequestConfiguration configuration = new BuildRequestConfiguration(1, new BuildRequestData("Nothing", new Dictionary<string, string>(), "4.0", new string[0], null), "2.0");
+            BuildRequestConfiguration configuration = new BuildRequestConfiguration(1, new BuildRequestData("Nothing", new Dictionary<string, string>(), "4.0", Array.Empty<string>(), null), "2.0");
 
             configuration.Project = new ProjectInstance(ProjectRootElement.Create());
 
@@ -120,20 +122,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void CustomBuildErrorEventIsPreserved()
         {
             // Create a custom build event args that derives from MSBuild's BuildErrorEventArgs.
-            // Set a custom field on this event (FXCopRule).
-            MyCustomBuildErrorEventArgs fxcopError = new MyCustomBuildErrorEventArgs("Your code failed.");
-            fxcopError.FXCopRule = "CodeViolation";
+            // Set a custom field on this event.
+            MyCustomBuildErrorEventArgs customBuildError = new MyCustomBuildErrorEventArgs("Your code failed.");
+            customBuildError.CustomData = "CodeViolation";
 
             // Log the custom event args.  (Pretend that the task actually did this.)
-            _taskHost.LogErrorEvent(fxcopError);
+            _taskHost.LogErrorEvent(customBuildError);
 
             // Make sure our custom logger received the actual custom event and not some fake.
             Assert.True(_customLogger.LastError is MyCustomBuildErrorEventArgs); // "Expected Custom Error Event"
 
             // Make sure the special fields in the custom event match what we originally logged.
-            fxcopError = _customLogger.LastError as MyCustomBuildErrorEventArgs;
-            Assert.Equal("Your code failed.", fxcopError.Message);
-            Assert.Equal("CodeViolation", fxcopError.FXCopRule);
+            customBuildError = _customLogger.LastError as MyCustomBuildErrorEventArgs;
+            Assert.Equal("Your code failed.", customBuildError.Message);
+            Assert.Equal("CodeViolation", customBuildError.CustomData);
         }
 
         /// <summary>
@@ -146,19 +148,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void CustomBuildWarningEventIsPreserved()
         {
             // Create a custom build event args that derives from MSBuild's BuildWarningEventArgs.
-            // Set a custom field on this event (FXCopRule).
-            MyCustomBuildWarningEventArgs fxcopWarning = new MyCustomBuildWarningEventArgs("Your code failed.");
-            fxcopWarning.FXCopRule = "CodeViolation";
+            // Set a custom field on this event.
+            MyCustomBuildWarningEventArgs customBuildWarning = new MyCustomBuildWarningEventArgs("Your code failed.");
+            customBuildWarning.CustomData = "CodeViolation";
 
-            _taskHost.LogWarningEvent(fxcopWarning);
+            _taskHost.LogWarningEvent(customBuildWarning);
 
             // Make sure our custom logger received the actual custom event and not some fake.
             Assert.True(_customLogger.LastWarning is MyCustomBuildWarningEventArgs); // "Expected Custom Warning Event"
 
             // Make sure the special fields in the custom event match what we originally logged.
-            fxcopWarning = _customLogger.LastWarning as MyCustomBuildWarningEventArgs;
-            Assert.Equal("Your code failed.", fxcopWarning.Message);
-            Assert.Equal("CodeViolation", fxcopWarning.FXCopRule);
+            customBuildWarning = _customLogger.LastWarning as MyCustomBuildWarningEventArgs;
+            Assert.Equal("Your code failed.", customBuildWarning.Message);
+            Assert.Equal("CodeViolation", customBuildWarning.CustomData);
         }
 
         /// <summary>
@@ -171,7 +173,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void CustomBuildMessageEventIsPreserved()
         {
             // Create a custom build event args that derives from MSBuild's BuildMessageEventArgs.
-            // Set a custom field on this event (FXCopRule).
+            // Set a custom field on this event.
             MyCustomMessageEvent customMessage = new MyCustomMessageEvent("I am a message");
             customMessage.CustomMessage = "CodeViolation";
 
@@ -496,7 +498,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void LogCustomAfterTaskIsDone()
         {
             string projectFileContents = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='msbuilddefaulttoolsversion'>
+                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
                         <UsingTask TaskName='test' TaskFactory='CodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' >
                             <Task>
                               <Using Namespace='System' />
@@ -532,7 +534,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void LogCommentAfterTaskIsDone()
         {
             string projectFileContents = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='msbuilddefaulttoolsversion'>
+                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
                         <UsingTask TaskName='test' TaskFactory='CodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' >
                             <Task>
                               <Using Namespace='System' />
@@ -568,7 +570,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void LogWarningAfterTaskIsDone()
         {
             string projectFileContents = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='msbuilddefaulttoolsversion'>
+                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
                         <UsingTask TaskName='test' TaskFactory='CodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' >
                             <Task>
                               <Using Namespace='System' />
@@ -604,7 +606,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void LogErrorAfterTaskIsDone()
         {
             string projectFileContents = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='msbuilddefaulttoolsversion'>
+                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
                         <UsingTask TaskName='test' TaskFactory='CodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' >
                             <Task>
                               <Using Namespace='System' />
@@ -861,7 +863,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Some custom data for the custom event.
             /// </summary>
-            private string _fxcopRule;
+            private string _customData;
 
             /// <summary>
             /// Constructor
@@ -877,16 +879,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Some data which can be set on the custom error event to make sure it makes it to the logger.
             /// </summary>
-            internal string FXCopRule
+            internal string CustomData
             {
                 get
                 {
-                    return _fxcopRule;
+                    return _customData;
                 }
 
                 set
                 {
-                    _fxcopRule = value;
+                    _customData = value;
                 }
             }
         }
@@ -900,7 +902,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Custom data for the custom event
             /// </summary>
-            private string _fxcopRule;
+            private string _customData;
 
             /// <summary>
             /// Constructor
@@ -916,16 +918,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Getter for the custom data in the custom event.
             /// </summary>
-            internal string FXCopRule
+            internal string CustomData
             {
                 get
                 {
-                    return _fxcopRule;
+                    return _customData;
                 }
 
                 set
                 {
-                    _fxcopRule = value;
+                    _customData = value;
                 }
             }
         }
@@ -973,7 +975,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         internal class MyCustomBuildEventArgsNotSerializable : CustomBuildEventArgs
         {
-            //  If binary serialization is not available, then we use a simple serializer which relies on a default constructor.  So to test
+            // If binary serialization is not available, then we use a simple serializer which relies on a default constructor.  So to test
             //  what happens for an event that's not serializable, don't include a default constructor.
             /// <summary>
             /// Default constructor
@@ -998,7 +1000,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Custom data for the custom event
             /// </summary>
-            private string _fxcopRule;
+            private string _customData;
 
             /// <summary>
             /// Constructor
@@ -1014,16 +1016,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Getter and setter for the custom data
             /// </summary>
-            internal string FXCopRule
+            internal string CustomData
             {
                 get
                 {
-                    return _fxcopRule;
+                    return _customData;
                 }
 
                 set
                 {
-                    _fxcopRule = value;
+                    _customData = value;
                 }
             }
         }
@@ -1036,7 +1038,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Custom data for the custom event
             /// </summary>
-            private string _fxcopRule;
+            private string _customData;
 
             /// <summary>
             /// Constructor
@@ -1052,16 +1054,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Getter and setter for the custom data
             /// </summary>
-            internal string FXCopRule
+            internal string CustomData
             {
                 get
                 {
-                    return _fxcopRule;
+                    return _customData;
                 }
 
                 set
                 {
-                    _fxcopRule = value;
+                    _customData = value;
                 }
             }
         }

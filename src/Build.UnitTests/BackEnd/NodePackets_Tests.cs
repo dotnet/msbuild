@@ -11,6 +11,8 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using System.Collections.Generic;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
@@ -52,6 +54,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildErrorEventArgs error = new BuildErrorEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
             TargetStartedEventArgs targetStarted = new TargetStartedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile");
             TargetFinishedEventArgs targetFinished = new TargetFinishedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile", true);
+            TargetSkippedEventArgs targetSkipped = CreateTargetSkipped();
             ProjectStartedEventArgs projectStarted = new ProjectStartedEventArgs(-1, "message", "help", "ProjectFile", "targetNames", null, null, null);
             ProjectFinishedEventArgs projectFinished = new ProjectFinishedEventArgs("message", "help", "ProjectFile", true);
             ExternalProjectStartedEventArgs externalStartedEvent = new ExternalProjectStartedEventArgs("message", "help", "senderName", "projectFile", "targetNames");
@@ -69,6 +72,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(error, LoggingEventType.BuildErrorEvent);
             VerifyLoggingPacket(targetStarted, LoggingEventType.TargetStartedEvent);
             VerifyLoggingPacket(targetFinished, LoggingEventType.TargetFinishedEvent);
+            VerifyLoggingPacket(targetSkipped, LoggingEventType.TargetSkipped);
             VerifyLoggingPacket(projectStarted, LoggingEventType.ProjectStartedEvent);
             VerifyLoggingPacket(projectFinished, LoggingEventType.ProjectFinishedEvent);
             VerifyLoggingPacket(evaluationStarted, LoggingEventType.ProjectEvaluationStartedEvent);
@@ -158,6 +162,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 items,
                 logItemMetadata: true,
                 DateTime.MinValue);
+            result.LineNumber = 30000;
+            result.ColumnNumber = 50;
 
             // normalize line endings as we can't rely on the line endings of NodePackets_Tests.cs
             Assert.Equal(@"Task Parameter:
@@ -171,6 +177,26 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 2=2value
                 3=3value".Replace("\r\n", "\n"), result.Message);
 
+            return result;
+        }
+
+        private static TargetSkippedEventArgs CreateTargetSkipped()
+        {
+            var result = new TargetSkippedEventArgs(message: null)
+            {
+                BuildReason = TargetBuiltReason.DependsOn,
+                SkipReason = TargetSkipReason.PreviouslyBuiltSuccessfully,
+                BuildEventContext = CreateBuildEventContext(),
+                OriginalBuildEventContext = CreateBuildEventContext(),
+                Condition = "$(Condition) == 'true'",
+                EvaluatedCondition = "'true' == 'true'",
+                Importance = MessageImportance.Normal,
+                OriginallySucceeded = true,
+                ProjectFile = "1.proj",
+                TargetFile = "1.proj",
+                TargetName = "Build",
+                ParentTarget = "ParentTarget"
+            };
             return result;
         }
 
@@ -195,7 +221,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new BuildFinishedEventArgs("Message", "Keyword", true),
                     new BuildStartedEventArgs("Message", "Help"),
                     new BuildMessageEventArgs("Message", "help", "sender", MessageImportance.Low),
-                    new TaskStartedEventArgs("message", "help", "projectFile", "taskFile", "taskName"),
+                    new TaskStartedEventArgs("message", "help", "projectFile", "taskFile", "taskName")
+                    {
+                        LineNumber = 345,
+                        ColumnNumber = 123
+                    },
                     new TaskFinishedEventArgs("message", "help", "projectFile", "taskFile", "taskName", true),
                     new TaskCommandLineEventArgs("commandLine", "taskName", MessageImportance.Low),
                     CreateTaskParameter(),
@@ -207,7 +237,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new ProjectFinishedEventArgs("message", "help", "ProjectFile", true),
                     new ExternalProjectStartedEventArgs("message", "help", "senderName", "projectFile", "targetNames"),
                     CreateProjectEvaluationStarted(),
-                    CreateProjectEvaluationFinished()
+                    CreateProjectEvaluationFinished(),
+                    CreateTargetSkipped()
                 };
 
                 foreach (BuildEventArgs arg in testArgs)
@@ -398,8 +429,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Assert.Equal(leftTargetFinished.Succeeded, rightTargetFinished.Succeeded);
                     Assert.Equal(leftTargetFinished.TargetFile, rightTargetFinished.TargetFile);
                     Assert.Equal(leftTargetFinished.TargetName, rightTargetFinished.TargetName);
-                    //TODO: target output translation is a special case and is done in TranslateTargetFinishedEvent
-                    //Assert.Equal(leftTargetFinished.TargetOutputs, rightTargetFinished.TargetOutputs);
+                    // TODO: target output translation is a special case and is done in TranslateTargetFinishedEvent
+                    // Assert.Equal(leftTargetFinished.TargetOutputs, rightTargetFinished.TargetOutputs);
                     break;
 
                 case LoggingEventType.TargetStartedEvent:
@@ -410,6 +441,23 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Assert.Equal(leftTargetStarted.ProjectFile, rightTargetStarted.ProjectFile);
                     Assert.Equal(leftTargetStarted.TargetFile, rightTargetStarted.TargetFile);
                     Assert.Equal(leftTargetStarted.TargetName, rightTargetStarted.TargetName);
+                    break;
+
+                case LoggingEventType.TargetSkipped:
+                    TargetSkippedEventArgs leftTargetSkipped = left.NodeBuildEvent.Value.Value as TargetSkippedEventArgs;
+                    TargetSkippedEventArgs rightTargetSkipped = right.NodeBuildEvent.Value.Value as TargetSkippedEventArgs;
+                    Assert.Equal(leftTargetSkipped.BuildReason, rightTargetSkipped.BuildReason);
+                    Assert.Equal(leftTargetSkipped.SkipReason, rightTargetSkipped.SkipReason);
+                    Assert.Equal(leftTargetSkipped.BuildEventContext, rightTargetSkipped.BuildEventContext);
+                    Assert.Equal(leftTargetSkipped.OriginalBuildEventContext, rightTargetSkipped.OriginalBuildEventContext);
+                    Assert.Equal(leftTargetSkipped.Condition, rightTargetSkipped.Condition);
+                    Assert.Equal(leftTargetSkipped.EvaluatedCondition, rightTargetSkipped.EvaluatedCondition);
+                    Assert.Equal(leftTargetSkipped.Importance, rightTargetSkipped.Importance);
+                    Assert.Equal(leftTargetSkipped.OriginallySucceeded, rightTargetSkipped.OriginallySucceeded);
+                    Assert.Equal(leftTargetSkipped.ProjectFile, rightTargetSkipped.ProjectFile);
+                    Assert.Equal(leftTargetSkipped.TargetFile, rightTargetSkipped.TargetFile);
+                    Assert.Equal(leftTargetSkipped.TargetName, rightTargetSkipped.TargetName);
+                    Assert.Equal(leftTargetSkipped.ParentTarget, rightTargetSkipped.ParentTarget);
                     break;
 
                 case LoggingEventType.TaskCommandLineEvent:
@@ -433,6 +481,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Assert.Equal(leftTaskParameter.Message, rightTaskParameter.Message);
                     Assert.Equal(leftTaskParameter.BuildEventContext, rightTaskParameter.BuildEventContext);
                     Assert.Equal(leftTaskParameter.Timestamp, rightTaskParameter.Timestamp);
+                    Assert.Equal(leftTaskParameter.LineNumber, rightTaskParameter.LineNumber);
+                    Assert.Equal(leftTaskParameter.ColumnNumber, rightTaskParameter.ColumnNumber);
                     break;
 
                 case LoggingEventType.TaskFinishedEvent:
@@ -454,6 +504,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Assert.Equal(leftTaskStarted.ProjectFile, rightTaskStarted.ProjectFile);
                     Assert.Equal(leftTaskStarted.TaskFile, rightTaskStarted.TaskFile);
                     Assert.Equal(leftTaskStarted.TaskName, rightTaskStarted.TaskName);
+                    Assert.Equal(leftTaskStarted.LineNumber, rightTaskStarted.LineNumber);
+                    Assert.Equal(leftTaskStarted.ColumnNumber, rightTaskStarted.ColumnNumber);
                     break;
 
                 default:

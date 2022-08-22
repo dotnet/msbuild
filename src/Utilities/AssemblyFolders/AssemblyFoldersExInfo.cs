@@ -3,17 +3,20 @@
 //-----------------------------------------------------------------------
 // Contains information about entries in the AssemblyFoldersEx registry keys.
 //-----------------------------------------------------------------------
-#if FEATURE_WIN32_REGISTRY
 
 using System;
+using System.Runtime.Versioning;
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
+
+#nullable disable
 
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
     /// Contains information about entries in the AssemblyFoldersEx registry keys.
     /// </summary>
+    [SupportedOSPlatform("windows")]
     public class AssemblyFoldersExInfo
     {
         /// <summary>
@@ -58,4 +61,3 @@ namespace Microsoft.Build.Utilities
         public Version TargetFrameworkVersion { get; }
     }
 }
-#endif

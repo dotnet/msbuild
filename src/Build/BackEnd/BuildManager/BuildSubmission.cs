@@ -7,6 +7,8 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using System.Globalization;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>
@@ -165,13 +167,8 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Indicates that all logging events for this submission are complete.
         /// </summary>
-        internal void CompleteLogging(bool waitForLoggingThread)
+        internal void CompleteLogging()
         {
-            if (waitForLoggingThread)
-            {
-                ((BackEnd.Logging.LoggingService)((IBuildComponentHost)BuildManager).LoggingService).WaitForThreadToProcessEvents();
-            }
-
             LoggingCompleted = true;
             CheckForCompletion();
         }

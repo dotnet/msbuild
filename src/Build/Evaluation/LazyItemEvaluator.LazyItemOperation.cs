@@ -11,6 +11,8 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
@@ -27,7 +29,7 @@ namespace Microsoft.Build.Evaluation
             protected readonly Expander<P, I> _expander;
             protected readonly bool _conditionResult;
 
-            //  This is used only when evaluating an expression, which instantiates
+            // This is used only when evaluating an expression, which instantiates
             //  the items and then removes them
             protected readonly IItemFactory<I, I> _itemFactory;
             internal ItemSpec<P, I> Spec => _itemSpec;
@@ -44,14 +46,14 @@ namespace Microsoft.Build.Evaluation
 
                 _evaluatorData = new EvaluatorData(_lazyEvaluator._outerEvaluatorData, itemType => GetReferencedItems(itemType, ImmutableHashSet<string>.Empty));
                 _itemFactory = new ItemFactoryWrapper(_itemElement, _lazyEvaluator._itemFactory);
-                _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, _lazyEvaluator.FileSystem);
+                _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, _lazyEvaluator.EvaluationContext);
 
                 _itemSpec.Expander = _expander;
             }
 
-            protected EngineFileUtilities EngineFileUtilities => _lazyEvaluator.EngineFileUtilities;
+            protected FileMatcher FileMatcher => _lazyEvaluator.FileMatcher;
 
-            public void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            public void Apply(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 MSBuildEventSource.Log.ApplyLazyItemOperationsStart(_itemElement.ItemType);
                 using (_lazyEvaluator._evaluationProfiler.TrackElement(_itemElement))
@@ -61,7 +63,7 @@ namespace Microsoft.Build.Evaluation
                 MSBuildEventSource.Log.ApplyLazyItemOperationsStop(_itemElement.ItemType);
             }
 
-            protected virtual void ApplyImpl(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            protected virtual void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 var items = SelectItems(listBuilder, globsToIgnore);
                 MutateItems(items);
@@ -71,16 +73,16 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Produce the items to operate on. For example, create new ones or select existing ones
             /// </summary>
-            protected virtual ImmutableList<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            protected virtual ImmutableList<I> SelectItems(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 return listBuilder.Select(itemData => itemData.Item)
                                   .ToImmutableList();
             }
 
-            // todo Refactoring: MutateItems should clone each item before mutation. See https://github.com/Microsoft/msbuild/issues/2328
+            // todo Refactoring: MutateItems should clone each item before mutation. See https://github.com/dotnet/msbuild/issues/2328
             protected virtual void MutateItems(ImmutableList<I> items) { }
 
-            protected virtual void SaveItems(ImmutableList<I> items, ImmutableList<ItemData>.Builder listBuilder) { }
+            protected virtual void SaveItems(ImmutableList<I> items, OrderedItemDataCollection.Builder listBuilder) { }
 
             private IList<I> GetReferencedItems(string itemType, ImmutableHashSet<string> globsToIgnore)
             {
@@ -230,7 +232,6 @@ namespace Microsoft.Build.Evaluation
                         // End of legal area for metadata expressions.
                         _expander.Metadata = null;
                     }
-
                     // End of pseudo batching
                     ////////////////////////////////////////////////////
                     // Start of old code
@@ -261,7 +262,7 @@ namespace Microsoft.Build.Evaluation
                                 continue;
                             }
 
-                            string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, metadataExpansionOptions, metadataElement.Location);
+                            string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, metadataExpansionOptions, metadataElement.Location, _lazyEvaluator._loggingContext);
                             evaluatedValue = FileUtilities.MaybeAdjustFilePath(evaluatedValue, metadataElement.ContainingProject.DirectoryPath);
 
                             metadataTable.SetValue(metadataElement, evaluatedValue);
@@ -283,17 +284,18 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            protected bool NeedToExpandMetadataForEachItem(ImmutableList<ProjectMetadataElement> metadata, out ItemsAndMetadataPair itemsAndMetadataFound)
+            private static IEnumerable<string> GetMetadataValuesAndConditions(ImmutableList<ProjectMetadataElement> metadata)
             {
-                List<string> values = new List<string>(metadata.Count * 2);
-
                 foreach (var metadataElement in metadata)
                 {
-                    values.Add(metadataElement.Value);
-                    values.Add(metadataElement.Condition);
+                    yield return metadataElement.Value;
+                    yield return metadataElement.Condition;
                 }
+            }
 
-                itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(values);
+            protected bool NeedToExpandMetadataForEachItem(ImmutableList<ProjectMetadataElement> metadata, out ItemsAndMetadataPair itemsAndMetadataFound)
+            {
+                itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(GetMetadataValuesAndConditions(metadata));
 
                 bool needToExpandMetadataForEachItem = false;
 

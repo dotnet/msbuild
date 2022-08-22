@@ -36,7 +36,6 @@
                          SetPlatform="Platform=x64"
                          OutputItemType="MSBuildTaskHostX64ResolvedProjectReferencePath"
                          GlobalPropertiesToRemove="TargetFramework" />
-
   </ItemGroup>
 
   <Target Name="SetBinPaths" DependsOnTargets="ResolveProjectReferences">

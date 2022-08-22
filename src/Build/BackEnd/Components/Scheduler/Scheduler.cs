@@ -11,12 +11,16 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
+using Microsoft.Build.Shared.Debugging;
+using Microsoft.Build.Utilities;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -140,7 +144,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Flag used for debugging by forcing all scheduling to go out-of-proc.
         /// </summary>
-        private bool _forceAffinityOutOfProc;
+        internal bool ForceAffinityOutOfProc { get; private set; }
 
         /// <summary>
         /// The path into which debug files will be written.
@@ -166,14 +170,20 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private AssignUnscheduledRequestsDelegate _customRequestSchedulingAlgorithm;
 
+        private NodeLoggingContext _inprocNodeContext;
+
+        private int _loggedWarningsForProxyBuildsOnOutOfProcNodes = 0;
+
         /// <summary>
         /// Constructor.
         /// </summary>
         public Scheduler()
         {
-            _debugDumpState = Environment.GetEnvironmentVariable("MSBUILDDEBUGSCHEDULER") == "1";
-            _forceAffinityOutOfProc = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
-            _debugDumpPath = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+            // Be careful moving these to Traits, changing the timing of reading environment variables has a breaking potential.
+            _debugDumpState = Traits.Instance.DebugScheduler;
+            _debugDumpPath = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
+                ? DebugUtils.DebugPath
+                : Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
             _schedulingUnlimitedVariable = Environment.GetEnvironmentVariable("MSBUILDSCHEDULINGUNLIMITED");
             _nodeLimitOffset = 0;
 
@@ -610,6 +620,11 @@ namespace Microsoft.Build.BackEnd
             _componentHost = host;
             _resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
             _configCache = (IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache);
+            _inprocNodeContext =  new NodeLoggingContext(_componentHost.LoggingService, InProcNodeId, true);
+            var inprocNodeDisabledViaEnvironmentVariable = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
+            ForceAffinityOutOfProc = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
+                ? inprocNodeDisabledViaEnvironmentVariable || _componentHost.BuildParameters.DisableInProcNode
+                : inprocNodeDisabledViaEnvironmentVariable;
         }
 
         /// <summary>
@@ -791,6 +806,9 @@ namespace Microsoft.Build.BackEnd
                 {
                     // We want to find more work first, and we assign traversals to the in-proc node first, if possible.
                     AssignUnscheduledRequestsByTraversalsFirst(responses, idleNodes);
+
+                    AssignUnscheduledProxyBuildRequestsToInProcNode(responses, idleNodes);
+
                     if (idleNodes.Count == 0)
                     {
                         return;
@@ -967,6 +985,27 @@ namespace Microsoft.Build.BackEnd
                             idleNodes.Remove(InProcNodeId);
                             break;
                         }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Proxy build requests <see cref="ProxyTargets"/> should be really cheap (only return properties and items) and it's not worth
+        /// paying the IPC cost and re-evaluating them on out of proc nodes (they are guaranteed to be evaluated in the Scheduler process).
+        /// </summary>
+        private void AssignUnscheduledProxyBuildRequestsToInProcNode(List<ScheduleResponse> responses, HashSet<int> idleNodes)
+        {
+            if (idleNodes.Contains(InProcNodeId))
+            {
+                List<SchedulableRequest> unscheduledRequests = new List<SchedulableRequest>(_schedulingData.UnscheduledRequestsWhichCanBeScheduled);
+                foreach (SchedulableRequest request in unscheduledRequests)
+                {
+                    if (CanScheduleRequestToNode(request, InProcNodeId) && request.IsProxyBuildRequest())
+                    {
+                        AssignUnscheduledRequestToNode(request, InProcNodeId, responses);
+                        idleNodes.Remove(InProcNodeId);
+                        break;
                     }
                 }
             }
@@ -1325,12 +1364,6 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentNull(responses, nameof(responses));
             ErrorUtilities.VerifyThrow(nodeId != InvalidNodeId, "Invalid node id specified.");
 
-            // Currently we cannot move certain kinds of traversals (notably solution metaprojects) to other nodes because 
-            // they only have a ProjectInstance representation, and besides these kinds of projects build very quickly 
-            // and produce more references (more work to do.)  This just verifies we do not attempt to send a traversal to
-            // an out-of-proc node because doing so is inefficient and presently will cause the engine to fail on the remote
-            // node because these projects cannot be found.
-            ErrorUtilities.VerifyThrow(nodeId == InProcNodeId || _forceAffinityOutOfProc || !IsTraversalRequest(request.BuildRequest), "Can't assign traversal request to out-of-proc node!");
             request.VerifyState(SchedulableRequestState.Unscheduled);
 
             // Determine if this node has seen our configuration before.  If not, we must send it along with this request.
@@ -1348,7 +1381,27 @@ namespace Microsoft.Build.BackEnd
 
             responses.Add(ScheduleResponse.CreateScheduleResponse(nodeId, request.BuildRequest, mustSendConfigurationToNode));
             TraceScheduler("Executing request {0} on node {1} with parent {2}", request.BuildRequest.GlobalRequestId, nodeId, (request.Parent == null) ? -1 : request.Parent.BuildRequest.GlobalRequestId);
+
+            WarnWhenProxyBuildsGetScheduledOnOutOfProcNode();
+
             request.ResumeExecution(nodeId);
+
+            void WarnWhenProxyBuildsGetScheduledOnOutOfProcNode()
+            {
+                if (request.IsProxyBuildRequest() && nodeId != InProcNodeId && _schedulingData.CanScheduleRequestToNode(request, InProcNodeId))
+                {
+                    ErrorUtilities.VerifyThrow(
+                        _componentHost.BuildParameters.DisableInProcNode || ForceAffinityOutOfProc,
+                        "Proxy requests should only get scheduled to out of proc nodes when the inproc node is disabled");
+
+                    var loggedWarnings = Interlocked.CompareExchange(ref _loggedWarningsForProxyBuildsOnOutOfProcNodes, 1, 0);
+
+                    if (loggedWarnings == 0)
+                    {
+                        _inprocNodeContext.LogWarning("ProxyRequestNotScheduledOnInprocNode");
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -1582,7 +1635,7 @@ namespace Microsoft.Build.BackEnd
             // it isn't modifying its own state, just running a background process), ready, or still blocked.
             blockingRequest.VerifyOneOfStates(new SchedulableRequestState[] { SchedulableRequestState.Yielding, SchedulableRequestState.Ready, SchedulableRequestState.Blocked });
 
-            // detect the case for https://github.com/Microsoft/msbuild/issues/3047
+            // detect the case for https://github.com/dotnet/msbuild/issues/3047
             // if we have partial results AND blocked and blocking share the same configuration AND are blocked on each other
             if (blocker.PartialBuildResult !=null &&
                 blockingRequest.BuildRequest.ConfigurationId == blockedRequest.BuildRequest.ConfigurationId &&
@@ -1713,7 +1766,25 @@ namespace Microsoft.Build.BackEnd
 
                         if (affinityMismatch)
                         {
-                            BuildResult result = new BuildResult(request, new InvalidOperationException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("AffinityConflict", requestAffinity, existingRequestAffinity)));
+                            ErrorUtilities.VerifyThrowInternalError(
+                                _configCache.HasConfiguration(request.ConfigurationId),
+                                "A request should have a configuration if it makes it this far in the build process.");
+
+                            var config = _configCache[request.ConfigurationId];
+                            var globalProperties = string.Join(
+                                ";",
+                                config.GlobalProperties.ToDictionary().Select(kvp => $"{kvp.Key}={kvp.Value}"));
+
+                            var result = new BuildResult(
+                                request,
+                                new InvalidOperationException(
+                                    ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                                        "AffinityConflict",
+                                        requestAffinity,
+                                        existingRequestAffinity,
+                                        config.ProjectFullPath,
+                                        globalProperties
+                                        )));
                             response = GetResponseForResult(nodeForResults, request, result);
                             responses.Add(response);
                             continue;
@@ -2047,12 +2118,21 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private NodeAffinity GetNodeAffinityForRequest(BuildRequest request)
         {
-            if (_forceAffinityOutOfProc)
+            if (ForceAffinityOutOfProc)
             {
                 return NodeAffinity.OutOfProc;
             }
 
             if (IsTraversalRequest(request))
+            {
+                return NodeAffinity.InProc;
+            }
+
+            ErrorUtilities.VerifyThrow(request.ConfigurationId != BuildRequestConfiguration.InvalidConfigurationId, "Requests should have a valid configuration id at this point");
+            // If this configuration has been previously built on an out of proc node, scheduling it on the inproc node can cause either an affinity mismatch error when
+            // there are other pending requests for the same configuration or "unscheduled requests remain in the presence of free out of proc nodes" errors if there's no pending requests.
+            // So only assign proxy builds to the inproc node if their config hasn't been previously assigned to an out of proc node.
+            if (_schedulingData.CanScheduleConfigurationToNode(request.ConfigurationId, InProcNodeId) && request.IsProxyBuildRequest())
             {
                 return NodeAffinity.InProc;
             }

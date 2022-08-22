@@ -10,6 +10,8 @@ using Microsoft.Build.Tasks;
 using Marshal = System.Runtime.InteropServices.Marshal;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>

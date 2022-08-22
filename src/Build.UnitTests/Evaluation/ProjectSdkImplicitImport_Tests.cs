@@ -19,7 +19,9 @@ using Xunit;
 using SdkResolverContext = Microsoft.Build.Framework.SdkResolverContext;
 using SdkResult = Microsoft.Build.Framework.SdkResult;
 using SdkResultFactory = Microsoft.Build.Framework.SdkResultFactory;
-using SdkReferencePropertyExpansionMode = Microsoft.Build.Utilities.EscapeHatches.SdkReferencePropertyExpansionMode;
+using SdkReferencePropertyExpansionMode = Microsoft.Build.Framework.EscapeHatches.SdkReferencePropertyExpansionMode;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -297,7 +299,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 Project project = new Project(ProjectRootElement.Create(XmlReader.Create(new StringReader(content))));
             });
-            
+
             Assert.Equal("MSB4229", exception.ErrorCode);
         }
 
@@ -475,7 +477,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 loadSettings: ProjectLoadSettings.IgnoreMissingImports);
 
             project.GetPropertyValue("Success").ShouldBe("true");
-            
+
             ProjectImportedEventArgs[] events = logger.BuildMessageEvents.OfType<ProjectImportedEventArgs>().ToArray();
 
             // There are two implicit imports so there should be two logged ProjectImportedEventArgs

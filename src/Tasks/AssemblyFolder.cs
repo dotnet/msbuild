@@ -9,6 +9,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Win32;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -54,7 +56,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    ErrorUtilities.VerifyThrow(false, "AssemblyFolder.AddFoldersFromRegistryKey expected a known hive.");
+                    ErrorUtilities.ThrowInternalError("AssemblyFolder.AddFoldersFromRegistryKey expected a known hive.");
                 }
 
                 if (baseKey != null)

@@ -176,7 +176,7 @@ namespace Microsoft.Build.BuildEngine
             }
             else
             {
-                if(e.GetType().Equals(BuildErrorEventArgsType))
+                if (e.GetType().Equals(BuildErrorEventArgsType))
                 {
                     // We'd like to add the project file to the subcategory, but since this property
                     // is read-only on the BuildErrorEventArgs type, this requires creating a new
@@ -264,7 +264,7 @@ namespace Microsoft.Build.BuildEngine
             }
 
             // Don't bother adding the project file path if it's already in the file part
-            if(String.Equals(file, parentProjectFullFileName, StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(file, parentProjectFullFileName, StringComparison.OrdinalIgnoreCase))
             {
                 return message;
             }
