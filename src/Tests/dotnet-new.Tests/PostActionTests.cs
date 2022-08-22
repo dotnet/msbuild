@@ -766,5 +766,79 @@ namespace Microsoft.DotNet.New.Tests
                 .And.HaveStdOutContaining($"Manual instructions: Run the following command:")
                 .And.HaveStdOutContaining($"Actual command: setup.cmd <your project name>");
         }
+
+        [Fact]
+        public void ItCanCreateTemplate_WithAddProjectReference()
+        {
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string tempSettingsDir = TestUtils.CreateTemporaryFolder("Home");
+            string templateLocation = GetTestTemplateLocation("AddProjectReference");
+            var cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir)
+                .Execute("install", templateLocation);
+            cmd.Should().Pass();
+
+            cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute("TestAssets.AddReference");
+
+            cmd.Should().Pass()
+                .And.HaveStdOutContaining("Adding a project reference")
+                .And.HaveStdOutContaining("Successfully added a reference to the project file.");
+        }
+
+        [Fact]
+        public void ItCanCreateTemplate_WithAddPackageReference()
+        {
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string tempSettingsDir = TestUtils.CreateTemporaryFolder("Home");
+            string templateLocation = GetTestTemplateLocation("AddPackageReference");
+            var cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir)
+                .Execute("install", templateLocation);
+            cmd.Should().Pass();
+
+            cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir)
+                .Execute("TestAssets.AddReference", "-o", workingDirectory);
+            cmd.Should().Pass()
+                .And.HaveStdOutContaining("Adding a package reference Newtonsoft.Json (version: 13.0.1) to project file")
+                .And.HaveStdOutContaining("Successfully added a reference to the project file.");
+        }
+
+        [Fact]
+        public void ItCanCreateTemplate_WithAddProjectToSolution()
+        {
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string tempSettingsDir = TestUtils.CreateTemporaryFolder("Home");
+            string templateLocation = GetTestTemplateLocation("AddProjectToSolution");
+            var cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir)
+                .Execute("install", templateLocation);
+            cmd.Should().Pass();
+
+            cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir)
+                .Execute("TestAssets.AddProjectToSolution", "-o", workingDirectory);
+            cmd.Should().Pass()
+                .And.HaveStdOutContaining("Successfully added project(s) to a solution file.");
+        }
+
+        [Fact]
+        public void ItCanCreateTemplate_WithRestore()
+        {
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string tempSettingsDir = TestUtils.CreateTemporaryFolder("Home");
+
+            var cmd = new DotnetNewCommand(Log)
+                .WithCustomHive(tempSettingsDir)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute("console");
+
+            cmd.Should().Pass()
+                .And.HaveStdOutContaining("Determining projects to restore...")
+                .And.HaveStdOutContaining("Restore succeeded.");
+        }
     }
 }
