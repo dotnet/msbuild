@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         public void GivenMalformedPathItThrows()
         {
             Action a = () => ToolConfigurationDeserializer.Deserialize("DotnetToolSettingsMalformed.xml");
-            a.ShouldThrow<ToolConfigurationException>()
+            a.Should().Throw<ToolConfigurationException>()
                 .And.Message.Should()
                 .Contain(string.Format(CommonLocalizableStrings.ToolSettingsInvalidXml, string.Empty));
         }
@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         public void GivenMissingContentItThrows()
         {
             Action a = () => ToolConfigurationDeserializer.Deserialize("DotnetToolSettingsMissing.xml");
-            a.ShouldThrow<ToolConfigurationException>()
+            a.Should().Throw<ToolConfigurationException>()
                 .And.Message.Should()
                 .Contain(CommonLocalizableStrings.ToolSettingsMissingCommandName);
         }
@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         {
             var invalidCommandName = "na\0me";
             Action a = () => new ToolConfiguration(invalidCommandName, "my.dll");
-            a.ShouldThrow<ToolConfigurationException>()
+            a.Should().Throw<ToolConfigurationException>()
                 .And.Message.Should()
                 .Contain(
                     string.Format(
@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         {
             var invalidCommandName = ".mytool";
             Action a = () => new ToolConfiguration(invalidCommandName, "my.dll");
-            a.ShouldThrow<ToolConfigurationException>()
+            a.Should().Throw<ToolConfigurationException>()
                 .And.Message.Should()
                 .Contain(string.Format(
                         CommonLocalizableStrings.ToolSettingsInvalidLeadingDotCommandName,

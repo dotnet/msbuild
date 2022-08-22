@@ -800,7 +800,7 @@ public class Class1
                 .Pass();
 
             var getPRIResourceItems = getPRIResourceItemsCommand.GetValues();
-            getPRIResourceItems.ShouldBeEquivalentTo(new[] { "ResourcesResw.resw" });
+            getPRIResourceItems.Should().BeEquivalentTo(new[] { "ResourcesResw.resw" });
 
             // Validate Content items.
             var getContentItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "Content", GetValuesCommand.ValueType.Item);
@@ -809,7 +809,7 @@ public class Class1
                 .Pass();
 
             var getContentItems = getContentItemsCommand.GetValues();
-            getContentItems.ShouldBeEquivalentTo(imageFiles);
+            getContentItems.Should().BeEquivalentTo(imageFiles);
         }
 
         [Fact]
@@ -843,7 +843,7 @@ public class Class1
             var getNoneItems = getNoneItemsCommand.GetValues();
             List<string> expectedFiles = imageFiles;
             expectedFiles.Add("ResourcesResw.resw");
-            getNoneItems.ShouldBeEquivalentTo(expectedFiles.ToArray());
+            getNoneItems.Should().BeEquivalentTo(expectedFiles.ToArray());
 
             // Validate PRIResource items.
             var getPRIResourceItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "PRIResource", GetValuesCommand.ValueType.Item);
