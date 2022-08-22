@@ -619,6 +619,8 @@ public static class Program
 
             var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
             Assert.True(File.Exists(expectedAssetPath));
+            var releaseAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
+            Assert.False(File.Exists(releaseAssetPath)); // build will produce a debug asset, need to make sure this doesn't exist either.
         }
 
         [Fact]
@@ -649,6 +651,8 @@ public static class Program
 
             var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
             Assert.True(File.Exists(expectedAssetPath));
+            var releaseAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
+            Assert.False(File.Exists(releaseAssetPath)); // build will produce a debug asset, need to make sure this doesn't exist either.
         }
 
         [Fact]
@@ -679,6 +683,8 @@ public static class Program
 
             var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
             Assert.True(File.Exists(expectedAssetPath));
+            var releaseAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
+            Assert.False(File.Exists(releaseAssetPath)); // build will produce a debug asset, need to make sure this doesn't exist either.
         }
 
         [Fact]

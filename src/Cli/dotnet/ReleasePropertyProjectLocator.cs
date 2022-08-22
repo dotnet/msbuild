@@ -22,6 +22,45 @@ namespace Microsoft.DotNet.Cli
     {
         private bool checkSolutions;
 
+        /// <summary>
+        /// Returns dotnet CLI command-line parameters (or an empty list) to change configuration based on 
+        /// a boolean that may or may not exist in the targeted project.
+        /// <param name="defaultedConfigurationProperty">The boolean property to check the project for. Ex: PublishRelease</param>
+        /// <param name="slnOrProjectArgs">The arguments or solution passed to a dotnet invocation.</param>
+        /// <param name="configOption">The arguments passed to a dotnet invocation related to Configuration.</param>
+        /// </summary>
+        /// <returns>Returns a string such as -property:configuration=value for a projects desired config. May be empty string.</returns>
+        public IEnumerable<string> GetCustomDefaultConfigurationValueIfSpecified(
+            ParseResult parseResult,
+            string defaultedConfigurationProperty,
+            IEnumerable<string> slnOrProjectArgs,
+            Option<string> configOption,
+            IEnumerable<string> userPropertyArgs
+            )
+        {
+            ProjectInstance project = null;
+            var globalProperties = GetGlobalPropertiesFromUserArgs(userPropertyArgs);
+
+            if (parseResult.HasOption(configOption) || globalProperties.ContainsKey(MSBuildPropertyNames.CONFIGURATION))
+                return Enumerable.Empty<string>();
+
+            // CLI Configuration values take precedence over ones in the project. Passing PublishRelease as a global property allows it to take precedence.
+            project = GetTargetedProject(slnOrProjectArgs, globalProperties, defaultedConfigurationProperty);
+
+            if (project != null)
+            {
+                string configurationToUse = "";
+                string releasePropertyFlag = project.GetPropertyValue(defaultedConfigurationProperty);
+                if (!string.IsNullOrEmpty(releasePropertyFlag))
+                    configurationToUse = releasePropertyFlag.Equals("true", StringComparison.OrdinalIgnoreCase) ? MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE : "";
+
+                if (!ProjectHasUserCustomizedConfiguration(project) && !string.IsNullOrEmpty(configurationToUse))
+                    return new List<string> { $"--property:{MSBuildPropertyNames.CONFIGURATION}={configurationToUse}" };
+            }
+            return Enumerable.Empty<string>();
+        }
+
+
         public ReleasePropertyProjectLocator(bool shouldCheckSolutionsForProjects)
         {
             checkSolutions = shouldCheckSolutionsForProjects;
@@ -29,7 +68,7 @@ namespace Microsoft.DotNet.Cli
 
         /// <param name="slnProjectPropertytoCheck">A property to enforce if we are looking into SLN files. If projects disagree on the property, throws exception.</param>
         /// <returns>A project instance that will be targeted to publish/pack, etc. null if one does not exist.</returns>
-        public ProjectInstance GetTargetedProject(IEnumerable<string> slnOrProjectArgs, string slnProjectPropertytoCheck = "")
+        public ProjectInstance GetTargetedProject(IEnumerable<string> slnOrProjectArgs, Dictionary<string, string> globalProps, string slnProjectPropertytoCheck = "")
         {
             string potentialProject = "";
 
@@ -37,13 +76,13 @@ namespace Microsoft.DotNet.Cli
             {
                 if (IsValidProjectFilePath(arg))
                 {
-                    return TryGetProjectInstance(arg);
+                    return TryGetProjectInstance(arg, globalProps);
                 }
                 else if (Directory.Exists(arg)) // We should get here if the user did not provide a .proj or a .sln
                 {
                     try
                     {
-                        return TryGetProjectInstance(MsbuildProject.GetProjectFileFromDirectory(arg).FullName);
+                        return TryGetProjectInstance(MsbuildProject.GetProjectFileFromDirectory(arg).FullName, globalProps);
                     }
                     catch (GracefulException)
                     {
@@ -51,17 +90,17 @@ namespace Microsoft.DotNet.Cli
                         string potentialSln = Directory.GetFiles(arg, "*.sln", SearchOption.TopDirectoryOnly).FirstOrDefault();
 
                         if (!string.IsNullOrEmpty(potentialSln))
-                            return GetSlnProject(potentialSln, slnProjectPropertytoCheck);
+                            return GetSlnProject(potentialSln, globalProps, slnProjectPropertytoCheck);
                     } // If nothing can be found: that's caught by MSBuild XMake::ProcessProjectSwitch -- don't change the behavior by failing here. 
                 }
             }
 
-            return string.IsNullOrEmpty(potentialProject) ? null : TryGetProjectInstance(potentialProject);
+            return string.IsNullOrEmpty(potentialProject) ? null : TryGetProjectInstance(potentialProject, globalProps);
         }
 
         /// <returns>The executable project (first if multiple exist) in a SLN. Returns null if no executable project. Throws exception if two executable projects disagree
         /// in the configuration property to check.</returns>
-        public ProjectInstance GetSlnProject(string slnPath, string slnProjectConfigPropertytoCheck = "")
+        public ProjectInstance GetSlnProject(string slnPath, Dictionary<string, string> globalProps, string slnProjectConfigPropertytoCheck = "")
         {
             // This has a performance overhead so don't do this unless opted in.
             if (!checkSolutions)
@@ -92,7 +131,7 @@ namespace Microsoft.DotNet.Cli
                 if (project.TypeGuid == solutionFolderGuid || project.TypeGuid == sharedProjectGuid || !IsValidProjectFilePath(project.FilePath))
                     return;
 
-                var projectData = TryGetProjectInstance(project.FilePath);
+                var projectData = TryGetProjectInstance(project.FilePath, globalProps);
                 if (projectData == null)
                     return;
 
@@ -125,49 +164,12 @@ namespace Microsoft.DotNet.Cli
             return shouldReturnNull ? null : configuredProjects.FirstOrDefault();
         }
 
-        /// <summary>
-        /// Returns dotnet CLI command-line parameters (or an empty list) to change configuration based on 
-        /// a boolean that may or may not exist in the targeted project.
-        /// <param name="defaultedConfigurationProperty">The boolean property to check the project for. Ex: PublishRelease</param>
-        /// <param name="slnOrProjectArgs">The arguments or solution passed to a dotnet invocation.</param>
-        /// <param name="configOption">The arguments passed to a dotnet invocation related to Configuration.</param>
-        /// </summary>
-        /// <returns>Returns a string such as -property:configuration=value for a projects desired config. May be empty string.</returns>
-        public IEnumerable<string> GetCustomDefaultConfigurationValueIfSpecified(
-            ParseResult parseResult,
-            string defaultedConfigurationProperty,
-            IEnumerable<string> slnOrProjectArgs,
-            Option<string> configOption,
-            IEnumerable<string> userPropertyArgs
-            )
-        {
-            ProjectInstance project = null;
-
-            IEnumerable<string> calledArguments = parseResult.Tokens.Select(x => x.ToString());
-            IEnumerable<string> slnProjectAndCommandArgs = slnOrProjectArgs.Concat(calledArguments);
-            if (!parseResult.HasOption(configOption) && !ArgsContainsProperty(userPropertyArgs, MSBuildPropertyNames.CONFIGURATION) && !ArgsContainsProperty(userPropertyArgs, defaultedConfigurationProperty))
-                // CLI Configuration values take precedence over ones in the project.
-                project = GetTargetedProject(slnProjectAndCommandArgs, defaultedConfigurationProperty);
-
-            if (project != null)
-            {
-                string configurationToUse = "";
-                string releasePropertyFlag = project.GetPropertyValue(defaultedConfigurationProperty);
-                if (!string.IsNullOrEmpty(releasePropertyFlag))
-                    configurationToUse = releasePropertyFlag.Equals("true", StringComparison.OrdinalIgnoreCase) ? MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE : "";
-
-                if (!ProjectHasUserCustomizedConfiguration(project) && !string.IsNullOrEmpty(configurationToUse))
-                    return new List<string> { $"-property:{MSBuildPropertyNames.CONFIGURATION}={configurationToUse}" };
-            }
-            return Enumerable.Empty<string>();
-        }
-
         /// <returns>Creates a ProjectInstance if the project is valid, elsewise, fails..</returns>
-        protected static ProjectInstance TryGetProjectInstance(string projectPath)
+        private ProjectInstance TryGetProjectInstance(string projectPath, Dictionary<string, string> globalProperties)
         {
             try
             {
-                return new ProjectInstance(projectPath);
+                return new ProjectInstance(projectPath, globalProperties, "Current");
             }
             catch (Exception e) // Catch failed file access, or invalid project files that cause errors when read into memory,
             {
@@ -176,23 +178,23 @@ namespace Microsoft.DotNet.Cli
             return null;
         }
 
-        /// <returns>Returns true if msbuildargs contains a forwarded property named propertyToCheck.</returns>
-        private bool ArgsContainsProperty(IEnumerable<string> msbuildargs, string propertyToCheck)
-        {
-            var calledProperties = MSBuildPropertyParser.ParseProperties(String.Join(";", msbuildargs));
-            foreach (var calledProperty in calledProperties)
-            {
-                if (calledProperty.value == propertyToCheck)
-                    return true;
-            }
-            return false;
-        }
-        protected static bool IsValidProjectFilePath(string path)
+        private bool IsValidProjectFilePath(string path)
         {
             return File.Exists(path) && Path.GetExtension(path).EndsWith("proj");
         }
 
-        protected static bool ProjectHasUserCustomizedConfiguration(ProjectInstance project)
+        /// <returns>A case-insensitive dictionary of any properties passed from the user and their values.</returns>
+        private Dictionary<string, string> GetGlobalPropertiesFromUserArgs(IEnumerable<string> userPropertyArgs)
+        {
+            Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            IEnumerable<(string key, string value)> globalPropEnumerable = MSBuildPropertyParser.ParseProperties(String.Join(";", userPropertyArgs));
+
+            // The parser puts keys into the format --property:Key no matter the user input, so we can expect that pattern and extract the key.
+            globalPropEnumerable.Select(kvPair => globalProperties[kvPair.key.Split(new string[] { "--property:" }, StringSplitOptions.None).Last()] = kvPair.value);
+            return globalProperties;
+        }
+
+        private bool ProjectHasUserCustomizedConfiguration(ProjectInstance project)
         {
             return project.GlobalProperties.ContainsKey(MSBuildPropertyNames.CONFIGURATION);
         }
