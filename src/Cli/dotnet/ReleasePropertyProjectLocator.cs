@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Cli
                     configurationToUse = releasePropertyFlag.Equals("true", StringComparison.OrdinalIgnoreCase) ? MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE : "";
 
                 if (!ProjectHasUserCustomizedConfiguration(project) && !string.IsNullOrEmpty(configurationToUse))
-                    return new List<string> { $"--property:{MSBuildPropertyNames.CONFIGURATION}={configurationToUse}" };
+                    return new List<string> { $"-property:{MSBuildPropertyNames.CONFIGURATION}={configurationToUse}" };
             }
             return Enumerable.Empty<string>();
         }
@@ -190,7 +190,7 @@ namespace Microsoft.DotNet.Cli
             IEnumerable<(string key, string value)> globalPropEnumerable = MSBuildPropertyParser.ParseProperties(String.Join(";", userPropertyArgs));
 
             // The parser puts keys into the format --property:Key no matter the user input, so we can expect that pattern and extract the key.
-            foreach(var kvPair in globalPropEnumerable)
+            foreach (var kvPair in globalPropEnumerable)
             {
                 globalProperties[kvPair.key.Split(new string[] { "--property:" }, StringSplitOptions.None).Last()] = kvPair.value;
             }
