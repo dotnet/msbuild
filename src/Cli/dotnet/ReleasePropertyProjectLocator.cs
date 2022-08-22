@@ -190,7 +190,10 @@ namespace Microsoft.DotNet.Cli
             IEnumerable<(string key, string value)> globalPropEnumerable = MSBuildPropertyParser.ParseProperties(String.Join(";", userPropertyArgs));
 
             // The parser puts keys into the format --property:Key no matter the user input, so we can expect that pattern and extract the key.
-            globalPropEnumerable.Select(kvPair => globalProperties[kvPair.key.Split(new string[] { "--property:" }, StringSplitOptions.None).Last()] = kvPair.value);
+            foreach(var kvPair in globalPropEnumerable)
+            {
+                globalProperties[kvPair.key.Split(new string[] { "--property:" }, StringSplitOptions.None).Last()] = kvPair.value;
+            }
             return globalProperties;
         }
 
