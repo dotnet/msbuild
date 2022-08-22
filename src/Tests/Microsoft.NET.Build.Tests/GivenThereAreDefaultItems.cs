@@ -392,6 +392,7 @@ namespace Microsoft.NET.Build.Tests
                     XElement itemGroup = new XElement(ns + "ItemGroup");
                     project.Root.Add(itemGroup);
                     itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", testProject.Name + ".cs")));
+                    itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", testProject.Name + "Program.cs")));
                 });
 
             var projectFolder = Path.Combine(testAsset.TestRoot, testProject.Name);
@@ -409,7 +410,7 @@ namespace Microsoft.NET.Build.Tests
 
             var compileItems = getCompileItemsCommand.GetValues();
             RemoveGeneratedCompileItems(compileItems);
-            compileItems.ShouldBeEquivalentTo(new[] { testProject.Name + ".cs" });
+            compileItems.ShouldBeEquivalentTo(new[] { testProject.Name + ".cs", testProject.Name + "Program.cs" });
 
             // Validate None items.
             var getNoneItemsCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks, "None", GetValuesCommand.ValueType.Item);
