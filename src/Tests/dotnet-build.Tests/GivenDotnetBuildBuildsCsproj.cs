@@ -269,7 +269,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                .NotHaveStdOutContaining("NETSDK1031");
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.4.0.41702")]
         public void It_builds_referenced_exe_with_self_contained_specified_via_command_line_argument()
         {
             var referencedProject = new TestProject("ReferencedProject")
