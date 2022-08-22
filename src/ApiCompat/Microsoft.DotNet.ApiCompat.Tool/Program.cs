@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using System.IO;
 using Microsoft.DotNet.ApiCompatibility.Logging;
 
 namespace Microsoft.DotNet.ApiCompat.Tool
@@ -34,7 +35,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
             };
             Option<MessageImportance> verbosityOption = new(new string[] { "--verbosity", "-v" },
                 "Controls the log level verbosity. Allowed values are high, normal, and low.");
-            verbosityOption.SetDefaultValue(MessageImportance.Normal);
+            verbosityOption.SetDefaultValue(MessageImportance.High);
 
             // Root command
             Option<string[]> leftAssembliesOption = new(new string[] { "--left-assembly", "--left", "-l" },
@@ -109,11 +110,10 @@ namespace Microsoft.DotNet.ApiCompat.Tool
 
             rootCommand.SetHandler((InvocationContext context) =>
             {
-                string? roslynAssembliesPath = context.ParseResult.GetValueForOption(roslynAssembliesPathOption);
-                if (roslynAssembliesPath != null)
-                {
-                    RoslynResolver.Register(roslynAssembliesPath);
-                }
+                // If a roslyn assemblies path isn't provided, use the compiled against version from a subfolder.
+                string roslynAssembliesPath = context.ParseResult.GetValueForOption(roslynAssembliesPathOption) ??
+                    Path.Combine(AppContext.BaseDirectory, "codeanalysis");
+                RoslynResolver roslynResolver = RoslynResolver.Register(roslynAssembliesPath);
 
                 MessageImportance verbosity = context.ParseResult.GetValueForOption(verbosityOption);
                 bool generateSuppressionFile = context.ParseResult.GetValueForOption(generateSuppressionFileOption);
@@ -141,6 +141,8 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                     createWorkItemPerAssembly,
                     leftAssembliesTransformationPattern,
                     rightAssembliesTransformationPattern);
+
+                roslynResolver.Unregister();
             });
 
             // Package command
@@ -197,11 +199,10 @@ namespace Microsoft.DotNet.ApiCompat.Tool
             packageCommand.AddOption(baselinePackageAssemblyReferencesOption);
             packageCommand.SetHandler((InvocationContext context) =>
             {
-                string? roslynAssembliesPath = context.ParseResult.GetValueForOption(roslynAssembliesPathOption);
-                if (roslynAssembliesPath != null)
-                {
-                    RoslynResolver.Register(roslynAssembliesPath);
-                }
+                // If a roslyn assemblies path isn't provided, use the compiled against version from a subfolder.
+                string roslynAssembliesPath = context.ParseResult.GetValueForOption(roslynAssembliesPathOption) ??
+                    Path.Combine(AppContext.BaseDirectory, "codeanalysis");
+                RoslynResolver roslynResolver = RoslynResolver.Register(roslynAssembliesPath);
 
                 MessageImportance verbosity = context.ParseResult.GetValueForOption(verbosityOption);
                 bool generateSuppressionFile = context.ParseResult.GetValueForOption(generateSuppressionFileOption);
@@ -231,6 +232,8 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                     runtimeGraph,
                     packageAssemblyReferences,
                     baselinePackageAssemblyReferences);
+
+                roslynResolver.Unregister();
             });
             
             rootCommand.AddCommand(packageCommand);

@@ -89,20 +89,24 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<bool> BlameCrashOption = new ForwardedOption<bool>("--blame-crash", LocalizableStrings.CmdBlameCrashDescription)
             .ForwardAs("-property:VSTestBlameCrash=true");
 
-        public static readonly Argument<string> BlameCrashDumpArgument = new Argument<string>(LocalizableStrings.CrashDumpTypeArgumentName).FromAmong(new string[] { "full", "mini" });
-
         public static readonly Option<string> BlameCrashDumpOption = new ForwardedOption<string>("--blame-crash-dump-type", LocalizableStrings.CmdBlameCrashDumpTypeDescription)
-            .ForwardAsMany(o => new[] { "-property:VSTestBlameCrash=true", $"-property:VSTestBlameCrashDumpType={o}" });
+        {
+            ArgumentHelpName = LocalizableStrings.CrashDumpTypeArgumentName,
+        }
+        .FromAmong(new string[] { "full", "mini" })
+        .ForwardAsMany(o => new[] { "-property:VSTestBlameCrash=true", $"-property:VSTestBlameCrashDumpType={o}" });
 
-        public static readonly Option<string> BlameCrashAlwaysOption = new ForwardedOption<string>("--blame-crash-collect-always", LocalizableStrings.CmdBlameCrashCollectAlwaysDescription)
+        public static readonly Option<bool> BlameCrashAlwaysOption = new ForwardedOption<bool>("--blame-crash-collect-always", LocalizableStrings.CmdBlameCrashCollectAlwaysDescription)
             .ForwardAsMany(o => new[] { "-property:VSTestBlameCrash=true", "-property:VSTestBlameCrashCollectAlways=true" });
 
         public static readonly Option<bool> BlameHangOption = new ForwardedOption<bool>("--blame-hang", LocalizableStrings.CmdBlameHangDescription)
             .ForwardAs("-property:VSTestBlameHang=true");
 
-        public static readonly Argument<string> BlameHangDumpArgument = new Argument<string>(LocalizableStrings.HangDumpTypeArgumentName).FromAmong(new string[] { "full", "mini", "none" });
-
         public static readonly Option<string> BlameHangDumpOption = new ForwardedOption<string>("--blame-hang-dump-type", LocalizableStrings.CmdBlameHangDumpTypeDescription)
+        {
+            ArgumentHelpName = LocalizableStrings.HangDumpTypeArgumentName
+        }
+            .FromAmong(new string[] { "full", "mini", "none" })
             .ForwardAsMany(o => new[] { "-property:VSTestBlameHang=true", $"-property:VSTestBlameHangDumpType={o}" });
 
         public static readonly Option<string> BlameHangTimeoutOption = new ForwardedOption<string>("--blame-hang-timeout", LocalizableStrings.CmdBlameHangTimeoutDescription)
