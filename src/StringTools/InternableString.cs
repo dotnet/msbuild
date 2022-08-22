@@ -33,6 +33,7 @@ namespace Microsoft.NET.StringTools
             /// </summary>
             private int _charIndex;
 
+            // https://github.com/dotnet/msbuild/pull/7790#issuecomment-1213603253
             internal Enumerator(scoped ref InternableString str)
             {
                 _string = str;
