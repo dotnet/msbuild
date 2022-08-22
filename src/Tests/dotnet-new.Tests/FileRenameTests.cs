@@ -1,18 +1,13 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.IO;
-using System.Linq;
-using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using Microsoft.TemplateEngine.TestHelper;
-using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.New.Tests
+namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
-    public class FileRenameTests : SdkTest
+    public class FileRenameTests : BaseIntegrationTest
     {
         private readonly ITestOutputHelper _log;
 
@@ -24,9 +19,9 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void CanUseFileRenameWithNowGenerator()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("TemplateWithFileRenameDate", _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate("TemplateWithFileRenameDate", _log, home, workingDirectory);
             new DotnetNewCommand(_log, "TestAssets.TemplateWithFileRenameDate", "--migrationName", "MyTestName")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)

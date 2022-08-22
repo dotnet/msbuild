@@ -5,6 +5,7 @@
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <OutputType>Exe</OutputType>
     <IsUnitTestProject>true</IsUnitTestProject>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,7 +31,7 @@
   <PropertyGroup>
     <GeneratedText>
       <![CDATA[
-namespace Microsoft.DotNet.New.Tests
+namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
   class TemplatePackagesPaths
   {

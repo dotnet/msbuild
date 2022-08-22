@@ -1,18 +1,17 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#nullable enable
 
 using FluentAssertions;
-using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.TemplateEngine.TestHelper;
 
-namespace Microsoft.DotNet.New.Tests
+namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
-    public class MSBuildEvaluationTests : SdkTest
+    public class MSBuildEvaluationTests : BaseIntegrationTest
     {
         public MSBuildEvaluationTests(ITestOutputHelper log) : base(log)
         {
@@ -21,25 +20,25 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void Class_BasicTest()
         {
-            TestDirectory tempDir = _testAssetsManager.CreateTestDirectory();
-            TestDirectory tempSettingsDir = _testAssetsManager.CreateTestDirectory();
+            string tempDir = CreateTemporaryFolder();
+            string tempSettingsDir = CreateTemporaryFolder("Home");
 
-            string templateLocation = GetTestTemplatePath("Item/ClassTemplate");
+            string templateLocation = GetTestTemplateLocation("Item/ClassTemplate");
             CommandResult cmd = new DotnetNewCommand(Log)
-                .WithCustomHive(tempSettingsDir.Path)
+                .WithCustomHive(tempSettingsDir)
                 .Execute("install", templateLocation);
             cmd.Should().Pass();
 
             cmd = new DotnetNewCommand(Log)
-                .WithCustomHive(tempSettingsDir.Path)
-                .WithWorkingDirectory(tempDir.Path)
+                .WithCustomHive(tempSettingsDir)
+                .WithWorkingDirectory(tempDir)
                 .Execute("console", "--name", "MyConsole");
             cmd.Should().Pass();
 
-            string projectPath = Path.Combine(tempDir.Path, "MyConsole");
+            string projectPath = Path.Combine(tempDir, "MyConsole");
 
             cmd = new DotnetNewCommand(Log)
-                .WithCustomHive(tempSettingsDir.Path)
+                .WithCustomHive(tempSettingsDir)
                 .WithWorkingDirectory(projectPath)
                 .Execute("TestAssets.ClassTemplate", "--name", "MyTestClass");
             cmd.Should().Pass();
@@ -59,26 +58,26 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void TestClass_BasicTest()
         {
-            TestDirectory tempDir = _testAssetsManager.CreateTestDirectory();
-            TestDirectory tempSettingsDir = _testAssetsManager.CreateTestDirectory();
+            string tempDir = CreateTemporaryFolder();
+            string tempSettingsDir = CreateTemporaryFolder("Home");
 
-            string templateLocation = GetTestTemplatePath("Item/TestClassTemplate");
+            string templateLocation = GetTestTemplateLocation("Item/TestClassTemplate");
             CommandResult cmd = new DotnetNewCommand(Log)
-                .WithCustomHive(tempSettingsDir.Path)
+                .WithCustomHive(tempSettingsDir)
                 .Execute("install", templateLocation);
             cmd.Should().Pass();
 
             cmd = new DotnetNewCommand(Log)
-                .WithCustomHive(tempSettingsDir.Path)
-                .WithWorkingDirectory(tempDir.Path)
+                .WithCustomHive(tempSettingsDir)
+                .WithWorkingDirectory(tempDir)
                 .Execute("xunit", "--name", "MyTestProject");
             cmd.Should().Pass();
 
 
-            string projectPath = Path.Combine(tempDir.Path, "MyTestProject");
+            string projectPath = Path.Combine(tempDir, "MyTestProject");
 
             cmd = new DotnetNewCommand(Log)
-                .WithCustomHive(tempSettingsDir.Path)
+                .WithCustomHive(tempSettingsDir)
                 .WithWorkingDirectory(projectPath)
                 .WithEnvironmentVariable("DOTNET_CLI_CONTEXT_VERBOSE", "true")
                 .Execute("TestAssets.TestClassTemplate", "--name", "MyTestClass");
@@ -99,37 +98,37 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void ListFiltersOutRestrictedTemplates()
         {
-            TestDirectory tempDir = _testAssetsManager.CreateTestDirectory();
-            TestDirectory tempSettingsDir = _testAssetsManager.CreateTestDirectory();
+            string tempDir = CreateTemporaryFolder();
+            string tempSettingsDir = CreateTemporaryFolder("Home");
 
-            string templateLocation = GetTestTemplatePath("Item/TestClassTemplate");
+            string templateLocation = GetTestTemplateLocation("Item/TestClassTemplate");
             CommandResult cmd = new DotnetNewCommand(Log)
-                .WithCustomHive(tempSettingsDir.Path)
+                .WithCustomHive(tempSettingsDir)
                 .Execute("install", templateLocation);
             cmd.Should().Pass();
 
-            templateLocation = GetTestTemplatePath("Item/ClassTemplate");
+            templateLocation = GetTestTemplateLocation("Item/ClassTemplate");
             cmd = new DotnetNewCommand(Log)
-                .WithCustomHive(tempSettingsDir.Path)
+                .WithCustomHive(tempSettingsDir)
                 .Execute("install", templateLocation);
             cmd.Should().Pass();
 
             cmd = new DotnetNewCommand(Log)
-                .WithCustomHive(tempSettingsDir.Path)
+                .WithCustomHive(tempSettingsDir)
                 .Execute("list");
             cmd.Should().Pass();
             cmd.StdOut.Should().NotContain("TestAssets.ClassTemplate").And.NotContain("TestAssets.TestClassTemplate");
 
             cmd = new DotnetNewCommand(Log)
-                .WithCustomHive(tempSettingsDir.Path)
-                .WithWorkingDirectory(tempDir.Path)
+                .WithCustomHive(tempSettingsDir)
+                .WithWorkingDirectory(tempDir)
                 .Execute("console", "--name", "MyConsole");
             cmd.Should().Pass();
 
-            string projectPath = Path.Combine(tempDir.Path, "MyConsole");
+            string projectPath = Path.Combine(tempDir, "MyConsole");
 
             cmd = new DotnetNewCommand(Log)
-                .WithCustomHive(tempSettingsDir.Path)
+                .WithCustomHive(tempSettingsDir)
                 .WithWorkingDirectory(projectPath)
                 .Execute("list");
             cmd.Should().Pass();
@@ -139,31 +138,31 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void MultipleProjects_BasicTest()
         {
-            TestDirectory tempDir = _testAssetsManager.CreateTestDirectory();
-            TestDirectory tempSettingsDir = _testAssetsManager.CreateTestDirectory();
+            string tempDir = CreateTemporaryFolder();
+            string tempSettingsDir = CreateTemporaryFolder("Home");
 
-            string templateLocation = GetTestTemplatePath("Item/ClassTemplate");
+            string templateLocation = GetTestTemplateLocation("Item/ClassTemplate");
             CommandResult cmd = new DotnetNewCommand(Log)
-                .WithCustomHive(tempSettingsDir.Path)
+                .WithCustomHive(tempSettingsDir)
                 .Execute("install", templateLocation);
             cmd.Should().Pass();
 
             cmd = new DotnetNewCommand(Log)
-                .WithCustomHive(tempSettingsDir.Path)
-                .WithWorkingDirectory(tempDir.Path)
+                .WithCustomHive(tempSettingsDir)
+                .WithWorkingDirectory(tempDir)
                 .Execute("console", "--name", "MyProject");
             cmd.Should().Pass();
 
             cmd = new DotnetNewCommand(Log)
-                .WithCustomHive(tempSettingsDir.Path)
-                .WithWorkingDirectory(tempDir.Path)
+                .WithCustomHive(tempSettingsDir)
+                .WithWorkingDirectory(tempDir)
                 .Execute("classlib", "--language", "F#", "--name", "MyProject");
             cmd.Should().Pass();
 
-            string projectPath = Path.Combine(tempDir.Path, "MyProject");
+            string projectPath = Path.Combine(tempDir, "MyProject");
 
             cmd = new DotnetNewCommand(Log)
-                .WithCustomHive(tempSettingsDir.Path)
+                .WithCustomHive(tempSettingsDir)
                 .WithWorkingDirectory(projectPath)
                 .Execute("TestAssets.ClassTemplate", "--name", "MyTestClass");
             cmd.Should().Fail()
@@ -172,7 +171,7 @@ namespace Microsoft.DotNet.New.Tests
                 .And.HaveStdErrContaining("Specify the project to use using --project option.");
 
             cmd = new DotnetNewCommand(Log)
-                .WithCustomHive(tempSettingsDir.Path)
+                .WithCustomHive(tempSettingsDir)
                 .WithWorkingDirectory(projectPath)
                 .Execute("TestAssets.ClassTemplate", "--name", "MyTestClass", "--project", "MyProject.csproj");
             cmd.Should().Pass();
@@ -191,65 +190,24 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void NonSDKStyleProject_BasicTest()
         {
-            TestDirectory tempDir = _testAssetsManager.CreateTestDirectory();
-            TestDirectory tempSettingsDir = _testAssetsManager.CreateTestDirectory();
+            string tempDir = CreateTemporaryFolder();
+            string tempSettingsDir = CreateTemporaryFolder("Home");
 
-            string templateLocation = GetTestTemplatePath("Item/ClassTemplate");
+            string templateLocation = GetTestTemplateLocation("Item/ClassTemplate");
             CommandResult cmd = new DotnetNewCommand(Log)
-                .WithCustomHive(tempSettingsDir.Path)
+                .WithCustomHive(tempSettingsDir)
                 .Execute("install", templateLocation);
             cmd.Should().Pass();
-            string projectPath = Path.Combine(tempDir.Path, "ConsoleFullFramework");
-            DirectoryCopy(GetTestTemplatePath("ConsoleFullFramework"), projectPath);
+            string projectPath = Path.Combine(tempDir, "ConsoleFullFramework");
+            TestUtils.DirectoryCopy(GetTestTemplateLocation("ConsoleFullFramework"), projectPath, copySubDirs: true);
 
             cmd = new DotnetNewCommand(Log)
-                .WithCustomHive(tempSettingsDir.Path)
+                .WithCustomHive(tempSettingsDir)
                 .WithWorkingDirectory(projectPath)
                 .Execute("TestAssets.ClassTemplate", "--name", "MyTestClass");
             cmd.Should().Fail()
                 .And.HaveStdErrContaining("Failed to instatiate template 'ClassTemplate', the following constraints are not met:")
                 .And.HaveStdErrContaining($"Project capabiltities: The project {Path.Combine(projectPath, "ConsoleFullFramework.csproj")} is not an SDK style project, and is not supported for evaluation.");
-        }
-
-
-
-        private static string GetTestTemplatePath(string templateName)
-        {
-            string templateFolder = Path.Combine(Path.GetDirectoryName(typeof(NewCommandTests).Assembly.Location) ?? string.Empty, "TestTemplates", templateName);
-            Assert.True(Directory.Exists(templateFolder));
-            return Path.GetFullPath(templateFolder);
-        }
-
-        private static void DirectoryCopy(string sourceDirName, string destDirName)
-        {
-            // Get the subdirectories for the specified directory.
-            DirectoryInfo dir = new(sourceDirName);
-
-            if (!dir.Exists)
-            {
-                throw new DirectoryNotFoundException(
-                    "Source directory does not exist or could not be found: "
-                    + dir.FullName);
-            }
-
-            DirectoryInfo[] dirs = dir.GetDirectories();
-
-            // If the destination directory doesn't exist, create it.       
-            Directory.CreateDirectory(destDirName);
-
-            // Get the files in the directory and copy them to the new location.
-            FileInfo[] files = dir.GetFiles();
-            foreach (FileInfo file in files)
-            {
-                string tempPath = Path.Combine(destDirName, file.Name);
-                file.CopyTo(tempPath, false);
-            }
-
-            foreach (DirectoryInfo subdir in dirs)
-            {
-                string tempPath = Path.Combine(destDirName, subdir.Name);
-                DirectoryCopy(subdir.FullName, tempPath);
-            }
         }
     }
 }
