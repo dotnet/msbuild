@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Xml.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
@@ -593,7 +594,7 @@ public static class Program
         }
 
         [Fact]
-        public void PublishRelease_does_not_override_Configuration_on_proj()
+        public void PublishRelease_overrides_Configuration_Debug_on_proj()
         {
             var helloWorldAsset = _testAssetsManager
                .CopyTestAsset("HelloWorld", "PublishReleaseHelloWorldCsProjConfigOverride")
@@ -622,7 +623,40 @@ public static class Program
             var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
             Assert.True(File.Exists(expectedAssetPath));
             var releaseAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
-            Assert.False(File.Exists(releaseAssetPath)); // build will produce a debug asset, need to make sure this doesn't exist either.
+            Assert.True(File.Exists(releaseAssetPath)); // build will produce a debug asset, need to make sure this doesn't exist either.
+        }
+
+        [Fact]
+        public void PublishRelease_does_not_override_custom_Configuration_on_proj_and_logs()
+        {
+            var helloWorldAsset = _testAssetsManager
+               .CopyTestAsset("HelloWorld", "PublishReleaseHelloWorldCsProjConfigOverrideCustom")
+               .WithSource()
+               .WithTargetFramework(ToolsetInfo.CurrentTargetFramework)
+               .WithProjectChanges(project =>
+               {
+                   var ns = project.Root.Name.Namespace;
+                   var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                   propertyGroup.Add(new XElement(ns + "PublishRelease", "true"));
+                   propertyGroup.Add(new XElement(ns + "Configuration", "CUSTOM"));
+               });
+
+            new BuildCommand(helloWorldAsset)
+           .Execute()
+           .Should()
+           .Pass();
+
+            var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
+
+            publishCommand
+            .Execute()
+            .Should()
+            .Pass()
+            .And
+            .HaveStdOutContaining("Custom Configuration Detected, PublishRelease will not take effect.");
+
+            var releaseAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
+            Assert.False(File.Exists(releaseAssetPath)); // build will produce a debug asset, need to make sure this doesn't exist either.       
         }
 
         [Fact]
@@ -687,6 +721,60 @@ public static class Program
             Assert.True(File.Exists(expectedAssetPath));
             var releaseAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
             Assert.False(File.Exists(releaseAssetPath)); // build will produce a debug asset, need to make sure this doesn't exist either.
+        }
+
+        [Fact]
+        public void PublishRelease_overrides_Debug_PublishProfile_Configuration()
+        {
+            var tfm = ToolsetInfo.CurrentTargetFramework;
+            var rid = EnvironmentInfo.GetCompatibleRid(tfm);
+
+            var helloWorldAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld", "PublishReleaseHelloWorldCsProjPublishProfile")
+                .WithSource()
+                .WithTargetFramework(ToolsetInfo.CurrentTargetFramework)
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Add(new XElement(ns + "PublishRelease", "true"));
+                });
+
+            var projectDirectory = Path.Combine(helloWorldAsset.Path, helloWorldAsset.Name);
+            var publishProfilesDirectory = Path.Combine(projectDirectory, "Properties", "PublishProfiles");
+            Directory.CreateDirectory(publishProfilesDirectory);
+
+            File.WriteAllText(Path.Combine(publishProfilesDirectory, "test.pubxml"), $@"
+            <Project>
+              <PropertyGroup>
+                <RuntimeIdentifier>{rid}</RuntimeIdentifier>
+                <Configuration>Debug</Configuration>
+              </PropertyGroup>
+            </Project>
+            ");
+
+            new BuildCommand(helloWorldAsset)
+           .Execute()
+           .Should()
+           .Pass();
+
+            var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
+
+            publishCommand
+            .Execute()
+            .Should()
+            .Pass()
+            .And
+            .HaveStdOutContaining("Custom Configuration Detected, PublishRelease will not take effect.");
+
+            var releaseAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
+            Assert.False(File.Exists(releaseAssetPath)); // build will produce a debug asset, need to make sure this doesn't exist either.       
+        }
+
+        [Fact]
+        public void PublishRelease_does_not_override_custom_PublishProfile_Configuration_and_logs()
+        {
+
         }
 
         [Fact]
