@@ -24,8 +24,8 @@
     <Description>Tasks and targets to natively publish .NET applications as containers.</Description>
     <Copyright></Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/rainersigwald/containers</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/rainersigwald/containers</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/dotnet/sdk-container-builds</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/dotnet/sdk-container-builds</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>containers;docker;Microsoft.NET.Build.Containers</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>

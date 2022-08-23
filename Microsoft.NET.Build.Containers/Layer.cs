@@ -30,7 +30,7 @@ public record struct Layer
         string tempTarballPath = ContentStore.GetTempFile();
         using (FileStream fs = File.Create(tempTarballPath))
         {
-            // using (GZipStream gz = new(fs, CompressionMode.Compress)) // TODO: https://github.com/rainersigwald/containers/issues/29
+            // using (GZipStream gz = new(fs, CompressionMode.Compress)) // TODO: https://github.com/dotnet/sdk-container-builds/issues/29
             using (TarWriter writer = new(fs, TarEntryFormat.Gnu, leaveOpen: true))
             {
                 foreach (var item in fileList)

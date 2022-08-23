@@ -1,8 +1,11 @@
 # Documents Index
 
+This directory contains the documentation for this repo.
+
+You can quickly try containerizing your applications by following the [Getting Started](./GettingStarted.md) guide.
+
+You can [Customize your container](./ContainerCustomization.md) easily as well!
+
 ## References
 
-* [OCI Image Format spec](https://github.com/opencontainers/image-spec/blob/main/spec.md)
-* [Docker Registry API docs](https://docs.docker.com/registry/spec/api/)
-* [Setting up a local Docker registry](https://docs.docker.com/registry/)
 * [Tutorial: Containerize a .NET app](https://docs.microsoft.com/dotnet/core/docker/build-container?tabs=windows)

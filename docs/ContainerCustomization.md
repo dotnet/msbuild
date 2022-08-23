@@ -35,7 +35,7 @@ Be default, we push to the local Docker daemon (annotated by `docker://`), but f
 ```
 
 > **Note**
-> There is no authentication currently supported - that [will come in a future release](https://github.com/rainersigwald/containers/issues/70) - so make sure you're pointing to an unauthenticated registry
+> There is no authentication currently supported - that [will come in a future release](https://github.com/dotnet/sdk-container-builds/issues/70) - so make sure you're pointing to a local Docker daemon
 
 ## ContainerImageName
 
