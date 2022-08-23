@@ -4,8 +4,6 @@
 using System;
 using System.Runtime.InteropServices;
 
-#nullable disable
-
 namespace Microsoft.Build.Shared
 {
     internal static partial class EnvironmentUtilities
