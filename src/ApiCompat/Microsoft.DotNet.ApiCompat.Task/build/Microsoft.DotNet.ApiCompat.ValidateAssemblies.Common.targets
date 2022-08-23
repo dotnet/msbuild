@@ -19,6 +19,7 @@
       GenerateCompatibilitySuppressionFile="$(GenerateCompatibilitySuppressionFile)"
       CompatibilitySuppressionFilePath="$(CompatibilitySuppressionFilePath)"
       NoWarn="$(NoWarn)"
+      ExcludeAttributesFiles="@(ApiCompatExcludeAttributesFile)"
       EnableStrictMode="$(ApiCompatStrictMode)"
       LeftAssembliesReferences="@(ApiCompatLeftAssembliesReferences)"
       RightAssembliesReferences="@(ApiCompatRightAssembliesReferences)"

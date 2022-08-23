@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.DotNet.ApiCompatibility.Logging;
+using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
@@ -12,9 +13,12 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     {
         private readonly ICompatibilityLogger _log;
 
-        public RuleFactory(ICompatibilityLogger log)
+        private readonly IEnumerable<string>? _excludeAttributesFiles;
+
+        public RuleFactory(ICompatibilityLogger log, IEnumerable<string>? excludeAttributesFiles = null)
         {
             _log = log;
+            _excludeAttributesFiles = excludeAttributesFiles;
         }
 
         /// <inheritdoc />
@@ -29,7 +33,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 new CannotRemoveBaseTypeOrInterface(settings, context),
                 new CannotSealType(settings, context),
                 new EnumsMustMatch(settings, context),
-                new MembersMustExist(settings, context)
+                new MembersMustExist(settings, context),
+                new AttributesMustMatch(settings, context, _excludeAttributesFiles)
             };
         }
     }

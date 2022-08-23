@@ -36,6 +36,8 @@ namespace Microsoft.DotNet.ApiCompat.Tool
             Option<MessageImportance> verbosityOption = new(new string[] { "--verbosity", "-v" },
                 "Controls the log level verbosity. Allowed values are high, normal, and low.");
             verbosityOption.SetDefaultValue(MessageImportance.High);
+            Option<string[]> excludeAttributesFilesOption = new("--exclude-attributes-file",
+                "The path to one or more attribute exclusion files with types in DocId format.");
 
             // Root command
             Option<string[]> leftAssembliesOption = new(new string[] { "--left-assembly", "--left", "-l" },
@@ -98,6 +100,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
             rootCommand.AddGlobalOption(noWarnOption);
             rootCommand.AddGlobalOption(roslynAssembliesPathOption);
             rootCommand.AddGlobalOption(verbosityOption);
+            rootCommand.AddGlobalOption(excludeAttributesFilesOption);
 
             rootCommand.AddOption(leftAssembliesOption);
             rootCommand.AddOption(rightAssembliesOption);
@@ -119,6 +122,8 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                 bool generateSuppressionFile = context.ParseResult.GetValueForOption(generateSuppressionFileOption);
                 string? suppressionFile = context.ParseResult.GetValueForOption(suppressionFileOption);
                 string? noWarn = context.ParseResult.GetValueForOption(noWarnOption);
+                string[]? excludeAttributesFiles = context.ParseResult.GetValueForOption(excludeAttributesFilesOption);
+
                 string[] leftAssemblies = context.ParseResult.GetValueForOption(leftAssembliesOption)!;
                 string[] rightAssemblies = context.ParseResult.GetValueForOption(rightAssembliesOption)!;
                 bool strictMode = context.ParseResult.GetValueForOption(strictModeOption);
@@ -133,6 +138,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                     generateSuppressionFile,
                     suppressionFile,
                     noWarn,
+                    excludeAttributesFiles,
                     leftAssemblies,
                     rightAssemblies,
                     strictMode,
@@ -208,6 +214,8 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                 bool generateSuppressionFile = context.ParseResult.GetValueForOption(generateSuppressionFileOption);
                 string? suppressionFile = context.ParseResult.GetValueForOption(suppressionFileOption);
                 string? noWarn = context.ParseResult.GetValueForOption(noWarnOption);
+                string[]? excludeAttributesFiles = context.ParseResult.GetValueForOption(excludeAttributesFilesOption);
+
                 string package = context.ParseResult.GetValueForArgument(packageArgument);
                 bool runApiCompat = context.ParseResult.GetValueForOption(runApiCompatOption);
                 bool enableStrictModeForCompatibleTfms = context.ParseResult.GetValueForOption(enableStrictModeForCompatibleTfmsOption);
@@ -223,6 +231,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                     generateSuppressionFile,
                     suppressionFile,
                     noWarn,
+                    excludeAttributesFiles,
                     package,
                     runApiCompat,
                     enableStrictModeForCompatibleTfms,

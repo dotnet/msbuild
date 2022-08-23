@@ -57,6 +57,11 @@
         <target state="translated">'{0}' soyut üyesi {2} üzerinde bulunmadığından {1} konumuna eklenemiyor</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotAddAttribute">
+        <source>Cannot add attribute '{0}' to '{1}'.</source>
+        <target state="new">Cannot add attribute '{0}' to '{1}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotAddMemberToInterface">
         <source>Cannot add interface member '{0}' to {1} because it does not exist on {2}</source>
         <target state="translated">'{0}' arabirim üyesi {2} üzerinde bulunmadığından {1} konumuna eklenemiyor</target>
@@ -65,6 +70,16 @@
       <trans-unit id="CannotAddVirtualToMember">
         <source>Cannot add virtual keyword to member '{0}'.</source>
         <target state="translated">Sanal anahtar sözcük, '{0}' üyesine eklenemiyor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotChangeAttribute">
+        <source>Cannot change arguments of attribute '{0}' on '{1}'.</source>
+        <target state="new">Cannot change arguments of attribute '{0}' on '{1}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotRemoveAttribute">
+        <source>Cannot remove attribute '{0}' from '{1}'.</source>
+        <target state="new">Cannot remove attribute '{0}' from '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">

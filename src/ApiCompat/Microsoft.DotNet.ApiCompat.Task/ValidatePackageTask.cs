@@ -40,6 +40,11 @@ namespace Microsoft.DotNet.ApiCompat.Task
         public string? NoWarn { get; set; }
 
         /// <summary>
+        /// Set of files with types in DocId format of which attributes to exclude.
+        /// </summary>
+        public string[]? ExcludeAttributesFiles { get; set; }
+
+        /// <summary>
         /// If true, performs api compatibility checks on the package assets.
         /// </summary>
         public bool RunApiCompat { get; set; } = true;
@@ -120,6 +125,7 @@ namespace Microsoft.DotNet.ApiCompat.Task
                 GenerateCompatibilitySuppressionFile,
                 CompatibilitySuppressionFilePath,
                 NoWarn,
+                ExcludeAttributesFiles,
                 PackageTargetPath!,
                 RunApiCompat,
                 EnableStrictModeForCompatibleTfms,
