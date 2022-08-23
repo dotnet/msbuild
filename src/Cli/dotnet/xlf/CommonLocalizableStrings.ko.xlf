@@ -37,6 +37,11 @@
         <target state="translated">'{0}'에서 프로젝트를 찾을 수 없습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CustomConfigurationDisablesPublishAndPackReleaseProperties">
+        <source>A custom configuration was detected in the project '{0}', so the property '{1}' will not take effect.</source>
+        <target state="new">A custom configuration was detected in the project '{0}', so the property '{1}' will not take effect.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
         <source>Force the command to ignore any persistent build servers.</source>
         <target state="translated">모든 영구 빌드 서버를 무시하도록 명령을 강제 실행합니다.</target>

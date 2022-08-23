@@ -653,7 +653,9 @@ public static class Program
             .Should()
             .Pass()
             .And
-            .HaveStdOutContaining("Custom Configuration Detected, PublishRelease will not take effect.");
+            .HaveStdOutContaining(helloWorldAsset.Path) // match the logged string without being specific to localization
+            .And
+            .HaveStdOutContaining("PublishRelease");
 
             var releaseAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
             Assert.False(File.Exists(releaseAssetPath)); // build will produce a debug asset, need to make sure this doesn't exist either.       
@@ -723,8 +725,10 @@ public static class Program
             Assert.False(File.Exists(releaseAssetPath)); // build will produce a debug asset, need to make sure this doesn't exist either.
         }
 
-        [Fact]
-        public void PublishRelease_overrides_Debug_PublishProfile_Configuration()
+        [Theory]
+        [InlineData("Debug")]
+        [InlineData("Custom")]
+        public void PublishRelease_interacts_similarly_with_PublishProfile_Configuration(string config)
         {
             var tfm = ToolsetInfo.CurrentTargetFramework;
             var rid = EnvironmentInfo.GetCompatibleRid(tfm);
@@ -748,7 +752,8 @@ public static class Program
             <Project>
               <PropertyGroup>
                 <RuntimeIdentifier>{rid}</RuntimeIdentifier>
-                <Configuration>Debug</Configuration>
+                <Configuration>{config}</Configuration>
+                <FunkyTestProperty>true</FunkyTestProperty>
               </PropertyGroup>
             </Project>
             ");
@@ -760,21 +765,20 @@ public static class Program
 
             var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
 
-            publishCommand
-            .Execute()
-            .Should()
-            .Pass()
-            .And
-            .HaveStdOutContaining("Custom Configuration Detected, PublishRelease will not take effect.");
+            CommandResult publishOutput = publishCommand
+            .Execute("/p:PublishProfile=test", "-bl:C:\\users\\noahgilson\\profile.binlog");
 
+            publishOutput.Should().Pass();
             var releaseAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
-            Assert.False(File.Exists(releaseAssetPath)); // build will produce a debug asset, need to make sure this doesn't exist either.       
-        }
-
-        [Fact]
-        public void PublishRelease_does_not_override_custom_PublishProfile_Configuration_and_logs()
-        {
-
+            if (config == "Debug")
+            {
+                Assert.True(File.Exists(releaseAssetPath));
+            }
+            else
+            {
+                Assert.False(File.Exists(releaseAssetPath)); // build will produce a debug asset, need to make sure this doesn't exist either.       
+                publishOutput.Should().HaveStdOutContaining("PublishRelease"); 
+            }
         }
 
         [Fact]

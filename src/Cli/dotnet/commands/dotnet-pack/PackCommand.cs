@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Tools.Pack
             var msbuildArgs = new List<string>()
             {
                 "-target:pack",
-                "-property:_IsPacking=true"
+                "--property:_IsPacking=true"
             };
 
             IEnumerable<string> slnOrProjectArgs = parseResult.GetValueForArgument(PackCommandParser.SlnOrProjectArgument);

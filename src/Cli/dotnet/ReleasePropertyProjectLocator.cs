@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Cli
                 if (!string.IsNullOrEmpty(releasePropertyFlag))
                     configurationToUse = releasePropertyFlag.Equals("true", StringComparison.OrdinalIgnoreCase) ? MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE : "";
 
-                if (!ProjectHasUserCustomizedConfiguration(project) && !string.IsNullOrEmpty(configurationToUse))
+                if (!string.IsNullOrEmpty(configurationToUse) && !ProjectHasUserCustomizedConfiguration(project, defaultedConfigurationProperty))
                     return new List<string> { $"-property:{MSBuildPropertyNames.CONFIGURATION}={configurationToUse}" };
             }
             return Enumerable.Empty<string>();
@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.Cli
 
                 if (projectData.GetPropertyValue(MSBuildPropertyNames.OUTPUT_TYPE) == executableProjectOutputType)
                 {
-                    if (ProjectHasUserCustomizedConfiguration(projectData))
+                    if (ProjectHasUserCustomizedConfiguration(projectData, slnProjectConfigPropertytoCheck))
                     {
                         shouldReturnNull = true;
                         state.Stop(); // We don't want to override Configuration if ANY project in a sln uses a custom configuration
@@ -197,9 +197,19 @@ namespace Microsoft.DotNet.Cli
             return globalProperties;
         }
 
-        private bool ProjectHasUserCustomizedConfiguration(ProjectInstance project)
+        /// <param name="propertyToDisableIfTrue">A property that will be disabled (NOT BY THIS FUCTION) based on the condition.</param>
+        /// <returns>Returns true if Configuration on a project is not Debug or Release. Note if someone explicitly set Debug, we don't detect that here.</returns>
+        /// <remarks>Will log that the property will not work if this is true.</remarks>
+        private bool ProjectHasUserCustomizedConfiguration(ProjectInstance project, string propertyToDisableIfTrue)
         {
-            return project.GlobalProperties.ContainsKey(MSBuildPropertyNames.CONFIGURATION);
+            var config_value = project.GetPropertyValue(MSBuildPropertyNames.CONFIGURATION);
+            // Case does matter for configuration values.
+            if(!(config_value.Equals(MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE) || config_value.Equals(MSBuildPropertyNames.CONFIGURATION_DEBUG_VALUE)))
+            {
+                Reporter.Output.WriteLine(string.Format(CommonLocalizableStrings.CustomConfigurationDisablesPublishAndPackReleaseProperties, project.FullPath, propertyToDisableIfTrue));
+                return true;
+            }
+            return false;
         }
     }
 }

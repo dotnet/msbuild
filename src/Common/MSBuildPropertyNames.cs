@@ -9,6 +9,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly string PACK_RELEASE = "PackRelease";
         public static readonly string CONFIGURATION = "Configuration";
         public static readonly string CONFIGURATION_RELEASE_VALUE = "Release";
+        public static readonly string CONFIGURATION_DEBUG_VALUE = "Debug";
         public static readonly string OUTPUT_TYPE = "OutputType";
         public static readonly string OUTPUT_TYPE_EXECUTABLE = "Exe";
     }
