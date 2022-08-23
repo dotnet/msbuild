@@ -63,11 +63,13 @@
   <!-- Packages that are in-box for .NET Core, so we only need to reference them for .NET Framework -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildFromSource)' != 'true'">
     <!--
-        MSBuild depends on a new version of SRM/SCI; keep in sync with binding redirect:
+        Microsoft.NET.HostModel also uses System.Reflection.Metadata. Don't move ahead of the version of System.Reflection.Metadata
+        that MSBuild supports with the binding redirect to ensure that both this project and Microsoft.NET.HostModel can load
+        the same System.Reflection.Metadata assembly and their types can unify. See the following link for the MSBuild binding redirect config.
           https://github.com/dotnet/msbuild/blob/5d102ae37163fc1f22610bb433c3ab9a2fff91f0/src/MSBuild/app.config#L59
     -->
-    <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
-    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
+    <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
+    <PackageReference Include="System.Reflection.Metadata" Version="6.0.0" />
   </ItemGroup>
 
   <!-- These are loaded from the CLI's copy on .NET Core, we don't need to duplicate them on disk -->
