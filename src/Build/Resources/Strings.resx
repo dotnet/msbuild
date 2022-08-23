@@ -1973,4 +1973,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
     </comment>
   </data>
+   <data name="DefaultSDKResolverError" xml:space="preserve">
+    <value>The DefaultSdkResolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</value>
+  </data>
 </root>

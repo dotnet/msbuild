@@ -92,6 +92,11 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="DefaultSDKResolverError">
+        <source>The DefaultSdkResolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
+        <target state="new">The DefaultSdkResolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
         <target state="translated">MSB4275: Es wurde versucht, mehrere Außerkraftsetzungen derselben Aufgabe zu erstellen: {0}</target>
