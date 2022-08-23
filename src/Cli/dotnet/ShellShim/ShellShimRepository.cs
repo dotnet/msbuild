@@ -105,14 +105,24 @@ namespace Microsoft.DotNet.ShellShim
                     {
                         foreach (var file in GetShimFiles(commandName).Where(f => _fileSystem.File.Exists(f.Value)))
                         {
-                            using (var tempPath = File.OpenWrite(FileUtilities.CreateTempFile()))
+                            if (File.Exists(file.ToString()))
                             {
-                                Stream oldFile = _fileSystem.File.OpenRead(file.Value);
-                                oldFile.Seek(0, SeekOrigin.Begin);
-                                oldFile.CopyTo(tempPath);
-                                oldFile.Dispose();
-                                File.Delete(file.Value);
-                                files[file.Value] = tempPath.Name;
+                                try
+                                {
+                                    Stream oldFile = _fileSystem.File.OpenRead(file.Value);
+                                    using (var tempPath = File.OpenWrite(FileUtilities.CreateTempFile()))
+                                    {
+                                        oldFile.Seek(0, SeekOrigin.Begin);
+                                        oldFile.CopyTo(tempPath);
+                                        oldFile.Dispose();
+                                        File.Delete(file.Value);
+                                        files[file.Value] = tempPath.Name;
+                                    }
+                                }
+                                catch (Exception ex) when (ex is System.IO.FileNotFoundException || ex is System.IO.IOException) // catch race condition on file lock
+                                {
+                                    continue;
+                                }
                             }
                         }
                     }
