@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="ApiCompatibilityFooter">
         <source>Performed api validation on '{0}' ({2}) and '{1}' ({3}).</source>
-        <target state="translated">Provedlo se ověření rozhraní API pro {0} ({2}) a {1} ({3}).</target>
+        <target state="new">Performed api validation on '{0}' ({2}) and '{1}' ({3}).</target>
         <note />
       </trans-unit>
       <trans-unit id="ApiCompatibilityHeader">
@@ -44,17 +44,17 @@
       </trans-unit>
       <trans-unit id="AssembyCultureDoesNotMatch">
         <source>{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</source>
-        <target state="translated">Jazyková verze sestavení {2} {0} se neshoduje s jazykovou verzí sestavení {3} {1}.</target>
+        <target state="new">{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssembyVersionDoesNotMatch">
         <source>{3} assembly version '{1}' should be equal to {2} version '{0}'.</source>
-        <target state="translated">Verze sestavení {3} {1} by měla být rovna {2} verzi {0}.</target>
+        <target state="new">{3} assembly version '{1}' should be equal to {2} version '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssembyVersionIsNotCompatible">
         <source>{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</source>
-        <target state="translated">Verze sestavení {2} {0} by se měla rovnat nebo být vyšší než {3} verze {1}.</target>
+        <target state="new">{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotAddAbstractMember">
@@ -169,12 +169,12 @@
       </trans-unit>
       <trans-unit id="TypeExistsOnLeft">
         <source>Type '{0}' exists on {1} but not on {2}</source>
-        <target state="translated">Typ {0} existuje v {1}, ale ne v {2}</target>
+        <target state="new">Type '{0}' exists on {1} but not on {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="TypeExistsOnRight">
         <source>Type '{0}' exists on {2} but not on {1}</source>
-        <target state="translated">Typ {0} existuje v {2}, ale ne v {1}</target>
+        <target state="new">Type '{0}' exists on {2} but not on {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="TypeIsActuallySealed">
