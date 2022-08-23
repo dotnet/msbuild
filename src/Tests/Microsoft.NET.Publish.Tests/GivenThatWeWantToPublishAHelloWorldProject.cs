@@ -766,7 +766,7 @@ public static class Program
             var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
 
             CommandResult publishOutput = publishCommand
-            .Execute("/p:PublishProfile=test", "-bl:C:\\users\\noahgilson\\profile.binlog");
+            .Execute("/p:PublishProfile=test");
 
             publishOutput.Should().Pass();
             var releaseAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
