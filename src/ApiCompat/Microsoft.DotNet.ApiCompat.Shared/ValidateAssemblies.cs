@@ -39,7 +39,8 @@ namespace Microsoft.DotNet.ApiCompat
         public static void Run(Func<ISuppressionEngine, ICompatibilityLogger> logFactory,
             bool generateSuppressionFile,
             string? suppressionFile,
-            string? noWarn, 
+            string? noWarn,
+            string[]? excludeAttributesFiles,
             string[] leftAssemblies,
             string[] rightAssemblies,
             bool enableStrictMode,
@@ -55,7 +56,7 @@ namespace Microsoft.DotNet.ApiCompat
             // Initialize the service provider
             ValidateAssembliesServiceProvider serviceProvider = new(logFactory,
                 () => new SuppressionEngine(suppressionFileForEngine, noWarn, generateSuppressionFile),
-                (log) => new RuleFactory(log));
+                (log) => new RuleFactory(log, excludeAttributesFiles));
 
             IApiCompatRunner apiCompatRunner = serviceProvider.GetService<IApiCompatRunner>();
             ApiCompatRunnerOptions apiCompatOptions = new(enableStrictMode);

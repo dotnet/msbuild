@@ -38,6 +38,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       PackageTargetPath="@(_PackageTargetPath)"
       RuntimeGraph="$(RuntimeIdentifierGraphPath)"
       NoWarn="$(NoWarn)"
+      ExcludeAttributesFiles="@(ApiCompatExcludeAttributesFile)"
       RunApiCompat="$(RunApiCompat)"
       EnableStrictModeForCompatibleTfms="$([MSBuild]::ValueOrDefault('$(EnableStrictModeForCompatibleTfms)', 'true'))"
       EnableStrictModeForCompatibleFrameworksInPackage="$(EnableStrictModeForCompatibleFrameworksInPackage)"
