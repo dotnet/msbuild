@@ -14,6 +14,7 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
 using Microsoft.NET.Build.Tasks;
+using System.Diagnostics;
 
 namespace Microsoft.DotNet.ToolPackage
 {
@@ -165,7 +166,7 @@ namespace Microsoft.DotNet.ToolPackage
             DirectoryPath? rootConfigDirectory,
             string[] additionalFeeds)
         {
-            string tempProject = _tempProject.ToString() ?? (FileUtilities.CreateTempFile(FileUtilities.CreateTempPath(), "csproj"));
+            string tempProject = _tempProject != null ? _tempProject.ToString() : (FileUtilities.CreateTempFile(FileUtilities.CreateTempPath(), "csproj"));
             if (_tempProject != null)
             {
                 tempProject = Path.ChangeExtension(tempProject, "csproj");
