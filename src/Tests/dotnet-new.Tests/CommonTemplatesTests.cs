@@ -295,9 +295,9 @@ Restore succeeded\.",
             };
 
             string[] unsupportedLanguageVersions = { "1", "ISO-1" };
-            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "latest", "latestMajor", "default", "preview" };
+            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
 
-            string?[] topLevelStatementSupport = { null, "9.0", "10.0", "latest", "latestMajor", "default", "preview" };
+            string?[] topLevelStatementSupport = { null, "9.0", "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
 
             foreach (var template in templatesToTest)
             {
@@ -400,6 +400,8 @@ Restore succeeded\.",
         }
 
         [Theory]
+        [InlineData("11.0")]
+        [InlineData("11")]
         [InlineData("10.0")]
         [InlineData("10")]
         [InlineData("preview")]
@@ -502,10 +504,10 @@ class Program
             };
 
             string[] unsupportedLanguageVersions = { "1", "ISO-1" };
-            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "latest", "latestMajor", "default", "preview" };
+            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
 
             string?[] supportedInFrameworkByDefault = { null, "net7.0", "netstandard2.1" };
-            string?[] supportedInLanguageVersion = { "8.0", "9.0", "10.0", "latest", "latestMajor", "default", "preview" };
+            string?[] supportedInLanguageVersion = { "8.0", "9.0", "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
 
             foreach (var template in templatesToTest)
             {
@@ -606,10 +608,10 @@ class Program
                 new { Template = "classlib", Frameworks = new[] { null, "net7.0", "netstandard2.0", "netstandard2.1" } }
             };
             string[] unsupportedLanguageVersions = { "1", "ISO-1" };
-            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "latest", "latestMajor", "default", "preview" };
+            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
 
             string?[] supportedInFramework = { null, "net7.0" };
-            string?[] supportedInLangVersion = { null, "10.0", "latest", "latestMajor", "default", "preview" };
+            string?[] supportedInLangVersion = { null, "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
 
             foreach (var template in templatesToTest)
             {
@@ -707,10 +709,10 @@ class Program
                 new { Template = "classlib", Frameworks = new[] { null, "net7.0", "netstandard2.0", "netstandard2.1" } }
             };
             string[] unsupportedLanguageVersions = { "1", "ISO-1" };
-            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "latest", "latestMajor", "default", "preview" };
+            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
 
             string?[] supportedFrameworks = { null, "net7.0" };
-            string?[] fileScopedNamespacesSupportedLanguages = { "10.0", "latest", "latestMajor", "default", "preview" };
+            string?[] fileScopedNamespacesSupportedLanguages = { "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
 
             foreach (var template in templatesToTest)
             {
