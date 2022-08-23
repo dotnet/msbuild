@@ -73,5 +73,16 @@ namespace Microsoft.NET.Build.Tasks
             return Path.GetTempFileName();
         }
 
+
+        [DllImport("libc", SetLastError = true)]
+        private static extern int chmod(string pathname, uint mode);
+        public static void ResetTempFilePermissions(string path)
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                chmod(path, 0000700);
+            }
+        }
+
     }
 }
