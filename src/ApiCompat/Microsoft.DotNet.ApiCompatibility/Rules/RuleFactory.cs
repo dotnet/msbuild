@@ -13,9 +13,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     {
         private readonly ICompatibilityLogger _log;
 
-        private readonly IEnumerable<string>? _excludeAttributesFiles;
+        private readonly IReadOnlyCollection<string>? _excludeAttributesFiles;
 
-        public RuleFactory(ICompatibilityLogger log, IEnumerable<string>? excludeAttributesFiles = null)
+        public RuleFactory(ICompatibilityLogger log, IReadOnlyCollection<string>? excludeAttributesFiles = null)
         {
             _log = log;
             _excludeAttributesFiles = excludeAttributesFiles;

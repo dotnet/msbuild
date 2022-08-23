@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -21,10 +21,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         private readonly RuleSettings _settings;
         private readonly HashSet<string>? _attributesToExclude;
 
-        public AttributesMustMatch(RuleSettings settings, IRuleRegistrationContext context, IEnumerable<string>? excludeAttributesFiles)
+        public AttributesMustMatch(RuleSettings settings, IRuleRegistrationContext context, IReadOnlyCollection<string>? excludeAttributesFiles)
         {
             _settings = settings;
-            if (excludeAttributesFiles != null)
+            if (excludeAttributesFiles != null && excludeAttributesFiles.Count > 0)
             {
                 IEnumerable<string> attributesToExclude = ReadExclusions(excludeAttributesFiles);
                 _attributesToExclude = new HashSet<string>(attributesToExclude);
@@ -330,8 +330,29 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
             public ConstantComparer(RuleSettings settings) => _settings = settings;
 
-            public bool Equals(TypedConstant x, TypedConstant y) =>
-                x.Kind == y.Kind && x.Value!.Equals(y.Value) && _settings.SymbolComparer.Equals(x.Type!, y.Type!);
+            public bool Equals(TypedConstant x, TypedConstant y)
+            {
+                if (x.Kind != y.Kind)
+                    return false;
+
+                switch (x.Kind)
+                {
+                    case TypedConstantKind.Array:
+                        if (!x.Values.SequenceEqual(y.Values, this))
+                            return false;
+                        break;
+                    case TypedConstantKind.Type:
+                        if (!_settings.SymbolComparer.Equals((x.Value as INamedTypeSymbol)!, (y.Value as INamedTypeSymbol)!))
+                            return false;
+                        break;
+                    default:
+                        if (!Equals(x.Value, y.Value))
+                            return false;
+                        break;
+                }
+
+                return _settings.SymbolComparer.Equals(x.Type!, y.Type!);
+            }
 
             public int GetHashCode([DisallowNull] TypedConstant obj) => throw new NotImplementedException();
         }
