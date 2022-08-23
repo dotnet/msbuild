@@ -3,7 +3,7 @@
     "dotnet": "7.0.100-preview.5.22307.18",
     "runtimes": {
       "dotnet": [
-        "$(VSRedistCommonNetCoreSharedFrameworkx6470PackageVersion)"
+        "$(VSRedistCommonNetCoreSharedFrameworkx6480PackageVersion)"
       ]
     },
     "vs-opt": {
