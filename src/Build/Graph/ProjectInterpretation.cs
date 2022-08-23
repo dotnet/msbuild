@@ -112,7 +112,9 @@ namespace Microsoft.Build.Graph
 
                     var  projectInstance = _projectInstanceFactory(
                         projectReferenceFullPath,
-                        null, // Platform negotiation requires an evaluation with no global properties first
+                        new Dictionary<string, string>(){
+                            {"PlatformNegotiationOuterBuild", "true"},
+                        }, // Platform negotiation requires an evaluation with no global properties first but we need a way to designate this as an outerbuild
                         _projectCollection);
 
                     var selectedPlatform = PlatformNegotiation.GetNearestPlatform(projectInstance.GetPropertyValue(PlatformMetadataName), projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), requesterInstance.GetPropertyValue(PlatformLookupTableMetadataName), projectInstance.FullPath, requesterInstance.GetPropertyValue(PlatformMetadataName));
@@ -125,6 +127,9 @@ namespace Microsoft.Build.Graph
                     {
                         var platformPropertyInstance = ProjectPropertyInstance.Create(PlatformMetadataName, selectedPlatform);
                         referenceGlobalProperties[PlatformMetadataName] = platformPropertyInstance;
+                        // We will use this property to designate an inner build for platform negotiation
+                        var platformInnerBuildPropertyInstance = ProjectPropertyInstance.Create("PlatformNegotiationInnerBuild", "true");
+                        referenceGlobalProperties["PlatformNegotiationInnerBuild"] = platformInnerBuildPropertyInstance;
                     }
                 }
 
