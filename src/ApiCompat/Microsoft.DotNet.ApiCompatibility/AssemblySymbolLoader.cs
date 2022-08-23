@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -57,6 +57,7 @@ namespace Microsoft.DotNet.ApiCompatibility
                         if (directoryName != null)
                         {
                             _referencePathFiles.Add(assemblyName, directoryName);
+                            _referencePathDirectories.Add(directoryName);
                         }
                     }
                 }
@@ -253,11 +254,12 @@ namespace Microsoft.DotNet.ApiCompatibility
             List<MetadataReference> result = new();
             foreach (string path in paths)
             {
-                string? directory = null;
-
                 if (Directory.Exists(path))
                 {
-                    directory = path;
+                    // If a directory is passed in as a path, add that to the reference paths.
+                    // Otherwise, if a file is passed in, add its parent directory to the reference paths.
+                    _referencePathDirectories.Add(path);
+
                     foreach (string assembly in Directory.EnumerateFiles(path, "*.dll"))
                     {
                         result.Add(CreateOrGetMetadataReferenceFromPath(assembly, referenceAssemblyNamesToIgnore));
@@ -265,18 +267,18 @@ namespace Microsoft.DotNet.ApiCompatibility
                 }
                 else if (File.Exists(path))
                 {
-                    directory = Path.GetDirectoryName(path);
+                    string? directory = Path.GetDirectoryName(path);
+                    // If a directory is passed in as a path, add that to the reference paths.
+                    // Otherwise, if a file is passed in, add its parent directory to the reference paths.
+                    if (!string.IsNullOrEmpty(directory))
+                        _referencePathDirectories.Add(directory);
+
                     result.Add(CreateOrGetMetadataReferenceFromPath(path, referenceAssemblyNamesToIgnore));
                 }
                 else
                 {
                     throw new FileNotFoundException(string.Format(Resources.ProvidedPathToLoadBinariesFromNotFound, path));
                 }
-
-                // If a directory is passed in as a path, add that to the reference paths.
-                // Otherwise, if a file is passed in, add its parent directory to the reference paths.
-                if (!string.IsNullOrEmpty(directory))
-                    _referencePathDirectories.Add(directory);
             }
 
             return result;
