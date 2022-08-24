@@ -128,9 +128,6 @@ namespace Microsoft.Build.Graph
                         var platformPropertyInstance = ProjectPropertyInstance.Create(PlatformMetadataName, selectedPlatform);
                         referenceGlobalProperties[PlatformMetadataName] = platformPropertyInstance;
                     }
-                    // We will use this property to designate an inner build for platform negotiation 
-                    var platformInnerBuildPropertyInstance = ProjectPropertyInstance.Create("PlatformNegotiationInnerBuild", "true");
-                    referenceGlobalProperties["PlatformNegotiationInnerBuild"] = platformInnerBuildPropertyInstance;
                 }
 
                 var referenceConfig = new ConfigurationMetadata(projectReferenceFullPath, referenceGlobalProperties);
