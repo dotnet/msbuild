@@ -49,7 +49,7 @@ stages:
       ${{ if eq(variables['System.TeamProject'], 'public') }}:
         vmImage: 'windows-2019'
       ${{ if eq(variables['System.TeamProject'], 'internal') }}:
-        name: NetCore1ESPool-Internal
+        name: NetCore1ESPool-Svc-Internal
         demands: ImageOverride -equals build.windows.10.amd64.vs2019
     steps:
       - publish: $(Build.SourcesDirectory)\eng\BuildConfiguration
@@ -62,7 +62,7 @@ stages:
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
           vmImage: 'windows-2022'
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
-          name: NetCore1ESPool-Internal
+          name: NetCore1ESPool-Svc-Internal
           demands: ImageOverride -equals Build.Windows.Amd64.VS2022.Pre
       ${{ if eq(variables['System.TeamProject'], 'public') }}:
         helixTargetQueue: Windows.Amd64.VS2022.Pre.Open
@@ -92,7 +92,7 @@ stages:
           ${{ if eq(variables['System.TeamProject'], 'public') }}:
             vmImage: 'windows-2022'
           ${{ if ne(variables['System.TeamProject'], 'public') }}:
-            name: NetCore1ESPool-Internal
+            name: NetCore1ESPool-Svc-Internal
             demands: ImageOverride -equals Build.Windows.Amd64.VS2022.Pre
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
           helixTargetQueue: Windows.Amd64.VS2022.Pre.Open
@@ -118,7 +118,7 @@ stages:
           ${{ if eq(variables['System.TeamProject'], 'public') }}:
             vmImage: 'windows-2019'
           ${{ if ne(variables['System.TeamProject'], 'public') }}:
-            name: NetCore1ESPool-Internal
+            name: NetCore1ESPool-Svc-Internal
             demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre
         strategy:
           matrix:
@@ -134,7 +134,7 @@ stages:
           ${{ if eq(variables['System.TeamProject'], 'public') }}:
             vmImage: 'ubuntu-20.04'
           ${{ if ne(variables['System.TeamProject'], 'public') }}:
-            name: NetCore1ESPool-Internal
+            name: NetCore1ESPool-Svc-Internal
             demands: ImageOverride -equals 1es-ubuntu-2004
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
           helixTargetQueue: 'ubuntu.2004.amd64.open@mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-20.04-helix-amd64-20220502145738-4b2e4c2'
@@ -175,7 +175,7 @@ stages:
           - Windows_NT
           - Source_Build_Managed
         pool:
-          name: NetCore1ESPool-Internal
+          name: NetCore1ESPool-Svc-Internal
           demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: /eng/common/templates/post-build/post-build.yml
