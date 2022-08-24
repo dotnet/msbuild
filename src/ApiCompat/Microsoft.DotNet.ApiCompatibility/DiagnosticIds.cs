@@ -24,6 +24,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         public const string CannotRemoveAttribute = "CP0014";
         public const string CannotChangeAttribute = "CP0015";
         public const string CannotAddAttribute = "CP0016";
+        public const string CannotChangeParameterName = "CP0017";
 
         // Assembly loading ids
         public const string AssemblyNotFound = "CP1001";

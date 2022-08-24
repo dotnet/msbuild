@@ -77,6 +77,11 @@
         <target state="new">Cannot change arguments of attribute '{0}' on '{1}'.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotChangeParameterName">
+        <source>Parameter name on member '{0}' changed from '{1}' to '{2}'.</source>
+        <target state="new">Parameter name on member '{0}' changed from '{1}' to '{2}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotRemoveAttribute">
         <source>Cannot remove attribute '{0}' from '{1}'.</source>
         <target state="new">Cannot remove attribute '{0}' from '{1}'.</target>
