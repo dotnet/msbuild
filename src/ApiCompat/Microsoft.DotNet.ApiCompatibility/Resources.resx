@@ -234,4 +234,7 @@
   <data name="CannotRemoveAttribute" xml:space="preserve">
     <value>Cannot remove attribute '{0}' from '{1}'.</value>
   </data>
+  <data name="CannotChangeParameterName" xml:space="preserve">
+    <value>Parameter name on member '{0}' changed from '{1}' to '{2}'.</value>
+  </data>
 </root>

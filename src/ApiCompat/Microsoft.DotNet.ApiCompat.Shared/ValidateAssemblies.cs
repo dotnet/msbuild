@@ -41,6 +41,7 @@ namespace Microsoft.DotNet.ApiCompat
             string? suppressionFile,
             string? noWarn,
             string[]? excludeAttributesFiles,
+            bool enableRuleCannotChangeParameterName,
             string[] leftAssemblies,
             string[] rightAssemblies,
             bool enableStrictMode,
@@ -56,7 +57,7 @@ namespace Microsoft.DotNet.ApiCompat
             // Initialize the service provider
             ValidateAssembliesServiceProvider serviceProvider = new(logFactory,
                 () => new SuppressionEngine(suppressionFileForEngine, noWarn, generateSuppressionFile),
-                (log) => new RuleFactory(log, excludeAttributesFiles));
+                (log) => new RuleFactory(log, excludeAttributesFiles, enableRuleCannotChangeParameterName));
 
             IApiCompatRunner apiCompatRunner = serviceProvider.GetService<IApiCompatRunner>();
             ApiCompatRunnerOptions apiCompatOptions = new(enableStrictMode);

@@ -12,19 +12,20 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     public class RuleFactory : IRuleFactory
     {
         private readonly ICompatibilityLogger _log;
-
         private readonly IReadOnlyCollection<string>? _excludeAttributesFiles;
+        private readonly bool _enableRuleCannotChangeParameterName;
 
-        public RuleFactory(ICompatibilityLogger log, IReadOnlyCollection<string>? excludeAttributesFiles = null)
+        public RuleFactory(ICompatibilityLogger log, IReadOnlyCollection<string>? excludeAttributesFiles = null, bool enableRuleCannotChangeParameterName = false)
         {
             _log = log;
             _excludeAttributesFiles = excludeAttributesFiles;
+            _enableRuleCannotChangeParameterName = enableRuleCannotChangeParameterName;
         }
 
         /// <inheritdoc />
         public IRule[] CreateRules(RuleSettings settings, IRuleRegistrationContext context)
         {
-            return new IRule[]
+            List<IRule> rules = new()
             {
                 new AssemblyIdentityMustMatch(_log, settings, context),
                 new CannotAddAbstractMember(settings, context),
@@ -34,8 +35,15 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 new CannotSealType(settings, context),
                 new EnumsMustMatch(settings, context),
                 new MembersMustExist(settings, context),
-                new AttributesMustMatch(settings, context, _excludeAttributesFiles)
+                new AttributesMustMatch(settings, context, _excludeAttributesFiles),
             };
+
+            if (_enableRuleCannotChangeParameterName)
+            {
+                rules.Add(new CannotChangeParameterName(settings, context));
+            }
+
+            return rules.ToArray();
         }
     }
 }

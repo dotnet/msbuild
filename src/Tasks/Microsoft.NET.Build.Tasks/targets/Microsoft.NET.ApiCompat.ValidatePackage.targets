@@ -27,7 +27,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <PackageValidationBaselinePath Condition="'$(PackageValidationBaselinePath)' == '' and '$(PackageValidationBaselineVersion)' != ''">$([MSBuild]::NormalizePath('$(NuGetPackageRoot)', '$(PackageValidationBaselineName.ToLower())', '$(PackageValidationBaselineVersion)', '$(PackageValidationBaselineName.ToLower()).$(PackageValidationBaselineVersion).nupkg'))</PackageValidationBaselinePath>
       <_packageValidationBaselinePath Condition="'$(DisablePackageBaselineValidation)' != 'true'">$(PackageValidationBaselinePath)</_packageValidationBaselinePath>
     </PropertyGroup>
-    
+
     <ItemGroup>
       <_PackageTargetPath Include="@(NuGetPackOutput->WithMetadataValue('Extension', '.nupkg'))"
                           Condition="!$([System.String]::new('%(Identity)').EndsWith('.symbols.nupkg'))" />
@@ -39,6 +39,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       RuntimeGraph="$(RuntimeIdentifierGraphPath)"
       NoWarn="$(NoWarn)"
       ExcludeAttributesFiles="@(ApiCompatExcludeAttributesFile)"
+      EnableRuleCannotChangeParameterName="@(ApiCompatEnableRuleCannotChangeParameterName)"
       RunApiCompat="$(RunApiCompat)"
       EnableStrictModeForCompatibleTfms="$([MSBuild]::ValueOrDefault('$(EnableStrictModeForCompatibleTfms)', 'true'))"
       EnableStrictModeForCompatibleFrameworksInPackage="$(EnableStrictModeForCompatibleFrameworksInPackage)"
@@ -49,7 +50,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       RoslynAssembliesPath="$(RoslynAssembliesPath)"
       PackageAssemblyReferences="@(PackageValidationReferencePath)" />
 
-      <Touch Files="$(ApiCompatValidatePackageSemaphoreFile)" AlwaysCreate="true" />
+    <Touch Files="$(ApiCompatValidatePackageSemaphoreFile)" AlwaysCreate="true" />
   </Target>
 
   <Target Name="_GetReferencePathForPackageValidation"
