@@ -31,7 +31,7 @@ namespace Microsoft.Build.Exceptions
         {
             ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "BuildAborted");
 
-            ErrorCode = errorCode;
+            ErrorCode = "MSB4188";
         }
 
         /// <summary>

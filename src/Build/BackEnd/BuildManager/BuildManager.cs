@@ -20,6 +20,7 @@ using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
@@ -714,6 +715,7 @@ namespace Microsoft.Build.Execution
                         {
                             BuildResult result = new BuildResult(submission.BuildRequest, new BuildAbortedException());
                             _resultsCache.AddResult(result);
+                            ((IBuildComponentHost)this).LoggingService.LogError(BuildEventContext.Invalid, new BuildEventFileInfo(ElementLocation.EmptyLocation), "BuildAborted");
                             submission.CompleteResults(result);
                         }
                     }
@@ -723,6 +725,7 @@ namespace Microsoft.Build.Execution
                         if (submission.IsStarted)
                         {
                             submission.CompleteResults(new GraphBuildResult(submission.SubmissionId, new BuildAbortedException()));
+                            ((IBuildComponentHost)this).LoggingService.LogError(BuildEventContext.Invalid, new BuildEventFileInfo(ElementLocation.EmptyLocation), "BuildAborted");
                         }
                     }
 

@@ -156,7 +156,7 @@ namespace Microsoft.Build.Execution
             // this one.)
             ErrorUtilities.VerifyThrow(result.ConfigurationId == BuildRequest.ConfigurationId, "BuildResult doesn't match BuildRequest configuration");
 
-            if (BuildResult == null)
+            if (BuildResult is null || (BuildResult.OverallResult == BuildResultCode.Success && result is not null))
             {
                 BuildResult = result;
             }
