@@ -19,7 +19,7 @@
     </PropertyGroup>
     <ItemGroup>
         <ResolvedFileToPublish
-          Include="$(PkgMicrosoft_FSharp_Compiler)/lib/net6.0/FSharp.Core.xml"
+          Include="$(PkgMicrosoft_FSharp_Compiler)/lib/net7.0/FSharp.Core.xml"
           CopyToPublishDirectory="PreserveNewest"
           DestinationSubPath="FSharp.Core.xml"
           RelativePath="FSharp.Core.xml"
