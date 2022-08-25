@@ -4213,12 +4213,12 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                 "Release",
                 "x64",
                 new HashSet<string>() { "sdkName" },
-                false,
-                false,
+                treatErrorsAsWarnings: false,
+                prefer32Bit: false,
                 "windows",
                 new Version("1.0.2"),
-                "myProjectName",
-                true);
+                "projectName",
+                enableMaxPlatformVersionEmptyWarning: true);
 
             reference.ResolutionErrors.ShouldBeEmpty();
             reference.ResolutionWarnings.ShouldBeEmpty();
