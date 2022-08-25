@@ -49,7 +49,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         public abstract void PacketReceived(int node, INodePacket packet);
 
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
-        public abstract SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio);
+        public abstract SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, bool throwExceptions);
 
         /// <inheritdoc cref="IBuildComponent.ShutdownComponent"/>
         public virtual void ShutdownComponent()

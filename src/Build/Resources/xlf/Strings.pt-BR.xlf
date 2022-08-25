@@ -127,6 +127,11 @@
         <target state="translated">MSB4258: a gravação do arquivo de cache do resultado de saída no caminho "{0}" encontrou um erro: {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="FailedToResolveSDK">
+        <source>No SDK resolver succeeded in resolving SDK "{0}". Their error messages are printed below. Only one of the following indicates a real failure:</source>
+        <target state="new">No SDK resolver succeeded in resolving SDK "{0}". Their error messages are printed below. Only one of the following indicates a real failure:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: espaço inesperado na posição "{1}" da condição "{0}". Você esqueceu de remover um espaço?</target>

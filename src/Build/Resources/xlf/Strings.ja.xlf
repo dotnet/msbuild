@@ -127,6 +127,11 @@
         <target state="translated">MSB4258: パス "{0}" の出力結果キャッシュ ファイルに書き込む処理でエラーが発生しました: {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="FailedToResolveSDK">
+        <source>No SDK resolver succeeded in resolving SDK "{0}". Their error messages are printed below. Only one of the following indicates a real failure:</source>
+        <target state="new">No SDK resolver succeeded in resolving SDK "{0}". Their error messages are printed below. Only one of the following indicates a real failure:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: 条件 "{0}" の位置 "{1}" に予期しないスペースがあります。スペースを削除したか確認してください。</target>

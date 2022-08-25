@@ -110,15 +110,15 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         }
 
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
-        public virtual SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
+        public virtual SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, bool throwExceptions)
         {
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
             {
-                return ResolveSdkUsingResolversWithPatternsFirst(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
+                return ResolveSdkUsingResolversWithPatternsFirst(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio, throwExceptions);
             }
             else
             {
-                return ResolveSdkUsingAllResolvers(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
+                return ResolveSdkUsingAllResolvers(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio, throwExceptions);
             }
         }
 
@@ -128,7 +128,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// If the first pass is unsuccessful, on the second pass all the general resolvers (i.e. resolvers without pattern), ordered by their priority, are tried one after one.
         /// After that, if the second pass is unsuccessful, sdk resolution is unsuccessful.
         /// </remarks>
-        private SdkResult ResolveSdkUsingResolversWithPatternsFirst(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
+        private SdkResult ResolveSdkUsingResolversWithPatternsFirst(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, bool throwExceptions)
         {
             if (_specificResolversManifestsRegistry == null || _generalResolversManifestsRegistry == null)
             {
@@ -169,6 +169,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     projectPath,
                     interactive,
                     isRunningInVisualStudio,
+                    throwExceptions,
                     out sdkResult))
                 {
                     return sdkResult;
@@ -191,6 +192,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 projectPath,
                 interactive,
                 isRunningInVisualStudio,
+                throwExceptions,
                 out sdkResult))
             {
                 return sdkResult;
@@ -228,7 +230,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return resolvers;
         }
 
-        private SdkResult ResolveSdkUsingAllResolvers(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
+        private SdkResult ResolveSdkUsingAllResolvers(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, bool throwExceptions)
         {
             // Lazy initialize all SDK resolvers
             if (_resolversList == null)
@@ -246,12 +248,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 projectPath,
                 interactive,
                 isRunningInVisualStudio,
+                throwExceptions,
                 out SdkResult sdkResult);
 
             return sdkResult;
         }
 
-        private bool TryResolveSdkUsingSpecifiedResolvers(IList<SdkResolver> resolvers, int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, out SdkResult sdkResult)
+        private bool TryResolveSdkUsingSpecifiedResolvers(IList<SdkResolver> resolvers, int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, bool throwExceptions, out SdkResult sdkResult)
         {
             List<SdkResult> results = new List<SdkResult>();
 
@@ -317,6 +320,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 }
 
                 results.Add(result);
+            }
+
+            if (throwExceptions)
+            {
+                loggingContext.LogError(new BuildEventFileInfo(sdkReferenceLocation), "FailedToResolveSDK", sdk.Name);
             }
 
             foreach (SdkResult result in results)

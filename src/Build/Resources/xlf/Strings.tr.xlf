@@ -127,6 +127,11 @@
         <target state="translated">MSB4258: Çıkış sonucu önbellek dosyası "{0}" yoluna yazılırken bir hatayla karşılaşıldı: {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="FailedToResolveSDK">
+        <source>No SDK resolver succeeded in resolving SDK "{0}". Their error messages are printed below. Only one of the following indicates a real failure:</source>
+        <target state="new">No SDK resolver succeeded in resolving SDK "{0}". Their error messages are printed below. Only one of the following indicates a real failure:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: "{0}" koşulunun "{1}" konumunda beklenmeyen boşluk var. Boşluğu kaldırmayı unutmuş olabilirsiniz.</target>
