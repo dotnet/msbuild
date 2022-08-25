@@ -8,7 +8,6 @@ using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Mocks;
-using Microsoft.TemplateEngine.TestHelper;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 {
@@ -147,21 +146,21 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                 CliTemplateInfo.FromTemplateInfo(templates, A.Fake<IHostSpecificDataLoader>()))
                 .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager templatePackageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
-            var parseResult = myCommand.Parse($" new {command}");
+            ParseResult parseResult = myCommand.Parse($" new {command}");
             var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
-            var templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            HashSet<TemplateCommand> templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Empty(templateCommands);
 
-            var templateMatchInfos = InstantiateCommand.CollectTemplateMatchInfo(args, settings, templatePackageManager, templateGroup);
-            var invalidOptions = InstantiateCommand.GetInvalidOptions(templateMatchInfos);
+            List<TemplateResult> templateMatchInfos = InstantiateCommand.CollectTemplateMatchInfo(args, settings, templatePackageManager, templateGroup);
+            List<InvalidTemplateOptionResult> invalidOptions = InstantiateCommand.GetInvalidOptions(templateMatchInfos);
             Assert.Equal(expectedInvalidParams.Length, invalidOptions.Count);
 
-            foreach (var invalidParam in expectedInvalidParams)
+            foreach (string?[] invalidParam in expectedInvalidParams)
             {
                 InvalidTemplateOptionResult.Kind expectedErrorKind = invalidParam[0] == "name"
                     ? InvalidTemplateOptionResult.Kind.InvalidName
@@ -176,7 +175,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                     expectedErrorMessage = invalidParam[4];
                 }
 
-                var actualParam = invalidOptions.Single(param => param.InputFormat == expectedInputFormat);
+                InvalidTemplateOptionResult actualParam = invalidOptions.Single(param => param.InputFormat == expectedInputFormat);
 
                 Assert.Equal(expectedErrorKind, actualParam.ErrorKind);
                 Assert.Equal(expectedCanonicalName, actualParam.TemplateOption?.TemplateParameter.Name);

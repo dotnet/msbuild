@@ -35,6 +35,20 @@
     Detail: Filters templates based on language.
   },
   {
+    Label: --output,
+    Kind: Keyword,
+    SortText: --output,
+    InsertText: --output,
+    Detail: Location to place the generated output.
+  },
+  {
+    Label: --project,
+    Kind: Keyword,
+    SortText: --project,
+    InsertText: --project,
+    Detail: The project that should be used for context evaluation.
+  },
+  {
     Label: --tag,
     Kind: Keyword,
     SortText: --tag,
@@ -54,5 +68,12 @@
     SortText: -lang,
     InsertText: -lang,
     Detail: Filters templates based on language.
+  },
+  {
+    Label: -o,
+    Kind: Keyword,
+    SortText: -o,
+    InsertText: -o,
+    Detail: Location to place the generated output.
   }
 ]
