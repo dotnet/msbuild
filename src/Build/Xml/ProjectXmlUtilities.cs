@@ -12,9 +12,12 @@ using System.Xml;
 
 namespace Microsoft.Build.Internal
 {
-    internal sealed class UnbuildableProjectType : Exception
+    /// <summary>
+    /// Exception indicating that we tried to build a type of project MSBuild did not recognize.
+    /// </summary>
+    internal sealed class UnbuildableProjectTypeException : Exception
     {
-        internal UnbuildableProjectType(string file)
+        internal UnbuildableProjectTypeException(string file)
             : base(file)
         {
         }
@@ -96,7 +99,7 @@ namespace Microsoft.Build.Internal
                         if (child.Name.Equals("Database", StringComparison.OrdinalIgnoreCase))
                         {
                             validMSBuildProject = false;
-                            throw new UnbuildableProjectType(element.Location.File);
+                            throw new UnbuildableProjectTypeException(element.Location.File);
                         }
                     }
 

@@ -820,7 +820,8 @@ namespace Microsoft.Build.BackEnd
 
                 thrownException = ex;
             }
-            catch (UnbuildableProjectType ex)
+            // This is a workaround for https://github.com/dotnet/msbuild/issues/2064. It catches the exception case and turns it into a more understandable warning.
+            catch (UnbuildableProjectTypeException ex)
             {
                 thrownException = ex;
                 if (_projectLoggingContext is null)
