@@ -61,7 +61,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolver2 running");
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldNotContain("MockSdkResolverWithResolvableSdkPattern1 running");
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolverWithResolvableSdkPattern2 running");
-            _logger.Errors.Select(i => i.Message).ShouldBe(new [] { "ERROR4", "ERROR1", "ERROR2" });
+            string[] loggerErrors = _logger.Errors.Select(i => i.Message).ToArray();
+            loggerErrors[1].ShouldBe("ERROR4");
+            loggerErrors[3].ShouldBe("ERROR1");
+            loggerErrors[4].ShouldBe("ERROR2");
             _logger.Warnings.Select(i => i.Message).ShouldBe(new[] { "WARNING4", "WARNING2" });
         }
 
