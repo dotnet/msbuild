@@ -185,6 +185,40 @@ namespace CompatTests
 new CompatDifference[] {
     CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.CannotAddAttribute, "", DifferenceType.Added, "T:CompatTests.First:[T:System.SerializableAttribute]")
 }
+            },
+            // Attributes with array and type arguments
+            {
+                @"
+namespace CompatTests
+{
+  using System;
+
+  [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
+  public class FooAttribute : Attribute {
+    public FooAttribute(int[] arr, Type type) {}
+  }
+
+  [Foo(new int[] {1,2,3}, typeof(int))]
+  public class First {}
+}
+",
+                @"
+namespace CompatTests
+{
+  using System;
+
+  [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
+  public class FooAttribute : Attribute {
+    public FooAttribute(int[] arr, Type type) {}
+  }
+
+  [Foo(new int[] {4,5,6}, typeof(bool))]
+  public class First {}
+}
+",
+new CompatDifference[] {
+    CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.CannotChangeAttribute, "", DifferenceType.Changed, "T:CompatTests.First:[T:CompatTests.FooAttribute]")
+}
             }
         };
 
@@ -672,7 +706,9 @@ new CompatDifference[] {
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
             ApiComparer differ = new(s_ruleFactory);
+
             IEnumerable<CompatDifference> actual = differ.GetDifferences(left, right);
+
             Assert.Equal(expected, actual);
         }
 
@@ -719,7 +755,9 @@ namespace CompatTests
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
             ApiComparer differ = new(s_ruleFactory);
+
             IEnumerable<CompatDifference> actual = differ.GetDifferences(left, right);
+
             Assert.Empty(actual);
         }
     }
