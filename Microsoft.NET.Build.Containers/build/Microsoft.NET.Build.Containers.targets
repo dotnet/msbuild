@@ -55,7 +55,7 @@
             <Output TaskParameter="ParsedContainerTag" PropertyName="ContainerBaseTag" />
             <Output TaskParameter="NewContainerRegistry" PropertyName="ContainerRegistry" />
             <Output TaskParameter="NewContainerImageName" PropertyName="ContainerImageName" />
-            <Output TaskParameter="NewContainerTag" PropertyName="ContainerImageTag" />
+            <Output TaskParameter="NewContainerTags" ItemName="ContainerImageTags" />
         </ParseContainerProperties>
     </Target>
 
@@ -71,7 +71,7 @@
                         BaseImageTag="$(ContainerBaseTag)"
                         OutputRegistry="$(ContainerRegistry)"
                         ImageName="$(ContainerImageName)"
-                        ImageTag="$(ContainerImageTag)"
+                        ImageTags="$(ContainerImageTags)"
                         PublishDirectory="$(PublishDir)"
                         WorkingDirectory="$(ContainerWorkingDirectory)"
                         Entrypoint="@(ContainerEntrypoint)"

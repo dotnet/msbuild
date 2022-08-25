@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Build.Containers.Tasks;
@@ -44,7 +45,7 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
     public string NewContainerImageName { get; private set; }
 
     [Output]
-    public string NewContainerTag { get; private set; }
+    public string[] NewContainerTags { get; private set; }
 
     public ParseContainerProperties()
     {
@@ -57,16 +58,66 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
         ParsedContainerTag = "";
         NewContainerRegistry = "";
         NewContainerImageName = "";
-        NewContainerTag = "";
+        NewContainerTags = Array.Empty<string>();
+    }
+
+    private static bool ParsePropertyAsArray(string input, [NotNullWhen(true)] out string[]? items)
+    {
+        if (String.IsNullOrEmpty(input))
+        {
+            items = null;
+            return false;
+        }
+        else
+        {
+            items = input.Split(';');
+            return true;
+        }
+    }
+
+    private static bool TryValidateTags(string[] inputTags, out string[] validTags, out string[] invalidTags)
+    {
+        var v = new List<string>();
+        var i = new List<string>();
+        foreach (var tag in inputTags)
+        {
+            if (ContainerHelpers.IsValidImageTag(tag))
+            {
+                v.Add(tag);
+            }
+            else
+            {
+                i.Add(tag);
+            }
+        }
+        validTags = v.ToArray();
+        invalidTags = i.ToArray();
+        return invalidTags.Count() == 0;
     }
 
     public override bool Execute()
     {
 
-        if (!string.IsNullOrEmpty(ContainerImageTag) && !ContainerHelpers.IsValidImageTag(ContainerImageTag))
+        string[] validTags;
+        if (!string.IsNullOrEmpty(ContainerImageTag) && ParsePropertyAsArray(ContainerImageTag, out var inputTags) && !TryValidateTags(inputTags, out var valids, out var invalids))
         {
-            Log.LogError($"Invalid {nameof(ContainerImageTag)}: {0}", ContainerImageTag);
-            return !Log.HasLoggedErrors;
+            if (invalids.Any())
+            {
+                if (invalids.Length == 1)
+                {
+                    Log.LogError($"Invalid {nameof(ContainerImageTag)} provided: {0}. {nameof(ContainerImageTag)} must be a semicolon-delimited list of valid image tags. Image tags must be alphanumeric, underscore, hyphen, or period.", invalids[0]);
+                }
+                else
+                {
+                    Log.LogError($"Invalid {nameof(ContainerImageTag)}s provided: {0}. {nameof(ContainerImageTag)} must be a semicolon-delimited list of valid image tags. Image tags must be alphanumeric, underscore, hyphen, or period.", String.Join(", ", invalids));
+                }
+                return !Log.HasLoggedErrors;
+            }
+            validTags = invalids;
+        }
+        else
+        {
+            validTags = Array.Empty<string>();
         }
 
         string registryToUse = string.Empty;
@@ -124,7 +175,7 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
         ParsedContainerImage = outputImage;
         ParsedContainerTag = outputTag;
         NewContainerRegistry = registryToUse;
-        NewContainerTag = ContainerImageTag;
+        NewContainerTags = validTags;
 
         if (BuildEngine != null)
         {
@@ -133,7 +184,7 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
             Log.LogMessage(MessageImportance.Low, "Image: {0}", ParsedContainerImage);
             Log.LogMessage(MessageImportance.Low, "Tag: {0}", ParsedContainerTag);
             Log.LogMessage(MessageImportance.Low, "Image Name: {0}", NewContainerImageName);
-            Log.LogMessage(MessageImportance.Low, "Image Tag: {0}", NewContainerTag);
+            Log.LogMessage(MessageImportance.Low, "Image Tags: {0}", String.Join(", ", NewContainerTags));
         }
 
         return !Log.HasLoggedErrors;
