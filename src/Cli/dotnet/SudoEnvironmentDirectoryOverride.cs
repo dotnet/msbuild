@@ -34,14 +34,10 @@ namespace Microsoft.DotNet.Cli
             return false;
         }
 
-
-        [DllImport("libc", SetLastError = true)]
-        public static extern int chown(string username, string path);
         private static void OverridePathFromSudoPermToSudoUserPerm(string path)
         {
             if (!OperatingSystem.IsWindows() && IsRunningUnderSudo())
             {
-                chown(Environment.GetEnvironmentVariable("SUDO_USER"), path);
                 FileUtilities.ResetTempFilePermissions(path);
             }
         }

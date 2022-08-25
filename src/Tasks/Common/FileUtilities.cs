@@ -37,13 +37,18 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         [DllImport("libc", SetLastError = true)]
-        public static extern int mkdir(string pathname, uint mode);
+        public static extern int mkdir(string pathname, int mode);
         public static string CreateTempPath()
         {
             string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                mkdir(path, 0000700);
+                const int S_IRUSR = 256;
+                const int S_IWUSR = 128;
+                const int S_IXUSR = 64;
+                int _700 = S_IRUSR | S_IWUSR | S_IXUSR;
+                mkdir(path, _700);
+                ResetTempFilePermissions(path);
             }
             else
             {
@@ -61,6 +66,7 @@ namespace Microsoft.NET.Build.Tasks
             string fileName = Path.ChangeExtension(Path.Combine(tempDirectory, Path.GetTempFileName()), extension);
             var fstream = File.Create(fileName.ToString());
             fstream.Close();
+            ResetTempFilePermissions(fileName);
             return fileName;
         }
 
@@ -75,12 +81,24 @@ namespace Microsoft.NET.Build.Tasks
 
 
         [DllImport("libc", SetLastError = true)]
-        private static extern int chmod(string pathname, uint mode);
+        private static extern int chmod(string pathname, int mode);
+        [DllImport("libc", SetLastError = true)]
+        public static extern int chown(string path, int owner, int group);
         public static void ResetTempFilePermissions(string path)
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                chmod(path, 0000700);
+                if(Environment.GetEnvironmentVariable("SUDO_USER") != null)
+                {
+                    string UID = Environment.GetEnvironmentVariable("SUDO_UID");
+                    string GID = Environment.GetEnvironmentVariable("SUDO_GID");
+                    chown(path, Int32.Parse(UID), Int32.Parse(GID)); 
+                }
+                const int S_IRUSR = 256;
+		        const int S_IWUSR = 128;
+		        const int S_IXUSR = 64;
+                int _700 = S_IRUSR | S_IWUSR | S_IXUSR;
+                chmod(path, _700);
             }
         }
 
