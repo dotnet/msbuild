@@ -1,4 +1,11 @@
 <Project>
+    <Target Name="_ContainerVerifySDKVersion">
+        <PropertyGroup>
+            <_IsAllowedVersion Condition="$(NETCoreSdkVersion.StartsWith('7.0.100-preview.7')) or $(NETCoreSdkVersion.StartsWith('7.0.100-rc')) or $(NETCoreSdkVersion.StartsWith('7.0.100'))">true</_IsAllowedVersion>
+        </PropertyGroup>
+        <Error Code="CONTAINER002" Text="The current .NET SDK \($(NETCoreSdkVersion)\) doesn't support containerization. Please use version 7.0.100-preview.7 or higher." />
+    </Target>
+
     <Target Name="ComputeContainerConfig">
         <!-- Reference data about this project -->
         <PropertyGroup>
@@ -58,6 +65,7 @@
 
     <PropertyGroup>
         <PublishContainerDependsOn>
+            _ContainerVerifySDKVersion;
             ComputeContainerConfig
         </PublishContainerDependsOn>
     </PropertyGroup>
