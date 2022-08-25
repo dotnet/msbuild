@@ -101,7 +101,7 @@ namespace Microsoft.Build.Graph
                 var projectReferenceFullPath = projectReferenceItem.GetMetadataValue(FullPathMetadataName);
 
                 var referenceGlobalProperties = GetGlobalPropertiesForItem(projectReferenceItem, requesterInstance.GlobalPropertiesDictionary, globalPropertiesModifiers);
-                referenceGlobalProperties.Remove("PlatformNegotiationInnerBuild");
+
                 var requesterPlatform = "";
                 var requesterPlatformLookupTable = "";
 
@@ -249,8 +249,6 @@ namespace Microsoft.Build.Graph
 
             newUndefineProperties = newUndefineProperties.AddRange(defaultParts.UndefineProperties);
             newUndefineProperties = newUndefineProperties.AddRange(globalPropertiesToRemove);
-
-            newUndefineProperties.Add("InnerBuildProperty");
 
             var newProperties = defaultParts.Properties;
 
