@@ -44,6 +44,7 @@ namespace Microsoft.DotNet.ApiCompat
             bool generateSuppressionFile,
             string? suppressionFile,
             string? noWarn,
+            bool enableRuleAttributesMustMatch,
             string[]? excludeAttributesFiles,
             bool enableRuleCannotChangeParameterName,
             string packagePath,
@@ -62,7 +63,10 @@ namespace Microsoft.DotNet.ApiCompat
             // Initialize the service provider
             ValidatePackageServiceProvider serviceProvider = new(logFactory,
                 () => new SuppressionEngine(suppressionFileForEngine, noWarn, generateSuppressionFile),
-                (log) => new RuleFactory(log, excludeAttributesFiles, enableRuleCannotChangeParameterName));
+                (log) => new RuleFactory(log,
+                    enableRuleAttributesMustMatch,
+                    excludeAttributesFiles,
+                    enableRuleCannotChangeParameterName));
 
             // If a runtime graph is provided, parse and use it for asset selection during the in-memory package construction.
             if (runtimeGraph != null)
