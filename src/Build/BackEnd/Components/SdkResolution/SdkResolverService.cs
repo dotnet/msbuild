@@ -120,6 +120,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             else
             {
                 SdkResult result = ResolveSdkUsingAllResolvers(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio, out IEnumerable<string> errors, out IEnumerable<string> warnings);
+
+                // Warnings are already logged on success.
                 if (!result.Success)
                 {
                     LogWarnings(loggingContext, sdkReferenceLocation, warnings);
