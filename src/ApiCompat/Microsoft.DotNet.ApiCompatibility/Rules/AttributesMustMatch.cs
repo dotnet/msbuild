@@ -24,13 +24,14 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         public AttributesMustMatch(RuleSettings settings, IRuleRegistrationContext context, IReadOnlyCollection<string>? excludeAttributesFiles)
         {
             _settings = settings;
-            if (excludeAttributesFiles != null && excludeAttributesFiles.Count > 0)
+            if (excludeAttributesFiles != null)
             {
                 IEnumerable<string> attributesToExclude = ReadExclusions(excludeAttributesFiles);
                 _attributesToExclude = new HashSet<string>(attributesToExclude);
-                context.RegisterOnMemberSymbolAction(RunOnMemberSymbol);
-                context.RegisterOnTypeSymbolAction(RunOnTypeSymbol);
             }
+
+            context.RegisterOnMemberSymbolAction(RunOnMemberSymbol);
+            context.RegisterOnTypeSymbolAction(RunOnTypeSymbol);
         }
 
         private static IEnumerable<string> ReadExclusions(IEnumerable<string> excludeAttributesFiles)
