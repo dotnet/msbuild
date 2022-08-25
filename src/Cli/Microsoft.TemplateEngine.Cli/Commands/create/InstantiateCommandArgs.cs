@@ -19,6 +19,18 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 tokens.Add(ShortName);
             }
             tokens.AddRange(RemainingArguments);
+
+            foreach (OptionResult optionResult in parseResult.CommandResult.Children.OfType<OptionResult>())
+            {
+                if (command.PassByOptions.Contains(optionResult.Option))
+                {
+                    if (optionResult.Token is { } token) 
+                    { 
+                        tokens.Add(token.Value); 
+                    }
+                    tokens.AddRange(optionResult.Tokens.Select(t => t.Value));
+                }
+            }
             TokensToInvoke = tokens.ToArray();
         }
 

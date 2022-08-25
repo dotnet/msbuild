@@ -36,33 +36,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         protected IEngineEnvironmentSettings CreateEnvironmentSettings(GlobalArgs args, ParseResult parseResult)
         {
-            //reparse to get output option if present
-            //it's kept private so it is not reused for any other purpose except initializing host
-            //for template instantiaton it has to be reparsed
-            string? outputPath = ParseOutputOption(parseResult);
             IEngineEnvironmentSettings environmentSettings = new EngineEnvironmentSettings(
-                new CliTemplateEngineHost(_hostBuilder(parseResult), outputPath),
+                _hostBuilder(parseResult),
                 settingsLocation: args.DebugCustomSettingsLocation,
                 virtualizeSettings: args.DebugVirtualizeSettings,
                 environment: new CliEnvironment());
             return environmentSettings;
         }
-
-        private static string? ParseOutputOption(ParseResult commandParseResult)
-        {
-            Option<string> outputOption = SharedOptionsFactory.CreateOutputOption();
-            Command helperCommand = new Command("parse-output")
-            {
-                outputOption
-            };
-
-            ParseResult reparseResult = ParserFactory
-                .CreateParser(helperCommand, disableHelp: true)
-                .Parse(commandParseResult.Tokens.Select(t => t.Value).ToArray());
-
-            return reparseResult.GetValueForOption<string>(outputOption);
-        }
-
     }
 
     internal abstract class BaseCommand<TArgs> : BaseCommand, ICommandHandler where TArgs : GlobalArgs

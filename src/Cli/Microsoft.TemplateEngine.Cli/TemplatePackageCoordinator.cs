@@ -414,14 +414,12 @@ namespace Microsoft.TemplateEngine.Cli
 
                 if (!args.Force)
                 {
-                    Option forceOption = SharedOptionsFactory.CreateForceOption();
-
-                    reporter.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Install_Info_UseForceToOverride, forceOption.Aliases.First()));
+                    reporter.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Install_Info_UseForceToOverride, SharedOptions.ForceOption.Aliases.First()));
                     reporter.WriteCommand(
                         Example
                             .For<InstallCommand>(args.ParseResult)
                             .WithArgument(InstallCommand.NameArgument, installRequests.Select(ir => ir.DisplayName).ToArray())
-                            .WithOption(forceOption));
+                            .WithOption(SharedOptions.ForceOption));
                     return false;
                 }
             }

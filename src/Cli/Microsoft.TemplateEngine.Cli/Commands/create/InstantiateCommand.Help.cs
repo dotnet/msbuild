@@ -81,7 +81,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             ShowTemplateDetailHeaders(preferredTemplate.Template, context.Output);
             //we need to show all possible short names (not just the one specified)
             ShowUsage(instantiateCommandArgs.Command, templateGroup.ShortNames, context);
-            ShowCommandOptions(templatesToShow, preferredTemplate, context);
+            ShowCommandOptions(templatesToShow, context);
             ShowTemplateSpecificOptions(templatesToShow, context);
             ShowHintForOtherTemplates(templateGroup, preferredTemplate.Template, instantiateCommandArgs, context.Output);
         }
@@ -278,16 +278,16 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal static void ShowCommandOptions(
             IEnumerable<TemplateCommand> templatesToShow,
-            TemplateCommand preferredTemplate,
             HelpContext context)
         {
             List<Option> optionsToShow = new List<Option>()
             {
-                preferredTemplate.NameOption,
-                preferredTemplate.OutputOption,
-                preferredTemplate.DryRunOption,
-                TemplateCommand.ForceOption,
-                preferredTemplate.NoUpdateCheckOption
+                SharedOptions.NameOption,
+                SharedOptions.OutputOption,
+                SharedOptions.DryRunOption,
+                SharedOptions.ForceOption,
+                SharedOptions.NoUpdateCheckOption,
+                SharedOptions.ProjectPathOption
             };
 
             foreach (var template in templatesToShow)

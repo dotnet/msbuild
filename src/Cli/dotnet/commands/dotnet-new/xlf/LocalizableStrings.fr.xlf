@@ -233,11 +233,6 @@
         <target state="translated">Contexte du projet</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectPath_OptionDescription">
-        <source>The project that should be used for context evaluation.</source>
-        <target state="translated">Projet à utiliser pour l’évaluation du contexte</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SdkInfoProvider_Message_InstallSdk">
         <source>Go to aka.ms/get-dotnet and install any of the supported SDK versions: '{0}'.</source>
         <target state="translated">Accédez à aka.ms/get-dotnet et installez l'une des versions de SDK prises en charge : '{0}'.</target>

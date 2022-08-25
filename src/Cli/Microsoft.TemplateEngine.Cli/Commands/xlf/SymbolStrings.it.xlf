@@ -183,6 +183,11 @@ Se il comando è specificato senza l'argomento, vengono elencati tutti i pacchet
         <target state="translated">Filtra i modelli basati sull'ID pacchetto NuGet. Si applica a--search.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Option_ProjectPath">
+        <source>The project that should be used for context evaluation.</source>
+        <target state="new">The project that should be used for context evaluation.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Option_TagFilter">
         <source>Filters the templates based on the tag.</source>
         <target state="translated">Filtra i modelli in base al tag.</target>

@@ -4,7 +4,6 @@
 using System.Text.RegularExpressions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Edge.Settings;
@@ -18,6 +17,7 @@ namespace Microsoft.TemplateEngine.Cli
     internal class TemplateInvoker
     {
         private readonly IEngineEnvironmentSettings _environmentSettings;
+        private readonly ICliTemplateEngineHost _cliTemplateEngineHost;
         private readonly Func<string> _inputGetter;
         private readonly TemplateCreator _templateCreator;
         private readonly PostActionDispatcher _postActionDispatcher;
@@ -27,6 +27,7 @@ namespace Microsoft.TemplateEngine.Cli
             Func<string> inputGetter)
         {
             _environmentSettings = environment;
+            _cliTemplateEngineHost = _environmentSettings.Host as ICliTemplateEngineHost ?? throw new ArgumentException($"The hosts other than {typeof(ICliTemplateEngineHost).Name} are not supported.");
             _inputGetter = inputGetter;
 
             _templateCreator = new TemplateCreator(_environmentSettings);
@@ -100,16 +101,16 @@ namespace Microsoft.TemplateEngine.Cli
             };
         }
 
-        private static string AdjustReportedPath(string targetPath, string? requestedOutputPath, IPhysicalFileSystem fileSystem)
+        private string AdjustReportedPath(string targetPath)
         {
-            if (string.IsNullOrEmpty(requestedOutputPath))
+            if (!_cliTemplateEngineHost.IsCustomOutputPath)
             {
                 return targetPath;
             }
 
-            return fileSystem
+            return _environmentSettings.Host.FileSystem
                 .PathRelativeTo(
-                    Path.Combine(requestedOutputPath, targetPath),
+                    Path.Combine(_cliTemplateEngineHost.OutputPath, targetPath),
                     Directory.GetCurrentDirectory());
         }
 
@@ -126,12 +127,7 @@ namespace Microsoft.TemplateEngine.Cli
                 return NewCommandStatus.InvalidOption;
             }
 
-            string? fallbackName = new DirectoryInfo(
-                !string.IsNullOrWhiteSpace(templateArgs.OutputPath)
-                    ? templateArgs.OutputPath
-                    : Directory.GetCurrentDirectory())
-                .Name;
-
+            string? fallbackName = new DirectoryInfo(_cliTemplateEngineHost.OutputPath).Name;
             if (string.IsNullOrEmpty(fallbackName) || string.Equals(fallbackName, "/", StringComparison.Ordinal))
             {
                 // DirectoryInfo("/").Name on *nix returns "/", as opposed to null or "".
@@ -156,7 +152,9 @@ namespace Microsoft.TemplateEngine.Cli
                     templateArgs.Template,
                     templateArgs.Name,
                     fallbackName,
-                    templateArgs.OutputPath,
+                    //in case outputPath is set, TemplateCreator will not create folder in case name is specified.
+                    //consider fixing it in complex
+                    _cliTemplateEngineHost.IsCustomOutputPath ? _cliTemplateEngineHost.OutputPath : null,
                     templateArgs.TemplateParameters,
                     templateArgs.IsForceFlagSpecified,
                     templateArgs.BaselineName,
@@ -196,8 +194,7 @@ namespace Microsoft.TemplateEngine.Cli
                         {
                             foreach (IFileChange change in instantiateResult.CreationEffects.FileChanges.OrderBy(fc => fc.TargetRelativePath, StringComparer.Ordinal))
                             {
-                                string targetPathToReport = AdjustReportedPath(change.TargetRelativePath, templateArgs.OutputPath, _environmentSettings.Host.FileSystem);
-                                Reporter.Output.WriteLine($"  {GetChangeString(change.ChangeKind)}: {targetPathToReport}");
+                                Reporter.Output.WriteLine($"  {GetChangeString(change.ChangeKind)}: {AdjustReportedPath(change.TargetRelativePath)}");
                             }
                         }
                     }
@@ -271,9 +268,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                         foreach (IFileChange change in destructiveChanges)
                         {
-                            string changeKind = GetChangeString(change.ChangeKind);
-                            string targetPathToReport = AdjustReportedPath(change.TargetRelativePath, templateArgs.OutputPath, _environmentSettings.Host.FileSystem);
-                            Reporter.Error.WriteLine(($"  {changeKind}".PadRight(padLen) + targetPathToReport).Bold().Red());
+                            Reporter.Error.WriteLine(($"  {GetChangeString(change.ChangeKind)}".PadRight(padLen) + AdjustReportedPath(change.TargetRelativePath)).Bold().Red());
                         }
                         Reporter.Error.WriteLine();
                     }

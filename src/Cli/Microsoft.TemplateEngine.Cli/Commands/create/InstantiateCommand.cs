@@ -18,11 +18,28 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     internal partial class InstantiateCommand : BaseCommand<InstantiateCommandArgs>, ICustomHelp
     {
         internal InstantiateCommand(
+            NewCommand parentCommand,
             Func<ParseResult, ITemplateEngineHost> hostBuilder)
             : base(hostBuilder, "create", SymbolStrings.Command_Instantiate_Description)
         {
             this.AddArgument(ShortNameArgument);
             this.AddArgument(RemainingArguments);
+
+            this.AddOption(SharedOptions.OutputOption);
+            this.AddOption(SharedOptions.NameOption);
+            this.AddOption(SharedOptions.DryRunOption);
+            this.AddOption(SharedOptions.ForceOption);
+            this.AddOption(SharedOptions.NoUpdateCheckOption);
+            this.AddOption(SharedOptions.ProjectPathOption);
+
+            parentCommand.AddNoLegacyUsageValidators(this);
+            this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.OutputOption));
+            this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.NameOption));
+            this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.DryRunOption));
+            this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.ForceOption));
+            this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.NoUpdateCheckOption));
+            this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.ProjectPathOption));
+
             IsHidden = true;
         }
 
@@ -36,6 +53,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             Description = SymbolStrings.Command_Instantiate_Argument_TemplateOptions,
             Arity = new ArgumentArity(0, 999)
+        };
+
+        internal IReadOnlyList<Option> PassByOptions { get; } = new Option[]
+        {
+            SharedOptions.ForceOption,
+            SharedOptions.NameOption,
+            SharedOptions.DryRunOption,
+            SharedOptions.NoUpdateCheckOption
         };
 
         internal static Task<NewCommandStatus> ExecuteAsync(NewCommandArgs newCommandArgs, IEngineEnvironmentSettings environmentSettings, InvocationContext context)

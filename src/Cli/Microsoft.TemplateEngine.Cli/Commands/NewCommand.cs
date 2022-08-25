@@ -4,7 +4,6 @@
 using System.CommandLine;
 using System.CommandLine.Completions;
 using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Settings;
 
@@ -22,7 +21,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             //it is important that legacy commands are built before non-legacy, as non legacy commands are building validators that rely on legacy stuff
             BuildLegacySymbols(hostBuilder);
 
-            this.Add(new InstantiateCommand(hostBuilder));
+            this.Add(new InstantiateCommand(this, hostBuilder));
             this.Add(new InstallCommand(this, hostBuilder));
             this.Add(new UninstallCommand(this, hostBuilder));
             this.Add(new UpdateCommand(this, hostBuilder));
@@ -36,6 +35,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.AddGlobalOption(DebugReinitOption);
             this.AddGlobalOption(DebugRebuildCacheOption);
             this.AddGlobalOption(DebugShowConfigOption);
+
+            this.AddOption(SharedOptions.OutputOption);
+            this.AddOption(SharedOptions.NameOption);
+            this.AddOption(SharedOptions.DryRunOption);
+            this.AddOption(SharedOptions.ForceOption);
+            this.AddOption(SharedOptions.NoUpdateCheckOption);
+            this.AddOption(SharedOptions.ProjectPathOption);
         }
 
         internal static Option<string?> DebugCustomSettingsLocationOption { get; } = new("--debug:custom-hive")
@@ -87,6 +93,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Arity = new ArgumentArity(0, 999),
             IsHidden = true
         };
+
+        internal IReadOnlyList<Option> PassByOptions { get; } = new Option[]
+        {
+            SharedOptions.ForceOption,
+            SharedOptions.NameOption,
+            SharedOptions.DryRunOption,
+            SharedOptions.NoUpdateCheckOption
+        };
+   
 
         protected internal override IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings)
         {

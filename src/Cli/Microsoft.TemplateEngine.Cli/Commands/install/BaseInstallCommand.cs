@@ -42,10 +42,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IEngineEnvironmentSettings environmentSettings,
             InvocationContext context)
         {
-            using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
-            TemplatePackageCoordinator templatePackageCoordinator = new TemplatePackageCoordinator(
-                environmentSettings,
-                templatePackageManager);
+            using TemplatePackageManager templatePackageManager = new(environmentSettings);
+            TemplatePackageCoordinator templatePackageCoordinator = new(environmentSettings, templatePackageManager);
 
             //we need to await, otherwise templatePackageManager will be disposed.
             return await templatePackageCoordinator.EnterInstallFlowAsync(args, context.GetCancellationToken()).ConfigureAwait(false);

@@ -183,6 +183,11 @@ Wenn der Befehl ohne Argument angegeben wird, werden alle installierten Vorlagen
         <target state="translated">Filtert die Vorlagen basierend auf der NuGet-Paket-ID.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Option_ProjectPath">
+        <source>The project that should be used for context evaluation.</source>
+        <target state="new">The project that should be used for context evaluation.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Option_TagFilter">
         <source>Filters the templates based on the tag.</source>
         <target state="translated">Filtert die Vorlagen basierend auf dem Tag.</target>
