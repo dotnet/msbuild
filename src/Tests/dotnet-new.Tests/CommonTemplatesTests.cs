@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
@@ -30,17 +31,17 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("Console App", "console", "C#")]
         [InlineData("Console App", "console", "F#")]
         [InlineData("Console App", "console", "VB")]
-        [InlineData("Console App", "console", "C#", "net7.0")]
-        [InlineData("Console App", "console", "F#", "net7.0")]
-        [InlineData("Console App", "console", "VB", "net7.0")]
+        [InlineData("Console App", "console", "C#", "net8.0")]
+        [InlineData("Console App", "console", "F#", "net8.0")]
+        [InlineData("Console App", "console", "VB", "net8.0")]
 
         [InlineData("Class Library", "classlib")]
         [InlineData("Class Library", "classlib", "C#")]
         [InlineData("Class Library", "classlib", "F#")]
         [InlineData("Class Library", "classlib", "VB")]
-        [InlineData("Class Library", "classlib", "C#", "net7.0")]
-        [InlineData("Class Library", "classlib", "F#", "net7.0")]
-        [InlineData("Class Library", "classlib", "VB", "net7.0")]
+        [InlineData("Class Library", "classlib", "C#", "net8.0")]
+        [InlineData("Class Library", "classlib", "F#", "net8.0")]
+        [InlineData("Class Library", "classlib", "VB", "net8.0")]
         [InlineData("Class Library", "classlib", "C#", "netstandard2.1")]
         [InlineData("Class Library", "classlib", "VB", "netstandard2.1")]
         [InlineData("Class Library", "classlib", "F#", "netstandard2.1")]
@@ -118,29 +119,28 @@ Restore succeeded\.",
         [InlineData("Console App", "console", "C#")]
         [InlineData("Console App", "console", "F#")]
         [InlineData("Console App", "console", "VB")]
+        [InlineData("Console App", "console", "C#", "net8.0")]
+        [InlineData("Console App", "console", "F#", "net8.0")]
+        [InlineData("Console App", "console", "VB", "net8.0")]
         [InlineData("Console App", "console", "C#", "net7.0")]
         [InlineData("Console App", "console", "F#", "net7.0")]
         [InlineData("Console App", "console", "VB", "net7.0")]
-        [InlineData("Console Application", "console", "C#", "net5.0")]
-        [InlineData("Console Application", "console", "F#", "net5.0")]
-        [InlineData("Console Application", "console", "VB", "net5.0")]
-        [InlineData("Console Application", "console", "C#", "netcoreapp3.1")]
-        [InlineData("Console Application", "console", "F#", "netcoreapp3.1")]
-        [InlineData("Console Application", "console", "VB", "netcoreapp3.1")]
+        [InlineData("Console App", "console", "C#", "net6.0")]
+        [InlineData("Console App", "console", "F#", "net6.0")]
+        [InlineData("Console App", "console", "VB", "net6.0")]
 
         [InlineData("Class Library", "classlib")]
         [InlineData("Class Library", "classlib", "C#")]
         [InlineData("Class Library", "classlib", "F#")]
         [InlineData("Class Library", "classlib", "VB")]
+        [InlineData("Class Library", "classlib", "C#", "net8.0")]
+        [InlineData("Class Library", "classlib", "F#", "net8.0")]
+        [InlineData("Class Library", "classlib", "VB", "net8.0")]
         [InlineData("Class Library", "classlib", "C#", "net7.0")]
         [InlineData("Class Library", "classlib", "F#", "net7.0")]
         [InlineData("Class Library", "classlib", "VB", "net7.0")]
-        [InlineData("Class library", "classlib", "C#", "net5.0")]
-        [InlineData("Class library", "classlib", "F#", "net5.0")]
-        [InlineData("Class library", "classlib", "VB", "net5.0")]
-        [InlineData("Class library", "classlib", "C#", "netcoreapp3.1")]
-        [InlineData("Class library", "classlib", "F#", "netcoreapp3.1")]
-        [InlineData("Class library", "classlib", "VB", "netcoreapp3.1")]
+        [InlineData("Class Library", "classlib", "C#", "net6.0")]
+        [InlineData("Class Library", "classlib", "F#", "net6.0")]
         [InlineData("Class Library", "classlib", "C#", "netstandard2.1")]
         [InlineData("Class Library", "classlib", "VB", "netstandard2.1")]
         [InlineData("Class Library", "classlib", "F#", "netstandard2.1")]
@@ -241,22 +241,22 @@ Restore succeeded\.",
         [InlineData(
 @"{
   ""sdk"": {
-    ""version"": ""5.0.200""
+    ""version"": ""6.0.200""
   }
 }",
             "globaljson",
             "--sdk-version",
-            "5.0.200")]
+            "6.0.200")]
         [InlineData(
 @"{
   ""sdk"": {
     ""rollForward"": ""major"",
-    ""version"": ""5.0.200""
+    ""version"": ""6.0.200""
   }
 }",
             "globaljson",
             "--sdk-version",
-            "5.0.200",
+            "6.0.200",
             "--roll-forward",
             "major")]
         public void GlobalJsonTests(string expectedContent, params string[] parameters)
@@ -327,13 +327,13 @@ Restore succeeded\.",
         {
             var templatesToTest = new[]
             {
-                new { Name = "console",  Frameworks = new[] { null, "net7.0" } }
+                new { Name = "console",  Frameworks = new[] { null, "net8.0" } }
             };
 
             string[] unsupportedLanguageVersions = { "1", "ISO-1" };
-            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
+            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "12.0", "latest", "latestMajor", "default", "preview" };
 
-            string?[] topLevelStatementSupport = { null, "9.0", "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
+            string?[] topLevelStatementSupport = { null, "9.0", "10.0", "11.0", "12.0", "latest", "latestMajor", "default", "preview" };
 
             foreach (var template in templatesToTest)
             {
@@ -397,7 +397,7 @@ Restore succeeded\.",
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            CommandResult buildResult = new DotnetBuildCommand(_log, "MyProject")
+            CommandResult buildResult = new DotnetCommand(_log, "build", "MyProject")
                 .WithWorkingDirectory(workingDir)
                 .Execute();
 
@@ -438,6 +438,8 @@ Restore succeeded\.",
         }
 
         [Theory]
+        [InlineData("12.0")]
+        [InlineData("12")]
         [InlineData("11.0")]
         [InlineData("11")]
         [InlineData("10.0")]
@@ -466,7 +468,7 @@ Restore succeeded\.",
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            new DotnetBuildCommand(_log, "MyProject")
+            new DotnetCommand(_log, "build", "MyProject")
                 .WithWorkingDirectory(workingDir)
                 .Execute()
                 .Should().ExitWith(0).And.NotHaveStdErr();
@@ -508,7 +510,7 @@ class Program
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            new DotnetBuildCommand(_log, "MyProject")
+            new DotnetCommand(_log, "build", "MyProject")
                 .WithWorkingDirectory(workingDir)
                 .Execute()
                 .Should().ExitWith(0).And.NotHaveStdErr();
@@ -537,15 +539,15 @@ class Program
         {
             var templatesToTest = new[]
             {
-                new { Template = "console",  Frameworks = new[] { null, "net7.0" } },
-                new { Template = "classlib", Frameworks = new[] { null, "net7.0", "netstandard2.0", "netstandard2.1" } }
+                new { Template = "console",  Frameworks = new[] { null, "net8.0" } },
+                new { Template = "classlib", Frameworks = new[] { null, "net8.0", "netstandard2.0", "netstandard2.1" } }
             };
 
             string[] unsupportedLanguageVersions = { "1", "ISO-1" };
-            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
+            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "12.0", "latest", "latestMajor", "default", "preview" };
 
-            string?[] supportedInFrameworkByDefault = { null, "net7.0", "netstandard2.1" };
-            string?[] supportedInLanguageVersion = { "8.0", "9.0", "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
+            string?[] supportedInFrameworkByDefault = { null, "net8.0", "netstandard2.1" };
+            string?[] supportedInLanguageVersion = { "8.0", "9.0", "10.0", "11.0", "12.0", "latest", "latestMajor", "default", "preview" };
 
             foreach (var template in templatesToTest)
             {
@@ -611,7 +613,7 @@ class Program
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            CommandResult buildResult = new DotnetBuildCommand(_log, "MyProject")
+            CommandResult buildResult = new DotnetCommand(_log, "build", "MyProject")
                 .WithWorkingDirectory(workingDir)
                 .Execute();
 
@@ -644,14 +646,14 @@ class Program
         {
             var templatesToTest = new[]
             {
-                new { Template = "console",  Frameworks = new[] { null, "net7.0" } },
-                new { Template = "classlib", Frameworks = new[] { null, "net7.0", "netstandard2.0", "netstandard2.1" } }
+                new { Template = "console",  Frameworks = new[] { null, "net8.0" } },
+                new { Template = "classlib", Frameworks = new[] { null, "net8.0", "netstandard2.0", "netstandard2.1" } }
             };
             string[] unsupportedLanguageVersions = { "1", "ISO-1" };
-            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
+            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "12.0", "latest", "latestMajor", "default", "preview" };
 
-            string?[] supportedInFramework = { null, "net7.0" };
-            string?[] supportedInLangVersion = { null, "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
+            string?[] supportedInFramework = { null, "net8.0" };
+            string?[] supportedInLangVersion = { null, "10.0", "11.0", "12.0", "latest", "latestMajor", "default", "preview" };
 
             foreach (var template in templatesToTest)
             {
@@ -715,7 +717,7 @@ class Program
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            CommandResult buildResult = new DotnetBuildCommand(_log, "MyProject")
+            CommandResult buildResult = new DotnetCommand(_log, "build", "MyProject")
                 .WithWorkingDirectory(workingDir)
                 .Execute();
 
@@ -748,13 +750,13 @@ class Program
         {
             var templatesToTest = new[]
             {
-                new { Template = "classlib", Frameworks = new[] { null, "net7.0", "netstandard2.0", "netstandard2.1" } }
+                new { Template = "classlib", Frameworks = new[] { null, "net8.0", "netstandard2.0", "netstandard2.1" } }
             };
             string[] unsupportedLanguageVersions = { "1", "ISO-1" };
-            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
+            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "12.0", "latest", "latestMajor", "default", "preview" };
 
-            string?[] supportedFrameworks = { null, "net7.0" };
-            string?[] fileScopedNamespacesSupportedLanguages = { "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
+            string?[] supportedFrameworks = { null, "net8.0" };
+            string?[] fileScopedNamespacesSupportedLanguages = { "10.0", "11.0", "12.0", "latest", "latestMajor", "default", "preview" };
 
             foreach (var template in templatesToTest)
             {
@@ -804,7 +806,7 @@ class Program
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            CommandResult buildResult = new DotnetBuildCommand(_log, "MyProject")
+            CommandResult buildResult = new DotnetCommand(_log, "build", "MyProject")
                 .WithWorkingDirectory(workingDir)
                 .Execute();
 
@@ -852,44 +854,42 @@ public class Class1
         [InlineData("Nullable", "enable", "Console App", "console", null, null)]
         [InlineData("CheckForOverflowUnderflow", null, "Console App", "console", null, null)]
         [InlineData("LangVersion", null, "Console App", "console", null, null)]
-        [InlineData("TargetFramework", "net7.0", "Console App", "console", null, null)]
-        [InlineData("Nullable", null, "Console Application", "console", null, "net5.0")]
-        [InlineData("Nullable", null, "Console Application", "console", null, "netcoreapp3.1")]
+        [InlineData("TargetFramework", "net8.0", "Console App", "console", null, null)]
 
         [InlineData("Nullable", null, "Console App", "console", "F#", null)]
         [InlineData("CheckForOverflowUnderflow", null, "Console App", "console", "F#", null)]
         [InlineData("LangVersion", null, "Console App", "console", "F#", null)]
-        [InlineData("TargetFramework", "net7.0", "Console App", "console", "F#", null)]
+        [InlineData("TargetFramework", "net8.0", "Console App", "console", "F#", null)]
         [InlineData("GenerateDocumentationFile", null, "Console App", "console", "F#", null)]
 
         [InlineData("Nullable", null, "Console App", "console", "VB", null)]
         [InlineData("CheckForOverflowUnderflow", null, "Console App", "console", "VB", null)]
         [InlineData("LangVersion", null, "Console App", "console", "VB", null)]
-        [InlineData("TargetFramework", "net7.0", "Console App", "console", "VB", null)]
+        [InlineData("TargetFramework", "net8.0", "Console App", "console", "VB", null)]
 
         [InlineData("Nullable", "enable", "Class Library", "classlib", null, null)]
         [InlineData("CheckForOverflowUnderflow", null, "Class Library", "classlib", null, null)]
         [InlineData("LangVersion", null, "Class Library", "classlib", null, null)]
-        [InlineData("TargetFramework", "net7.0", "Class Library", "classlib", null, null)]
+        [InlineData("TargetFramework", "net8.0", "Class Library", "classlib", null, null)]
         [InlineData("Nullable", null, "Class Library", "classlib", null, "netstandard2.0")]
         [InlineData("Nullable", "enable", "Class Library", "classlib", null, "netstandard2.1")]
 
         [InlineData("Nullable", null, "Class Library", "classlib", "F#", null)]
         [InlineData("CheckForOverflowUnderflow", null, "Class Library", "classlib", "F#", null)]
         [InlineData("LangVersion", null, "Class Library", "classlib", "F#", null)]
-        [InlineData("TargetFramework", "net7.0", "Class Library", "classlib", "F#", null)]
+        [InlineData("TargetFramework", "net8.0", "Class Library", "classlib", "F#", null)]
         [InlineData("GenerateDocumentationFile", "true", "Class Library", "classlib", "F#", null)]
         [InlineData("Nullable", null, "Class Library", "classlib", "F#", "netstandard2.0")]
 
         [InlineData("Nullable", null, "Class Library", "classlib", "VB", null)]
         [InlineData("CheckForOverflowUnderflow", null, "Class Library", "classlib", "VB", null)]
         [InlineData("LangVersion", null, "Class Library", "classlib", "VB", null)]
-        [InlineData("TargetFramework", "net7.0", "Class Library", "classlib", "VB", null)]
+        [InlineData("TargetFramework", "net8.0", "Class Library", "classlib", "VB", null)]
         [InlineData("Nullable", null, "Class Library", "classlib", "VB", "netstandard2.0")]
 
         public void SetPropertiesByDefault(string propertyName, string? propertyValue, string expectedTemplateName, string templateShortName, string? language, string? framework)
         {
-            string workingDir = CreateTemporaryFolder(folderName: $"{propertyName}-{templateShortName}-{templateShortName.Replace("#", "Sharp") ?? "null"}-{framework ?? "null"}");
+            string workingDir = TestUtils.CreateTemporaryFolder();
             List<string> args = new() { templateShortName, "--no-restore" };
             if (!string.IsNullOrWhiteSpace(language))
             {
@@ -940,22 +940,22 @@ public class Class1
         [InlineData("LangVersion", "9.0", "--langVersion", "9.0", "Class Library", "classlib", "VB", null)]
 
         //framework
-        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Console Application", "console", null, null)]
-        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Console Application", "console", "VB", null)]
-        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Console Application", "console", "F#", null)]
-        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Class library", "classlib", null, null)]
-        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Class library", "classlib", "VB", null)]
-        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Class library", "classlib", "F#", null)]
+        [InlineData("TargetFramework", "net6.0", "--framework", "net6.0", "Console App", "console", null, null)]
+        [InlineData("TargetFramework", "net6.0", "--framework", "net6.0", "Console App", "console", "VB", null)]
+        [InlineData("TargetFramework", "net6.0", "--framework", "net6.0", "Console App", "console", "F#", null)]
+        [InlineData("TargetFramework", "net6.0", "--framework", "net6.0", "Class Library", "classlib", null, null)]
+        [InlineData("TargetFramework", "net6.0", "--framework", "net6.0", "Class Library", "classlib", "VB", null)]
+        [InlineData("TargetFramework", "net6.0", "--framework", "net6.0", "Class Library", "classlib", "F#", null)]
 
-        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Console Application", "console", null, null)]
-        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Console Application", "console", "VB", null)]
-        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Console Application", "console", "F#", null)]
-        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Class library", "classlib", null, null)]
-        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Class library", "classlib", "VB", null)]
-        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Class library", "classlib", "F#", null)]
+        [InlineData("TargetFramework", "net6.0", "-f", "net6.0", "Console App", "console", null, null)]
+        [InlineData("TargetFramework", "net6.0", "-f", "net6.0", "Console App", "console", "VB", null)]
+        [InlineData("TargetFramework", "net6.0", "-f", "net6.0", "Console App", "console", "F#", null)]
+        [InlineData("TargetFramework", "net6.0", "-f", "net6.0", "Class Library", "classlib", null, null)]
+        [InlineData("TargetFramework", "net6.0", "-f", "net6.0", "Class Library", "classlib", "VB", null)]
+        [InlineData("TargetFramework", "net6.0", "-f", "net6.0", "Class Library", "classlib", "F#", null)]
         public void CanSetProperty(string propertyName, string? propertyValue, string argName, string argValue, string expectedTemplateName, string templateShortName, string? language, string? framework)
         {
-            string workingDir = CreateTemporaryFolder(folderName: $"{propertyName}-{templateShortName}-{templateShortName.Replace("#", "Sharp") ?? "null"}-{framework ?? "null"}");
+            string workingDir = TestUtils.CreateTemporaryFolder();
             List<string> args = new() { templateShortName, "--no-restore" };
             if (!string.IsNullOrWhiteSpace(language))
             {

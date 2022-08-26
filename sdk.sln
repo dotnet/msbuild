@@ -383,7 +383,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "template_feed", "template_f
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Common.ItemTemplates", "template_feed\Microsoft.DotNet.Common.ItemTemplates\Microsoft.DotNet.Common.ItemTemplates.csproj", "{92F4E400-8C28-41B9-9D7D-8E9A4535636B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Common.ProjectTemplates.7.0", "template_feed\Microsoft.DotNet.Common.ProjectTemplates.7.0\Microsoft.DotNet.Common.ProjectTemplates.7.0.csproj", "{AB7ADCF8-48AC-4885-9C70-16D752B97168}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Common.ProjectTemplates.8.0", "template_feed\Microsoft.DotNet.Common.ProjectTemplates.8.0\Microsoft.DotNet.Common.ProjectTemplates.8.0.csproj", "{AB7ADCF8-48AC-4885-9C70-16D752B97168}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-new.IntegrationTests", "src\Tests\dotnet-new.Tests\dotnet-new.IntegrationTests.csproj", "{8868D816-C072-4B66-84D6-7E014EA16D48}"
 EndProject
