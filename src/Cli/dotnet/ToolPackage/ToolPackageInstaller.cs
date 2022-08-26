@@ -131,7 +131,6 @@ namespace Microsoft.DotNet.ToolPackage
             string verbosity = null)
         {
             var tempDirectoryForAssetJson = FileUtilities.CreateTempPath();
-            FileUtilities.CreateTempFile(tempDirectoryForAssetJson);
 
             string tempProject = CreateDirectoryWithTempProject(
                 packageId: packageId,
@@ -166,13 +165,9 @@ namespace Microsoft.DotNet.ToolPackage
             DirectoryPath? rootConfigDirectory,
             string[] additionalFeeds)
         {
-            string tempProject = _tempProject != null ? _tempProject.ToString() : (FileUtilities.CreateTempFile(FileUtilities.CreateTempPath(), "csproj"));
-            if (_tempProject != null)
-            {
-                tempProject = Path.ChangeExtension(tempProject, "csproj");
-                Directory.CreateDirectory(Path.GetDirectoryName(tempProject));
-            }
+            string tempProject = _tempProject != null && _tempProject.HasValue ? _tempProject.Value.Value : FileUtilities.CreateTempFile(FileUtilities.CreateTempPath(), "csproj");
 
+            Directory.CreateDirectory(Path.GetDirectoryName(tempProject));
             var tempProjectContent = new XDocument(
                 new XElement("Project",
                     new XElement("PropertyGroup",
