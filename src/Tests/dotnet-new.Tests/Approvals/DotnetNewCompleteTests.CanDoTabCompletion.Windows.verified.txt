@@ -16,12 +16,10 @@ nunit
 nunit-test
 page
 proto
-razor
 razorclasslib
 razorcomponent
 react
 sln
-solution
 tool-manifest
 viewimports
 viewstart
