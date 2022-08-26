@@ -42,11 +42,11 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>7193b9098794406cca52bb044c528efd47a23c22</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="17.4.0-preview-22426-03">
+    <Dependency Name="Microsoft.Build" Version="17.4.0-preview-22426-02">
       <Uri>https://github.com/dotnet/msbuild</Uri>
       <Sha>4d406957aee2295900f802c9afe53530654725a0</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build.Localization" Version="17.4.0-preview-22426-03">
+    <Dependency Name="Microsoft.Build.Localization" Version="17.4.0-preview-22426-02">
       <Uri>https://github.com/dotnet/msbuild</Uri>
       <Sha>4d406957aee2295900f802c9afe53530654725a0</Sha>
     </Dependency>
