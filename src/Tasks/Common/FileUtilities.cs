@@ -92,7 +92,7 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     string UID = Environment.GetEnvironmentVariable("SUDO_UID");
                     string GID = Environment.GetEnvironmentVariable("SUDO_GID");
-                    chown(path, Int32.Parse(UID), Int32.Parse(GID)); 
+                    //chown(path, Int32.Parse(UID), Int32.Parse(GID)); 
                 }
                 const int S_IRUSR = 256;
 		        const int S_IWUSR = 128;
