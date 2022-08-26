@@ -19,10 +19,10 @@
 
     <!-- MSBuild tasks shouldn't be referenced. This is by design. -->
     <NoWarn>NU5100;NU5128</NoWarn>
-    <Authors>Rainer Sigwald, Ben Villalobos, Chet Husk</Authors>
+    <Authors>Microsoft</Authors>
     <Company>Microsoft</Company>
     <Description>Tasks and targets to natively publish .NET applications as containers.</Description>
-    <Copyright></Copyright>
+    <Copyright>&#169; Microsoft Corporation. All rights reserved.</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/dotnet/sdk-container-builds</PackageProjectUrl>
     <RepositoryUrl>https://github.com/dotnet/sdk-container-builds</RepositoryUrl>
