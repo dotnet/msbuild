@@ -15,6 +15,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     {
         private readonly RuleSettings _settings;
 
+        private static bool IsSealed(ISymbol sym) => sym.IsSealed || (!sym.IsVirtual && !sym.IsAbstract);
+
         public CannotAddOrRemoveVirtualKeyword(RuleSettings settings, IRuleRegistrationContext context)
         {
             _settings = settings;
@@ -29,10 +31,20 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 return;
             }
 
-            // TODO: Skip interfaces for now, until the compatibility rules for interface
-            // members are clarified: https://github.com/dotnet/sdk/issues/26169.
             if (leftContainingType.TypeKind == TypeKind.Interface || rightContainingType.TypeKind == TypeKind.Interface)
             {
+                if (!IsSealed(left) && IsSealed(right))
+                {
+                    // Introducing the sealed keyword to an interface method is a breaking change.
+                    differences.Add(new CompatDifference(
+                        leftMetadata,
+                        rightMetadata,
+                        DiagnosticIds.CannotAddSealedToInterfaceMember,
+                        string.Format(Resources.CannotAddSealedToInterfaceMember, right),
+                        DifferenceType.Added,
+                        right));
+                }
+
                 return;
             }
 

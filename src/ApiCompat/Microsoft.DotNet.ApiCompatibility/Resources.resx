@@ -237,4 +237,7 @@
   <data name="CannotChangeParameterName" xml:space="preserve">
     <value>Parameter name on member '{0}' changed from '{1}' to '{2}'.</value>
   </data>
+  <data name="CannotAddSealedToInterfaceMember" xml:space="preserve">
+    <value>Cannot add sealed keyword to default interface member '{0}'.</value>
+  </data>
 </root>
