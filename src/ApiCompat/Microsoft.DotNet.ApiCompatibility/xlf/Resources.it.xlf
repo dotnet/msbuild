@@ -67,6 +67,11 @@
         <target state="translated">Non è possibile aggiungere il membro di interfaccia '{0}' a {1} perché non esiste in {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotAddSealedToInterfaceMember">
+        <source>Cannot add sealed keyword to default interface member '{0}'.</source>
+        <target state="new">Cannot add sealed keyword to default interface member '{0}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotAddVirtualToMember">
         <source>Cannot add virtual keyword to member '{0}'.</source>
         <target state="translated">Non è possibile aggiungere la parola chiave virtuale nel membro '{0}'.</target>

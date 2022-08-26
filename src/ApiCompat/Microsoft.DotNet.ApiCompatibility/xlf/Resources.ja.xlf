@@ -67,6 +67,11 @@
         <target state="translated">インターフェイス メンバーが {2} に存在しないため、インターフェイス メンバー '{0}' を {1} に追加できません</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotAddSealedToInterfaceMember">
+        <source>Cannot add sealed keyword to default interface member '{0}'.</source>
+        <target state="new">Cannot add sealed keyword to default interface member '{0}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotAddVirtualToMember">
         <source>Cannot add virtual keyword to member '{0}'.</source>
         <target state="translated">メンバー '{0}' に仮想キーワードを追加できません。</target>

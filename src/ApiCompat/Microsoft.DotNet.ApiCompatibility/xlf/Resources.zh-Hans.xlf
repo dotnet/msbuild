@@ -67,6 +67,11 @@
         <target state="translated">无法将接口成员“{0}”添加到 {1}，因为它在 {2} 上不存在</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotAddSealedToInterfaceMember">
+        <source>Cannot add sealed keyword to default interface member '{0}'.</source>
+        <target state="new">Cannot add sealed keyword to default interface member '{0}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotAddVirtualToMember">
         <source>Cannot add virtual keyword to member '{0}'.</source>
         <target state="translated">无法将虚拟关键字添加到成员“{0}”。</target>
