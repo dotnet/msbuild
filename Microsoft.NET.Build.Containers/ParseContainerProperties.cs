@@ -100,7 +100,7 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
                 }
                 return !Log.HasLoggedErrors;
             }
-            validTags = invalids;
+            validTags = valids;
         } else {
             validTags = Array.Empty<string>();
         }
