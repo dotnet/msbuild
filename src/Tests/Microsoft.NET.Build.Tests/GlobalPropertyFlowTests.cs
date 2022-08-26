@@ -45,7 +45,7 @@ namespace Microsoft.NET.Build.Tests
 
         TestAsset Build(bool passSelfContained, bool passRuntimeIdentifier, [CallerMemberName] string callingMethod = "", string identifier = "")
         {
-            var testAsset = _testAssetsManager.CreateTestProject(_testProject, identifier:identifier);
+            var testAsset = _testAssetsManager.CreateTestProject(_testProject, callingMethod: callingMethod, identifier:identifier);
 
             var arguments = GetDotnetArguments(passSelfContained, passRuntimeIdentifier);
 

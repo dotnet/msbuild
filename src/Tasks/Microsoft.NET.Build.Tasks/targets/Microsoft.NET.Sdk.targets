@@ -1135,6 +1135,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <NETSdkWarning Condition="'$(_SelfContainedWasSpecified)' != 'true' and
                    '$(_CommandLineDefinedRuntimeIdentifier)' == 'true' and
+                   '$(RuntimeIdentifier)' != '' and
                    '$(PublishAot)' != 'true' and
                    '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
                    $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '6.0'))"
