@@ -7,7 +7,6 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
@@ -179,13 +178,18 @@ Restore succeeded\.",
         [InlineData("dotnet gitignore file", "gitignore")]
         [InlineData("global.json file", "globaljson")]
         [InlineData("NuGet Config", "nugetconfig")]
+        [InlineData("dotnet gitignore file", ".gitignore")]
+        [InlineData("global.json file", "global.json")]
+        [InlineData("NuGet Config", "nuget.config")]
         [InlineData("Solution File", "sln")]
         [InlineData("Solution File", "solution")]
         [InlineData("Dotnet local tool manifest file", "tool-manifest")]
         [InlineData("Web Config", "webconfig")]
+        [InlineData("EditorConfig file", "editorconfig")]
+        [InlineData("EditorConfig file", ".editorconfig")]
         public void AllCommonItemsCreate(string expectedTemplateName, string templateShortName)
         {
-            string workingDir = CreateTemporaryFolder(folderName: $"{templateShortName}");
+            string workingDir = CreateTemporaryFolder(folderName: templateShortName.Replace(".", "_"));
 
             new DotnetNewCommand(_log, templateShortName)
                 .WithCustomHive(_fixture.HomeDirectory)
