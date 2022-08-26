@@ -29,6 +29,9 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>containers;docker;Microsoft.NET.Build.Containers</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <!-- While in prerelease, ship the symbols to everyone all the time. -->
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
