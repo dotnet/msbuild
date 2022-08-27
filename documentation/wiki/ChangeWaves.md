@@ -5,13 +5,13 @@ A Change Wave is a set of risky features developed under the same opt-out flag. 
 Opt-out is a better approach for us because we'd likely get limited feedback when a feature impacts customer builds. When a feature does impact a customer negatively, it's a quick switch to disable and allows time to adapt. The key aspect to Change Waves is that it smooths the transition for customers adapting to risky changes that the MSBuild team feels strongly enough to take.
 
 ## How do they work?
-The opt-out comes in the form of setting the environment variable `MSBuildDisableFeaturesFromVersion` to the Change Wave (or version) that contains the feature you want **disabled**. This version happens to be the version of MSBuild that the features were developed for. See the mapping of change waves to features below.
+The opt-out comes in the form of setting the environment variable `MSBUILDDISABLEFEATURESFROMVERSION` to the Change Wave (or version) that contains the feature you want **disabled**. This version happens to be the version of MSBuild that the features were developed for. See the mapping of change waves to features below.
 
 ## When do they become permanent?
 A wave of features is set to "rotate out" (i.e. become standard functionality) two bands after its release. For example, wave 16.8 stayed opt-out through wave 16.10, becoming standard functionality when wave 17.0 is introduced.
 
-## MSBuildDisableFeaturesFromVersion Values & Outcomes
-| `MSBuildDisableFeaturesFromVersion` Value                         | Result        | Receive Warning? |
+## MSBUILDDISABLEFEATURESFROMVERSION Values & Outcomes
+| `MSBUILDDISABLEFEATURESFROMVERSION` Value                         | Result        | Receive Warning? |
 | :-------------                                                    | :----------   | :----------: |
 | Unset                                                             | All Change Waves will be enabled, meaning all features behind each Change Wave will be enabled.               | No   |
 | Any valid & current Change Wave (Ex: `16.8`)                      | All features behind Change Wave `16.8` and higher will be disabled.                                           | No   |
