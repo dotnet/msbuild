@@ -99,7 +99,7 @@ public class Image
         return container;
     }
 
-    static JsonArray ToJsonArray(string[] items) => new JsonArray(items.Where(s => !string.IsNullOrEmpty(s)).Select(s => (JsonValue)s).ToArray());
+    static JsonArray ToJsonArray(string[] items) => new JsonArray(items.Where(s => !string.IsNullOrEmpty(s)).Select(s => JsonValue.Create(s)).ToArray());
 
     public void SetEntrypoint(string[] executableArgs, string[]? args = null)
     {
