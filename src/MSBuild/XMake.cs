@@ -2366,6 +2366,12 @@ namespace Microsoft.Build.CommandLine
                         out enableProfiler
                         );
 
+                    // We're finished with defining individual loggers' verbosity at this point, so we don't need to worry about messing them up.
+                    if (Traits.Instance.DebugEngine)
+                    {
+                        verbosity = LoggerVerbosity.Diagnostic;
+                    }
+
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.DetailedSummary))
                     {
                         detailedSummary = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.DetailedSummary], defaultValue: true, resourceName: "InvalidDetailedSummaryValue");
