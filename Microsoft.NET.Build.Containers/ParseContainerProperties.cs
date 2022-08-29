@@ -27,7 +27,7 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
     /// The tag for the container to be created.
     /// </summary>
     [Required]
-    public string ContainerImageTag { get; set; }
+    public string[] ContainerImageTag { get; set; }
 
     [Output]
     public string ParsedContainerRegistry { get; private set; }
@@ -52,23 +52,13 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
         FullyQualifiedBaseImageName = "";
         ContainerRegistry = "";
         ContainerImageName = "";
-        ContainerImageTag = "";
+        ContainerImageTag = Array.Empty<string>();
         ParsedContainerRegistry = "";
         ParsedContainerImage = "";
         ParsedContainerTag = "";
         NewContainerRegistry = "";
         NewContainerImageName = "";
         NewContainerTags = Array.Empty<string>();
-    }
-
-    private static bool ParsePropertyAsArray(string input, [NotNullWhen(true)] out string[]? items) {
-        if(String.IsNullOrEmpty(input)) {
-            items = null;
-            return false;
-        } else {
-            items = input.Split(';');
-            return true;
-        }
     }
 
     private static bool TryValidateTags(string[] inputTags, out string[] validTags, out string[] invalidTags) {
@@ -88,19 +78,18 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
 
     public override bool Execute()
     {
-
         string[] validTags;
-        if (!string.IsNullOrEmpty(ContainerImageTag) && ParsePropertyAsArray(ContainerImageTag, out var inputTags) && !TryValidateTags(inputTags, out var valids, out var invalids))
+        if (ContainerImageTag.Length != 0 && !TryValidateTags(ContainerImageTag, out var valids, out var invalids))
         {
+            validTags = valids;
             if (invalids.Any()) {
-                if (invalids.Length == 1) {
-                    Log.LogError(null, "CONTAINER003", "Container.InvalidTag", null, 0, 0, 0, 0, $"Invalid {nameof(ContainerImageTag)} provided: {0}. {nameof(ContainerImageTag)} must be a semicolon-delimited list of valid image tags. Image tags must be alphanumeric, underscore, hyphen, or period.", invalids[0]);
-                } else {
-                    Log.LogError(null, "CONTAINER003", "Container.InvalidTag", null, 0, 0, 0, 0, $"Invalid {nameof(ContainerImageTag)}s provided: {0}. {nameof(ContainerImageTag)} must be a semicolon-delimited list of valid image tags. Image tags must be alphanumeric, underscore, hyphen, or period.", String.Join(", ", invalids));
-                }
+                (string message, string args) = invalids switch {
+                    { Length: 1 } => ($"Invalid {nameof(ContainerImageTag)} provided: {{0}}. {nameof(ContainerImageTag)} must be a semicolon-delimited list of valid image tags. Image tags must be alphanumeric, underscore, hyphen, or period.", invalids[0]),
+                    _ => ($"Invalid {nameof(ContainerImageTag)}s provided: {{0}}. {nameof(ContainerImageTag)} must be a semicolon-delimited list of valid image tags. Image tags must be alphanumeric, underscore, hyphen, or period.", String.Join(", ", invalids))
+                };
+                Log.LogError(null, "CONTAINER003", "Container.InvalidTag", null, 0, 0, 0, 0, message, args);
                 return !Log.HasLoggedErrors;
             }
-            validTags = valids;
         } else {
             validTags = Array.Empty<string>();
         }
