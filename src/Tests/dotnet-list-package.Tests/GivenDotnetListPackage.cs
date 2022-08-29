@@ -91,6 +91,9 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
                 .WithProjectChanges(ChangeTargetFrameworkTo2_1);
             var projectDirectory = testAsset.Path;
 
+            var debugCmd = new DotnetCommand(Log);
+            debugCmd.Execute($"dotnet", "msbuild", "--pp", $"{projectDirectory + "\\TestAppSimple.csproj"}");
+
             new RestoreCommand(testAsset)
                 .Execute()
                 .Should()
