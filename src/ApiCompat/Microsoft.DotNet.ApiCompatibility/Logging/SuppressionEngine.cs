@@ -127,6 +127,13 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
             if (_validationSuppressions.Count == 0)
                 return false;
 
+            Suppression[] orderedSuppressions = _validationSuppressions
+                .OrderBy(sup => sup.DiagnosticId)
+                .ThenBy(sup => sup.Left)
+                .ThenBy(sup => sup.Right)
+                .ThenBy(sup => sup.Target)
+                .ToArray();
+
             using (Stream writer = GetWritableStream(supressionFile))
             {
                 _readerWriterLock.EnterReadLock();
@@ -137,7 +144,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
                         Formatting = Formatting.Indented,
                         Indentation = 2
                     };
-                    _serializer.Serialize(xmlWriter, _validationSuppressions.ToArray());
+                    _serializer.Serialize(xmlWriter, orderedSuppressions);
                     AfterWrittingSuppressionsCallback(writer);
                 }
                 finally
