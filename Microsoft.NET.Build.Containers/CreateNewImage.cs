@@ -40,7 +40,7 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
     /// <summary>
     /// The tag to associate with the new image.
     /// </summary>
-    public string ImageTag { get; set; }
+    public string[] ImageTags { get; set; }
 
     /// <summary>
     /// The directory for the build outputs to be published.
@@ -78,7 +78,7 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
         BaseImageTag = "";
         OutputRegistry = "";
         ImageName = "";
-        ImageTag = "";
+        ImageTags = Array.Empty<string>();
         PublishDirectory = "";
         WorkingDirectory = "";
         Entrypoint = Array.Empty<ITaskItem>();
@@ -112,7 +112,7 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
         {
             Log.LogMessage($"Loading from directory: {PublishDirectory}");
         }
-        
+
         Layer newLayer = Layer.FromDirectory(PublishDirectory, WorkingDirectory);
         image.AddLayer(newLayer);
         image.WorkingDirectory = WorkingDirectory;
@@ -122,39 +122,45 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
         {
             image.Label(label.ItemSpec, label.GetMetadata("Value"));
         }
-        
-        if (OutputRegistry.StartsWith("docker://"))
-        {
-            try
-            {
-                LocalDocker.Load(image, ImageName, ImageTag, BaseImageName).Wait();
-            }
-            catch (AggregateException ex) when (ex.InnerException is DockerLoadException dle)
-            {
-                Log.LogErrorFromException(dle, showStackTrace: false);
-                return !Log.HasLoggedErrors;
-            }
-        }
-        else
-        {
-            Registry outputReg = new Registry(new Uri(OutputRegistry));
-            try
-            {
-                outputReg.Push(image, ImageName, ImageTag, BaseImageName).Wait();
-            }
-            catch (Exception e)
-            {
-                if (BuildEngine != null)
-                {
-                    Log.LogError("Failed to push to the output registry: {0}", e);
-                }
-                return !Log.HasLoggedErrors;
-            }
-        }
 
-        if (BuildEngine != null)
+        var isDockerPush = OutputRegistry.StartsWith("docker://");
+        Registry? outputReg = isDockerPush ? null : new Registry(new Uri(OutputRegistry));
+        foreach (var tag in ImageTags)
         {
-            Log.LogMessage(MessageImportance.High, "Pushed container '{0}:{1}' to registry '{2}'", ImageName, ImageTag, OutputRegistry);
+            if (isDockerPush)
+            {
+                try
+                {
+                    LocalDocker.Load(image, ImageName, tag, BaseImageName).Wait();
+                    if (BuildEngine != null)
+                    {
+                        Log.LogMessage(MessageImportance.High, "Pushed container '{0}:{1}' to Docker daemon", ImageName, tag);
+                    }
+                }
+                catch (AggregateException ex) when (ex.InnerException is DockerLoadException dle)
+                {
+                    Log.LogErrorFromException(dle, showStackTrace: false);
+                }
+            }
+            else
+            {
+                try
+                {
+                    outputReg?.Push(image, ImageName, tag, BaseImageName).Wait();
+                    if (BuildEngine != null)
+                    {
+                        Log.LogMessage(MessageImportance.High, "Pushed container '{0}:{1}' to registry '{2}'", ImageName, tag, OutputRegistry);
+                    }
+                }
+                catch (Exception e)
+                {
+                    if (BuildEngine != null)
+                    {
+                        Log.LogError("Failed to push to the output registry: {0}", e);
+                    }
+                }
+            }
+
         }
 
         return !Log.HasLoggedErrors;

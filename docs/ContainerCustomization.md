@@ -51,15 +51,20 @@ By default, the value used will be the `AssemblyName` of the project.
 > **Note**
 > Image names can only contain lowercase alphanumeric characters, periods, underscores, and dashes, and must start with a letter or number - any other characters will result in an error being thrown.
 
-## ContainerImageTag
+## ContainerImageTag(s)
 
-This property controls the tag that is generated for the image. Tags are often used to refer to different versions of an application, but they can also refer to different operating system distributions, or even just different baked-in configuration.
+This property controls the tag that is generated for the image. Tags are often used to refer to different versions of an application, but they can also refer to different operating system distributions, or even just different baked-in configuration. This property also can be used to push multiple tags - simply use a semicolon-delimited set of tags in the `ContainerImageTags` property, similar to setting multiple `TargetFrameworks`.
 
 By default, the value used will be the `Version` of the project.
 
 ```xml
 <ContainerImageTag>1.2.3-alpha2</ContainerImageTag>
 ```
+
+```xml
+<ContainerImageTags>1.2.3-alpha2;latest</ContainerImageTags>
+```
+
 
 > **Note**
 > Tags can only contain up to 127 alphanumeric characters, periods, underscores, and dashes. They must start with an alphanumeric character or an underscore. Any other form will result in an error being thrown.
