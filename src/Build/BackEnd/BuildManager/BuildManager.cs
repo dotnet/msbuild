@@ -1348,23 +1348,6 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        private void LoadSubmissionProjectIntoConfiguration(BuildSubmission submission, BuildRequestConfiguration config)
-        {
-            if (!config.IsLoaded)
-            {
-                config.LoadProjectIntoConfiguration(
-                    this,
-                    submission.BuildRequestData.Flags,
-                    submission.SubmissionId,
-                    Scheduler.InProcNodeId
-                );
-
-                // If we're taking the time to evaluate, avoid having other nodes to repeat the same evaluation.
-                // Based on the assumption that ProjectInstance serialization is faster than evaluating from scratch.
-                config.Project.TranslateEntireState = true;
-            }
-        }
-
         /// <summary>
         /// Creates the traversal and metaproject instances necessary to represent the solution and populates new configurations with them.
         /// </summary>
