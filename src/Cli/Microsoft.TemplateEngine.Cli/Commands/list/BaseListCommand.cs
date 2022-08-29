@@ -56,19 +56,18 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal NewCommand ParentCommand { get; }
 
-        protected override async Task<NewCommandStatus> ExecuteAsync(
+        protected override Task<NewCommandStatus> ExecuteAsync(
             ListCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager, 
             InvocationContext context)
         {
-            using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
             TemplateListCoordinator templateListCoordinator = new TemplateListCoordinator(
                 environmentSettings,
                 templatePackageManager,
                 new HostSpecificDataLoader(environmentSettings));
 
-            //we need to await, otherwise templatePackageManager will be disposed.
-            return await templateListCoordinator.DisplayTemplateGroupListAsync(args, default).ConfigureAwait(false);
+            return templateListCoordinator.DisplayTemplateGroupListAsync(args, default);
         }
 
         protected override ListCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);

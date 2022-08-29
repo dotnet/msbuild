@@ -103,11 +103,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             SharedOptions.NoUpdateCheckOption
         };
 
-        protected internal override IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings)
+        protected internal override IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager)
         {
             if (context is not TextCompletionContext textCompletionContext)
             {
-                foreach (CompletionItem completion in base.GetCompletions(context, environmentSettings))
+                foreach (CompletionItem completion in base.GetCompletions(context, environmentSettings, templatePackageManager))
                 {
                     yield return completion;
                 }
@@ -115,9 +115,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
 
             InstantiateCommandArgs instantiateCommandArgs = InstantiateCommandArgs.FromNewCommandArgs(ParseContext(context.ParseResult));
-
-            using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
-            HostSpecificDataLoader? hostSpecificDataLoader = new HostSpecificDataLoader(environmentSettings);
+            HostSpecificDataLoader? hostSpecificDataLoader = new(environmentSettings);
 
             //TODO: consider new API to get templates only from cache (non async)
             IReadOnlyList<ITemplateInfo> templates =
@@ -138,7 +136,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 yield return completion;
             }
-            foreach (CompletionItem completion in base.GetCompletions(context, environmentSettings))
+            foreach (CompletionItem completion in base.GetCompletions(context, environmentSettings, templatePackageManager))
             {
                 yield return completion;
             }
@@ -147,9 +145,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override Task<NewCommandStatus> ExecuteAsync(
             NewCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager, 
             InvocationContext context)
         {
-            return InstantiateCommand.ExecuteAsync(args, environmentSettings, context);
+            return InstantiateCommand.ExecuteAsync(args, environmentSettings, templatePackageManager, context);
         }
 
         protected override NewCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);

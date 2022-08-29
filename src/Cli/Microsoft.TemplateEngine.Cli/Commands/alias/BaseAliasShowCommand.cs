@@ -5,6 +5,7 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Edge.Settings;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -18,7 +19,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override Task<NewCommandStatus> ExecuteAsync(
             AliasShowCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
-            InvocationContext context) => throw new NotImplementedException();
+            TemplatePackageManager templatePackageManager, InvocationContext context) => throw new NotImplementedException();
 
         protected override AliasShowCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);
     }

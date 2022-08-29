@@ -49,19 +49,18 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal NewCommand ParentCommand { get; }
 
-        protected override async Task<NewCommandStatus> ExecuteAsync(
+        protected override Task<NewCommandStatus> ExecuteAsync(
             SearchCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager, 
             InvocationContext context)
         {
-            using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
-            //we need to await, otherwise templatePackageManager will be disposed.
-            return await CliTemplateSearchCoordinator.SearchForTemplateMatchesAsync(
+            return CliTemplateSearchCoordinator.SearchForTemplateMatchesAsync(
                 environmentSettings,
                 templatePackageManager,
                 args,
                 environmentSettings.GetDefaultLanguage(),
-                context.GetCancellationToken()).ConfigureAwait(false);
+                context.GetCancellationToken());
         }
 
         protected override SearchCommandArgs ParseContext(ParseResult parseResult)

@@ -14,11 +14,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal partial class InstantiateCommand : BaseCommand<InstantiateCommandArgs>
     {
-        private static readonly TimeSpan ConstraintEvaluationTimeout = TimeSpan.FromMilliseconds(1000);
+        private static readonly TimeSpan s_constraintEvaluationTimeout = TimeSpan.FromMilliseconds(1000);
 
         internal static IEnumerable<CompletionItem> GetTemplateNameCompletions(string? tempalteName, IEnumerable<TemplateGroup> templateGroups, IEngineEnvironmentSettings environmentSettings)
         {
-            TemplateConstraintManager constraintManager = new TemplateConstraintManager(environmentSettings);
+            TemplateConstraintManager constraintManager = new(environmentSettings);
             if (string.IsNullOrWhiteSpace(tempalteName))
             {
                 return GetAllowedTemplateGroups(constraintManager, templateGroups)
@@ -28,7 +28,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     .ToArray();
             }
 
-            var matchingTemplateGroups = templateGroups.Where(t => t.ShortNames.Any(sn => sn.StartsWith(tempalteName, StringComparison.OrdinalIgnoreCase)));
+            IEnumerable<TemplateGroup> matchingTemplateGroups = templateGroups.Where(t => t.ShortNames.Any(sn => sn.StartsWith(tempalteName, StringComparison.OrdinalIgnoreCase)));
 
             return GetAllowedTemplateGroups(constraintManager, matchingTemplateGroups)
                 .SelectMany(g => g.ShortNames, (g, shortName) => new CompletionItem(shortName, documentation: g.Description))
@@ -45,8 +45,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             TemplatePackageManager templatePackageManager,
             TextCompletionContext context)
         {
-            HashSet<CompletionItem> distinctCompletions = new HashSet<CompletionItem>();
-            TemplateConstraintManager constraintManager = new TemplateConstraintManager(environmentSettings);
+            HashSet<CompletionItem> distinctCompletions = new();
+            TemplateConstraintManager constraintManager = new(environmentSettings);
             foreach (TemplateGroup templateGroup in templateGroups.Where(template => template.ShortNames.Contains(args.ShortName)))
             {
                 foreach (IGrouping<int, CliTemplateInfo> templateGrouping in GetAllowedTemplates(constraintManager, templateGroup).GroupBy(g => g.Precedence).OrderByDescending(g => g.Key))
@@ -55,7 +55,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     {
                         try
                         {
-                            TemplateCommand command = new TemplateCommand(
+                            TemplateCommand command = new(
                                 args.Command,
                                 environmentSettings,
                                 templatePackageManager,
@@ -99,11 +99,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return distinctCompletions.OrderBy(c => c.Label, StringComparer.OrdinalIgnoreCase);
         }
 
-        protected internal override IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings)
+        protected internal override IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager)
         {
             if (context is not TextCompletionContext textCompletionContext)
             {
-                foreach (CompletionItem completion in base.GetCompletions(context, environmentSettings))
+                foreach (CompletionItem completion in base.GetCompletions(context, environmentSettings, templatePackageManager))
                 {
                     yield return completion;
                 }
@@ -111,9 +111,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
 
             InstantiateCommandArgs instantiateArgs = ParseContext(context.ParseResult);
-
-            using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
-            HostSpecificDataLoader? hostSpecificDataLoader = new HostSpecificDataLoader(environmentSettings);
+            HostSpecificDataLoader? hostSpecificDataLoader = new(environmentSettings);
 
             //TODO: consider new API to get templates only from cache (non async)
             IReadOnlyList<ITemplateInfo> templates =
@@ -133,7 +131,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 yield return completion;
             }
-            foreach (CompletionItem completion in base.GetCompletions(context, environmentSettings))
+            foreach (CompletionItem completion in base.GetCompletions(context, environmentSettings, templatePackageManager))
             {
                 yield return completion;
             }
@@ -144,9 +142,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             //if at least one template in the group has constraint, they must be evaluated
             if (templateGroup.Templates.SelectMany(t => t.Constraints).Any())
             {
-                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                cancellationTokenSource.CancelAfter(ConstraintEvaluationTimeout);
-                var constraintEvaluationTask = templateGroup.GetAllowedTemplatesAsync(constraintManager, cancellationTokenSource.Token);
+                CancellationTokenSource cancellationTokenSource = new();
+                cancellationTokenSource.CancelAfter(s_constraintEvaluationTimeout);
+                Task<IEnumerable<CliTemplateInfo>> constraintEvaluationTask = templateGroup.GetAllowedTemplatesAsync(constraintManager, cancellationTokenSource.Token);
                 Task.Run(async () =>
                 {
                     try
@@ -172,11 +170,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         private static IEnumerable<TemplateGroup> GetAllowedTemplateGroups(TemplateConstraintManager constraintManager, IEnumerable<TemplateGroup> templateGroups)
         {
-            List<TemplateGroup> allowedTemplateGroups = new List<TemplateGroup>();
+            List<TemplateGroup> allowedTemplateGroups = new();
             List<(TemplateGroup TemplateGroup, Task<IEnumerable<CliTemplateInfo>> Task)> tasksToWait = new();
-            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-            cancellationTokenSource.CancelAfter(ConstraintEvaluationTimeout);
-            foreach (var group in templateGroups)
+            CancellationTokenSource cancellationTokenSource = new();
+            cancellationTokenSource.CancelAfter(s_constraintEvaluationTimeout);
+            foreach (TemplateGroup group in templateGroups)
             {
                 //if all the templates in a group have constraints, they must be evaluated
                 if (group.Templates.All(t => t.Constraints.Any()))
@@ -205,7 +203,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     //do nothing
                 }
             }).GetAwaiter().GetResult();
-            foreach (var task in tasksToWait)
+            foreach ((TemplateGroup TemplateGroup, Task<IEnumerable<CliTemplateInfo>> Task) task in tasksToWait)
             {
                 if (task.Task.IsCompletedSuccessfully)
                 {

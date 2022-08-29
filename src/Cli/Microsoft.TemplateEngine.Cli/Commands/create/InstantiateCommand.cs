@@ -61,9 +61,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             SharedOptions.NoUpdateCheckOption
         };
 
-        internal static Task<NewCommandStatus> ExecuteAsync(NewCommandArgs newCommandArgs, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
+        internal static Task<NewCommandStatus> ExecuteAsync(
+            NewCommandArgs newCommandArgs, 
+            IEngineEnvironmentSettings environmentSettings, 
+            TemplatePackageManager templatePackageManager,
+            InvocationContext context)
         {
-            return ExecuteIntAsync(InstantiateCommandArgs.FromNewCommandArgs(newCommandArgs), environmentSettings, context);
+            return ExecuteIntAsync(InstantiateCommandArgs.FromNewCommandArgs(newCommandArgs), environmentSettings, templatePackageManager, context);
         }
 
         internal static async Task<IEnumerable<TemplateGroup>> GetTemplateGroupsAsync(
@@ -193,9 +197,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override Task<NewCommandStatus> ExecuteAsync(
             InstantiateCommandArgs instantiateArgs,
             IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager, 
             InvocationContext context)
         {
-            return ExecuteIntAsync(instantiateArgs, environmentSettings, context);
+            return ExecuteIntAsync(instantiateArgs, environmentSettings, templatePackageManager, context);
         }
 
         protected override InstantiateCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);
@@ -203,10 +208,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         private static async Task<NewCommandStatus> ExecuteIntAsync(
             InstantiateCommandArgs instantiateArgs,
             IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager,
             InvocationContext context)
         {
             CancellationToken cancellationToken = context.GetCancellationToken();
-            using TemplatePackageManager templatePackageManager = new(environmentSettings);
             HostSpecificDataLoader hostSpecificDataLoader = new(environmentSettings);
             if (string.IsNullOrWhiteSpace(instantiateArgs.ShortName))
             {

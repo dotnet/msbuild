@@ -29,18 +29,16 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         protected NewCommand ParentCommand { get; }
 
-        protected override async Task<NewCommandStatus> ExecuteAsync(
+        protected override Task<NewCommandStatus> ExecuteAsync(
             UpdateCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
-            InvocationContext context)
+            TemplatePackageManager templatePackageManager, InvocationContext context)
         {
-            using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
             TemplatePackageCoordinator templatePackageCoordinator = new TemplatePackageCoordinator(
                 environmentSettings,
                 templatePackageManager);
 
-            //we need to await, otherwise templatePackageManager will be disposed.
-            return await templatePackageCoordinator.EnterUpdateFlowAsync(args, context.GetCancellationToken()).ConfigureAwait(false);
+            return templatePackageCoordinator.EnterUpdateFlowAsync(args, context.GetCancellationToken());
         }
 
         protected override UpdateCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);

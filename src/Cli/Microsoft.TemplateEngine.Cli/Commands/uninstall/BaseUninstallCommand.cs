@@ -25,17 +25,17 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Arity = new ArgumentArity(0, 99)
         };
 
-        protected override async Task<NewCommandStatus> ExecuteAsync(
+        protected override Task<NewCommandStatus> ExecuteAsync(
             UninstallCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager, 
             InvocationContext context)
         {
-            using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
             TemplatePackageCoordinator templatePackageCoordinator = new TemplatePackageCoordinator(
                 environmentSettings,
                 templatePackageManager);
 
-            return await templatePackageCoordinator.EnterUninstallFlowAsync(args, context.GetCancellationToken()).ConfigureAwait(false);
+            return templatePackageCoordinator.EnterUninstallFlowAsync(args, context.GetCancellationToken());
         }
 
         protected override UninstallCommandArgs ParseContext(ParseResult parseResult)

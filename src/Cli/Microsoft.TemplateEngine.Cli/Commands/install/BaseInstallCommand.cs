@@ -38,16 +38,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         protected NewCommand ParentCommand { get; }
 
-        protected override async Task<NewCommandStatus> ExecuteAsync(
+        protected override Task<NewCommandStatus> ExecuteAsync(
             InstallCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager, 
             InvocationContext context)
         {
-            using TemplatePackageManager templatePackageManager = new(environmentSettings);
             TemplatePackageCoordinator templatePackageCoordinator = new(environmentSettings, templatePackageManager);
-
-            //we need to await, otherwise templatePackageManager will be disposed.
-            return await templatePackageCoordinator.EnterInstallFlowAsync(args, context.GetCancellationToken()).ConfigureAwait(false);
+            return templatePackageCoordinator.EnterInstallFlowAsync(args, context.GetCancellationToken());
         }
 
         protected override InstallCommandArgs ParseContext(ParseResult parseResult)

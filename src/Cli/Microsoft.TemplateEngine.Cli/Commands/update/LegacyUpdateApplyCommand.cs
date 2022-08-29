@@ -5,6 +5,7 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Edge.Settings;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -23,10 +24,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal override Option<string[]> AddSourceOption => ParentCommand.AddSourceOption;
 
-        protected override Task<NewCommandStatus> ExecuteAsync(UpdateCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
+        protected override Task<NewCommandStatus> ExecuteAsync(UpdateCommandArgs args, IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager, InvocationContext context)
         {
             PrintDeprecationMessage<LegacyUpdateApplyCommand, UpdateCommand>(args.ParseResult);
-            return base.ExecuteAsync(args, environmentSettings, context);
+            return base.ExecuteAsync(args, environmentSettings, templatePackageManager, context);
         }
     }
 }

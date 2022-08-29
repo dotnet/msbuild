@@ -30,7 +30,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             _hostBuilder = hostBuilder;
         }
 
-        protected internal virtual IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings)
+        protected internal virtual IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager)
         {
 #pragma warning disable SA1100 // Do not prefix calls with base unless local implementation exists
             return base.GetCompletions(context);
@@ -63,6 +63,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             TArgs args = ParseContext(context.ParseResult);
             using IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args, context.ParseResult);
+            using TemplatePackageManager templatePackageManager = new(environmentSettings);
             CancellationToken cancellationToken = context.GetCancellationToken();
 
             NewCommandStatus returnCode;
@@ -71,8 +72,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 using (Timing.Over(environmentSettings.Host.Logger, "Execute"))
                 {
-                    await HandleGlobalOptionsAsync(args, environmentSettings, cancellationToken).ConfigureAwait(false);
-                    returnCode = await ExecuteAsync(args, environmentSettings, context).ConfigureAwait(false);
+                    await HandleGlobalOptionsAsync(args, environmentSettings, templatePackageManager, cancellationToken).ConfigureAwait(false);
+                    returnCode = await ExecuteAsync(args, environmentSettings, templatePackageManager, context).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -125,12 +126,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 return base.GetCompletions(context);
             }
-            GlobalArgs args = new GlobalArgs(this, context.ParseResult);
+            GlobalArgs args = new(this, context.ParseResult);
             using IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args, context.ParseResult);
-            return GetCompletions(context, environmentSettings).ToList();
+            using TemplatePackageManager templatePackageManager = new(environmentSettings);
+            return GetCompletions(context, environmentSettings, templatePackageManager).ToList();
         }
 
-        protected abstract Task<NewCommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context);
+        protected abstract Task<NewCommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager, InvocationContext context);
 
         protected abstract TArgs ParseContext(ParseResult parseResult);
 
@@ -141,10 +143,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         protected IReadOnlyDictionary<FilterOptionDefinition, Option> SetupFilterOptions(IReadOnlyList<FilterOptionDefinition> filtersToSetup)
         {
-            Dictionary<FilterOptionDefinition, Option> options = new Dictionary<FilterOptionDefinition, Option>();
-            foreach (var filterDef in filtersToSetup)
+            Dictionary<FilterOptionDefinition, Option> options = new();
+            foreach (FilterOptionDefinition filterDef in filtersToSetup)
             {
-                var newOption = GetFilterOption(filterDef);
+                Option newOption = GetFilterOption(filterDef);
                 this.AddOption(newOption);
                 options[filterDef] = newOption;
             }
@@ -160,7 +162,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.AddOption(command.ColumnsOption);
         }
 
-        protected void PrintDeprecationMessage<TDepr, TNew>(ParseResult parseResult, Option? additionalOption = null) where TDepr : Command where TNew : Command
+        protected static void PrintDeprecationMessage<TDepr, TNew>(ParseResult parseResult, Option? additionalOption = null) where TDepr : Command where TNew : Command
         {
             var newCommandExample = Example.For<TNew>(parseResult);
             if (additionalOption != null)
@@ -179,11 +181,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         }
 
-        private static async Task HandleGlobalOptionsAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken)
+        private static async Task HandleGlobalOptionsAsync(
+            TArgs args, 
+            IEngineEnvironmentSettings environmentSettings, 
+            TemplatePackageManager templatePackageManager, 
+            CancellationToken cancellationToken)
         {
             HandleDebugAttach(args);
             HandleDebugReinit(args, environmentSettings);
-            await HandleDebugRebuildCacheAsync(args, environmentSettings, cancellationToken).ConfigureAwait(false);
+            await HandleDebugRebuildCacheAsync(args, templatePackageManager, cancellationToken).ConfigureAwait(false);
             HandleDebugShowConfig(args, environmentSettings);
         }
 
@@ -207,15 +213,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             environmentSettings.Host.FileSystem.CreateDirectory(environmentSettings.Paths.HostVersionSettingsDir);
         }
 
-        private static async Task HandleDebugRebuildCacheAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken)
+        private static Task HandleDebugRebuildCacheAsync(TArgs args, TemplatePackageManager templatePackageManager, CancellationToken cancellationToken)
         {
             if (!args.DebugRebuildCache)
             {
-                return;
+                return Task.CompletedTask;
             }
-            using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
-            //need to await, otherwise template package manager is disposed too early - before the task is completed
-            await templatePackageManager.RebuildTemplateCacheAsync(cancellationToken).ConfigureAwait(true);
+            return templatePackageManager.RebuildTemplateCacheAsync(cancellationToken);
         }
 
         private static void HandleDebugShowConfig(TArgs args, IEngineEnvironmentSettings environmentSettings)
