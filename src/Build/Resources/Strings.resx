@@ -1902,6 +1902,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="ProjectCacheShutdownFailed" xml:space="preserve">
     <value>MSB4268: The project cache failed to shut down properly.</value>
   </data>
+  <data name="ProjectCacheHandleBuildResultFailed" xml:space="preserve">
+    <value>MSB4269: The project cache failed while handling build result for the following project: {0}.</value>
+  </data>
   <data name="NoProjectCachePluginFoundInAssembly" xml:space="preserve">
     <value>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</value>
   </data>

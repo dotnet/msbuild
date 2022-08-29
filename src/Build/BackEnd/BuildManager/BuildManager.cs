@@ -25,6 +25,7 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Experimental.ProjectCache;
+using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Graph;
@@ -572,9 +573,12 @@ namespace Microsoft.Build.Execution
 
                 InitializeCaches();
 
+                var fileAccessManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.FileAccessManager) as IFileAccessManager;
                 _projectCacheService = new ProjectCacheService(
                     this,
                     loggingService,
+                    fileAccessManager,
+                    _configCache,
                     _buildParameters.ProjectCacheDescriptor);
 
                 _taskHostNodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.TaskHostNodeManager) as INodeManager;
@@ -2369,6 +2373,38 @@ namespace Microsoft.Build.Execution
                 configuration.ProjectDefaultTargets ??= result.DefaultTargets;
                 configuration.ProjectInitialTargets ??= result.InitialTargets;
                 configuration.ProjectTargets ??= result.ProjectTargets;
+            }
+
+            // Only report results to the project cache services if it's the result for a build submission.
+            // Note that graph builds create a submission for each node in the graph, so each node in the graph will be
+            // handled here. This intentionally mirrors the behavior for cache requests, as it doesn't make sense to
+            // report for projects which aren't going to be requested. Ideally, *any* request could be handled, but that
+            // would require moving the cache service interactions to the Scheduler.
+            if (_buildSubmissions.TryGetValue(result.SubmissionId, out BuildSubmission buildSubmission))
+            {
+                // The result may be associated with the build submission due to it being the submission which
+                // caused the build, but not the actual request which was used with the build submission. Ensure
+                // only the actual submission's request is considered.
+                if (buildSubmission.BuildRequest != null
+                    && buildSubmission.BuildRequest.ConfigurationId == configuration.ConfigurationId
+                    && _projectCacheService.ShouldUseCache(configuration))
+                {
+                    BuildEventContext buildEventContext = _projectStartedEvents.TryGetValue(result.SubmissionId, out BuildEventArgs buildEventArgs)
+                        ? buildEventArgs.BuildEventContext
+                        : new BuildEventContext(result.SubmissionId, node, configuration.Project?.EvaluationId ?? BuildEventContext.InvalidEvaluationId, configuration.ConfigurationId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                    try
+                    {
+                        _projectCacheService.HandleBuildResultAsync(configuration, result, buildEventContext, _executionCancellationTokenSource.Token).Wait();
+                    }
+                    catch (AggregateException ex) when (ex.InnerExceptions.All(inner => inner is OperationCanceledException))
+                    {
+                        // The build is being cancelled. Swallow any exceptions related specifically to cancellation.
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // The build is being cancelled. Swallow any exceptions related specifically to cancellation.
+                    }
+                }
             }
 
             IEnumerable<ScheduleResponse> response = _scheduler.ReportResult(node, result);

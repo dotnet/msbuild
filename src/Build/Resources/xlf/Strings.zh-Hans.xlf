@@ -254,6 +254,11 @@
         <target state="translated">MSB4273: 项目缓存从 {0} 方法引发了未经处理的异常。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheHandleBuildResultFailed">
+        <source>MSB4269: The project cache failed while handling build result for the following project: {0}.</source>
+        <target state="new">MSB4269: The project cache failed while handling build result for the following project: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">
         <source>Project cache hit for "{0}" (default targets).</source>
         <target state="translated">项目缓存命中 "{0}" (默认目标)。</target>

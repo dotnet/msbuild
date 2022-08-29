@@ -254,6 +254,11 @@
         <target state="translated">MSB4273: Proje önbelleği {0} yönteminden yakalanamayan özel durum oluşturdu.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheHandleBuildResultFailed">
+        <source>MSB4269: The project cache failed while handling build result for the following project: {0}.</source>
+        <target state="new">MSB4269: The project cache failed while handling build result for the following project: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">
         <source>Project cache hit for "{0}" (default targets).</source>
         <target state="translated">"{0}" (varsayılan hedefler) için proje önbelleği isabeti.</target>
