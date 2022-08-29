@@ -21,7 +21,8 @@
             <ContainerRegistry Condition="'$(ContainerRegistry)' == ''">docker://</ContainerRegistry>
             <!-- Note: spaces will be replaced with '-' in ContainerImageName and ContainerImageTag -->
             <ContainerImageName Condition="'$(ContainerImageName)' == ''">$(AssemblyName)</ContainerImageName>
-            <ContainerImageTag Condition="'$(ContainerImageTag)' == ''">$(Version)</ContainerImageTag>
+            <!-- Only default a tag name if no tag names at all are provided -->
+            <ContainerImageTag Condition="'$(ContainerImageTag)' == '' and '$(ContainerImageTags)' == ''">$(Version)</ContainerImageTag>
             <ContainerWorkingDirectory Condition="'$(ContainerWorkingDirectory)' == ''">/app</ContainerWorkingDirectory>
             <!-- Could be semicolon-delimited -->
         </PropertyGroup>
@@ -48,7 +49,8 @@
         <ParseContainerProperties FullyQualifiedBaseImageName="$(ContainerBaseImage)"
                                   ContainerRegistry="$(ContainerRegistry)"
                                   ContainerImageName="$(ContainerImageName)"
-                                  ContainerImageTag="$(ContainerImageTag)">
+                                  ContainerImageTag="$(ContainerImageTag)"
+                                  ContainerImageTags="$(ContainerImageTags)">
 
             <Output TaskParameter="ParsedContainerRegistry" PropertyName="ContainerBaseRegistry" />
             <Output TaskParameter="ParsedContainerImage" PropertyName="ContainerBaseName" />

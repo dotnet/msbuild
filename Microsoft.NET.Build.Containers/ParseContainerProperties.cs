@@ -26,8 +26,11 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
     /// <summary>
     /// The tag for the container to be created.
     /// </summary>
-    [Required]
-    public string[] ContainerImageTag { get; set; }
+    public string ContainerImageTag { get; set; }
+    /// <summary>
+    /// The tags for the container to be created.
+    /// </summary>
+    public string[] ContainerImageTags { get; set; }
 
     [Output]
     public string ParsedContainerRegistry { get; private set; }
@@ -52,7 +55,8 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
         FullyQualifiedBaseImageName = "";
         ContainerRegistry = "";
         ContainerImageName = "";
-        ContainerImageTag = Array.Empty<string>();
+        ContainerImageTag = "";
+        ContainerImageTags = Array.Empty<string>();
         ParsedContainerRegistry = "";
         ParsedContainerImage = "";
         ParsedContainerTag = "";
@@ -61,13 +65,18 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
         NewContainerTags = Array.Empty<string>();
     }
 
-    private static bool TryValidateTags(string[] inputTags, out string[] validTags, out string[] invalidTags) {
+    private static bool TryValidateTags(string[] inputTags, out string[] validTags, out string[] invalidTags)
+    {
         var v = new List<string>();
         var i = new List<string>();
-        foreach (var tag in inputTags) {
-            if (ContainerHelpers.IsValidImageTag(tag)) {
+        foreach (var tag in inputTags)
+        {
+            if (ContainerHelpers.IsValidImageTag(tag))
+            {
                 v.Add(tag);
-            } else {
+            }
+            else
+            {
                 i.Add(tag);
             }
         }
@@ -79,18 +88,40 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
     public override bool Execute()
     {
         string[] validTags;
-        if (ContainerImageTag.Length != 0 && !TryValidateTags(ContainerImageTag, out var valids, out var invalids))
+        if (!String.IsNullOrEmpty(ContainerImageTag) && ContainerImageTags.Length >= 1)
+        {
+            Log.LogError(null, "CONTAINER005", "Container.AmbiguousTags", null, 0, 0, 0, 0, $"Both {nameof(ContainerImageTag)} and {nameof(ContainerImageTags)} were provided, but only one or the other is allowed.");
+            return !Log.HasLoggedErrors;
+        }
+
+        if (!String.IsNullOrEmpty(ContainerImageTag))
+        {
+            if (ContainerHelpers.IsValidImageTag(ContainerImageTag))
+            {
+                validTags = new[] { ContainerImageTag };
+            }
+            else
+            {
+                validTags = Array.Empty<string>();
+                Log.LogError(null, "CONTAINER003", "Container.InvalidTag", null, 0, 0, 0, 0, $"Invalid {nameof(ContainerImageTag)} provided: {{0}}. Image tags must be alphanumeric, underscore, hyphen, or period.", ContainerImageTag);
+            }
+        }
+        else if (ContainerImageTags.Length != 0 && !TryValidateTags(ContainerImageTags, out var valids, out var invalids))
         {
             validTags = valids;
-            if (invalids.Any()) {
-                (string message, string args) = invalids switch {
-                    { Length: 1 } => ($"Invalid {nameof(ContainerImageTag)} provided: {{0}}. {nameof(ContainerImageTag)} must be a semicolon-delimited list of valid image tags. Image tags must be alphanumeric, underscore, hyphen, or period.", invalids[0]),
-                    _ => ($"Invalid {nameof(ContainerImageTag)}s provided: {{0}}. {nameof(ContainerImageTag)} must be a semicolon-delimited list of valid image tags. Image tags must be alphanumeric, underscore, hyphen, or period.", String.Join(", ", invalids))
+            if (invalids.Any())
+            {
+                (string message, string args) = invalids switch
+                {
+                    { Length: 1 } => ($"Invalid {nameof(ContainerImageTags)} provided: {{0}}. {nameof(ContainerImageTags)} must be a semicolon-delimited list of valid image tags. Image tags must be alphanumeric, underscore, hyphen, or period.", invalids[0]),
+                    _ => ($"Invalid {nameof(ContainerImageTags)} provided: {{0}}. {nameof(ContainerImageTags)} must be a semicolon-delimited list of valid image tags. Image tags must be alphanumeric, underscore, hyphen, or period.", String.Join(", ", invalids))
                 };
                 Log.LogError(null, "CONTAINER003", "Container.InvalidTag", null, 0, 0, 0, 0, message, args);
                 return !Log.HasLoggedErrors;
             }
-        } else {
+        }
+        else
+        {
             validTags = Array.Empty<string>();
         }
 
