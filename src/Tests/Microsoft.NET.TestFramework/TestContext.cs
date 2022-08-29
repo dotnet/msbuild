@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Commands;
-using System.Reflection;
 using System.Globalization;
 
 namespace Microsoft.NET.TestFramework

@@ -23,16 +23,16 @@ This option is currently only supported on Windows, and requires procdump.exe an
 Or PROCDUMP_PATH environment variable to be set, and point to a directory that contains procdump.exe and procdump64.exe. 
 The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downloads/procdump 
 Implies --blame.</source>
-        <target state="translated">Führt den Test im Modus "Verantwortung zuweisen" aus und aktiviert die Erfassung von Absturzabbildern bei einer unerwarteten Beendigung des Testhosts. 
-Diese Option wird derzeit nur unter Windows unterstützt und erfordert, dass "procdump.exe" und "procdump64.exe" in PATH verfügbar sind.
-Alternativ dazu kann die Umgebungsvariable PROCDUMP_PATH festgelegt werden und auf ein Verzeichnis verweisen, das "procdump.exe" und "procdump64.exe" enthält. 
-Die Tools können hier heruntergeladen werden: https://docs.microsoft.com/sysinternals/downloads/procdump 
-Impliziert "--blame".</target>
+        <target state="new">Runs the tests in blame mode and enables collecting crash dump when testhost exits unexpectedly. 
+This option is currently only supported on Windows, and requires procdump.exe and procdump64.exe to be available in PATH.
+Or PROCDUMP_PATH environment variable to be set, and point to a directory that contains procdump.exe and procdump64.exe. 
+The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downloads/procdump 
+Implies --blame.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
         <source>The type of crash dump to be collected. Implies --blame-crash.</source>
-        <target state="translated">Der Typ des zu erfassenden Absturzspeicherabbilds. Impliziert "--blame-crash".</target>
+        <target state="new">The type of crash dump to be collected. Implies --blame-crash.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangDescription">
@@ -42,7 +42,7 @@ Impliziert "--blame".</target>
       </trans-unit>
       <trans-unit id="CmdBlameHangDumpTypeDescription">
         <source>The type of crash dump to be collected. When None, is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</source>
-        <target state="translated">Der Typ des zu erfassenden Absturzabbilds. Bei Festlegung auf "None" wird der Testhost bei einem Timeout beendet, aber es wird kein Speicherabbild erfasst. Impliziert "--blame-hang".</target>
+        <target state="new">The type of crash dump to be collected. When None, is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangTimeoutDescription">
@@ -51,11 +51,11 @@ The timeout value is specified in the following format: 1.5h / 90m / 5400s / 540
 When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit and NUnit the timeout is renewed after every test case,
 For MSTest, the timeout is used for all testcases.
 This option is currently supported only on Windows together with netcoreapp2.1 and newer. And on Linux with netcoreapp3.1 and newer. OSX and UWP are not supported.</source>
-        <target state="translated">Timeout pro Test, nach dem ein Blockadeabbild ausgelöst und der Testhostprozess beendet wird. 
-Der Timeoutwert wird im folgenden Format angegeben: 1.5h / 90m / 5400s / 5400000ms. Ist keine Einheit angegeben (z. B. 5400000), wird von einem Wert in Millisekunden ausgegangen.
-Bei Verwendung in Verbindung mit datengesteuerten Tests hängt das Timeoutverhalten vom verwendeten Testadapter ab. Für xUnit und NUnit wird das Timeout nach jedem Testfall erneuert,
-für MSTest wird das Timeout für alle Testfälle verwendet.
-Diese Option wird aktuell nur unter Windows zusammen mit netcoreapp 2.1 und höher unterstützt. Unter Linux wird die Option mit netcoreapp 3.1 und höher unterstützt. OSX und UWP werden nicht unterstützt.</target>
+        <target state="new">Per-test timeout, after which hang dump is triggered and the testhost process is terminated. 
+The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
+When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit and NUnit the timeout is renewed after every test case,
+For MSTest, the timeout is used for all testcases.
+This option is currently supported only on Windows together with netcoreapp2.1 and newer. And on Linux with netcoreapp3.1 and newer. OSX and UWP are not supported.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableDescription">
@@ -256,15 +256,15 @@ Example:
   Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
   dotnet test --blame-hang-timeout 20min
 </source>
-        <target state="translated">Führt den Test im Modus "Verantwortung zuweisen" aus. Diese Option ist hilfreich zum Isolieren des problematischen Tests, der dazu geführt hat, dass der Testhost abgestürzt ist oder nicht mehr reagiert.
-Wird ein Absturz erkannt, wird in "TestResults/guid/guid_Sequence.xml" eine Sequenzdatei erstellt, in der die Reihenfolge der Testausführung vor dem Absturz erfasst wird.
-Basierend auf den zusätzlichen Einstellungen kann auch ein Blockade- oder Absturzabbild erfasst werden.
-Beispiel: 
-  Es wird ein Timeout für die Testausführung ausgelöst, wenn der Test länger als 1 Stunde (Standardwert) dauert, und es wird ein Absturzabbild erfasst, wenn der Testhost unerwartet beendet wird. 
-  (Für Absturzabbilder ist eine zusätzliche Einrichtung erforderlich, siehe unten.)
+        <target state="new">Runs the tests in blame mode. This option is helpful in isolating problematic tests that cause the test host to crash or hang. 
+When a crash is detected, it creates an sequence file in TestResults/guid/guid_Sequence.xml that captures the order of tests that were run before the crash.
+Based on the additional settings, hang dump or crash dump can also be collected.
+Example: 
+  Timeout the test run when test takes more than the default timeout of 1 hour, and collect crash dump when the test host exits unexpectedly. 
+  (Crash dumps require additional setup, see below.)
   dotnet test --blame-hang --blame-crash
-Beispiel: 
-  Es wird ein Timeout für die Testausführung ausgelöst, wenn der Test mehr als 20 Minuten dauert, und es wird ein Blockadeabbild erfasst. 
+Example: 
+  Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
   dotnet test --blame-hang-timeout 20min
 </target>
         <note />

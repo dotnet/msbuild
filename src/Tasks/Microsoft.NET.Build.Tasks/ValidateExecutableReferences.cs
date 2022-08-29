@@ -52,6 +52,38 @@ namespace Microsoft.NET.Build.Tasks
                 bool shouldBeValidatedAsExecutableReference = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["ShouldBeValidatedAsExecutableReference"], true);
                 bool referencedProjectIsExecutable = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["_IsExecutable"]);
                 bool referencedProjectIsSelfContained = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["SelfContained"]);
+                bool referencedProjectHadSelfContainedSpecified = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["_SelfContainedWasSpecified"]);
+
+                var globalProperties = BuildEngine6.GetGlobalProperties();
+
+                bool selfContainedIsGlobalProperty = globalProperties.ContainsKey("SelfContained");
+                bool runtimeIdentifierIsGlobalProperty = globalProperties.ContainsKey("RuntimeIdentifier");
+
+                bool projectIsRidAgnostic = true;
+                if (projectAdditionalProperties.TryGetValue("IsRidAgnostic", out string isRidAgnostic) &&
+                    bool.TryParse(isRidAgnostic, out bool isRidAgnosticParseResult))
+                {
+                    projectIsRidAgnostic = isRidAgnosticParseResult;
+                }
+
+                if (!projectIsRidAgnostic)
+                {
+                    //  If the project is NOT RID agnostic, and SelfContained was set as a global property,
+                    //  then SelfContained will flow across the project reference when we go to build it,
+                    //  despite the fact that we ignored it when doing the GetTargetFrameworks negotiation
+                    if (selfContainedIsGlobalProperty && SelfContained)
+                    {
+                        referencedProjectIsSelfContained = true;
+                    }
+
+                    //  If the project is NOT RID agnostic, then a global RuntimeIdentifier will flow to it.
+                    //  If the project didn't explicitly specify a value for SelfContained, then this will
+                    //  set SelfContained to true
+                    if (runtimeIdentifierIsGlobalProperty && !referencedProjectHadSelfContainedSpecified)
+                    {
+                        referencedProjectIsSelfContained = true;
+                    }
+                }
 
                 if (referencedProjectIsExecutable && shouldBeValidatedAsExecutableReference)
                 {

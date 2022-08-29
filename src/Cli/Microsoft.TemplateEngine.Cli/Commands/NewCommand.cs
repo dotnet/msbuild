@@ -14,22 +14,21 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         internal NewCommand(
             string commandName,
-            Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
-            : base(hostBuilder, telemetryLoggerBuilder, commandName, SymbolStrings.Command_New_Description)
+            Func<ParseResult, ITemplateEngineHost> hostBuilder)
+            : base(hostBuilder, commandName, SymbolStrings.Command_New_Description)
         {
             this.TreatUnmatchedTokensAsErrors = true;
 
             //it is important that legacy commands are built before non-legacy, as non legacy commands are building validators that rely on legacy stuff
-            BuildLegacySymbols(hostBuilder, telemetryLoggerBuilder);
+            BuildLegacySymbols(hostBuilder);
 
-            this.Add(new InstantiateCommand(hostBuilder, telemetryLoggerBuilder));
-            this.Add(new InstallCommand(this, hostBuilder, telemetryLoggerBuilder));
-            this.Add(new UninstallCommand(this, hostBuilder, telemetryLoggerBuilder));
-            this.Add(new UpdateCommand(this, hostBuilder, telemetryLoggerBuilder));
-            this.Add(new SearchCommand(this, hostBuilder, telemetryLoggerBuilder));
-            this.Add(new ListCommand(this, hostBuilder, telemetryLoggerBuilder));
-            this.Add(new AliasCommand(hostBuilder, telemetryLoggerBuilder));
+            this.Add(new InstantiateCommand(hostBuilder));
+            this.Add(new InstallCommand(this, hostBuilder));
+            this.Add(new UninstallCommand(this, hostBuilder));
+            this.Add(new UpdateCommand(this, hostBuilder));
+            this.Add(new SearchCommand(this, hostBuilder));
+            this.Add(new ListCommand(this, hostBuilder));
+            this.Add(new AliasCommand(hostBuilder));
 
             this.AddGlobalOption(DebugCustomSettingsLocationOption);
             this.AddGlobalOption(DebugVirtualizeSettingsOption);
@@ -133,10 +132,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override Task<NewCommandStatus> ExecuteAsync(
             NewCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
-            ITelemetryLogger telemetryLogger,
             InvocationContext context)
         {
-            return InstantiateCommand.ExecuteAsync(args, environmentSettings, telemetryLogger, context);
+            return InstantiateCommand.ExecuteAsync(args, environmentSettings, context);
         }
 
         protected override NewCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);

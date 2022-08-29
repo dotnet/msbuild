@@ -11,8 +11,6 @@ using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Mocks;
 using Microsoft.TemplateEngine.TestHelper;
-using VerifyXunit;
-using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 {
@@ -72,7 +70,7 @@ Author: Me
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             StringWriter sw = new StringWriter();
             HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
@@ -85,7 +83,7 @@ Author: Me
         {
             ITemplateEngineHost host = TestHost.GetVirtualHost();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             StringWriter sw = new StringWriter();
             HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
@@ -105,7 +103,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
@@ -128,7 +126,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
@@ -151,7 +149,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
@@ -174,7 +172,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
@@ -198,7 +196,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
@@ -224,7 +222,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             TemplateCommand templateCommand1 = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[0]);
             TemplateCommand templateCommand2 = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[1]);
@@ -249,7 +247,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
@@ -277,7 +275,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             TemplateCommand templateCommand1 = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[0]);
             TemplateCommand templateCommand2 = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[1]);
@@ -302,7 +300,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
@@ -326,7 +324,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
@@ -349,7 +347,7 @@ Author: Me
 
             ITemplateEngineHost host = TestHost.GetVirtualHost();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             ParseResult parseResult = myCommand.Parse("new -h");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
@@ -372,7 +370,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
@@ -396,7 +394,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
@@ -438,7 +436,7 @@ Author: Me
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             TemplateCommand templateCommand1 = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[0]);
             TemplateCommand templateCommand2 = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[1]);

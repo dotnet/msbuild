@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="ApiCompatibilityFooter">
         <source>Performed api validation on '{0}' ({2}) and '{1}' ({3}).</source>
-        <target state="translated">Выполнена проверка API для "{0}" ({2} ) и "{1}" ({3}).</target>
+        <target state="new">Performed api validation on '{0}' ({2}) and '{1}' ({3}).</target>
         <note />
       </trans-unit>
       <trans-unit id="ApiCompatibilityHeader">
@@ -44,17 +44,17 @@
       </trans-unit>
       <trans-unit id="AssembyCultureDoesNotMatch">
         <source>{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</source>
-        <target state="translated">Язык и региональные параметры {0} сборки "{2}" не совпадают с языком и региональными параметрами {1} сборки "{3}".</target>
+        <target state="new">{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssembyVersionDoesNotMatch">
         <source>{3} assembly version '{1}' should be equal to {2} version '{0}'.</source>
-        <target state="translated">Версия "{1}" сборки {3} должна быть равна {2} версии "{0}".</target>
+        <target state="new">{3} assembly version '{1}' should be equal to {2} version '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssembyVersionIsNotCompatible">
         <source>{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</source>
-        <target state="translated">Версия "{0}" сборки {2} должна быть больше или равна {3} версии "{1}".</target>
+        <target state="new">{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotAddAbstractMember">
@@ -169,12 +169,12 @@
       </trans-unit>
       <trans-unit id="TypeExistsOnLeft">
         <source>Type '{0}' exists on {1} but not on {2}</source>
-        <target state="translated">Тип "{0}" существует в {1}, но не в {2}</target>
+        <target state="new">Type '{0}' exists on {1} but not on {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="TypeExistsOnRight">
         <source>Type '{0}' exists on {2} but not on {1}</source>
-        <target state="translated">Тип "{0}" существует в {2}, но не в {1}</target>
+        <target state="new">Type '{0}' exists on {2} but not on {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="TypeIsActuallySealed">

@@ -5,19 +5,18 @@ using System.CommandLine;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.TestHelper;
-using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 {
-    public class UpdateTests
+    public class UpdateTests : BaseTest
     {
         [Theory]
         [InlineData("--add-source")]
         [InlineData("--nuget-source")]
         public void Update_CanParseAddSourceOption(string optionName)
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse($"new update {optionName} my-custom-source");
             UpdateCommandArgs args = new UpdateCommandArgs((UpdateCommand)parseResult.CommandResult.Command, parseResult);
@@ -32,8 +31,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("update")]
         public void Update_Error_WhenArguments(string commandName)
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse($"new {commandName} source");
 
@@ -46,8 +45,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("new update --check-only --add-source my-custom-source1 --add-source my-custom-source2")]
         public void Update_CanParseAddSourceOption_MultipleEntries(string testCase)
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             var parseResult = myCommand.Parse(testCase);
             UpdateCommandArgs args = new UpdateCommandArgs((UpdateCommand)parseResult.CommandResult.Command, parseResult);
 
@@ -59,8 +58,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void Update_CanParseInteractiveOption()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse($"new update --interactive");
             UpdateCommandArgs args = new UpdateCommandArgs((UpdateCommand)parseResult.CommandResult.Command, parseResult);
@@ -78,8 +77,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("--dry-run")]
         public void Update_CanParseCheckOnlyOption(string optionAlias)
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse($"new update {optionAlias}");
             UpdateCommandArgs args = new UpdateCommandArgs((UpdateCommand)parseResult.CommandResult.Command, parseResult);
@@ -95,8 +94,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void Update_Legacy_CanParseCheckOnlyOption()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse($"new --update-check");
             UpdateCommandArgs args = new UpdateCommandArgs((LegacyUpdateCheckCommand)parseResult.CommandResult.Command, parseResult);
@@ -115,8 +114,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("new --nuget-source my-custom-source --update-apply")]
         public void Update_Legacy_CanParseAddSourceOption(string testCase)
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse(testCase);
             UpdateCommandArgs args = new UpdateCommandArgs((BaseUpdateCommand)parseResult.CommandResult.Command, parseResult);
@@ -130,8 +129,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("new --interactive --update-apply source")]
         public void Update_Legacy_CanParseInteractiveOption(string testCase)
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse(testCase);
             UpdateCommandArgs args = new UpdateCommandArgs((BaseUpdateCommand)parseResult.CommandResult.Command, parseResult);
@@ -145,8 +144,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("new --add-source my-custom-source1 --update-apply --add-source my-custom-source2")]
         public void Update_Legacy_CanParseAddSourceOption_MultipleEntries(string testCase)
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             var parseResult = myCommand.Parse(testCase);
             UpdateCommandArgs args = new UpdateCommandArgs((BaseUpdateCommand)parseResult.CommandResult.Command, parseResult);
 
@@ -165,8 +164,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("new source1 --update-apply source", "'source1'|'source'")]
         public void Update_CanReturnParseError(string command, string expectedInvalidTokens)
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse(command);
             var errorMessages = parseResult.Errors.Select(error => error.Message);
@@ -184,8 +183,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void CommandExampleCanShowParentCommandsBeyondNew()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             Command rootCommand = new Command("dotnet")
             {
                 myCommand

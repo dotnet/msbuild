@@ -488,8 +488,8 @@ namespace Microsoft.NET.Build.Tests
                 testProj.AdditionalProperties["TargetPlatformIdentifier"] = targetPlatformIdentifier;
                 testProj.AdditionalProperties["TargetPlatformVersion"] = targetPlatformVersion;
             }
-            var testAsset = _testAssetsManager.CreateTestProject(testProj, targetFramework);
-            File.WriteAllText(Path.Combine(testAsset.Path, testProj.Name, $"{testProj.Name}.cs"), @"
+
+            testProj.SourceFiles[$"{testProj.Name}.cs"] = @"
 using System;
 class Program
 {
@@ -529,7 +529,8 @@ class Program
             Console.WriteLine(""IOS"");
         #endif
     }
-}");
+}";
+            var testAsset = _testAssetsManager.CreateTestProject(testProj, targetFramework);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.Path, testProj.Name));
             buildCommand

@@ -5,12 +5,9 @@ namespace Microsoft.TemplateEngine.Cli
 {
     internal static class TelemetryConstants
     {
-        // event name suffixes
-        internal const string InstallEventSuffix = "-install";
-
-        internal const string HelpEventSuffix = "-help";
-        internal const string CreateEventSuffix = "-create-template";
-        internal const string CalledWithNoArgsEventSuffix = "-called-with-no-args";
+        // event names
+        internal const string InstallEvent = "template/new-install";
+        internal const string CreateEvent = "template/new-create-template";
 
         // install event args
         internal const string ToInstallCount = "CountOfThingsToInstall";

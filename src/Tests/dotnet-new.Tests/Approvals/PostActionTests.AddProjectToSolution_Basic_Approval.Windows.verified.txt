@@ -2,8 +2,8 @@
 
 Processing post-creation actions...
 Adding
-    project(s): %Test Execution Direcotry%\TemplateEngine.Tests\Guid_1\MyProject.csproj
-    to solution file: %Test Execution Direcotry%\TemplateEngine.Tests\Guid_1\MySolution.sln
+    project(s): %working directory%\MyProject.csproj
+    to solution file: %working directory%\MySolution.sln
     solution folder: src
 %CALLBACK OUTPUT%
 Successfully added project(s) to a solution file.

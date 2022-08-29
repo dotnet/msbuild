@@ -170,11 +170,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return templateConstraints.Where(cr => cr.EvaluationStatus != TemplateConstraintResult.Status.Allowed).ToList();
         }
 
-        internal async Task<NewCommandStatus> InvokeAsync(ParseResult parseResult, ITelemetryLogger telemetryLogger, CancellationToken cancellationToken)
+        internal async Task<NewCommandStatus> InvokeAsync(ParseResult parseResult, CancellationToken cancellationToken)
         {
             TemplateCommandArgs args = new TemplateCommandArgs(this, _instantiateCommand, parseResult);
-            TemplateInvoker invoker = new TemplateInvoker(_environmentSettings, telemetryLogger, () => Console.ReadLine() ?? string.Empty);
-            TemplatePackageCoordinator packageCoordinator = new TemplatePackageCoordinator(telemetryLogger, _environmentSettings, _templatePackageManager);
+            TemplateInvoker invoker = new TemplateInvoker(_environmentSettings, () => Console.ReadLine() ?? string.Empty);
+            TemplatePackageCoordinator packageCoordinator = new TemplatePackageCoordinator(_environmentSettings, _templatePackageManager);
             TemplateConstraintManager constraintManager = new TemplateConstraintManager(_environmentSettings);
 
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();

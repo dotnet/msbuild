@@ -2,19 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Globalization;
-using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
-using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.New.Tests
+namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
-    public class DotnetNewLocaleTests : SdkTest
+    public class DotnetNewLocaleTests : BaseIntegrationTest
     {
         private readonly ITestOutputHelper _log;
 
@@ -29,13 +26,13 @@ namespace Microsoft.DotNet.New.Tests
         {
             CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 
-            var home = TestUtils.CreateTemporaryFolder("Home");
+            var home = CreateTemporaryFolder(folderName: "Home");
             var thisDir = Path.GetDirectoryName(typeof(DotnetNewLocaleTests).Assembly.Location);
-            var testTemplatesFolder = TestUtils.GetTestTemplateLocation("TemplateWithLocalization");
+            var testTemplatesFolder = GetTestTemplateLocation("TemplateWithLocalization");
 
             var commandResult = new DotnetNewCommand(_log, "-i", testTemplatesFolder)
                 .WithCustomHive(home)
-                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithWorkingDirectory(CreateTemporaryFolder())
                 .WithEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", string.Empty)
                 .Execute();
 
@@ -53,13 +50,13 @@ namespace Microsoft.DotNet.New.Tests
         [InlineData("tr-TR", "name_tr-TR")]
         public void TestDotnetCLIEnvVariable(string dotnetCliEnvVar, string expectedName)
         {
-            var home = TestUtils.CreateTemporaryFolder("Home");
+            var home = CreateTemporaryFolder(folderName: "Home");
             var thisDir = Path.GetDirectoryName(typeof(DotnetNewLocaleTests).Assembly.Location);
-            var testTemplatesFolder = TestUtils.GetTestTemplateLocation("TemplateWithLocalization");
+            var testTemplatesFolder = GetTestTemplateLocation("TemplateWithLocalization");
 
             var commandResult = new DotnetNewCommand(_log, "-i", testTemplatesFolder)
                 .WithCustomHive(home)
-                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithWorkingDirectory(CreateTemporaryFolder())
                 .WithEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", dotnetCliEnvVar)
                 .Execute();
 
@@ -74,9 +71,9 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void SkipsLocalizationOnInstall_WhenInvalidFormat()
         {
-            var home = TestUtils.CreateTemporaryFolder("Home");
-            var workingDir = TestUtils.CreateTemporaryFolder("Home");
-            var testTemplateLocation = TestUtils.GetTestTemplateLocation("Invalid/Localization/InvalidFormat");
+            var home = CreateTemporaryFolder(folderName: "Home");
+            var workingDir = CreateTemporaryFolder();
+            var testTemplateLocation = GetTestTemplateLocation("Invalid/Localization/InvalidFormat");
             new DotnetNewCommand(_log, "-i", testTemplateLocation)
                 .WithDebug()
                 .WithCustomHive(home)
@@ -94,9 +91,9 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void SkipsLocalizationOnInstall_WhenLocalizationValidationFails()
         {
-            var home = TestUtils.CreateTemporaryFolder("Home");
-            var workingDir = TestUtils.CreateTemporaryFolder("Home");
-            var testTemplateLocation = TestUtils.GetTestTemplateLocation("Invalid/Localization/ValidationFailure");
+            var home = CreateTemporaryFolder(folderName: "Home");
+            var workingDir = CreateTemporaryFolder();
+            var testTemplateLocation = GetTestTemplateLocation("Invalid/Localization/ValidationFailure");
 
             var expectedErrors = new[]
             {
@@ -130,11 +127,11 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void SkipsLocalizationOnInstantiate_WhenInvalidFormat()
         {
-            var home = TestUtils.CreateTemporaryFolder("Home");
-            var workingDir = TestUtils.CreateTemporaryFolder();
-            var validTestTemplateLocation = TestUtils.GetTestTemplateLocation("TemplateWithLocalization");
-            var invalidTestTemplateLocation = TestUtils.GetTestTemplateLocation("Invalid/Localization/InvalidFormat");
-            var tmpTemplateLocation = TestUtils.CreateTemporaryFolder();
+            var home = CreateTemporaryFolder(folderName: "Home");
+            var workingDir = CreateTemporaryFolder();
+            var validTestTemplateLocation = GetTestTemplateLocation("TemplateWithLocalization");
+            var invalidTestTemplateLocation = GetTestTemplateLocation("Invalid/Localization/InvalidFormat");
+            var tmpTemplateLocation = CreateTemporaryFolder();
             TestUtils.DirectoryCopy(validTestTemplateLocation, tmpTemplateLocation, copySubDirs: true);
 
             new DotnetNewCommand(_log, "-i", tmpTemplateLocation)
@@ -170,11 +167,11 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void SkipsLocalizationOnInstantiate_WhenLocalizationValidationFails()
         {
-            var home = TestUtils.CreateTemporaryFolder("Home");
-            var workingDir = TestUtils.CreateTemporaryFolder();
-            var validTestTemplateLocation = TestUtils.GetTestTemplateLocation("TemplateWithLocalization");
-            var invalidTestTemplateLocation = TestUtils.GetTestTemplateLocation("Invalid/Localization/ValidationFailure");
-            var tmpTemplateLocation = TestUtils.CreateTemporaryFolder();
+            var home = CreateTemporaryFolder(folderName: "Home");
+            var workingDir = CreateTemporaryFolder();
+            var validTestTemplateLocation = GetTestTemplateLocation("TemplateWithLocalization");
+            var invalidTestTemplateLocation = GetTestTemplateLocation("Invalid/Localization/ValidationFailure");
+            var tmpTemplateLocation = CreateTemporaryFolder();
             TestUtils.DirectoryCopy(validTestTemplateLocation, tmpTemplateLocation, copySubDirs: true);
 
             var expectedErrors =

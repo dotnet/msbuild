@@ -2,16 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
-using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using Microsoft.TemplateEngine.TestHelper;
-using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.New.Tests
+namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
-    public class FirstRunTest : SdkTest
+    public class FirstRunTest : BaseIntegrationTest
     {
         private readonly ITestOutputHelper _log;
 
@@ -23,7 +20,7 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void FirstRunSuccess()
         {
-            var home = TestUtils.CreateTemporaryFolder("Home");
+            var home = CreateTemporaryFolder(folderName: "Home");
             new DotnetNewCommand(_log)
                 .WithCustomHive(home)
                 .Execute()

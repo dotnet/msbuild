@@ -5,7 +5,6 @@ using System.Reflection;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Cli.TabularOutput;
 using Microsoft.TemplateEngine.Mocks;
-using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests
 {
