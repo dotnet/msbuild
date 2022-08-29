@@ -50,7 +50,7 @@ public record struct Layer
             }
 
             fileSize = fs.Length;
-            
+
             fs.Position = 0;
 
             SHA256.HashData(fs, hash);
@@ -130,6 +130,7 @@ public record struct Layer
         {
             try
             {
+                hashAlgorithm.Dispose();
                 sha256Stream.Dispose();
                 compressionStream.Dispose();
             }
