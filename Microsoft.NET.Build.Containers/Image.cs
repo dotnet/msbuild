@@ -56,7 +56,7 @@ public class Image
     {
         newLayers.Add(l);
         manifest["layers"]!.AsArray().Add(l.Descriptor);
-        config["rootfs"]!["diff_ids"]!.AsArray().Add(l.Descriptor.Digest); // TODO: this should be the descriptor of the UNCOMPRESSED tarball (once we turn on compression)
+        config["rootfs"]!["diff_ids"]!.AsArray().Add(l.Descriptor.UncompressedDigest);
         RecalculateDigest();
     }
 
