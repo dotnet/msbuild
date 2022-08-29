@@ -71,7 +71,7 @@
                         BaseImageTag="$(ContainerBaseTag)"
                         OutputRegistry="$(ContainerRegistry)"
                         ImageName="$(ContainerImageName)"
-                        ImageTags="$(ContainerImageTags)"
+                        ImageTags="@(ContainerImageTags)"
                         PublishDirectory="$(PublishDir)"
                         WorkingDirectory="$(ContainerWorkingDirectory)"
                         Entrypoint="@(ContainerEntrypoint)"
