@@ -25,7 +25,7 @@ public record struct Layer
     public static Layer FromFiles(IEnumerable<(string path, string containerPath)> fileList)
     {
         long fileSize;
-        byte[] hash;
+        Span<byte> hash = stackalloc byte[SHA256.HashSizeInBytes];
 
         string tempTarballPath = ContentStore.GetTempFile();
         using (FileStream fs = File.Create(tempTarballPath))
@@ -47,8 +47,7 @@ public record struct Layer
 
             fs.Position = 0;
 
-            using SHA256 mySHA256 = SHA256.Create();
-            hash = mySHA256.ComputeHash(fs);
+            SHA256.HashData(fs, hash);
         }
 
         string contentHash = Convert.ToHexString(hash).ToLowerInvariant();
