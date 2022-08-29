@@ -793,4 +793,10 @@ The header is followed by the list of parameters and their errors (might be seve
     <value>Did you mean one of the following subcommands?</value>
     <comment>Followed by the list of suggestions</comment>
   </data>
+  <data name="InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplate" xml:space="preserve">
+    <value>Failed to get information about template packages for the template with identity '{0}'.</value>
+  </data>
+  <data name="InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplateGroup" xml:space="preserve">
+    <value>Failed to get information about template packages for template group '{0}'.</value>
+  </data>
 </root>

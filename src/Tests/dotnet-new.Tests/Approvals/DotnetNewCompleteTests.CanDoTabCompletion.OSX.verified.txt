@@ -44,6 +44,7 @@ xunit
 -o
 /?
 /h
+create
 install
 list
 search

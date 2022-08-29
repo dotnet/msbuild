@@ -19,8 +19,9 @@ Options:
   -?, -h, --help         Show command line help.
 
 Commands:
-  install <package>       Installs a template package.
-  uninstall <package>     Uninstalls a template package.
-  update                  Checks the currently installed template packages for update, and install the updates.
-  search <template-name>  Searches for the templates on NuGet.org.
-  list <template-name>    Lists templates containing the specified template name. If no name is specified, lists all templates.
+  create <template-short-name> <template-args>  Instantiates a template with given short name. Same as 'dotnet new <template name>'.
+  install <package>                             Installs a template package.
+  uninstall <package>                           Uninstalls a template package.
+  update                                        Checks the currently installed template packages for update, and install the updates.
+  search <template-name>                        Searches for the templates on NuGet.org.
+  list <template-name>                          Lists templates containing the specified template name. If no name is specified, lists all templates.

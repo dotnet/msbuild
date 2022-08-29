@@ -14,6 +14,13 @@
     Documentation: A project for creating a command-line application that can run on .NET on Windows, Linux and macOS
   },
   {
+    Label: create,
+    Kind: Keyword,
+    SortText: create,
+    InsertText: create,
+    Detail: Instantiates a template with given short name. Same as 'dotnet new <template name>'.
+  },
+  {
     Label: search,
     Kind: Keyword,
     SortText: search,

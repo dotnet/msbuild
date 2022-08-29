@@ -3,6 +3,7 @@
 //
 
 using FluentAssertions;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 
@@ -22,7 +23,27 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string workingDirectory = CreateTemporaryFolder();
 
-            var commandResult = new DotnetNewCommand(_log, command)
+            CommandResult commandResult = new DotnetNewCommand(_log, command)
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult.Should().ExitWith(0)
+                .And.NotHaveStdErr();
+
+            return Verify(commandResult.StdOut)
+                .UseTextForParameters("common")
+                .DisableRequireUniquePrefix();
+        }
+
+        [Theory]
+        [InlineData("-h")]
+        [InlineData("--help")]
+        public Task CanShowHelp_Create(string option)
+        {
+            string workingDirectory = CreateTemporaryFolder();
+
+            CommandResult commandResult = new DotnetNewCommand(_log, "create", option)
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -42,7 +63,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string workingDirectory = CreateTemporaryFolder();
 
-            var commandResult = new DotnetNewCommand(_log, "install", option)
+            CommandResult commandResult = new DotnetNewCommand(_log, "install", option)
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -62,7 +83,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string workingDirectory = CreateTemporaryFolder();
 
-            var commandResult = new DotnetNewCommand(_log, "update", option)
+            CommandResult commandResult = new DotnetNewCommand(_log, "update", option)
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -82,7 +103,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string workingDirectory = CreateTemporaryFolder();
 
-            var commandResult = new DotnetNewCommand(_log, "uninstall", option)
+            CommandResult commandResult = new DotnetNewCommand(_log, "uninstall", option)
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -102,7 +123,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string workingDirectory = CreateTemporaryFolder();
 
-            var commandResult = new DotnetNewCommand(_log, "list", option)
+            CommandResult commandResult = new DotnetNewCommand(_log, "list", option)
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -122,7 +143,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string workingDirectory = CreateTemporaryFolder();
 
-            var commandResult = new DotnetNewCommand(_log, "search", option)
+            CommandResult commandResult = new DotnetNewCommand(_log, "search", option)
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -145,7 +166,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string workingDirectory = CreateTemporaryFolder();
 
-            var commandResult = new DotnetNewCommand(_log, command.Split(" "))
+            CommandResult commandResult = new DotnetNewCommand(_log, command.Split(" "))
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -166,7 +187,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string workingDirectory = CreateTemporaryFolder();
 
-            var commandResult = new DotnetNewCommand(_log, "class", "-h")
+            CommandResult commandResult = new DotnetNewCommand(_log, "class", "-h")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -180,7 +201,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string workingDirectory = CreateTemporaryFolder();
 
-            var commandResult = new DotnetNewCommand(_log, "Console App", "-h")
+            CommandResult commandResult = new DotnetNewCommand(_log, "Console App", "-h")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -197,7 +218,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, _fixture.HomeDirectory, workingDirectory);
             InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicVB", _log, _fixture.HomeDirectory, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, "basic", "--help")
+            CommandResult commandResult = new DotnetNewCommand(_log, "basic", "--help")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -213,7 +234,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string workingDirectory = CreateTemporaryFolder();
             InstallTestTemplate("TemplateWithMultiValueChoice", _log, _fixture.HomeDirectory, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, "TestAssets.TemplateWithMultiValueChoice", "--help")
+            CommandResult commandResult = new DotnetNewCommand(_log, "TestAssets.TemplateWithMultiValueChoice", "--help")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -228,7 +249,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string workingDirectory = CreateTemporaryFolder();
 
-            var commandResult = new DotnetNewCommand(_log, "console", "--help", "--framework", "net7.0")
+            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--help", "--framework", "net7.0")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -246,7 +267,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string workingDirectory = CreateTemporaryFolder();
 
-            var commandResult = new DotnetNewCommand(_log, "console", "--help", "--framework")
+            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--help", "--framework")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -261,7 +282,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string workingDirectory = CreateTemporaryFolder();
 
-            var commandResult = new DotnetNewCommand(_log, "console", "--help", "--do-not-exist")
+            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--help", "--do-not-exist")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -276,7 +297,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string workingDirectory = CreateTemporaryFolder();
 
-            var commandResult = new DotnetNewCommand(_log, "console", "--help", "--langVersion", "8.0")
+            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--help", "--langVersion", "8.0")
                     .WithCustomHive(_fixture.HomeDirectory)
                     .WithWorkingDirectory(workingDirectory)
                     .Execute();
@@ -291,7 +312,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string workingDirectory = CreateTemporaryFolder();
 
-            var commandResult = new DotnetNewCommand(_log, "console", "--help", "--language", "F#")
+            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--help", "--language", "F#")
                     .WithCustomHive(_fixture.HomeDirectory)
                     .WithWorkingDirectory(workingDirectory)
                     .Execute();
@@ -309,7 +330,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string workingDirectory = CreateTemporaryFolder();
 
-            var commandResult = new DotnetNewCommand(_log, "console", "--help", "--langVersion")
+            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--help", "--langVersion")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -328,7 +349,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string workingDirectory = CreateTemporaryFolder();
             InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, templateName, "--help")
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName, "--help")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();

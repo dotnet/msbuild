@@ -141,7 +141,8 @@ To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;ver
     <value>Template specific options to use.</value>
   </data>
   <data name="Command_Instantiate_Description" xml:space="preserve">
-    <value>Instantiates a template with given short name.</value>
+    <value>Instantiates a template with given short name. Same as 'dotnet new &lt;template name&gt;'.</value>
+    <comment>do not translate 'dotnet new &lt;template name&gt;'</comment>
   </data>
   <data name="Command_Legacy_Update_Check_Description" xml:space="preserve">
     <value>Checks the currently installed template packages for updates.</value>

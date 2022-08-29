@@ -39,8 +39,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.ForceOption));
             this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.NoUpdateCheckOption));
             this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.ProjectPathOption));
-
-            IsHidden = true;
         }
 
         internal static Argument<string> ShortNameArgument { get; } = new Argument<string>("template-short-name")
@@ -74,7 +72,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             CancellationToken cancellationToken)
         {
             IReadOnlyList<ITemplateInfo> templates = await templatePackageManager.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
-            return TemplateGroup.FromTemplateList(CliTemplateInfo.FromTemplateInfo(templates, hostSpecificDataLoader));
+            IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(CliTemplateInfo.FromTemplateInfo(templates, hostSpecificDataLoader));
+            return templateGroups.Where(template => template.ShortNames.Contains(instantiateArgs.ShortName));
         }
 
         internal static HashSet<TemplateCommand> GetTemplateCommand(
@@ -184,8 +183,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 }
                 catch (Exception ex)
                 {
-                    environmentSettings.Host.Logger.LogWarning("Failed to get information about template packages for template group {groupIdentity}.", templateGroup.GroupIdentity);
-                    environmentSettings.Host.Logger.LogDebug("Details: {ex}", ex);
+                    environmentSettings.Host.Logger.LogWarning(LocalizableStrings.InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplateGroup, templateGroup.GroupIdentity);
+                    environmentSettings.Host.Logger.LogDebug("Details: {exception}.", ex);
                     return string.Empty;
                 }
             }
@@ -368,8 +367,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 }
                 catch (Exception ex)
                 {
-                    environmentSettings.Host.Logger.LogWarning("Failed to get information about template packages for template group {identity}.", template.Identity);
-                    environmentSettings.Host.Logger.LogDebug("Details: {ex}.", ex);
+                    environmentSettings.Host.Logger.LogWarning(LocalizableStrings.InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplate, template.Identity);
+                    environmentSettings.Host.Logger.LogDebug("Details: {exception}.", ex);
                     return string.Empty;
                 }
             }

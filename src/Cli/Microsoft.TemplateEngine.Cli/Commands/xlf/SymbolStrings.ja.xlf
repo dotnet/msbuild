@@ -42,9 +42,9 @@ To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;ver
         <note />
       </trans-unit>
       <trans-unit id="Command_Instantiate_Description">
-        <source>Instantiates a template with given short name.</source>
-        <target state="translated">指定された短い名前のテンプレートにインスタンスを作成します。</target>
-        <note />
+        <source>Instantiates a template with given short name. Same as 'dotnet new &lt;template name&gt;'.</source>
+        <target state="needs-review-translation">指定された短い名前のテンプレートにインスタンスを作成します。</target>
+        <note>do not translate 'dotnet new &lt;template name&gt;'</note>
       </trans-unit>
       <trans-unit id="Command_Legacy_Update_Check_Description">
         <source>Checks the currently installed template packages for updates.</source>
