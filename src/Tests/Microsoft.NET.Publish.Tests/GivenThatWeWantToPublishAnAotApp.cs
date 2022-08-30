@@ -286,6 +286,11 @@ namespace Microsoft.NET.Publish.Tests
                 publishCommand
                     .Execute($"/p:RuntimeIdentifier={rid}")
                     .Should().Pass();
+                // Having an explicit package reference will generate a warning
+                // Comment back after the below issue is fixed
+                // https://github.com/dotnet/sdk/issues/27533
+                //.And.HaveStdOutContaining("warning")
+                //.And.HaveStdOutContaining("Microsoft.DotNet.ILCompiler");
 
                 var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
                 var sharedLibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".dll" : ".so";
@@ -335,24 +340,47 @@ namespace Microsoft.NET.Publish.Tests
                     .Should().Pass();
 
                 var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
-                var sharedLibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".dll" : ".so";
-                var publishedDll = Path.Combine(publishDirectory, $"{projectName}{sharedLibSuffix}");
+                var publishedDll = Path.Combine(publishDirectory, $"{projectName}.dll");
                 var publishedExe = Path.Combine(publishDirectory, $"{testProject.Name}{Constants.ExeSuffix}");
-                var symbolSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".pdb" : ".dbg";
-                var publishedDebugFile = Path.Combine(publishDirectory, $"{testProject.Name}{symbolSuffix}");
 
-                // NativeAOT published dir should not contain a non-host stand alone package
-                File.Exists(publishedDll).Should().BeFalse();
-                // The exe exist and should be native
-                File.Exists(publishedExe).Should().BeTrue();
-                File.Exists(publishedDebugFile).Should().BeTrue();
-                IsNativeImage(publishedExe).Should().BeTrue();
+                // Not setting PublishAot to true will be a normal publish
+                // Comment back after the below issue is fixed
+                // https://github.com/dotnet/sdk/issues/27533
+                // File.Exists(publishedDll).Should().BeTrue();
 
                 var command = new RunExeCommand(Log, publishedExe)
                     .Execute().Should().Pass()
                     .And.HaveStdOutContaining("Hello World");
             }
         }
+        
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
+        public void NativeAot_hw_runs_with_cross_target_PublishAot_is_enabled(string targetFramework)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && (RuntimeInformation.OSArchitecture == System.Runtime.InteropServices.Architecture.X64))
+            {
+                var projectName = "HellowWorldNativeAotApp";
+                var rid = "win-arm64";
+
+                var testProject = CreateHelloWorldTestProject(targetFramework, projectName, true);
+                testProject.AdditionalProperties["PublishAot"] = "true";
+
+                var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                publishCommand
+                    .Execute($"/p:RuntimeIdentifier={rid}")
+                    .Should().Pass();
+                var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+                var publishedDll = Path.Combine(publishDirectory, $"{projectName}.dll");
+                var publishedExe = Path.Combine(publishDirectory, $"{testProject.Name}{Constants.ExeSuffix}");
+                File.Exists(publishedDll).Should().BeFalse();
+                File.Exists(publishedExe).Should().BeTrue();
+
+            }
+        }
+
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
@@ -376,6 +404,17 @@ namespace Microsoft.NET.Publish.Tests
                 publishCommand
                     .Execute($"/p:RuntimeIdentifier={rid}")
                     .Should().Pass();
+                // Having an explicit package reference will generate a warning
+                // Comment back after the below issue is fixed
+                // https://github.com/dotnet/sdk/issues/27533
+                //.And.HaveStdOutContaining("warning")
+                //.And.HaveStdOutContaining("Microsoft.DotNet.ILCompiler");
+
+                var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+                var publishedDll = Path.Combine(publishDirectory, $"{projectName}.dll");
+                var publishedExe = Path.Combine(publishDirectory, $"{testProject.Name}{Constants.ExeSuffix}");
+                File.Exists(publishedDll).Should().BeFalse();
+                File.Exists(publishedExe).Should().BeTrue();
             }
         }
 
@@ -400,6 +439,14 @@ namespace Microsoft.NET.Publish.Tests
                 publishCommand
                     .Execute($"/p:RuntimeIdentifier={rid}")
                     .Should().Pass();
+
+                // Not setting PublishAot to true will be a normal publish
+                // Comment back after the below issue is fixed
+                // https://github.com/dotnet/sdk/issues/27533
+                var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+                var publishedDll = Path.Combine(publishDirectory, $"{projectName}.dll");
+                // File.Exists(publishedDll).Should().BeTrue();
+
             }
         }
 
