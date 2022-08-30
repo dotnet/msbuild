@@ -196,14 +196,7 @@ namespace Microsoft.DotNet.Watcher.Internal
             {
                 if (File.Exists(watchList))
                 {
-                    try
-                    {
-                        File.Delete(watchList);
-                    }
-                    catch(System.IO.IOException)
-                    {
-                        // Catch file locking problems on deletion.
-                    }
+                    File.Delete(watchList);
                 }
             }
         }

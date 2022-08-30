@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.ToolPackage
                         }
                         finally
                         {
-                            Directory.Delete(Path.GetDirectoryName(tempProject), recursive: true);
+                            File.Delete(tempProject);
                         }
 
                         var version = _store.GetStagedPackageVersion(stageDirectory, packageId);
@@ -150,7 +150,7 @@ namespace Microsoft.DotNet.ToolPackage
             }
             finally
             {
-                Directory.Delete(Path.GetDirectoryName(tempProject), recursive: true);
+                File.Delete(tempProject);
             }
 
             return ToolPackageInstance.CreateFromAssetFile(packageId, new DirectoryPath(tempDirectoryForAssetJson));

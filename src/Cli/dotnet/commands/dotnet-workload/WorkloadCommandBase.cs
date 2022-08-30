@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.Workloads.Workload
                 : FileUtilities.CreateTempPath();
 
             // The security owness on a custom tempDir is on the user according to docs. 
-            TempPackagesDirectory = new DirectoryPath(TempDirectoryPath == "" ? FileUtilities.CreateTempPath() : Path.Combine(TempDirectoryPath, "dotnet-sdk-advertising-temp"));
+            TempPackagesDirectory = new DirectoryPath(Path.Combine(TempDirectoryPath, "dotnet-sdk-advertising-temp"));
 
             PackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(TempPackagesDirectory,
                 filePermissionSetter: null,

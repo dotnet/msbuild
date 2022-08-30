@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Workloads.Workload
             var sourceOption = parseResult.GetValueForOption(InstallingWorkloadCommandParser.SourceOption);
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides: sourceOption);
-                       
+
             var sdkWorkloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _installedSdkVersion.ToString(), userProfileDir);
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(sdkWorkloadManifestProvider, _dotnetPath, _installedSdkVersion.ToString(), _userProfileDir);
 
@@ -99,7 +99,8 @@ namespace Microsoft.DotNet.Workloads.Workload
                 if (!skipManifestUpdate)
                 {
                     DirectoryPath folderForManifestDownloads;
-                    tempPath = new DirectoryPath(FileUtilities.CreateTempPath());
+                    // This path would've been secured earlier.
+                    tempPath = new DirectoryPath(Path.Combine(TempDirectoryPath, "dotnet-manifest-extraction"));
                     string extractedManifestsPath = Path.Combine(tempPath.Value.Value, "manifests");
 
                     if (downloadFolder != null)
