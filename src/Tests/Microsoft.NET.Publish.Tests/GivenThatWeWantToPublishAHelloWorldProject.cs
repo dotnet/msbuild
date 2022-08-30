@@ -761,13 +761,13 @@ public static class Program
            .Should()
            .Pass();
 
-            var publishCommand = new PublishCommand(helloWorldAsset);
+            var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.Path);
 
             CommandResult publishOutput = publishCommand
             .Execute("/p:PublishProfile=test");
 
             publishOutput.Should().Pass();
-            var releaseAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
+            var releaseAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, rid, "HelloWorld.dll");
             if (config == "Debug")
             {
                 Assert.True(File.Exists(releaseAssetPath)); // We ignore Debug configuration and override it, IF its custom though, we dont use publishrelease.

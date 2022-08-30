@@ -204,7 +204,7 @@ namespace Microsoft.DotNet.Cli
         {
             var config_value = project.GetPropertyValue(MSBuildPropertyNames.CONFIGURATION);
             // Case does matter for configuration values.
-            if(!(config_value.Equals(MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE) || config_value.Equals(MSBuildPropertyNames.CONFIGURATION_DEBUG_VALUE)))
+            if (!(config_value.Equals(MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE) || config_value.Equals(MSBuildPropertyNames.CONFIGURATION_DEBUG_VALUE)))
             {
                 Reporter.Output.WriteLine(string.Format(CommonLocalizableStrings.CustomConfigurationDisablesPublishAndPackReleaseProperties, project.FullPath, propertyToDisableIfTrue));
                 return true;

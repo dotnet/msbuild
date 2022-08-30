@@ -68,6 +68,7 @@ namespace Microsoft.DotNet.Tools.Publish
                 noRestore,
                 msbuildPath);
         }
+
         public static int Run(ParseResult parseResult)
         {
             parseResult.HandleDebugSwitch();
