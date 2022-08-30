@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.ShellShim
                     {
                         foreach (var file in GetShimFiles(commandName).Where(f => _fileSystem.File.Exists(f.Value)))
                         {
-                            var tempPath = Path.Combine(FileUtilities.CreateTempPath(), Path.GetRandomFileName());
+                            var tempPath = FileUtilities.CreateTempFile(FileUtilities.CreateTempPath());
                             FileAccessRetrier.RetryOnMoveAccessFailure(() => _fileSystem.File.Move(file.Value, tempPath));
                             FileUtilities.ResetTempFilePermissions(tempPath);
                             files[file.Value] = tempPath;                            
