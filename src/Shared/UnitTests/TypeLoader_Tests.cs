@@ -10,6 +10,7 @@ using Microsoft.Build.UnitTests.Shared;
 using Xunit;
 using Xunit.Abstractions;
 using Shouldly;
+using System.Linq;
 
 #nullable disable
 
@@ -100,7 +101,10 @@ namespace Microsoft.Build.UnitTests
                 string utilitiesName = "Microsoft.Build.Utilities.Core.dll";
                 string newAssemblyLocation = Path.Combine(folder.Path, Path.GetFileName(currentAssembly));
                 string portableTaskFolderPath = Path.GetFullPath(
-                    Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "..", "..", "..", "Samples", "PortableTask", "Debug", "netstandard2.0", "OldMSBuild"));
+                    Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "..", "..", "..", "Samples", "PortableTask"));
+
+                // The "first" directory is "Debug" or "Release"
+                portableTaskFolderPath = Path.Combine(Directory.GetDirectories(portableTaskFolderPath).First(), "netstandard2.0", "OldMSBuild");
                 string utilities = Path.Combine(portableTaskFolderPath, utilitiesName);
                 File.Copy(utilities, Path.Combine(folder.Path, utilitiesName));
                 File.Copy(currentAssembly, newAssemblyLocation);

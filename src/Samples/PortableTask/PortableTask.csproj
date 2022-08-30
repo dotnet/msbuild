@@ -13,7 +13,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Framework" Version="15.5.180" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.5.180" GeneratePathProperty="true" />
-    <PackageDownload Include="Microsoft.Build.Utilities.Core" Version="[15.5.180]" />
   </ItemGroup>
   <Target Name="UpdateXlf" />
   <Target Name="CopyMSBuildUtilitiesToTemp" AfterTargets="Build">
