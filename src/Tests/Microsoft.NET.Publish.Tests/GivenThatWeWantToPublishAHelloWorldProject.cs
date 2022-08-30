@@ -744,8 +744,7 @@ public static class Program
                     propertyGroup.Add(new XElement(ns + "PublishRelease", "true"));
                 });
 
-            var projectDirectory = Path.Combine(helloWorldAsset.Path, helloWorldAsset.Name);
-            var publishProfilesDirectory = Path.Combine(projectDirectory, "Properties", "PublishProfiles");
+            var publishProfilesDirectory = Path.Combine(helloWorldAsset.Path, "Properties", "PublishProfiles");
             Directory.CreateDirectory(publishProfilesDirectory);
 
             File.WriteAllText(Path.Combine(publishProfilesDirectory, "test.pubxml"), $@"
@@ -753,7 +752,6 @@ public static class Program
               <PropertyGroup>
                 <RuntimeIdentifier>{rid}</RuntimeIdentifier>
                 <Configuration>{config}</Configuration>
-                <FunkyTestProperty>true</FunkyTestProperty>
               </PropertyGroup>
             </Project>
             ");
@@ -763,7 +761,7 @@ public static class Program
            .Should()
            .Pass();
 
-            var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
+            var publishCommand = new PublishCommand(helloWorldAsset);
 
             CommandResult publishOutput = publishCommand
             .Execute("/p:PublishProfile=test");
@@ -772,12 +770,12 @@ public static class Program
             var releaseAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
             if (config == "Debug")
             {
-                Assert.True(File.Exists(releaseAssetPath));
+                Assert.True(File.Exists(releaseAssetPath)); // We ignore Debug configuration and override it, IF its custom though, we dont use publishrelease.
             }
             else
             {
                 Assert.False(File.Exists(releaseAssetPath)); // build will produce a debug asset, need to make sure this doesn't exist either.       
-                publishOutput.Should().HaveStdOutContaining("PublishRelease"); 
+                publishOutput.Should().HaveStdOutContaining("PublishRelease");
             }
         }
 
