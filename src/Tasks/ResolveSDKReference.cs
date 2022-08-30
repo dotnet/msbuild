@@ -28,7 +28,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Platform aliases
         /// </summary>
-        private static Dictionary<string, string> platformAliases = new(StringComparer.OrdinalIgnoreCase)
+        private static readonly Dictionary<string, string> PlatformAliases = new(StringComparer.OrdinalIgnoreCase)
         {
             { "UAP", "windows" }
         };
@@ -1259,7 +1259,7 @@ namespace Microsoft.Build.Tasks
                     AddResolutionWarning("ResolveSDKReference.MaxPlatformVersionNotSpecified", projectName, DisplayName, Version, targetPlatformIdentifier, targetPlatformVersionFromItem.ToString(), targetPlatformIdentifier, targetPlatformVersion.ToString());
                 }
 
-                if (!String.IsNullOrEmpty(TargetPlatform) && !String.Equals(targetPlatformIdentifier, TargetPlatform) && (!platformAliases.TryGetValue(TargetPlatform, out string platform) || !String.Equals(targetPlatformIdentifier, platform, StringComparison.OrdinalIgnoreCase)))
+                if (!String.IsNullOrEmpty(TargetPlatform) && !String.Equals(targetPlatformIdentifier, TargetPlatform) && (!PlatformAliases.TryGetValue(TargetPlatform, out string platform) || !String.Equals(targetPlatformIdentifier, platform, StringComparison.OrdinalIgnoreCase)))
                 {
                     AddResolutionErrorOrWarning("ResolveSDKReference.TargetPlatformIdentifierDoesNotMatch", projectName, DisplayName, Version, targetPlatformIdentifier, TargetPlatform);
                 }
