@@ -98,11 +98,13 @@ namespace Microsoft.Build.UnitTests
                 TransientTestFolder folder = env.CreateFolder(createFolder: true);
                 string currentAssembly = Assembly.GetExecutingAssembly().Location;
                 string utilitiesName = "Microsoft.Build.Utilities.Core.dll";
-                string utilities = Path.Combine(Path.GetDirectoryName(currentAssembly), utilitiesName);
                 string newAssemblyLocation = Path.Combine(folder.Path, Path.GetFileName(currentAssembly));
+                string portableTaskFolderPath = Path.GetFullPath(
+                    Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "..", "..", "..", "Samples", "PortableTask", "Debug", "netstandard2.0", "OldMSBuild"));
+                string utilities = Path.Combine(portableTaskFolderPath, utilitiesName);
                 File.Copy(utilities, Path.Combine(folder.Path, utilitiesName));
                 File.Copy(currentAssembly, newAssemblyLocation);
-                TypeLoader typeLoader = new((_, _) => true);
+                TypeLoader typeLoader = new(TaskLoader.IsTaskClass);
 
                 // If we cannot accept MSBuild next to the task assembly we're loading, this will throw.
                 typeLoader.Load("TypeLoader_Tests", AssemblyLoadInfo.Create(null, newAssemblyLocation), useTaskHost: true);
