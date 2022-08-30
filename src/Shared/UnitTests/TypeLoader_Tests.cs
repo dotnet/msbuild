@@ -91,6 +91,25 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void LoadTaskDependingOnMSBuild()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+                string currentAssembly = Assembly.GetExecutingAssembly().Location;
+                string utilitiesName = "Microsoft.Build.Utilities.Core.dll";
+                string utilities = Path.Combine(Path.GetDirectoryName(currentAssembly), utilitiesName);
+                string newAssemblyLocation = Path.Combine(folder.Path, Path.GetFileName(currentAssembly));
+                File.Copy(utilities, Path.Combine(folder.Path, utilitiesName));
+                File.Copy(currentAssembly, newAssemblyLocation);
+                TypeLoader typeLoader = new((_, _) => true);
+
+                // If we cannot accept MSBuild next to the task assembly we're loading, this will throw.
+                typeLoader.Load("TypeLoader_Tests", AssemblyLoadInfo.Create(null, newAssemblyLocation), useTaskHost: true);
+            }
+        }
+
+        [Fact]
         public void LoadOutsideAssembly()
         {
             using (var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder))
