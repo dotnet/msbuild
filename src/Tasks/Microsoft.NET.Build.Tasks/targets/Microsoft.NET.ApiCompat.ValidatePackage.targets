@@ -53,11 +53,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Touch Files="$(ApiCompatValidatePackageSemaphoreFile)" AlwaysCreate="true" />
   </Target>
 
-  <Target Name="_GetReferencePathForPackageValidation"
-          DependsOnTargets="ResolveReferences"
-          Returns="@(_ReferencePathWithTargetFramework)">
+  <Target Name="GetReferencesForApiCompatValidatePackage"
+          DependsOnTargets="FindReferenceAssembliesForReferences"
+          Returns="@(ApiCompatAssemblyReferencesWithTargetFramework)">
     <ItemGroup>
-      <_ReferencePathWithTargetFramework Include="$(TargetFramework)" ReferencePath="@(ReferencePath, ',')" />
+      <ApiCompatAssemblyReferencesWithTargetFramework Include="$(TargetFramework)"
+                                                      ReferencePath="@(ReferencePathWithRefAssemblies, ',')" />
     </ItemGroup>
   </Target>
 
@@ -66,7 +67,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_GetTargetFrameworksOutput"
           Condition="'$(RunPackageValidationWithoutReferences)' != 'true'">
     <MSBuild Projects="$(MSBuildProjectFullPath)"
-             Targets="_GetReferencePathForPackageValidation"
+             Targets="GetReferencesForApiCompatValidatePackage"
              Properties="TargetFramework=%(_TargetFrameworks.Identity);
                          BuildProjectReferences=false">
       <Output ItemName="PackageValidationReferencePath" TaskParameter="TargetOutputs" />
