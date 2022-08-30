@@ -119,7 +119,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 topLevelCommandName: new HashSet<string> {"publish"},
                 optionsToLog: new HashSet<Option> { PublishCommandParser.RuntimeOption }
             ),
-            new AllowListToSendVerbSecondVerbFirstArgument(new HashSet<string> {"workload", "tool"}),
+            new AllowListToSendVerbSecondVerbFirstArgument(new HashSet<string> {"workload", "tool", "new"}),
         };
 
         private static void LogVerbosityForAllTopLevelCommand(
