@@ -221,11 +221,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             ListCommandArgs args = new ListCommandArgs((BaseListCommand)parseResult.CommandResult.Command, parseResult);
 
             Assert.False(args.DisplayAllColumns);
-            Assert.NotEmpty(args.ColumnsToDisplay);
+            Assert.NotEmpty(args.ColumnsToDisplay!);
             Assert.Equal(expectedColumns.Length, args.ColumnsToDisplay?.Count);
             foreach (var column in expectedColumns)
             {
-                Assert.Contains(column, args.ColumnsToDisplay);
+                Assert.Contains(column, args.ColumnsToDisplay!);
             }
         }
 
