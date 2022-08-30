@@ -352,7 +352,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 manifest.BasePath.Should().Be(expected.BasePath);
                 manifest.Mode.Should().Be(expected.Mode);
                 manifest.ManifestType.Should().Be(expected.ManifestType);
-                
+                 
                 manifest.ReferencedProjectsConfiguration.Count().Should().Be(expected.ReferencedProjectsConfiguration.Count());
 
                 // Relax the check for project reference configuration items see
