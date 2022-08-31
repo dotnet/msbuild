@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("The template \"TestAssets.TemplateWithFileRenameDate\" was created successfully.");
 
-            DirectoryInfo directoryInfo = new DirectoryInfo(workingDirectory);
+            DirectoryInfo directoryInfo = new(workingDirectory);
             Assert.Matches("\\d{8}_mytestname.cs", directoryInfo.EnumerateFiles().Single().Name);
         }
     }

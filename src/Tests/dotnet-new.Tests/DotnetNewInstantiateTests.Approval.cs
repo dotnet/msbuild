@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     [UsesVerify]
     [Collection("Verify Tests")]
-    public partial class DotnetNewInstantiate
+    public partial class DotnetNewInstantiateTests
     {
         [Fact]
         public Task CannotInstantiateUnknownTemplate()

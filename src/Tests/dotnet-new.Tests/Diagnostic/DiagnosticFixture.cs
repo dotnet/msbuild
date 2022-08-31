@@ -8,13 +8,11 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     public class DiagnosticFixture
     {
-        private readonly IMessageSink _diagnosticMessageSink;
-
         public DiagnosticFixture(IMessageSink sink)
         {
-            _diagnosticMessageSink = sink;
+           DiagnosticSink = sink;
         }
 
-        public IMessageSink DiagnosticSink => _diagnosticMessageSink;
+        public IMessageSink DiagnosticSink { get; }
     }
 }

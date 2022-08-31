@@ -13,12 +13,12 @@ using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
-    public partial class DotnetNewInstantiate : BaseIntegrationTest, IClassFixture<SharedHomeDirectory>
+    public partial class DotnetNewInstantiateTests : BaseIntegrationTest, IClassFixture<SharedHomeDirectory>
     {
         private readonly SharedHomeDirectory _fixture;
         private readonly ITestOutputHelper _log;
 
-        public DotnetNewInstantiate(SharedHomeDirectory fixture, ITestOutputHelper log) : base(log)
+        public DotnetNewInstantiateTests(SharedHomeDirectory fixture, ITestOutputHelper log) : base(log)
         {
             _fixture = fixture;
             _log = log;

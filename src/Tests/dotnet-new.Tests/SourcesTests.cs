@@ -8,11 +8,11 @@ using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
-    public class SourcesTest : BaseIntegrationTest
+    public class SourcesTests : BaseIntegrationTest
     {
         private readonly ITestOutputHelper _log;
 
-        public SourcesTest(ITestOutputHelper log) : base(log)
+        public SourcesTests(ITestOutputHelper log) : base(log)
         {
             _log = log;
         }

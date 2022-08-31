@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     [UsesVerify]
     [Collection("Verify Tests")]
-    public partial class DotnetNewHelp : BaseIntegrationTest
+    public partial class DotnetNewHelpTests : BaseIntegrationTest
     {
         [Theory]
         [InlineData("-h")]

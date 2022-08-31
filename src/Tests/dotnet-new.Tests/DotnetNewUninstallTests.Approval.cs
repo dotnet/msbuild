@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     [UsesVerify]
     [Collection("Verify Tests")]
-    public partial class DotnetNewUninstall
+    public partial class DotnetNewUninstallTests
     {
         [Fact]
         public Task CanShowMessageInCaseShortNameConflict()

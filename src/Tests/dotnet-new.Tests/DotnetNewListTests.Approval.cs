@@ -9,7 +9,7 @@ using Microsoft.NET.TestFramework.Commands;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
-    public partial class DotnetNewList
+    public partial class DotnetNewListTests
     {
         [Theory]
         [InlineData("-l")]

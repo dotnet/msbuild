@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     [UsesVerify]
     [Collection("Verify Tests")]
-    public partial class DotnetNewSearch
+    public partial class DotnetNewSearchTests
     {
         [Theory]
         [InlineData("--search")]

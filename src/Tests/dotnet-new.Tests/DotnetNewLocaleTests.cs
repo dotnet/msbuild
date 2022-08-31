@@ -5,6 +5,7 @@
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
@@ -27,11 +28,11 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 
-            var home = CreateTemporaryFolder(folderName: "Home");
-            var thisDir = Path.GetDirectoryName(typeof(DotnetNewLocaleTests).Assembly.Location);
-            var testTemplatesFolder = GetTestTemplateLocation("TemplateWithLocalization");
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string? thisDir = Path.GetDirectoryName(typeof(DotnetNewLocaleTests).Assembly.Location);
+            string testTemplatesFolder = GetTestTemplateLocation("TemplateWithLocalization");
 
-            var commandResult = new DotnetNewCommand(_log, "-i", testTemplatesFolder)
+            CommandResult commandResult = new DotnetNewCommand(_log, "-i", testTemplatesFolder)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(CreateTemporaryFolder())
                 .WithEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", string.Empty)
@@ -51,11 +52,11 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("tr-TR", "name_tr-TR")]
         public void TestDotnetCLIEnvVariable(string dotnetCliEnvVar, string expectedName)
         {
-            var home = CreateTemporaryFolder(folderName: "Home");
-            var thisDir = Path.GetDirectoryName(typeof(DotnetNewLocaleTests).Assembly.Location);
-            var testTemplatesFolder = GetTestTemplateLocation("TemplateWithLocalization");
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string? thisDir = Path.GetDirectoryName(typeof(DotnetNewLocaleTests).Assembly.Location);
+            string testTemplatesFolder = GetTestTemplateLocation("TemplateWithLocalization");
 
-            var commandResult = new DotnetNewCommand(_log, "-i", testTemplatesFolder)
+            CommandResult commandResult = new DotnetNewCommand(_log, "-i", testTemplatesFolder)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(CreateTemporaryFolder())
                 .WithEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", dotnetCliEnvVar)
@@ -72,9 +73,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public void SkipsLocalizationOnInstall_WhenInvalidFormat()
         {
-            var home = CreateTemporaryFolder(folderName: "Home");
-            var workingDir = CreateTemporaryFolder();
-            var testTemplateLocation = GetTestTemplateLocation("Invalid/Localization/InvalidFormat");
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDir = CreateTemporaryFolder();
+            string testTemplateLocation = GetTestTemplateLocation("Invalid/Localization/InvalidFormat");
             new DotnetNewCommand(_log, "-i", testTemplateLocation)
                 .WithDebug()
                 .WithCustomHive(home)
@@ -92,11 +93,11 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public void SkipsLocalizationOnInstall_WhenLocalizationValidationFails()
         {
-            var home = CreateTemporaryFolder(folderName: "Home");
-            var workingDir = CreateTemporaryFolder();
-            var testTemplateLocation = GetTestTemplateLocation("Invalid/Localization/ValidationFailure");
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDir = CreateTemporaryFolder();
+            string testTemplateLocation = GetTestTemplateLocation("Invalid/Localization/ValidationFailure");
 
-            var expectedErrors = new[]
+            string[] expectedErrors = new[]
             {
 @$"Warning: [{testTemplateLocation + Path.DirectorySeparatorChar}.template.config/template.json]: id of the post action 'pa2' at index '3' is not unique. Only the first post action that uses this id will be localized.",
 
@@ -108,7 +109,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
   Post action(s) with id(s) 'pa6' specified in the localization file do not exist in the template.json file. Remove the localized strings from the localization file."
   };
 
-            var commandResult = new DotnetNewCommand(_log, "-i", testTemplateLocation)
+            CommandResult commandResult = new DotnetNewCommand(_log, "-i", testTemplateLocation)
                 .WithDebug()
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDir)
@@ -119,7 +120,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And
                 .NotHaveStdErr()
                 .And.HaveStdOutContaining($"Success: {testTemplateLocation} installed the following templates:").And.HaveStdOutContaining("TestAssets.Invalid.Localiation.ValidationFailure");
-            foreach (var error in expectedErrors)
+            foreach (string? error in expectedErrors)
             {
                 commandResult.Should().HaveStdOutContaining(error);
             }
@@ -128,11 +129,11 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public void SkipsLocalizationOnInstantiate_WhenInvalidFormat()
         {
-            var home = CreateTemporaryFolder(folderName: "Home");
-            var workingDir = CreateTemporaryFolder();
-            var validTestTemplateLocation = GetTestTemplateLocation("TemplateWithLocalization");
-            var invalidTestTemplateLocation = GetTestTemplateLocation("Invalid/Localization/InvalidFormat");
-            var tmpTemplateLocation = CreateTemporaryFolder();
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDir = CreateTemporaryFolder();
+            string validTestTemplateLocation = GetTestTemplateLocation("TemplateWithLocalization");
+            string invalidTestTemplateLocation = GetTestTemplateLocation("Invalid/Localization/InvalidFormat");
+            string tmpTemplateLocation = CreateTemporaryFolder();
             TestUtils.DirectoryCopy(validTestTemplateLocation, tmpTemplateLocation, copySubDirs: true);
 
             new DotnetNewCommand(_log, "-i", tmpTemplateLocation)
@@ -168,14 +169,14 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public void SkipsLocalizationOnInstantiate_WhenLocalizationValidationFails()
         {
-            var home = CreateTemporaryFolder(folderName: "Home");
-            var workingDir = CreateTemporaryFolder();
-            var validTestTemplateLocation = GetTestTemplateLocation("TemplateWithLocalization");
-            var invalidTestTemplateLocation = GetTestTemplateLocation("Invalid/Localization/ValidationFailure");
-            var tmpTemplateLocation = CreateTemporaryFolder();
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDir = CreateTemporaryFolder();
+            string validTestTemplateLocation = GetTestTemplateLocation("TemplateWithLocalization");
+            string invalidTestTemplateLocation = GetTestTemplateLocation("Invalid/Localization/ValidationFailure");
+            string tmpTemplateLocation = CreateTemporaryFolder();
             TestUtils.DirectoryCopy(validTestTemplateLocation, tmpTemplateLocation, copySubDirs: true);
 
-            var expectedErrors =
+            string expectedErrors =
 Regex.Escape(@$"Warnung: Die Lokalisierungsdatei {tmpTemplateLocation + Path.DirectorySeparatorChar}.template.config/localize/templatestrings.de-DE.json ist nicht mit der Basiskonfiguration {tmpTemplateLocation + Path.DirectorySeparatorChar}.template.config/template.json kompatibel und wird übersprungen.
   In der Lokalisierungsdatei unter der POST-Aktion mit der ID „pa1“ befinden sich lokalisierte Zeichenfolgen für manuelle Anweisungen mit den IDs „do-not-exist“. Diese manuellen Anweisungen sind in der Datei „template.json“ nicht vorhanden und sollten aus der Lokalisierungsdatei entfernt werden.").Replace('„', '.').Replace('“', '.');
 

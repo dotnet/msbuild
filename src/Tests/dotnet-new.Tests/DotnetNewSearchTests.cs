@@ -10,12 +10,12 @@ using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
-    public partial class DotnetNewSearch : BaseIntegrationTest, IClassFixture<SharedHomeDirectory>
+    public partial class DotnetNewSearchTests : BaseIntegrationTest, IClassFixture<SharedHomeDirectory>
     {
         private readonly SharedHomeDirectory _sharedHome;
         private readonly ITestOutputHelper _log;
 
-        public DotnetNewSearch(SharedHomeDirectory sharedHome, ITestOutputHelper log) : base(log)
+        public DotnetNewSearchTests(SharedHomeDirectory sharedHome, ITestOutputHelper log) : base(log)
         {
             _sharedHome = sharedHome;
             _log = log;

@@ -12,11 +12,11 @@ using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
-    public partial class DotnetNewUninstall : BaseIntegrationTest
+    public partial class DotnetNewUninstallTests : BaseIntegrationTest
     {
         private readonly ITestOutputHelper _log;
 
-        public DotnetNewUninstall(ITestOutputHelper log) : base(log)
+        public DotnetNewUninstallTests(ITestOutputHelper log) : base(log)
         {
             _log = log;
         }
