@@ -466,5 +466,39 @@ namespace CompatTests
             };
             Assert.Equal(expected, differences);
         }
+
+        [Fact]
+        public void NumericPtrNotFlagged()
+        {
+            string leftSyntax = @"
+namespace CompatTests
+{
+  using System;
+
+  public class First
+  {
+    public void F(IntPtr p) {}
+    public void G(UIntPtr p) {}
+  }
+}
+";
+            string rightSyntax = @"
+namespace CompatTests
+{
+  public class First
+  {
+    public void F(nint p) {}
+    public void G(nuint p) {}
+  }
+}
+";
+            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
+            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory);
+
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
+
+            Assert.Empty(differences);
+        }
     }
 }
