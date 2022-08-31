@@ -12,4 +12,9 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Reflection.Metadata" Version="1.0.21"/>
+    <Compile Include="$(RepoRoot)src\Tasks\Common\FileUtilities.cs" LinkBase="Common" />
+    <Compile Include="$(RepoRoot)src\Tasks\Common\FileUtilities.MetadataReader.cs" LinkBase="Common" />
+  </ItemGroup>
 </Project>

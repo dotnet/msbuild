@@ -3,6 +3,7 @@
 
 using Microsoft.Extensions.EnvironmentAbstractions;
 using System.IO;
+using Microsoft.NET.Build.Tasks;
 
 namespace Microsoft.DotNet.InternalAbstractions
 {
@@ -12,7 +13,7 @@ namespace Microsoft.DotNet.InternalAbstractions
 
         public TemporaryDirectory()
         {
-            DirectoryPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            DirectoryPath = Path.Combine(FileUtilities.CreateTempPath(), Path.GetRandomFileName());
             Directory.CreateDirectory(DirectoryPath);
         }
 

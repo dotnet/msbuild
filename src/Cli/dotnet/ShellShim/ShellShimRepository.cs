@@ -105,10 +105,10 @@ namespace Microsoft.DotNet.ShellShim
                     {
                         foreach (var file in GetShimFiles(commandName).Where(f => _fileSystem.File.Exists(f.Value)))
                         {
-                            var tempPath = FileUtilities.CreateTempFile(FileUtilities.CreateTempPath());
+                            // v This should call FileUtilities for a secure directory, or call the mock temp path creator.
+                            var tempPath = Path.Combine(_fileSystem.Directory.CreateTempPath(), Path.GetRandomFileName());
                             FileAccessRetrier.RetryOnMoveAccessFailure(() => _fileSystem.File.Move(file.Value, tempPath));
-                            FileUtilities.ResetTempFilePermissions(tempPath);
-                            files[file.Value] = tempPath;                            
+                            files[file.Value] = tempPath;
                         }
                     }
                     catch (Exception ex) when (ex is UnauthorizedAccessException || ex is IOException)
