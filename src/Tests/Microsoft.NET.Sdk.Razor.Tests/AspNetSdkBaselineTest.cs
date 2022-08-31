@@ -362,9 +362,9 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 //    .Should()
                 //    .BeEquivalentTo(expected.ReferencedProjectsConfiguration.OrderBy(cm => cm.Identity));
 
-                manifest.DiscoveryPatterns.OrderBy(dp => dp.Name).ShouldBeEquivalentTo(expected.DiscoveryPatterns.OrderBy(dp => dp.Name));
+                manifest.DiscoveryPatterns.OrderBy(dp => dp.Name).Should().BeEquivalentTo(expected.DiscoveryPatterns.OrderBy(dp => dp.Name));
                 manifest.Assets.OrderBy(a => a.BasePath).ThenBy(a => a.RelativePath).ThenBy(a => a.AssetKind)
-                    .ShouldBeEquivalentTo(expected.Assets.OrderBy(a => a.BasePath).ThenBy(a => a.RelativePath).ThenBy(a => a.AssetKind));
+                    .Should().BeEquivalentTo(expected.Assets.OrderBy(a => a.BasePath).ThenBy(a => a.RelativePath).ThenBy(a => a.AssetKind));
             }
             else
             {
