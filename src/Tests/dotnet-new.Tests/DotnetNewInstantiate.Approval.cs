@@ -641,5 +641,24 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             return Verify(commandResult.StdErr);
         }
 
+        [Fact]
+        public Task CanShowMessageInCaseShortNameConflict()
+        {
+            string customHivePath = CreateTemporaryFolder(folderName: "Home");
+            InstallTestTemplate("TemplateWithSourceName", _log, customHivePath);
+            InstallTestTemplate("TemplateWithConflictShortName", _log, customHivePath);
+
+            CommandResult commandResult = new DotnetNewCommand(_log, "create", "TestAssets.TemplateWithSourceName")
+                  .WithCustomHive(customHivePath)
+                  .WithoutBuiltInTemplates()
+                  .WithWorkingDirectory(CreateTemporaryFolder())
+                  .Execute();
+
+            commandResult
+                .Should()
+                .Pass();
+
+            return Verify(commandResult.StdOut);
+        }
     }
 }

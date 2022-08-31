@@ -76,8 +76,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             CancellationToken cancellationToken)
         {
             IReadOnlyList<ITemplateInfo> templates = await templatePackageManager.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
-            IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(CliTemplateInfo.FromTemplateInfo(templates, hostSpecificDataLoader));
-            return templateGroups.Where(template => template.ShortNames.Contains(instantiateArgs.ShortName));
+            return TemplateGroup.FromTemplateList(CliTemplateInfo.FromTemplateInfo(templates, hostSpecificDataLoader));
         }
 
         internal static HashSet<TemplateCommand> GetTemplateCommand(
@@ -194,13 +193,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
         }
 
-        protected override Task<NewCommandStatus> ExecuteAsync(
+        protected override async Task<NewCommandStatus> ExecuteAsync(
             InstantiateCommandArgs instantiateArgs,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager, 
             InvocationContext context)
         {
-            return ExecuteIntAsync(instantiateArgs, environmentSettings, templatePackageManager, context);
+            NewCommandStatus status = await ExecuteIntAsync(instantiateArgs, environmentSettings, templatePackageManager, context).ConfigureAwait(false);
+            await CheckTemplatesWithSubCommandName(instantiateArgs, templatePackageManager, context.GetCancellationToken()).ConfigureAwait(false);
+            return status;
         }
 
         protected override InstantiateCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);

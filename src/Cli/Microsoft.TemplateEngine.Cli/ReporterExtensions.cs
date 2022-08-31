@@ -27,7 +27,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// <summary>
         /// Writes formatted command output from <paramref name="process"/>.
         /// </summary>
-        internal static void WriteCommandOutput(this Reporter reporter, Process process)
+        internal static void WriteCommandOutput(this IReporter reporter, Process process)
         {
             if (process.StartInfo.RedirectStandardOutput || process.StartInfo.RedirectStandardError)
             {
@@ -84,8 +84,8 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 return s.Indent(level);
             }
-            StringBuilder builder = new StringBuilder();
-            using StringReader sr = new StringReader(s);
+            StringBuilder builder = new();
+            using StringReader sr = new(s);
             bool firstLine = true;
             string? line = sr.ReadLine();
             while (line != null)

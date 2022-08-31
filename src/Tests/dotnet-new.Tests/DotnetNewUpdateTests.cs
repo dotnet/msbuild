@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
-    public class DotnetNewUpdateTests : BaseIntegrationTest
+    public partial class DotnetNewUpdateTests : BaseIntegrationTest
     {
         private readonly ITestOutputHelper _log;
 

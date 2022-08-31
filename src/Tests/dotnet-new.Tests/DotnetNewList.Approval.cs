@@ -3,6 +3,7 @@
 //
 
 using FluentAssertions;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 
@@ -15,7 +16,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("--list")]
         public Task BasicTest_WhenLegacyCommandIsUsed(string commandName)
         {
-            var commandResult = new DotnetNewCommand(_log, commandName)
+            CommandResult commandResult = new DotnetNewCommand(_log, commandName)
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute();
@@ -33,7 +34,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public Task BasicTest_WhenListCommandIsUsed()
         {
-            var commandResult = new DotnetNewCommand(_log, "list")
+            CommandResult commandResult = new DotnetNewCommand(_log, "list")
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute();
@@ -48,11 +49,11 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public Task Constraints_CanShowMessageIfTemplateGroupIsRestricted()
         {
-            var customHivePath = CreateTemporaryFolder(folderName: "Home");
+            string customHivePath = CreateTemporaryFolder(folderName: "Home");
             InstallTestTemplate("Constraints/RestrictedTemplate", _log, customHivePath);
             InstallTestTemplate("TemplateWithSourceName", _log, customHivePath);
 
-            var commandResult = new DotnetNewCommand(_log, "list", "RestrictedTemplate")
+            CommandResult commandResult = new DotnetNewCommand(_log, "list", "RestrictedTemplate")
                   .WithCustomHive(customHivePath)
                   .Execute();
 
@@ -66,12 +67,30 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public Task Constraints_CanIgnoreConstraints()
         {
-            var customHivePath = CreateTemporaryFolder(folderName: "Home");
+            string customHivePath = CreateTemporaryFolder(folderName: "Home");
             InstallTestTemplate("Constraints/RestrictedTemplate", _log, customHivePath);
             InstallTestTemplate("TemplateWithSourceName", _log, customHivePath);
 
-            var commandResult = new DotnetNewCommand(_log, "list", "RestrictedTemplate", "--ignore-constraints")
+            CommandResult commandResult = new DotnetNewCommand(_log, "list", "RestrictedTemplate", "--ignore-constraints")
                   .WithCustomHive(customHivePath)
+                  .Execute();
+
+            commandResult
+                .Should()
+                .Pass();
+
+            return Verify(commandResult.StdOut);
+        }
+
+        [Fact]
+        public Task CanShowMessageInCaseShortNameConflict()
+        {
+            string customHivePath = CreateTemporaryFolder(folderName: "Home");
+            InstallTestTemplate("TemplateWithConflictShortName", _log, customHivePath);
+
+            CommandResult commandResult = new DotnetNewCommand(_log, "list")
+                  .WithCustomHive(customHivePath)
+                  .WithoutBuiltInTemplates()
                   .Execute();
 
             commandResult

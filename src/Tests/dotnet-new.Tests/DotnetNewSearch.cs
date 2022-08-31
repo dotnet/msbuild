@@ -3,15 +3,14 @@
 //
 
 using System.Text;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
-    [UsesVerify]
-    [Collection("Verify Tests")]
-    public class DotnetNewSearch : BaseIntegrationTest, IClassFixture<SharedHomeDirectory>
+    public partial class DotnetNewSearch : BaseIntegrationTest, IClassFixture<SharedHomeDirectory>
     {
         private readonly SharedHomeDirectory _sharedHome;
         private readonly ITestOutputHelper _log;
@@ -28,7 +27,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("search console")]
         public void BasicTest(string testCase)
         {
-            var commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
+            CommandResult commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .Execute();
 
@@ -42,29 +41,13 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "console"), "'Template Name' or 'Short Name' columns do not contain the criteria");
 
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
-        }
-
-        [Theory]
-        [InlineData("--search")]
-        [InlineData("search")]
-        public Task CannotExecuteEmptyCriteria(string testCase)
-        {
-            var commandResult = new DotnetNewCommand(_log, testCase)
-                .WithCustomHive(_sharedHome.HomeDirectory)
-                .Execute();
-
-            commandResult.Should().Fail();
-
-            return Verify(commandResult.StdErr)
-                .UseTextForParameters("common")
-                .DisableRequireUniquePrefix();
         }
 
         [Theory]
@@ -100,7 +83,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("search azure")]
         public void ExamplePrefersMicrosoftPackage(string testCase)
         {
-            var commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
+            CommandResult commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .Execute();
 
@@ -113,13 +96,13 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "azure"), "'Template Name' or 'Short Name' columns do not contain the criteria");
 
-            var microsoftPackages = tableOutput.Where(row => row[2] == "Microsoft" && row[4].StartsWith("Microsoft", StringComparison.OrdinalIgnoreCase));
-            var installationCommands = microsoftPackages.Select(package => $"new install {package[4]}");
+            IEnumerable<List<string>> microsoftPackages = tableOutput.Where(row => row[2] == "Microsoft" && row[4].StartsWith("Microsoft", StringComparison.OrdinalIgnoreCase));
+            IEnumerable<string> installationCommands = microsoftPackages.Select(package => $"new install {package[4]}");
 
-            Func<string, bool> containsOneOfInstallationCommands = (output) => installationCommands.Any(command => output.Contains(command));
+            bool containsOneOfInstallationCommands(string output) => installationCommands.Any(command => output.Contains(command));
             commandResult.Should().HaveStdOutContaining(containsOneOfInstallationCommands, "Checks if the output contains one of the expected installation commands");
         }
 
@@ -129,7 +112,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("search console --columns-all")]
         public void CanShowAllColumns(string testCase)
         {
-            var commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
+            CommandResult commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .Execute();
 
@@ -141,7 +124,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Type", "Tags", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Type", "Tags", "Package", "Downloads" });
 
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "console"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
@@ -156,7 +139,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("search console --columns tags --tag Common")]
         public void CanFilterTags(string testCase)
         {
-            var commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
+            CommandResult commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .Execute();
 
@@ -170,7 +153,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Tags", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Tags", "Package", "Downloads" });
 
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "console"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AllRowsContain(tableOutput, new[] { "Tags" }, "Common"), "'Tags' column does not contain the criteria");
@@ -187,7 +170,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("search --columns tags --tag Common")]
         public void CanFilterTags_WithoutName(string testCase)
         {
-            var commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
+            CommandResult commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .Execute();
 
@@ -201,7 +184,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Tags", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Tags", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Tags" }, "Common"), "'Tags' column does not contain the criteria");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
@@ -216,7 +199,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("search func --columns author --author micro")]
         public void CanFilterAuthor(string testCase)
         {
-            var commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
+            CommandResult commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .WithDebug()
                 .Execute();
@@ -231,7 +214,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Package", "Downloads" });
 
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "func"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AllRowsContain(tableOutput, new[] { "Author" }, "micro"), "'Author' column does not contain the criteria");
@@ -247,7 +230,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("search --columns author --author micro")]
         public void CanFilterAuthor_WithoutName(string testCase)
         {
-            var commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
+            CommandResult commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .WithDebug()
                 .Execute();
@@ -262,7 +245,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Author" }, "micro"), "'Author' column does not contain the criteria");
             Assert.True(SomeRowsContain(tableOutput, new[] { "Author" }, "Microsoft"), "'Author' column does not contain any rows with 'Microsoft'");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
@@ -278,7 +261,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("search console --columns language --language Q#")]
         public void CanFilterLanguage(string testCase)
         {
-            var commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
+            CommandResult commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .Execute();
 
@@ -292,7 +275,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package", "Downloads" });
 
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "console"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AllRowsContain(tableOutput, new[] { "Language" }, "Q#"), "'Language' column does not contain criteria");
@@ -311,7 +294,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("search --columns language -lang Q#", "-lang")]
         public void CanFilterLanguage_WithoutName(string testCase, string optionName)
         {
-            var commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
+            CommandResult commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .Execute();
 
@@ -325,7 +308,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Language" }, "Q#"), "'Language' column does not contain criteria");
 
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
@@ -341,7 +324,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("search console --columns type --type item")]
         public void CanFilterType(string testCase)
         {
-            var commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
+            CommandResult commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
                 .WithCustomHive(_sharedHome.HomeDirectory).WithDebug()
                 .Execute();
 
@@ -355,7 +338,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Type", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Type", "Package", "Downloads" });
 
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "console"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AllRowsEqual(tableOutput, new[] { "Type" }, "item"), "'Type' column does not contain criteria");
@@ -372,7 +355,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("search --columns type --type item")]
         public void CanFilterType_WithoutName(string testCase)
         {
-            var commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
+            CommandResult commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
                 .WithCustomHive(_sharedHome.HomeDirectory).WithDebug()
                 .Execute();
 
@@ -386,7 +369,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Type", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Type", "Package", "Downloads" });
             Assert.True(AllRowsEqual(tableOutput, new[] { "Type" }, "item"), "'Type' column does not contain criteria");
 
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
@@ -402,7 +385,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("search console --package core")]
         public void CanFilterPackage(string testCase)
         {
-            var commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
+            CommandResult commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .Execute();
 
@@ -416,7 +399,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
 
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "console"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AllRowsContain(tableOutput, new[] { "Package" }, "core"), "'Package' column does not contain criteria");
@@ -432,7 +415,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("search --package core")]
         public void CanFilterPackage_WithoutName(string testCase)
         {
-            var commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
+            CommandResult commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .Execute();
 
@@ -446,7 +429,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Package" }, "core"), "'Package' column does not contain criteria");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
@@ -460,7 +443,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("search console")]
         public void CanSortByDownloadCountAndThenByName(string testCase)
         {
-            var commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
+            CommandResult commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .WithEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", "en-US")
                 .Execute();
@@ -472,7 +455,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads");
 
-            var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
 
             Assert.True(tableOutput.Count > 2, "At least 2 search hits are expected");
 
@@ -500,7 +483,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 #pragma warning restore xUnit1004 // Test methods should not be skipped
         public void CanFilterByChoiceParameter()
         {
-            var commandResult = new DotnetNewCommand(_log, "con", "--search", "--framework")
+            CommandResult commandResult = new DotnetNewCommand(_log, "con", "--search", "--framework")
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .Execute();
 
@@ -513,7 +496,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "con"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
@@ -565,7 +548,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 #pragma warning restore xUnit1004 // Test methods should not be skipped
         public void CanFilterByNonChoiceParameter()
         {
-            var commandResult = new DotnetNewCommand(_log, "con", "--search", "--langVersion")
+            CommandResult commandResult = new DotnetNewCommand(_log, "con", "--search", "--langVersion")
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .WithDebug()
                 .Execute();
@@ -579,7 +562,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "con"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
@@ -612,7 +595,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 #pragma warning restore xUnit1004 // Test methods should not be skipped
         public void IgnoresValueForNonChoiceParameter()
         {
-            var commandResult = new DotnetNewCommand(_log, "con", "--search", "--langVersion", "smth")
+            CommandResult commandResult = new DotnetNewCommand(_log, "con", "--search", "--langVersion", "smth")
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .WithDebug()
                 .Execute();
@@ -626,7 +609,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "con"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
@@ -659,7 +642,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 #pragma warning restore xUnit1004 // Test methods should not be skipped
         public void CanFilterByChoiceParameterWithValue()
         {
-            var commandResult = new DotnetNewCommand(_log, "con", "--search", "-f", "netcoreapp3.1")
+            CommandResult commandResult = new DotnetNewCommand(_log, "con", "--search", "-f", "netcoreapp3.1")
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .WithDebug()
                 .Execute();
@@ -673,7 +656,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "con"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
@@ -731,11 +714,11 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("zoop --search --columns-all", "--search zoop --columns-all")]
         public void CanFallbackToSearchOption(string command1, string command2)
         {
-            var commandResult1 = new DotnetNewCommand(_log, command1.Split())
+            CommandResult commandResult1 = new DotnetNewCommand(_log, command1.Split())
              .WithCustomHive(_sharedHome.HomeDirectory)
              .Execute();
 
-            var commandResult2 = new DotnetNewCommand(_log, command2.Split())
+            CommandResult commandResult2 = new DotnetNewCommand(_log, command2.Split())
                .WithCustomHive(_sharedHome.HomeDirectory)
                .Execute();
 
@@ -754,7 +737,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("foo search bar", "foo", "bar")]
         public void CannotSearchOnParseError(string command, string invalidArguments, string validArguments)
         {
-            var commandResult = new DotnetNewCommand(_log, command.Split())
+            CommandResult commandResult = new DotnetNewCommand(_log, command.Split())
              .WithCustomHive(_sharedHome.HomeDirectory)
              .Execute();
 
@@ -780,7 +763,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 For more information, run: 
    dotnet new search -h";
 
-            var commandResult = new DotnetNewCommand(_log, "--search", "console")
+            CommandResult commandResult = new DotnetNewCommand(_log, "--search", "console")
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .Execute();
 
@@ -794,7 +777,7 @@ For more information, run:
         [Fact]
         public void DoNotShowDeprecationMessage_WhenNewCommandIsUsed()
         {
-            var commandResult = new DotnetNewCommand(_log, "search", "console")
+            CommandResult commandResult = new DotnetNewCommand(_log, "search", "console")
                 .WithCustomHive(_sharedHome.HomeDirectory)
                 .Execute();
 
@@ -807,7 +790,7 @@ For more information, run:
 
         private static bool AllRowsContain(List<List<string>> tableOutput, string[] columnsNames, string value)
         {
-            var columnIndexes = columnsNames.Select(columnName => tableOutput[0].IndexOf(columnName));
+            IEnumerable<int> columnIndexes = columnsNames.Select(columnName => tableOutput[0].IndexOf(columnName));
 
             for (int i = 1; i < tableOutput.Count; i++)
             {
@@ -852,7 +835,7 @@ For more information, run:
 
         private static bool AllRowsEqual(List<List<string>> tableOutput, string[] columnsNames, string value)
         {
-            var columnIndexes = columnsNames.Select(columnName => tableOutput[0].IndexOf(columnName));
+            IEnumerable<int> columnIndexes = columnsNames.Select(columnName => tableOutput[0].IndexOf(columnName));
 
             for (int i = 1; i < tableOutput.Count; i++)
             {
@@ -867,7 +850,7 @@ For more information, run:
 
         private static bool SomeRowsContain(List<List<string>> tableOutput, string[] columnsNames, string value)
         {
-            var columnIndexes = columnsNames.Select(columnName => tableOutput[0].IndexOf(columnName));
+            IEnumerable<int> columnIndexes = columnsNames.Select(columnName => tableOutput[0].IndexOf(columnName));
 
             for (int i = 1; i < tableOutput.Count; i++)
             {
@@ -881,17 +864,17 @@ For more information, run:
 
         private static bool AllRowsAreNotEmpty(List<List<string>> tableOutput, string columnName)
         {
-            var columnIndex = tableOutput[0].IndexOf(columnName);
+            int columnIndex = tableOutput[0].IndexOf(columnName);
             return tableOutput.All(row => !string.IsNullOrWhiteSpace(row[columnIndex]));
         }
 
         private static bool AtLeastOneRowIsNotEmpty(List<List<string>> tableOutput, string columnName)
         {
-            var columnIndex = tableOutput[0].IndexOf(columnName);
+            int columnIndex = tableOutput[0].IndexOf(columnName);
             return tableOutput.Any(row => !string.IsNullOrWhiteSpace(row[columnIndex]));
         }
 
-        private List<List<string>> ParseTableOutput(string stdOut, string[] expectedColumns)
+        private static List<List<string>> ParseTableOutput(string stdOut, string[] expectedColumns)
         {
             string[] lines = stdOut.Split(Environment.NewLine);
 
@@ -901,12 +884,12 @@ For more information, run:
             //or before first [Debug] entry
             //table is written in single call, so there can be no [Debug] entry in the middle
             int lastLineIndex = Array.FindIndex(lines, headerLineIndex + 1, line => (line.Length == 0 || line.Contains("[Debug]"))) - 1;
-            var columnIndexes = expectedColumns.Select(column => headerLine.IndexOf(column)).ToArray();
+            int[] columnIndexes = expectedColumns.Select(column => headerLine.IndexOf(column)).ToArray();
 
             var parsedTable = new List<List<string>>();
             // first array contain headers
             var headerRow = new List<string>();
-            foreach (var expectedColumn in expectedColumns)
+            foreach (string expectedColumn in expectedColumns)
             {
                 headerRow.Add(expectedColumn.Trim());
             }
@@ -1011,11 +994,11 @@ For more information, run:
 
                 if (x != "<1k")
                 {
-                    int.TryParse(x.Trim().Substring(0, x.Length - 1), out xInt);
+                    _ = int.TryParse(x.Trim().AsSpan(0, x.Length - 1), out xInt);
                 }
                 if (y != "<1k")
                 {
-                    int.TryParse(y.Trim().Substring(0, y.Length - 1), out yInt);
+                    _ = int.TryParse(y.Trim().AsSpan(0, y.Length - 1), out yInt);
                 }
                 return xInt.CompareTo(yInt);
             }

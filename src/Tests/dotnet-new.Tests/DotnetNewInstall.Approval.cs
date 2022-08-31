@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 
@@ -14,7 +15,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public Task CannotInstallPackageAvailableFromBuiltIns()
         {
-            var commandResult = new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ItemTemplates::6.0.100")
+            CommandResult commandResult = new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ItemTemplates::6.0.100")
                 .WithCustomHive(CreateTemporaryFolder(folderName: "Home"))
                 .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute();
@@ -33,7 +34,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public Task CanInstallPackageAvailableFromBuiltInsWithForce()
         {
-            var commandResult = new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ItemTemplates::6.0.100", "--force")
+            CommandResult commandResult = new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ItemTemplates::6.0.100", "--force")
                 .WithCustomHive(CreateTemporaryFolder(folderName: "Home"))
                 .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute();
@@ -52,7 +53,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public Task CannotInstallMultiplePackageAvailableFromBuiltIns()
         {
-            var commandResult = new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ItemTemplates::6.0.100", "Microsoft.DotNet.Web.ItemTemplates::5.0.0")
+            CommandResult commandResult = new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ItemTemplates::6.0.100", "Microsoft.DotNet.Web.ItemTemplates::5.0.0")
                 .WithCustomHive(CreateTemporaryFolder(folderName: "Home"))
                 .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute();
@@ -73,7 +74,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("--install")]
         public Task CanShowDeprecationMessage_WhenLegacyCommandIsUsed(string commandName)
         {
-            var commandResult = new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Web.ItemTemplates::5.0.0")
+            CommandResult commandResult = new DotnetNewCommand(_log, commandName, "Microsoft.DotNet.Web.ItemTemplates::5.0.0")
                 .WithCustomHive(CreateTemporaryFolder(folderName: "Home"))
                 .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute();
@@ -90,7 +91,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public Task DoNotShowDeprecationMessage_WhenNewCommandIsUsed()
         {
-            var commandResult = new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Web.ItemTemplates::5.0.0")
+            CommandResult commandResult = new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Web.ItemTemplates::5.0.0")
                 .WithCustomHive(CreateTemporaryFolder(folderName: "Home"))
                 .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute();
@@ -105,8 +106,8 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public Task CanShowWarning_WhenConstraintTemplateIsInstalled()
         {
-            var testTemplateLocation = GetTestTemplateLocation("Constraints/RestrictedTemplate");
-            var commandResult = new DotnetNewCommand(_log, "install", testTemplateLocation)
+            string testTemplateLocation = GetTestTemplateLocation("Constraints/RestrictedTemplate");
+            CommandResult commandResult = new DotnetNewCommand(_log, "install", testTemplateLocation)
                 .WithCustomHive(CreateTemporaryFolder(folderName: "Home"))
                 .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute();
@@ -126,7 +127,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public Task CanInstallSameSourceTwice_Folder_WhenSourceIsSpecified()
         {
-            var home = CreateTemporaryFolder(folderName: "Home");
+            string home = CreateTemporaryFolder(folderName: "Home");
             string basicFSharp = GetTestTemplateLocation("TemplateResolution/DifferentLanguagesGroup/BasicFSharp");
             new DotnetNewCommand(_log, "install", basicFSharp)
                 .WithCustomHive(home)
@@ -135,7 +136,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .Should()
                 .ExitWith(0);
 
-            var commandResult = new DotnetNewCommand(_log, "install", basicFSharp, "--force")
+            CommandResult commandResult = new DotnetNewCommand(_log, "install", basicFSharp, "--force")
                  .WithCustomHive(home)
                  .WithWorkingDirectory(CreateTemporaryFolder())
                  .Execute();
@@ -148,7 +149,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public Task CanInstallSameSourceTwice_RemoteNuGet_WhenSourceIsSpecified()
         {
-            var home = CreateTemporaryFolder(folderName: "Home");
+            string home = CreateTemporaryFolder(folderName: "Home");
             string basicFSharp = GetTestTemplateLocation("TemplateResolution/DifferentLanguagesGroup/BasicFSharp");
             new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home)
@@ -157,7 +158,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .Should()
                 .ExitWith(0);
 
-            var commandResult = new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0", "--force")
+            CommandResult commandResult = new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0", "--force")
                  .WithCustomHive(home)
                  .WithWorkingDirectory(CreateTemporaryFolder())
                  .Execute();
@@ -169,7 +170,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public Task CannotInstallSameSourceTwice_NuGet()
         {
-            var home = CreateTemporaryFolder(folderName: "Home");
+            string home = CreateTemporaryFolder(folderName: "Home");
 
             new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home)
@@ -182,7 +183,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("console")
                 .And.HaveStdOutContaining("classlib");
 
-            var commandResult = new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
+            CommandResult commandResult = new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
                  .WithCustomHive(home)
                  .WithWorkingDirectory(CreateTemporaryFolder())
                  .Execute();
@@ -194,7 +195,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public Task CannotInstallSameSourceTwice_Folder()
         {
-            var home = CreateTemporaryFolder(folderName: "Home");
+            string home = CreateTemporaryFolder(folderName: "Home");
             string basicFSharp = GetTestTemplateLocation("TemplateResolution/DifferentLanguagesGroup/BasicFSharp");
             new DotnetNewCommand(_log, "install", basicFSharp)
                 .WithCustomHive(home)
@@ -213,7 +214,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                  .Should().Fail()
                  .And.HaveStdErrContaining($"{basicFSharp} is already installed");
 
-            var commandResult = new DotnetNewCommand(_log, "install", basicFSharp)
+            CommandResult commandResult = new DotnetNewCommand(_log, "install", basicFSharp)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute();
@@ -221,6 +222,25 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             commandResult.Should().Fail();
             return Verify(commandResult.StdErr)
                 .AddScrubber(output => output.ScrubAndReplace(basicFSharp, "%TEMPLATE FOLDER%"));
+        }
+
+        [Fact]
+        public Task CanShowMessageInCaseShortNameConflict()
+        {
+            string customHivePath = CreateTemporaryFolder(folderName: "Home");
+            string templateToInstall = GetTestTemplateLocation("TemplateWithConflictShortName");
+
+            CommandResult commandResult = new DotnetNewCommand(_log, "install", templateToInstall)
+                  .WithCustomHive(customHivePath)
+                  .WithoutBuiltInTemplates()
+                  .Execute();
+
+            commandResult
+                .Should()
+                .Pass();
+
+            return Verify(commandResult.StdOut)
+                .AddScrubber(output => output.ScrubAndReplace(templateToInstall, "%TEMPLATE FOLDER%"));
         }
 
     }

@@ -4,6 +4,7 @@
 
 using System.Text.RegularExpressions;
 using FluentAssertions;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
@@ -11,7 +12,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
-    public class DotnetNewUninstall : BaseIntegrationTest
+    public partial class DotnetNewUninstall : BaseIntegrationTest
     {
         private readonly ITestOutputHelper _log;
 
@@ -48,7 +49,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("uninstall")]
         public void CanListInstalledSources_NuGet(string commandName)
         {
-            var home = CreateTemporaryFolder(folderName: "Home");
+            string home = CreateTemporaryFolder(folderName: "Home");
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(CreateTemporaryFolder())
@@ -81,7 +82,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("uninstall")]
         public void CanListInstalledSources_WhenNothingIsInstalled(string commandName)
         {
-            var home = CreateTemporaryFolder(folderName: "Home");
+            string home = CreateTemporaryFolder(folderName: "Home");
             new DotnetNewCommand(_log, commandName)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(CreateTemporaryFolder())
@@ -143,7 +144,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("--uninstall")]
         public void CanUninstall_NuGet(string commandName)
         {
-            var home = CreateTemporaryFolder(folderName: "Home");
+            string home = CreateTemporaryFolder(folderName: "Home");
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(CreateTemporaryFolder())
@@ -203,7 +204,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public void CanUninstallSeveralSources_LegacySyntax()
         {
-            var home = CreateTemporaryFolder(folderName: "Home");
+            string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
             string basicFSharp = InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, home, workingDirectory);
             string basicVB = InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicVB", _log, home, workingDirectory);
@@ -249,7 +250,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public void CanUninstallSeveralSources()
         {
-            var home = CreateTemporaryFolder(folderName: "Home");
+            string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
             string basicFSharp = InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, home, workingDirectory);
             string basicVB = InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicVB", _log, home, workingDirectory);
@@ -297,7 +298,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("uninstall")]
         public void CannotUninstallUnknownPackage(string commandName)
         {
-            var home = CreateTemporaryFolder(folderName: "Home");
+            string home = CreateTemporaryFolder(folderName: "Home");
             new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(CreateTemporaryFolder())
@@ -325,7 +326,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("uninstall")]
         public void CannotUninstallByTemplateName(string commandName)
         {
-            var home = CreateTemporaryFolder(folderName: "Home");
+            string home = CreateTemporaryFolder(folderName: "Home");
             new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(CreateTemporaryFolder())
@@ -353,7 +354,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("uninstall")]
         public void CannotUninstallByTemplateName_ShowsAllPackages(string commandName)
         {
-            var home = CreateTemporaryFolder(folderName: "Home");
+            string home = CreateTemporaryFolder(folderName: "Home");
             new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home).WithoutBuiltInTemplates()
                 .WithWorkingDirectory(CreateTemporaryFolder())
@@ -390,7 +391,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("uninstall")]
         public void CanExpandWhenUninstall(string commandName)
         {
-            var home = CreateTemporaryFolder(folderName: "Home");
+            string home = CreateTemporaryFolder(folderName: "Home");
             string testTemplateLocation = GetTestTemplateLocation(string.Empty);
             string testTemplateLocationAbsolute = Path.GetFullPath(testTemplateLocation);
             string pattern = testTemplateLocation + Path.DirectorySeparatorChar + "*";
@@ -439,7 +440,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public void CanResolveRelativePathOnUninstall()
         {
-            var home = CreateTemporaryFolder(folderName: "Home");
+            string home = CreateTemporaryFolder(folderName: "Home");
             string testTemplateLocation = GetTestTemplateLocation(string.Empty);
             string testTemplateLocationAbsolute = Path.GetFullPath(testTemplateLocation);
             string pattern = testTemplateLocation;
@@ -521,7 +522,7 @@ For more information, run:
    dotnet new uninstall -h";
 
             string home = CreateTemporaryFolder(folderName: "Home");
-            var commandResult = new DotnetNewCommand(_log, commandName)
+            CommandResult commandResult = new DotnetNewCommand(_log, commandName)
                 .WithCustomHive(home)
                 .Execute();
 
@@ -536,7 +537,7 @@ For more information, run:
         public void DoNotShowDeprecationMessage_WhenNewCommandIsUsed()
         {
             string home = CreateTemporaryFolder(folderName: "Home");
-            var commandResult = new DotnetNewCommand(_log, "uninstall")
+            CommandResult commandResult = new DotnetNewCommand(_log, "uninstall")
                 .WithCustomHive(home)
                 .Execute();
 

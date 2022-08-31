@@ -799,4 +799,8 @@ The header is followed by the list of parameters and their errors (might be seve
   <data name="InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplateGroup" xml:space="preserve">
     <value>Failed to get information about template packages for template group '{0}'.</value>
   </data>
+  <data name="Commands_TemplateShortNameCommandConflict_Info" xml:space="preserve">
+    <value>To instantiate the template with short name '{0}', run:</value>
+    <comment>Followed by command example from new line.</comment>
+  </data>
 </root>

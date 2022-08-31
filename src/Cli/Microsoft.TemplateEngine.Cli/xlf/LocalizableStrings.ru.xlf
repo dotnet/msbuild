@@ -308,6 +308,11 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">Команда выполнена.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Commands_TemplateShortNameCommandConflict_Info">
+        <source>To instantiate the template with short name '{0}', run:</source>
+        <target state="new">To instantiate the template with short name '{0}', run:</target>
+        <note>Followed by command example from new line.</note>
+      </trans-unit>
       <trans-unit id="Commands_Validator_WrongArgumentValue">
         <source>Argument(s) {0} are not recognized. Must be one of: {1}.</source>
         <target state="translated">Аргументы {0} не распознаны. Требуется один из следующих: {1}.</target>
@@ -467,6 +472,16 @@ The header is followed by the list of parameters and their errors (might be seve
         <source>Did you mean one of the following templates?</source>
         <target state="translated">Вы имели в виду один из следующих шаблонов?</target>
         <note>Followed by the list of suggestions</note>
+      </trans-unit>
+      <trans-unit id="InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplate">
+        <source>Failed to get information about template packages for the template with identity '{0}'.</source>
+        <target state="new">Failed to get information about template packages for the template with identity '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplateGroup">
+        <source>Failed to get information about template packages for template group '{0}'.</source>
+        <target state="new">Failed to get information about template packages for template group '{0}'.</target>
+        <note />
       </trans-unit>
       <trans-unit id="InvalidCommandOptions">
         <source>Error: Invalid option(s):</source>
