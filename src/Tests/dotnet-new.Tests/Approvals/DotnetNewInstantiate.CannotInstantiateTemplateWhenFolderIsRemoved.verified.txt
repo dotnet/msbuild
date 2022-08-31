@@ -8,7 +8,7 @@ To rescan installed template packages, run:
    dotnet new --debug:rebuild-cache
 
 To uninstall the template package, run:
-   dotnet new uninstall %Test Execution Direcotry%\TemplateEngine.Tests\Guid_1\template
+   dotnet new uninstall %template location%
 
 To install the template package, run:
-   dotnet new install %Test Execution Direcotry%\TemplateEngine.Tests\Guid_1\template
+   dotnet new install %template location%

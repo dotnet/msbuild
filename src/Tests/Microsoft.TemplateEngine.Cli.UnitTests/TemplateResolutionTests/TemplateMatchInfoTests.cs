@@ -7,7 +7,6 @@ using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Mocks;
 using Microsoft.TemplateEngine.Utils;
-using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests
 {

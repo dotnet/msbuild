@@ -14,11 +14,10 @@ using Microsoft.TemplateSearch.Common;
 using Microsoft.TemplateSearch.Common.Abstractions;
 using Microsoft.TemplateSearch.Common.Providers;
 using Newtonsoft.Json.Linq;
-using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests
 {
-    public class TemplateSearchCoordinatorTests : IClassFixture<EnvironmentSettingsHelper>
+    public class TemplateSearchCoordinatorTests : BaseTest, IClassFixture<EnvironmentSettingsHelper>
     {
         private EnvironmentSettingsHelper _environmentSettingsHelper;
        
@@ -71,7 +70,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var engineEnvironmentSettings = _environmentSettingsHelper.CreateEnvironment(
                 virtualize: true,
                 environment: environment,
-                additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+                additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             var templatePackageManager = new TemplatePackageManager(engineEnvironmentSettings);
             engineEnvironmentSettings.Components.AddComponent(typeof(ITemplateSearchProviderFactory), new NuGetMetadataSearchProviderFactory());
 
@@ -116,7 +115,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var engineEnvironmentSettings = _environmentSettingsHelper.CreateEnvironment(
                 virtualize: true,
                 environment: environment,
-                additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+                additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             var templatePackageManager = new TemplatePackageManager(engineEnvironmentSettings);
             engineEnvironmentSettings.Components.AddComponent(typeof(ITemplateSearchProviderFactory), new NuGetMetadataSearchProviderFactory());
 
@@ -158,7 +157,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var engineEnvironmentSettings = _environmentSettingsHelper.CreateEnvironment(
                 virtualize: true,
                 environment: environment,
-                additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+                additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             var templatePackageManager = new TemplatePackageManager(engineEnvironmentSettings);
             engineEnvironmentSettings.Components.AddComponent(typeof(ITemplateSearchProviderFactory), new NuGetMetadataSearchProviderFactory());
 
@@ -197,7 +196,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var engineEnvironmentSettings = _environmentSettingsHelper.CreateEnvironment(
                 virtualize: true,
                 environment: environment,
-                additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+                additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             var templatePackageManager = new TemplatePackageManager(engineEnvironmentSettings);
             engineEnvironmentSettings.Components.AddComponent(typeof(ITemplateSearchProviderFactory), new NuGetMetadataSearchProviderFactory());
 
@@ -241,7 +240,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var engineEnvironmentSettings = _environmentSettingsHelper.CreateEnvironment(
                 virtualize: true,
                 environment: environment,
-                additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+                additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             var templatePackageManager = new TemplatePackageManager(engineEnvironmentSettings);
             engineEnvironmentSettings.Components.AddComponent(typeof(ITemplateSearchProviderFactory), new NuGetMetadataSearchProviderFactory());
 
@@ -282,7 +281,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var engineEnvironmentSettings = _environmentSettingsHelper.CreateEnvironment(
                 virtualize: true,
                 environment: environment,
-                additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+                additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             var templatePackageManager = new TemplatePackageManager(engineEnvironmentSettings);
             engineEnvironmentSettings.Components.AddComponent(typeof(ITemplateSearchProviderFactory), new NuGetMetadataSearchProviderFactory());
 
@@ -324,7 +323,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var engineEnvironmentSettings = _environmentSettingsHelper.CreateEnvironment(
                 virtualize: true,
                 environment: environment,
-                additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+                additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             var templatePackageManager = new TemplatePackageManager(engineEnvironmentSettings);
             engineEnvironmentSettings.Components.AddComponent(typeof(ITemplateSearchProviderFactory), new NuGetMetadataSearchProviderFactory());
 
@@ -371,7 +370,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var engineEnvironmentSettings = _environmentSettingsHelper.CreateEnvironment(
                 virtualize: true,
                 environment: environment,
-                additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+                additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             var templatePackageManager = new TemplatePackageManager(engineEnvironmentSettings);
             engineEnvironmentSettings.Components.AddComponent(typeof(ITemplateSearchProviderFactory), new NuGetMetadataSearchProviderFactory());
 
@@ -413,7 +412,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var engineEnvironmentSettings = _environmentSettingsHelper.CreateEnvironment(
                 virtualize: true,
                 environment: environment,
-                additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+                additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             var templatePackageManager = new TemplatePackageManager(engineEnvironmentSettings);
             engineEnvironmentSettings.Components.AddComponent(typeof(ITemplateSearchProviderFactory), new NuGetMetadataSearchProviderFactory());
 

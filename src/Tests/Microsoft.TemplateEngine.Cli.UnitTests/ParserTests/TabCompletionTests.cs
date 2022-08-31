@@ -12,7 +12,6 @@ using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Mocks;
 using Microsoft.TemplateEngine.TestHelper;
-using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 {
@@ -21,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void Instantiate_CanSuggestTemplateOption_StartsWith()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             var myCommand = NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse("new console --framework net7.0 --l");
@@ -37,7 +36,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 #pragma warning restore xUnit1004 // Test methods should not be skipped
         public void Instantiate_CanSuggestLanguages()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             var myCommand = NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse("new console --language ");
@@ -54,7 +53,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 #pragma warning restore xUnit1004 // Test methods should not be skipped
         public void Install_GetSuggestionsAfterInteractive()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             var myCommand = NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse("new install --interactive ");
@@ -67,7 +66,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void Install_GetSuggestionsAfterOptionWithoutArg()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             var myCommand = NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse("new install --nuget-source ");
@@ -81,7 +80,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 #pragma warning restore xUnit1004 // Test methods should not be skipped
         public void Install_GetSuggestionsAfterOptionWithArg()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             var myCommand = NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse("new install --nuget-source me");
@@ -94,7 +93,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void Instantiate_CanSuggestTemplate_StartsWith()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             var myCommand = NewCommandFactory.Create("new", _ => host);
 
             var parseResult = myCommand.Parse("new co");

@@ -17,7 +17,6 @@
       "src\\Tests\\Microsoft.TemplateEngine.Cli.IntegrationTests\\Microsoft.TemplateEngine.Cli.IntegrationTests.csproj",
       "src\\Tests\\Microsoft.TemplateEngine.Cli.UnitTests\\Microsoft.TemplateEngine.Cli.UnitTests.csproj",
       "src\\Tests\\Microsoft.TemplateEngine.EndToEndTestHarness\\Microsoft.TemplateEngine.EndToEndTestHarness.csproj",
-      "src\\Tests\\Microsoft.TemplateEngine.TestHelper\\Microsoft.TemplateEngine.TestHelper.csproj",
       "src\\Tests\\dotnet-new.Tests\\dotnet-new.IntegrationTests.csproj",
       "template_feed\\Microsoft.DotNet.Common.ItemTemplates\\Microsoft.DotNet.Common.ItemTemplates.csproj",
       "template_feed\\Microsoft.DotNet.Common.ProjectTemplates.7.0\\Microsoft.DotNet.Common.ProjectTemplates.7.0.csproj"

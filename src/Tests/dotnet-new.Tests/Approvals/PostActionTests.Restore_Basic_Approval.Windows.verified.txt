@@ -1,6 +1,6 @@
 ﻿The template "TestAssets.PostActions.RestoreNuGet.Basic" was created successfully.
 
 Processing post-creation actions...
-Restoring %Test Execution Direcotry%\TemplateEngine.Tests\Guid_1\MyProject.csproj:
+Restoring %working directory%\MyProject.csproj:
 %RESTORE CALLBACK OUTPUT%
 Restore succeeded.

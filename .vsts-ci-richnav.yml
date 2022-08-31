@@ -32,7 +32,7 @@ stages:
         richCodeNavigationLanguage: 'csharp'
         richCodeNavigationEnvironment: 'production'
         pool:
-            name: NetCore1ESPool-Public
+            name: NetCore1ESPool-Svc-Public
             demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre.Open  
         timeoutInMinutes: 180
         strategy:

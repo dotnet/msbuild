@@ -7,11 +7,10 @@ using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.TestHelper;
-using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 {
-    public class MiscTests
+    public class MiscTests : BaseTest
     {
         /// <summary>
         /// This test checks if help aliases are in sync with System.CommandLine.
@@ -77,7 +76,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                 { "--debug:show-config", args => args.DebugShowConfig }
             };
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             var parseResult = ParserFactory.CreateParser(myCommand).Parse(command);
             NewCommandArgs args = new NewCommandArgs(myCommand, parseResult);
@@ -107,7 +106,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                 { "--debug:show-config", args => args.DebugShowConfig }
             };
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             var parseResult = ParserFactory.CreateParser(myCommand).Parse(command);
             InstallCommandArgs args = new InstallCommandArgs((InstallCommand)parseResult.CommandResult.Command, parseResult);
@@ -137,7 +136,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                 { "--debug:show-config", args => args.DebugShowConfig }
             };
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             var parseResult = myCommand.Parse(command);
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
@@ -150,7 +149,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void ManuallyAddedOptionIsPreservedOnTemplateSubcommandLevel()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
+            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             var customOption = new Option<string>("--newOption");

@@ -3,7 +3,6 @@
 
 using System.CommandLine;
 using FakeItEasy;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Utilities;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Commands;
@@ -11,8 +10,6 @@ using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Mocks;
 using Microsoft.TemplateEngine.TestHelper;
-using VerifyXunit;
-using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 {

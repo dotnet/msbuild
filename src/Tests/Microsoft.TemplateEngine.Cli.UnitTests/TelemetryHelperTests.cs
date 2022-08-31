@@ -6,7 +6,6 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Parameters;
 using Microsoft.TemplateEngine.Utils;
-using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests
 {
