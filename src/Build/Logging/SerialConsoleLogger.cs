@@ -11,6 +11,7 @@ using Microsoft.Build.Shared;
 using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
+using System.Linq;
 
 #nullable disable
 
@@ -111,6 +112,10 @@ namespace Microsoft.Build.BackEnd.Logging
             if (Traits.LogAllEnvironmentVariables)
             {
                 WriteEnvironment(e.BuildEnvironment);
+            }
+            else
+            {
+                WriteEnvironment(e.BuildEnvironment.Where(kvp => EnvironmentUtilities.IsReservedProperty(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
             }
         }
 

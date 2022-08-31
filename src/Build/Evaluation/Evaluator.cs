@@ -824,8 +824,9 @@ namespace Microsoft.Build.Evaluation
             List<P> list = new(dictionary.Count);
             foreach (P p in dictionary)
             {
-                if (p is EnvironmentDerivedProjectPropertyInstance ||
-                    (p is ProjectProperty pp && pp.IsEnvironmentProperty))
+                if ((p is EnvironmentDerivedProjectPropertyInstance ||
+                    (p is ProjectProperty pp && pp.IsEnvironmentProperty)) &&
+                    !EnvironmentUtilities.IsReservedProperty(p.Name))
                 {
                     continue;
                 }

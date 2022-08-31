@@ -12,5 +12,12 @@ namespace Microsoft.Build.Shared
 
         public static bool Is64BitOperatingSystem =>
             Environment.Is64BitOperatingSystem;
+
+        public static bool IsReservedProperty(string propertyName)
+        {
+            return propertyName.StartsWith("MSBUILD") ||
+                propertyName.StartsWith("COMPLUS_") ||
+                propertyName.StartsWith("DOTNET_");
+        }
     }
 }
