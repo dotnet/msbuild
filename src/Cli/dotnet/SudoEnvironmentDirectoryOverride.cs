@@ -34,20 +34,11 @@ namespace Microsoft.DotNet.Cli
             return false;
         }
 
-        private static void OverridePathFromSudoPermToSudoUserPerm(string path)
-        {
-            if (!OperatingSystem.IsWindows() && IsRunningUnderSudo())
-            {
-                FileUtilities.ResetTempFilePermissions(path);
-            }
-        }
-
         public static void OverrideEnvironmentVariableToTmp(ParseResult parseResult)
         {
             if (!OperatingSystem.IsWindows() && IsRunningUnderSudo() && IsRunningWorkloadCommand(parseResult))
             {
                 string newProcessHomeDirectory = FileUtilities.CreateTempPath();
-                OverridePathFromSudoPermToSudoUserPerm(newProcessHomeDirectory);
                 var homeBeforeOverride = Path.Combine(Environment.GetEnvironmentVariable("HOME"));
                 Environment.SetEnvironmentVariable("HOME", newProcessHomeDirectory);
 
