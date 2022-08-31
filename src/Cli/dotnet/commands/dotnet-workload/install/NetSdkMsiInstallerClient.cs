@@ -493,17 +493,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         public async Task ExtractManifestAsync(string nupkgPath, string targetPath)
         {
             Log?.LogMessage($"ExtractManifestAsync: Extracting '{nupkgPath}' to '{targetPath}'");
-
             string extractionPath = FileUtilities.CreateTempPath();
-            if (Directory.Exists(extractionPath))
-            {
-                Directory.Delete(extractionPath, true);
-            }
 
             try
             {
-                Directory.CreateDirectory(extractionPath);
-                FileUtilities.ResetTempFilePermissions(extractionPath);
                 Log?.LogMessage($"ExtractManifestAsync: Temporary extraction path: '{extractionPath}'");
                 await _nugetPackageDownloader.ExtractPackageAsync(nupkgPath, new DirectoryPath(extractionPath));
                 if (Directory.Exists(targetPath))
