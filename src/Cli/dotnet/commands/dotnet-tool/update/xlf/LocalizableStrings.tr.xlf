@@ -79,7 +79,7 @@
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Update a global tool.</source>
-        <target state="translated">Genel bir aracı güncelleştirin.</target>
+        <target state="new">Update a global tool.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
