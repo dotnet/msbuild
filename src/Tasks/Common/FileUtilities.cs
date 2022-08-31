@@ -82,7 +82,7 @@ namespace Microsoft.NET.Build.Tasks
 
         [DllImport("libc", SetLastError = true)]
         private static extern int chmod(string pathname, int mode);
-        public static void ResetTempFilePermissions(string path)
+        private static void ResetTempFilePermissions(string path)
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {

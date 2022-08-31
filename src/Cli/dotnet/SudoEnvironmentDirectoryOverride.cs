@@ -38,9 +38,9 @@ namespace Microsoft.DotNet.Cli
         {
             if (!OperatingSystem.IsWindows() && IsRunningUnderSudo() && IsRunningWorkloadCommand(parseResult))
             {
-                string newProcessHomeDirectory = FileUtilities.CreateTempPath();
+                string sudoHome = FileUtilities.CreateTempPath();
                 var homeBeforeOverride = Path.Combine(Environment.GetEnvironmentVariable("HOME"));
-                Environment.SetEnvironmentVariable("HOME", newProcessHomeDirectory);
+                Environment.SetEnvironmentVariable("HOME", sudoHome);
 
                 CopyUserNuGetConfigToOverriddenHome(homeBeforeOverride);
             }
