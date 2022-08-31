@@ -600,11 +600,11 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         public IDictionary<string, string> GlobalProperties => implementation.GlobalProperties;
 
-        internal bool GlobalPropertiesContains(string key) => implementation is ProjectImpl projImpl ? projImpl.GlobalPropertiesContains(key) : GlobalProperties.ContainsKey(key);
+        internal bool GlobalPropertiesContains(string key) => implementation.GlobalPropertiesContains(key);
 
-        internal int GlobalPropertiesCount => implementation is ProjectImpl projImpl ? projImpl.GlobalPropertiesCount() : GlobalProperties.Count;
+        internal int GlobalPropertiesCount => implementation.GlobalPropertiesCount();
 
-        internal IEnumerable<KeyValuePair<string, string>> GlobalPropertiesEnumerable => implementation is ProjectImpl projImpl ? projImpl.GlobalPropertiesEnumerable() : GlobalProperties;
+        internal IEnumerable<KeyValuePair<string, string>> GlobalPropertiesEnumerable => implementation.GlobalPropertiesEnumerable();
 
         /// <summary>
         /// Item types in this project.
@@ -2093,25 +2093,22 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            public bool GlobalPropertiesContains(string key)
+            public override bool GlobalPropertiesContains(string key)
             {
                 return _data.GlobalPropertiesDictionary.Contains(key);
             }
 
-            public int GlobalPropertiesCount()
+            public override int GlobalPropertiesCount()
             {
                 return _data.GlobalPropertiesDictionary.Count;
             }
 
-            public IEnumerable<KeyValuePair<string, string>> GlobalPropertiesEnumerable()
+            public override IEnumerable<KeyValuePair<string, string>> GlobalPropertiesEnumerable()
             {
-                List<KeyValuePair<string, string>> result = new List<KeyValuePair<string, string>>();
                 foreach (ProjectPropertyInstance property in _data.GlobalPropertiesDictionary)
                 {
-                    result.Add(new KeyValuePair<string, string>(property.Name, ((IProperty)property).EvaluatedValueEscaped));
+                    yield return new KeyValuePair<string, string>(property.Name, ((IProperty)property).EvaluatedValueEscaped);
                 }
-
-                return result;
             }
 
             /// <summary>

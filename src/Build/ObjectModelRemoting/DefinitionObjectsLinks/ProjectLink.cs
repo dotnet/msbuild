@@ -259,5 +259,11 @@ namespace Microsoft.Build.ObjectModelRemoting
         /// Called by the local project collection to indicate to this project that it is no longer loaded.
         /// </summary>
         public abstract void Unload();
+
+        public virtual bool GlobalPropertiesContains(string key) => GlobalProperties.ContainsKey(key);
+
+        public virtual int GlobalPropertiesCount() => GlobalProperties.Count;
+
+        public virtual IEnumerable<KeyValuePair<string, string>> GlobalPropertiesEnumerable() => GlobalProperties;
     }
 }
