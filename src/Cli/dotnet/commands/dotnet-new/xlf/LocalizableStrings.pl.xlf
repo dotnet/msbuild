@@ -63,7 +63,7 @@
     to solution file: {1}
     solution folder: {2}</source>
         <target state="translated">Dodawanie
-    projektów: {0}
+    projektu (-ów): {0}
     do pliku rozwiązania: {1}
     folder rozwiązania: {2}</target>
         <note />

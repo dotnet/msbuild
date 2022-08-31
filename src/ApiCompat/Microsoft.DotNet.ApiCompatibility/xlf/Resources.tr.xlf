@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="AssemblyCultureDoesNotMatch">
         <source>{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</source>
-        <target state="new">{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</target>
+        <target state="translated">{2} bütünleştirilmiş kod kültürü '{0}', {3} bütünleştirilmiş kod kültürüyle '{1}' eşleşmiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyLoadError">
@@ -44,12 +44,12 @@
       </trans-unit>
       <trans-unit id="AssemblyVersionDoesNotMatch">
         <source>{3} assembly version '{1}' should be equal to {2} version '{0}'.</source>
-        <target state="new">{3} assembly version '{1}' should be equal to {2} version '{0}'.</target>
+        <target state="translated">{3} bütünleştirilmiş kodunun '{1}' sürümü {2} sürümüne '{0}' eşit olmalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyVersionIsNotCompatible">
         <source>{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</source>
-        <target state="new">{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</target>
+        <target state="translated">{2} bütünleştirilmiş kodunun '{0}' sürümü {3} sürümüne '{1}' eşit veya bundan yüksek olmalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotAddAbstractMember">
@@ -199,7 +199,7 @@
       </trans-unit>
       <trans-unit id="TypeMissingOnSide">
         <source>Type '{0}' exists on {1} but not on {2}</source>
-        <target state="new">Type '{0}' exists on {1} but not on {2}</target>
+        <target state="translated">'{0}' türü {1} üzerinde var ancak {2} üzerinde yok</target>
         <note />
       </trans-unit>
       <trans-unit id="VisitorRightCountShouldMatchMappersSetSize">

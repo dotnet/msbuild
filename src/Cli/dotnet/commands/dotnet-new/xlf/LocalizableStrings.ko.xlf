@@ -63,7 +63,7 @@
     to solution file: {1}
     solution folder: {2}</source>
         <target state="translated">
-    프로젝트 추가: {0}
+    프로젝트 추가 {0}
     대상 솔루션 파일: {1}
     솔루션 폴더: {2}</target>
         <note />
