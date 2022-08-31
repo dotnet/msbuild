@@ -1,5 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
@@ -241,8 +242,8 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         public async Task CanInstantiateTemplate_MultiValueChoiceParameterConditions()
         {
             // We cannot use Data-driven unit test (InlineData) as it's not supported by verifier framework (unless separate file per parameters is supplied)
-            await MultiValueChoiceParameterConditionsExecutor(new[] { "TestAssets.TemplateWithMultiValueChoice", "--Platform", "MacOS", "--Platform", "iOS" });
-            await MultiValueChoiceParameterConditionsExecutor(new[] { "TestAssets.TemplateWithMultiValueChoice", "--Platform", "MacOS", "iOS" });
+            await MultiValueChoiceParameterConditionsExecutor(new[] { "TestAssets.TemplateWithMultiValueChoice", "--Platform", "MacOS", "--Platform", "iOS" }).ConfigureAwait(false);
+            await MultiValueChoiceParameterConditionsExecutor(new[] { "TestAssets.TemplateWithMultiValueChoice", "--Platform", "MacOS", "iOS" }).ConfigureAwait(false);
         }
 
         private Task MultiValueChoiceParameterConditionsExecutor(string[] args)

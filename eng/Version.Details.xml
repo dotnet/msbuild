@@ -77,6 +77,10 @@
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>c5d3485aaab167b5b8d19ae8c317c7cf1693a08a</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="4.4.0-3.22430.19">
+      <Uri>https://github.com/dotnet/roslyn</Uri>
+      <Sha>c5d3485aaab167b5b8d19ae8c317c7cf1693a08a</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.CodeAnalysis.CSharp.Features" Version="4.4.0-3.22430.19">
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>c5d3485aaab167b5b8d19ae8c317c7cf1693a08a</Sha>
