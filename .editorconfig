@@ -16,7 +16,7 @@ trim_trailing_whitespace = true
 indent_size = 2
 
 # Generated code
-[*{_AssemblyInfo.cs,.notsupported.cs}]
+[*{_AssemblyInfo.cs,.notsupported.cs,*/obj/*/External/**/*,*/obj/dotnet-new.IntegrationTests/*/TemplatePackagesPaths.cs}]
 generated_code = true
 
 # C# files
@@ -444,8 +444,6 @@ dotnet_diagnostic.SA1649.severity = none
 [src/Tests/Common/Program.cs]
 # Declare types in namespaces
 dotnet_diagnostic.CA1050.severity = none
-# Comments should contain text
-dotnet_diagnostic.SA1120.severity = none
 # Elements should be documented
 dotnet_diagnostic.SA1600.severity = none
 # Partial elements should be documented
@@ -500,12 +498,6 @@ end_of_line = crlf
 
 # IDE0040: Add accessibility modifiers
 dotnet_diagnostic.IDE0040.severity = warning
-
-# Rules for generated code for template engine
-[{*/obj/*/External/**/*,*/obj/dotnet-new.IntegrationTests/**}]
-generated_code = true
-dotnet_diagnostic.IDE0005.severity = none
-dotnet_analyzer_diagnostic.severity = none
 
 [*.txt]
 insert_final_newline = false
