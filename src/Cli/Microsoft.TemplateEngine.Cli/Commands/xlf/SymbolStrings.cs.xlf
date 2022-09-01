@@ -185,7 +185,7 @@ Pokud je příkaz zadán bez argumentu, zobrazí seznam všech nainstalovaných 
       </trans-unit>
       <trans-unit id="Option_ProjectPath">
         <source>The project that should be used for context evaluation.</source>
-        <target state="new">The project that should be used for context evaluation.</target>
+        <target state="translated">Projekt, který by se měl použít pro vyhodnocení kontextu.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_TagFilter">

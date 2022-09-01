@@ -185,7 +185,7 @@ Se o comando for especificado sem o argumento, ele listará todos os pacotes de 
       </trans-unit>
       <trans-unit id="Option_ProjectPath">
         <source>The project that should be used for context evaluation.</source>
-        <target state="new">The project that should be used for context evaluation.</target>
+        <target state="translated">O projeto que deve ser usado para avaliação de contexto.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_TagFilter">
