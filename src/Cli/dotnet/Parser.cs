@@ -209,13 +209,13 @@ namespace Microsoft.DotNet.Cli
 
             if (exception is Utils.GracefulException)
             {
-                Reporter.Error.WriteLine(CommandContext.IsVerbose()
+                Reporter.Error.WriteLine(CommandLoggingContext.IsVerbose
                     ? exception.ToString().Red().Bold()
                     : exception.Message.Red().Bold());
             }
             else if (exception is CommandParsingException)
             {
-                Reporter.Error.WriteLine(CommandContext.IsVerbose()
+                Reporter.Error.WriteLine(CommandLoggingContext.IsVerbose
                     ? exception.ToString().Red().Bold()
                     : exception.Message.Red().Bold());
                 context.ParseResult.ShowHelp();

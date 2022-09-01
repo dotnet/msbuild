@@ -154,7 +154,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
             IEnumerable<TemplateGroup> templateGroups,
-            Reporter reporter,
+            IReporter reporter,
             CancellationToken cancellationToken = default)
         {
             IEnvironment environment = environmentSettings.Environment;
@@ -313,7 +313,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
             IEnumerable<CliTemplateInfo> templates,
-            Reporter reporter,
+            IReporter reporter,
             CancellationToken cancellationToken = default)
         {
             if (!templates.Any(t => string.IsNullOrWhiteSpace(t.GetLanguage()))
