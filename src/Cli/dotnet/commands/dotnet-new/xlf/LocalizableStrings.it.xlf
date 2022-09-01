@@ -243,6 +243,11 @@
         <target state="translated">Sono installate altre versioni dell'SDK che possono essere usate per eseguire questo modello. Per eseguire questo modello, passare a uno degli SDK seguenti nel sistema: '{0}'. Dettagli sulla selezione della versione SDK da eseguire: https://docs.microsoft.com/dotnet/core/tools/global-json.</target>
         <note>{0} is the list of installed and supported versions.</note>
       </trans-unit>
+      <trans-unit id="Verbosity_OptionDescription">
+        <source>Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</source>
+        <target state="new">Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WorkloadInfoProvider_Message_AddWorkloads">
         <source>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</source>
         <target state="translated">Eseguire 'dotnet workload search' per cercare i carichi di lavoro disponibili per l'installazione nell'SDK.</target>

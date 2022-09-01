@@ -243,6 +243,11 @@
         <target state="translated">Tiene instaladas otras versiones del SDK que se pueden usar para ejecutar esta plantilla. Cambie a cualquiera de los siguientes SDK en el sistema para ejecutar esta plantilla: "{0}". Detalles sobre la selección de la versión del SDK que se va a ejecutar: https://docs.microsoft.com/dotnet/core/tools/global-json.</target>
         <note>{0} is the list of installed and supported versions.</note>
       </trans-unit>
+      <trans-unit id="Verbosity_OptionDescription">
+        <source>Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</source>
+        <target state="new">Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WorkloadInfoProvider_Message_AddWorkloads">
         <source>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</source>
         <target state="translated">Ejecute "dotnet workload search" para buscar las cargas de trabajo disponibles para instalarse en el SDK.</target>

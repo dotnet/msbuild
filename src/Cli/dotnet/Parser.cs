@@ -62,8 +62,7 @@ namespace Microsoft.DotNet.Cli
             WorkloadCommandParser.GetCommand()
         };
 
-        // Options
-        public static readonly Option<bool> DiagOption = new Option<bool>(new[] { "-d", "--diagnostics" });
+        public static readonly Option<bool> DiagOption = CommonOptionsFactory.CreateDiagnosticsOption();
 
         public static readonly Option<bool> VersionOption = new Option<bool>("--version");
 

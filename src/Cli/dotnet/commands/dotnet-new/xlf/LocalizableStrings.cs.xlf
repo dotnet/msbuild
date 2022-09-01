@@ -243,6 +243,11 @@
         <target state="translated">Máte nainstalované další verze sady SDK, které se dají použít ke spuštění této šablony. Pokud chcete spustit tuto šablonu, přepněte na některou z následujících sad SDK ve vašem systému: {0}. Podrobnosti o výběru verze sady SDK, která se má spustit: https://docs.microsoft.com/dotnet/core/tools/global-json.</target>
         <note>{0} is the list of installed and supported versions.</note>
       </trans-unit>
+      <trans-unit id="Verbosity_OptionDescription">
+        <source>Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</source>
+        <target state="new">Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WorkloadInfoProvider_Message_AddWorkloads">
         <source>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</source>
         <target state="translated">Spuštěním příkazu dotnet workload search vyhledejte úlohy, které jsou k dispozici pro instalaci ve vaší sadě SDK.</target>

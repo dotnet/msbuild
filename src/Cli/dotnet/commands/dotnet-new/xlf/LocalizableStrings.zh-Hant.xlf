@@ -243,6 +243,11 @@
         <target state="translated">您已安裝其他可用來執行此範本的 SDK 版本。請在系統上切換至下列任一 SDK 以執行此範本: '{0}'。有關選取要執行之 SDK 版本的詳細資料: https://docs.microsoft.com/dotnet/core/tools/global-json。</target>
         <note>{0} is the list of installed and supported versions.</note>
       </trans-unit>
+      <trans-unit id="Verbosity_OptionDescription">
+        <source>Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</source>
+        <target state="new">Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WorkloadInfoProvider_Message_AddWorkloads">
         <source>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</source>
         <target state="translated">執行 ‘dotnet 工作負載搜尋’ 以搜尋可安裝在 SDK 上的工作負載。</target>

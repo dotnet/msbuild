@@ -243,6 +243,11 @@
         <target state="translated">이 템플릿을 실행하는 데 사용할 수 있는 다른 SDK 버전이 설치되어 있습니다. 이 템플릿을 실행하려면 시스템에서 다음 SDK 중 하나로 전환하세요. '{0}'. 실행할 SDK 버전 선택에 대한 세부 정보: https://docs.microsoft.com/dotnet/core/tools/global-json.</target>
         <note>{0} is the list of installed and supported versions.</note>
       </trans-unit>
+      <trans-unit id="Verbosity_OptionDescription">
+        <source>Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</source>
+        <target state="new">Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WorkloadInfoProvider_Message_AddWorkloads">
         <source>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</source>
         <target state="translated">'dotnet 워크로드 검색'을 실행하여 SDK에 설치할 수 있는 워크로드를 검색합니다.</target>

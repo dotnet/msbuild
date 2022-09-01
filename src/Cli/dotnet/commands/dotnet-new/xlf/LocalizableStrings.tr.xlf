@@ -243,6 +243,11 @@
         <target state="translated">Bu şablonu çalıştırmak için kullanılabilen başka SDK sürümü/sürümleri yüklü. Bu şablonu çalıştırmak için sisteminizde aşağıdaki SDK’(lar)dan herhangi birine geçiş yapın: '{0}'. Çalıştırılacak SDK sürümünü seçmeyle ilgili ayrıntılar için: https://docs.microsoft.com/dotnet/core/tools/global-json.</target>
         <note>{0} is the list of installed and supported versions.</note>
       </trans-unit>
+      <trans-unit id="Verbosity_OptionDescription">
+        <source>Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</source>
+        <target state="new">Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WorkloadInfoProvider_Message_AddWorkloads">
         <source>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</source>
         <target state="translated">SDK'nıza yüklenebilecek iş yüklerini aramak için 'dotnet workload search' komutunu çalıştırın.</target>
