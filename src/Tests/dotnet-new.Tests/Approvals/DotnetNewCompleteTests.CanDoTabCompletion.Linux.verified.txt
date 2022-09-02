@@ -29,9 +29,17 @@ webapp
 webconfig
 worker
 xunit
+--dry-run
+--force
 --help
+--name
+--no-update-check
+--output
+--project
 -?
 -h
+-n
+-o
 /?
 /h
 install

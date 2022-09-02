@@ -359,7 +359,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 
             if (!TestContext.IsLocalized())
             {
-                cmd.StdErr.Should().StartWith("No templates found");
+                cmd.StdErr.Should().StartWith("No templates or subcommands found");
             }
         }
 
@@ -419,7 +419,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 
             if (!TestContext.IsLocalized())
             {
-                cmd.StdErr.Should().StartWith("No templates found matching: 'c'.");
+                cmd.StdErr.Should().StartWith("No templates or subcommands found matching: 'c'.");
             }
         }
 

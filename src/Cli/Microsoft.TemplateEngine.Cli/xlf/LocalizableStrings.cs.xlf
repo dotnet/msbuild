@@ -403,6 +403,16 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">Upozornění: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="Generic_CommandHints_List">
+        <source>To list installed templates, run:</source>
+        <target state="new">To list installed templates, run:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_CommandHints_Search">
+        <source>To search for the templates on NuGet.org, run:</source>
+        <target state="new">To search for the templates on NuGet.org, run:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Generic_Details">
         <source>Details: {0}</source>
         <target state="translated">Podrobnosti: {0}</target>
@@ -423,6 +433,11 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">Příklady:</target>
         <note />
       </trans-unit>
+      <trans-unit id="Generic_Info_NoMatchingTemplates">
+        <source>No templates found matching: {0}.</source>
+        <target state="new">No templates found matching: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Generic_NoCallbackError">
         <source>No callback is configured. Running post action is not possible.</source>
         <target state="translated">Není nakonfigurováno žádné zpětné volání. Spuštění akce příspěvku není možné.</target>
@@ -437,6 +452,21 @@ The header is followed by the list of parameters and their errors (might be seve
         <source>Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</source>
         <target state="translated">Nepovedlo se načíst data hostitele dotnet CLI pro šablonu {0} z {1}. Data hostitele se budou ignorovat.</target>
         <note>{0} - template short name, {1} - file path to host data.</note>
+      </trans-unit>
+      <trans-unit id="InstantiateCommand_Info_NoMatchingTemplatesSubCommands">
+        <source>No templates or subcommands found matching: '{0}'.</source>
+        <target state="new">No templates or subcommands found matching: '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstantiateCommand_Info_TypoCorrection_Subcommands">
+        <source>Did you mean one of the following subcommands?</source>
+        <target state="new">Did you mean one of the following subcommands?</target>
+        <note>Followed by the list of suggestions</note>
+      </trans-unit>
+      <trans-unit id="InstantiateCommand_Info_TypoCorrection_Templates">
+        <source>Did you mean one of the following templates?</source>
+        <target state="new">Did you mean one of the following templates?</target>
+        <note>Followed by the list of suggestions</note>
       </trans-unit>
       <trans-unit id="InvalidCommandOptions">
         <source>Error: Invalid option(s):</source>
@@ -473,11 +503,6 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">Neplatná syntaxe příkazu: místo toho použijte {0}.</target>
         <note>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</note>
       </trans-unit>
-      <trans-unit id="ListTemplatesCommand">
-        <source>To list installed templates, run:</source>
-        <target state="translated">Pokud chcete vypsat nainstalované šablony, spusťte:</target>
-        <note />
-      </trans-unit>
       <trans-unit id="MissingRequiredParameter">
         <source>Mandatory option '{0}' is missing for the template '{1}'.</source>
         <target state="translated">U šablony {1} chybí povinná možnost {0}.</target>
@@ -501,11 +526,6 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="NoTemplatesFound">
         <source>No templates installed.</source>
         <target state="translated">Nejsou nainstalované žádné šablony.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NoTemplatesMatchingInputParameters">
-        <source>No templates found matching: {0}.</source>
-        <target state="translated">Nenašly se žádné šablony, které by odpovídaly tomuto hledání: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionalWorkloadsSyncFailed">
@@ -674,11 +694,6 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="RunningCommand">
         <source>Running command '{0}'...</source>
         <target state="translated">Spouští se příkaz {0}...</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SearchTemplatesCommand">
-        <source>To search for the templates on NuGet.org, run:</source>
-        <target state="translated">Pokud chcete hledat šablony na NuGet.org, spusťte:</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">

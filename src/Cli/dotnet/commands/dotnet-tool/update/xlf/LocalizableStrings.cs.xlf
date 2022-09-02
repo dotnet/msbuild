@@ -79,7 +79,7 @@
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Update a global or local tool.</source>
-        <target state="needs-review-translation">Aktualizuje globální nástroj.</target>
+        <target state="translated">Aktualizace globálního nebo místního nástroje.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">

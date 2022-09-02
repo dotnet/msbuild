@@ -233,11 +233,6 @@
         <target state="translated">项目上下文</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectPath_OptionDescription">
-        <source>The project that should be used for context evaluation.</source>
-        <target state="translated">应用于上下文评估的项目。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SdkInfoProvider_Message_InstallSdk">
         <source>Go to aka.ms/get-dotnet and install any of the supported SDK versions: '{0}'.</source>
         <target state="translated">转到 aka.ms/get-dotnet 并安装任何受支持的 SDK 版本:“{0}”。</target>

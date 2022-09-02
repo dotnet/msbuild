@@ -1,12 +1,10 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Diagnostics;
 using System.Globalization;
-using System.Text;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
-using Microsoft.TemplateEngine.Edge;
+using Microsoft.TemplateEngine.Cli;
 
 namespace Dotnet_new3
 {
@@ -18,7 +16,7 @@ namespace Dotnet_new3
         private const string VsLanguageOverrideEnvironmentVar = "VSLANG";
         private const string CompilerLanguageEnvironmentVar = "PreferredUILang";
 
-        internal static DefaultTemplateEngineHost CreateHost(bool disableSdkTemplates)
+        internal static CliTemplateEngineHost CreateHost(bool disableSdkTemplates, string? outputPath)
         {
             var preferences = new Dictionary<string, string>
             {
@@ -49,12 +47,13 @@ namespace Dotnet_new3
 
             ConfigureLocale();
 
-            DefaultTemplateEngineHost host = new DefaultTemplateEngineHost(
+            var host = new CliTemplateEngineHost(
                 HostIdentifier,
                 HostVersion,
                 preferences,
                 builtIns,
-                new[] { "dotnetcli" });
+                new[] { "dotnetcli" },
+                outputPath);
 
             return host;
         }
@@ -116,7 +115,7 @@ namespace Dotnet_new3
             Dotnet versionCommand = Dotnet.Version();
             versionCommand.CaptureStdOut();
 
-            var result = versionCommand.Execute();
+            Dotnet.Result result = versionCommand.Execute();
             if (result.ExitCode != 0)
             {
                 return null;

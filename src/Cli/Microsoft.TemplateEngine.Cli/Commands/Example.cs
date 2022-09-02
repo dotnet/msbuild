@@ -116,6 +116,20 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return this;
         }
 
+        internal Example WithSubcommand(string token)
+        {
+            Command? commandToUse = _currentCommand.Children.OfType<Command>().FirstOrDefault(c => c.Aliases.Contains(token));
+
+            if (commandToUse is null)
+            {
+                throw new ArgumentException($"Command {_currentCommand.Name} does not have subcommand '{token}'.");
+            }
+
+            _commandParts.Add(token);
+            _currentCommand = commandToUse;
+            return this;
+        }
+
         internal Example WithSubcommand<T>() where T : Command
         {
             if (!_currentCommand.Children.OfType<Command>().Any( c => c is T))

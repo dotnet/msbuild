@@ -76,7 +76,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             ValidateArgumentUsage(commandResult, ShortNameArgument, RemainingArguments);
         }
 
-        private static void ValidateOptionUsage(CommandResult commandResult, Option option)
+        internal void ValidateOptionUsage(CommandResult commandResult, Option option)
         {
             OptionResult? optionResult = commandResult.Parent?.Children.FirstOrDefault(symbol => symbol.Symbol == option) as OptionResult;
             if (optionResult != null)

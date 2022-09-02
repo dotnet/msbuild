@@ -183,6 +183,11 @@ Jeśli polecenie zostanie określone bez argumentu, zostanie wyświetlona lista 
         <target state="translated">Filtruje szablony na podstawie identyfikatora pakietu NuGet..</target>
         <note />
       </trans-unit>
+      <trans-unit id="Option_ProjectPath">
+        <source>The project that should be used for context evaluation.</source>
+        <target state="new">The project that should be used for context evaluation.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Option_TagFilter">
         <source>Filters the templates based on the tag.</source>
         <target state="translated">Filtruje szablony na podstawie tagu.</target>

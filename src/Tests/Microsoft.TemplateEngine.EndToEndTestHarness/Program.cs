@@ -11,6 +11,7 @@ using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli;
+using Microsoft.TemplateEngine.Cli.Commands;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.TemplateEngine.EndToEndTestHarness
@@ -20,32 +21,37 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
         private const string HostIdentifier = "endtoendtestharness";
         private const string HostVersion = "v1.0.0";
         private const string CommandName = "test-test";
-        private static readonly Dictionary<string, Func<IPhysicalFileSystem, JObject, string, bool>> VerificationLookup = new Dictionary<string, Func<IPhysicalFileSystem, JObject, string, bool>>(StringComparer.OrdinalIgnoreCase);
+        private static readonly Dictionary<string, Func<IPhysicalFileSystem, JObject, string, bool>> s_verificationLookup = new(StringComparer.OrdinalIgnoreCase);
 
         private static int Main(string[] args)
         {
-            VerificationLookup["dir_exists"] = CheckDirectoryExists;
-            VerificationLookup["file_exists"] = CheckFileExists;
-            VerificationLookup["dir_does_not_exist"] = CheckDirectoryDoesNotExist;
-            VerificationLookup["file_does_not_exist"] = CheckFileDoesNotExist;
-            VerificationLookup["file_contains"] = CheckFileContains;
-            VerificationLookup["file_does_not_contain"] = CheckFileDoesNotContain;
+            s_verificationLookup["dir_exists"] = CheckDirectoryExists;
+            s_verificationLookup["file_exists"] = CheckFileExists;
+            s_verificationLookup["dir_does_not_exist"] = CheckDirectoryDoesNotExist;
+            s_verificationLookup["file_does_not_exist"] = CheckFileDoesNotExist;
+            s_verificationLookup["file_contains"] = CheckFileContains;
+            s_verificationLookup["file_does_not_contain"] = CheckFileDoesNotContain;
 
             int batteryCount = int.Parse(args[0], CultureInfo.InvariantCulture);
             string outputPath = args[batteryCount + 1];
 
-            List<string> passThroughArgs = new List<string>();
+            List<string> passThroughArgs = new();
             passThroughArgs.AddRange(args.Skip(3 + batteryCount));
             passThroughArgs.Add("--debug:ephemeral-hive");
 
             string testAssetsRoot = args[batteryCount + 2];
+            CliTemplateEngineHost host = null;
 
-            ITemplateEngineHost host = CreateHost(testAssetsRoot);
-            host.VirtualizeDirectory(outputPath);
+            Command newCommand = NewCommandFactory.Create(
+       CommandName,
+               (ParseResult parseResult) =>
+               {
+                   FileInfo outputPath = parseResult.GetValueForOption(SharedOptions.OutputOption);
+                   host = CreateHost(testAssetsRoot, outputPath?.FullName);
+                   return host;
+               });
 
-            var command = NewCommandFactory.Create(CommandName, _ => host);
-
-            int result = ParserFactory.CreateParser(command).Parse(passThroughArgs.ToArray()).Invoke();
+            int result = ParserFactory.CreateParser(newCommand).Parse(passThroughArgs.ToArray()).Invoke();
 
             bool verificationsPassed = false;
 
@@ -70,7 +76,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             Console.Error.WriteLine("Output Files:");
             foreach (string fileName in host.FileSystem.EnumerateFiles(outputPath, "*", SearchOption.AllDirectories))
             {
-                Console.Error.WriteLine(fileName.Substring(outputPath.Length));
+                Console.Error.WriteLine(fileName.AsSpan(outputPath.Length));
             }
 
             return result != 0 ? result : batteryCount == 0 ? 0 : verificationsPassed ? 0 : 1;
@@ -85,7 +91,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
                 return true;
             }
 
-            Console.Error.WriteLine($"Expected {path} to not contain {config["text"].ToString()} but it did");
+            Console.Error.WriteLine($"Expected {path} to not contain {config["text"]} but it did");
             return false;
         }
 
@@ -161,10 +167,10 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
         private static bool RunVerifications(JArray verifications, IPhysicalFileSystem fs, string outputPath)
         {
             bool success = true;
-            foreach (JObject verification in verifications)
+            foreach (JObject verification in verifications.Cast<JObject>())
             {
                 string kind = verification["kind"].ToString();
-                if (!VerificationLookup.TryGetValue(kind, out Func<IPhysicalFileSystem, JObject, string, bool> func))
+                if (!s_verificationLookup.TryGetValue(kind, out Func<IPhysicalFileSystem, JObject, string, bool> func))
                 {
                     Console.Error.WriteLine($"Unable to find a verification handler for {kind}");
                     return false;
@@ -175,7 +181,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             return success;
         }
 
-        private static ITemplateEngineHost CreateHost(string testAssetsRoot)
+        private static CliTemplateEngineHost CreateHost(string testAssetsRoot, string outputPath)
         {
             var preferences = new Dictionary<string, string>
             {
@@ -199,7 +205,16 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             builtIns.AddRange(Cli.Components.AllComponents);
             builtIns.Add((typeof(ITemplatePackageProviderFactory), new BuiltInTemplatePackagesProviderFactory(testAssetsRoot)));
 
-            return new Edge.DefaultTemplateEngineHost(HostIdentifier, HostVersion, preferences, builtIns, new[] { "dotnetcli" });
+            var host = new CliTemplateEngineHost(
+                HostIdentifier,
+                HostVersion,
+                preferences,
+                builtIns,
+                new[] { "dotnetcli" },
+                outputPath);
+
+            host.VirtualizeDirectory(outputPath);
+            return host;
         }
 
         /// <summary>
@@ -210,14 +225,14 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
         /// </remarks>
         private static string GetCLIVersion()
         {
-            ProcessStartInfo processInfo = new ProcessStartInfo("dotnet", "--version")
+            ProcessStartInfo processInfo = new("dotnet", "--version")
             {
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 RedirectStandardError = true,
                 RedirectStandardOutput = true
             };
-            StringBuilder version = new StringBuilder();
+            StringBuilder version = new();
             Process p = Process.Start(processInfo);
             if (p != null)
             {

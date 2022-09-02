@@ -31,6 +31,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             this.AddArgument(NameArgument);
             this.AddOption(IgnoreConstraintsOption);
+            this.AddOption(SharedOptions.OutputOption);
+            this.AddOption(SharedOptions.ProjectPathOption);
             SetupTabularOutputOptions(this);
         }
 

@@ -3,7 +3,6 @@
 
 using System.CommandLine;
 using System.CommandLine.Parsing;
-using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.TestHelper;
 
@@ -11,7 +10,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 {
     public class ListTests : BaseTest
     {
-        private static Dictionary<string, FilterOptionDefinition> _stringToFilterDefMap = new Dictionary<string, FilterOptionDefinition>()
+        private static readonly Dictionary<string, FilterOptionDefinition> _stringToFilterDefMap = new()
         {
             { "author", FilterOptionDefinition.AuthorFilter },
             { "type", FilterOptionDefinition.TypeFilter },
@@ -79,11 +78,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         {
             FilterOptionDefinition expectedDef = _stringToFilterDefMap[expectedFilter];
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse(command);
-            ListCommandArgs args = new ListCommandArgs((BaseListCommand)parseResult.CommandResult.Command, parseResult);
+            ParseResult parseResult = myCommand.Parse(command);
+            ListCommandArgs args = new((BaseListCommand)parseResult.CommandResult.Command, parseResult);
 
             Assert.Single(args.AppliedFilters);
             Assert.Contains("filter-value", args.GetFilterValue(expectedDef));
@@ -120,11 +119,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         {
             FilterOptionDefinition expectedDef = _stringToFilterDefMap[expectedFilter];
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse(command);
-            ListCommandArgs args = new ListCommandArgs((BaseListCommand)parseResult.CommandResult.Command, parseResult);
+            ParseResult parseResult = myCommand.Parse(command);
+            ListCommandArgs args = new((BaseListCommand)parseResult.CommandResult.Command, parseResult);
 
             Assert.Single(args.AppliedFilters);
             Assert.Contains("filter-value", args.GetFilterValue(expectedDef));
@@ -136,25 +135,25 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("new list cr1 cr2")]
         public void List_CannotParseMultipleArgs(string command)
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse(command);
+            ParseResult parseResult = myCommand.Parse(command);
 
             Assert.NotEmpty(parseResult.Errors);
-            Assert.Equal("Unrecognized command or argument 'cr2'.", parseResult.Errors.First().Message);
+            Assert.Equal("Unrecognized command or argument 'cr2'.", parseResult.Errors[0].Message);
         }
 
         [Fact]
         public void List_CannotParseArgsAtNewLevel()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse("new smth list");
+            ParseResult parseResult = myCommand.Parse("new smth list");
 
             Assert.NotEmpty(parseResult.Errors);
-            Assert.Equal("Unrecognized command or argument(s): 'smth'.", parseResult.Errors.First().Message);
+            Assert.Equal("Unrecognized command or argument(s): 'smth'.", parseResult.Errors[0].Message);
         }
 
         [Theory]
@@ -165,25 +164,25 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("new -lang filter-value list source", "-lang")]
         public void List_CannotParseOptionsAtNewLevel(string command, string expectedFilter)
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse(command);
+            ParseResult parseResult = myCommand.Parse(command);
 
             Assert.NotEmpty(parseResult.Errors);
-            Assert.Equal($"Unrecognized command or argument(s): '{expectedFilter}','filter-value'.", parseResult.Errors.First().Message);
+            Assert.Equal($"Unrecognized command or argument(s): '{expectedFilter}','filter-value'.", parseResult.Errors[0].Message);
         }
 
         [Fact]
         public void List_Legacy_CannotParseArgsAtBothLevels()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse("new smth --list smth-else");
+            ParseResult parseResult = myCommand.Parse("new smth --list smth-else");
 
             Assert.NotEmpty(parseResult.Errors);
-            Assert.Equal("Unrecognized command or argument(s): 'smth'.", parseResult.Errors.First().Message);
+            Assert.Equal("Unrecognized command or argument(s): 'smth'.", parseResult.Errors[0].Message);
         }
 
         [Theory]
@@ -192,12 +191,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("new list --columns-all")]
         public void List_CanParseColumnsAll(string command)
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse(command);
+            ParseResult parseResult = myCommand.Parse(command);
 
-            ListCommandArgs args = new ListCommandArgs((BaseListCommand)parseResult.CommandResult.Command, parseResult);
+            ListCommandArgs args = new((BaseListCommand)parseResult.CommandResult.Command, parseResult);
 
             Assert.True(args.DisplayAllColumns);
         }
@@ -212,17 +211,17 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         //[InlineData("new --list --columns author,type", new[] { "author", "type" })]
         public void List_CanParseColumns(string command, string[] expectedColumns)
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse(command);
+            ParseResult parseResult = myCommand.Parse(command);
 
-            ListCommandArgs args = new ListCommandArgs((BaseListCommand)parseResult.CommandResult.Command, parseResult);
+            ListCommandArgs args = new((BaseListCommand)parseResult.CommandResult.Command, parseResult);
 
             Assert.False(args.DisplayAllColumns);
             Assert.NotEmpty(args.ColumnsToDisplay);
             Assert.Equal(expectedColumns.Length, args.ColumnsToDisplay?.Count);
-            foreach (var column in expectedColumns)
+            foreach (string column in expectedColumns)
             {
                 Assert.Contains(column, args.ColumnsToDisplay);
             }
@@ -233,13 +232,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("new list --columns c1 c2")]
         public void List_CannotParseUnknownColumns(string command)
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse(command);
+            ParseResult parseResult = myCommand.Parse(command);
 
             Assert.NotEmpty(parseResult.Errors);
-            Assert.Contains("Argument 'c1' not recognized. Must be one of:", parseResult.Errors.First().Message);
+            Assert.Contains("Argument 'c1' not recognized. Must be one of:", parseResult.Errors[0].Message);
         }
 
         [Theory]
@@ -249,17 +248,17 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("new foo bar list source", "'foo'")] //only first error is added
         public void List_HandleParseErrors(string command, string expectedInvalidTokens)
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse(command);
-            var errorMessages = parseResult.Errors.Select(error => error.Message);
+            ParseResult parseResult = myCommand.Parse(command);
+            IEnumerable<string> errorMessages = parseResult.Errors.Select(error => error.Message);
 
-            var expectedInvalidTokenSets = expectedInvalidTokens.Split("|");
+            string[] expectedInvalidTokenSets = expectedInvalidTokens.Split("|");
 
             Assert.NotEmpty(parseResult.Errors);
             Assert.Equal(expectedInvalidTokenSets.Length, parseResult.Errors.Count);
-            foreach (var tokenSet in expectedInvalidTokenSets)
+            foreach (string tokenSet in expectedInvalidTokenSets)
             {
                 Assert.True(errorMessages.Contains($"Unrecognized command or argument(s): {tokenSet}.") || errorMessages.Contains($"Unrecognized command or argument {tokenSet}."));
             }
@@ -268,14 +267,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void CommandExampleCanShowParentCommandsBeyondNew()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
-            Command rootCommand = new Command("dotnet")
+            Command rootCommand = new("dotnet")
             {
                 myCommand
             };
 
-            var parseResult = rootCommand.Parse("dotnet new list");
+            ParseResult parseResult = rootCommand.Parse("dotnet new list");
             Assert.Equal("dotnet new list", Example.For<NewCommand>(parseResult).WithSubcommand<ListCommand>());
         }
     }
