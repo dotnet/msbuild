@@ -363,35 +363,8 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 //    .BeEquivalentTo(expected.ReferencedProjectsConfiguration.OrderBy(cm => cm.Identity));
 
                 manifest.DiscoveryPatterns.OrderBy(dp => dp.Name).Should().BeEquivalentTo(expected.DiscoveryPatterns.OrderBy(dp => dp.Name));
-                var manifestAssets = manifest.Assets.OrderBy(a => a.BasePath).ThenBy(a => a.RelativePath).ThenBy(a => a.AssetKind);
-                var expectedAssets = expected.Assets.OrderBy(a => a.BasePath).ThenBy(a => a.RelativePath).ThenBy(a => a.AssetKind);
-                
-                manifestAssets.Should().BeEquivalentTo(expectedAssets, AssetDifferencesDetails(manifestAssets, expectedAssets));
-
-                static string AssetDifferencesDetails(IEnumerable<StaticWebAsset> manifestAssets, IEnumerable<StaticWebAsset> expectedAssets)
-                {
-                    var missingAssets = expectedAssets.Except(manifestAssets);
-                    var unexpectedAssets = manifestAssets.Except(expectedAssets);
-
-                    var differences = new List<string>();
-
-                    if (missingAssets.Any())
-                    {
-                        differences.Add($"The following expected assets weren't found in the manifest {string.Join(", ", missingAssets.Select(a => a.Identity))}.");
-                    }
-
-                    if (unexpectedAssets.Any())
-                    {
-                        differences.Add($"The following additional unexpected assets were found in the manifest {string.Join(", ", unexpectedAssets.Select(a => a.Identity))}.");
-                    }
-
-                    if (differences.Any())
-                    {
-                        differences.Add("If the difference in baselines is expected, please re-generate the baselines. Instructions are available at https://aka.ms/aspnet/blazor/blazor-wasm-sdk-baselines");
-                    }
-
-                    return string.Join(Environment.NewLine, differences);
-                }
+                manifest.Assets.OrderBy(a => a.BasePath).ThenBy(a => a.RelativePath).ThenBy(a => a.AssetKind)
+                    .Should().BeEquivalentTo(expected.Assets.OrderBy(a => a.BasePath).ThenBy(a => a.RelativePath).ThenBy(a => a.AssetKind));
             }
             else
             {
