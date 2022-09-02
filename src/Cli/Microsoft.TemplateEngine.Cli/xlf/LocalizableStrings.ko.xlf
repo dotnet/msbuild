@@ -405,12 +405,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="Generic_CommandHints_List">
         <source>To list installed templates, run:</source>
-        <target state="new">To list installed templates, run:</target>
+        <target state="translated">설치된 템플릿을 나열하려면 다음을 실행하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_CommandHints_Search">
         <source>To search for the templates on NuGet.org, run:</source>
-        <target state="new">To search for the templates on NuGet.org, run:</target>
+        <target state="translated">NuGet.org에서 템플릿을 검색하려면 다음을 실행하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_Details">
@@ -435,7 +435,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="Generic_Info_NoMatchingTemplates">
         <source>No templates found matching: {0}.</source>
-        <target state="new">No templates found matching: {0}.</target>
+        <target state="translated">일치하는 템플릿이 없음:{0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_NoCallbackError">
