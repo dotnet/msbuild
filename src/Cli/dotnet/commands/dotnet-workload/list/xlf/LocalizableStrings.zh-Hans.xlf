@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
         <source>Updates are available for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
-        <target state="translated">更新可用于以下工作负载: {0}。运行 `dotnet 工作负载更新` 以获取最新版本。</target>
+        <target state="translated">以下工作负载有可用的更新: {0}。请运行 `dotnet workload update` 以获取最新版本。</target>
         <note />
       </trans-unit>
     </body>
