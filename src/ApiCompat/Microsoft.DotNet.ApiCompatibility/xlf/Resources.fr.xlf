@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="AssemblyCultureDoesNotMatch">
         <source>{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</source>
-        <target state="translated">{2} la culture de l’assembly « {0} » ne correspond pas à la {3}culture de l’assembly de « {1} ».</target>
+        <target state="new">{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyLoadError">
@@ -44,12 +44,12 @@
       </trans-unit>
       <trans-unit id="AssemblyVersionDoesNotMatch">
         <source>{3} assembly version '{1}' should be equal to {2} version '{0}'.</source>
-        <target state="translated">La version de l’assembly {3} « {1} » doit être égale à la version de {2} « {0} ».</target>
+        <target state="new">{3} assembly version '{1}' should be equal to {2} version '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyVersionIsNotCompatible">
         <source>{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</source>
-        <target state="translated">{2}La version de l’assembly  «{0}» doit être supérieure ou égale à la version de {3} «{1}».</target>
+        <target state="new">{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotAddAbstractMember">
@@ -199,7 +199,7 @@
       </trans-unit>
       <trans-unit id="TypeMissingOnSide">
         <source>Type '{0}' exists on {1} but not on {2}</source>
-        <target state="translated">Le type '{0}' existe sur {1}, mais pas sur {2}.</target>
+        <target state="new">Type '{0}' exists on {1} but not on {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="VisitorRightCountShouldMatchMappersSetSize">
