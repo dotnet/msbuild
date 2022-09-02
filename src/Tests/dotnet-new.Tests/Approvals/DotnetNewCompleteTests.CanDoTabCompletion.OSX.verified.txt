@@ -1,6 +1,8 @@
 ﻿angular
 blazorserver
+blazorserver-empty
 blazorwasm
+blazorwasm-empty
 classlib
 console
 editorconfig
