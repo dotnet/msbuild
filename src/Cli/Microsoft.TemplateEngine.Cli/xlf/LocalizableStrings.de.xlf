@@ -475,7 +475,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
         <source>To list installed templates, run:</source>
-        <target state="translated">Um installierte Vorlagen aufzulisten, führen Sie folgende Aktion aus:</target>
+        <target state="new">To list installed templates, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingRequiredParameter">
@@ -505,7 +505,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="NoTemplatesMatchingInputParameters">
         <source>No templates found matching: {0}.</source>
-        <target state="translated">Keine Vorlagen gefunden, die "{0}" entsprechen.</target>
+        <target state="new">No templates found matching: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionalWorkloadsSyncFailed">
@@ -678,7 +678,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
         <source>To search for the templates on NuGet.org, run:</source>
-        <target state="translated">Um nach den Vorlagen unter NuGet.org zu suchen, führen Sie folgende Aktion aus:</target>
+        <target state="new">To search for the templates on NuGet.org, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">
