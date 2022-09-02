@@ -503,6 +503,11 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">잘못된 명령 구문: 대신 '{0}'을(를) 사용하세요.</target>
         <note>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</note>
       </trans-unit>
+      <trans-unit id="ListTemplatesCommand">
+        <source>To list installed templates, run:</source>
+        <target state="new">To list installed templates, run:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MissingRequiredParameter">
         <source>Mandatory option '{0}' is missing for the template '{1}'.</source>
         <target state="translated">'{1}' 템플릿에 대한 '{0}' 필수 옵션이 없습니다.</target>
@@ -526,6 +531,11 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="NoTemplatesFound">
         <source>No templates installed.</source>
         <target state="translated">템플릿이 설치되어 있지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoTemplatesMatchingInputParameters">
+        <source>No templates found matching: {0}.</source>
+        <target state="new">No templates found matching: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionalWorkloadsSyncFailed">
@@ -694,6 +704,11 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="RunningCommand">
         <source>Running command '{0}'...</source>
         <target state="translated">'{0}' 명령 실행 중 ...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SearchTemplatesCommand">
+        <source>To search for the templates on NuGet.org, run:</source>
+        <target state="new">To search for the templates on NuGet.org, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">
