@@ -8,7 +8,9 @@ using System.Linq;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Commands;
 
-internal partial class Program
+#pragma warning disable SA1205 // Partial elements should declare access
+partial class Program
+#pragma warning restore SA1205 // Partial elements should declare access
 {
     public static int Main(string[] args)
     {
