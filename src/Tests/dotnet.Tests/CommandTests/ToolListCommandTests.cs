@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             Action a = () => toolInstallCommand.Execute();
 
-            a.ShouldThrow<GracefulException>().And.Message
+            a.Should().Throw<GracefulException>().And.Message
                 .Should().Contain(string.Format(
                     LocalizableStrings.ListToolCommandInvalidGlobalAndLocalAndToolPath,
                     "global tool-path"));
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             Action a = () => toolInstallCommand.Execute();
 
-            a.ShouldThrow<GracefulException>().And.Message
+            a.Should().Throw<GracefulException>().And.Message
                 .Should().Contain(
                     string.Format(LocalizableStrings.ListToolCommandInvalidGlobalAndLocalAndToolPath,
                         "local tool-path"));

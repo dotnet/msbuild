@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using FluentAssertions;
+using FluentAssertions.Extensions;
 using ManifestReaderTests;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.ToolPackage;
@@ -260,9 +261,9 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 //  6.0.300 manifest was requested and then 6.0.200 manifest was requested
                 // we can't assert this for the offline cache
                 nugetDownloader.DownloadCallParams[0].id.ToString().Should().Be($"{testManifestName}.manifest-6.0.300");
-                nugetDownloader.DownloadCallParams[0].version.ShouldBeEquivalentTo(null);
+                nugetDownloader.DownloadCallParams[0].version.Should().BeNull();
                 nugetDownloader.DownloadCallParams[1].id.ToString().Should().Be($"{testManifestName}.manifest-6.0.200");
-                nugetDownloader.DownloadCallParams[1].version.ShouldBeEquivalentTo(null);
+                nugetDownloader.DownloadCallParams[1].version.Should().BeNull();
                 nugetDownloader.DownloadCallParams.Count.Should().Be(2);    
                 
             }
@@ -337,9 +338,9 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 //  6.0.300 manifest was requested and then 6.0.200 manifest was requested
                 // we can't assert this for the offline cache
                 nugetDownloader.DownloadCallParams[0].id.ToString().Should().Be($"{testManifestName}.manifest-6.0.300");
-                nugetDownloader.DownloadCallParams[0].version.ShouldBeEquivalentTo(null);
+                nugetDownloader.DownloadCallParams[0].version.Should().BeNull();
                 nugetDownloader.DownloadCallParams[1].id.ToString().Should().Be($"{testManifestName}.manifest-6.0.200");
-                nugetDownloader.DownloadCallParams[1].version.ShouldBeEquivalentTo(null);
+                nugetDownloader.DownloadCallParams[1].version.Should().BeNull();
                 nugetDownloader.DownloadCallParams.Count.Should().Be(2);
             }
 
@@ -403,7 +404,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 // only 6.0.300 manifest was requested
                 // we can't assert this for the offline cache
                 nugetDownloader.DownloadCallParams[0].id.ToString().Should().Be($"{testManifestName}.manifest-6.0.300");
-                nugetDownloader.DownloadCallParams[0].version.ShouldBeEquivalentTo(null);
+                nugetDownloader.DownloadCallParams[0].version.Should().BeNull();
             }
 
             //  Assert
@@ -671,7 +672,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             updater2.BackgroundUpdateAdvertisingManifestsWhenRequiredAsync().Wait();
             // var updateTime1 = DateTime.Now;
             downloader2.DownloadCallParams.Should().BeEmpty();
-            File.GetLastAccessTime(sentinelPath2).Should().BeCloseTo(updateTime2);
+            File.GetLastAccessTime(sentinelPath2).Should().BeCloseTo(updateTime2, 1.Seconds());
         }
 
         private List<(PackageId, NuGetVersion, DirectoryPath?, PackageSourceLocation)> GetExpectedDownloadedPackages(string sdkFeatureBand = "6.0.100")

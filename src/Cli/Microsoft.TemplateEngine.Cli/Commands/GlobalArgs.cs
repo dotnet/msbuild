@@ -19,6 +19,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             ParseResult = parseResult;
             Command = command;
             RootCommand = GetNewCommandFromParseResult(parseResult);
+            HasHelpOption = parseResult.CommandResult
+                .Children
+                .OfType<OptionResult>()
+                .Select(r => r.Option)
+                .Any(o => o.HasAlias(Constants.KnownHelpAliases[0]));
         }
 
         protected GlobalArgs(GlobalArgs args) : this(args.Command, args.ParseResult) { }
@@ -42,6 +47,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal bool DebugShowConfig { get; private set; }
 
         internal string? DebugCustomSettingsLocation { get; private set; }
+
+        internal bool HasHelpOption { get; private set; }
 
         protected static (bool, IReadOnlyList<string>?) ParseTabularOutputSettings(ITabularOutputCommand command, ParseResult parseResult)
         {

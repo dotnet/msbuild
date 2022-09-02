@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Cli;
+using Microsoft.TemplateEngine.Cli.Commands;
 
 namespace Dotnet_new3
 {
@@ -25,36 +25,16 @@ namespace Dotnet_new3
         {
             Command newCommand = NewCommandFactory.Create(
                 CommandName,
-                (ParseResult parseResult) => HostFactory.CreateHost(parseResult.GetValueForOption(_debugDisableBuiltInTemplatesOption)),
-                (ParseResult parseResult) => new TelemetryLogger(null, parseResult.GetValueForOption(_debugEmitTelemetryOption)));
+                (ParseResult parseResult) =>
+                {
+                    FileInfo? outputPath = parseResult.GetValueForOption(SharedOptions.OutputOption);
+                    return HostFactory.CreateHost(parseResult.GetValueForOption(_debugDisableBuiltInTemplatesOption), outputPath?.FullName);
+                });
 
             newCommand.AddGlobalOption(_debugEmitTelemetryOption);
             newCommand.AddGlobalOption(_debugDisableBuiltInTemplatesOption);
             newCommand.AddCommand(new CompleteCommand());
             return newCommand;
-        }
-
-        private static bool ExecuteDotnetCommand(Dotnet command)
-        {
-            command.CaptureStdOut();
-            command.CaptureStdErr();
-            Console.WriteLine($"Running '{command.Command}':");
-            var result = command.Execute();
-            Console.WriteLine(result.ExitCode == 0 ? "Command succeeded." : "Command failed.");
-            WriteCommandOutput(result);
-            return result.ExitCode == 0;
-        }
-
-        /// <summary>
-        /// Writes formatted command output from <paramref name="process"/>.
-        /// </summary>
-        private static void WriteCommandOutput(Dotnet.Result process)
-        {
-            Console.WriteLine("Output from command:");
-            Console.WriteLine("StdOut:");
-            Console.WriteLine(string.IsNullOrWhiteSpace(process.StdOut) ? "(empty)" : process.StdOut.Trim('\n', '\r'));
-            Console.WriteLine("StdErr:");
-            Console.WriteLine(string.IsNullOrWhiteSpace(process.StdErr) ? "(empty)" : process.StdErr.Trim('\n', '\r'));
         }
     }
 }

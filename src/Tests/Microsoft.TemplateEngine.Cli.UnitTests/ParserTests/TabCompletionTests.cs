@@ -12,7 +12,6 @@ using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Mocks;
 using Microsoft.TemplateEngine.TestHelper;
-using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 {
@@ -21,11 +20,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void Instantiate_CanSuggestTemplateOption_StartsWith()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            Command myCommand = NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse("new console --framework net7.0 --l");
-            var suggestions = parseResult.GetCompletions().Select(l => l.Label).ToArray();
+            ParseResult parseResult = myCommand.Parse("new console --framework net7.0 --l");
+            string[] suggestions = parseResult.GetCompletions().Select(l => l.Label).ToArray();
 
             Assert.Equal(2, suggestions.Length);
             Assert.Contains("--langVersion", suggestions);
@@ -37,11 +36,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 #pragma warning restore xUnit1004 // Test methods should not be skipped
         public void Instantiate_CanSuggestLanguages()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            Command myCommand = NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse("new console --language ");
-            var suggestions = parseResult.GetCompletions().Select(l => l.Label).ToArray();
+            ParseResult parseResult = myCommand.Parse("new console --language ");
+            string[] suggestions = parseResult.GetCompletions().Select(l => l.Label).ToArray();
 
             Assert.Equal(3, suggestions.Length);
             Assert.Contains("C#", suggestions);
@@ -54,11 +53,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 #pragma warning restore xUnit1004 // Test methods should not be skipped
         public void Install_GetSuggestionsAfterInteractive()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            Command myCommand = NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse("new install --interactive ");
-            var result = parseResult.GetCompletions().Select(l => l.Label).ToArray();
+            ParseResult parseResult = myCommand.Parse("new install --interactive ");
+            string[] result = parseResult.GetCompletions().Select(l => l.Label).ToArray();
 
             Assert.Equal(2, result.Length);
             Assert.Contains("--nuget-source", result);
@@ -67,11 +66,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void Install_GetSuggestionsAfterOptionWithoutArg()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            Command myCommand = NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse("new install --nuget-source ");
-            var result = parseResult.GetCompletions().ToArray();
+            ParseResult parseResult = myCommand.Parse("new install --nuget-source ");
+            CompletionItem[] result = parseResult.GetCompletions().ToArray();
 
             Assert.Empty(result);
         }
@@ -81,11 +80,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 #pragma warning restore xUnit1004 // Test methods should not be skipped
         public void Install_GetSuggestionsAfterOptionWithArg()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            Command myCommand = NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse("new install --nuget-source me");
-            var result = parseResult.GetCompletions().Select(l => l.Label).ToArray();
+            ParseResult parseResult = myCommand.Parse("new install --nuget-source me");
+            string[] result = parseResult.GetCompletions().Select(l => l.Label).ToArray();
 
             Assert.Single(result);
             Assert.Contains("--interactive", result);
@@ -94,11 +93,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void Instantiate_CanSuggestTemplate_StartsWith()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            var myCommand = NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            Command myCommand = NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse("new co");
-            var suggestions = parseResult.GetCompletions().Select(l => l.Label).ToArray();
+            ParseResult parseResult = myCommand.Parse("new co");
+            string[] suggestions = parseResult.GetCompletions().Select(l => l.Label).ToArray();
 
             Assert.Single(suggestions);
             Assert.Equal("console", suggestions.Single());
@@ -107,24 +106,24 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void CanCompleteChoice_FromSingleTemplate()
         {
-            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithChoiceParameter("testChoice", "val1", "val2", "val3");
 
-            var templateGroups = TemplateGroup.FromTemplateList(
+            IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()));
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($" new foo --testChoice ");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($" new foo --testChoice ");
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
-            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            IEnumerable<string> result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Equal(new[] { "val1", "val2", "val3" }, result);
         }
@@ -136,24 +135,24 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         //  Skip = "Multiple arity option completion does not work. https://github.com/dotnet/command-line-api/issues/1727")]
         public void CanCompleteChoice_MultichoiceTabCompletion(string command, string[] suggestions)
         {
-            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithMultiChoiceParameter("testChoice", "val1", "val2", "val3");
 
-            var templateGroups = TemplateGroup.FromTemplateList(
+            IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()));
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse(command);
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse(command);
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
-            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            IEnumerable<string> result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Equal(suggestions, result);
         }
@@ -161,23 +160,23 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void CanCompleteChoice_FromSingleTemplate_StartsWith()
         {
-            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithChoiceParameter("testChoice", "val1", "val2", "boo");
 
-            var templateGroups = TemplateGroup.FromTemplateList(
+            IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()));
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($" new foo --testChoice v");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($" new foo --testChoice v");
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
-            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            IEnumerable<string> result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Equal(new[] { "val1", "val2" }, result);
         }
@@ -185,24 +184,24 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void CanCompleteChoice_FromSingleTemplate_InTheMiddle()
         {
-            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithChoiceParameter("testChoice", "val1", "val2", "boo");
 
-            var templateGroups = TemplateGroup.FromTemplateList(
+            IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()));
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($" new foo --testChoice v --name test");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($" new foo --testChoice v --name test");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
             completionContext = completionContext!.AtCursorPosition(23);
 
-            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            IEnumerable<string> result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Equal(new[] { "val1", "val2" }, result);
         }
@@ -210,26 +209,26 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void CanCompleteChoice_FromMultipleTemplates()
         {
-            var template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithChoiceParameter("testChoice", "val1");
 
-            var template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group")
+            MockTemplateInfo template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group")
                 .WithChoiceParameter("testChoice", "val2", "val3");
 
-            var templateGroups = TemplateGroup.FromTemplateList(
+            IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template1, template2 }, A.Fake<IHostSpecificDataLoader>()));
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($" new foo --testChoice ");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($" new foo --testChoice ");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
-            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            IEnumerable<string> result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Equal(new[] { "val1", "val2", "val3" }, result);
         }
@@ -237,26 +236,26 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void CanCompleteChoice_FromMultipleTemplates_StartsWith()
         {
-            var template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithChoiceParameter("testChoice", "val1");
 
-            var template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group")
+            MockTemplateInfo template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group")
                 .WithChoiceParameter("testChoice", "val2", "boo");
 
-            var templateGroups = TemplateGroup.FromTemplateList(
+            IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template1, template2 }, A.Fake<IHostSpecificDataLoader>()));
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($" new foo --testChoice v");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($" new foo --testChoice v");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
-            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            IEnumerable<string> result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Equal(new[] { "val1", "val2" }, result);
         }
@@ -264,28 +263,28 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void CanCompleteParameters_FromMultipleTemplates()
         {
-            var template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithChoiceParameter("testChoice", "val1")
                 .WithParameters("foo", "bar");
 
-            var template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group")
+            MockTemplateInfo template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group")
                 .WithChoiceParameter("testChoice", "val2", "val3")
                 .WithParameters("param");
 
-            var templateGroups = TemplateGroup.FromTemplateList(
+            IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template1, template2 }, A.Fake<IHostSpecificDataLoader>()));
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($" new foo ");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($" new foo ");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
-            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            IEnumerable<string> result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Contains("--param", result);
             Assert.Contains("--testChoice", result);
@@ -305,28 +304,28 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void CanCompleteParameters_StartsWith_FromMultipleTemplates()
         {
-            var template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithChoiceParameter("testChoice", "val1")
                 .WithParameters("foo", "bar");
 
-            var template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group")
+            MockTemplateInfo template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group")
                 .WithChoiceParameter("testChoice", "val2", "val3")
                 .WithParameters("test");
 
-            var templateGroups = TemplateGroup.FromTemplateList(
+            IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template1, template2 }, A.Fake<IHostSpecificDataLoader>()));
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($" new foo --t");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($" new foo --t");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
-            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            IEnumerable<string> result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Contains("--test", result);
             Assert.Contains("--testChoice", result);
@@ -348,28 +347,28 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 #pragma warning restore xUnit1004 // Test methods should not be skipped
         public void CanCompleteParameters_StartsWith_AfterOption()
         {
-            var template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithChoiceParameter("testChoice", "val1")
                 .WithParameters("foo", "bar");
 
-            var template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group")
+            MockTemplateInfo template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group")
                 .WithChoiceParameter("testChoice", "val2", "val3")
                 .WithParameters("test");
 
-            var templateGroups = TemplateGroup.FromTemplateList(
+            IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template1, template2 }, A.Fake<IHostSpecificDataLoader>()));
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($" new foo --foo val1 --bar val2 --t");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($" new foo --foo val1 --bar val2 --t");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
-            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            IEnumerable<string> result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.DoesNotContain("--test", result);
             Assert.Contains("--testChoice", result);
@@ -391,26 +390,26 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("--language")]
         public void CanCompleteLanguages(string optionName)
         {
-            var template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithTag("language", "C#");
 
-            var template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group")
+            MockTemplateInfo template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group")
                 .WithTag("language", "F#");
 
-            var templateGroups = TemplateGroup.FromTemplateList(
+            IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template1, template2 }, A.Fake<IHostSpecificDataLoader>()));
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($" new foo {optionName} ");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($" new foo {optionName} ");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
-            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            IEnumerable<string> result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Equal(new[] { "C#", "F#" }, result);
         }
@@ -418,26 +417,26 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void CanCompleteTypes()
         {
-            var template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithTag("type", "project");
 
-            var template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group")
+            MockTemplateInfo template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group")
                 .WithTag("type", "solution");
 
-            var templateGroups = TemplateGroup.FromTemplateList(
+            IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template1, template2 }, A.Fake<IHostSpecificDataLoader>()));
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($" new foo --type ");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($" new foo --type ");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
-            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            IEnumerable<string> result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Equal(new[] { "project", "solution" }, result);
         }
@@ -445,29 +444,29 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void CanIgnoreTemplateGroupsWithConstraints()
         {
-            var template1 = new MockTemplateInfo("foo1", identity: "foo.1")
+            MockTemplateInfo template1 = new MockTemplateInfo("foo1", identity: "foo.1")
                 .WithConstraints(new TemplateConstraintInfo("test", "yes"));
 
-            var template2 = new MockTemplateInfo("foo2", identity: "foo.2")
+            MockTemplateInfo template2 = new MockTemplateInfo("foo2", identity: "foo.2")
                 .WithConstraints(new TemplateConstraintInfo("test", "no"));
 
-            var template3 = new MockTemplateInfo("foo3", identity: "foo.3")
+            MockTemplateInfo template3 = new MockTemplateInfo("foo3", identity: "foo.3")
              .WithConstraints(new TemplateConstraintInfo("test", "bad-params"));
 
-            var templateGroups = TemplateGroup.FromTemplateList(
+            IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template1, template2, template3 }, A.Fake<IHostSpecificDataLoader>()));
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: new[] { (typeof(ITemplateConstraintFactory), (IIdentifiedComponent)new TestConstraintFactory("test")) });
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: new[] { (typeof(ITemplateConstraintFactory), (IIdentifiedComponent)new TestConstraintFactory("test")) });
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($" new fo");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($" new fo");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
-            var result = InstantiateCommand.GetTemplateNameCompletions(args.ShortName, templateGroups, settings).Select(l => l.Label);
+            IEnumerable<string> result = InstantiateCommand.GetTemplateNameCompletions(args.ShortName, templateGroups, settings).Select(l => l.Label);
 
             Assert.Equal(new[] { "foo1" }, result);
         }
@@ -475,29 +474,29 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void CanIgnoreTemplateGroupsWithConstraints_IgnoresLongEvaluationTemplateGroups()
         {
-            var template1 = new MockTemplateInfo("foo1", identity: "foo.1")
+            MockTemplateInfo template1 = new MockTemplateInfo("foo1", identity: "foo.1")
                 .WithConstraints(new TemplateConstraintInfo("test", "yes"));
 
-            var template2 = new MockTemplateInfo("foo2", identity: "foo.2")
+            MockTemplateInfo template2 = new MockTemplateInfo("foo2", identity: "foo.2")
                 .WithConstraints(new TemplateConstraintInfo("test", "no"));
 
-            var template3 = new MockTemplateInfo("foo3", identity: "foo.3")
+            MockTemplateInfo template3 = new MockTemplateInfo("foo3", identity: "foo.3")
              .WithConstraints(new TemplateConstraintInfo("test", "bad-params"));
 
-            var templateGroups = TemplateGroup.FromTemplateList(
+            IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template1, template2, template3 }, A.Fake<IHostSpecificDataLoader>()));
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: new[] { (typeof(ITemplateConstraintFactory), (IIdentifiedComponent)new LongRunningConstraintFactory("test", 1500)) });
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: new[] { (typeof(ITemplateConstraintFactory), (IIdentifiedComponent)new LongRunningConstraintFactory("test", 1500)) });
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($" new fo");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($" new fo");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
-            var result = InstantiateCommand.GetTemplateNameCompletions(args.ShortName, templateGroups, settings).Select(l => l.Label);
+            IEnumerable<string> result = InstantiateCommand.GetTemplateNameCompletions(args.ShortName, templateGroups, settings).Select(l => l.Label);
 
             Assert.Empty(result);
         }
@@ -505,32 +504,32 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void CanIgnoreTemplatesInGroupWithConstraints()
         {
-            var template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "group")
+            MockTemplateInfo template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "group")
                 .WithConstraints(new TemplateConstraintInfo("test", "yes"))
                 .WithParameter("a");
 
-            var template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "group")
+            MockTemplateInfo template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "group")
                 .WithConstraints(new TemplateConstraintInfo("test", "no"))
-                .WithParameter("b"); 
+                .WithParameter("b");
 
-            var template3 = new MockTemplateInfo("foo", identity: "foo.3", groupIdentity: "group")
+            MockTemplateInfo template3 = new MockTemplateInfo("foo", identity: "foo.3", groupIdentity: "group")
              .WithConstraints(new TemplateConstraintInfo("test", "bad-params"))
              .WithParameter("c");
 
-            var templateGroups = TemplateGroup.FromTemplateList(
+            IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template1, template2, template3 }, A.Fake<IHostSpecificDataLoader>()));
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: new[] { (typeof(ITemplateConstraintFactory), (IIdentifiedComponent)new TestConstraintFactory("test")) });
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: new[] { (typeof(ITemplateConstraintFactory), (IIdentifiedComponent)new TestConstraintFactory("test")) });
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($" new foo ");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($" new foo ");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
-            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            IEnumerable<string> result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Contains("--a", result);
             Assert.DoesNotContain("--b", result);
@@ -540,32 +539,32 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void IncludesTemplatesInGroupWithLongEvaluatedConstraints()
         {
-            var template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "group")
+            MockTemplateInfo template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "group")
                 .WithConstraints(new TemplateConstraintInfo("test", "yes"))
                 .WithParameter("a");
 
-            var template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "group")
+            MockTemplateInfo template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "group")
                 .WithConstraints(new TemplateConstraintInfo("test", "no"))
                 .WithParameter("b");
 
-            var template3 = new MockTemplateInfo("foo", identity: "foo.3", groupIdentity: "group")
+            MockTemplateInfo template3 = new MockTemplateInfo("foo", identity: "foo.3", groupIdentity: "group")
              .WithConstraints(new TemplateConstraintInfo("test", "bad-params"))
              .WithParameter("c");
 
-            var templateGroups = TemplateGroup.FromTemplateList(
+            IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template1, template2, template3 }, A.Fake<IHostSpecificDataLoader>()));
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: new[] { (typeof(ITemplateConstraintFactory), (IIdentifiedComponent)new LongRunningConstraintFactory("test", 1500)) });
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: new[] { (typeof(ITemplateConstraintFactory), (IIdentifiedComponent)new LongRunningConstraintFactory("test", 1500)) });
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($" new foo ");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($" new foo ");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
-            var result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
+            IEnumerable<string> result = InstantiateCommand.GetTemplateCompletions(args, templateGroups, settings, packageManager, completionContext!).Select(l => l.Label);
 
             Assert.Contains("--a", result);
             Assert.Contains("--b", result);
@@ -575,31 +574,31 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void WillNotEvaluateConstraints_WhenAtLeastOneTemplateInGroupDoesNotHaveConstraints()
         {
-            var template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "group")
+            MockTemplateInfo template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "group")
                 .WithParameter("a");
 
-            var template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "group")
+            MockTemplateInfo template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "group")
                 .WithConstraints(new TemplateConstraintInfo("test", "no"))
                 .WithParameter("b");
 
-            var template3 = new MockTemplateInfo("foo", identity: "foo.3", groupIdentity: "group")
+            MockTemplateInfo template3 = new MockTemplateInfo("foo", identity: "foo.3", groupIdentity: "group")
              .WithConstraints(new TemplateConstraintInfo("test", "bad-params"))
              .WithParameter("c");
 
-            var templateGroups = TemplateGroup.FromTemplateList(
+            IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template1, template2, template3 }, A.Fake<IHostSpecificDataLoader>()));
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: new[] { (typeof(ITemplateConstraintFactory), (IIdentifiedComponent)new LongRunningConstraintFactory("test", 3000)) });
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: new[] { (typeof(ITemplateConstraintFactory), (IIdentifiedComponent)new LongRunningConstraintFactory("test", 3000)) });
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($" new fo");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($" new fo");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             var completionContext = parseResult.GetCompletionContext() as TextCompletionContext;
             Assert.NotNull(completionContext);
 
-            var result = InstantiateCommand.GetTemplateNameCompletions(args.ShortName, templateGroups, settings).Select(l => l.Label);
+            IEnumerable<string> result = InstantiateCommand.GetTemplateNameCompletions(args.ShortName, templateGroups, settings).Select(l => l.Label);
 
             Assert.Equal(new[] { "foo" }, result);
         }

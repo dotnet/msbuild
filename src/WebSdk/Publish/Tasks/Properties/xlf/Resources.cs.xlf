@@ -636,9 +636,9 @@ Volitelné příznaky:
 </source>
         <target state="translated">
 /M:&lt;Název cílového serveru nebo adresa URL služby&gt;
-	Pokud tento příznak není zadán, balíček je instalován v počítači, v němž je spuštěn tento příkaz. Adresa URL služby může mít následující formát:
+	Pokud tento příznak není zadán, balíček je instalován v počítači, v němž je spuštěn tento příkaz. Adresa URL služby může mít následující formát:
 		https://&lt;cílový_server&gt;:8172/MSDeploy.axd 
-	Tento formát vyžaduje, aby na cílovém serveru byla nainstalována služba IIS 7 a aby byla nastavena služba IIS 7 Web Management Service(WMSvc) a obslužná rutina nasazení webu.
+	Tento formát vyžaduje, aby na cílovém serveru byla nainstalována služba IIS 7 a aby byla nastavena služba IIS 7 Web Management Service(WMSvc) a obslužná rutina nasazení webu.
 	Adresa URL služby může rovněž mít následující formát:
 		http://&lt;cílový_server&gt;/MSDeployAgentService 
 	Tento formát vyžaduje práva pro správu na cílovém serveru a dále vyžaduje, aby bna cílovém serveru byla nainstalována služba Web Deploy Remote Service (MsDepSvc). Služba IIS 7 nemusí být na cílovém serveru nainstalována.

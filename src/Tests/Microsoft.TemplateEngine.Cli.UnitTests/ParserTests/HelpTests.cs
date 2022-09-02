@@ -10,16 +10,12 @@ using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Mocks;
-using Microsoft.TemplateEngine.TestHelper;
-using VerifyXunit;
-using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 {
     public partial class HelpTests
     {
         [Theory]
-#pragma warning disable SA1117 // ParameterDefinitionSet should be on same line or separate lines
         [InlineData("Template Name", "Language", "Me", "Template Description",
 @"Template Name (Language)
 Author: Me
@@ -46,10 +42,9 @@ Author: Me
 @"Template Name
 
 ")]
-#pragma warning restore SA1117 // ParameterDefinitionSet should be on same line or separate lines
         public void CanShowTemplateDescription(string name, string? language, string? author, string? description, string expected)
         {
-            MockTemplateInfo templateInfo = new MockTemplateInfo(
+            MockTemplateInfo templateInfo = new(
                 "console2",
                 name: name,
                 identity: "Console.App2",
@@ -61,8 +56,8 @@ Author: Me
                 templateInfo.WithTag("language", language);
             }
 
-            CliTemplateInfo cliTemplateInfo = new CliTemplateInfo(templateInfo, HostSpecificTemplateData.Default);
-            StringWriter sw = new StringWriter();
+            CliTemplateInfo cliTemplateInfo = new(templateInfo, HostSpecificTemplateData.Default);
+            StringWriter sw = new();
             InstantiateCommand.ShowTemplateDetailHeaders(cliTemplateInfo, sw);
             Assert.Equal(expected, sw.ToString());
         }
@@ -70,11 +65,11 @@ Author: Me
         [Fact]
         public void CanShowUsage()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            StringWriter sw = new();
+            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowUsage(myCommand, new[] { "short-name" }, helpContext);
             Assert.Equal($"Usage:{Environment.NewLine}  new short-name [options] [template options]{Environment.NewLine}{Environment.NewLine}", sw.ToString());
@@ -83,11 +78,11 @@ Author: Me
         [Fact]
         public void CanShowUsage_ForMultipleShortNames()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            StringWriter sw = new();
+            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowUsage(myCommand, new[] { "short-name1", "short-name2" }, helpContext);
             Assert.Equal($"Usage:{Environment.NewLine}  new short-name1 [options] [template options]{Environment.NewLine}  new short-name2 [options] [template options]{Environment.NewLine}{Environment.NewLine}", sw.ToString());
@@ -101,85 +96,85 @@ Author: Me
                CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
                .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
-            StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            StringWriter sw = new();
+            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
-            InstantiateCommand.ShowCommandOptions(new[] { templateCommand }, templateCommand, helpContext);
+            InstantiateCommand.ShowCommandOptions(new[] { templateCommand }, helpContext);
             return Verify(sw.ToString());
         }
 
         [Fact]
         public Task CanShowCommandOptions_Language()
         {
-            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("language", "MyLang");
+            MockTemplateInfo template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("language", "MyLang");
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
                .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
-            StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            StringWriter sw = new();
+            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
-            InstantiateCommand.ShowCommandOptions(new[] { templateCommand }, templateCommand, helpContext);
+            InstantiateCommand.ShowCommandOptions(new[] { templateCommand }, helpContext);
             return Verify(sw.ToString());
         }
 
         [Fact]
         public Task CanShowCommandOptions_Type()
         {
-            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("type", "MyType");
+            MockTemplateInfo template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("type", "MyType");
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
                .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
-            StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            StringWriter sw = new();
+            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
-            InstantiateCommand.ShowCommandOptions(new[] { templateCommand }, templateCommand, helpContext);
+            InstantiateCommand.ShowCommandOptions(new[] { templateCommand }, helpContext);
             return Verify(sw.ToString());
         }
 
         [Fact]
         public void CanShowCommandOptions_NoOptions()
         {
-            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("type", "MyType");
+            MockTemplateInfo template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("type", "MyType");
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
                .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
-            StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            StringWriter sw = new();
+            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
             Assert.Equal($"Template options:{Environment.NewLine}   (No options){Environment.NewLine}", sw.ToString());
@@ -188,22 +183,22 @@ Author: Me
         [Fact]
         public Task CanShowTemplateOptions_SingleTemplate_Choice()
         {
-            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithChoiceParameter("choice", new[] { "val1", "val2" }, description: "my description", defaultValue: "def-val", defaultIfNoOptionValue: "def-val-no-arg" );
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
                .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
-            StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            StringWriter sw = new();
+            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
             return Verify(sw.ToString());
@@ -212,25 +207,25 @@ Author: Me
         [Fact]
         public Task CanShowTemplateOptions_MultipleTemplate_CombinedChoice()
         {
-            var template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group", precedence: 0)
+            MockTemplateInfo template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group", precedence: 0)
                 .WithChoiceParameter("choice", new[] { "val1", "val2" }, description: "my description", defaultValue: "def-val-not-shown", defaultIfNoOptionValue: "def-val-not-shown");
-            var template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group", precedence: 2)
+            MockTemplateInfo template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group", precedence: 2)
              .WithChoiceParameter("choice", new[] { "val1", "val3" }, description: "my description", defaultValue: "def-val", defaultIfNoOptionValue: "def-val-no-arg");
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                CliTemplateInfo.FromTemplateInfo(new[] { template1, template2 }, A.Fake<IHostSpecificDataLoader>()))
                .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            TemplateCommand templateCommand1 = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[0]);
-            TemplateCommand templateCommand2 = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[1]);
+            TemplateCommand templateCommand1 = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[0]);
+            TemplateCommand templateCommand2 = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[1]);
 
-            StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            StringWriter sw = new();
+            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand2, templateCommand1 }, helpContext);
             return Verify(sw.ToString());
@@ -239,22 +234,22 @@ Author: Me
         [Fact]
         public Task CanShowTemplateOptions_SingleTemplate_NonChoice()
         {
-            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithParameter("non-choice", paramType: "text", description: "my description", defaultValue: "def-val", defaultIfNoOptionValue: "def-val-no-arg");
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
                .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
-            StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            StringWriter sw = new();
+            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
             return Verify(sw.ToString());
@@ -263,27 +258,27 @@ Author: Me
         [Fact]
         public Task CanShowTemplateOptions_MultipleTemplate_MultipleParams()
         {
-            var template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group", precedence: 0)
+            MockTemplateInfo template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group", precedence: 0)
                 .WithChoiceParameter("choice", new[] { "val1", "val2" }, description: "my description", defaultValue: "def-val-not-shown", defaultIfNoOptionValue: "def-val-not-shown")
                 .WithParameter("bool", paramType: "boolean", description: "my bool", defaultValue: "false", defaultIfNoOptionValue: "false");
-            var template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group", precedence: 2)
+            MockTemplateInfo template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group", precedence: 2)
              .WithChoiceParameter("choice", new[] { "val1", "val3" }, description: "my description", defaultValue: "def-val", defaultIfNoOptionValue: "def-val-no-arg")
              .WithParameter("int", paramType: "integer", description: "my int", defaultValue: "0", defaultIfNoOptionValue: "10");
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                CliTemplateInfo.FromTemplateInfo(new[] { template1, template2 }, A.Fake<IHostSpecificDataLoader>()))
                .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            TemplateCommand templateCommand1 = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[0]);
-            TemplateCommand templateCommand2 = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[1]);
+            TemplateCommand templateCommand1 = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[0]);
+            TemplateCommand templateCommand2 = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[1]);
 
-            StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            StringWriter sw = new();
+            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand2, templateCommand1 }, helpContext);
             return Verify(sw.ToString());
@@ -292,22 +287,22 @@ Author: Me
         [Fact]
         public Task CanShowTemplateOptions_SingleTemplate_Choice_Required()
         {
-            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithChoiceParameter("choice", new[] { "val1", "val2" }, description: "my description", defaultIfNoOptionValue: "def-val-no-arg", isRequired: true);
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
                .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
-            StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            StringWriter sw = new();
+            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
             return Verify(sw.ToString());
@@ -316,22 +311,22 @@ Author: Me
         [Fact]
         public void CanShowTemplateOptions_RequiredIsNotShownWhenDefaultValueIsGiven()
         {
-            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithChoiceParameter("choice", new[] { "val1", "val2" }, description: "my description", defaultValue: "def-val", defaultIfNoOptionValue: "def-val-no-arg", isRequired: true);
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
                .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
-            StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            StringWriter sw = new();
+            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
             Assert.DoesNotContain("(REQUIRED)", sw.ToString());
@@ -340,20 +335,20 @@ Author: Me
         [Fact]
         public Task CanShowHintsForOtherTemplates()
         {
-            var template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("language", "Lang1").WithTag("type", "project");
-            var template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("language", "Lang2").WithTag("type", "item");
+            MockTemplateInfo template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("language", "Lang1").WithTag("type", "project");
+            MockTemplateInfo template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("language", "Lang2").WithTag("type", "item");
 
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                CliTemplateInfo.FromTemplateInfo(new[] { template1, template2 }, A.Fake<IHostSpecificDataLoader>()))
                .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             ParseResult parseResult = myCommand.Parse("new -h");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
-            StringWriter sw = new StringWriter();
+            StringWriter sw = new();
 
             InstantiateCommand.ShowHintForOtherTemplates(templateGroup, templateGroup.Templates[0], args, sw);
             return Verify(sw.ToString());
@@ -362,22 +357,22 @@ Author: Me
         [Fact]
         public Task CanShowTemplateOptions_SingleTemplate_Choice_ShortenedUsage_FirstTwoValuesFit()
         {
-            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithChoiceParameter("choice", new[] { "val1", "val2", "val3", "val4", "val5", "val6" }, description: "my description", defaultValue: "def-val", defaultIfNoOptionValue: "def-val-no-arg");
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
                .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
-            StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance, maxWidth: 100), myCommand, sw);
+            StringWriter sw = new();
+            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance, maxWidth: 100), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
             return Verify(sw.ToString());
@@ -386,22 +381,22 @@ Author: Me
         [Fact]
         public Task CanShowTemplateOptions_SingleTemplate_Choice_ShortenedUsage()
         {
-            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithChoiceParameter("choice", new[] { "val1", "val2", "val3", "val4", "val5", "val6" }, description: "my description", defaultValue: "def-val", defaultIfNoOptionValue: "def-val-no-arg");
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
                .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            TemplateCommand templateCommand = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
-            StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance, maxWidth: 50), myCommand, sw);
+            StringWriter sw = new();
+            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance, maxWidth: 50), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
             return Verify(sw.ToString());
@@ -410,10 +405,10 @@ Author: Me
         [Fact]
         public Task DoesNotCombineParametersWhenAliasesAreDifferent()
         {
-            var template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template1 = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithChoiceParameter("Choice", new[] { "val1" }, description: "my description", defaultValue: "def-val", defaultIfNoOptionValue: "def-val-no-arg");
 
-            var template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group")
+            MockTemplateInfo template2 = new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group")
                 .WithChoiceParameter("Choice", new[] { "val2" }, description: "my description", defaultValue: "def-val", defaultIfNoOptionValue: "def-val-no-arg");
 
             IHostSpecificDataLoader hostDataLoader = A.Fake<IHostSpecificDataLoader>();
@@ -434,17 +429,17 @@ Author: Me
                CliTemplateInfo.FromTemplateInfo(new[] { template1, template2 }, hostDataLoader))
                .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            TemplateCommand templateCommand1 = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[0]);
-            TemplateCommand templateCommand2 = new TemplateCommand(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[1]);
+            TemplateCommand templateCommand1 = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[0]);
+            TemplateCommand templateCommand2 = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[1]);
 
-            StringWriter sw = new StringWriter();
-            HelpContext helpContext = new HelpContext(new HelpBuilder(LocalizationResources.Instance, maxWidth: 50), myCommand, sw);
+            StringWriter sw = new();
+            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance, maxWidth: 50), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand1, templateCommand2 }, helpContext);
             return Verifier.Verify(sw.ToString());

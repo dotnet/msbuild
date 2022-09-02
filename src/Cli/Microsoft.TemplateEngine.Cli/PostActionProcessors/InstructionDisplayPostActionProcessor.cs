@@ -14,8 +14,8 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
         protected override bool ProcessInternal(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationEffects creationEffects, ICreationResult templateCreationResult, string outputBasePath)
         {
-            Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionDescription, actionConfig.Description));
-            Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionInstructions, actionConfig.ManualInstructions));
+            Reporter.Output.WriteLine(LocalizableStrings.PostActionDescription, actionConfig.Description);
+            Reporter.Output.WriteLine(LocalizableStrings.PostActionInstructions, actionConfig.ManualInstructions);
 
             if (actionConfig.Args != null && actionConfig.Args.TryGetValue("executable", out string? executable))
             {

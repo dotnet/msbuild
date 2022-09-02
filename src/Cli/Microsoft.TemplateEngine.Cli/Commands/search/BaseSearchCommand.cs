@@ -25,9 +25,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal BaseSearchCommand(
             NewCommand parentCommand,
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
             string commandName)
-            : base(hostBuilder, telemetryLoggerBuilder, commandName, SymbolStrings.Command_Search_Description)
+            : base(hostBuilder, commandName, SymbolStrings.Command_Search_Description)
         {
             ParentCommand = parentCommand;
             Filters = SetupFilterOptions(SupportedFilters);
@@ -53,7 +52,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override async Task<NewCommandStatus> ExecuteAsync(
             SearchCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
-            ITelemetryLogger telemetryLogger,
             InvocationContext context)
         {
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);

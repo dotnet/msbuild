@@ -14,10 +14,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal BaseUpdateCommand(
             NewCommand parentCommand,
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
             string commandName,
             string description)
-            : base(hostBuilder, telemetryLoggerBuilder, commandName, description)
+            : base(hostBuilder, commandName, description)
         {
             ParentCommand = parentCommand;
             this.AddOption(InteractiveOption);
@@ -33,12 +32,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override async Task<NewCommandStatus> ExecuteAsync(
             UpdateCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
-            ITelemetryLogger telemetryLogger,
             InvocationContext context)
         {
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
             TemplatePackageCoordinator templatePackageCoordinator = new TemplatePackageCoordinator(
-                telemetryLogger,
                 environmentSettings,
                 templatePackageManager);
 

@@ -4,7 +4,6 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
-using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.TemplateEngine.Abstractions;
@@ -18,16 +17,32 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     internal partial class InstantiateCommand : BaseCommand<InstantiateCommandArgs>, ICustomHelp
     {
         internal InstantiateCommand(
-            Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
-            : base(hostBuilder, telemetryLoggerBuilder, "create", SymbolStrings.Command_Instantiate_Description)
+            NewCommand parentCommand,
+            Func<ParseResult, ITemplateEngineHost> hostBuilder)
+            : base(hostBuilder, "create", SymbolStrings.Command_Instantiate_Description)
         {
             this.AddArgument(ShortNameArgument);
             this.AddArgument(RemainingArguments);
+
+            this.AddOption(SharedOptions.OutputOption);
+            this.AddOption(SharedOptions.NameOption);
+            this.AddOption(SharedOptions.DryRunOption);
+            this.AddOption(SharedOptions.ForceOption);
+            this.AddOption(SharedOptions.NoUpdateCheckOption);
+            this.AddOption(SharedOptions.ProjectPathOption);
+
+            parentCommand.AddNoLegacyUsageValidators(this);
+            this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.OutputOption));
+            this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.NameOption));
+            this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.DryRunOption));
+            this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.ForceOption));
+            this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.NoUpdateCheckOption));
+            this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.ProjectPathOption));
+
             IsHidden = true;
         }
 
-        internal Argument<string> ShortNameArgument { get; } = new Argument<string>("template-short-name")
+        internal static Argument<string> ShortNameArgument { get; } = new Argument<string>("template-short-name")
         {
             Description = SymbolStrings.Command_Instantiate_Argument_ShortName,
             Arity = new ArgumentArity(0, 1)
@@ -39,20 +54,26 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Arity = new ArgumentArity(0, 999)
         };
 
-        internal static Task<NewCommandStatus> ExecuteAsync(NewCommandArgs newCommandArgs, IEngineEnvironmentSettings environmentSettings, ITelemetryLogger telemetryLogger, InvocationContext context)
+        internal IReadOnlyList<Option> PassByOptions { get; } = new Option[]
         {
-            return ExecuteIntAsync(InstantiateCommandArgs.FromNewCommandArgs(newCommandArgs), environmentSettings, telemetryLogger, context);
+            SharedOptions.ForceOption,
+            SharedOptions.NameOption,
+            SharedOptions.DryRunOption,
+            SharedOptions.NoUpdateCheckOption
+        };
+
+        internal static Task<NewCommandStatus> ExecuteAsync(NewCommandArgs newCommandArgs, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
+        {
+            return ExecuteIntAsync(InstantiateCommandArgs.FromNewCommandArgs(newCommandArgs), environmentSettings, context);
         }
 
-        internal static async Task<IEnumerable<TemplateGroup>> GetMatchingTemplateGroupsAsync(
-            InstantiateCommandArgs instantiateArgs,
+        internal static async Task<IEnumerable<TemplateGroup>> GetTemplateGroupsAsync(
             TemplatePackageManager templatePackageManager,
             HostSpecificDataLoader hostSpecificDataLoader,
             CancellationToken cancellationToken)
         {
-            var templates = await templatePackageManager.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
-            var templateGroups = TemplateGroup.FromTemplateList(CliTemplateInfo.FromTemplateInfo(templates, hostSpecificDataLoader));
-            return templateGroups.Where(template => template.ShortNames.Contains(instantiateArgs.ShortName));
+            IReadOnlyList<ITemplateInfo> templates = await templatePackageManager.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
+            return TemplateGroup.FromTemplateList(CliTemplateInfo.FromTemplateInfo(templates, hostSpecificDataLoader));
         }
 
         internal static HashSet<TemplateCommand> GetTemplateCommand(
@@ -94,16 +115,18 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return new HashSet<TemplateCommand>();
         }
 
-        internal static void HandleNoMatchingTemplateGroup(InstantiateCommandArgs instantiateArgs, Reporter reporter)
+        internal static void HandleNoMatchingTemplateGroup(InstantiateCommandArgs instantiateArgs, IEnumerable<TemplateGroup> templateGroups, IReporter reporter)
         {
             reporter.WriteLine(
-                string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, $"'{instantiateArgs.ShortName}'").Bold().Red());
+                string.Format(LocalizableStrings.InstantiateCommand_Info_NoMatchingTemplatesSubCommands, instantiateArgs.ShortName).Bold().Red());
+
+            SuggestTypoCorrections(instantiateArgs, templateGroups, reporter);
             reporter.WriteLine();
 
-            reporter.WriteLine(LocalizableStrings.ListTemplatesCommand);
+            reporter.WriteLine(LocalizableStrings.Generic_CommandHints_List);
             reporter.WriteCommand(Example.For<NewCommand>(instantiateArgs.ParseResult).WithSubcommand<ListCommand>());
 
-            reporter.WriteLine(LocalizableStrings.SearchTemplatesCommand);
+            reporter.WriteLine(LocalizableStrings.Generic_CommandHints_Search);
 
             if (string.IsNullOrWhiteSpace(instantiateArgs.ShortName))
             {
@@ -121,7 +144,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                       .WithSubcommand<SearchCommand>()
                       .WithArgument(SearchCommand.NameArgument, instantiateArgs.ShortName));
             }
-
             reporter.WriteLine();
         }
 
@@ -161,8 +183,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 }
                 catch (Exception ex)
                 {
-                    environmentSettings.Host.Logger.LogWarning($"Failed to get information about template packages for template group {templateGroup.GroupIdentity}.");
-                    environmentSettings.Host.Logger.LogDebug($"Details: {ex}.");
+                    environmentSettings.Host.Logger.LogWarning("Failed to get information about template packages for template group {groupIdentity}.", templateGroup.GroupIdentity);
+                    environmentSettings.Host.Logger.LogDebug("Details: {ex}", ex);
                     return string.Empty;
                 }
             }
@@ -171,10 +193,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override Task<NewCommandStatus> ExecuteAsync(
             InstantiateCommandArgs instantiateArgs,
             IEngineEnvironmentSettings environmentSettings,
-            ITelemetryLogger telemetryLogger,
             InvocationContext context)
         {
-            return ExecuteIntAsync(instantiateArgs, environmentSettings, telemetryLogger, context);
+            return ExecuteIntAsync(instantiateArgs, environmentSettings, context);
         }
 
         protected override InstantiateCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);
@@ -182,32 +203,31 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         private static async Task<NewCommandStatus> ExecuteIntAsync(
             InstantiateCommandArgs instantiateArgs,
             IEngineEnvironmentSettings environmentSettings,
-            ITelemetryLogger telemetryLogger,
             InvocationContext context)
         {
-            var cancellationToken = context.GetCancellationToken();
-            using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
-            HostSpecificDataLoader hostSpecificDataLoader = new HostSpecificDataLoader(environmentSettings);
+            CancellationToken cancellationToken = context.GetCancellationToken();
+            using TemplatePackageManager templatePackageManager = new(environmentSettings);
+            HostSpecificDataLoader hostSpecificDataLoader = new(environmentSettings);
             if (string.IsNullOrWhiteSpace(instantiateArgs.ShortName))
             {
-                TemplateListCoordinator templateListCoordinator = new TemplateListCoordinator(
+                TemplateListCoordinator templateListCoordinator = new(
                     environmentSettings,
                     templatePackageManager,
-                    hostSpecificDataLoader,
-                    telemetryLogger);
+                    hostSpecificDataLoader);
 
                 return await templateListCoordinator.DisplayCommandDescriptionAsync(instantiateArgs, cancellationToken).ConfigureAwait(false);
             }
 
-            var selectedTemplateGroups = await GetMatchingTemplateGroupsAsync(
-                instantiateArgs,
+            IEnumerable<TemplateGroup> allTemplateGroups = await GetTemplateGroupsAsync(
                 templatePackageManager,
                 hostSpecificDataLoader,
                 cancellationToken).ConfigureAwait(false);
 
+            IEnumerable<TemplateGroup> selectedTemplateGroups = allTemplateGroups.Where(template => template.ShortNames.Contains(instantiateArgs.ShortName));
+
             if (!selectedTemplateGroups.Any())
             {
-                HandleNoMatchingTemplateGroup(instantiateArgs, Reporter.Error);
+                HandleNoMatchingTemplateGroup(instantiateArgs, allTemplateGroups, Reporter.Error);
                 return NewCommandStatus.NotFound;
             }
             if (selectedTemplateGroups.Count() > 1)
@@ -217,7 +237,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return await HandleTemplateInstantationAsync(
                 instantiateArgs,
                 environmentSettings,
-                telemetryLogger,
                 templatePackageManager,
                 selectedTemplateGroups.Single(),
                 cancellationToken).ConfigureAwait(false);
@@ -258,7 +277,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         private static async Task<NewCommandStatus> HandleTemplateInstantationAsync(
             InstantiateCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
-            ITelemetryLogger telemetryLogger,
             TemplatePackageManager templatePackageManager,
             TemplateGroup templateGroup,
             CancellationToken cancellationToken)
@@ -270,7 +288,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 args.Command.AddCommand(templateCommandToRun);
 
                 ParseResult updatedParseResult = args.ParseResult.Parser.Parse(args.ParseResult.Tokens.Select(t => t.Value).ToList());
-                return await candidates.Single().InvokeAsync(updatedParseResult, telemetryLogger, cancellationToken).ConfigureAwait(false);
+                return await candidates.Single().InvokeAsync(updatedParseResult, cancellationToken).ConfigureAwait(false);
             }
             else if (candidates.Any())
             {
@@ -349,8 +367,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 }
                 catch (Exception ex)
                 {
-                    environmentSettings.Host.Logger.LogWarning($"Failed to get information about template packages for template group {template.Identity}.");
-                    environmentSettings.Host.Logger.LogDebug($"Details: {ex}.");
+                    environmentSettings.Host.Logger.LogWarning("Failed to get information about template packages for template group {identity}.", template.Identity);
+                    environmentSettings.Host.Logger.LogDebug("Details: {ex}.", ex);
                     return string.Empty;
                 }
             }
@@ -365,7 +383,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             out bool languageOptionSpecified)
         {
             languageOptionSpecified = false;
-            HashSet<TemplateCommand> candidates = new HashSet<TemplateCommand>();
+            HashSet<TemplateCommand> candidates = new();
             foreach (CliTemplateInfo template in templatesToReparse)
             {
                 if (ReparseForTemplate(args, environmentSettings, templatePackageManager, templateGroup, template) is (TemplateCommand command, ParseResult parseResult))
@@ -388,8 +406,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             TemplateGroup templateGroup,
             HashSet<TemplateCommand> candidates)
         {
-            HashSet<TemplateCommand> languageAwareCandidates = new HashSet<TemplateCommand>();
-            foreach (var templateCommand in candidates)
+            HashSet<TemplateCommand> languageAwareCandidates = new();
+            foreach (TemplateCommand templateCommand in candidates)
             {
                 if (ReparseForTemplate(
                     args,
@@ -420,7 +438,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             try
             {
-                TemplateCommand command = new TemplateCommand(
+                TemplateCommand command = new(
                     args.Command,
                     environmentSettings,
                     templatePackageManager,
@@ -434,8 +452,66 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
             catch (InvalidTemplateParametersException e)
             {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.GenericWarning, e.Message));
+                Reporter.Error.WriteLine(LocalizableStrings.GenericWarning, e.Message);
                 return null;
+            }
+        }
+
+        private static void SuggestTypoCorrections(InstantiateCommandArgs instantiateArgs, IEnumerable<TemplateGroup> templateGroups, IReporter reporter)
+        {
+            if (string.IsNullOrWhiteSpace(instantiateArgs.ShortName))
+            {
+                return;
+            }
+
+            IEnumerable<string> possibleTemplates = templateGroups
+                .SelectMany(g => g.ShortNames);
+
+            bool useInstantiateCommand = instantiateArgs.Command is InstantiateCommand;
+            bool helpOption = instantiateArgs.HasHelpOption;
+            IEnumerable<string> possibleTemplateMatches = TypoCorrection.GetSimilarTokens(possibleTemplates, instantiateArgs.ShortName);
+
+            if (possibleTemplateMatches.Any())
+            {
+
+                reporter.WriteLine(LocalizableStrings.InstantiateCommand_Info_TypoCorrection_Templates);
+                foreach (string possibleMatch in possibleTemplateMatches)
+                {
+                    Example example = useInstantiateCommand
+                        ? Example.For<InstantiateCommand>(instantiateArgs.ParseResult).WithArgument(InstantiateCommand.ShortNameArgument, possibleMatch)
+                        : Example.For<NewCommand>(instantiateArgs.ParseResult).WithArgument(NewCommand.ShortNameArgument, possibleMatch);
+                    if (helpOption)
+                    {
+                        example = example.WithHelpOption();
+                    }
+                    reporter.WriteCommand(example);
+                }
+            }
+
+            if (useInstantiateCommand)
+            {
+                //no subcommands in dotnet new create
+                return;
+            }
+
+            IEnumerable<string> possibleSubcommands =
+                instantiateArgs.Command.Subcommands
+                    .Where(sc => !sc.IsHidden)
+                    .SelectMany(sc => sc.Aliases);
+
+            IEnumerable<string> possibleSubcommandsMatches = TypoCorrection.GetSimilarTokens(possibleSubcommands, instantiateArgs.ShortName);
+            if (possibleSubcommandsMatches.Any())
+            {
+                reporter.WriteLine(LocalizableStrings.InstantiateCommand_Info_TypoCorrection_Subcommands);
+                foreach (string possibleMatch in possibleSubcommandsMatches)
+                {
+                    Example example = Example.For<NewCommand>(instantiateArgs.ParseResult).WithSubcommand(possibleMatch);
+                    if (helpOption)
+                    {
+                        example = example.WithHelpOption();
+                    }
+                    reporter.WriteCommand(example);
+                }
             }
         }
     }

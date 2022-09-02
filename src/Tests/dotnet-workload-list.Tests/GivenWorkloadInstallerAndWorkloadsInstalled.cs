@@ -152,7 +152,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                 workloadRecordRepo: new MockMatchingFeatureBandInstallationRecordRepository());
 
             Action a = () => _workloadListCommand.Execute();
-            a.ShouldThrow<ArgumentException>();
+            a.Should().Throw<ArgumentException>();
         }
 
         [Fact]
@@ -172,7 +172,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                 workloadRecordRepo: new MockMatchingFeatureBandInstallationRecordRepository());
 
             Action a = () => _workloadListCommand.Execute();
-            a.ShouldNotThrow();
+            a.Should().NotThrow();
         }
 
         internal class MockMatchingFeatureBandInstallationRecordRepository : IWorkloadInstallationRecordRepository

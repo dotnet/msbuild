@@ -275,9 +275,6 @@
   <data name="ProjectContextSymbolSource_DisplayName" xml:space="preserve">
     <value>Project context</value>
   </data>
-  <data name="ProjectPath_OptionDescription" xml:space="preserve">
-    <value>The project that should be used for context evaluation.</value>
-  </data>
   <data name="SdkInfoProvider_Message_InstallSdk" xml:space="preserve">
     <value>Go to aka.ms/get-dotnet and install any of the supported SDK versions: '{0}'.</value>
     <comment>{0} is the list of supported versions.</comment>

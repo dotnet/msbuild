@@ -11,19 +11,17 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     internal class AliasCommand : BaseCommand<AliasCommandArgs>
     {
         internal AliasCommand(
-            Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
-            : base(hostBuilder, telemetryLoggerBuilder, "alias", SymbolStrings.Command_Alias_Description)
+            Func<ParseResult, ITemplateEngineHost> hostBuilder)
+            : base(hostBuilder, "alias", SymbolStrings.Command_Alias_Description)
         {
             IsHidden = true;
-            this.Add(new AliasAddCommand(hostBuilder, telemetryLoggerBuilder));
-            this.Add(new AliasShowCommand(hostBuilder, telemetryLoggerBuilder));
+            this.Add(new AliasAddCommand(hostBuilder));
+            this.Add(new AliasShowCommand(hostBuilder));
         }
 
         protected override Task<NewCommandStatus> ExecuteAsync(
             AliasCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
-            ITelemetryLogger telemetryLogger,
             InvocationContext context) => throw new NotImplementedException();
 
         protected override AliasCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);
