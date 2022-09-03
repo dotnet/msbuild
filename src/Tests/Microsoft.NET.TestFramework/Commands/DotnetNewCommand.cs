@@ -20,6 +20,14 @@ namespace Microsoft.NET.TestFramework.Commands
             WithEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", "true");
         }
 
+        public DotnetNewCommand WithVirutalHive()
+        {
+            Arguments.Add("--debug:ephemeral-hive");
+            _hiveSet = true;
+            return this;
+        }
+
+
         public DotnetNewCommand WithCustomHive(string path)
         {
             Arguments.Add("--debug:custom-hive");

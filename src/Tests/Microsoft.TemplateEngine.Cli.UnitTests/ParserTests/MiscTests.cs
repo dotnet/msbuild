@@ -4,14 +4,12 @@
 using System.CommandLine;
 using System.CommandLine.Completions;
 using System.CommandLine.Parsing;
-using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.TestHelper;
-using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 {
-    public class MiscTests
+    public class MiscTests : BaseTest
     {
         /// <summary>
         /// This test checks if help aliases are in sync with System.CommandLine.
@@ -19,12 +17,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void KnownHelpAliasesAreCorrect()
         {
-            var result = new CommandLineBuilder()
+            ParseResult result = new CommandLineBuilder()
                 .UseDefaults()
                 .Build()
                 .Parse(Constants.KnownHelpAliases[0]);
 
-            var aliases = result.CommandResult
+            IReadOnlyCollection<string> aliases = result.CommandResult
                 .Children
                 .OfType<OptionResult>()
                 .Select(r => r.Option)
@@ -68,7 +66,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 
         public void DebugFlagCanBeParsedOnNewLevel(string command, string option)
         {
-             Dictionary<string, Func<GlobalArgs, bool>> optionsMap = new Dictionary<string, Func<GlobalArgs, bool>>()
+             Dictionary<string, Func<GlobalArgs, bool>> optionsMap = new()
             {
                 { "--debug:attach", args => args.DebugAttach },
                 { "--debug:ephemeral-hive", args => args.DebugVirtualizeSettings },
@@ -77,10 +75,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                 { "--debug:show-config", args => args.DebugShowConfig }
             };
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = ParserFactory.CreateParser(myCommand).Parse(command);
-            NewCommandArgs args = new NewCommandArgs(myCommand, parseResult);
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = ParserFactory.CreateParser(myCommand).Parse(command);
+            NewCommandArgs args = new(myCommand, parseResult);
 
             Assert.True(optionsMap[option](args));
         }
@@ -98,7 +96,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 
         public void DebugFlagCanBeParsedOnSubcommandLevel(string command, string option)
         {
-            Dictionary<string, Func<GlobalArgs, bool>> optionsMap = new Dictionary<string, Func<GlobalArgs, bool>>()
+            Dictionary<string, Func<GlobalArgs, bool>> optionsMap = new()
             {
                 { "--debug:attach", args => args.DebugAttach },
                 { "--debug:ephemeral-hive", args => args.DebugVirtualizeSettings },
@@ -107,10 +105,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                 { "--debug:show-config", args => args.DebugShowConfig }
             };
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = ParserFactory.CreateParser(myCommand).Parse(command);
-            InstallCommandArgs args = new InstallCommandArgs((InstallCommand)parseResult.CommandResult.Command, parseResult);
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = ParserFactory.CreateParser(myCommand).Parse(command);
+            InstallCommandArgs args = new((InstallCommand)parseResult.CommandResult.Command, parseResult);
 
             Assert.True(optionsMap[option](args));
         }
@@ -128,7 +126,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 
         public void DebugFlagCanBeParsedOnTemplateSubcommandLevel(string command, string option)
         {
-            Dictionary<string, Func<GlobalArgs, bool>> optionsMap = new Dictionary<string, Func<GlobalArgs, bool>>()
+            Dictionary<string, Func<GlobalArgs, bool>> optionsMap = new()
             {
                 { "--debug:attach", args => args.DebugAttach },
                 { "--debug:ephemeral-hive", args => args.DebugVirtualizeSettings },
@@ -137,9 +135,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                 { "--debug:show-config", args => args.DebugShowConfig }
             };
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse(command);
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse(command);
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
             Assert.True(optionsMap[option](args));
@@ -150,19 +148,57 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void ManuallyAddedOptionIsPreservedOnTemplateSubcommandLevel()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
             var customOption = new Option<string>("--newOption");
             myCommand.AddGlobalOption(customOption);
 
-            var parseResult = myCommand.Parse("new console --newOption val");
+            ParseResult parseResult = myCommand.Parse("new console --newOption val");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
             Assert.NotNull(args.ParseResult);
             Assert.Equal("console", args.ShortName);
             Assert.Empty(args.RemainingArguments);
             Assert.Equal("val", args.ParseResult.GetValueForOption(customOption));
+        }
+
+        [Theory]
+        [InlineData ("new --output test console", "test")]
+        [InlineData("new console --output test", "test")]
+        [InlineData("new -o test console", "test")]
+        [InlineData("new console -o test", "test")]
+        [InlineData("new console --framework net6.0 --output test", "test")]
+        [InlineData("--output test new console", null)]
+        public void CanParseOutputOption(string command, string? expected)
+        {
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+
+            RootCommand rootCommand = new();
+
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            rootCommand.Add(myCommand);
+
+            ParseResult parseResult = rootCommand.Parse(command);
+            Assert.Equal(expected, parseResult.GetValueForOption(SharedOptions.OutputOption)?.Name);
+        }
+
+        [Theory]
+        [InlineData("new --project test console", "test")]
+        [InlineData("new console --project test", "test")]
+        [InlineData("new console --framework net6.0 --project test", "test")]
+        [InlineData("--project test new console", null)]
+        public void CanParseProjectOption(string command, string? expected)
+        {
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+
+            RootCommand rootCommand = new();
+
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            rootCommand.Add(myCommand);
+
+            ParseResult parseResult = rootCommand.Parse(command);
+            Assert.Equal(expected, parseResult.GetValueForOption(SharedOptions.ProjectPathOption)?.Name);
         }
     }
 }

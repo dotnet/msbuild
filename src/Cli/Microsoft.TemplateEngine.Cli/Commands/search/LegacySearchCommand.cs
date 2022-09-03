@@ -10,8 +10,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class LegacySearchCommand : BaseSearchCommand
     {
-        public LegacySearchCommand(NewCommand parentCommand, Func<ParseResult, ITemplateEngineHost> hostBuilder, Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
-            : base(parentCommand, hostBuilder, telemetryLoggerBuilder, "--search")
+        public LegacySearchCommand(NewCommand parentCommand, Func<ParseResult, ITemplateEngineHost> hostBuilder)
+            : base(parentCommand, hostBuilder, "--search")
         {
             this.IsHidden = true;
             AddValidator(ValidateParentCommandArguments);
@@ -28,10 +28,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return ParentCommand.LegacyFilters[def];
         }
 
-        protected override Task<NewCommandStatus> ExecuteAsync(SearchCommandArgs args, IEngineEnvironmentSettings environmentSettings, ITelemetryLogger telemetryLogger, InvocationContext context)
+        protected override Task<NewCommandStatus> ExecuteAsync(SearchCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
         {
             PrintDeprecationMessage<LegacySearchCommand, SearchCommand>(args.ParseResult);
-            return base.ExecuteAsync(args, environmentSettings, telemetryLogger, context);
+            return base.ExecuteAsync(args, environmentSettings, context);
         }
 
         private void ValidateParentCommandArguments(CommandResult commandResult)

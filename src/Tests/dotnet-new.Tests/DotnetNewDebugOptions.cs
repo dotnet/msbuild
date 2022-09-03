@@ -1,27 +1,18 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.NET.TestFramework;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using Microsoft.TemplateEngine.TestHelper;
-using VerifyTests;
-using VerifyXunit;
-using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.New.Tests
+namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     [UsesVerify]
     [Collection("Verify Tests")]
-    public class DotnetNewDebugOptions : SdkTest
+    public class DotnetNewDebugOptions : BaseIntegrationTest
     {
         private readonly ITestOutputHelper _log;
 
@@ -33,10 +24,10 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void CanShowBasicInfoWithDebugReinit()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string cacheFilePath = Path.Combine(home, "dotnetcli", TestUtils.Version, "templatecache.json");
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string cacheFilePath = Path.Combine(home, "dotnetcli", Version, "templatecache.json");
 
-            var commandResult = new DotnetNewCommand(_log)
+            CommandResult commandResult = new DotnetNewCommand(_log)
                 .WithCustomHive(home)
                 .Execute();
 
@@ -44,7 +35,7 @@ namespace Microsoft.DotNet.New.Tests
             Assert.True(File.Exists(cacheFilePath));
             DateTime lastUpdateDate = File.GetLastWriteTimeUtc(cacheFilePath);
 
-            var reinitCommandResult = new DotnetNewCommand(_log, "--debug:reinit")
+            CommandResult reinitCommandResult = new DotnetNewCommand(_log, "--debug:reinit")
                .WithCustomHive(home)
                .Execute();
 
@@ -57,10 +48,10 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void CanShowBasicInfoWithDebugRebuildCache()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string cacheFilePath = Path.Combine(home, "dotnetcli", TestUtils.Version, "templatecache.json");
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string cacheFilePath = Path.Combine(home, "dotnetcli", Version, "templatecache.json");
 
-            var commandResult = new DotnetNewCommand(_log)
+            CommandResult commandResult = new DotnetNewCommand(_log)
                 .WithCustomHive(home)
                 .Execute();
 
@@ -68,7 +59,7 @@ namespace Microsoft.DotNet.New.Tests
             Assert.True(File.Exists(cacheFilePath));
             DateTime lastUpdateDate = File.GetLastWriteTimeUtc(cacheFilePath);
 
-            var reinitCommandResult = new DotnetNewCommand(_log, "--debug:rebuildcache")
+            CommandResult reinitCommandResult = new DotnetNewCommand(_log, "--debug:rebuildcache")
                .WithCustomHive(home)
                .Execute();
 
@@ -81,8 +72,8 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task CanShowConfigWithDebugShowConfig()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            var commandResult = new DotnetNewCommand(_log, "--debug:show-config")
+            string home = CreateTemporaryFolder(folderName: "Home");
+            CommandResult commandResult = new DotnetNewCommand(_log, "--debug:show-config")
                .WithCustomHive(home)
                .Execute();
 
@@ -108,8 +99,8 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void DoesNotCreateCacheWhenVirtualHiveIsUsed()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            var envVariable = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "USERPROFILE" : "HOME";
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string envVariable = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "USERPROFILE" : "HOME";
 
             new DotnetNewCommand(_log, "--debug:ephemeral-hive")
                .WithoutCustomHive()
@@ -123,17 +114,44 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void DoesCreateCacheInDifferentLocationWhenCustomHiveIsUsed()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
+            string home = CreateTemporaryFolder(folderName: "Home");
             new DotnetNewCommand(_log, "--debug:custom-hive", home)
                .WithoutCustomHive()
                .Execute()
                .Should().Pass().And.NotHaveStdErr();
 
-            var createdCacheEntries = Directory.GetFileSystemEntries(home);
+            string[] createdCacheEntries = Directory.GetFileSystemEntries(home);
 
-            Assert.Equal(2, createdCacheEntries.Count());
+            Assert.Equal(2, createdCacheEntries.Length);
             Assert.Contains(Path.Combine(home, "packages"), createdCacheEntries);
-            Assert.True(File.Exists(Path.Combine(home, "dotnetcli", TestUtils.Version, "templatecache.json")));
+            Assert.True(File.Exists(Path.Combine(home, "dotnetcli", Version, "templatecache.json")));
+        }
+
+        [Fact]
+        public void CanDisableBuiltInTemplates_List()
+        {
+            CommandResult commandResult = new DotnetNewCommand(_log, "list", "--debug:disable-sdk-templates")
+                .WithCustomHive(CreateTemporaryFolder())
+                .Execute();
+
+            commandResult
+                .Should()
+                .Pass()
+                .And.NotHaveStdOutContaining("console")
+                .And.HaveStdOutContaining("No templates installed.");
+        }
+
+        [Fact]
+        public void CanDisableBuiltInTemplates_Instantiate()
+        {
+            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--debug:disable-sdk-templates")
+                .WithCustomHive(CreateTemporaryFolder())
+                .Execute();
+
+            commandResult
+                .Should()
+                .Fail()
+                .And.HaveStdErrContaining("No templates or subcommands found matching: 'console'.");
         }
     }
 }

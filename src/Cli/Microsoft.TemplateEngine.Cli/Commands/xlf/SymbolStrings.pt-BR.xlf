@@ -183,6 +183,11 @@ Se o comando for especificado sem o argumento, ele listará todos os pacotes de 
         <target state="translated">Filtra os modelos com base na ID do pacote NuGet.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Option_ProjectPath">
+        <source>The project that should be used for context evaluation.</source>
+        <target state="new">The project that should be used for context evaluation.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Option_TagFilter">
         <source>Filters the templates based on the tag.</source>
         <target state="translated">Filtra os modelos com base na marca.</target>

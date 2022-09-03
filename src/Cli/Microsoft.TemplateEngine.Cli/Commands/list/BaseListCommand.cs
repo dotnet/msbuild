@@ -23,15 +23,16 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal BaseListCommand(
             NewCommand parentCommand,
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder,
             string commandName)
-            : base(hostBuilder, telemetryLoggerBuilder, commandName, SymbolStrings.Command_List_Description)
+            : base(hostBuilder, commandName, SymbolStrings.Command_List_Description)
         {
             ParentCommand = parentCommand;
             Filters = SetupFilterOptions(SupportedFilters);
 
             this.AddArgument(NameArgument);
             this.AddOption(IgnoreConstraintsOption);
+            this.AddOption(SharedOptions.OutputOption);
+            this.AddOption(SharedOptions.ProjectPathOption);
             SetupTabularOutputOptions(this);
         }
 
@@ -58,15 +59,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override async Task<NewCommandStatus> ExecuteAsync(
             ListCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
-            ITelemetryLogger telemetryLogger,
             InvocationContext context)
         {
             using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
             TemplateListCoordinator templateListCoordinator = new TemplateListCoordinator(
                 environmentSettings,
                 templatePackageManager,
-                new HostSpecificDataLoader(environmentSettings),
-                telemetryLogger);
+                new HostSpecificDataLoader(environmentSettings));
 
             //we need to await, otherwise templatePackageManager will be disposed.
             return await templateListCoordinator.DisplayTemplateGroupListAsync(args, default).ConfigureAwait(false);

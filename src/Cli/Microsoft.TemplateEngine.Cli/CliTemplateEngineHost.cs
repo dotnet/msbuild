@@ -4,25 +4,27 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
+using Microsoft.TemplateEngine.Edge;
 
 namespace Microsoft.TemplateEngine.Cli
 {
-    internal class CliTemplateEngineHost : ITemplateEngineHost
+    public class CliTemplateEngineHost : DefaultTemplateEngineHost, ICliTemplateEngineHost
     {
-        private readonly ITemplateEngineHost _baseHost;
-        private readonly ILoggerFactory _loggerFactory;
-        private readonly ILogger _logger;
-        private string? _outputPath;
-
-        internal CliTemplateEngineHost(ITemplateEngineHost baseHost, string? outputPath)
-        {
-            _baseHost = baseHost;
-            _outputPath = outputPath;
-
-            bool enableVerboseLogging = bool.TryParse(Environment.GetEnvironmentVariable("DOTNET_CLI_CONTEXT_VERBOSE"), out bool value) && value;
-            _loggerFactory =
-                Microsoft.Extensions.Logging.LoggerFactory.Create(builder =>
+        public CliTemplateEngineHost(
+            string hostIdentifier,
+            string version,
+            Dictionary<string, string> preferences,
+            IReadOnlyList<(Type InterfaceType, IIdentifiedComponent Instance)> builtIns,
+            IReadOnlyList<string>? fallbackHostNames = null,
+            string? outputPath = null,
+            bool enableVerboseLogging = false)
+            : base(
+                  hostIdentifier, 
+                  version, 
+                  preferences, 
+                  builtIns, 
+                  fallbackHostNames,
+                  loggerFactory: Microsoft.Extensions.Logging.LoggerFactory.Create(builder =>
                     builder
                         .SetMinimumLevel(enableVerboseLogging ? LogLevel.Trace : LogLevel.Information)
                         .AddConsole(config => config.FormatterName = nameof(CliConsoleFormatter))
@@ -30,36 +32,24 @@ namespace Microsoft.TemplateEngine.Cli
                         {
                             config.IncludeScopes = true;
                             config.TimestampFormat = "yyyy-MM-dd HH:mm:ss.fff";
-                        }));
-            _logger = _loggerFactory.CreateLogger<CliTemplateEngineHost>();
+                        })))
+        {
+            string workingPath = FileSystem.GetCurrentDirectory();
+            IsCustomOutputPath = outputPath != null;
+            OutputPath = outputPath != null ? Path.Combine(workingPath, outputPath) : workingPath;
         }
 
-        public IPhysicalFileSystem FileSystem => _baseHost.FileSystem;
+        public string OutputPath { get; }
 
-        public string HostIdentifier => _baseHost.HostIdentifier;
-
-        public IReadOnlyList<string> FallbackHostTemplateConfigNames => _baseHost.FallbackHostTemplateConfigNames;
-
-        public string Version => _baseHost.Version;
-
-        public virtual IReadOnlyList<(Type, IIdentifiedComponent)> BuiltInComponents => _baseHost.BuiltInComponents;
-
-        public ILogger Logger => _logger;
-
-        public ILoggerFactory LoggerFactory => _loggerFactory;
+        public bool IsCustomOutputPath { get; }
 
         private bool GlobalJsonFileExistsInPath
         {
             get
             {
                 const string fileName = "global.json";
-                string? workingPath = FileSystem.GetCurrentDirectory();
-                if (!string.IsNullOrWhiteSpace(_outputPath))
-                {
-                    workingPath = Path.Combine(workingPath, _outputPath);
-                }
-                bool found = false;
-
+                string? workingPath = OutputPath;
+                bool found;
                 do
                 {
                     string checkPath = Path.Combine(workingPath, fileName);
@@ -80,7 +70,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        public virtual bool TryGetHostParamDefault(string paramName, out string? value)
+        public override bool TryGetHostParamDefault(string paramName, out string? value)
         {
             switch (paramName)
             {
@@ -88,80 +78,36 @@ namespace Microsoft.TemplateEngine.Cli
                     value = GlobalJsonFileExistsInPath.ToString();
                     return true;
                 default:
-                    return _baseHost.TryGetHostParamDefault(paramName, out value);
+                    return base.TryGetHostParamDefault(paramName, out value);
             }
         }
 
-        public void VirtualizeDirectory(string path)
-        {
-            _baseHost.VirtualizeDirectory(path);
-        }
-
-        public void Dispose()
-        {
-            _loggerFactory?.Dispose();
-        }
-
-        #region Obsolete
-        [Obsolete]
-#pragma warning disable SA1202 // Elements should be ordered by access
-        void ITemplateEngineHost.LogMessage(string message)
-#pragma warning restore SA1202 // Elements should be ordered by access
-        {
-            //do nothing
-        }
-
-        [Obsolete]
-        void ITemplateEngineHost.OnCriticalError(string code, string message, string currentFile, long currentPosition)
-        {
-            //do nothing
-        }
-
-        [Obsolete]
-        bool ITemplateEngineHost.OnNonCriticalError(string code, string message, string currentFile, long currentPosition)
-        {
-            //do nothing
-            return false;
-        }
-
-        [Obsolete]
-        bool ITemplateEngineHost.OnParameterError(ITemplateParameter parameter, string receivedValue, string message, out string newValue)
-        {
-            //do nothing
-            newValue = receivedValue;
-            return false;
-        }
-
-        [Obsolete]
-        void ITemplateEngineHost.OnSymbolUsed(string symbol, object value)
-        {
-            //do nothing
-        }
-
-        [Obsolete]
-        bool ITemplateEngineHost.OnConfirmPartialMatch(string name)
-        {
-            return true;
-        }
-
-        [Obsolete]
+        [Obsolete("Use " + nameof(Logger) + " instead")]
         void ITemplateEngineHost.LogDiagnosticMessage(string message, string category, params string[] details)
         {
-            //do nothing
+            //do nothing if used
+            //DefaultTemplateEngineHost may log these messages to Console 
         }
 
-        [Obsolete]
+        [Obsolete("Use " + nameof(Logger) + " instead")]
         void ITemplateEngineHost.LogTiming(string label, TimeSpan duration, int depth)
         {
-            //do nothing
+            //do nothing if used
+            //DefaultTemplateEngineHost may log these messages to Console 
         }
 
-        [Obsolete]
+        [Obsolete("Use " + nameof(Logger) + " instead")]
+        void ITemplateEngineHost.LogMessage(string message)
+        {
+            //do nothing if used
+            //DefaultTemplateEngineHost may log these messages to Console 
+        }
+
+        [Obsolete("Use CreationStatusResult instead")]
         bool ITemplateEngineHost.OnPotentiallyDestructiveChangesDetected(IReadOnlyList<IFileChange> changes, IReadOnlyList<IFileChange> destructiveChanges)
         {
-            //do nothing - CreationStatusResult is handled instead in TemplateInvoker
+            //return false to return TemplateCreationResult with CreationResultStatus.DestructiveChangesDetected status.
             return false;
         }
-        #endregion
     }
 }

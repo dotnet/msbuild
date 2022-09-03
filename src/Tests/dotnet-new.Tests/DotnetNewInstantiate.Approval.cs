@@ -1,20 +1,13 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.NET.TestFramework;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
-using VerifyTests;
-using VerifyXunit;
-using Xunit;
 
-namespace Microsoft.DotNet.New.Tests
+namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     [UsesVerify]
     [Collection("Verify Tests")]
@@ -23,9 +16,9 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task CannotInstantiateUnknownTemplate()
         {
-            var commandResult = new DotnetNewCommand(_log, "unknownapp")
+            CommandResult commandResult = new DotnetNewCommand(_log, "unknownapp")
                 .WithCustomHive(_fixture.HomeDirectory)
-                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute();
 
             commandResult
@@ -39,9 +32,9 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task CannotInstantiateTemplateWithUnknownLanguage()
         {
-            var commandResult = new DotnetNewCommand(_log, "console", "--language", "D#")
+            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--language", "D#")
                 .WithCustomHive(_fixture.HomeDirectory)
-                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute();
 
             commandResult
@@ -55,9 +48,9 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task CannotInstantiateTemplateWithUnknownType()
         {
-            var commandResult = new DotnetNewCommand(_log, "console", "--type", "item")
+            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--type", "item")
                 .WithCustomHive(_fixture.HomeDirectory)
-                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute();
 
             commandResult
@@ -71,12 +64,12 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task CannotInstantiateTemplate_WhenAmbiguousLanguageChoice()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, home, workingDirectory);
-            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicVB", _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, home, workingDirectory);
+            InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicVB", _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, "basic")
+            CommandResult commandResult = new DotnetNewCommand(_log, "basic")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -92,12 +85,12 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task CannotInstantiateTemplate_WhenAmbiguousShortNameChoice()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            string templateOneLocation = Helpers.InstallTestTemplate("TemplateResolution/SameShortName/BasicFSharp", _log, home, workingDirectory);
-            string templateTwoLocation = Helpers.InstallTestTemplate("TemplateResolution/SameShortName/BasicVB", _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            string templateOneLocation = InstallTestTemplate("TemplateResolution/SameShortName/BasicFSharp", _log, home, workingDirectory);
+            string templateTwoLocation = InstallTestTemplate("TemplateResolution/SameShortName/BasicVB", _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, "basic")
+            CommandResult commandResult = new DotnetNewCommand(_log, "basic")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -124,9 +117,9 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task CannotInstantiateTemplate_WhenFullNameIsUsed()
         {
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string workingDirectory = CreateTemporaryFolder();
 
-            var commandResult = new DotnetNewCommand(_log, "Console App")
+            CommandResult commandResult = new DotnetNewCommand(_log, "Console App")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -141,9 +134,9 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task CannotInstantiateTemplate_WhenParameterIsInvalid()
         {
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string workingDirectory = CreateTemporaryFolder();
 
-            var commandResult = new DotnetNewCommand(_log, "console", "--fake")
+            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--fake")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -159,9 +152,9 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task CannotInstantiateTemplate_WhenChoiceParameterValueIsInvalid()
         {
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string workingDirectory = CreateTemporaryFolder();
 
-            var commandResult = new DotnetNewCommand(_log, "console", "--framework", "fake")
+            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--framework", "fake")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -177,9 +170,9 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task CannotInstantiateTemplate_WhenChoiceParameterValueIsNotComplete()
         {
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string workingDirectory = CreateTemporaryFolder();
 
-            var commandResult = new DotnetNewCommand(_log, "console", "--framework", "netcoreapp")
+            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--framework", "netcoreapp")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -195,9 +188,9 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task CannotInstantiateTemplate_OnMultipleParameterErrors()
         {
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string workingDirectory = CreateTemporaryFolder();
 
-            var commandResult = new DotnetNewCommand(_log, "console", "--framework", "netcoreapp", "--fake")
+            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--framework", "netcoreapp", "--fake")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -213,12 +206,12 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task CannotInstantiateTemplate_WhenPrecedenceIsSame()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            var templateOneLocation = Helpers.InstallTestTemplate("TemplateResolution/SamePrecedenceGroup/BasicTemplate1", _log, home, workingDirectory);
-            var templateTwoLocation = Helpers.InstallTestTemplate("TemplateResolution/SamePrecedenceGroup/BasicTemplate2", _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            string templateOneLocation = InstallTestTemplate("TemplateResolution/SamePrecedenceGroup/BasicTemplate1", _log, home, workingDirectory);
+            string templateTwoLocation = InstallTestTemplate("TemplateResolution/SamePrecedenceGroup/BasicTemplate2", _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, "basic")
+            CommandResult commandResult = new DotnetNewCommand(_log, "basic")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -254,11 +247,11 @@ namespace Microsoft.DotNet.New.Tests
 
         private Task MultiValueChoiceParameterConditionsExecutor(string[] args)
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("TemplateWithMultiValueChoice", _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate("TemplateWithMultiValueChoice", _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, args)
+            CommandResult commandResult = new DotnetNewCommand(_log, args)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -278,11 +271,11 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task CanInstantiateTemplate_MultiValueChoiceParameterExplicitlyUnset()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("TemplateWithMultiValueChoice", _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate("TemplateWithMultiValueChoice", _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, "TestAssets.TemplateWithMultiValueChoice", "--Platform", "")
+            CommandResult commandResult = new DotnetNewCommand(_log, "TestAssets.TemplateWithMultiValueChoice", "--Platform", "")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -301,11 +294,11 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task CanInstantiateTemplate_WithConditionalParameters_DisabledBehaveLikeNotSpecified()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("TemplateWithConditionalParameters", _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate("TemplateWithConditionalParameters", _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(
+            CommandResult commandResult = new DotnetNewCommand(
                     _log,
                     "TestAssets.TemplateWithConditionalParameters",
                     "--A_enabled",
@@ -334,11 +327,11 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void CannotInstantiateTemplate_MultiValueChoiceParameterWithExplicitUnsetAndOtherChoice()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("TemplateWithMultiValueChoice", _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate("TemplateWithMultiValueChoice", _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, "TestAssets.TemplateWithMultiValueChoice", "--Platform", "", "--Platform", "MacOS")
+            CommandResult commandResult = new DotnetNewCommand(_log, "TestAssets.TemplateWithMultiValueChoice", "--Platform", "", "--Platform", "MacOS")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -352,9 +345,9 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task CanInstantiateTemplate_ConditionalProcessing()
         {
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            Helpers.InstallTestTemplate($"TemplateConditionalProcessing", _log, home, workingDirectory);
+            string workingDirectory = CreateTemporaryFolder();
+            string home = CreateTemporaryFolder(folderName: "Home");
+            InstallTestTemplate($"TemplateConditionalProcessing", _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, "TestAssets.TemplateConditionalProcessing")
                 .WithCustomHive(home)
@@ -380,11 +373,11 @@ namespace Microsoft.DotNet.New.Tests
         public Task DryRunRespectsTargetPathAndOutputDir()
         {
             const string _OUT_FOLDER = "folderF";
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("TemplateWithSourceNameAndCustomTargetPath", _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate("TemplateWithSourceNameAndCustomTargetPath", _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, "TestAssets.TemplateWithSourceNameAndCustomTargetPath", "-o", _OUT_FOLDER, "--dry-run")
+            CommandResult commandResult = new DotnetNewCommand(_log, "TestAssets.TemplateWithSourceNameAndCustomTargetPath", "-o", _OUT_FOLDER, "--dry-run")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -403,7 +396,7 @@ namespace Microsoft.DotNet.New.Tests
                     output = output.Replace("\\", "/");
                     //order of files may vary, replace filename with placeholders
                     //filenames are verified above
-                    foreach (var file in expectedFiles)
+                    foreach (string file in expectedFiles)
                     {
                         output = output.Replace(file, "%FILENAME%");
                     }
@@ -413,7 +406,7 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task CannotOverwriteFilesWithoutForce()
         {
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string workingDirectory = CreateTemporaryFolder();
 
             new DotnetNewCommand(_log, "console", "--name", "overwrite-test", "-o", "folderA")
                 .WithCustomHive(_fixture.HomeDirectory)
@@ -424,7 +417,7 @@ namespace Microsoft.DotNet.New.Tests
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("The template \"Console App\" was created successfully.");
 
-            var commandResult = new DotnetNewCommand(_log, "console", "--name", "overwrite-test", "-o", "folderA")
+            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--name", "overwrite-test", "-o", "folderA")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -434,7 +427,7 @@ namespace Microsoft.DotNet.New.Tests
             commandResult
                 .Should().Fail();
 
-            foreach (var file in expectedFiles)
+            foreach (string file in expectedFiles)
             {
                 commandResult.Should().HaveStdErrContaining(file);
             }
@@ -446,7 +439,7 @@ namespace Microsoft.DotNet.New.Tests
                     output = output.Replace("\\", "/");
                     //order of files may vary, replace filename with placeholders
                     //filenames are verified above
-                    foreach (var file in expectedFiles)
+                    foreach (string file in expectedFiles)
                     {
                         output = output.Replace(file, "%FILENAME%");
                     }
@@ -456,11 +449,11 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task CanShowWarning_WhenHostDataIsIncorrect()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            var templateLocation = Helpers.InstallTestTemplate("Invalid/InvalidHostData", _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            string templateLocation = InstallTestTemplate("Invalid/InvalidHostData", _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, "TestAssets.Invalid.InvalidHostData")
+            CommandResult commandResult = new DotnetNewCommand(_log, "TestAssets.Invalid.InvalidHostData")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -483,15 +476,15 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task CanShowWarningIfPackageIsAvailableFromBuiltInSources()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
             new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ItemTemplates::6.0.100", "--force")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should().Pass();
 
-            var commandResult = new DotnetNewCommand(_log, "gitignore")
+            CommandResult commandResult = new DotnetNewCommand(_log, "gitignore")
                   .WithCustomHive(home)
                   .WithWorkingDirectory(workingDirectory)
                   .Execute();
@@ -512,11 +505,11 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task CanShowError_OnTemplatesWithSameShortName()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            string templateLocation = Helpers.InstallTestTemplate("Invalid/SameShortName", _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            string templateLocation = InstallTestTemplate("Invalid/SameShortName", _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, "sameshortname")
+            CommandResult commandResult = new DotnetNewCommand(_log, "sameshortname")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -540,10 +533,10 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task Constraints_Error_IfTemplateIsRestricted()
         {
-            var customHivePath = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("Constraints/RestrictedTemplate", _log, customHivePath);
+            string customHivePath = CreateTemporaryFolder(folderName: "Home");
+            InstallTestTemplate("Constraints/RestrictedTemplate", _log, customHivePath);
 
-            var commandResult = new DotnetNewCommand(_log, "Constraints.RestrictedTemplate")
+            CommandResult commandResult = new DotnetNewCommand(_log, "Constraints.RestrictedTemplate")
                   .WithCustomHive(customHivePath)
                   .Execute();
 
@@ -562,10 +555,10 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task Constraints_CanIgnoreConstraints_WhenForceIsSpecified()
         {
-            var customHivePath = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("Constraints/RestrictedTemplate", _log, customHivePath);
+            string customHivePath = CreateTemporaryFolder(folderName: "Home");
+            InstallTestTemplate("Constraints/RestrictedTemplate", _log, customHivePath);
 
-            var commandResult = new DotnetNewCommand(_log, "Constraints.RestrictedTemplate", "--force")
+            CommandResult commandResult = new DotnetNewCommand(_log, "Constraints.RestrictedTemplate", "--force")
                   .WithCustomHive(customHivePath)
                   .Execute();
 
@@ -583,10 +576,10 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task CannotInstantiateTemplateWhenFolderIsRemoved()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDir = TestUtils.CreateTemporaryFolder();
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDir = CreateTemporaryFolder();
             string templateLocation = Path.Combine(workingDir, "template");
-            TestUtils.DirectoryCopy(TestUtils.GetTestTemplateLocation("TemplateWithSourceName"), templateLocation, true);
+            TestUtils.DirectoryCopy(GetTestTemplateLocation("TemplateWithSourceName"), templateLocation, true);
 
             new DotnetNewCommand(_log, "install", templateLocation)
                 .WithCustomHive(home)
@@ -598,7 +591,7 @@ namespace Microsoft.DotNet.New.Tests
 
             Directory.Delete(templateLocation, true);
             // Template should be removed from the template list, and it's unknown template now.
-            var commandResult = new DotnetNewCommand(_log, "TestAssets.TemplateWithSourceName")
+            CommandResult commandResult = new DotnetNewCommand(_log, "TestAssets.TemplateWithSourceName")
                 .WithCustomHive(home)
                 .Execute();
 
@@ -606,17 +599,45 @@ namespace Microsoft.DotNet.New.Tests
                 .Should()
                 .Fail();
 
-            string testExecDirPatternForVerify = $"{{SolutionDirectory}}artifacts(\\\\|\\/)tmp(\\\\|\\/){TestUtils.Configuration}";
             return Verify(commandResult.FormatOutputStreams())
-                .UniqueForOSPlatform()
-                .ScrubInlineGuids()
                 .AddScrubber(output =>
                 {
                     // for Linux Verify.NET replaces sub path /tmp/ to be {TempPath} wrongly
                     output.Replace("{TempPath}", "/tmp/");
-                    output.ScrubByRegex(testExecDirPatternForVerify, "%Test Execution Direcotry%");
+                    output.Replace(templateLocation, "%template location%");
                 });
-                
+        }
+
+        [Fact]
+        public Task CanSuggestTypoCorrection_Template()
+        {
+            CommandResult commandResult = new DotnetNewCommand(_log, "cnsle")
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute();
+
+            commandResult
+                .Should()
+                .Fail()
+                .And.NotHaveStdOut();
+
+            return Verify(commandResult.StdErr);
+        }
+
+        [Fact]
+        public Task CanSuggestTypoCorrection_Command()
+        {
+            CommandResult commandResult = new DotnetNewCommand(_log, "uninstal")
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute();
+
+            commandResult
+                .Should()
+                .Fail()
+                .And.NotHaveStdOut();
+
+            return Verify(commandResult.StdErr);
         }
 
     }

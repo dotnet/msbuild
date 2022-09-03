@@ -90,7 +90,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                         }
                         catch (InvalidTemplateParametersException e)
                         {
-                            Reporter.Error.WriteLine(string.Format(LocalizableStrings.GenericWarning, e.Message));
+                            Reporter.Error.WriteLine(LocalizableStrings.GenericWarning, e.Message);
                         }
                     }
                 }

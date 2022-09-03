@@ -1,29 +1,31 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable enable
+
 namespace Microsoft.DotNet.Cli.Utils
 {
     // Stupid-simple console manager
     public class Reporter : IReporter
     {
-        private static readonly Reporter NullReporter = new Reporter(console: null);
-        private static object _lock = new object();
+        private static readonly Reporter NullReporter = new(console: null);
+        private static readonly object _lock = new();
 
-        private readonly AnsiConsole _console;
+        private readonly AnsiConsole? _console;
 
         static Reporter()
         {
             Reset();
         }
 
-        private Reporter(AnsiConsole console)
+        private Reporter(AnsiConsole? console)
         {
             _console = console;
         }
 
-        public static Reporter Output { get; private set; }
-        public static Reporter Error { get; private set; }
-        public static Reporter Verbose { get; private set; }
+        public static Reporter Output { get; private set; } = NullReporter;
+        public static Reporter Error { get; private set; } = NullReporter;
+        public static Reporter Verbose { get; private set; } = NullReporter;
 
         /// <summary>
         /// Resets the Reporters to write to the current Console Out/Error.
@@ -79,5 +81,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 }
             }
         }
+
+        public void WriteLine(string format, params object?[] args) => WriteLine(string.Format(format, args));
     }
 }

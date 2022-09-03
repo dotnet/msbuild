@@ -379,6 +379,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The project that should be used for context evaluation..
+        /// </summary>
+        internal static string Option_ProjectPath {
+            get {
+                return ResourceManager.GetString("Option_ProjectPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Filters the templates based on the tag..
         /// </summary>
         internal static string Option_TagFilter {

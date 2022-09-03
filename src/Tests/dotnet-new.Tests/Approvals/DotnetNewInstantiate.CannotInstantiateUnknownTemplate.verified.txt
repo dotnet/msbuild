@@ -1,4 +1,4 @@
-﻿No templates found matching: 'unknownapp'.
+﻿No templates or subcommands found matching: 'unknownapp'.
 
 To list installed templates, run:
    dotnet new list

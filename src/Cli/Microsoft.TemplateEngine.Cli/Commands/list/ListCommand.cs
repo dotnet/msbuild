@@ -11,9 +11,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         public ListCommand(
                 NewCommand parentCommand,
-                Func<ParseResult, ITemplateEngineHost> hostBuilder,
-                Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
-            : base(parentCommand, hostBuilder, telemetryLoggerBuilder, "list")
+                Func<ParseResult, ITemplateEngineHost> hostBuilder)
+            : base(parentCommand, hostBuilder, "list")
         {
             parentCommand.AddNoLegacyUsageValidators(this);
         }

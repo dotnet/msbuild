@@ -19,5 +19,26 @@
     SortText: search,
     InsertText: search,
     Detail: Searches for the templates on NuGet.org.
+  },
+  {
+    Label: --force,
+    Kind: Keyword,
+    SortText: --force,
+    InsertText: --force,
+    Detail: Forces content to be generated even if it would change existing files.
+  },
+  {
+    Label: --project,
+    Kind: Keyword,
+    SortText: --project,
+    InsertText: --project,
+    Detail: The project that should be used for context evaluation.
+  },
+  {
+    Label: --no-update-check,
+    Kind: Keyword,
+    SortText: --no-update-check,
+    InsertText: --no-update-check,
+    Detail: Disables checking for the template package updates when instantiating a template.
   }
 ]

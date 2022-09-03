@@ -10,9 +10,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     internal class LegacyAliasAddCommand : BaseAliasAddCommand
     {
         internal LegacyAliasAddCommand(
-            Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
-            : base(hostBuilder, telemetryLoggerBuilder, "--alias")
+            Func<ParseResult, ITemplateEngineHost> hostBuilder)
+            : base(hostBuilder, "--alias")
         {
             AddAlias("-a");
             IsHidden = true;

@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
 
             Action a = () => shellShimRepository.CreateShim(outputDll, new ToolCommandName(shellCommandName));
 
-            a.ShouldNotThrow<DirectoryNotFoundException>();
+            a.Should().NotThrow<DirectoryNotFoundException>();
         }
 
         [Theory]
@@ -163,7 +163,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
                 }
             };
 
-            a.ShouldThrow<ShellShimException>().Where(
+            a.Should().Throw<ShellShimException>().Where(
                 ex => ex.Message ==
                     string.Format(
                         CommonLocalizableStrings.ShellShimConflict,
@@ -208,7 +208,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
                     scope.Complete();
                 }
             };
-            a.ShouldThrow<ToolPackageException>().WithMessage("simulated error");
+            a.Should().Throw<ToolPackageException>().WithMessage("simulated error");
 
             Directory.EnumerateFileSystemEntries(pathToShim).Should().BeEmpty();
         }
@@ -397,7 +397,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
                 new ToolCommandName(shellCommandName),
                 new[] { new FilePath(dummyShimPath), new FilePath("path" + dummyShimPath) });
 
-            a.ShouldThrow<ShellShimException>()
+            a.Should().Throw<ShellShimException>()
                 .And.Message
                 .Should().Contain(
                     string.Format(

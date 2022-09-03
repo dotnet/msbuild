@@ -117,20 +117,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return option;
         }
 
-        internal static Option<string> CreateOutputOption()
-        {
-            return new Option<string>(new string[] { "-o", "--output" })
-            {
-                Description = SymbolStrings.Option_Output,
-                IsRequired = false,
-                Arity = new ArgumentArity(1, 1)
-            };
-        }
-
         internal static string[] ParseCommaSeparatedValues(ArgumentResult result)
         {
-            List<string> values = new List<string>();
-            foreach (var value in result.Tokens.Select(t => t.Value))
+            List<string> values = new();
+            foreach (string value in result.Tokens.Select(t => t.Value))
             {
                 values.AddRange(value.Split(",", StringSplitOptions.TrimEntries).Where(s => !string.IsNullOrWhiteSpace(s)));
             }

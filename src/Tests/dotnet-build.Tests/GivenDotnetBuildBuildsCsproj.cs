@@ -269,6 +269,33 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                .NotHaveStdOutContaining("NETSDK1031");
         }
 
+        [RequiresMSBuildVersionFact("17.4.0.41702")]
+        public void It_builds_referenced_exe_with_self_contained_specified_via_command_line_argument()
+        {
+            var referencedProject = new TestProject("ReferencedProject")
+            {
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true
+            };
+
+            var testProject = new TestProject("TestProject")
+            {
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true
+            };
+            testProject.ReferencedProjects.Add(referencedProject);
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            new DotnetCommand(Log)
+               .WithWorkingDirectory(Path.Combine(testAsset.Path, testProject.Name))
+               .Execute("build", "-r", EnvironmentInfo.GetCompatibleRid(), "--self-contained")
+               .Should()
+               .Pass()
+               .And
+               .NotHaveStdOutContaining("NETSDK1179");
+        }
+
         [Theory]
         [InlineData("roslyn3.9")]
         [InlineData("roslyn4.0")]

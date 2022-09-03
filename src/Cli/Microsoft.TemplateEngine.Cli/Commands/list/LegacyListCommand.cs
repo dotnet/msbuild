@@ -12,9 +12,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         public LegacyListCommand(
             NewCommand parentCommand,
-            Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
-            : base(parentCommand, hostBuilder, telemetryLoggerBuilder, "--list")
+            Func<ParseResult, ITemplateEngineHost> hostBuilder)
+            : base(parentCommand, hostBuilder, "--list")
         {
             this.IsHidden = true;
             this.AddAlias("-l");
@@ -32,10 +31,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return ParentCommand.LegacyFilters[def];
         }
 
-        protected override Task<NewCommandStatus> ExecuteAsync(ListCommandArgs args, IEngineEnvironmentSettings environmentSettings, ITelemetryLogger telemetryLogger, InvocationContext context)
+        protected override Task<NewCommandStatus> ExecuteAsync(ListCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
         {
             PrintDeprecationMessage<LegacyListCommand, ListCommand>(args.ParseResult);
-            return base.ExecuteAsync(args, environmentSettings, telemetryLogger, context);
+            return base.ExecuteAsync(args, environmentSettings, context);
         }
 
         private void ValidateParentCommandArguments(CommandResult commandResult)

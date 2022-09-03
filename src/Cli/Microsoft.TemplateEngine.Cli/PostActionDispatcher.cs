@@ -110,10 +110,10 @@ namespace Microsoft.TemplateEngine.Cli
 
                 if (actionProcessor == null)
                 {
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.PostActionDispatcher_Error_NotSupported, action.ActionId));
+                    Reporter.Error.WriteLine(LocalizableStrings.PostActionDispatcher_Error_NotSupported, action.ActionId);
                     if (!string.IsNullOrWhiteSpace(action.Description))
                     {
-                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.PostActionDescription, action.Description));
+                        Reporter.Error.WriteLine(LocalizableStrings.PostActionDescription, action.Description);
                     }
                     // The host doesn't know how to handle this action, just display manual instructions.
                     DisplayInstructionsForAction(action, useErrorOutput: true);
@@ -126,7 +126,7 @@ namespace Microsoft.TemplateEngine.Cli
                         Reporter.Error.WriteLine(LocalizableStrings.PostActionDispatcher_Error_RunScriptNotAllowed);
                         if (!string.IsNullOrWhiteSpace(action.Description))
                         {
-                            Reporter.Error.WriteLine(string.Format(LocalizableStrings.PostActionDescription, action.Description));
+                            Reporter.Error.WriteLine(LocalizableStrings.PostActionDescription, action.Description);
                         }
                         DisplayInstructionsForAction(action, useErrorOutput: true);
                         result |= PostActionExecutionStatus.Cancelled;
@@ -179,7 +179,7 @@ namespace Microsoft.TemplateEngine.Cli
             Reporter.Output.WriteLine(LocalizableStrings.PostActionPromptHeader);
             if (!string.IsNullOrWhiteSpace(action.Description))
             {
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionDescription, action.Description));
+                Reporter.Output.WriteLine(LocalizableStrings.PostActionDescription, action.Description);
             }
             // actual command that will be run by 'Run script' post action
             if (action.Args != null && action.Args.TryGetValue("executable", out string? executable))
@@ -187,7 +187,7 @@ namespace Microsoft.TemplateEngine.Cli
                 action.Args.TryGetValue("args", out string? commandArgs);
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionCommand, $"{executable} {commandArgs}").Bold().Red());
             }
-            Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionPromptRequest, YesAnswer, NoAnswer));
+            Reporter.Output.WriteLine(LocalizableStrings.PostActionPromptRequest, YesAnswer, NoAnswer);
 
             do
             {
@@ -202,7 +202,7 @@ namespace Microsoft.TemplateEngine.Cli
                     return false;
                 }
 
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionInvalidInputRePrompt, input, YesAnswer, NoAnswer));
+                Reporter.Output.WriteLine(LocalizableStrings.PostActionInvalidInputRePrompt, input, YesAnswer, NoAnswer);
             }
             while (true);
         }
@@ -230,7 +230,7 @@ namespace Microsoft.TemplateEngine.Cli
             catch (Exception e)
             {
                 Reporter.Error.WriteLine(LocalizableStrings.PostActionFailedInstructionHeader);
-                Reporter.Verbose.WriteLine(string.Format(LocalizableStrings.Generic_Details, e.ToString()));
+                Reporter.Verbose.WriteLine(LocalizableStrings.Generic_Details, e.ToString());
                 DisplayInstructionsForAction(action, useErrorOutput: true);
                 return PostActionExecutionStatus.Failure;
             }
@@ -246,7 +246,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             Reporter stream = useErrorOutput ? Reporter.Error : Reporter.Output;
-            stream.WriteLine(string.Format(LocalizableStrings.PostActionInstructions, action.ManualInstructions));
+            stream.WriteLine(LocalizableStrings.PostActionInstructions, action.ManualInstructions);
 
             // if the post action executes the command ('Run script' post action), additionally display command to be executed.
             if (action.Args != null && action.Args.TryGetValue("executable", out string? executable))
