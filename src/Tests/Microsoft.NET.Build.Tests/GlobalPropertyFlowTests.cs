@@ -207,8 +207,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(_testProject, identifier: identifier);
 
-            new DotnetNewCommand(Log, "sln")
-                .WithVirtualHive()
+            new DotnetNewCommand(Log, "sln", "--debug:ephemeral-hive")
                 .WithWorkingDirectory(testAsset.TestRoot)
                 .Execute()
                 .Should()
