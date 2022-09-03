@@ -8,8 +8,8 @@
         <note>{StrBegin="NETSDK1076: "}</note>
       </trans-unit>
       <trans-unit id="AotNoValidRuntimePackageError">
-        <source>NETSDK1183: Unable to optimize assemblies for Ahead of time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing. When targeting .NET 7 or higher, make sure to restore packages with the PublishAot property set to true.</source>
-        <target state="translated">NETSDK1183: Ahead of Time 컴파일을 위해 어셈블리를 최적화할 수 없습니다. 유효한 런타임 패키지를 찾을 수 없습니다. PublishAot 속성을 false로 설정하거나 게시할 때 지원되는 런타임 식별자를 사용하세요. .NET 7 이상을 대상으로 하는 경우 PublishAot 속성이 true로 설정된 패키지를 복원해야 합니다.</target>
+        <source>NETSDK1183: Unable to optimize assemblies for Ahead of time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing and make sure to restore packages with the PublishAot property set to true.</source>
+        <target state="needs-review-translation">NETSDK1183: Ahead of Time 컴파일을 위해 어셈블리를 최적화할 수 없습니다. 유효한 런타임 패키지를 찾을 수 없습니다. PublishAot 속성을 false로 설정하거나 게시할 때 지원되는 런타임 식별자를 사용하세요. .NET 7 이상을 대상으로 하는 경우 PublishAot 속성이 true로 설정된 패키지를 복원해야 합니다.</target>
         <note>{StrBegin="NETSDK1183: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
@@ -726,8 +726,8 @@ The following are names of parameters or literal values and should not be transl
         <note />
       </trans-unit>
       <trans-unit id="ReadyToRunNoValidRuntimePackageError">
-        <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing. When targeting .NET 6 or higher, make sure to restore packages with the PublishReadyToRun property set to true.</source>
-        <target state="translated">NETSDK1094: 성능을 위해 어셈블리를 최적화할 수 없습니다. 유효한 런타임 패키지를 찾을 수 없습니다. PublishReadyToRun 속성을 false로 설정하거나 게시할 때 지원되는 런타임 식별자를 사용하세요. .NET 6 이상을 대상으로 하는 경우 PublishReadyToRun 속성이 true로 설정된 패키지를 복원해야 합니다.</target>
+        <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing and make sure to restore packages with the PublishReadyToRun property set to true.</source>
+        <target state="needs-review-translation">NETSDK1094: 성능을 위해 어셈블리를 최적화할 수 없습니다. 유효한 런타임 패키지를 찾을 수 없습니다. PublishReadyToRun 속성을 false로 설정하거나 게시할 때 지원되는 런타임 식별자를 사용하세요. .NET 6 이상을 대상으로 하는 경우 PublishReadyToRun 속성이 true로 설정된 패키지를 복원해야 합니다.</target>
         <note>{StrBegin="NETSDK1094: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunTargetNotSupportedError">

@@ -8,8 +8,8 @@
         <note>{StrBegin="NETSDK1076: "}</note>
       </trans-unit>
       <trans-unit id="AotNoValidRuntimePackageError">
-        <source>NETSDK1183: Unable to optimize assemblies for Ahead of time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing. When targeting .NET 7 or higher, make sure to restore packages with the PublishAot property set to true.</source>
-        <target state="translated">NETSDK1183: 無法為提前編譯最佳化組件: 找不到有效的執行階段套件。請將 PublishAot 屬性設為 false，或在發佈時使用支援的執行階段識別碼。以 .NET 7 或更高版本為目標時，請務必還原套件，將 PublishAot 屬性設為 true。</target>
+        <source>NETSDK1183: Unable to optimize assemblies for Ahead of time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing and make sure to restore packages with the PublishAot property set to true.</source>
+        <target state="needs-review-translation">NETSDK1183: 無法為提前編譯最佳化組件: 找不到有效的執行階段套件。請將 PublishAot 屬性設為 false，或在發佈時使用支援的執行階段識別碼。以 .NET 7 或更高版本為目標時，請務必還原套件，將 PublishAot 屬性設為 true。</target>
         <note>{StrBegin="NETSDK1183: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
@@ -726,8 +726,8 @@ The following are names of parameters or literal values and should not be transl
         <note />
       </trans-unit>
       <trans-unit id="ReadyToRunNoValidRuntimePackageError">
-        <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing. When targeting .NET 6 or higher, make sure to restore packages with the PublishReadyToRun property set to true.</source>
-        <target state="translated">NETSDK1094: 無法最佳化組件的效能: 找不到有效的執行階段套件。請將 PublishReadyToRun 屬性設定為 false，或在發佈時使用支援的執行階段識別碼。以 .NET 6 或更高版本為目標時，請務必還原套件，將 PublishReadyToRun 屬性設為 true。</target>
+        <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing and make sure to restore packages with the PublishReadyToRun property set to true.</source>
+        <target state="needs-review-translation">NETSDK1094: 無法最佳化組件的效能: 找不到有效的執行階段套件。請將 PublishReadyToRun 屬性設定為 false，或在發佈時使用支援的執行階段識別碼。以 .NET 6 或更高版本為目標時，請務必還原套件，將 PublishReadyToRun 屬性設為 true。</target>
         <note>{StrBegin="NETSDK1094: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunTargetNotSupportedError">

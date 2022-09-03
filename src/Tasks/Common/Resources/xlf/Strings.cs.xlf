@@ -8,8 +8,8 @@
         <note>{StrBegin="NETSDK1076: "}</note>
       </trans-unit>
       <trans-unit id="AotNoValidRuntimePackageError">
-        <source>NETSDK1183: Unable to optimize assemblies for Ahead of time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing. When targeting .NET 7 or higher, make sure to restore packages with the PublishAot property set to true.</source>
-        <target state="translated">NETSDK1183: Sestavení nelze optimalizovat pro kompilaci s předstihem: nebyl nalezen platný balíček modulu runtime. Buď nastavte vlastnost PublishAot na hodnotu false, nebo při publikování použijte podporovaný identifikátor modulu runtime. Při cílení na .NET 7 nebo vyšší nezapomeňte obnovit balíčky s vlastností PublishAot nastavenou na hodnotu true.</target>
+        <source>NETSDK1183: Unable to optimize assemblies for Ahead of time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing and make sure to restore packages with the PublishAot property set to true.</source>
+        <target state="needs-review-translation">NETSDK1183: Sestavení nelze optimalizovat pro kompilaci s předstihem: nebyl nalezen platný balíček modulu runtime. Buď nastavte vlastnost PublishAot na hodnotu false, nebo při publikování použijte podporovaný identifikátor modulu runtime. Při cílení na .NET 7 nebo vyšší nezapomeňte obnovit balíčky s vlastností PublishAot nastavenou na hodnotu true.</target>
         <note>{StrBegin="NETSDK1183: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
@@ -726,8 +726,8 @@ The following are names of parameters or literal values and should not be transl
         <note />
       </trans-unit>
       <trans-unit id="ReadyToRunNoValidRuntimePackageError">
-        <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing. When targeting .NET 6 or higher, make sure to restore packages with the PublishReadyToRun property set to true.</source>
-        <target state="translated">NETSDK1094: Sestavení nelze optimalizovat z hlediska výkonu: nebyl nalezen platný balíček modulu runtime. Buď nastavte vlastnost PublishReadyToRun na hodnotu false, nebo při publikování použijte podporovaný identifikátor modulu runtime. Při cílení na .NET 6 nebo vyšší nezapomeňte obnovit balíčky s vlastností PublishReadyToRun nastavenou na hodnotu true.</target>
+        <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing and make sure to restore packages with the PublishReadyToRun property set to true.</source>
+        <target state="needs-review-translation">NETSDK1094: Sestavení nelze optimalizovat z hlediska výkonu: nebyl nalezen platný balíček modulu runtime. Buď nastavte vlastnost PublishReadyToRun na hodnotu false, nebo při publikování použijte podporovaný identifikátor modulu runtime. Při cílení na .NET 6 nebo vyšší nezapomeňte obnovit balíčky s vlastností PublishReadyToRun nastavenou na hodnotu true.</target>
         <note>{StrBegin="NETSDK1094: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunTargetNotSupportedError">
