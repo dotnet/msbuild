@@ -370,7 +370,6 @@ jobs:
       - ${{ if contains(parameters.agentOs, 'Windows_NT') }}:
         - script: eng\CIBuild.cmd
                     -configuration $(_BuildConfig)
-                    $(_PublishArgs)
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)
                     /p:Test=false
@@ -412,8 +411,11 @@ jobs:
           displayName: Run dotnet new Integration Tests
 
       - ${{ if not(contains(parameters.agentOs, 'Windows_NT')) }}:
-        - script: eng/common/cibuild.sh
+        - script: eng/common/build.sh
                     --configuration $(_BuildConfig)
+                    --restore
+                    --build
+                    --ci
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)
                     $(_InternalRuntimeDownloadArgs)
