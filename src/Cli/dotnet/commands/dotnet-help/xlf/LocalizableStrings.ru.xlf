@@ -17,11 +17,6 @@
         <target state="translated">Управление установкой пакета SDK .NET.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SqlCacheDefinition">
-        <source>SQL Server cache command-line tools.</source>
-        <target state="new">SQL Server cache command-line tools.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Usage">
         <source>Usage</source>
         <target state="translated">Использование</target>
@@ -60,6 +55,11 @@
       <trans-unit id="HostOptions">
         <source>Host options (passed before the command)</source>
         <target state="translated">Параметры узла (передаваемые перед командой)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UserJwtsDefinition">
+        <source>Manage JSON Web Tokens in development.</source>
+        <target state="translated">Управлять JSON Web Token в разработке.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionDescription">

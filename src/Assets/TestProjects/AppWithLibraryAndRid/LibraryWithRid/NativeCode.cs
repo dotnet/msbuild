@@ -10,17 +10,18 @@ namespace LibraryWithRid
         {
             switch(GetRidStoredInAssemblyDescriptionAttribute())
             {
-                case "'centos.7-x64'":
-                case "'rhel.7.2-x64'":
-                case "'debian.8-x64'":
-                case "'fedora.24-x64'":
-                case "'opensuse.42.1-x64'":
+                case "'centos.9-x64'":
+                case "'rhel.9-x64'":
+                case "'debian.9-x64'":
+                case "'fedora.37-x64'":
+                case "'opensuse.42.3-x64'":
                 case "'linux-musl-x64'":
                 case "'ubuntu.14.04-x64'":
                 case "'ubuntu.16.04-x64'":
                 case "'ubuntu.16.10-x64'":
                 case "'ubuntu.18.04-x64'":
                 case "'ubuntu.20.04-x64'":
+                case "'ubuntu.22.04-x64'":
                     return Marshal.PtrToStringAnsi(LinuxNativeMethods.sqlite3_libversion());
                 case "'osx.10.10-x64'": 
                 case "'osx.10.11-x64'": 

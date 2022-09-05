@@ -1,0 +1,6 @@
+﻿The template "TestAssets.PostActions.Instructions.Basic" was created successfully.
+
+Processing post-creation actions...
+Description: Manual actions needed
+Manual instructions: Run the following command:
+Actual command: setup.cmd <your project name>

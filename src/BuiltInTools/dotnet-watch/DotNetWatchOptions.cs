@@ -23,6 +23,8 @@ namespace Microsoft.DotNet.Watcher
             RunningAsTest: IsEnvironmentSet("__DOTNET_WATCH_RUNNING_AS_TEST")
         );
 
+        public bool NonInteractive { get; set; }
+
         private static bool IsEnvironmentSet(string key)
         {
             var envValue = Environment.GetEnvironmentVariable(key);

@@ -77,7 +77,7 @@ namespace Microsoft.NET.Build.Tasks
                                                 appHostDestinationFilePath: AppHostDestinationPath,
                                                 appBinaryFilePath: AppBinaryName,
                                                 windowsGraphicalUserInterface: isGUI,
-                                                assemblyToCopyResorcesFrom: resourcesAssembly,
+                                                assemblyToCopyResourcesFrom: resourcesAssembly,
                                                 enableMacOSCodeSign: EnableMacOSCodeSign);
                         return;
                     }

@@ -1,11 +1,12 @@
 ﻿namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 {
-    using CultureInfo = System.Globalization.CultureInfo;
-    using IO = System.IO;
-    using Framework = Microsoft.Build.Framework;
-    using Utilities = Microsoft.Build.Utilities;
+    using System;
     using System.Linq;
     using Microsoft.NET.Sdk.Publish.Tasks.Properties;
+    using CultureInfo = System.Globalization.CultureInfo;
+    using Framework = Microsoft.Build.Framework;
+    using IO = System.IO;
+    using Utilities = Microsoft.Build.Utilities;
 
     /// <summary>
     /// The MSDeploy task, which is a wrapper around msdeploy.exe
@@ -263,13 +264,24 @@
 #else
                 if (string.IsNullOrEmpty(m_exePath))
                 {
-                    string programFilesX86 = System.Environment.ExpandEnvironmentVariables("%ProgramFiles(x86)%");
-                    string msdeployExePath = System.IO.Path.Combine("IIS", "Microsoft Web Deploy V3");
-                    m_exePath = IO.Path.Combine(programFilesX86, msdeployExePath);
+                    string programFiles = Environment.ExpandEnvironmentVariables("%ProgramFiles(x86)%");
+                    string msdeployExePath = IO.Path.Combine("IIS", "Microsoft Web Deploy V3");
+                    m_exePath = IO.Path.Combine(programFiles, msdeployExePath);
                     if (!IO.File.Exists(IO.Path.Combine(m_exePath, ToolName)))
                     {
-                        string programFiles = System.Environment.ExpandEnvironmentVariables("%ProgramW6432%");
-                        m_exePath = IO.Path.Combine(programFiles, msdeployExePath);
+                        /// On 32-bit Operating Systems, this will return C:\Program Files
+                        /// On 64-bit Operating Systems - regardless of process bitness, this will return C:\Program Files
+                        if (!Environment.Is64BitOperatingSystem || Environment.Is64BitProcess)
+                        {
+                            programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+                            m_exePath = IO.Path.Combine(programFiles, msdeployExePath);
+                        }
+                        else
+                        {
+                            // 32 bit process on a 64 bit OS can't use SpecialFolder.ProgramFiles to get the 64-bit program files folder
+                            programFiles = Environment.ExpandEnvironmentVariables("%ProgramW6432%");
+                            m_exePath = IO.Path.Combine(programFiles, msdeployExePath);
+                        }
                     }
                 }
 #endif

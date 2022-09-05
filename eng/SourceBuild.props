@@ -4,10 +4,10 @@
     <GitHubRepositoryName>sdk</GitHubRepositoryName>
     <SourceBuildManagedOnly>true</SourceBuildManagedOnly>
   </PropertyGroup>
-
   <Target Name="ConfigureInnerBuildArg" BeforeTargets="GetSourceBuildCommandConfiguration">
     <PropertyGroup>
       <InnerBuildArgs>$(InnerBuildArgs) /p:Projects="$(InnerSourceBuildRepoRoot)\source-build.slnf"</InnerBuildArgs>
+      <InnerBuildArgs>$(InnerBuildArgs) /p:UseSharedCompilation=false</InnerBuildArgs>
     </PropertyGroup>
   </Target>
 

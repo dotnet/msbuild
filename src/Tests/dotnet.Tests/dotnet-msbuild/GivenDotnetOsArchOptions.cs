@@ -143,5 +143,37 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 .Should()
                 .Pass();
         }
+
+        [Fact]
+        public void ItUsesImplicitRidWhenNoneIsSpecifiedForSelfContained()
+        {
+            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
+            {
+                var msbuildPath = "<msbuildpath>";
+                var currentRid = CommonOptions.GetCurrentRuntimeId();
+                var command = BuildCommand.FromArgs(new string[] { "--self-contained" }, msbuildPath);
+                command.GetArgumentsToMSBuild()
+                    .Should()
+                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary " +
+                    $"-property:SelfContained=True -property:_CommandLineDefinedSelfContained=true " +
+                    $"-property:RuntimeIdentifier={currentRid} -property:_CommandLineDefinedRuntimeIdentifier=true");
+            });
+        }
+
+        [Fact]
+        public void ItDoesNotUseImplicitRidWhenOneIsSpecifiedForSelfContained()
+        {
+            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
+            {
+                var msbuildPath = "<msbuildpath>";
+                var currentRid = CommonOptions.GetCurrentRuntimeId();
+                var command = BuildCommand.FromArgs(new string[] { "--self-contained", "--runtime", "fake-rid" }, msbuildPath);
+                command.GetArgumentsToMSBuild()
+                    .Should()
+                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary " +
+                    $"-property:RuntimeIdentifier=fake-rid -property:_CommandLineDefinedRuntimeIdentifier=true " +
+                    $"-property:SelfContained=True -property:_CommandLineDefinedSelfContained=true");
+            });
+        }
     }
 }

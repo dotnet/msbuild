@@ -37,6 +37,11 @@
         <target state="translated">'{0}'에서 프로젝트를 찾을 수 없습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DisableBuildServersOptionDescription">
+        <source>Force the command to ignore any persistent build servers.</source>
+        <target state="translated">모든 영구 빌드 서버를 무시하도록 명령을 강제 실행합니다.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="EnvironmentPathOSXBashManualInstructions">
         <source>Tools directory '{0}' is not currently on the PATH environment variable.
 If you are using bash, you can add it to your profile by running the following command:

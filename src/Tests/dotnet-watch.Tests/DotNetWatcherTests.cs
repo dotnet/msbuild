@@ -168,5 +168,32 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await app.Process.GetOutputLineAsyncWithConsoleHistoryAsync("Environment: Development", TimeSpan.FromSeconds(10));
         }
+
+        [CoreMSBuildOnlyFact]
+        public async Task Run_WithHotReloadEnabled_DoesNotReadConsoleIn_InNonInteractiveMode()
+        {
+            var testAsset = _testAssetsManager.CopyTestAsset("WatchAppWithLaunchSettings")
+                .WithSource()
+                .Path;
+
+            using var app = new WatchableApp(testAsset, _logger)
+            {
+                EnvironmentVariables =
+                {
+                    ["READ_INPUT"] = "true",
+                },
+            };
+
+            app.DotnetWatchArgs.Add("--verbose");
+            app.DotnetWatchArgs.Add("--non-interactive");
+
+            await app.StartWatcherAsync();
+
+            var standardInput = app.Process.Process.StandardInput;
+            var inputString = "This is a test input";
+
+            await standardInput.WriteLineAsync(inputString).WaitAsync(TimeSpan.FromSeconds(10));
+            await app.Process.GetOutputLineAsync($"Echo: {inputString}", TimeSpan.FromSeconds(10));
+        }
     }
 }

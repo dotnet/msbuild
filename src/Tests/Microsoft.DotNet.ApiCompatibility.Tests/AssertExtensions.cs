@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             {
                 Assert.Equal(expectedLeft, a.left);
 
-                MetadataInformation expectedRight = new(string.Empty, string.Empty, $"runtime-{i}");
+                MetadataInformation expectedRight = new(string.Empty, $"runtime-{i}");
                 Assert.Equal(expectedRight, a.right);
 
                 CompatDifference[] expectedDiff = expectedDifferences[i++];
@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             foreach ((MetadataInformation left, MetadataInformation right, IEnumerable<CompatDifference> differences) diff in differences)
             {
                 Assert.Equal(expectedLeft, diff.left);
-                MetadataInformation expectedRightMetadata = new(string.Empty, string.Empty, $"runtime-{i++}");
+                MetadataInformation expectedRightMetadata = new(string.Empty, $"runtime-{i++}");
                 Assert.Equal(expectedRightMetadata, diff.right);
                 Assert.Empty(diff.differences);
             }

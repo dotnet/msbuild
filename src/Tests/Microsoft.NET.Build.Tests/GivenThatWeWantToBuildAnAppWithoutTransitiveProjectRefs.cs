@@ -282,7 +282,7 @@ namespace _{0}
             var project4 = new TestProject
             {
                 Name = "4",
-                TargetFrameworks = "netstandard1.3;netstandard1.6;net461",
+                TargetFrameworks = "netstandard1.3;netstandard1.6;net462",
                 ReferencedProjects = { project5 },
                 SourceFiles =
                 {

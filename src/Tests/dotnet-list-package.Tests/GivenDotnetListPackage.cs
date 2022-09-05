@@ -4,6 +4,7 @@
 using System;
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using FluentAssertions;
@@ -12,6 +13,7 @@ using Microsoft.DotNet.Tools.List.PackageReferences;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -156,11 +158,39 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         [Fact]
         public void ItListsTransitivePackage()
         {
-            var testAssetName = "NewtonSoftDependentProject";
-            var testAsset = _testAssetsManager
-                .CopyTestAsset(testAssetName)
-                .WithSource();
-            var projectDirectory = testAsset.Path;
+            var testProject = new TestProject
+            {
+                Name = "NewtonSoftDependentProject",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true,
+                SourceFiles =
+                {
+["Program.cs"] = @"
+using System;
+using System.Collections;
+using Newtonsoft.Json.Linq;
+
+class Program
+{
+    public static void Main(string[] args)
+    {
+        ArrayList argList = new ArrayList(args);
+        JObject jObject = new JObject();
+
+        foreach (string arg in argList)
+        {
+            jObject[arg] = arg;
+        }
+        Console.WriteLine(jObject.ToString());
+    }
+}
+",
+                }
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("NewtonSoft.Json", "9.0.1"));
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var projectDirectory = Path.Combine(testAsset.Path, testProject.Name);
 
             new RestoreCommand(testAsset)
                 .Execute()

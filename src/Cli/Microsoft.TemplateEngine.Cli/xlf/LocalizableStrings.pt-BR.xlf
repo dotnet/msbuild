@@ -1,0 +1,1052 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="ActionWouldHaveBeenTakenAutomatically">
+        <source>Action would have been taken automatically:</source>
+        <target state="translated">A ação seria executada automaticamente:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasAssignmentCoordinator_Error_LongAlias">
+        <source>Failed to assign long option alias for parameter '{0}', tried: '{1}'; '{2}'.</source>
+        <target state="translated">Falha ao atribuir alias de opção longa para o parâmetro '{0}', tentado: '{1}'; '{2}'.</target>
+        <note>{0} is parameter name, {1} and {2} are attempted option aliases for the parameter.
+{0}, {1}, {2} should have no whitespaces.</note>
+      </trans-unit>
+      <trans-unit id="AliasAssignmentCoordinator_Error_NameShouldNotHaveColon">
+        <source>Parameter name '{0}' contains colon, which is forbidden.</source>
+        <target state="translated">O nome do parâmetro '{0}' contém dois pontos, o que é proibido.</target>
+        <note>{0} is parameter name, has no whitespaces.</note>
+      </trans-unit>
+      <trans-unit id="AliasAssignmentCoordinator_Error_ShortAlias">
+        <source>Failed to assign short option alias for parameter '{0}', tried: '{1}'; '{2}'.</source>
+        <target state="translated">Falha ao atribuir alias de opção curta para o parâmetro '{0}', tentado: '{1}'; '{2}'.</target>
+        <note>{0} is parameter name, {1} and {2} are attempted option aliases for the parameter.
+{0}, {1}, {2} should have no whitespaces.</note>
+      </trans-unit>
+      <trans-unit id="AliasCannotBeShortName">
+        <source>Alias '{0}' is a template short name, and therefore cannot be aliased.</source>
+        <target state="translated">O alias '{0}' é um nome curto do modelo e, portanto, não pode receber um alias.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasCommandAfterExpansion">
+        <source>After expanding aliases, the command is:
+    dotnet {0}</source>
+        <target state="translated">Após expandir os aliases, o comando é:
+   dotnet {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasCreated">
+        <source>Successfully created alias named '{0}' with value '{1}'</source>
+        <target state="translated">Alias denominado '{0}' criado com êxito com o valor '{1}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasCycleError">
+        <source>Alias not created. It would have created an alias cycle, resulting in infinite expansion.</source>
+        <target state="translated">Alias não criado. Seria criado um ciclo de alias, resultando em uma expansão infinita.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasExpandedCommandParseError">
+        <source>Command is invalid after expanding aliases.</source>
+        <target state="translated">Comando inválido após expandir aliases.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasExpansionError">
+        <source>Error expanding aliases on input params.</source>
+        <target state="translated">Erro ao expandir aliases em parâmetros de entrada.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasName">
+        <source>Alias Name</source>
+        <target state="translated">Nome do Alias</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasNameContainsInvalidCharacters">
+        <source>Alias names can only contain letters, numbers, underscores, and periods.</source>
+        <target state="translated">Os nomes de alias só podem conter letras, números, sublinhados e pontos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasNotCreatedInvalidInput">
+        <source>Alias not created. The input was invalid.</source>
+        <target state="translated">Alias não criado. A entrada era inválida.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasRemoveNonExistentFailed">
+        <source>Unable to remove alias '{0}'. It did not exist.</source>
+        <target state="translated">Não é possível remover o alias '{0}'. Ele não existia.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasRemoved">
+        <source>Successfully removed alias named '{0}' whose value was '{1}'.</source>
+        <target state="translated">Removido com êxito o alias denominado '{0}' cujo valor era '{1}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasShowAllAliasesHeader">
+        <source>All Aliases:</source>
+        <target state="translated">Todos os Aliases:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasShowErrorUnknownAlias">
+        <source>Unknown alias name '{0}'.
+Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
+        <target state="translated">Nome de alias '{0}' desconhecido.
+Execute 'dotnet {1} --mostrar- aliases' sem nenhum args para mostrar todos os aliases.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasUpdated">
+        <source>Successfully updated alias named '{0}' to value '{1}'.</source>
+        <target state="translated">O alias chamado '{0}' foi atualizado com êxito para o valor '{1}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasValue">
+        <source>Alias Value</source>
+        <target state="translated">Valor de Alias</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasValueFirstArgError">
+        <source>First argument of an alias value must begin with a letter or digit.</source>
+        <target state="translated">O primeiro argumento de um valor de alias deve começar com uma letra ou dígito.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AllowScriptsNoChoice">
+        <source>Do not allow scripts to run</source>
+        <target state="translated">Não permitir que scripts executem</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AllowScriptsPromptChoice">
+        <source>Ask before running each script</source>
+        <target state="translated">Perguntar antes de executar cada script</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AllowScriptsYesChoice">
+        <source>Allow scripts to run</source>
+        <target state="translated">Permitir que scripts executem</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AmbiguousParameterDetail">
+        <source>The value '{1}' is ambiguous for option {0}.</source>
+        <target state="translated">O valor '{1}' é ambíguo para a opção {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AmbiguousTemplateGroupListHint">
+        <source>Re-run the command using the template's exact short name.</source>
+        <target state="translated">Execute novamente o comando usando o nome curto exato do modelo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AmbiguousTemplatesHeader">
+        <source>Unable to resolve the template, the following installed templates are conflicting:</source>
+        <target state="translated">Não foi possível resolver o modelo, os seguintes modelos instalados são conflitantes:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
+        <source>Uninstall the template packages containing the templates to keep only one template from the list or add the template options which differentiate the template to run.</source>
+        <target state="translated">Desinstale os pacotes de modelos que contêm os modelos para manter somente um modelo da lista ou adicione as opções de modelo que diferenciam o modelo a ser executado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AmbiguousTemplatesSamePackageHint">
+        <source>The package {0} is not correct, uninstall it and report the issue to the package author.</source>
+        <target state="translated">O pacote {0} não está correto, desinstale-o e relate o problema ao autor do pacote.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgsFileNotFound">
+        <source>The specified extra args file does not exist: {0}.</source>
+        <target state="translated">O arquivo extra args especificado não existe: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgsFileWrongFormat">
+        <source>Extra args file {0} is not formatted properly.</source>
+        <target state="translated">O {0} de arquivo args extra não está formatado corretamente.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Assembly">
+        <source>Assembly</source>
+        <target state="translated">assembly</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Authoring_AmbiguousBestPrecedence">
+        <source>Equal highest precedence values among the best template matches prevented unambiguously choosing a template to invoke.</source>
+        <target state="translated">Valores de precedência mais altos entre as melhores correspondências de modelo impedidos de escolher não ambiguamente um modelo para invocar.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Authoring_AmbiguousChoiceParameterValue">
+        <source>An ambiguous choice parameter value prevented unambiguously choosing a template to invoke.</source>
+        <target state="translated">Um valor de parâmetro de escolha ambíguo impediu a escolha não ambígua de um modelo para invocar.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BaseCommand_ExitCodeHelp">
+        <source>For details on the exit code, refer to https://aka.ms/templating-exit-codes#{0}</source>
+        <target state="translated">Para obter detalhes sobre o código de saída, consulte https://aka.ms/templating-exit-codes#{0}</target>
+        <note>{0} is the exit code</note>
+      </trans-unit>
+      <trans-unit id="Change">
+        <source>Change</source>
+        <target state="translated">Alterar</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_NoSources">
+        <source>No remoted sources defined to search for the templates.</source>
+        <target state="translated">Não há fontes remotas definidas para pesquisar os modelos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_NoTemplateName">
+        <source>Search failed: not enough information specified for search.</source>
+        <target state="translated">A pesquisa falhou: não há informações suficientes especificadas para pesquisa.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_NotFound">
+        <source>Template '{0}' was not found.</source>
+        <target state="translated">Modelo '{0}' não encontrado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_SearchFailure">
+        <source>Search failed: {0}</source>
+        <target state="translated">Falha na pesquisa: {0}</target>
+        <note>0 - localized error message</note>
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort">
+        <source>Search failed: template name is too short, minimum 2 characters are required.</source>
+        <target state="translated">Falha na pesquisa: o nome do modelo é muito curto, são necessários dois caracteres no mínimo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Info_InstallHelp">
+        <source>To use the template, run the following command to install the package:</source>
+        <target state="translated">Para usar o modelo, execute o seguinte comando para instalar o pacote:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Info_MatchesFromSource">
+        <source>Matches from template source: {0}</source>
+        <target state="translated">Correspondências da origem do modelo: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
+        <source>To search for templates, specify partial template name or use one of the supported filters: {0}.</source>
+        <target state="translated">Para pesquisar modelos, especifique o nome parcial do modelo ou utilize um dos filtros com suporte: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">
+        <source>Searching for the templates...</source>
+        <target state="translated">Procurando modelos...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameAuthor">
+        <source>Author</source>
+        <target state="translated">Autor</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameCurrentVersion">
+        <source>Current</source>
+        <target state="translated">Atual</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameIdentity">
+        <source>Identity</source>
+        <target state="translated">Identidade</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameLanguage">
+        <source>Language</source>
+        <target state="translated">Idioma</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameLatestVersion">
+        <source>Latest</source>
+        <target state="translated">Mais Recente</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNamePackage">
+        <source>Package</source>
+        <target state="translated">Pacote</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNamePrecedence">
+        <source>Precedence</source>
+        <target state="translated">Precedência</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameShortName">
+        <source>Short Name</source>
+        <target state="translated">Nome Curto</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameTags">
+        <source>Tags</source>
+        <target state="translated">Tags</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameTemplateName">
+        <source>Template Name</source>
+        <target state="translated">Nome do modelo</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameTotalDownloads">
+        <source>Downloads</source>
+        <target state="translated">Downloads</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameType">
+        <source>Type</source>
+        <target state="translated">Tipo</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNamesAreNotSupported">
+        <source>The column {0} is/are not supported, the supported columns are: {1}.</source>
+        <target state="translated">Não há suporte para a coluna {0}, as colunas com suporte são: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandFailed">
+        <source>Command failed.</source>
+        <target state="translated">Falha no comando.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOutput">
+        <source>Output from command:</source>
+        <target state="translated">Saída do comando:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandSucceeded">
+        <source>Command succeeded.</source>
+        <target state="translated">O comando foi bem-sucedido.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Commands_Validator_WrongArgumentValue">
+        <source>Argument(s) {0} are not recognized. Must be one of: {1}.</source>
+        <target state="translated">O(s) argumento(s) {0} não é(são) reconhecido(s). Deve ser um destes: {1}.</target>
+        <note>{0} - comma-separated quoted list of argument value(s) given by user, {1} - comma-separated quoted list of allowed values.</note>
+      </trans-unit>
+      <trans-unit id="Commands_Validator_WrongTokens">
+        <source>Unrecognized command or argument(s): {0}.</source>
+        <target state="translated">Comando ou argumento(s) não reconhecido(s): {0}.</target>
+        <note>{0} - wrong token or comma-separated tokens (if multiple). Each token is enclosed with single quotes: 'token'.</note>
+      </trans-unit>
+      <trans-unit id="Commands_Warning_DeprecatedCommand">
+        <source>Warning: use of '{0}' is deprecated. Use '{1}' instead.</source>
+        <target state="translated">Aviso: o uso de '{0}' foi preterido. Use '{1}'.</target>
+        <note>{0} - deprecated command ('dotnet new --install'); {1} - new command ('dotnet new install).</note>
+      </trans-unit>
+      <trans-unit id="Commands_Warning_DeprecatedCommand_Info">
+        <source>For more information, run: </source>
+        <target state="translated">Para obter mais informações, execute: </target>
+        <note>followed by command example (at new line, without quotes)</note>
+      </trans-unit>
+      <trans-unit id="ConfiguredValue">
+        <source>Configured Value: {0}</source>
+        <target state="translated">Valor Configurado: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Create">
+        <source>Create</source>
+        <target state="translated">Criar</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CreateFailed">
+        <source>Template "{0}" could not be created.
+{1}</source>
+        <target state="translated">Não foi possível criar o modelo "{0}".
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CreateSuccessful">
+        <source>The template "{0}" was created successfully.</source>
+        <target state="translated">O modelo "{0}" foi criado com êxito.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CurrentConfiguration">
+        <source>Current configuration:</source>
+        <target state="translated">Configuração atual:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Delete">
+        <source>Delete</source>
+        <target state="translated">Excluir</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DestructiveChangesNotification">
+        <source>Creating this template will make changes to existing files:</source>
+        <target state="translated">A criação deste modelo fará alterações nos arquivos existentes:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DisplaysHelp">
+        <source>Displays help for this command.</source>
+        <target state="translated">Exibe a ajuda para este comando.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Exception_InvalidTemplateParameters_MessageHeader">
+        <source>Template {0} ({1}) is malformed. The following template parameters are invalid:</source>
+        <target state="translated">O modelo {0} ({1}) está mal formado. Os seguintes parâmetros do modelo são inválidos:</target>
+        <note>{0} is template identity, {1} is template short name.
+The header is followed by the list of parameters and their errors (might be several for one parameter).</note>
+      </trans-unit>
+      <trans-unit id="ExtraArgsCommandAfterExpansion">
+        <source>After expanding the extra args files, the command is:
+    dotnet {0}</source>
+        <target state="translated">Após expandir os arquivos args adicionais, o comando é:
+ dotnet {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileActionsWouldHaveBeenTaken">
+        <source>File actions would have been taken:</source>
+        <target state="translated">As ações de arquivo seriam tomadas:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generators">
+        <source>Generators</source>
+        <target state="translated">Geradores</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GenericError">
+        <source>Error: {0}</source>
+        <target state="translated">Erro: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GenericWarning">
+        <source>Warning: {0}</source>
+        <target state="translated">Aviso: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_CommandHints_List">
+        <source>To list installed templates, run:</source>
+        <target state="translated">Para listar os modelos instalados, execute:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_CommandHints_Search">
+        <source>To search for the templates on NuGet.org, run:</source>
+        <target state="translated">Para pesquisar os modelos no NuGet.org, execute:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_Details">
+        <source>Details: {0}</source>
+        <target state="translated">Detalhes: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_Empty">
+        <source>(empty)</source>
+        <target state="translated">(vazio)</target>
+        <note>shown when there is no data to show</note>
+      </trans-unit>
+      <trans-unit id="Generic_ExampleHeader">
+        <source>Example:</source>
+        <target state="translated">Exemplo:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_ExamplesHeader">
+        <source>Examples:</source>
+        <target state="translated">Exemplos:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_Info_NoMatchingTemplates">
+        <source>No templates found matching: {0}.</source>
+        <target state="translated">Nenhum modelo encontrado: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_NoCallbackError">
+        <source>No callback is configured. Running post action is not possible.</source>
+        <target state="translated">Nenhum retorno de chamada está configurado. Não é possível executar a ação de postagem.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="HostSpecificDataLoader_Warning_FailedToRead">
+        <source>Failed to load dotnet CLI host data for template {0} from cache.</source>
+        <target state="translated">Falha ao carregar os dados do host CLI do dotnet para o modelo {0} do cache.</target>
+        <note>{0} - template short name</note>
+      </trans-unit>
+      <trans-unit id="HostSpecificDataLoader_Warning_FailedToReadFromFile">
+        <source>Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</source>
+        <target state="translated">Falha ao carregar os dados do host CLI do dotnet para o modelo {0} de {1}. Os dados do host serão ignorados.</target>
+        <note>{0} - template short name, {1} - file path to host data.</note>
+      </trans-unit>
+      <trans-unit id="InstantiateCommand_Info_NoMatchingTemplatesSubCommands">
+        <source>No templates or subcommands found matching: '{0}'.</source>
+        <target state="translated">Nenhum modelo ou subcomando encontrado correspondente: '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstantiateCommand_Info_TypoCorrection_Subcommands">
+        <source>Did you mean one of the following subcommands?</source>
+        <target state="translated">Você quis dizer um dos seguintes subcomandos?</target>
+        <note>Followed by the list of suggestions</note>
+      </trans-unit>
+      <trans-unit id="InstantiateCommand_Info_TypoCorrection_Templates">
+        <source>Did you mean one of the following templates?</source>
+        <target state="translated">Você quis dizer um dos seguintes modelos?</target>
+        <note>Followed by the list of suggestions</note>
+      </trans-unit>
+      <trans-unit id="InvalidCommandOptions">
+        <source>Error: Invalid option(s):</source>
+        <target state="translated">Erro: Opções inválidas:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidNameParameter">
+        <source>Name cannot contain any of the following characters {0} or character codes {1}</source>
+        <target state="translated">O nome da pasta não pode conter nenhum dos seguintes caracteres {0} ou código de caractere {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidParameterDefault">
+        <source>The default value '{1}' is not a valid value for {0}.</source>
+        <target state="translated">O valor padrão '{1}' não é um valor válido para {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidParameterDetail">
+        <source>'{1}' is not a valid value for {0}.</source>
+        <target state="translated">'{1}' não é um valor válido para '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidParameterNameDetail">
+        <source>'{0}' is not a valid option</source>
+        <target state="translated">'{0}' não é uma opção válida.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidParameterTemplateHint">
+        <source>For more information, run:</source>
+        <target state="translated">Para obter mais informações, execute:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidSyntax">
+        <source>Invalid command syntax: use '{0}' instead.</source>
+        <target state="translated">Sintaxe de comando inválida: usar '{0}' em seu lugar.</target>
+        <note>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</note>
+      </trans-unit>
+      <trans-unit id="MissingRequiredParameter">
+        <source>Mandatory option '{0}' is missing for the template '{1}'.</source>
+        <target state="translated">A opção obrigatória '{0}' está faltando para o modelo '{1}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MountPointFactories">
+        <source>Mount Point Factories</source>
+        <target state="translated">Fábricas de Ponto de Montagem</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoItems">
+        <source>(No Items)</source>
+        <target state="translated">(Sem Itens)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoParameters">
+        <source>    (No Parameters)</source>
+        <target state="translated">    (Nenhum Parâmetro)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoTemplatesFound">
+        <source>No templates installed.</source>
+        <target state="translated">Nenhum modelo instalado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionalWorkloadsSyncFailed">
+        <source>Error during synchronization with the Optional SDK Workloads.</source>
+        <target state="translated">Erro durante a sincronização com as Cargas de trabalho do SDK Opcionais.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Options">
+        <source>Options:</source>
+        <target state="translated">Opções:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Overwrite">
+        <source>Overwrite</source>
+        <target state="translated">Sobrescrever</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ParseChoiceTemplateOption_ErrorText_InvalidChoiceValue">
+        <source>value '{0}' is not allowed, allowed values are: {1}</source>
+        <target state="translated">o valor '{0}' não é permitido, os valores permitidos são: {1}</target>
+        <note>the error message is part of other sentence, no punctuation is needed
+{0} is a value given by user / configuration, {1} is comma separated list of possible values(each value is in quotes).</note>
+      </trans-unit>
+      <trans-unit id="ParseChoiceTemplateOption_ErrorText_NoChoicesDefined">
+        <source>no choices are defined for parameter</source>
+        <target state="translated">nenhuma opção está definida para o parâmetro</target>
+        <note>the error message is part of other sentence, no punctuation is needed</note>
+      </trans-unit>
+      <trans-unit id="ParseChoiceTemplateOption_Error_InvalidArgument">
+        <source>Cannot parse argument '{0}' for option '{1}' as expected type '{2}': {3}.</source>
+        <target state="translated">Não é possível analisar o argumento '{0}' para a opção '{1}' conforme o tipo esperado '{2}': {3}.</target>
+        <note>{0} - value that is given by used for option {1}
+{1} - option name
+{2} - type of the value (string, choice, etc).
+{3} - detailed error message</note>
+      </trans-unit>
+      <trans-unit id="ParseChoiceTemplateOption_Error_InvalidDefaultIfNoOptionValue">
+        <source>Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}': {3}.</source>
+        <target state="translated">Não é possível analisar o padrão se a opção sem o valor '{0}' para a opção '{1}' conforme o tipo esperado '{2}': {3}.</target>
+        <note>{0} - default value for option {1} in case no argument is given
+{1} - option name
+{2} - type of the value (string, choice, etc).
+{3} - detailed error message</note>
+      </trans-unit>
+      <trans-unit id="ParseChoiceTemplateOption_Error_InvalidDefaultValue">
+        <source>Cannot parse default value '{0}' for option '{1}' as expected type '{2}': {3}.</source>
+        <target state="translated">Não é possível analisar o valor padrão '{0}' para a opção '{1}' conforme o tipo esperado '{2}': {3}.</target>
+        <note>{0} - default value for option {1}
+{1} - option name
+{2} - type of the value (string, choice, etc).
+{3} - detailed error message</note>
+      </trans-unit>
+      <trans-unit id="ParseTemplateOption_Error_InvalidArgument">
+        <source>Cannot parse argument '{0}' for option '{1}' as expected type '{2}'.</source>
+        <target state="translated">Não é possível analisar o argumento '{0}' para a opção '{1}' conforme o tipo esperado '{2}'.</target>
+        <note>{0} - value that is given by used for option {1}
+{1} - option name
+{2} - type of the value (string, choice, etc).</note>
+      </trans-unit>
+      <trans-unit id="ParseTemplateOption_Error_InvalidCount">
+        <source>Using more than 1 argument is not allowed for '{0}', used: {1}.</source>
+        <target state="translated">O uso de mais de 1 argumento não é permitido para '{0}', usado: {1}.</target>
+        <note>{0} - option name, {1} - count of arguments used</note>
+      </trans-unit>
+      <trans-unit id="ParseTemplateOption_Error_InvalidDefaultIfNoOptionValue">
+        <source>Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}'.</source>
+        <target state="translated">Não é possível analisar o padrão se a opção sem o valor '{0}' para a opção '{1}' conforme o tipo esperado '{2}'.</target>
+        <note>{0} - default value for option {1} in case no argument is given
+{1} - option name
+{2} - type of the value (string, choice, etc).
+</note>
+      </trans-unit>
+      <trans-unit id="ParseTemplateOption_Error_InvalidDefaultValue">
+        <source>Cannot parse default value '{0}' for option '{1}' as expected type {2}'.</source>
+        <target state="translated">Não foi possível analisar o valor padrão '{0}' para a opção '{1}' conforme o tipo esperado {2}'.</target>
+        <note>{0} - default value for option {1}
+{1} - option name
+{2} - type of the value (string, choice, etc).
+</note>
+      </trans-unit>
+      <trans-unit id="ParseTemplateOption_Error_MissingDefaultIfNoOptionValue">
+        <source>Required argument missing for option: '{0}'.</source>
+        <target state="translated">Argumento necessário ausente para a opção: '{0}'.</target>
+        <note>{0} - option name</note>
+      </trans-unit>
+      <trans-unit id="ParseTemplateOption_Error_MissingDefaultValue">
+        <source>Default value for argument missing for option: '{0}'.</source>
+        <target state="translated">Valor padrão para o argumento ausente para a opção: '{0}'.</target>
+        <note>{0} - option name</note>
+      </trans-unit>
+      <trans-unit id="PartialTemplateMatchSwitchesNotValidForAllMatches">
+        <source>Some partially matched templates may not support these input switches:</source>
+        <target state="translated">Alguns modelos com correspondência parcial podem não dar suporte a essas opções de entrada:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PossibleValuesHeader">
+        <source>The possible values are:</source>
+        <target state="translated">Os valores possíveis são:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostActionCommand">
+        <source>Actual command: {0}</source>
+        <target state="translated">Comando real: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostActionDescription">
+        <source>Description: {0}</source>
+        <target state="translated">Descrição: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostActionDispatcher_Error_NotSupported">
+        <source>The post action {0} is not supported.</source>
+        <target state="translated">A ação de postagem {0} não é suportada.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostActionDispatcher_Error_RunScriptNotAllowed">
+        <source>Execution of 'Run script' post action is not allowed.</source>
+        <target state="translated">A execução da ação de postagem 'Executar script' não é permitida.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostActionFailedInstructionHeader">
+        <source>Post action failed.</source>
+        <target state="translated">Falha na postagem.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostActionInstructions">
+        <source>Manual instructions: {0}</source>
+        <target state="translated">Instruções manuais: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostActionInvalidInputRePrompt">
+        <source>Invalid input "{0}". Please enter one of [{1}(yes)|{2}(no)].</source>
+        <target state="translated">Entrada inválida "{0}". Insira um das opções [{1} (sim) |{2} (não)].</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostActionPromptHeader">
+        <source>Template is configured to run the following action:</source>
+        <target state="translated">O modelo está configurado para executar a seguinte ação:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostActionPromptRequest">
+        <source>Do you want to run this action [{0}(yes)|{1}(no)]?</source>
+        <target state="translated">Deseja executar esta ação [{0}(yes)|{1}(no)]?</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
+        <source>Failed to run the command: argument 'executable' is missing in post action configuration.</source>
+        <target state="translated">Falha ao executar o comando: o argumento 'executável' está ausente na configuração pós-ação.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProcessingPostActions">
+        <source>Processing post-creation actions...</source>
+        <target state="translated">Processando ações pós-criação...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RerunCommandAndPassForceToCreateAnyway">
+        <source>Rerun the command and pass --force to accept and create.</source>
+        <target state="translated">Re-execute o comando e passe --force para aceitar e criar.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunHelpForInformationAboutAcceptedParameters">
+        <source>For usage information, run: </source>
+        <target state="translated">Para obter informações de uso, execute: </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunningCommand">
+        <source>Running command '{0}'...</source>
+        <target state="translated">Comando em execução '{0}'...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SettingsReadError">
+        <source>Error reading the installed configuration, file may be corrupted. If this problem persists, try resetting with the `--debug:reinit' flag</source>
+        <target state="translated">Erro ao ler a configuração instalada; o arquivo pode estar corrompido. Se o problema persistir, tente redefinir com o sinalizador '--debug:reinit'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShowsAllTemplates">
+        <source>Shows all templates.</source>
+        <target state="translated">Ver todos os modelos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches">
+        <source>The following option(s) or their value(s) are not valid in combination with other supplied options or their values:</source>
+        <target state="translated">A(s) opção(ões) a seguir ou seus valores não são válidos em combinação com outras opções fornecidas ou seus valores:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_DisplayConstraintResults_Error">
+        <source>Failed to instatiate template '{0}', the following constraints are not met:</source>
+        <target state="translated">Falha ao instanciar o modelo '{0}', as seguintes restrições não são atendidas:</target>
+        <note>{0} - template name (user friendly)</note>
+      </trans-unit>
+      <trans-unit id="TemplateCommand_DisplayConstraintResults_Hint">
+        <source>To run the template anyway, use '{0}' option:</source>
+        <target state="translated">Para executar o modelo de qualquer maneira, use a opção '{0}':</target>
+        <note>{0} - additional option name (--force)</note>
+      </trans-unit>
+      <trans-unit id="TemplateCommand_DisplayConstraintResults_Hint_TemplateNotUsable">
+        <source>The template might not be usable.</source>
+        <target state="translated">O modelo pode não ser utilizável.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_DisplayConstraintResults_Warning">
+        <source>Warning: the following constraints for the template '{0}' are not met:</source>
+        <target state="translated">Aviso: as seguintes restrições para o modelo '{0}' não são atendidas:</target>
+        <note>{0} - template name (user friendly)</note>
+      </trans-unit>
+      <trans-unit id="TemplateCreator_Error_TemplateNotFound">
+        <source>Unable to locate the specified template content, the template package might be removed or corrupted.</source>
+        <target state="translated">Não foi possível localizar o conteúdo do modelo especificado, o pacote de modelo pode ter sido removido ou corrompido.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCreator_Hint_Install">
+        <source>To install the template package, run:</source>
+        <target state="translated">Para instalar o pacote de modelo, execute:</target>
+        <note>The sentence is followed by the command to run the action</note>
+      </trans-unit>
+      <trans-unit id="TemplateCreator_Hint_RebuildCache">
+        <source>To rescan installed template packages, run:</source>
+        <target state="translated">Para verificar novamente os pacotes de modelo instalados, execute:</target>
+        <note>The sentence is followed by the command to run the action</note>
+      </trans-unit>
+      <trans-unit id="TemplateCreator_Hint_Uninstall">
+        <source>To uninstall the template package, run:</source>
+        <target state="translated">Para desinstalar o pacote de modelo, execute:</target>
+        <note>The sentence is followed by the command to run the action</note>
+      </trans-unit>
+      <trans-unit id="TemplateInformationCoordinator_DotnetNew_Description">
+        <source>The '{0}' command creates a .NET project based on a template.</source>
+        <target state="translated">O comando '{0}' criar um projeto .NET baseado em um modelo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInformationCoordinator_DotnetNew_DisplayOptionsHint">
+        <source>Display template options with:</source>
+        <target state="translated">Exibir opções de modelos com:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInformationCoordinator_DotnetNew_ExampleHeader">
+        <source>An example would be:</source>
+        <target state="translated">Um exemplo seria:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInformationCoordinator_DotnetNew_ListTemplatesHint">
+        <source>Display all installed templates with:</source>
+        <target state="translated">Exibir todos os modelos instalados com:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint">
+        <source>Display templates available on NuGet.org with:</source>
+        <target state="translated">Exibir modelos disponíveis no NuGet.org com:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInformationCoordinator_DotnetNew_TemplatesHeader">
+        <source>Common templates are:</source>
+        <target state="translated">Os modelos comuns são:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateListCoordinator_Error_FailedConstraints">
+        <source>{0} template(s) are hidden because their constraints are not satisfied. To show them, use the '{1}' option.</source>
+        <target state="translated">{0} template(s) estão ocultos porque suas restrições não são satisfeitas. Para mostrá-los, use a opção '{1}'.</target>
+        <note>{0} - the count of templates that are not shown. {1} - option to be used (--ignore-constraints).</note>
+      </trans-unit>
+      <trans-unit id="TemplateOptions_Error_AllowedValuesForOptionList">
+        <source>Allowed values for '{0}' option are: {1}.</source>
+        <target state="translated">Os valores permitidos para a opção '{0}' são: {1}.</target>
+        <note>0} - option name (as --language)
+{1} - comma separated, escaped in quotes list of allowed values</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_BuiltInCheck_Info_BuiltInPackageAvailable">
+        <source>An update for template package '{0}' is available in the '{1}' provider.</source>
+        <target state="translated">Uma atualização para o pacote de modelo '{0}' está disponível no provedor '{1}'.</target>
+        <note>{0} - id and version of template package, {1} - provider name (.NET SDK, Optional workloads, etc)</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_BuiltInCheck_Info_UninstallPackage">
+        <source>To use built-in template package, uninstall manually installed template package using:</source>
+        <target state="translated">Para usar o pacote de modelo integrado, desinstale o pacote de modelo instalado manualmente usando:</target>
+        <note>followed by command to uninstall package</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
+        <source>Could not find the template package containing template '{0}'</source>
+        <target state="translated">Não foi possível localizar o pacote de modelo contendo o modelo '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Error_PackageNameContainsTemplates">
+        <source>{0} (contains {1} templates)</source>
+        <target state="translated">{0} (contém modelos de {1})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Error_PackageNotFound">
+        <source>The template package '{0}' is not found.</source>
+        <target state="translated">O pacote do modelo '{0}' não foi encontrado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Error_TemplateIncludedToPackages">
+        <source>The template '{0}' is included to the packages:</source>
+        <target state="translated">O modelo '{0}' está incluído nos pacotes:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_ConstraintsNotice">
+        <source>The following templates might not work because their constraints are not met:</source>
+        <target state="translated">Os modelos a seguir podem não funcionar porque suas restrições não são atendidas:</target>
+        <note>The sentence is followed by the list of templates with information on their constraints. Each template and each restriction is given from new line.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_Error_FoundNoPackagesToInstall">
+        <source>Found no template packages to install.</source>
+        <target state="translated">Não foram encontrados os pacotes do modelo para instalar.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_Error_SameInstallRequests">
+        <source>The command is attempting to install the template package '{0}' twice, check the arguments and retry.</source>
+        <target state="translated">O comando está tentando instalar o pacote de modelos '{0}' duas vezes, verifique os argumentos e tente novamente.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_Info_OverrideNotice">
+        <source>Installing the template package(s) will override the available template package(s).</source>
+        <target state="translated">A instalação do(s) pacote(s) de modelos substituirá o(s) pacote(s) de modelo disponível(is).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_Info_PackageIsAvailable">
+        <source>The following template package(s) are already available:</source>
+        <target state="translated">O(s) seguinte(s) pacote(s) de modelos já está(ão) disponível(is):</target>
+        <note>Followed by list of packages that are available</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_Info_PackagesToBeInstalled">
+        <source>The following template packages will be installed:</source>
+        <target state="translated">Os seguintes pacotes de modelo serão instalados:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_Info_UseForceToOverride">
+        <source>To install the template package(s) anyway, apply '{0}' option:</source>
+        <target state="translated">Para instalar o(s) pacote(s) de modelos de qualquer maneira, aplique a opção '{0}':</target>
+        <note>{0} is option to use (--force). Followed by command to use to install the packages.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Uninstall_Error_GenericError">
+        <source>Failed to uninstall {0}, reason: {1}.</source>
+        <target state="translated">Falha ao desinstalar {0}, motivo: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Uninstall_Error_ListPackagesHeader">
+        <source>To list installed template packages use:</source>
+        <target state="translated">Para listar os pacotes do modelo utilize:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Uninstall_Error_UninstallCommandHeader">
+        <source>To uninstall the template package use:</source>
+        <target state="translated">Para desinstalar o pacote do modelo utilize:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Uninstall_Info_DetailsHeader">
+        <source>Details:</source>
+        <target state="translated">Detalhes:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Uninstall_Info_InstalledItems">
+        <source>Currently installed items:</source>
+        <target state="translated">Itens instalados no momento:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Uninstall_Info_Success">
+        <source>Success: {0} was uninstalled.</source>
+        <target state="translated">Êxito: {0} foi desinstalado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Uninstall_Info_UninstallCommandHint">
+        <source>Uninstall Command:</source>
+        <target state="translated">Comando de Desinstalação:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Error_GenericError">
+        <source>Failed to check update for {0}: {1}.</source>
+        <target state="translated">Falha ao verificar a atualização para {0}: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Error_InvalidNuGetFeeds">
+        <source>Failed to check update for {0}: no NuGet feeds are configured or they are invalid.</source>
+        <target state="translated">Falha ao verificar a atualização para a {0}: nenhum feed do NuGet está configurado ou eles são inválidos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Error_PackageNotFound">
+        <source>Failed to check update for {0}: the package is not available in configured NuGet feeds.</source>
+        <target state="translated">Falha ao verificar a atualização para {0}: o pacote não está disponível nos feeds configurados do NuGet.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Error_PackageNotSupported">
+        <source>Failed to check update for {0}: the package is not supported.</source>
+        <target state="translated">Falha ao verificar a atualização para {0}: não há suporte para o pacote.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Info_AllPackagesAreUpToDate">
+        <source>All template packages are up-to-date.</source>
+        <target state="translated">Todos os pacotes de modelo estão atualizados.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Info_PackagesToBeUpdated">
+        <source>The following template packages will be updated:</source>
+        <target state="translated">Os seguintes pacotes de modelo serão atualizados:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Info_UpdateAllCommandHeader">
+        <source>To update all the packages use:</source>
+        <target state="translated">Para atualizar todos os pacotes utilize:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Info_UpdateAvailable">
+        <source>An update for template package '{0}' is available.</source>
+        <target state="translated">Uma atualização para o pacote de modelos '{0}' está disponível.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Info_UpdateAvailablePackages">
+        <source>An update for template packages is available:</source>
+        <target state="translated">Uma atualização para os pacotes do modelo está disponível:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Info_UpdateSingleCommandHeader">
+        <source>To update the package use:</source>
+        <target state="translated">Para atualizar o pacote utilize:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Verbose_NuGetCredentialServiceError">
+        <source>Failed to initialize NuGet credential service, details: {0}.</source>
+        <target state="translated">Falha ao inicializar o serviço de credencial NuGet, detalhes: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled">
+        <source>{0} is already installed.</source>
+        <target state="translated">{0} já está instalado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled_Hint">
+        <source>To reinstall the same version of the template package, use '{0}' option:</source>
+        <target state="translated">Para reinstalar a mesma versão do pacote de modelo, use opção '{0}':</target>
+        <note>{0} - option name (--force). Followed by command example on new line.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Error_DownloadFailed">
+        <source>{0} could not be installed, download failed.</source>
+        <target state="translated">O {0} não pôde ser instalado, falha no download.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Error_GenericError">
+        <source>{0} could not be installed.</source>
+        <target state="translated">O {0} não pôde ser instalado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Error_InvalidNuGetFeeds">
+        <source>{0} could not be installed, no NuGet feeds are configured or they are invalid.</source>
+        <target state="translated">O {0} não pôde ser instalado, não foram configurados os feeds do NuGet ou eles são inválidos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Error_InvalidPackage">
+        <source>Failed to install {0}, failed to uninstall previous version of the template package.</source>
+        <target state="translated">Falha ao instalar o {0}, falha ao desinstalar a versão anterior do pacote do modelo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Error_PackageNotFound">
+        <source>{0} could not be installed, the package does not exist.</source>
+        <target state="translated">{0} não pôde ser instalado, o pacote não existe.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Error_UninstallFailed">
+        <source>Failed to install {0}, the template package is invalid.</source>
+        <target state="translated">Falha ao instalar o {0}, o pacote do modelo é inválido.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Error_UnsupportedRequest">
+        <source>{0} is not supported.</source>
+        <target state="translated">Não há suporte para {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Info_Success">
+        <source>Success: {0} installed the following templates:</source>
+        <target state="translated">Êxito: {0} instalou os seguintes modelos:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Warning_No_Templates_In_Package">
+        <source>No templates were found in the package {0}.</source>
+        <target state="translated">Não foram encontrados modelos no pacote {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateResolver_Warning_FailedToReparseTemplate">
+        <source>[Warning]: Failed to parse input for template {0}, it will be skipped from further processing.</source>
+        <target state="translated">[Alerta]: Falha ao analisar a entrada para o modelo {0}, ele será ignorado de outro processamento.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Templates">
+        <source>Templates</source>
+        <target state="translated">Modelos</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesFoundMatchingInputParameters">
+        <source>These templates matched your input: {0}</source>
+        <target state="translated">Esses modelos correspondem à sua entrada: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesNotValidGivenTheSpecifiedFilter">
+        <source>{0} template(s) partially matched, but failed on {1}.</source>
+        <target state="translated">{0} modelo(s) parcialmente correspondente(s), mas com falha em {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ThirdPartyNotices">
+        <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
+        <target state="translated">Este modelo contém tecnologias de outras pessoas além da Microsoft, consulte {0} para obter detalhes.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Type">
+        <source>Type</source>
+        <target state="translated">Tipo</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToSetPermissions">
+        <source>Unable to apply permissions {0} to "{1}".</source>
+        <target state="translated">Não é possível aplicar as permissões {0} a "{1}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownChangeKind">
+        <source>Unknown Change</source>
+        <target state="translated">Alteração desconhecida</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Version">
+        <source>Version:</source>
+        <target state="translated">Versão:</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

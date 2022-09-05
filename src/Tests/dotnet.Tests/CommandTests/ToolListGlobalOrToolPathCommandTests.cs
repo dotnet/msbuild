@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             Action a = () => command.Execute();
 
-            a.ShouldThrow<GracefulException>()
+            a.Should().Throw<GracefulException>()
              .And
              .Message
              .Should()

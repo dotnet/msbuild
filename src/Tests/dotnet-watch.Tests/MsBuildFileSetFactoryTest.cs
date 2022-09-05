@@ -22,8 +22,6 @@ namespace Microsoft.DotNet.Watcher.Tools
         private readonly IReporter _reporter;
         private readonly TestAssetsManager _testAssets;
 
-        private static string DotNetHostPath => TestContext.Current.ToolsetUnderTest.DotNetHostPath;
-
         public MsBuildFileSetFactoryTest(ITestOutputHelper output)
         {
             _reporter = new TestReporter(output);
@@ -134,7 +132,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         {
             var project = _testAssets.CreateTestProject(new TestProject("Project1")
             {
-                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework};net461",
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework};net462",
                 AdditionalProperties =
                 {
                     ["EnableDefaultCompileItems"] = "false",
@@ -144,7 +142,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             project.WithProjectChanges(d => d.Root.Add(XElement.Parse(
 $@"<ItemGroup>
     <Compile Include=""Class1.netcore.cs"" Condition=""'$(TargetFramework)'=='{ToolsetInfo.CurrentTargetFramework}'"" />
-    <Compile Include=""Class1.desktop.cs"" Condition=""'$(TargetFramework)'=='net461'"" />
+    <Compile Include=""Class1.desktop.cs"" Condition=""'$(TargetFramework)'=='net462'"" />
 </ItemGroup>")));
 
             WriteFile(project, "Class1.netcore.cs");
@@ -252,7 +250,7 @@ $@"<ItemGroup>
 
             var project1 = _testAssets.CreateTestProject(new TestProject("Project1")
             {
-                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework};net461",
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework};net462",
                 ReferencedProjects = { project2.TestProject, },
             });
 
@@ -287,7 +285,7 @@ $@"<ItemGroup>
 
             var project1 = _testAssets.CreateTestProject(new TestProject("Project1")
             {
-                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework};net461",
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework};net462",
                 ReferencedProjects = { project2.TestProject, },
             });
 
@@ -328,7 +326,7 @@ $@"<ItemGroup>
 
             var output = new OutputSink();
             var options = GetWatchOptions();
-            var filesetFactory = new MsBuildFileSetFactory(options, DotNetHostPath, _reporter, projectA, output, waitOnError: false, trace: true);
+            var filesetFactory = new MsBuildFileSetFactory(options, _reporter, projectA, output, waitOnError: false, trace: true);
 
             var fileset = await GetFileSet(filesetFactory);
 
@@ -363,7 +361,7 @@ $@"<ItemGroup>
         private Task<FileSet> GetFileSet(string projectPath)
         {
             DotNetWatchOptions options = GetWatchOptions();
-            return GetFileSet(new MsBuildFileSetFactory(options, DotNetHostPath, _reporter, projectPath, new OutputSink(), waitOnError: false, trace: false));
+            return GetFileSet(new MsBuildFileSetFactory(options, _reporter, projectPath, new OutputSink(), waitOnError: false, trace: false));
         }
 
         private static DotNetWatchOptions GetWatchOptions() => 

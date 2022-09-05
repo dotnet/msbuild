@@ -29,7 +29,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Trimmer defaults -->
     <PublishTrimmed Condition="'$(PublishTrimmed)' == ''">true</PublishTrimmed>
-    <TrimMode Condition="'$(TrimMode)' == ''">link</TrimMode>
+    <TrimMode Condition="'$(TrimMode)' == ''">partial</TrimMode>
     <TrimmerRemoveSymbols Condition="'$(TrimmerRemoveSymbols)' == ''">false</TrimmerRemoveSymbols>
 
     <!-- Static web assets defaults -->
@@ -39,6 +39,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <StaticWebAssetsAdditionalPublishProperties>$(StaticWebAssetsAdditionalPublishProperties);BuildProjectReferences=false;ResolveAssemblyReferencesFindRelatedSatellites=true;_PublishingBlazorWasmProject=true</StaticWebAssetsAdditionalPublishProperties>
     <StaticWebAssetsAdditionalPublishPropertiesToRemove>$(StaticWebAssetsAdditionalPublishPropertiesToRemove);NoBuild;RuntimeIdentifier</StaticWebAssetsAdditionalPublishPropertiesToRemove>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectCapability Include="WebAssembly" />
+  </ItemGroup>
 
   <Import Sdk="Microsoft.NET.Sdk.Razor" Project="Sdk.props" />
   <Import Sdk="Microsoft.NET.Sdk.Web.ProjectSystem" Project="Sdk.props" />

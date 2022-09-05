@@ -1,0 +1,66 @@
+jobs:
+  - template: /eng/build.yml
+    parameters:
+      agentOs: Windows_NT_TemplateEngine
+      pool:
+        ${{ if eq(variables['System.TeamProject'], 'public') }}:
+          name: NetCore-Svc-Public
+          demands: ImageOverride -equals Build.Windows.Amd64.VS2022.Pre.Open
+        ${{ if ne(variables['System.TeamProject'], 'public') }}:
+          name: NetCore1ESPool-Svc-Internal
+          demands: ImageOverride -equals Build.Windows.Amd64.VS2022.Pre
+      ${{ if eq(variables['System.TeamProject'], 'public') }}:
+        helixTargetQueue: Windows.Amd64.VS2022.Pre.Open
+      ${{ if ne(variables['System.TeamProject'], 'public') }}:
+        helixTargetQueue: Windows.Amd64.VS2022.Pre
+      strategy:
+        matrix:
+          Build_Release:
+            _BuildConfig: Release
+            _PublishArgs: '-publish /p:DotNetPublishUsingPipelines=true'
+            ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+              _SignType: test
+              _Test: -test
+            ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+              _SignType: real
+              _Test: ''
+
+  - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Ubuntu_20_04_TemplateEngine
+        pool:
+          ${{ if eq(variables['System.TeamProject'], 'public') }}:
+            name: NetCore-Svc-Public
+            demands: ImageOverride -equals 1es-ubuntu-2004-open
+          ${{ if ne(variables['System.TeamProject'], 'public') }}:
+            name: NetCore1ESPool-Svc-Internal
+            demands: ImageOverride -equals 1es-ubuntu-2004
+        ${{ if eq(variables['System.TeamProject'], 'public') }}:
+          helixTargetQueue: 'ubuntu.2004.amd64.open@mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-20.04-helix-amd64-20220502145738-4b2e4c2'
+        ${{ if ne(variables['System.TeamProject'], 'public') }}:
+          helixTargetQueue: Ubuntu.2004.Amd64
+        strategy:
+          matrix:
+            Build_Release:
+              _BuildConfig: Release
+              _PublishArgs: ''
+              _SignType: test
+              _Test: -test
+
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Darwin_TemplateEngine
+        pool:
+          vmImage: 'macOS-latest'
+        ${{ if eq(variables['System.TeamProject'], 'public') }}:
+          helixTargetQueue: OSX.1015.Amd64.Open
+        ${{ if ne(variables['System.TeamProject'], 'public') }}:
+          helixTargetQueue: OSX.1015.Amd64
+        strategy:
+          matrix:
+            Build_Release:
+              _BuildConfig: Release
+              _PublishArgs: ''
+              _SignType: test
+              _Test: -test

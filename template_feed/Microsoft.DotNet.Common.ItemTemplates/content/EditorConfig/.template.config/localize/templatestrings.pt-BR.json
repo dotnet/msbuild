@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "Arquivo EditorConfig",
+  "description": "Cria um arquivo .editorconfig para configurar as preferências de estilo de código.",
+  "symbols/Empty/displayName": "Vazio",
+  "symbols/Empty/description": "Cria .editorconfig vazio em vez dos padrões para .NET."
+}

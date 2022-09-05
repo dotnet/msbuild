@@ -84,5 +84,57 @@ namespace Microsoft.NET.Pack.Tests
                 .And
                 .HaveStdOutContaining("NETSDK1085");
         }
+
+        [Fact]
+        public void It_packs_with_release_if_PackRelease_property_set()
+        {
+            var helloWorldAsset = _testAssetsManager
+               .CopyTestAsset("HelloWorld", "PackReleaseHelloWorld")
+               .WithSource();
+
+            System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PackRelease>true</PackRelease></PropertyGroup></Project>");
+
+            new BuildCommand(helloWorldAsset)
+               .Execute()
+               .Should()
+               .Pass();
+
+            var packCommand = new DotnetPackCommand(Log, helloWorldAsset.TestRoot);
+
+            packCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", "HelloWorld.1.0.0.nupkg");
+            Assert.True(File.Exists(expectedAssetPath));
+        }
+
+        [Fact]
+        public void A_PackRelease_property_does_not_override_other_command_configuration()
+        {
+            var helloWorldAsset = _testAssetsManager
+               .CopyTestAsset("HelloWorld", "PackPropertiesHelloWorld")
+               .WithSource()
+               .WithTargetFramework(ToolsetInfo.CurrentTargetFramework);
+
+            System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PackRelease>true</PackRelease></PropertyGroup></Project>");
+
+            new BuildCommand(helloWorldAsset)
+               .Execute()
+               .Should()
+               .Pass();
+
+            // Another command, which should not be affected by PackRelease
+            var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
+
+            publishCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
+            Assert.False(File.Exists(expectedAssetPath));
+        }
     }
 }

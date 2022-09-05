@@ -35,6 +35,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--no-incremental", "-o", "myoutput", "-r", "myruntime", "-v", "diag", "/ArbitrarySwitchForMSBuild" },
                                   "-target:Rebuild -property:RuntimeIdentifier=myruntime -property:_CommandLineDefinedRuntimeIdentifier=true -verbosity:diag -property:OutputPath=<cwd>myoutput /ArbitrarySwitchForMSBuild")]
         [InlineData(new string[] { "/t:CustomTarget" }, "/t:CustomTarget")]
+        [InlineData(new string[] { "--disable-build-servers" }, "-p:UseRazorBuildServer=false -p:UseSharedCompilation=false /nodeReuse:false")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
             CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>

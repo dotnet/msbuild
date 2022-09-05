@@ -8,6 +8,9 @@ using System.Runtime.InteropServices;
 
 #nullable disable
 
+//  Work around https://github.com/dotnet/roslyn-analyzers/issues/6094
+#pragma warning disable CA1420
+
 namespace Microsoft.DotNet.NativeWrapper
 {
     public static partial class Interop
@@ -85,6 +88,7 @@ namespace Microsoft.DotNet.NativeWrapper
         {
             resolved_sdk_dir = 0,
             global_json_path = 1,
+            requested_version = 2,
         }
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]

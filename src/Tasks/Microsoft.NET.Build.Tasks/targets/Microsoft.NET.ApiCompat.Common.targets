@@ -1,0 +1,32 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.ApiCompat.Common.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+<Project>
+  <!-- Expose the tasks for SDK consumption and for external use cases. -->
+  <UsingTask TaskName="Microsoft.DotNet.ApiCompat.Task.ValidateAssembliesTask" AssemblyFile="$(DotNetApiCompatTaskAssembly)" />
+  <UsingTask TaskName="Microsoft.DotNet.ApiCompat.Task.ValidatePackageTask" AssemblyFile="$(DotNetApiCompatTaskAssembly)" />
+
+  <Target Name="CollectApiCompatInputs">
+    <PropertyGroup Condition="'$(RoslynAssembliesPath)' == ''">
+      <RoslynAssembliesPath>$(RoslynTargetsPath)</RoslynAssembliesPath>
+      <_packageReferenceList>@(PackageReference)</_packageReferenceList>
+      <!-- CSharpCoreTargetsPath and VisualBasicCoreTargetsPath point to the same location, Microsoft.CodeAnalysis.CSharp and Microsoft.CodeAnalysis.VisualBasic
+           are on the same directory as Microsoft.CodeAnalysis. So there is no need to distinguish between csproj or vbproj. -->
+      <RoslynAssembliesPath Condition="$(_packageReferenceList.Contains('Microsoft.Net.Compilers.Toolset'))">$([System.IO.Path]::GetDirectoryName($(CSharpCoreTargetsPath)))</RoslynAssembliesPath>
+      <RoslynAssembliesPath Condition="'$(MSBuildRuntimeType)' == 'Core'">$([System.IO.Path]::Combine('$(RoslynAssembliesPath)', bincore))</RoslynAssembliesPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(CompatibilitySuppressionFilePath)' == ''">
+      <_compatibilitySuppressionFilePath>$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', 'CompatibilitySuppressions.xml'))</_compatibilitySuppressionFilePath>
+      <CompatibilitySuppressionFilePath Condition="Exists($(_compatibilitySuppressionFilePath)) or '$(GenerateCompatibilitySuppressionFile)' == 'true'">$(_compatibilitySuppressionFilePath)</CompatibilitySuppressionFilePath>
+    </PropertyGroup>
+  </Target>
+</Project>

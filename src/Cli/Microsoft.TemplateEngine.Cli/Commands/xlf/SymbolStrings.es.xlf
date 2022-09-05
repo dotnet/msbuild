@@ -1,0 +1,243 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="es" original="../SymbolStrings.resx">
+    <body>
+      <trans-unit id="Command_AliasAdd_Description">
+        <source>Creates an alias for instantiate command with a certain set of arguments.</source>
+        <target state="translated">Crea un alias para crear instancias del comando con un determinado conjunto de argumentos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_AliasShow_Description">
+        <source>Displays defined aliases.</source>
+        <target state="translated">Muestra los alias definidos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Alias_Description">
+        <source>Creates or displays defined aliases.</source>
+        <target state="translated">Crea o muestra alias definidos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Install_Argument_Package">
+        <source>NuGet package ID or path to folder or NuGet package to install. 
+To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;version&gt;.
+</source>
+        <target state="translated">Id. del paquete NuGet o ruta de acceso a la carpeta o paquete NuGet que se va a instalar. 
+Para instalar el paquete NuGet de una versión determinada, use &lt;package ID&gt;::&lt;version&gt;.
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Install_Description">
+        <source>Installs a template package.</source>
+        <target state="translated">Instala un paquete de plantillas.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Instantiate_Argument_ShortName">
+        <source>A short name of the template to create.</source>
+        <target state="translated">Nombre corto de la plantilla que se va a crear.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Instantiate_Argument_TemplateOptions">
+        <source>Template specific options to use.</source>
+        <target state="translated">Opciones específicas de la plantilla que se van a usar.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Instantiate_Description">
+        <source>Instantiates a template with given short name.</source>
+        <target state="translated">Crea una instancia de una plantilla con un nombre corto determinado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Legacy_Update_Check_Description">
+        <source>Checks the currently installed template packages for updates.</source>
+        <target state="translated">Comprueba si hay actualizaciones para los paquetes de plantillas instalados actualmente.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_List_Argument_Name">
+        <source>If specified, only the templates matching the name will be shown.</source>
+        <target state="translated">Si se especifica, solo se mostrarán las plantillas que coincidan con el nombre.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_List_Description">
+        <source>Lists templates containing the specified template name. If no name is specified, lists all templates.</source>
+        <target state="translated">Muestra las plantillas que contienen el nombre de plantilla especificado. Si no se especifica ningún nombre, muestra todas las plantillas.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_New_Description">
+        <source>Template Instantiation Commands for .NET CLI.</source>
+        <target state="translated">Comandos de creación de instancias de la plantilla para CLI de .NET.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Search_Argument_Name">
+        <source>If specified, only the templates matching the name will be shown.</source>
+        <target state="translated">Si se especifica, solo se mostrarán las plantillas que coincidan con el nombre.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Search_Description">
+        <source>Searches for the templates on NuGet.org.</source>
+        <target state="translated">Busca las plantillas en NuGet.org.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Uninstall_Argument_Package">
+        <source>NuGet package ID (without version) or path to folder to uninstall. 
+If command is specified without the argument, it lists all the template packages installed.</source>
+        <target state="translated">Id. del paquete NuGet (sin versión) o ruta de acceso a la carpeta que se va a desinstalar. 
+Si el comando se especifica sin el argumento, muestra todos los paquetes de plantillas instalados.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Uninstall_Description">
+        <source>Uninstalls a template package.</source>
+        <target state="translated">Desinstala un paquete de plantillas.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Update_Description">
+        <source>Checks the currently installed template packages for update, and install the updates.</source>
+        <target state="translated">Comprueba si hay actualizaciones para los paquetes de plantillas instalados actualmente e instala las actualizaciones.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Update_Option_CheckOnly">
+        <source>Only check for updates and display the template packages to be updated without applying update.</source>
+        <target state="translated">Compruebe solo si hay actualizaciones y muestre los paquetes de plantillas que se van a actualizar sin aplicar la actualización.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListCommand_Option_IgnoreConstraints">
+        <source>Disables checking if the template meets the constraints to be run.</source>
+        <target state="translated">Deshabilita la comprobación de si la plantilla cumple las restricciones que se van a ejecutar.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_AddSource">
+        <source>Specifies a NuGet source to use during install.</source>
+        <target state="translated">Especifica un origen de NuGet para usarlo durante la instalación.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_AuthorFilter">
+        <source>Filters the templates based on the template author.</source>
+        <target state="translated">Filtra las plantillas en función del autor de la plantilla.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_BaselineFilter">
+        <source>Filters the templates based on baseline defined in the template.</source>
+        <target state="translated">Filtra las plantillas en función de la línea base definida en la plantilla.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Columns">
+        <source>Specifies the columns to display in the output. </source>
+        <target state="translated">Especifica las columnas que se van a mostrar en la salida. </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_ColumnsAll">
+        <source>Display all columns in the output.</source>
+        <target state="translated">Muestra todas las columnas de la salida.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_Attach">
+        <source>Allows to pause execution in order to attach to the process for debug purposes.</source>
+        <target state="translated">Permite pausar la ejecución para asociarla al proceso con fines de depuración.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_CustomSettings">
+        <source>Sets custom settings location.</source>
+        <target state="translated">Establece la ubicación de la configuración personalizada.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_RebuildCache">
+        <source>If specified, removes the template cache prior to command execution.</source>
+        <target state="translated">Si se especifica, quita la memoria caché de las plantillas antes de la ejecución del comando.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_Reinit">
+        <source>If specified, resets the settings prior to command execution.</source>
+        <target state="translated">Si se especifica, restablece la configuración antes de la ejecución del comando.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_ShowConfig">
+        <source>If specified, shows the template engine config prior to command execution.</source>
+        <target state="translated">Si se especifica, muestra la configuración del motor de plantillas antes de la ejecución del comando.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_VirtualSettings">
+        <source>If specified, the settings will be not preserved on file system.</source>
+        <target state="translated">Si se especifica, la configuración no se conservará en el sistema de archivos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Install_Force">
+        <source>Allows installing template packages from the specified sources even if they would override a template package from another source.</source>
+        <target state="translated">Permite instalar paquetes de plantillas desde los orígenes especificados, incluso si invalidarían un paquete de plantillas de otro origen.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Interactive">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">Permite que el comando se detenga y espere la entrada o acción del usuario (por ejemplo, para autenticarse).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_LanguageFilter">
+        <source>Filters templates based on language.</source>
+        <target state="translated">Filtra las plantillas en función del idioma.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Output">
+        <source>Location to place the generated output.</source>
+        <target state="translated">Ubicación en la que se colocará el resultado generado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_PackageFilter">
+        <source>Filters the templates based on NuGet package ID.</source>
+        <target state="translated">Filtra las plantillas en función del id. del paquete NuGet.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_ProjectPath">
+        <source>The project that should be used for context evaluation.</source>
+        <target state="translated">Proyecto que se debe usar para la evaluación de contexto.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_TagFilter">
+        <source>Filters the templates based on the tag.</source>
+        <target state="translated">Filtra las plantillas en función de la etiqueta.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_TypeFilter">
+        <source>Filters templates based on available types. Predefined values are "project" and "item".</source>
+        <target state="translated">Filtra las plantillas en función de los tipos disponibles. Los valores predefinidos son "proyecto" y "elemento".</target>
+        <note>project and item should not be translated</note>
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_AllowScripts">
+        <source>Specifies if post action scripts should run.</source>
+        <target state="translated">Especifica si deben ejecutarse los scripts de acción posterior.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_Baseline">
+        <source>Specifies the baseline to instantiate.</source>
+        <target state="translated">Especifica la línea base de la que se va a crear una instancia.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_DryRun">
+        <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
+        <target state="translated">Muestra un resumen de lo que sucede si se ejecuta la línea de comandos dada si se crea una plantilla.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_Force">
+        <source>Forces content to be generated even if it would change existing files.</source>
+        <target state="translated">Fuerza la generación de contenido aunque cambie a los archivos existentes.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_Language">
+        <source>Specifies the template language to instantiate.</source>
+        <target state="translated">Especifica el lenguaje de plantilla del que se va a crear una instancia.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_Name">
+        <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
+        <target state="translated">Nombre de la salida que se va a crear. Si no se especifica ningún nombre, se usa el nombre del directorio de salida.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_NoUpdateCheck">
+        <source>Disables checking for the template package updates when instantiating a template.</source>
+        <target state="translated">Deshabilita la comprobación de las actualizaciones del paquete de plantillas al crear una plantilla de forma instantánea.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_Type">
+        <source>Specifies the template type to instantiate.</source>
+        <target state="translated">Especifica el tipo de plantilla del que se va a crear una instancia.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

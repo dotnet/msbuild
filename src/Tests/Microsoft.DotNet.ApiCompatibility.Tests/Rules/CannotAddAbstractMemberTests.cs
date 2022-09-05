@@ -6,28 +6,29 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using Microsoft.DotNet.ApiCompatibility.Tests;
 using Xunit;
 
-namespace Microsoft.DotNet.ApiCompatibility.Tests
+namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
 {
     public class CannotAddAbstractMemberTests
     {
+        private static readonly TestRuleFactory s_ruleFactory = new((settings, context) => new CannotAddAbstractMember(settings, context));
+
         [Theory]
         [MemberData(nameof(AddedAbstractMemberIsReportedData))]
         public void AddedAbstractMemberIsReported(string leftSyntax, string rightSyntax, bool includeInternals)
         {
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(includeInternalSymbols: includeInternals));
 
-            ApiComparer differ = new();
-            differ.IncludeInternalSymbols = includeInternals;
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
             CompatDifference[] expected = new[]
             {
                 new CompatDifference(DiagnosticIds.CannotAddAbstractMember, string.Empty, DifferenceType.Added, "M:CompatTests.First.SecondAbstract")
             };
-
             Assert.Equal(expected, differences);
         }
 
@@ -37,8 +38,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
         {
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory);
 
-            ApiComparer differ = new();
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
             Assert.Empty(differences);
@@ -50,8 +51,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
         {
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory);
 
-            ApiComparer differ = new();
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
             Assert.Empty(differences);
@@ -66,9 +67,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
 
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: true));
 
-            ApiComparer differ = new();
-            differ.StrictMode = true;
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
             foreach (CompatDifference difference in differences)
@@ -145,11 +145,10 @@ namespace CompatTests
 }
 "};
 
-            ApiComparer differ = new();
             ElementContainer<IAssemblySymbol> left =
-                new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax), new MetadataInformation(string.Empty, string.Empty, "ref"));
-
-            IList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
+                new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax), new MetadataInformation(string.Empty, "ref"));
+            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
+            ApiComparer differ = new(s_ruleFactory);
 
             IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
                 differ.GetDifferences(left, right);

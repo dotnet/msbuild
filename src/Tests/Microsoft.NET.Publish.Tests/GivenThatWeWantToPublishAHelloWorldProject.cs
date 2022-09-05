@@ -139,7 +139,7 @@ namespace Microsoft.NET.Publish.Tests
                 RuntimeIdentifier = rid,
                 IsExe = true,
             };
-            
+
             testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = "true";
             testProject.SourceFiles["Program.cs"] = $@"
 using System;
@@ -162,7 +162,7 @@ public static class Program
 
             publishDirectory.Should().HaveFile($"Hello.World{Constants.ExeSuffix}");
         }
-		
+
         [Theory]
         [InlineData("win-arm")]
         [InlineData("win8-arm")]
@@ -206,14 +206,14 @@ public static class Program
                 targetFramework: targetFramework,
                 runtimeIdentifier: runtimeIdentifier);
             var outputDirectory = publishDirectory.Parent;
-            
+
             // The name of the self contained executable depends on the runtime identifier.
             // For Windows family ARM publishing, it'll always be Hello.exe.
             // We shouldn't use "Constants.ExeSuffix" for the suffix here because that changes
             // depending on the RuntimeInformation
             var selfContainedExecutable = "Hello.exe";
 
-            var filesPublished = new [] {
+            var filesPublished = new[] {
                 selfContainedExecutable,
                 "Hello.dll",
                 "Hello.pdb",
@@ -424,6 +424,32 @@ public static class Program
         }
 
         [Fact]
+        public void It_publishes_on_release_if_PublishRelease_property_set()
+        {
+            var helloWorldAsset = _testAssetsManager
+               .CopyTestAsset("HelloWorld", "PublishReleaseHelloWorld")
+               .WithSource()
+               .WithTargetFramework(ToolsetInfo.CurrentTargetFramework);
+
+            System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PublishRelease>true</PublishRelease></PropertyGroup></Project>");
+
+            new BuildCommand(helloWorldAsset)
+           .Execute()
+           .Should()
+           .Pass();
+
+            var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
+
+            publishCommand
+            .Execute()
+            .Should()
+            .Pass();
+
+            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
+            Assert.True(File.Exists(expectedAssetPath));
+        }
+
+        [Fact]
         public void It_allows_unsupported_rid_with_override()
         {
             var helloWorldAsset = _testAssetsManager
@@ -522,7 +548,7 @@ public static class Program
                     testProject.AdditionalProperties.Add("UseWpf", "true");
                     testProject.AdditionalProperties.Add("UseWindowsForms", "true");
                     break;
-               case "console":
+                case "console":
                     break;
                 case "web":
                     testProject.ProjectSdk = "Microsoft.NET.Sdk.Web";

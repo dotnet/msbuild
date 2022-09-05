@@ -1,0 +1,27 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithMultipleRenamesOnSameFileHandlesOverlap",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithMultipleRenamesOnSameFileHandlesOverlap",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithMultipleRenamesOnSameFileHandlesOverlap",
+  "shortName": "TestAssets.TemplateWithMultipleRenamesOnSameFileHandlesOverlap",
+  "symbols": {
+    "fooRename": {
+      "type": "parameter",
+      "dataType": "string",
+      "fileRename": "foo"
+    },
+    "oobRename": {
+      "type": "parameter",
+      "dataType": "string",
+      "fileRename": "oob"
+    }
+  },
+  "primaryOutputs": [
+    {
+      "path": "foob.txt"
+    }
+  ]
+}

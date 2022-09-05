@@ -52,29 +52,41 @@ namespace Microsoft.NET.Build.Tests
                 "Analyzer",
                 GetValuesCommand.ValueType.Item);
 
-            command.Execute().Should().Pass();
+            command
+                .WithWorkingDirectory(asset.Path)
+                .Execute("/bl")
+                .Should().Pass();
 
             var analyzers = command.GetValues();
 
             switch (language)
             {
                 case "C#":
-                    analyzers.Select(x => RelativeNuGetPath(x)).Where(x => x != null).Should().BeEquivalentTo(
-                        "Microsoft.NET.Sdk/targets/../analyzers/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll",
-                        "Microsoft.NET.Sdk/targets/../analyzers/Microsoft.CodeAnalysis.NetAnalyzers.dll",
-                        "microsoft.codequality.analyzers/2.6.0/analyzers/dotnet/cs/Microsoft.CodeQuality.Analyzers.dll",
-                        "microsoft.codequality.analyzers/2.6.0/analyzers/dotnet/cs/Microsoft.CodeQuality.CSharp.Analyzers.dll",
-                        "microsoft.dependencyvalidation.analyzers/0.9.0/analyzers/dotnet/Microsoft.DependencyValidation.Analyzers.dll"
+                    analyzers.Select(x => GetPackageAndPath(x)).Should().BeEquivalentTo(new[]
+                            {
+                                ("Microsoft.NET.Sdk", (string) null, "analyzers/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll"),
+                                ("Microsoft.NET.Sdk", (string)null, "analyzers/Microsoft.CodeAnalysis.NetAnalyzers.dll"),
+                                ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/cs/System.Text.Json.SourceGeneration.dll"),
+                                ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/cs/System.Text.RegularExpressions.Generator.dll"),
+                                ("microsoft.codequality.analyzers", "2.6.0", "analyzers/dotnet/cs/Microsoft.CodeQuality.Analyzers.dll"),
+                                ("microsoft.codequality.analyzers", "2.6.0", "analyzers/dotnet/cs/Microsoft.CodeQuality.CSharp.Analyzers.dll"),
+                                ("microsoft.dependencyvalidation.analyzers", "0.9.0", "analyzers/dotnet/Microsoft.DependencyValidation.Analyzers.dll"),
+                                ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/cs/Microsoft.Interop.LibraryImportGenerator.dll"),
+                                ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/cs/Microsoft.Interop.JavaScript.JSImportGenerator.dll"),
+                                ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/cs/Microsoft.Interop.SourceGeneration.dll")
+                            }
                         );
                     break;
 
                 case "VB":
-                    analyzers.Select(x => RelativeNuGetPath(x)).Should().BeEquivalentTo(
-                        "Microsoft.NET.Sdk/targets/../analyzers/Microsoft.CodeAnalysis.VisualBasic.NetAnalyzers.dll",
-                        "Microsoft.NET.Sdk/targets/../analyzers/Microsoft.CodeAnalysis.NetAnalyzers.dll",
-                        "microsoft.codequality.analyzers/2.6.0/analyzers/dotnet/vb/Microsoft.CodeQuality.Analyzers.dll",
-                        "microsoft.codequality.analyzers/2.6.0/analyzers/dotnet/vb/Microsoft.CodeQuality.VisualBasic.Analyzers.dll",
-                        "microsoft.dependencyvalidation.analyzers/0.9.0/analyzers/dotnet/Microsoft.DependencyValidation.Analyzers.dll"
+                    analyzers.Select(x => GetPackageAndPath(x)).Should().BeEquivalentTo( new[]
+                        {
+                            ("Microsoft.NET.Sdk", (string)null, "analyzers/Microsoft.CodeAnalysis.VisualBasic.NetAnalyzers.dll"),
+                            ("Microsoft.NET.Sdk", (string)null, "analyzers/Microsoft.CodeAnalysis.NetAnalyzers.dll"),
+                            ("microsoft.codequality.analyzers", "2.6.0", "analyzers/dotnet/vb/Microsoft.CodeQuality.Analyzers.dll"),
+                            ("microsoft.codequality.analyzers", "2.6.0", "analyzers/dotnet/vb/Microsoft.CodeQuality.VisualBasic.Analyzers.dll"),
+                            ("microsoft.dependencyvalidation.analyzers", "0.9.0", "analyzers/dotnet/Microsoft.DependencyValidation.Analyzers.dll")
+                        }
                         );
                     break;
 
@@ -113,7 +125,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            List<string> GetAnalyzersForTargetFramework(string targetFramework)
+            List<(string package, string version, string path)> GetAnalyzersForTargetFramework(string targetFramework)
             {
                 var getValuesCommand = new GetValuesCommand(testAsset,
                     valueName: "Analyzer",
@@ -124,10 +136,10 @@ namespace Microsoft.NET.Build.Tests
 
                 getValuesCommand.Execute("-p:TargetFramework=" + targetFramework).Should().Pass();
 
-                return getValuesCommand.GetValues().Select(x => RelativeNuGetPath(x,false)).ToList();
+                return getValuesCommand.GetValues().Select(x => GetPackageAndPath(x)).ToList();
             }
-            
-            GetAnalyzersForTargetFramework(ToolsetInfo.CurrentTargetFramework).Should().BeEquivalentTo("system.text.json/6.0.0-preview.4.21253.7/analyzers/dotnet/cs/System.Text.Json.SourceGeneration.dll");
+
+            GetAnalyzersForTargetFramework(ToolsetInfo.CurrentTargetFramework).Should().BeEquivalentTo(new[] { ("system.text.json", "6.0.0-preview.4.21253.7", "analyzers/dotnet/cs/System.Text.Json.SourceGeneration.dll") });
             GetAnalyzersForTargetFramework("net472").Should().BeEmpty();
         }
 
@@ -135,24 +147,43 @@ namespace Microsoft.NET.Build.Tests
             {
                 TestContext.Current.NuGetCachePath,
                 Path.Combine(FileConstants.UserProfileFolder, ".dotnet", "NuGetFallbackFolder"),
-                TestContext.Current.ToolsetUnderTest.SdksPath
+                Path.Combine(TestContext.Current.ToolsetUnderTest.DotNetRoot, "packs")
             };
 
-        static string RelativeNuGetPath(string absoluteNuGetPath, bool excludeSourceGeneration = true)
+        static (string package, string version, string path) GetPackageAndPath(string absolutePath)
         {
+            absolutePath = Path.GetFullPath(absolutePath);
+
+            if (absolutePath.StartsWith(TestContext.Current.ToolsetUnderTest.SdksPath))
+            {
+                string path = absolutePath.Substring(TestContext.Current.ToolsetUnderTest.SdksPath.Length + 1)
+                    .Replace(Path.DirectorySeparatorChar, '/');
+                var components = path.Split(new char[] { '/' }, 2);
+                string sdkName = components[0];
+                string pathInSdk = components[1];
+                return (sdkName, null, pathInSdk);
+            }
+
             foreach (var nugetRoot in nugetRoots)
             {
-                if (excludeSourceGeneration && absoluteNuGetPath.EndsWith("System.Text.Json.SourceGeneration.dll"))
+                if (absolutePath.StartsWith(nugetRoot + Path.DirectorySeparatorChar))
                 {
-                    return null;
-                }
-                if (absoluteNuGetPath.StartsWith(nugetRoot + Path.DirectorySeparatorChar))
-                {
-                    return absoluteNuGetPath.Substring(nugetRoot.Length + 1)
-                                .Replace(Path.DirectorySeparatorChar, '/');
+                    string path = absolutePath.Substring(nugetRoot.Length + 1)
+                        .Replace(Path.DirectorySeparatorChar, '/');
+                    var components = path.Split(new char[] { '/' }, 3);
+                    var packageName = components[0];
+                    var packageVersion = components[1];
+                    var pathInPackage = components[2];
+                    //  Don't check package version for analyzers included in targeting pack, as the version changes during development
+                    if (packageName.Equals("microsoft.netcore.app.ref", StringComparison.Ordinal))
+                    {
+                        packageVersion = null;
+                    }
+                    return (packageName, packageVersion, pathInPackage);
                 }
             }
-            throw new InvalidDataException("Expected path to be under a NuGet root: " + absoluteNuGetPath);
+
+            throw new InvalidDataException("Expected path to be under a known root: " + absolutePath);
         }
     }
 }

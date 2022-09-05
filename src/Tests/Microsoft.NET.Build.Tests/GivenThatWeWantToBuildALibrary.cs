@@ -488,8 +488,8 @@ namespace Microsoft.NET.Build.Tests
                 testProj.AdditionalProperties["TargetPlatformIdentifier"] = targetPlatformIdentifier;
                 testProj.AdditionalProperties["TargetPlatformVersion"] = targetPlatformVersion;
             }
-            var testAsset = _testAssetsManager.CreateTestProject(testProj, targetFramework);
-            File.WriteAllText(Path.Combine(testAsset.Path, testProj.Name, $"{testProj.Name}.cs"), @"
+
+            testProj.SourceFiles[$"{testProj.Name}.cs"] = @"
 using System;
 class Program
 {
@@ -529,7 +529,8 @@ class Program
             Console.WriteLine(""IOS"");
         #endif
     }
-}");
+}";
+            var testAsset = _testAssetsManager.CreateTestProject(testProj, targetFramework);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.Path, testProj.Name));
             buildCommand
@@ -567,7 +568,7 @@ class Program
         [InlineData(true)]
         public void It_fails_gracefully_if_targetframework_should_be_targetframeworks(bool useSolution)
         {
-            string targetFramework = $"{ToolsetInfo.CurrentTargetFramework};net461";
+            string targetFramework = $"{ToolsetInfo.CurrentTargetFramework};net462";
             TestInvalidTargetFramework("InvalidTargetFramework", targetFramework, useSolution,
                 $"The TargetFramework value '{targetFramework}' is not valid. To multi-target, use the 'TargetFrameworks' property instead");
         }
@@ -628,7 +629,7 @@ class Program
                 .Should()
                 .Pass();
 
-            getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { "7.0" });
+            getValuesCommand.GetValues().Should().BeEquivalentTo(new[] { "7.0" });
         }
 
         private void TestInvalidTargetFramework(string testName, string targetFramework, bool useSolution, string expectedOutput)
@@ -705,7 +706,7 @@ class Program
         }
 
         [Theory]
-        [InlineData("netcoreapp6.1")]
+        [InlineData("netcoreapp9.1")]
         [InlineData("netstandard2.2")]
         public void It_fails_to_build_if_targeting_a_higher_framework_than_is_supported(string targetFramework)
         {

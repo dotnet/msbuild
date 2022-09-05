@@ -12,6 +12,13 @@
     <WriteLinesToFile File="$(OutputPath)/.version"
                       Lines="$(GitCommitHash);$(Version);$(Rid)"
                       Overwrite="true" />
+
+	<!-- Development env and CI loads DotnetFiles type from the following location
+	      The resolution of the product version (https://github.com/dotnet/sdk/blob/main/src/Cli/Microsoft.DotNet.Cli.Utils/DotnetFiles.cs#L21)
+		  then need the version file there as well. -->
+    <Copy SourceFiles="$(OutputPath)/.version" DestinationFiles="$(BaseOutputPath)$(Configuration)/.version" SkipUnchangedFiles="true" />
+
+    
   </Target>
 
   <Target Name="PublishRoslyn"
@@ -48,8 +55,8 @@
       <AnalyzerAssemblies Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/analyzers/dotnet/vb/Microsoft.CodeAnalysis.VisualBasic.NetAnalyzers.dll" />
       <AnalyzerTargets Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/build/Microsoft.CodeAnalysis.NetAnalyzers.props" />
       <AnalyzerTargets Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/build/Microsoft.CodeAnalysis.NetAnalyzers.targets" />
-      <AnalyzerTargets Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/build/config/**/*" />
       <AnalyzerConfig Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/build/config/**/*" />
+      
       <ILLinkAnalyzersTargets Include="$(PkgMicrosoft_NET_ILLink_Analyzers)/build/Microsoft.NET.ILLink.Analyzers.props" />
       <ILLinkAnalyzersAssemblies Include="$(PkgMicrosoft_NET_ILLink_Analyzers)/analyzers/dotnet/cs/**/*.dll" />
 
@@ -94,9 +101,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <DotnetFormatDllFiles Include="$(Pkgdotnet-format)/tools/net6.0/any/**/*.dll" />
-      <DotnetFormatConfigFiles Include="$(Pkgdotnet-format)/tools/net6.0/any/**/*.json" />
-      <DotnetFormatConfigFiles Include="$(Pkgdotnet-format)/tools/net6.0/any/**/*.config" />
+      <DotnetFormatDllFiles Include="$(Pkgdotnet-format)/tools/net7.0/any/**/*.dll" />
+      <DotnetFormatConfigFiles Include="$(Pkgdotnet-format)/tools/net7.0/any/**/*.json" />
+      <DotnetFormatConfigFiles Include="$(Pkgdotnet-format)/tools/net7.0/any/**/*.config" />
     </ItemGroup>
 
     <Error Condition="'@(DotnetFormatDllFiles)' == ''" Text="Something moved around in dotnet-format package, adjust code here accordingly. TFM change?" />
@@ -153,7 +160,7 @@
   <Target Name="PublishTestCli"
           BeforeTargets="Build">
     <PropertyGroup>
-      <TestCliNuGetDirectoryTargetFramework Condition="'$(DotNetBuildFromSource)' != 'true'" >netcoreapp2.1</TestCliNuGetDirectoryTargetFramework>
+      <TestCliNuGetDirectoryTargetFramework Condition="'$(DotNetBuildFromSource)' != 'true'" >netcoreapp3.1</TestCliNuGetDirectoryTargetFramework>
       <TestCliNuGetDirectoryTargetFramework Condition="'$(DotNetBuildFromSource)' == 'true'" >net6.0</TestCliNuGetDirectoryTargetFramework>
       <TestCliNuGetDirectory>$(NuGetPackageRoot)/microsoft.testplatform.cli/$(MicrosoftTestPlatformCLIPackageVersion)/contentFiles/any/$(TestCliNuGetDirectoryTargetFramework)/</TestCliNuGetDirectory>
     </PropertyGroup>
@@ -292,10 +299,6 @@
       Targets="Publish"
       Projects="$(RepoRoot)/src/RazorSdk/Tool/Microsoft.NET.Sdk.Razor.Tool.csproj"
       Properties="Configuration=$(Configuration)" />
-    <MSBuild
-      Targets="Publish"
-      Projects="$(RepoRoot)/src/RazorSdk/SourceGenerators/Microsoft.NET.Sdk.Razor.SourceGenerators.csproj"
-      Properties="Configuration=$(Configuration)" />
   </Target>
 
   <Target Name="MoveRazorSdkTools" AfterTargets="PublishRazorSdkTools">
@@ -306,9 +309,7 @@
       rzc executable. -->
       <_RazorToolOutput Remove="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.Tool\$(Configuration)\$(SdkTargetFramework)\publish\Microsoft.CodeAnalysis.dll" />
       <_RazorToolOutput Remove="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.Tool\$(Configuration)\$(SdkTargetFramework)\publish\Microsoft.CodeAnalysis.CSharp.dll" />
-      <_RazorSourceGeneratorsOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.SourceGenerators\$(Configuration)\netstandard2.0\publish\Microsoft.AspNetCore.Razor.SourceGenerator.Tooling.Internal.dll" />
-      <_RazorSourceGeneratorsOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.SourceGenerators\$(Configuration)\netstandard2.0\publish\Microsoft.NET.Sdk.Razor.SourceGenerators.dll" />
-      <_RazorSourceGeneratorsOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.SourceGenerators\$(Configuration)\netstandard2.0\publish\RazorSourceGenerator.razorencconfig	" />
+      <_RazorSourceGeneratorsOutput Include="$(PkgMicrosoft_NET_Sdk_Razor_SourceGenerators_Transport)\source-generators\*" />
     </ItemGroup>
 
     <Copy
@@ -409,8 +410,9 @@
     </PropertyGroup>
     <ItemGroup>
       <!-- Exclude F# from retargeting: https://github.com/dotnet/toolset/issues/2866 -->
+      <!-- Exclude testhost from retargeting: https://github.com/dotnet/sdk/issues/24769 -->
       <ToolRuntimeConfigPath Include="$(OutputPath)/**/*.runtimeconfig.json"
-                             Exclude="$(OutputPath)/**/fsc.runtimeconfig.json;$(OutputPath)/**/fsi.runtimeconfig.json"/>
+                             Exclude="$(OutputPath)/**/fsc.runtimeconfig.json;$(OutputPath)/**/fsi.runtimeconfig.json;$(OutputPath)/**/testhost-*.runtimeconfig.json"/>
 
       <MSBuild15Items Include="$(OutputPath)/15.0/**/*" />
     </ItemGroup>

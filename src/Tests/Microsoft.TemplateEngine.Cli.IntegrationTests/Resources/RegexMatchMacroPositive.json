@@ -1,0 +1,12 @@
+[
+  {
+    "kind": "file_contains",
+    "path": "bar.cs",
+    "text": "True"
+  },
+  {
+    "kind": "file_contains",
+    "path": "bar.cs",
+    "text": "True"
+  }
+]

@@ -1,0 +1,243 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../SymbolStrings.resx">
+    <body>
+      <trans-unit id="Command_AliasAdd_Description">
+        <source>Creates an alias for instantiate command with a certain set of arguments.</source>
+        <target state="translated">使用一组参数创建实例化命令的别名。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_AliasShow_Description">
+        <source>Displays defined aliases.</source>
+        <target state="translated">显示定义的别名。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Alias_Description">
+        <source>Creates or displays defined aliases.</source>
+        <target state="translated">创建或显示定义的别名。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Install_Argument_Package">
+        <source>NuGet package ID or path to folder or NuGet package to install. 
+To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;version&gt;.
+</source>
+        <target state="translated">要安装的文件夹或 NuGet 包的 NuGet 包 ID 或路径。
+要安装特定版本的 NuGet 包，请使用 &lt;package ID&gt;::&lt;version&gt;。
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Install_Description">
+        <source>Installs a template package.</source>
+        <target state="translated">安装模板包。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Instantiate_Argument_ShortName">
+        <source>A short name of the template to create.</source>
+        <target state="translated">要创建的模板的短名称。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Instantiate_Argument_TemplateOptions">
+        <source>Template specific options to use.</source>
+        <target state="translated">要使用的模板特定选项。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Instantiate_Description">
+        <source>Instantiates a template with given short name.</source>
+        <target state="translated">实例化具有给定短名称的模板。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Legacy_Update_Check_Description">
+        <source>Checks the currently installed template packages for updates.</source>
+        <target state="translated">检查当前安装的模板包是否有更新。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_List_Argument_Name">
+        <source>If specified, only the templates matching the name will be shown.</source>
+        <target state="translated">如果指定，将仅显示与名称匹配的模板。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_List_Description">
+        <source>Lists templates containing the specified template name. If no name is specified, lists all templates.</source>
+        <target state="translated">列出包含指定模板名称的模板。如果未指定任何名称，则列出所有模板。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_New_Description">
+        <source>Template Instantiation Commands for .NET CLI.</source>
+        <target state="translated">.NET CLI 的模板实例化命令。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Search_Argument_Name">
+        <source>If specified, only the templates matching the name will be shown.</source>
+        <target state="translated">如果指定，将仅显示与名称匹配的模板。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Search_Description">
+        <source>Searches for the templates on NuGet.org.</source>
+        <target state="translated">在 NuGet.org 上搜索模板。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Uninstall_Argument_Package">
+        <source>NuGet package ID (without version) or path to folder to uninstall. 
+If command is specified without the argument, it lists all the template packages installed.</source>
+        <target state="translated">要卸载的文件夹的 NuGet 包 ID (没有版本)或路径。
+如果在不使用参数的情况下指定命令，则它将列出安装的所有模板包。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Uninstall_Description">
+        <source>Uninstalls a template package.</source>
+        <target state="translated">卸载模板包。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Update_Description">
+        <source>Checks the currently installed template packages for update, and install the updates.</source>
+        <target state="translated">检查当前安装的模板包是否有更新，然后安装更新。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Update_Option_CheckOnly">
+        <source>Only check for updates and display the template packages to be updated without applying update.</source>
+        <target state="translated">仅检查更新并显示要在不应用更新的情况下更新的模板包。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListCommand_Option_IgnoreConstraints">
+        <source>Disables checking if the template meets the constraints to be run.</source>
+        <target state="translated">禁用检查模板是否满足要运行的约束。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_AddSource">
+        <source>Specifies a NuGet source to use during install.</source>
+        <target state="translated">指定安装期间将使用的 NuGet 源。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_AuthorFilter">
+        <source>Filters the templates based on the template author.</source>
+        <target state="translated">根据模板作者筛选模板。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_BaselineFilter">
+        <source>Filters the templates based on baseline defined in the template.</source>
+        <target state="translated">根据模板中定义的基线筛选模板。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Columns">
+        <source>Specifies the columns to display in the output. </source>
+        <target state="translated">指定要在输出中显示的列。 </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_ColumnsAll">
+        <source>Display all columns in the output.</source>
+        <target state="translated">显示输出中的所有列。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_Attach">
+        <source>Allows to pause execution in order to attach to the process for debug purposes.</source>
+        <target state="translated">允许暂停执行，以便附加到进程以进行调试。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_CustomSettings">
+        <source>Sets custom settings location.</source>
+        <target state="translated">设置自定义设置位置。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_RebuildCache">
+        <source>If specified, removes the template cache prior to command execution.</source>
+        <target state="translated">如果指定，则在执行命令之前删除模板缓存。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_Reinit">
+        <source>If specified, resets the settings prior to command execution.</source>
+        <target state="translated">如果指定，则在执行命令之前重置设置。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_ShowConfig">
+        <source>If specified, shows the template engine config prior to command execution.</source>
+        <target state="translated">如果指定，则在执行命令之前显示模板引擎配置。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_VirtualSettings">
+        <source>If specified, the settings will be not preserved on file system.</source>
+        <target state="translated">如果指定，则不会在文件系统上保留这些设置。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Install_Force">
+        <source>Allows installing template packages from the specified sources even if they would override a template package from another source.</source>
+        <target state="translated">允许从指定的源安装模板包，即使它们将替代另一个源中的模板包。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Interactive">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">允许命令停止和等待用户输入或操作(例如，用以完成身份验证)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_LanguageFilter">
+        <source>Filters templates based on language.</source>
+        <target state="translated">根据语言筛选模板。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Output">
+        <source>Location to place the generated output.</source>
+        <target state="translated">要放置生成的输出的位置。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_PackageFilter">
+        <source>Filters the templates based on NuGet package ID.</source>
+        <target state="translated">根据 NuGet 包 ID 筛选模板。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_ProjectPath">
+        <source>The project that should be used for context evaluation.</source>
+        <target state="translated">应用于上下文评估的项目。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_TagFilter">
+        <source>Filters the templates based on the tag.</source>
+        <target state="translated">根据标记筛选模板。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_TypeFilter">
+        <source>Filters templates based on available types. Predefined values are "project" and "item".</source>
+        <target state="translated">根据可用类型筛选模板。预定义值为“项目”和“项”。</target>
+        <note>project and item should not be translated</note>
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_AllowScripts">
+        <source>Specifies if post action scripts should run.</source>
+        <target state="translated">指定是否应当运行 post 操作脚本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_Baseline">
+        <source>Specifies the baseline to instantiate.</source>
+        <target state="translated">指定要实例化的基线。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_DryRun">
+        <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
+        <target state="translated">如果运行给定命令行将导致模板创建，则显示将发生情况的摘要。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_Force">
+        <source>Forces content to be generated even if it would change existing files.</source>
+        <target state="translated">强制生成内容 (即使它会更改现有文件)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_Language">
+        <source>Specifies the template language to instantiate.</source>
+        <target state="translated">指定要实例化的模板语言。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_Name">
+        <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
+        <target state="translated">正在创建的输出名称。如未指定名称，则使用输出目录的名称。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_NoUpdateCheck">
+        <source>Disables checking for the template package updates when instantiating a template.</source>
+        <target state="translated">在实例化模板时，禁用对模板包更新的检查。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_Type">
+        <source>Specifies the template type to instantiate.</source>
+        <target state="translated">指定要实例化的模板类型。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

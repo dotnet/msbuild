@@ -1,0 +1,6 @@
+﻿Error: Invalid option(s):
+--langVersion 
+   Required argument missing for option: '--langVersion'.
+
+For more information, run:
+   dotnet new console -h

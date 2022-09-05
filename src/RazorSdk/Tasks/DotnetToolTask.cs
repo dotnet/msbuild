@@ -83,7 +83,13 @@ namespace Microsoft.AspNetCore.Razor.Tasks
         {
             if (Debug)
             {
-                Log.LogMessage(MessageImportance.High, "Waiting for debugger in pid: {0}", Process.GetCurrentProcess().Id);
+#if NET5_0_OR_GREATER
+                var processId = Environment.ProcessId;
+#else
+                var processId = Process.GetCurrentProcess().Id;
+#endif
+
+                Log.LogMessage(MessageImportance.High, "Waiting for debugger in pid: {0}", processId);
                 while (!Debugger.IsAttached)
                 {
                     Thread.Sleep(TimeSpan.FromSeconds(3));

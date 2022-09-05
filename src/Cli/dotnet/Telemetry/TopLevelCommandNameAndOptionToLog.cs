@@ -28,14 +28,14 @@ namespace Microsoft.DotNet.Cli.Telemetry
             foreach (var option in _optionsToLog)
             {
                 if (_topLevelCommandName.Contains(topLevelCommandName)
-                    && parseResult.HasOption(option))
+                    && parseResult.SafelyGetValueForOption(option) is string optionValue)
                 {
                     result.Add(new ApplicationInsightsEntryFormat(
                         "sublevelparser/command",
                         new Dictionary<string, string>
                         {
                             { "verb", topLevelCommandName},
-                            { option.Name, parseResult.GetValueForOption(option)?.ToString() }
+                            { option.Name, optionValue }
                         },
                         measurements));
                 }

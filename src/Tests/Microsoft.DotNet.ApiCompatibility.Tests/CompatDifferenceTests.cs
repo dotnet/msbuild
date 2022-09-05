@@ -1,6 +1,5 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
 
 using System;
 using System.Collections.Generic;
@@ -59,14 +58,6 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             Assert.False(difference.Equals(differentType));
             Assert.False(difference.Equals(differentMemberId));
             Assert.True(difference.Equals(differentMessage));
-        }
-
-        [Fact]
-        public void ConstructorThrowsExpected()
-        {
-            Assert.Throws<ArgumentNullException>("diagnosticId", () => new CompatDifference(null, string.Empty, DifferenceType.Added, string.Empty));
-            Assert.Throws<ArgumentNullException>("message", () => new CompatDifference(string.Empty, null, DifferenceType.Added, string.Empty));
-            Assert.Throws<ArgumentNullException>("memberId", () => new CompatDifference(string.Empty, string.Empty, DifferenceType.Added, (ISymbol)null));
         }
     }
 }

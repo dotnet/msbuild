@@ -34,7 +34,8 @@ namespace Microsoft.DotNet.Tools.Pack
 
             var msbuildArgs = new List<string>()
             {
-                "-target:pack"
+                "-target:pack",
+                "-property:_IsPacking=true"
             };
 
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PackCommandParser.GetCommand()));

@@ -18,6 +18,11 @@ namespace Microsoft.DotNet.NativeWrapper
         public string GlobalJsonPath;
 
         /// <summary>
+        /// The .NET SDK version specified in <strong>global.json</strong>.
+        /// </summary>
+        public string RequestedVersion;
+
+        /// <summary>
         /// True if a global.json was found but there was no compatible SDK, so it was ignored. 
         /// </summary>
         public bool FailedToResolveSDKSpecifiedInGlobalJson;
@@ -31,6 +36,9 @@ namespace Microsoft.DotNet.NativeWrapper
                     break;
                 case Interop.hostfxr_resolve_sdk2_result_key_t.global_json_path:
                     GlobalJsonPath = value;
+                    break;
+                case Interop.hostfxr_resolve_sdk2_result_key_t.requested_version:
+                    RequestedVersion = value;
                     break;
             }
         }

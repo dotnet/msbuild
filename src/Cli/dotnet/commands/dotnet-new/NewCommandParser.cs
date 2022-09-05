@@ -1,78 +1,117 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.New;
+using Microsoft.TemplateEngine.Cli;
+using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
+using Microsoft.DotNet.Workloads.Workload.List;
+using Microsoft.TemplateEngine.Abstractions.Components;
+using LocalizableStrings = Microsoft.DotNet.Tools.New.LocalizableStrings;
+using Microsoft.TemplateEngine.MSBuildEvaluation;
+using Microsoft.TemplateEngine.Abstractions.Constraints;
+using System.IO;
+using Microsoft.TemplateEngine.Cli.PostActionProcessors;
+using Microsoft.DotNet.Tools.New.PostActionProcessors;
+using Microsoft.TemplateEngine.Cli.Commands;
+using Command = System.CommandLine.Command;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class NewCommandParser
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-new";
+        public const string CommandName = "new";
+        private const string EnableProjectContextEvaluationEnvVarName = "DOTNET_CLI_DISABLE_PROJECT_EVAL";
+        private const string PrefferedLangEnvVarName = "DOTNET_NEW_PREFERRED_LANG";
 
-        public static readonly Argument Argument = new Argument<IEnumerable<string>>() { Arity = ArgumentArity.ZeroOrMore };
-
-        public static readonly Option ListOption = new Option<bool>(new string[] { "-l", "--list" });
-
-        public static readonly Option NameOption = new Option<string>(new string[] { "-n", "--name" });
-
-        public static readonly Option OutputOption = new Option<string>(new string[] { "-o", "--output" });
-
-        public static readonly Option InstallOption = new Option<bool>(new string[] { "-i", "--install" });
-
-        public static readonly Option UninstallOption = new Option<bool>(new string[] { "-u", "--uninstall" });
-
-        public static readonly Option InteractiveOption = new Option<bool>("--interactive");
+        private const string HostIdentifier = "dotnetcli";
         
-        public static readonly Option NuGetSourceOption = new Option<string>("--nuget-source");
-        
-        public static readonly Option TypeOption = new Option<string>("--type");
-        
-        public static readonly Option DryRunOption = new Option<bool>("--dry-run");
-        
-        public static readonly Option ForceOption = new Option<bool>("--force");
-        
-        public static readonly Option LanguageOption = new Option<string>(new string[] { "-lang", "--language" });
+        private static readonly Option<bool> s_disableSdkTemplatesOption = new Option<bool>(
+            "--debug:disable-sdk-templates",
+            () => false,
+            LocalizableStrings.DisableSdkTemplates_OptionDescription).Hide();
 
-        public static readonly Option UpdateCheckOption = new Option<bool>("--update-check");
+        private static readonly Option<bool> s_disableProjectContextEvaluationOption = new Option<bool>(
+            "--debug:disable-project-context",
+            () => false,
+            LocalizableStrings.DisableProjectContextEval_OptionDescription).Hide();
 
-        public static readonly Option UpdateApplyOption = new Option<bool>("--update-apply");
-
-        public static readonly Option ColumnsOption = new Option<bool>("--columns");
-
-        private static readonly Command Command = ConstructCommand();
+        internal static readonly Command s_command = GetCommand();
 
         public static Command GetCommand()
         {
-            return Command;
+            Command command = NewCommandFactory.Create(CommandName, (Func<ParseResult, CliTemplateEngineHost>)GetEngineHost);
+
+            command.AddGlobalOption(s_disableSdkTemplatesOption);
+            command.AddGlobalOption(s_disableProjectContextEvaluationOption);
+            return command;
+
+            static CliTemplateEngineHost GetEngineHost(ParseResult parseResult)
+            {
+                bool disableSdkTemplates = parseResult.GetValueForOption(s_disableSdkTemplatesOption);
+                bool disableProjectContext = parseResult.GetValueForOption(s_disableProjectContextEvaluationOption)
+                    || Env.GetEnvironmentVariableAsBool(EnableProjectContextEvaluationEnvVarName);
+                FileInfo? projectPath = parseResult.GetValueForOption(SharedOptions.ProjectPathOption);
+                FileInfo? outputPath = parseResult.GetValueForOption(SharedOptions.OutputOption);
+
+                return CreateHost(disableSdkTemplates, disableProjectContext, projectPath, outputPath);
+            }
         }
 
-        private static Command ConstructCommand()
+        private static CliTemplateEngineHost CreateHost(bool disableSdkTemplates, bool disableProjectContext, FileInfo? projectPath, FileInfo? outputPath)
         {
-            var command = new DocumentedCommand("new", DocsLink);
+            var builtIns = new List<(Type InterfaceType, IIdentifiedComponent Instance)>();
+            builtIns.AddRange(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Components.AllComponents);
+            builtIns.AddRange(Microsoft.TemplateEngine.Edge.Components.AllComponents);
+            builtIns.AddRange(Microsoft.TemplateEngine.Cli.Components.AllComponents);
+            builtIns.AddRange(Microsoft.TemplateSearch.Common.Components.AllComponents);
 
-            command.AddArgument(Argument);
-            command.AddOption(ListOption);
-            command.AddOption(NameOption);
-            command.AddOption(OutputOption);
-            command.AddOption(InstallOption);
-            command.AddOption(UninstallOption);
-            command.AddOption(InteractiveOption);
-            command.AddOption(NuGetSourceOption);
-            command.AddOption(TypeOption);
-            command.AddOption(DryRunOption);
-            command.AddOption(ForceOption);
-            command.AddOption(LanguageOption);
-            command.AddOption(UpdateCheckOption);
-            command.AddOption(UpdateApplyOption);
-            command.AddOption(ColumnsOption);
+            //post actions
+            builtIns.AddRange(new (Type, IIdentifiedComponent)[]
+            {
+                (typeof(IPostActionProcessor), new DotnetAddPostActionProcessor()),
+                (typeof(IPostActionProcessor), new DotnetSlnPostActionProcessor()),
+                (typeof(IPostActionProcessor), new DotnetRestorePostActionProcessor()),
+            });
+            if (!disableSdkTemplates)
+            {
+                builtIns.Add((typeof(ITemplatePackageProviderFactory), new BuiltInTemplatePackageProviderFactory()));
+                builtIns.Add((typeof(ITemplatePackageProviderFactory), new OptionalWorkloadProviderFactory()));
+            }
+            if (!disableProjectContext)
+            {
+                builtIns.Add((typeof(IBindSymbolSource), new ProjectContextSymbolSource()));
+                builtIns.Add((typeof(ITemplateConstraintFactory), new ProjectCapabilityConstraintFactory()));
+                builtIns.Add((typeof(MSBuildEvaluator), new MSBuildEvaluator(outputDirectory: outputPath?.FullName, projectPath: projectPath?.FullName)));
+            }
+            builtIns.Add((typeof(IWorkloadsInfoProvider), new WorkloadsInfoProvider(new WorkloadInfoHelper())));
+            builtIns.Add((typeof(ISdkInfoProvider), new SdkInfoProvider()));
 
-            command.SetHandler((ParseResult parseResult) => NewCommandShim.Run(parseResult.GetArguments()));
+            string? preferredLangEnvVar = Environment.GetEnvironmentVariable(PrefferedLangEnvVarName);
+            string preferredLang = string.IsNullOrWhiteSpace(preferredLangEnvVar)? "C#" : preferredLangEnvVar;
 
-            return command;
+            var preferences = new Dictionary<string, string>
+            {
+                { "prefs:language", preferredLang },
+                { "dotnet-cli-version", Product.Version },
+                { "RuntimeFrameworkVersion", new Muxer().SharedFxVersion },
+                { "NetStandardImplicitPackageVersion", new FrameworkDependencyFile().GetNetStandardLibraryVersion() },
+            };
+            bool enableVerboseLogging = Reporter.IsVerbose;
+            return new CliTemplateEngineHost(
+                HostIdentifier,
+                "v" + Product.Version,
+                preferences,
+                builtIns,
+                outputPath: outputPath?.FullName,
+                enableVerboseLogging: enableVerboseLogging);
         }
     }
 }

@@ -328,7 +328,7 @@
     <comment>{StrBegin="NETSDK1056: "}</comment>
   </data>
   <data name="UsingPreviewSdk_Info" xml:space="preserve">
-    <value>You are using a preview version of .NET. See: https://aka.ms/dotnet-core-preview</value>
+    <value>NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</value>
   </data>
   <data name="InvalidItemSpecToUse" xml:space="preserve">
     <value>NETSDK1058: Invalid value for ItemSpecToUse parameter: '{0}'.  This property must be blank or set to 'Left' or 'Right'</value>
@@ -479,7 +479,7 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1093: "}</comment>
   </data>
   <data name="ReadyToRunNoValidRuntimePackageError" xml:space="preserve">
-    <value>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing.</value>
+    <value>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing. When targeting .NET 6 or higher, make sure to restore packages with the PublishReadyToRun property set to true.</value>
     <comment>{StrBegin="NETSDK1094: "}</comment>
   </data>
   <data name="ReadyToRunTargetNotSupportedError" xml:space="preserve">
@@ -506,8 +506,11 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1100: To build a project targeting Windows on this operating system, set the EnableWindowsTargeting property to true.</value>
     <comment>{StrBegin="NETSDK1100: "}</comment>
   </data>
-  <data name="ILLink_Info" xml:space="preserve">
-    <value>Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</value>
+  <data name="ILLinkRunning" xml:space="preserve">
+    <value>Optimizing assemblies for size. This process might take a while.</value>
+  </data>
+  <data name="ILLinkOptimizedAssemblies" xml:space="preserve">
+    <value>Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</value>
   </data>
   <data name="ILLinkNotSupportedError" xml:space="preserve">
     <value>NETSDK1102: Optimizing assemblies for size is not supported for the selected publish configuration. Please ensure that you are publishing a self-contained app.</value>
@@ -784,7 +787,7 @@ To install these workloads, run the following command: dotnet workload restore</
     <comment>{StrBegin="NETSDK1169: "}</comment>
   </data>
   <data name="InvalidTypeLibraryId" xml:space="preserve">
-    <value>NETSDK1170: The provided type library ID '{0}' for type libary '{1}' is invalid. The ID must be a positive integer less than 65536.</value>
+    <value>NETSDK1170: The provided type library ID '{0}' for type library '{1}' is invalid. The ID must be a positive integer less than 65536.</value>
     <comment>{StrBegin="NETSDK1170: "}</comment>
   </data>
   <data name="MissingTypeLibraryId" xml:space="preserve">
@@ -832,16 +835,28 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</value>
     <comment>{StrBegin="NETSDK1182: "}</comment>
   </data>
-  <data name="TargetingPackNotRestored_TransitiveDisabled" xml:space="preserve">
-    <value>NETSDK1183: The Targeting Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</value>
+  <data name="AotNoValidRuntimePackageError" xml:space="preserve">
+    <value>NETSDK1183: Unable to optimize assemblies for Ahead of time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing. When targeting .NET 7 or higher, make sure to restore packages with the PublishAot property set to true.</value>
     <comment>{StrBegin="NETSDK1183: "}</comment>
   </data>
-  <data name="RuntimePackNotRestored_TransitiveDisabled" xml:space="preserve">
-    <value>NETSDK1184: The Runtime Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</value>
+  <data name="TargetingPackNotRestored_TransitiveDisabled" xml:space="preserve">
+    <value>NETSDK1184: The Targeting Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</value>
     <comment>{StrBegin="NETSDK1184: "}</comment>
   </data>
-  <data name="UnknownFrameworkReference_MauiEssentials" xml:space="preserve">
-    <value>NETSDK1185: This project depends on Maui Essentials through a project or NuGet package reference, but doesn't declare that dependency explicitly. To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</value>
+  <data name="RuntimePackNotRestored_TransitiveDisabled" xml:space="preserve">
+    <value>NETSDK1185: The Runtime Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</value>
     <comment>{StrBegin="NETSDK1185: "}</comment>
+  </data>
+  <data name="UnknownFrameworkReference_MauiEssentials" xml:space="preserve">
+    <value>NETSDK1186: This project depends on Maui Essentials through a project or NuGet package reference, but doesn't declare that dependency explicitly. To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</value>
+    <comment>{StrBegin="NETSDK1186: "}</comment>
+  </data>
+  <data name="PackageContainsIncorrectlyCasedLocale" xml:space="preserve">
+    <value>NETSDK1187: Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</value>
+    <comment>Error code is NETSDK1187. 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</comment>
+  </data>
+  <data name="PackageContainsUnknownLocale" xml:space="preserve">
+    <value>NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</value>
+    <comment>Error code is NETSDK1188. 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</comment>
   </data>
 </root>

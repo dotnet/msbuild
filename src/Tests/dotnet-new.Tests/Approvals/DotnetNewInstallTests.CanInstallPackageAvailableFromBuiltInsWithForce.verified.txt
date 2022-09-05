@@ -1,0 +1,17 @@
+﻿The following template packages will be installed:
+   Microsoft.DotNet.Common.ItemTemplates::%VERSION%
+
+Installing the template package(s) will override the available template package(s).
+The following template package(s) are already available:
+   Microsoft.DotNet.Common.ItemTemplates::%VERSION%
+
+Success: Microsoft.DotNet.Common.ItemTemplates::6.0.100 installed the following templates:
+Template Name                    Short Name     Language  Tags    
+-------------------------------  -------------  --------  --------
+dotnet gitignore file            gitignore                Config  
+Dotnet local tool manifest file  tool-manifest            Config  
+EditorConfig file                editorconfig             Config  
+global.json file                 globaljson               Config  
+NuGet Config                     nugetconfig              Config  
+Solution File                    sln                      Solution
+Web Config                       webconfig                Config  

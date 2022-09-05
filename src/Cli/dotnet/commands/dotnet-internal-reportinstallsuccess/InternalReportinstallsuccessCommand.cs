@@ -2,13 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Linq;
 using System.IO;
 using System.Collections.Generic;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Cli.Telemetry;
 using System.CommandLine;
-using System.CommandLine.Parsing;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -20,7 +19,7 @@ namespace Microsoft.DotNet.Cli
         {
             var telemetry = new ThreadBlockingTelemetry();
             ProcessInputAndSendTelemetry(parseResult, telemetry);
-
+            telemetry.Dispose();
             return 0;
         }
 
@@ -56,6 +55,11 @@ namespace Microsoft.DotNet.Cli
 
             public void Flush()
             {
+            }
+
+            public void Dispose()
+            {
+                telemetry.Dispose();
             }
 
             public void TrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)

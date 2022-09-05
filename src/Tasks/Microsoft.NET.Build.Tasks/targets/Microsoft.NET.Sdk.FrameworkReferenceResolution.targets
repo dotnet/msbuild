@@ -99,6 +99,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 SelfContained="$(SelfContained)"
                                 ReadyToRunEnabled="$(PublishReadyToRun)"
                                 ReadyToRunUseCrossgen2="$(PublishReadyToRunUseCrossgen2)"
+                                AotEnabled="$(PublishAot)"
                                 RuntimeIdentifier="$(RuntimeIdentifier)"
                                 RuntimeIdentifiers="$(RuntimeIdentifiers)"
                                 RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
@@ -109,6 +110,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 EnableWindowsTargeting="$(EnableWindowsTargeting)"
                                 DisableTransitiveFrameworkReferenceDownloads="$(DisableTransitiveFrameworkReferenceDownloads)"
                                 KnownCrossgen2Packs="@(KnownCrossgen2Pack)"
+                                KnownILCompilerPacks="@(KnownILCompilerPack)"
                                 NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"
                                 NetCoreRoot="$(NetCoreRoot)"
                                 NETCoreSdkVersion="$(NETCoreSdkVersion)">
@@ -118,6 +120,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="TargetingPacks" ItemName="TargetingPack" />
       <Output TaskParameter="RuntimePacks" ItemName="RuntimePack" />
       <Output TaskParameter="Crossgen2Packs" ItemName="Crossgen2Pack" />
+      <Output TaskParameter="HostILCompilerPacks" ItemName="HostILCompilerPack" />
+      <Output TaskParameter="TargetILCompilerPacks" ItemName="TargetILCompilerPack" />
       <Output TaskParameter="UnavailableRuntimePacks" ItemName="UnavailableRuntimePack" />
 
     </ProcessFrameworkReferences>
@@ -246,6 +250,20 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <Output TaskParameter="Output" ItemName="ResolvedCrossgen2Pack" />
 
+    </GetPackageDirectory>
+
+    <GetPackageDirectory
+      Items="@(HostILCompilerPack)"
+      PackageFolders="@(AssetsFilePackageFolder)">
+
+      <Output TaskParameter="Output" ItemName="ResolvedILCompilerPack" />
+    </GetPackageDirectory>
+
+    <GetPackageDirectory
+      Items="@(TargetILCompilerPack)"
+      PackageFolders="@(AssetsFilePackageFolder)">
+
+      <Output TaskParameter="Output" ItemName="ResolvedTargetILCompilerPack" />
     </GetPackageDirectory>
 
     <GetPackageDirectory

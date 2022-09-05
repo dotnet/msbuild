@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.4</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="Foo1.cs" />
+    <None Include="Foo2.cs" />
+
+
+    <None Include="Foo5.cs" Condition="'$(defaultFalse)' == 'true'" />
+    <None Include="Foo5.1.cs" />
+
+<!-- Without noEmit the following line will be emitted -->
+<!--/-:msbuild-conditional -->
+    <None Include="Foo5.2.cs" Condition="'$(defaultFalse)' == 'true'" />
+<!--/+:msbuild-conditional -->
+    <None Include="Foo5.3.cs" />
+
+    <!--#if (defaultFalse) -->
+    <None Include="Foo6.cs" />
+    <!--#endif -->
+    <None Include="Foo6.6.cs" />
+
+    <None Include="Things" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,10 @@
+{
+  "$schema": "http://json.schemastore.org/ide.host",
+  "tags": [
+    {
+      "type": "projectType",
+      "add": [],
+      "remove": [ "Common" ]
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+﻿{
+  "Microsoft.TemplateEngine.Abstractions.ITemplateSource": [
+    "dotnet_new3.FileSystemTemplateSource, dotnet-new3, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+    "dotnet_new3.ZipArchiveTemplateSource, dotnet-new3, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"
+  ]
+}

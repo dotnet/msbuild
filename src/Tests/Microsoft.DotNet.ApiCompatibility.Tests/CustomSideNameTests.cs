@@ -5,12 +5,15 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using Microsoft.DotNet.ApiCompatibility.Rules;
 using Xunit;
 
 namespace Microsoft.DotNet.ApiCompatibility.Tests
 {
     public class CustomSideNameTests
     {
+        private static readonly TestRuleFactory s_ruleFactory = new((settings, context) => new MembersMustExist(settings, context));
+
         [Fact]
         public void CustomSideNameAreNotSpecified()
         {
@@ -30,13 +33,15 @@ namespace CompatTests
 }
 ";
 
-            ApiComparer differ = new();
             bool enableNullable = false;
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax, enableNullable);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax, enableNullable);
             string expectedLeftName = "left";
             string expectedRightName = "right";
+            ApiComparer differ = new(s_ruleFactory);
+
             IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
+
             Assert.Single(differences);
             AssertNames(differences.First(), expectedLeftName, expectedRightName);
         }
@@ -62,20 +67,22 @@ namespace CompatTests
 }
 ";
 
-            ApiComparer differ = new();
             bool enableNullable = false;
-            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax, enableNullable);
-            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax, enableNullable);
-            string expectedLeftName = "ref/net6.0/a.dll";
-            string expectedRightName = "lib/net6.0/a.dll";
-            IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right }, leftName: expectedLeftName, rightName: expectedRightName);
+            ElementContainer<IAssemblySymbol> left = new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax, enableNullable),
+                new MetadataInformation("a.dll", "ref/net6.0/a.dll"));
+            ElementContainer<IAssemblySymbol> right = new(SymbolFactory.GetAssemblyFromSyntax(rightSyntax, enableNullable),
+                new MetadataInformation("a.dll", "lib/net6.0/a.dll"));
+            ApiComparer differ = new(s_ruleFactory);
+
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
+
             Assert.Single(differences);
-            AssertNames(differences.First(), expectedLeftName, expectedRightName);
+            AssertNames(differences.First(), left.MetadataInformation.DisplayString, right.MetadataInformation.DisplayString);
 
             // Use the single assembly override
-            differences = differ.GetDifferences(left, right, leftName: expectedLeftName, rightName: expectedRightName);
+            differences = differ.GetDifferences(left, right);
             Assert.Single(differences);
-            AssertNames(differences.First(), expectedLeftName, expectedRightName);
+            AssertNames(differences.First(), left.MetadataInformation.DisplayString, right.MetadataInformation.DisplayString);
         }
 
         [Fact]
@@ -99,16 +106,17 @@ namespace CompatTests
 }
 ";
 
-            ApiComparer differ = new();
             bool enableNullable = false;
-            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax, enableNullable);
-            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax, enableNullable);
-            string expectedLeftName = "ref/net6.0/a.dll";
-            string expectedRightName = "lib/net6.0/a.dll";
-            differ.StrictMode = true;
-            IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right }, leftName: expectedLeftName, rightName: expectedRightName);
+            ElementContainer<IAssemblySymbol> left = new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax, enableNullable),
+                new MetadataInformation("a.dll", "ref/net6.0/a.dll"));
+            ElementContainer<IAssemblySymbol> right = new(SymbolFactory.GetAssemblyFromSyntax(rightSyntax, enableNullable),
+                new MetadataInformation("a.dll", "lib/net6.0/a.dll"));
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: true));
+
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
+
             Assert.Single(differences);
-            AssertNames(differences.First(), expectedLeftName, expectedRightName, leftFirst: false);
+            AssertNames(differences.First(), left.MetadataInformation.DisplayString, right.MetadataInformation.DisplayString, leftFirst: false);
         }
 
         [Fact]
@@ -185,21 +193,14 @@ namespace CompatTests
   }
 }
 "};
+            ElementContainer<IAssemblySymbol> left = new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax), new MetadataInformation("a.dll", "ref/net6.0/a.dll"));
+            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
+            ApiComparer differ = new(s_ruleFactory);
 
-            ApiComparer differ = new();
-            ElementContainer<IAssemblySymbol> left =
-                new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax), new MetadataInformation(string.Empty, string.Empty, "ref/net6.0/a.dll"));
-
-            IList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
-
-            IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
-                differ.GetDifferences(left, right);
-
-            int i = 0;
-            foreach ((MetadataInformation, MetadataInformation, IEnumerable<CompatDifference> differences) diff in differences)
+            foreach ((MetadataInformation leftMetadata, MetadataInformation rightMetadata, IEnumerable<CompatDifference> differences) in differ.GetDifferences(left, right))
             {
-                Assert.Single(diff.differences);
-                AssertNames(diff.differences.First(), left.MetadataInformation.AssemblyId, right[i++].MetadataInformation.AssemblyId);
+                Assert.Single(differences);
+                AssertNames(differences.First(), leftMetadata.AssemblyId, rightMetadata.AssemblyId);
             }
         }
 

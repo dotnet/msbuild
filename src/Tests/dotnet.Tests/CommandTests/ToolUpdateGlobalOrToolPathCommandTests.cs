@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             Action a = () => command.Execute();
 
-            a.ShouldThrow<GracefulException>().And.Message
+            a.Should().Throw<GracefulException>().And.Message
                 .Should().Contain(
                    Tools.Tool.Install.LocalizableStrings.ToolInstallationRestoreFailed);
         }
@@ -203,7 +203,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             Action a = () => command.Execute();
 
-            a.ShouldThrow<GracefulException>().And.Message
+            a.Should().Throw<GracefulException>().And.Message
                 .Should().Contain(
                     string.Format(LocalizableStrings.UpdateToLowerVersion,
                         LowerPackageVersion,
@@ -222,10 +222,25 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             var command = CreateUpdateCommand($"-g {_packageId}");
 
             command.Execute();
+            
+            _reporter.Lines.First().Should().Contain(string.Format(
+                LocalizableStrings.UpdateSucceededStableVersionNoChange,
+                _packageId, HigherPackageVersion));
+        }
+
+        [Fact]
+        public void GivenAnExistedSameVersionInstallationWhenCallWithPrereleaseItUsesAPrereleaseSuccessMessage()
+        {
+            CreateInstallCommand($"-g {_packageId} --version {HigherPreviewPackageVersion}").Execute();
+            _reporter.Lines.Clear();
+
+            var command = CreateUpdateCommand($"-g {_packageId} --version {HigherPreviewPackageVersion}");
+
+            command.Execute();
 
             _reporter.Lines.First().Should().Contain(string.Format(
-                LocalizableStrings.UpdateSucceededVersionNoChange,
-                _packageId, HigherPackageVersion));
+                LocalizableStrings.UpdateSucceededPreVersionNoChange,
+                _packageId, HigherPreviewPackageVersion));
         }
 
         [Fact]
@@ -252,7 +267,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 _reporter);
 
             Action a = () => command.Execute();
-            a.ShouldThrow<GracefulException>().And.Message.Should().Contain(
+            a.Should().Throw<GracefulException>().And.Message.Should().Contain(
                 string.Format(LocalizableStrings.UpdateToolFailed, _packageId) + Environment.NewLine +
                 string.Format(Tools.Tool.Install.LocalizableStrings.InvalidToolConfiguration, "Simulated error"));
         }

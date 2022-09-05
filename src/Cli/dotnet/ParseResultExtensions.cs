@@ -193,5 +193,41 @@ namespace Microsoft.DotNet.Cli
                 DebugHelper.WaitForDebugger();
             }
         }
+
+        /// <summary>
+        /// Only returns the value for this option if the option is present and there are no parse errors for that option.
+        /// This allows cross-cutting code like the telemetry filters to safely get the value without throwing on null-ref errors.
+        /// If you are inside a command handler or 'normal' System.CommandLine code then you don't need this - the parse error handling
+        /// will have covered these cases.
+        /// </summary>
+        public static object SafelyGetValueForOption(this ParseResult parseResult, Option optionToGet)
+        {
+            if (parseResult.FindResultFor(optionToGet) is OptionResult optionResult &&
+                !parseResult.Errors.Any(e => e.SymbolResult == optionResult))
+            {
+                return optionResult.GetValueForOption(optionToGet);
+            } 
+            else {
+                return default;
+            }
+        }
+
+        /// <summary>
+        /// Only returns the value for this option if the option is present and there are no parse errors for that option.
+        /// This allows cross-cutting code like the telemetry filters to safely get the value without throwing on null-ref errors.
+        /// If you are inside a command handler or 'normal' System.CommandLine code then you don't need this - the parse error handling
+        /// will have covered these cases.
+        /// </summary>
+        public static T SafelyGetValueForOption<T>(this ParseResult parseResult, Option<T> optionToGet)
+        {
+            if (parseResult.FindResultFor(optionToGet) is OptionResult optionResult &&
+                !parseResult.Errors.Any(e => e.SymbolResult == optionResult))
+            {
+                return optionResult.GetValueForOption(optionToGet);
+            } 
+            else {
+                return default;
+            }
+        }
     }
 }

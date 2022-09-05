@@ -197,7 +197,7 @@ namespace Microsoft.NET.Publish.Tests
             File.WriteAllLines(manifestFile, new[]
             {
                 "<StoreArtifacts>",
-                @"  <Package Id=""Newtonsoft.Json"" Version=""9.0.1"" />",
+                @"  <Package Id=""Newtonsoft.Json"" Version=""13.0.1"" />",
                 @"  <Package Id=""System.Data.SqlClient"" Version=""4.3.0"" />",
                 "</StoreArtifacts>",
             });

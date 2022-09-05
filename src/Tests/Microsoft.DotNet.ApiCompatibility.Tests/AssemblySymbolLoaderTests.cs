@@ -100,17 +100,6 @@ namespace MyNamespace
         {
             AssemblySymbolLoader loader = new();
             Assert.Throws<FileNotFoundException>(() => loader.LoadAssembly(Guid.NewGuid().ToString("N").Substring(0, 8)));
-            Assert.Throws<ArgumentNullException>("path", () => loader.LoadAssembly(null));
-            Assert.Throws<ArgumentNullException>("stream", () => loader.LoadAssembly("Assembly", null));
-            Assert.Throws<ArgumentNullException>("name", () => loader.LoadAssembly(null, new MemoryStream()));
-        }
-
-        [Fact]
-        public void LoadAssemblies_Throws()
-        {
-            AssemblySymbolLoader loader = new();
-            Assert.Throws<ArgumentNullException>("paths", () => loader.LoadAssemblies((string)null));
-            Assert.Throws<ArgumentNullException>("paths", () => loader.LoadAssemblies((IEnumerable<string>)null));
         }
 
         [Fact]
@@ -119,7 +108,6 @@ namespace MyNamespace
             AssemblySymbolLoader loader = new();
             IEnumerable<string> paths = new[] { Guid.NewGuid().ToString("N") };
             Assert.Throws<FileNotFoundException>(() => loader.LoadAssemblyFromSourceFiles(paths, "assembly1", Array.Empty<string>()));
-            Assert.Throws<ArgumentNullException>("filePaths", () => loader.LoadAssemblyFromSourceFiles(null, "assembly1", Array.Empty<string>()));
             Assert.Throws<ArgumentNullException>("filePaths", () => loader.LoadAssemblyFromSourceFiles(Array.Empty<string>(), "assembly1", Array.Empty<string>()));
             Assert.Throws<ArgumentNullException>("assemblyName", () => loader.LoadAssemblyFromSourceFiles(paths, null, Array.Empty<string>()));
         }
@@ -132,8 +120,6 @@ namespace MyNamespace
             IAssemblySymbol assembly = SymbolFactory.GetAssemblyFromSyntax("namespace MyNamespace { class Foo { } }");
 
             Assert.Throws<FileNotFoundException>(() => loader.LoadMatchingAssemblies(new[] { assembly }, paths));
-            Assert.Throws<ArgumentNullException>("fromAssemblies", () => loader.LoadMatchingAssemblies(null, paths));
-            Assert.Throws<ArgumentNullException>("searchPaths", () => loader.LoadMatchingAssemblies(Array.Empty<IAssemblySymbol>(), null));
         }
 
         [Fact]

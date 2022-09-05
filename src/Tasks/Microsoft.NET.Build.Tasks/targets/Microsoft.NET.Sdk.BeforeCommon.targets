@@ -22,8 +22,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <_IsExecutable Condition="'$(OutputType)' == 'Exe' or '$(OutputType)'=='WinExe'">true</_IsExecutable>
-  </PropertyGroup>
 
+  </PropertyGroup>
+  
   <PropertyGroup Condition="'$(HasRuntimeOutput)' == ''">
     <HasRuntimeOutput>$(_IsExecutable)</HasRuntimeOutput>
     <_UsingDefaultForHasRuntimeOutput>true</_UsingDefaultForHasRuntimeOutput>
@@ -152,10 +153,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Framework assemblies introduced in .NET 4.5 -->
     <_SDKImplicitReference Include="System.IO.Compression.FileSystem" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
-
-    <!-- Don't automatically reference System.IO.Compression or System.Net.Http to help avoid hitting https://github.com/Microsoft/msbuild/issues/1329. -->
-    <!--<Reference Include="System.IO.Compression" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>
-    <_SDKImplicitReference Include="System.Net.Http" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.5' "/>-->
 
     <_SDKImplicitReference Update="@(_SDKImplicitReference)"
                            Pack="false"

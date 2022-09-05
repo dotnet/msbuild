@@ -213,7 +213,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
-        [InlineData("net5.0")]
+        [InlineData("net6.0")]
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         void It_can_publish_readytorun_using_crossgen2(string targetFramework)
         {
@@ -226,7 +226,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
-        [InlineData("net5.0")]
+        [InlineData("net6.0")]
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         void It_can_publish_readytorun_using_crossgen2_composite_mode(string targetFramework)
         {
@@ -239,7 +239,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
-        [InlineData("net5.0")]
+        [InlineData("net6.0")]
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_supports_libraries_when_using_crossgen2(string targetFramework)
         {

@@ -1,4 +1,4 @@
-FROM pandoc/core:2.14.1
+FROM pandoc/core:2.18.0
 
 ENTRYPOINT ["/usr/bin/env"]
 

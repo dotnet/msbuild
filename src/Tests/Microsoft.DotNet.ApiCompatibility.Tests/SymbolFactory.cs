@@ -1,15 +1,15 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Xunit;
 
 namespace Microsoft.DotNet.ApiCompatibility.Tests
@@ -51,13 +51,13 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             return compilation.Assembly;
         }
 
-        internal static IList<ElementContainer<IAssemblySymbol>> GetElementContainersFromSyntaxes(IEnumerable<string> syntaxes, IEnumerable<string> referencesSyntax = null, bool enableNullable = false, byte[] publicKey = null, [CallerMemberName] string assemblyName = "")
+        internal static IReadOnlyList<ElementContainer<IAssemblySymbol>> GetElementContainersFromSyntaxes(IEnumerable<string> syntaxes, IEnumerable<string> referencesSyntax = null, bool enableNullable = false, byte[] publicKey = null, [CallerMemberName] string assemblyName = "")
         {
             int i = 0;
             List<ElementContainer<IAssemblySymbol>> result = new();
             foreach (string syntax in syntaxes)
             {
-                MetadataInformation info = new(string.Empty, string.Empty, $"runtime-{i++}");
+                MetadataInformation info = new(string.Empty, $"runtime-{i++}");
                 IAssemblySymbol symbol = referencesSyntax != null ?
                     GetAssemblyFromSyntaxWithReferences(syntax, referencesSyntax, enableNullable, publicKey, assemblyName) :
                     GetAssemblyFromSyntax(syntax, enableNullable, publicKey, assemblyName);

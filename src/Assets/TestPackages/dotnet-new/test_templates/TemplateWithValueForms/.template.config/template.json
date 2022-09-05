@@ -1,0 +1,85 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithValueForms",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithValueForms",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithValueForms",
+  "shortName": "TestAssets.TemplateWithValueForms",
+  "symbols": {
+    "foo": {
+      "type": "parameter",
+      "dataType": "string",
+      "replaces": "test.value1",
+      "fileRename": "bar.2",
+      "forms": {
+        "global": [ "identity", "chained", "chained2", "dotToUnderscore" ]
+      }
+    },
+    "param1": {
+      "type": "parameter",
+      "dataType": "string",
+      "replaces": "Param1TestValue",
+      "fileRename": "Param1TestValue",
+      "forms": {
+        "global": [ "identity", "first_lc", "kebab" ]
+      }
+    },
+    "param2": {
+      "type": "parameter",
+      "dataType": "string",
+      "replaces": "param2TestValue",
+      "fileRename": "param2TestValue",
+      "forms": {
+        "global": [ "identity", "first_uc" ]
+      }
+    },
+    "param3": {
+      "type": "parameter",
+      "dataType": "string",
+      "replaces": "param 3 test value",
+      "fileRename": "param 3 test value",
+      "forms": {
+        "global": [ "identity", "title" ]
+      }
+    }
+  },
+  "forms": {
+    "chained": {
+      "identifier": "chain",
+      "steps": [ "dotToUnderscore", "digitToBang" ]
+    },
+    "chained2": {
+      "identifier": "chain",
+      "steps": [ "dotToQuestionMark", "digitToBang" ]
+    },
+    "digitToBang": {
+      "identifier": "replace",
+      "pattern": "\\d",
+      "replacement": "!"
+    },
+    "dotToUnderscore": {
+      "identifier": "replace",
+      "pattern": "\\.",
+      "replacement": "_"
+    },
+    "dotToQuestionMark": {
+      "identifier": "replace",
+      "pattern": "\\.",
+      "replacement": "?"
+    },
+    "first_lc": {
+      "identifier": "firstLowerCaseInvariant"
+    },
+    "first_uc": {
+      "identifier": "firstUpperCaseInvariant"
+    },
+    "kebab": {
+      "identifier": "kebabCase"
+    },
+    "title": {
+      "identifier": "titleCase"
+    }
+  }
+}

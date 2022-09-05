@@ -35,7 +35,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProject = new TestProject()
             {
-                TargetFrameworks = "net461",
+                TargetFrameworks = "net462",
                 IsExe = true
             };
             testProject.ReferencedProjects.Add(netStandardProject);

@@ -1,7 +1,0 @@
-<!-- Licensed to the .NET Foundation under one or more agreements. The .NET Foundation licenses this file to you under the MIT license. -->
-<Project>
-  <PropertyGroup>
-    <DotNetCompatibilityAssembly Condition="'$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)..\tools\net472\Microsoft.DotNet.Compatibility.dll</DotNetCompatibilityAssembly>
-    <DotNetCompatibilityAssembly Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)..\tools\net6.0\Microsoft.DotNet.Compatibility.dll</DotNetCompatibilityAssembly>
-  </PropertyGroup>
-</Project>

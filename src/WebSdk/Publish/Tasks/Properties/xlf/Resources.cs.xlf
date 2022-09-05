@@ -636,9 +636,9 @@ Volitelné příznaky:
 </source>
         <target state="translated">
 /M:&lt;Název cílového serveru nebo adresa URL služby&gt;
-	Pokud tento příznak není zadán, balíček je instalován v počítači, v němž je spuštěn tento příkaz. Adresa URL služby může mít následující formát:
+	Pokud tento příznak není zadán, balíček je instalován v počítači, v němž je spuštěn tento příkaz. Adresa URL služby může mít následující formát:
 		https://&lt;cílový_server&gt;:8172/MSDeploy.axd 
-	Tento formát vyžaduje, aby na cílovém serveru byla nainstalována služba IIS 7 a aby byla nastavena služba IIS 7 Web Management Service(WMSvc) a obslužná rutina nasazení webu.
+	Tento formát vyžaduje, aby na cílovém serveru byla nainstalována služba IIS 7 a aby byla nastavena služba IIS 7 Web Management Service(WMSvc) a obslužná rutina nasazení webu.
 	Adresa URL služby může rovněž mít následující formát:
 		http://&lt;cílový_server&gt;/MSDeployAgentService 
 	Tento formát vyžaduje práva pro správu na cílovém serveru a dále vyžaduje, aby bna cílovém serveru byla nainstalována služba Web Deploy Remote Service (MsDepSvc). Služba IIS 7 nemusí být na cílovém serveru nainstalována.
@@ -1164,9 +1164,14 @@ Podrobné informace o chybě:</target>
         <note />
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_FailedDeploy">
-        <source>The attempt to publish the ZIP file through {0} failed with HTTP status code {1}.</source>
-        <target state="needs-review-translation">Pokus o publikování souboru ZIP prostřednictvím {0} se nezdařil se stavovým kódem HTTP{1}.%0</target>
+        <source>The attempt to publish the ZIP file through '{0}' failed with HTTP status code '{1}'.</source>
+        <target state="translated">Pokus o publikování souboru ZIP prostřednictvím {0} se nezdařil se stavovým kódem HTTP{1}.%0</target>
         <note>{0} - URL to deploy zip, {1} - HTTP response code</note>
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_FailedDeployWithLogs">
+        <source>The attempt to publish the ZIP file through '{0}' failed with HTTP status code '{1}'. See the logs at '{2}'.</source>
+        <target state="translated">Pokus o publikování souboru ZIP prostřednictvím {0} se nezdařil se stavovým kódem HTTP{1}. Projděte si protokoly na {2}.</target>
+        <note>{0} - URL to deploy zip, {1} - HTTP response code, {2} - Logs URL</note>
       </trans-unit>
       <trans-unit id="ZIPDEPLOY_FailedToRetrieveCred">
         <source>Failed to retrieve credentials.</source>

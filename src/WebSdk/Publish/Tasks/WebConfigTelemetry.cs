@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using Microsoft.DotNet.Cli;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks
 {
     public class WebConfigTelemetry
     {
-        private const string TelemetryOptout = "DOTNET_CLI_TELEMETRY_OPTOUT";
         // An example of a project line looks like this:
         //  Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary1", "ClassLibrary1\ClassLibrary1.csproj", "{05A5AD00-71B5-4612-AF2F-9EA9121C4111}"
         private static readonly Lazy<Regex> s_crackProjectLine = new Lazy<Regex>(
@@ -31,7 +31,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
         {
             try
             {
-                bool isCLIOptOutEnabled = EnvironmentHelper.GetEnvironmentVariableAsBool(TelemetryOptout);
+                bool isCLIOptOutEnabled = EnvironmentHelper.GetEnvironmentVariableAsBool(EnvironmentVariableNames.TELEMETRY_OPTOUT, defaultValue: CompileOptions.TelemetryOptOutDefault);
                 if (string.IsNullOrEmpty(projectGuid) && !ignoreProjectGuid && !isCLIOptOutEnabled)
                 {
                     projectGuid = GetProjectGuidFromSolutionFile(solutionFileFullPath, projectFileFullPath);

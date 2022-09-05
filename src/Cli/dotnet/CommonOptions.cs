@@ -114,6 +114,12 @@ namespace Microsoft.DotNet.Cli
                 "--interactive",
                 CommonLocalizableStrings.CommandInteractiveOptionDescription);
 
+        public static Option<bool> DisableBuildServersOption =
+            new ForwardedOption<bool>(
+                "--disable-build-servers",
+                CommonLocalizableStrings.DisableBuildServersOptionDescription)
+            .ForwardAsMany(_ => new string[] { "-p:UseRazorBuildServer=false", "-p:UseSharedCompilation=false", "/nodeReuse:false" });
+
         public static Option<string> ArchitectureOption =
             new ForwardedOption<string>(
                 new string[] { "--arch", "-a" },
@@ -143,13 +149,14 @@ namespace Microsoft.DotNet.Cli
             new ForwardedOption<bool>(
                 new string[] { "--sc", "--self-contained" },
                 CommonLocalizableStrings.SelfContainedOptionDescription)
-            .ForwardAsMany(o => new string[] { $"-property:SelfContained={o}", "-property:_CommandLineDefinedSelfContained=true" });
+            .SetForwardingFunction(ForwardSelfContainedOptions);
 
         public static Option<bool> NoSelfContainedOption =
             new ForwardedOption<bool>(
                 "--no-self-contained",
                 CommonLocalizableStrings.FrameworkDependentOptionDescription)
-            .ForwardAsMany(o => new string[] { "-property:SelfContained=false", "-property:_CommandLineDefinedSelfContained=true" });
+            // Flip the argument so that if this option is specified we get selfcontained=false
+            .SetForwardingFunction((arg, p) => ForwardSelfContainedOptions(!arg, p)); 
 
         public static readonly Option<string> TestPlatformOption = new Option<string>("--Platform");
 
@@ -224,13 +231,25 @@ namespace Microsoft.DotNet.Cli
             return $"{os}-{arch}";
         }
 
-        private static string GetCurrentRuntimeId()
+        public static string GetDotnetExeDirectory()
         {
+            // Alternatively we could use Microsoft.DotNet.NativeWrapper.EnvironmentProvider.GetDotnetExeDirectory here
+            //  (while injecting env resolver so that DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR is being returned as null)
+            // However - it first looks on PATH - which can be problematic in environment (e.g. dev) where we have installed and xcopy dotnet versions
+
             var dotnetRootPath = Path.GetDirectoryName(Environment.ProcessPath);
-            // When running under test the path does not always contain "dotnet" and Product.Version is empty.
-            dotnetRootPath = Path.GetFileName(dotnetRootPath).Contains("dotnet") || Path.GetFileName(dotnetRootPath).Contains("x64") ? dotnetRootPath : Path.Combine(dotnetRootPath, "dotnet");
+            // When running under test the path does not always contain "dotnet".
+			// The sdk folder is /d/ when run on helix because of space issues
+            dotnetRootPath = Path.GetFileName(dotnetRootPath).Contains("dotnet") || Path.GetFileName(dotnetRootPath).Contains("x64") || Path.GetFileName(dotnetRootPath).Equals("d") ? dotnetRootPath : Path.Combine(dotnetRootPath, "dotnet");
+            return dotnetRootPath;
+        }
+
+        public static string GetCurrentRuntimeId()
+        {
+            var dotnetRootPath = GetDotnetExeDirectory();
             var ridFileName = "NETCoreSdkRuntimeIdentifierChain.txt";
-            string runtimeIdentifierChainPath = string.IsNullOrEmpty(Product.Version) ?
+            // When running under test the Product.Version might be empty or point to version not installed in dotnetRootPath.
+            string runtimeIdentifierChainPath = string.IsNullOrEmpty(Product.Version) || !Directory.Exists(Path.Combine(dotnetRootPath, "sdk", Product.Version)) ?
                 Path.Combine(Directory.GetDirectories(Path.Combine(dotnetRootPath, "sdk"))[0], ridFileName) :
                 Path.Combine(dotnetRootPath, "sdk", Product.Version, ridFileName);
             string[] currentRuntimeIdentifiers = File.Exists(runtimeIdentifierChainPath) ?
@@ -243,9 +262,29 @@ namespace Microsoft.DotNet.Cli
             return currentRuntimeIdentifiers[0]; // First rid is the most specific (ex win-x64)
         }
 
-        private static string GetOsFromRid(string rid) => rid.Substring(0, rid.LastIndexOf("-", StringComparison.InvariantCulture));
+        private static string GetOsFromRid(string rid) => rid.Substring(0, rid.LastIndexOf("-"));
 
-        private static string GetArchFromRid(string rid) => rid.Substring(rid.LastIndexOf("-", StringComparison.InvariantCulture) + 1, rid.Length - rid.LastIndexOf("-", StringComparison.InvariantCulture) - 1);
+        private static string GetArchFromRid(string rid) => rid.Substring(rid.LastIndexOf("-") + 1, rid.Length - rid.LastIndexOf("-") - 1);
+
+        private static IEnumerable<string> ForwardSelfContainedOptions(bool isSelfContained, ParseResult parseResult)
+        {
+            IEnumerable<string> selfContainedProperties = new string[] { $"-property:SelfContained={isSelfContained}", "-property:_CommandLineDefinedSelfContained=true" };
+            
+            if (!UserSpecifiedRidOption(parseResult) && isSelfContained)
+            {
+                var ridProperties = RuntimeArgFunc(GetCurrentRuntimeId());
+                selfContainedProperties = selfContainedProperties.Concat(ridProperties);
+            }
+            
+            return selfContainedProperties;
+        }
+
+        private static bool UserSpecifiedRidOption(ParseResult parseResult) =>
+            parseResult.HasOption(RuntimeOption) ||
+            parseResult.HasOption(LongFormRuntimeOption) ||
+            parseResult.HasOption(ArchitectureOption) ||
+            parseResult.HasOption(LongFormArchitectureOption) ||
+            parseResult.HasOption(OperatingSystemOption);
     }
 
     public enum VerbosityOptions

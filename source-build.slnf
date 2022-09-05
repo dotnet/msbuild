@@ -2,6 +2,10 @@
   "solution": {
     "path": "sdk.sln",
     "projects": [
+      "src\\ApiCompat\\Microsoft.DotNet.ApiCompat.Shared\\Microsoft.DotNet.ApiCompat.Shared.shproj",
+      "src\\ApiCompat\\Microsoft.DotNet.ApiCompat.Task\\Microsoft.DotNet.ApiCompat.Task.csproj",
+      "src\\ApiCompat\\Microsoft.DotNet.ApiCompatibility\\Microsoft.DotNet.ApiCompatibility.csproj",
+      "src\\ApiCompat\\Microsoft.DotNet.PackageValidation\\Microsoft.DotNet.PackageValidation.csproj",
       "src\\BlazorWasmSdk\\Tasks\\Microsoft.NET.Sdk.BlazorWebAssembly.Tasks.csproj",
       "src\\BlazorWasmSdk\\Tool\\Microsoft.NET.Sdk.BlazorWebAssembly.Tool.csproj",
       "src\\BuiltInTools\\BrowserRefresh\\Microsoft.AspNetCore.Watch.BrowserRefresh.csproj",
@@ -12,10 +16,8 @@
       "src\\Cli\\Microsoft.DotNet.Cli.Utils\\Microsoft.DotNet.Cli.Utils.csproj",
       "src\\Cli\\Microsoft.DotNet.Configurer\\Microsoft.DotNet.Configurer.csproj",
       "src\\Cli\\Microsoft.DotNet.InternalAbstractions\\Microsoft.DotNet.InternalAbstractions.csproj",
+      "src\\Cli\\Microsoft.TemplateEngine.Cli\\Microsoft.TemplateEngine.Cli.csproj",
       "src\\Cli\\dotnet\\dotnet.csproj",
-      "src\\Compatibility\\Microsoft.DotNet.ApiCompatibility\\Microsoft.DotNet.ApiCompatibility.csproj",
-      "src\\Compatibility\\Microsoft.DotNet.Compatibility\\Microsoft.DotNet.Compatibility.csproj",
-      "src\\Compatibility\\Microsoft.DotNet.PackageValidation\\Microsoft.DotNet.PackageValidation.csproj",
       "src\\Layout\\redist\\redist.csproj",
       "src\\Layout\\tool_fsharp\\tool_fsc.csproj",
       "src\\Layout\\tool_msbuild\\tool_msbuild.csproj",
@@ -23,7 +25,6 @@
       "src\\Layout\\toolset-tasks\\toolset-tasks.csproj",
       "src\\Microsoft.DotNet.TemplateLocator\\Microsoft.DotNet.TemplateLocator.csproj",
       "src\\Microsoft.Win32.Msi\\Microsoft.Win32.Msi.csproj",
-      "src\\RazorSdk\\SourceGenerators\\Microsoft.NET.Sdk.Razor.SourceGenerators.csproj",
       "src\\RazorSdk\\Tasks\\Microsoft.NET.Sdk.Razor.Tasks.csproj",
       "src\\RazorSdk\\Tool\\Microsoft.NET.Sdk.Razor.Tool.csproj",
       "src\\Resolvers\\Microsoft.DotNet.MSBuildSdkResolver\\Microsoft.DotNet.MSBuildSdkResolver.csproj",
@@ -37,7 +38,9 @@
       "src\\WebSdk\\ProjectSystem\\Tasks\\Microsoft.NET.Sdk.Web.ProjectSystem.Tasks.csproj",
       "src\\WebSdk\\Publish\\Tasks\\Microsoft.NET.Sdk.Publish.Tasks.csproj",
       "src\\WebSdk\\Web\\Tasks\\Microsoft.NET.Sdk.Web.Tasks.csproj",
-      "src\\WebSdk\\Worker\\Tasks\\Microsoft.NET.Sdk.Worker.Tasks.csproj"
+      "src\\WebSdk\\Worker\\Tasks\\Microsoft.NET.Sdk.Worker.Tasks.csproj",
+      "template_feed\\Microsoft.DotNet.Common.ItemTemplates\\Microsoft.DotNet.Common.ItemTemplates.csproj",
+      "template_feed\\Microsoft.DotNet.Common.ProjectTemplates.7.0\\Microsoft.DotNet.Common.ProjectTemplates.7.0.csproj"
     ]
   }
 }

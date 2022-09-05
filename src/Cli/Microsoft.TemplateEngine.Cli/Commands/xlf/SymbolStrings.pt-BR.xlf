@@ -1,0 +1,243 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pt-BR" original="../SymbolStrings.resx">
+    <body>
+      <trans-unit id="Command_AliasAdd_Description">
+        <source>Creates an alias for instantiate command with a certain set of arguments.</source>
+        <target state="translated">Cria um alias para o comando instanciado com um determinado conjunto de argumentos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_AliasShow_Description">
+        <source>Displays defined aliases.</source>
+        <target state="translated">Exibe os aliases definidos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Alias_Description">
+        <source>Creates or displays defined aliases.</source>
+        <target state="translated">Cria ou exibe os aliases definidos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Install_Argument_Package">
+        <source>NuGet package ID or path to folder or NuGet package to install. 
+To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;version&gt;.
+</source>
+        <target state="translated">ID do pacote NuGet ou caminho para a pasta ou pacote NuGet a ser instalado. 
+Para instalar o pacote NuGet de determinada versão, utilize &lt;package ID&gt;::&lt;version&gt;.
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Install_Description">
+        <source>Installs a template package.</source>
+        <target state="translated">Instala um pacote de modelos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Instantiate_Argument_ShortName">
+        <source>A short name of the template to create.</source>
+        <target state="translated">Um nome curto do modelo a ser criado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Instantiate_Argument_TemplateOptions">
+        <source>Template specific options to use.</source>
+        <target state="translated">Opções específicas do modelo a serem usados.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Instantiate_Description">
+        <source>Instantiates a template with given short name.</source>
+        <target state="translated">Instancia um modelo com um nome curto.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Legacy_Update_Check_Description">
+        <source>Checks the currently installed template packages for updates.</source>
+        <target state="translated">Verifica se há atualizações para os pacotes de modelos instalados atualmente.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_List_Argument_Name">
+        <source>If specified, only the templates matching the name will be shown.</source>
+        <target state="translated">Se especificado, somente os modelos correspondentes ao nome serão mostrados.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_List_Description">
+        <source>Lists templates containing the specified template name. If no name is specified, lists all templates.</source>
+        <target state="translated">Lista os modelos que contêm o nome do modelo especificado. Se nenhum nome for especificado, lista todos os modelos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_New_Description">
+        <source>Template Instantiation Commands for .NET CLI.</source>
+        <target state="translated">Comandos de Instanciação do Modelo da CLI para .NET.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Search_Argument_Name">
+        <source>If specified, only the templates matching the name will be shown.</source>
+        <target state="translated">Se especificado, somente os modelos correspondentes ao nome serão mostrados.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Search_Description">
+        <source>Searches for the templates on NuGet.org.</source>
+        <target state="translated">Pesquisa os modelos em NuGet.org.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Uninstall_Argument_Package">
+        <source>NuGet package ID (without version) or path to folder to uninstall. 
+If command is specified without the argument, it lists all the template packages installed.</source>
+        <target state="translated">ID do pacote NuGet (sem versão) ou caminho para a pasta a ser desinstalada. 
+Se o comando for especificado sem o argumento, ele listará todos os pacotes de modelos instalados.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Uninstall_Description">
+        <source>Uninstalls a template package.</source>
+        <target state="translated">Desinstala um pacote de modelos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Update_Description">
+        <source>Checks the currently installed template packages for update, and install the updates.</source>
+        <target state="translated">Verifica os pacotes de modelos atualmente instalados para a atualização, e instala as atualizações.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Command_Update_Option_CheckOnly">
+        <source>Only check for updates and display the template packages to be updated without applying update.</source>
+        <target state="translated">Verificar apenas se há atualizações e exibir os pacotes de modelos a serem atualizados sem aplicar a atualização.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ListCommand_Option_IgnoreConstraints">
+        <source>Disables checking if the template meets the constraints to be run.</source>
+        <target state="translated">Desabilita a verificação se o modelo atende às restrições a serem executadas.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_AddSource">
+        <source>Specifies a NuGet source to use during install.</source>
+        <target state="translated">Especifica uma fonte do NuGet a ser usada durante a instalação.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_AuthorFilter">
+        <source>Filters the templates based on the template author.</source>
+        <target state="translated">Filtra os modelos baseados no autor do modelo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_BaselineFilter">
+        <source>Filters the templates based on baseline defined in the template.</source>
+        <target state="translated">Filtra os modelos com base na linha de base definida no modelo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Columns">
+        <source>Specifies the columns to display in the output. </source>
+        <target state="translated">Especifica as colunas a serem exibidas na saída. </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_ColumnsAll">
+        <source>Display all columns in the output.</source>
+        <target state="translated">Exibir todas as colunas na saída.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_Attach">
+        <source>Allows to pause execution in order to attach to the process for debug purposes.</source>
+        <target state="translated">Permite pausar a execução a fim de anexar ao processo para fins de depuração.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_CustomSettings">
+        <source>Sets custom settings location.</source>
+        <target state="translated">Define o local das configurações personalizadas.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_RebuildCache">
+        <source>If specified, removes the template cache prior to command execution.</source>
+        <target state="translated">Se especificado, remove o cache do modelo antes da execução do comando.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_Reinit">
+        <source>If specified, resets the settings prior to command execution.</source>
+        <target state="translated">Se especificado, redefine as configurações antes da execução do comando.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_ShowConfig">
+        <source>If specified, shows the template engine config prior to command execution.</source>
+        <target state="translated">Se especificado, mostra a configuração do mecanismo de modelo antes da execução do comando.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Debug_VirtualSettings">
+        <source>If specified, the settings will be not preserved on file system.</source>
+        <target state="translated">Se especificado, as configurações não serão preservadas no sistema de arquivos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Install_Force">
+        <source>Allows installing template packages from the specified sources even if they would override a template package from another source.</source>
+        <target state="translated">Permite a instalação de pacotes de modelos a partir das fontes especificadas, mesmo que substituam um pacote de modelos a partir de outra fonte.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Interactive">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">Permite que o comando seja interrompido e aguarde a ação ou entrada do usuário (por exemplo, para concluir a autenticação).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_LanguageFilter">
+        <source>Filters templates based on language.</source>
+        <target state="translated">Filtra modelos com base no idioma.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_Output">
+        <source>Location to place the generated output.</source>
+        <target state="translated">Local para colocar a saída gerada.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_PackageFilter">
+        <source>Filters the templates based on NuGet package ID.</source>
+        <target state="translated">Filtra os modelos com base na ID do pacote NuGet.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_ProjectPath">
+        <source>The project that should be used for context evaluation.</source>
+        <target state="translated">O projeto que deve ser usado para avaliação de contexto.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_TagFilter">
+        <source>Filters the templates based on the tag.</source>
+        <target state="translated">Filtra os modelos com base na marca.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Option_TypeFilter">
+        <source>Filters templates based on available types. Predefined values are "project" and "item".</source>
+        <target state="translated">Filtra modelos com base em tipos disponíveis. Os valores predefinidos são "projeto" e "item".</target>
+        <note>project and item should not be translated</note>
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_AllowScripts">
+        <source>Specifies if post action scripts should run.</source>
+        <target state="translated">Especifica se os scripts de pós-ação devem ser executados.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_Baseline">
+        <source>Specifies the baseline to instantiate.</source>
+        <target state="translated">Especifica a linha de base a ser instanciada.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_DryRun">
+        <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
+        <target state="translated">Exibe um resumo do que aconteceria se a linha de comando especificada fosse executada se resultar em uma criação de modelo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_Force">
+        <source>Forces content to be generated even if it would change existing files.</source>
+        <target state="translated">Força o conteúdo a ser gerado mesmo que ele altere arquivos existentes.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_Language">
+        <source>Specifies the template language to instantiate.</source>
+        <target state="translated">Especifica o idioma do modelo a ser instanciado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_Name">
+        <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
+        <target state="translated">O nome da saída que está sendo criada. Se nenhum nome for especificado, o nome do diretório de saída será usado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_NoUpdateCheck">
+        <source>Disables checking for the template package updates when instantiating a template.</source>
+        <target state="translated">Desativa a verificação de atualizações de pacote de modelo ao instanciar um modelo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_Option_Type">
+        <source>Specifies the template type to instantiate.</source>
+        <target state="translated">Especifica o tipo de modelo a ser instanciado.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

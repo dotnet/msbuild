@@ -119,8 +119,8 @@ namespace Microsoft.NET.Pack.Tests
         {
             TestProject testProject = new TestProject()
             {
-                Name = "PackNet461App",
-                TargetFrameworks = "net461",
+                Name = "Packnet462App",
+                TargetFrameworks = "net462",
             };
 
             testProject.PackageReferences.Add(
@@ -208,7 +208,7 @@ namespace Microsoft.NET.Pack.Tests
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                testProject.TargetFrameworks += ";net461";
+                testProject.TargetFrameworks += ";net462";
             }
 
             var dependencyGroups = GetDependencyGroups(PackAndGetNuspec(testProject), out var ns);
@@ -237,7 +237,7 @@ namespace Microsoft.NET.Pack.Tests
             ExpectDependencyGroup(ToolsetInfo.CurrentTargetFramework, null);
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                ExpectDependencyGroup(".NETFramework4.6.1", null);
+                ExpectDependencyGroup(".NETFramework4.6.2", null);
             }
         }
 

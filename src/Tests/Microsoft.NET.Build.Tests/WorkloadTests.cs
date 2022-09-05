@@ -87,11 +87,11 @@ namespace Microsoft.NET.Build.Tests
 
             getValuesCommand.GetValuesWithMetadata().Select(valueAndMetadata => (valueAndMetadata.value, valueAndMetadata.metadata["VisualStudioComponentId"]))
                 .Should()
-                .BeEquivalentTo(("microsoft-net-sdk-missingtestworkload", "microsoft.net.sdk.missingtestworkload"));
+                .BeEquivalentTo(new[] { ("microsoft-net-sdk-missingtestworkload", "microsoft.net.sdk.missingtestworkload") });
 
             getValuesCommand.GetValuesWithMetadata().Select(valueAndMetadata => (valueAndMetadata.value, valueAndMetadata.metadata["VisualStudioComponentIds"]))
                 .Should()
-                .BeEquivalentTo(("microsoft-net-sdk-missingtestworkload", "microsoft.net.sdk.missingtestworkload"));
+                .BeEquivalentTo(new[] { ("microsoft-net-sdk-missingtestworkload", "microsoft.net.sdk.missingtestworkload") });
         }
 
         [Fact]
@@ -139,8 +139,6 @@ namespace Microsoft.NET.Build.Tests
                 .Fail()
                 .And
                 .HaveStdOutContaining("NETSDK1147")
-                .And
-                .HaveStdOutContaining("ios")
                 .And
                 .HaveStdOutContaining("android");
         }
@@ -271,7 +269,7 @@ namespace Microsoft.NET.Build.Tests
                 .BeEquivalentTo("android");
         }
 
-        [Theory]
+        [Theory(Skip = "https://github.com/dotnet/installer/issues/13361")]
         [InlineData($"{ToolsetInfo.CurrentTargetFramework}-android;{ToolsetInfo.CurrentTargetFramework}-ios", $"{ToolsetInfo.CurrentTargetFramework}-android;{ToolsetInfo.CurrentTargetFramework}-ios", "android;android-aot")]
         [InlineData(ToolsetInfo.CurrentTargetFramework, $"{ToolsetInfo.CurrentTargetFramework};{ToolsetInfo.CurrentTargetFramework}-android;{ToolsetInfo.CurrentTargetFramework}-ios", "macos;android-aot")]
         [InlineData($"{ToolsetInfo.CurrentTargetFramework};{ToolsetInfo.CurrentTargetFramework}-ios", $"{ToolsetInfo.CurrentTargetFramework};{ToolsetInfo.CurrentTargetFramework}-android", "macos;android-aot")]

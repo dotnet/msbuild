@@ -1,0 +1,61 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithMultiValueChoice",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithMultiValueChoice",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithMultiValueChoice",
+  "shortName": "TestAssets.TemplateWithMultiValueChoice",
+  "symbols": {
+    "Platform": {
+      "type": "parameter",
+      "description": "The target framework for the project.",
+      "datatype": "choice",
+      "allowMultipleValues": true,
+      "enableQuotelessLiterals": true,
+      "choices": [
+        {
+          "choice": "Windows",
+          "description": "Windows Desktop"
+        },
+        {
+          "choice": "WindowsPhone",
+          "description": "Windows Phone"
+        },
+        {
+          "choice": "MacOS",
+          "description": "Macintosh computers"
+        },
+        {
+          "choice": "iOS",
+          "description": "iOS mobile"
+        },
+        {
+          "choice": "android",
+          "description": "android mobile"
+        },
+        {
+          "choice": "nix",
+          "description": "Linux distributions"
+        }
+      ],
+      "defaultValue": "MacOS|iOS"
+    },
+    "joinedRename": {
+      "type": "generated",
+      "generator": "join",
+      "replaces": "SupportedPlatforms",
+      "parameters": {
+        "symbols": [
+          {
+            "type": "ref",
+            "value": "Platform"
+          }
+        ],
+        "separator": ", ",
+        "removeEmptyValues": true,
+      }
+    }
+  }
+}

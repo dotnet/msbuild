@@ -1,0 +1,24 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TestClassTemplate",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TestClassTemplate",
+  "precedence": "100",
+  "identity": "TestAssets.TestClassTemplate",
+  "shortName": "TestAssets.TestClassTemplate",
+  "sourceName": "UnitTest1",
+  "symbols": {
+    "DefaultNamespace": {
+      "type": "bind",
+      "binding": "msbuild:RootNamespace",
+      "replaces": "%NAMESPACE%"
+    }
+  },
+  "constraints": {
+    "csharp-only": {
+      "type": "project-capability",
+      "args": "CSharp + TestContainer"
+    }
+  }
+}

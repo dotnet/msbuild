@@ -55,7 +55,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                                     new XAttribute("version", "v4.0"),
                                     new XAttribute("sku", ".NETFramework,Version=v4.7.2")))));
 
-            WriteAppConfigWithSupportedRuntime.AddSupportedRuntimeToAppconfig(doc, ".NETFramework", "v4.6.1");
+            WriteAppConfigWithSupportedRuntime.AddSupportedRuntimeToAppconfig(doc, ".NETFramework", "v4.6.2");
 
             XElement supportedRuntime = doc.Element("configuration")
                 .Elements("startup")

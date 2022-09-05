@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "EditorConfig Dosyası",
+  "description": "Kod stili tercihlerini yapılandırmak için bir .editorconfig dosyası oluşturur.",
+  "symbols/Empty/displayName": "Boş",
+  "symbols/Empty/description": ".NET için varsayılanlar yerine boş .editorconfig dosyası oluşturur."
+}

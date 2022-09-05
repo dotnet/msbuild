@@ -6,12 +6,15 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using Microsoft.DotNet.ApiCompatibility.Tests;
 using Xunit;
 
-namespace Microsoft.DotNet.ApiCompatibility.Tests
+namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
 {
     public class CannotRemoveBaseTypeOrInterfaceTests
     {
+        private static readonly TestRuleFactory s_ruleFactory = new((settings, context) => new CannotRemoveBaseTypeOrInterface(settings, context));
+
         [Fact]
         public void PromotedBaseClassOrInterfaceIsNotReported()
         {
@@ -44,7 +47,7 @@ namespace CompatTests
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
 
-            ApiComparer differ = new();
+            ApiComparer differ = new(s_ruleFactory);
 
             Assert.Empty(differ.GetDifferences(left, right));
         }
@@ -75,7 +78,7 @@ namespace CompatTests
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
 
-            ApiComparer differ = new();
+            ApiComparer differ = new(s_ruleFactory);
 
             CompatDifference[] differences = differ.GetDifferences(left, right).ToArray();
 
@@ -116,9 +119,8 @@ namespace CompatTests
 
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(includeInternalSymbols: includeInternals));
 
-            ApiComparer differ = new();
-            differ.IncludeInternalSymbols = includeInternals;
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
             if (includeInternals)
@@ -159,9 +161,7 @@ namespace CompatTests
 
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
-
-            ApiComparer differ = new();
-            differ.StrictMode = true;
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: true));
 
             CompatDifference[] differences = differ.GetDifferences(left, right).ToArray();
 
@@ -218,8 +218,7 @@ namespace CompatTests
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
 
-            ApiComparer differ = new();
-            differ.StrictMode = strictMode;
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: strictMode));
 
             Assert.Empty(differ.GetDifferences(left, right));
         }
@@ -280,12 +279,11 @@ namespace CompatTests
             };
 
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
-            MetadataInformation leftMetadata = new("left", "net6.0", "ref/a.dll");
+            MetadataInformation leftMetadata = new("left", @"ref\a.dll");
             ElementContainer<IAssemblySymbol> leftContainer = new(left, leftMetadata);
+            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
+            ApiComparer differ = new(s_ruleFactory);
 
-            IList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
-
-            ApiComparer differ = new();
             IEnumerable<(MetadataInformation left, MetadataInformation right, IEnumerable<CompatDifference> differences)> result =
                 differ.GetDifferences(leftContainer, right);
 
@@ -360,7 +358,7 @@ namespace CompatTests
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
 
-            ApiComparer differ = new();
+            ApiComparer differ = new(s_ruleFactory);
 
             Assert.Empty(differ.GetDifferences(left, right));
         }

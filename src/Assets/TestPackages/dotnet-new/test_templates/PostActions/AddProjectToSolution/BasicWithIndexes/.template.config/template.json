@@ -1,0 +1,31 @@
+{
+    "author": "Test Asset",
+    "classifications": [ "Test Asset" ],
+    "name": "TestAssets.PostActions.AddProjectToSolution.BasicWithIndexes",
+    "generatorVersions": "[1.0.0.0-*)",
+    "groupIdentity": "TestAssets.PostActions.AddProjectToSolution.BasicWithIndexes",
+    "precedence": "100",
+    "identity": "TestAssets.PostActions.AddProjectToSolution.BasicWithIndexes",
+    "shortName": "TestAssets.PostActions.AddProjectToSolution.BasicWithIndexes",
+    "sourceName": "Basic",
+    "primaryOutputs": [
+        {
+            "path": "./Client/Client.csproj"
+        },
+        {
+            "path": "./Server/Server.csproj"
+        }
+    ],
+    "postActions": [
+        {
+            "description": "Add projects to solution",
+            "manualInstructions": [ { "text": "Add generated Server project to solution manually to folder 'Server'." } ],
+            "args": {
+                "solutionFolder": "Server",
+                "primaryOutputIndexes": "1"
+            },
+            "actionId": "D396686C-DE0E-4DE6-906D-291CD29FC5DE",
+            "continueOnError": true
+        }
+    ]
+}

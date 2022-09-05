@@ -1,0 +1,28 @@
+{
+    "author": "Test Asset",
+    "classifications": [ "Test Asset" ],
+    "name": "TestAssets.PostActions.RestoreNuGet.Invalid.ContinueOnError",
+    "generatorVersions": "[1.0.0.0-*)",
+    "groupIdentity": "TestAssets.PostActions.RestoreNuGet.Invalid.ContinueOnError",
+    "precedence": "100",
+    "identity": "TestAssets.PostActions.RestoreNuGet.Invalid.ContinueOnError",
+    "shortName": "TestAssets.PostActions.RestoreNuGet.Invalid.ContinueOnError",
+    "sourceName": "invalid",
+    "primaryOutputs": [
+        {
+            "path": "Invalid.csproj"
+        }
+    ],
+    "postActions": [
+        {
+            "description": "Restore NuGet packages required by this project.",
+            "manualInstructions": [
+                {
+                    "text": "Run 'dotnet restore'"
+                }
+            ],
+            "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+            "continueOnError": true
+        }
+    ]
+}

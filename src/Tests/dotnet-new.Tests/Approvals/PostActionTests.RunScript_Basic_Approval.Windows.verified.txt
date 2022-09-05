@@ -1,0 +1,6 @@
+﻿The template "TestAssets.PostActions.RunScript.Basic" was created successfully.
+
+Processing post-creation actions...
+Running command 'setup.cmd'...
+Hello Windows
+Command succeeded.

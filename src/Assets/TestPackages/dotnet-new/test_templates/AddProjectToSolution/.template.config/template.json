@@ -1,0 +1,26 @@
+{
+    "author": "Test Asset",
+    "classifications": [ "Test Asset" ],
+    "name": "TestAssets.AddProjectToSolution",
+    "groupIdentity": "TestAssets.AddProjectToSolution",
+    "precedence": "100",
+    "identity": "TestAssets.AddProjectToSolution",
+    "shortName": "TestAssets.AddProjectToSolution",
+    "sourceName": "Basic",
+    "primaryOutputs": [
+        {
+            "path": "Basic.csproj"
+        }
+    ],
+    "postActions": [
+        {
+            "description": "Add projects to solution",
+            "manualInstructions": [ { "text": "Add generated project to solution manually." } ],
+            "args": {
+                "solutionFolder": "src"
+            },
+            "actionId": "D396686C-DE0E-4DE6-906D-291CD29FC5DE",
+            "continueOnError": true
+        }
+    ]
+}

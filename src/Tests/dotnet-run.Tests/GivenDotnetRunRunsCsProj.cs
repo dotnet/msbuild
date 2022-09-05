@@ -233,7 +233,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
             string [] args = new string[] { "--packages", dir };
 
             string [] newArgs = new string[] { "console", "-o", rootPath, "--no-restore" };
-            new DotnetCommand(Log, "new")
+            new DotnetCommand(Log, "new","--debug:ephemeral-hive")
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)
                 .Should()
@@ -300,6 +300,74 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .Should()
                 .Pass()
                 .And.HaveStdOutContaining("echo args:-d;-a");
+        }
+
+        [Fact]
+        public void ItCanPassOptionAndArgumentsToSubjectAppByDoubleDash()
+        {
+            const string testAppName = "MSBuildTestApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var testProjectDirectory = testInstance.Path;
+
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("--", "foo", "-d", "-a")
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("echo args:foo;-d;-a");
+        }
+
+        [Fact]
+        public void ItCanPassArgumentsToSubjectAppWithoutDoubleDash()
+        {
+            const string testAppName = "MSBuildTestApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var testProjectDirectory = testInstance.Path;
+
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("foo", "bar", "baz")
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("echo args:foo;bar;baz");
+        }
+
+        [Fact]
+        public void ItCanPassUnrecognizedOptionArgumentsToSubjectAppWithoutDoubleDash()
+        {
+            const string testAppName = "MSBuildTestApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var testProjectDirectory = testInstance.Path;
+
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("-x", "-y", "-z")
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("echo args:-x;-y;-z");
+        }
+
+        [Fact]
+        public void ItCanPassOptionArgumentsAndArgumentsToSubjectAppWithoutAndByDoubleDash()
+        {
+            const string testAppName = "MSBuildTestApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var testProjectDirectory = testInstance.Path;
+
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("foo", "--", "-z")
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("echo args:foo;-z");
         }
 
         [Fact]
@@ -687,6 +755,46 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                .Pass()
                .And
                .HaveStdOutContaining(expectedValue);
+        }
+
+        [Fact]
+        public void ItIncludesCommandArgumentsSpecifiedInLaunchSettings()
+        {
+            var expectedValue = "TestAppCommandLineArguments";
+            var secondExpectedValue = "SecondTestAppCommandLineArguments";
+            var testAppName = "TestAppWithLaunchSettings";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            new DotnetCommand(Log, "run")
+               .WithWorkingDirectory(testInstance.Path)
+               .Execute()
+               .Should()
+               .Pass()
+               .And
+               .HaveStdOutContaining(expectedValue)
+               .And
+               .HaveStdOutContaining(secondExpectedValue);
+        }
+
+        [Fact]
+        public void ItCLIArgsOverrideCommandArgumentsSpecifiedInLaunchSettings()
+        {
+            var expectedValue = "TestAppCommandLineArguments";
+            var secondExpectedValue = "SecondTestAppCommandLineArguments";
+            var testAppName = "TestAppWithLaunchSettings";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            new DotnetCommand(Log, "run", "-- test")
+               .WithWorkingDirectory(testInstance.Path)
+               .Execute()
+               .Should()
+               .Pass()
+               .And
+               .NotHaveStdOutContaining(expectedValue)
+               .And
+               .NotHaveStdOutContaining(secondExpectedValue);
         }
     }
 }

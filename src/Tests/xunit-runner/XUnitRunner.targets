@@ -77,7 +77,6 @@
 
     <SDKCustomCreateXUnitWorkItemsWithTestExclusion
         XUnitProjects="@(SDKCustomXUnitProject)"
-        TestProjectExclusionListPath="$(reporoot)/src/Tests/testsProjectCannotRunOnHelixList.txt"
         IsPosixShell="$(IsPosixShell)"
         XUnitArguments="$(SDKCustomXUnitArgument)"
         XUnitWorkItemTimeout="$(XUnitWorkItemTimeout)">

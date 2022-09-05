@@ -110,7 +110,7 @@ namespace Microsoft.DotNet.Workloads.Workload
 
             PackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(TempPackagesDirectory,
                 filePermissionSetter: null,
-                new FirstPartyNuGetPackageSigningVerifier(TempPackagesDirectory, nugetLogger),
+                new FirstPartyNuGetPackageSigningVerifier(),
                 nugetLogger,
                 restoreActionConfig: RestoreActionConfiguration,
                 verifySignatures: VerifySignatures);

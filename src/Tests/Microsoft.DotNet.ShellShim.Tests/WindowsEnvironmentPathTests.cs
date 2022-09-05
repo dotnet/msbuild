@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
             var mockEnvironmentPathEditor = new MockEnvironmentPathEditor(_mockPathInternal);
             _windowsEnvironmentPath = new WindowsEnvironmentPath(
                 _toolsPath,
-                CliFolderPathCalculator.WindowsNonExpandedToolsShimPath,
+                @"%USERPROFILE%\.dotnet\tools",
                 mockEnvironmentProvider,
                 mockEnvironmentPathEditor,
                 _reporter

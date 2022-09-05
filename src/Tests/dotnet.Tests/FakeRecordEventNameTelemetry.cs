@@ -31,6 +31,10 @@ namespace Microsoft.DotNet.Tests
         {
         }
 
+        public void Dispose()
+        {
+        }
+
         public ConcurrentBag<LogEntry> LogEntries { get; set; } = new ConcurrentBag<LogEntry>();
 
         public class LogEntry

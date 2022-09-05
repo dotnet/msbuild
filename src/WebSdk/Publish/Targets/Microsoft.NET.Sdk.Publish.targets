@@ -19,7 +19,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <!-- We want to force this property to be true, hence not adding a condition check -->
     <SupportsDeployOnBuild>true</SupportsDeployOnBuild>
-    <_PublishTaskFramework Condition=" '$(MSBuildRuntimeType)' == 'Core'">net6.0</_PublishTaskFramework>
+    <_PublishTaskFramework Condition=" '$(MSBuildRuntimeType)' == 'Core'">net7.0</_PublishTaskFramework>
     <_PublishTaskFramework Condition=" '$(_PublishTaskFramework)' == ''">net472</_PublishTaskFramework>
     <_PublishTasksDir Condition=" '$(_PublishTasksDir)'=='' ">$(MSBuildThisFileDirectory)..\tools\$(_PublishTaskFramework)\</_PublishTasksDir>
     <_PublishTaskAssemblyFullPath Condition=" '$(_PublishTaskAssemblyFullPath)'=='' ">$(_PublishTasksDir)Microsoft.NET.Sdk.Publish.Tasks.dll</_PublishTaskAssemblyFullPath>
@@ -85,6 +85,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PublishIntermediateOutputPath Condition="'$(DockerPublish)' == 'true'">obj/Docker/publish/</PublishIntermediateOutputPath>
 
     <EFSQLScriptsFolderName Condition="$(EFSQLScriptsFolderName) == ''">EFSQLScripts</EFSQLScriptsFolderName>
+
+    <!-- If TrimMode has not already been set, default to partial trimming, as AspNet is not currently fully trim-compatible -->
+    <TrimMode Condition="'$(PublishTrimmed)' == 'true' and '$(TrimMode)' == ''">partial</TrimMode>
   </PropertyGroup>
 
   <!--

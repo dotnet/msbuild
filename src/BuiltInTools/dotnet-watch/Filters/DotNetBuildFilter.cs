@@ -11,7 +11,6 @@ namespace Microsoft.DotNet.Watcher.Tools
 {
     public class DotNetBuildFilter : IWatchFilter
     {
-        private readonly string _muxer = DotnetMuxer.MuxerPath;
         private readonly IFileSetFactory _fileSetFactory;
         private readonly ProcessRunner _processRunner;
         private readonly IReporter _reporter;
@@ -33,7 +32,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
                 var processSpec = new ProcessSpec
                 {
-                    Executable = _muxer,
+                    Executable = DotnetMuxer.MuxerPath,
                     Arguments = arguments,
                     WorkingDirectory = context.ProcessSpec.WorkingDirectory,
                 };

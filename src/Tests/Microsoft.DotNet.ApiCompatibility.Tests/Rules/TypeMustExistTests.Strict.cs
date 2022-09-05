@@ -1,21 +1,21 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
 
 using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using Microsoft.DotNet.ApiCompatibility.Tests;
 using Xunit;
 
-namespace Microsoft.DotNet.ApiCompatibility.Tests
+namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
 {
     public class TypeMustExistTests_Strict
     {
-        [Theory]
-        [InlineData("")]
-        [InlineData("CP002")]
-        public void MissingPublicTypesInLeftAreReported(string noWarn)
+        private static readonly TestRuleFactory s_ruleFactory = new((settings, context) => new MembersMustExist(settings, context));
+
+        [Fact]
+        public void MissingPublicTypesInLeftAreReported()
         {
             string leftSyntax = @"
 
@@ -37,12 +37,11 @@ namespace CompatTests
 }
 ";
 
-            ApiComparer differ = new();
-            differ.NoWarn = noWarn;
-            differ.StrictMode = true;
             bool enableNullable = false;
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax, enableNullable);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax, enableNullable);
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: true));
+
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
             CompatDifference[] expected = new[]
@@ -53,7 +52,6 @@ namespace CompatTests
                 new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:CompatTests.MyRecord"),
 #endif
             };
-
             Assert.Equal(expected, differences);
         }
 
@@ -82,15 +80,14 @@ namespace CompatTests
 ";
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntaxWithReferences(rightSyntax, new[] { forwardedTypeSyntax });
-            ApiComparer differ = new();
-            differ.StrictMode = true;
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: true));
+
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
             CompatDifference[] expected = new[]
             {
                 new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:CompatTests.ForwardedTestType")
             };
-
             Assert.Equal(expected, differences);
         }
 
@@ -113,36 +110,9 @@ namespace CompatTests
             IEnumerable<string> references = new[] { forwardedTypeSyntax };
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntaxWithReferences(syntax, references);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntaxWithReferences(syntax, references);
-            ApiComparer differ = new();
-            differ.StrictMode = true;
-            Assert.Empty(differ.GetDifferences(new[] { left }, new[] { right }));
-        }
 
-        [Fact]
-        public void NoDifferencesReportedWithNoWarn()
-        {
-            
-            string leftSyntax = @"
-namespace CompatTests
-{
-  public class First { }
-}
-";
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: true));
 
-            string rightSyntax = @"
-
-namespace CompatTests
-{
-  public class First { }
-  public class Second { }
-}
-";
-
-            ApiComparer differ = new();
-            differ.StrictMode = true;
-            differ.NoWarn = DiagnosticIds.TypeMustExist;
-            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
-            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
             Assert.Empty(differ.GetDifferences(new[] { left }, new[] { right }));
         }
 
@@ -172,24 +142,18 @@ namespace CompatTests
 }
 ";
 
-            (string, string)[] ignoredDifferences = new[]
-            {
-                (DiagnosticIds.TypeMustExist, "T:CompatTests.Second"),
-                (DiagnosticIds.TypeMustExist, "T:CompatTests.MyEnum"),
-            };
-
-            ApiComparer differ = new();
-            differ.IgnoredDifferences = ignoredDifferences;
-            differ.StrictMode = true;
-
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: true));
+
             IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
 
             CompatDifference[] expected = new[]
             {
+                new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:CompatTests.Second"),
                 new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:CompatTests.Third"),
-                new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:CompatTests.Fourth")
+                new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:CompatTests.Fourth"),
+                new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:CompatTests.MyEnum")
             };
 
             Assert.Equal(expected, differences);
@@ -221,17 +185,16 @@ namespace CompatTests
 }
 ";
 
-            ApiComparer differ = new();
-            differ.StrictMode = true;
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: true));
+
             IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
 
             List<CompatDifference> expected = new()
             {
                 new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:CompatTests.First.FirstNested"),
             };
-
             Assert.Equal(expected, differences);
         }
 
@@ -250,10 +213,10 @@ namespace CompatTests
   public class RightType { }
 }
 ";
-            ApiComparer differ = new();
-            differ.StrictMode = true;
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: true));
+
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
             List<CompatDifference> expected = new()
@@ -261,7 +224,6 @@ namespace CompatTests
                 new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.LeftType"),
                 new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:CompatTests.RightType"),
             };
-
             Assert.Equal(expected, differences);
         }
 
@@ -298,12 +260,10 @@ namespace CompatTests
 }
 "};
 
-            ApiComparer differ = new();
-            differ.StrictMode = true;
             ElementContainer<IAssemblySymbol> left =
-                new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax), new MetadataInformation(string.Empty, string.Empty, "ref"));
-
-            IList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
+                new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax), new MetadataInformation(string.Empty, "ref"));
+            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: true));
 
             IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
                 differ.GetDifferences(left, right);
@@ -320,7 +280,6 @@ namespace CompatTests
                     new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:CompatTests.Third"),
                 },
             };
-
             AssertExtensions.MultiRightResult(left.MetadataInformation, expected, differences);
         }
 
@@ -376,12 +335,10 @@ namespace CompatTests
 }
 "};
 
-            ApiComparer differ = new();
-            differ.StrictMode = true;
             ElementContainer<IAssemblySymbol> left =
-                new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax), new MetadataInformation(string.Empty, string.Empty, "ref"));
-
-            IList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
+                new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax), new MetadataInformation(string.Empty, "ref"));
+            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: true));
 
             IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
                 differ.GetDifferences(left, right);
@@ -418,11 +375,10 @@ namespace CompatTests
             string[] rightSyntaxes = new[] { rightWithForward, "namespace CompatTests { internal class Foo { } }", rightWithForward };
             IEnumerable<string> references = new[] { forwardedTypeSyntax };
             ElementContainer<IAssemblySymbol> left =
-                new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax), new MetadataInformation(string.Empty, string.Empty, "ref"));
-            IList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes, references);
+                new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax), new MetadataInformation(string.Empty, "ref"));
+            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes, references);
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: true));
 
-            ApiComparer differ = new();
-            differ.StrictMode = true;
             IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
                 differ.GetDifferences(left, right);
 
@@ -438,7 +394,6 @@ namespace CompatTests
                     new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:CompatTests.ForwardedTestType"),
                 },
             };
-
             AssertExtensions.MultiRightResult(left.MetadataInformation, expected, differences);
         }
     }

@@ -17,13 +17,15 @@ namespace Microsoft.NET.TestFramework
 {
     public class ToolsetInfo
     {
-        public const string CurrentTargetFramework = "net6.0";
-        public const string CurrentTargetFrameworkVersion = "6.0";
+        public const string CurrentTargetFramework = "net7.0";
+        public const string CurrentTargetFrameworkVersion = "7.0";
+        public const string NextTargetFramework = "net8.0";
+        public const string NextTargetFrameworkVersion = "8.0";
 
         public const string LatestWinRuntimeIdentifier = "win10";
-        public const string LatestLinuxRuntimeIdentifier = "ubuntu.20.04";
+        public const string LatestLinuxRuntimeIdentifier = "ubuntu.22.04";
         public const string LatestMacRuntimeIdentifier = "osx.10.15";
-        public const string LatestRuntimeIdentifiers = $"{LatestWinRuntimeIdentifier}-x64;{LatestWinRuntimeIdentifier}-x86;osx.10.10-x64;osx.10.11-x64;osx.10.12-x64;osx.10.14-x64;{LatestMacRuntimeIdentifier}-x64;ubuntu.14.04-x64;ubuntu.16.04-x64;ubuntu.16.10-x64;ubuntu.18.04-x64;{LatestLinuxRuntimeIdentifier}-x64;centos.7-x64;rhel.7.2-x64;debian.8-x64;fedora.24-x64;opensuse.42.1-x64;linux-musl-x64";
+        public const string LatestRuntimeIdentifiers = $"{LatestWinRuntimeIdentifier}-x64;{LatestWinRuntimeIdentifier}-x86;osx.10.10-x64;osx.10.11-x64;osx.10.12-x64;osx.10.14-x64;{LatestMacRuntimeIdentifier}-x64;ubuntu.14.04-x64;ubuntu.16.04-x64;ubuntu.16.10-x64;ubuntu.18.04-x64;ubuntu.20.04-x64;{LatestLinuxRuntimeIdentifier}-x64;centos.9-x64;rhel.9-x64;debian.9-x64;fedora.37-x64;opensuse.42.3-x64;linux-musl-x64";
 
         public string DotNetRoot { get; }
         public string DotNetHostPath { get; }
@@ -298,6 +300,10 @@ namespace Microsoft.NET.TestFramework
                 else if (!string.IsNullOrWhiteSpace(commandLine.MsbuildAdditionalSdkResolverFolder))
                 {
                     ret.SdkResolverPath = Path.Combine(commandLine.MsbuildAdditionalSdkResolverFolder, configuration, "net472", "SdkResolvers");
+                }
+                else if (Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_MSBUILDSDKRESOLVER_FOLDER") != null)
+                {
+                    ret.SdkResolverPath = Path.Combine(Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_MSBUILDSDKRESOLVER_FOLDER"), configuration, "net472", "SdkResolvers");
                 }
                 else
                 {

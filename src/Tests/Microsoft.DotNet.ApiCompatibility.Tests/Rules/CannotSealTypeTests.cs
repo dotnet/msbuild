@@ -6,20 +6,23 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using Microsoft.DotNet.ApiCompatibility.Tests;
 using Xunit;
 
-namespace Microsoft.DotNet.ApiCompatibility.Tests
+namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
 {
     public class CannotSealTypeTests
     {
+        private static readonly TestRuleFactory s_ruleFactory = new((settings, context) => new CannotSealType(settings, context));
+
         [Theory]
         [MemberData(nameof(SealNonInheritableTypeNotReportedData))]
         public void SealNonInheritableTypeNotReported(string leftSyntax, string rightSyntax)
         {
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory);
 
-            ApiComparer differ = new();
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
             foreach (CompatDifference difference in differences)
@@ -34,12 +37,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
         {
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory);
 
-            ApiComparer differ = new();
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
             CompatDifference difference = new(DiagnosticIds.CannotSealType, string.Empty, DifferenceType.Changed, "T:CompatTests.First");
-
             Assert.Contains(difference, differences);
         }
 
@@ -66,12 +68,10 @@ namespace CompatTests
     }
 }
 ";
-
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(includeInternalSymbols: includeInternals));
 
-            ApiComparer differ = new();
-            differ.IncludeInternalSymbols = includeInternals;
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
             if (!includeInternals)
@@ -137,12 +137,12 @@ namespace CompatTests
             };
 
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
-            MetadataInformation leftMetadata = new("left", "net6.0", "ref/a.dll");
+            MetadataInformation leftMetadata = new("left", @"ref\a.dll");
             ElementContainer<IAssemblySymbol> leftContainer = new(left, leftMetadata);
+            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
+            // Register CannotSealType and MemberMustExist rules as this test validates both.
+            ApiComparer differ = new(s_ruleFactory.WithRule((settings, context) => new MembersMustExist(settings, context)));
 
-            IList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
-
-            ApiComparer differ = new();
             IEnumerable<(MetadataInformation left, MetadataInformation right, IEnumerable<CompatDifference> differences)> result =
                 differ.GetDifferences(leftContainer, right);
 
@@ -160,7 +160,6 @@ namespace CompatTests
                     new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.#ctor"),
                 },
             };
-
             AssertExtensions.MultiRightResult(leftMetadata, expectedDiffs, result);
         }
 
@@ -204,13 +203,11 @@ namespace CompatTests
             };
 
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
-            MetadataInformation leftMetadata = new("left", "net6.0", "ref/a.dll");
+            MetadataInformation leftMetadata = new("left", @"ref\a.dll");
             ElementContainer<IAssemblySymbol> leftContainer = new(left, leftMetadata);
+            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(includeInternalSymbols: true));
 
-            IList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
-
-            ApiComparer differ = new();
-            differ.IncludeInternalSymbols = true;
             IEnumerable<(MetadataInformation left, MetadataInformation right, IEnumerable<CompatDifference> differences)> result =
                 differ.GetDifferences(leftContainer, right);
 
@@ -223,13 +220,11 @@ namespace CompatTests
         {
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: true));
 
-            ApiComparer differ = new();
-            differ.StrictMode = true;
             CompatDifference[] differences = differ.GetDifferences(left, right).ToArray();
 
             CompatDifference difference = new(DiagnosticIds.CannotSealType, string.Empty, DifferenceType.Changed, "T:CompatTests.First");
-
             Assert.Contains(difference, differences);
             Assert.True(differences[0].Message.IndexOf("left") < differences[0].Message.IndexOf("right"));
         }

@@ -1,0 +1,18 @@
+[
+  {
+    "kind": "file_does_not_exist",
+    "path": "foobar.txt"
+  },
+  {
+    "kind": "file_does_not_exist",
+    "path": "barfoo.txt"
+  },
+  {
+    "kind": "file_exists",
+    "path": "baseball.txt"
+  },
+  {
+    "kind": "file_exists",
+    "path": "ballandbase.txt"
+  }
+]

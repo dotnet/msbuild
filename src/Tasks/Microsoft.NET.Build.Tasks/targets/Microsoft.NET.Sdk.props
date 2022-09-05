@@ -20,7 +20,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <Configurations Condition=" '$(Configurations)' == '' ">Debug;Release</Configurations>
     <Platforms Condition=" '$(Platforms)' == '' ">AnyCPU</Platforms>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Configuration Condition=" '$(_IsPacking)' == 'true' and '$(PackRelease)' == 'true' and '$(Configuration)' == '' ">Release</Configuration>
+    <Configuration Condition=" '$(_IsPublishing)' == 'true' and '$(PublishRelease)' == 'true' and '$(Configuration)' == '' ">Release</Configuration>
+    <Configuration Condition="'$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
   </PropertyGroup>
 
@@ -75,6 +77,15 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <!-- Default settings for all projects built with this Sdk package -->
+
+  <PropertyGroup Condition=" '$(AssemblySearchPaths)' == '' ">
+    <!-- By default exclude GAC, registry, output directory from search paths. -->
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseCandidateAssemblyFiles)' != 'false'">{CandidateAssemblyFiles}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseHintPathFromItem)' != 'false'">$(AssemblySearchPaths);{HintPathFromItem}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseTargetFrameworkDirectory)' != 'false'">$(AssemblySearchPaths);{TargetFrameworkDirectory}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseRawFileName)' != 'false'">$(AssemblySearchPaths);{RawFileName}</AssemblySearchPaths>
+  </PropertyGroup>
+
   <PropertyGroup>
     <DebugType Condition=" '$(DebugType)' == '' ">portable</DebugType>
 
@@ -90,8 +101,6 @@ Copyright (c) .NET Foundation. All rights reserved.
          a project targets .NET Framework and doesn't have any direct package dependencies. -->
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
 
-    <!-- Exclude GAC, registry, output directory from search paths. -->
-    <AssemblySearchPaths Condition=" '$(AssemblySearchPaths)' == '' ">{CandidateAssemblyFiles};{HintPathFromItem};{TargetFrameworkDirectory};{RawFileName}</AssemblySearchPaths>
     <DesignTimeAssemblySearchPaths Condition=" '$(DesignTimeAssemblySearchPaths)' == '' ">$(AssemblySearchPaths)</DesignTimeAssemblySearchPaths>
 
     <AllowUnsafeBlocks Condition="'$(AllowUnsafeBlocks)'==''">false</AllowUnsafeBlocks>
@@ -144,8 +153,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.CSharp.props" Condition="'$(MSBuildProjectExtension)' == '.csproj'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.VisualBasic.props" Condition="'$(MSBuildProjectExtension)' == '.vbproj'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.FSharp.props" Condition="'$(MSBuildProjectExtension)' == '.fsproj'" />
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ILLink.props" />
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Compatibility.props" />
+  <Import Project="Sdk.props" Sdk="Microsoft.DotNet.ILCompiler" />
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.ILLink.Tasks" />
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackTool.props" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackProjectTool.props" />

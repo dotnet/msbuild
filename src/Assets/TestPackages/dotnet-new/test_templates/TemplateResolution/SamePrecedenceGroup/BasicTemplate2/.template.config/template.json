@@ -1,0 +1,15 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "Basic Template",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.SamePrecedenceGroup",
+  "precedence": "100",
+  "identity": "TestAssets.SamePrecedenceGroup.BasicTemplate2",
+  "shortName": "basic",
+  "sourceName": "bar",
+  "tags": {
+    "language": "C#",
+    "type": "item"
+  }
+}

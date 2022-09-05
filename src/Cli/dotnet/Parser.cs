@@ -10,6 +10,7 @@ using System.CommandLine.IO;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Format;
@@ -18,6 +19,7 @@ using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.New;
 using Microsoft.DotNet.Tools.NuGet;
 using Command = System.CommandLine.Command;
+using CommandResult = System.CommandLine.Parsing.CommandResult;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -144,15 +146,59 @@ namespace Microsoft.DotNet.Cli
 
         public static System.CommandLine.Parsing.Parser Instance { get; } = new CommandLineBuilder(ConfigureCommandLine(RootCommand))
             .UseExceptionHandler(ExceptionHandler)
+            // TODO:CH - we want this for dotnet-new argument reporting, but 
+            //           adding this makes forwarding commands (which can't know
+            //           all of the parameters of their wrapped command by design)
+            //           error. so `dotnet msbuild /t:thing` throws a parse error.
+            // .UseParseErrorReporting(127)
+            .UseParseErrorReporting("new")
             .UseHelp()
             .UseHelpBuilder(context => DotnetHelpBuilder.Instance.Value)
             .UseLocalizationResources(new CommandLineValidationMessages())
             .UseParseDirective()
             .UseSuggestDirective()
             .DisablePosixBinding()
-            .EnableLegacyDoubleDashBehavior()
             .UseTokenReplacer(TokenPerLine)
             .Build();
+
+        private static CommandLineBuilder UseParseErrorReporting(this CommandLineBuilder builder, string commandName)
+        {
+            builder.AddMiddleware(async (context, next) =>
+            {
+                CommandResult currentCommandResult = context.ParseResult.CommandResult;
+                while (currentCommandResult != null && currentCommandResult.Command.Name != commandName)
+                {
+                    currentCommandResult = currentCommandResult.Parent as CommandResult;
+                }
+
+                if (currentCommandResult == null || !context.ParseResult.Errors.Any())
+                {
+                    //different command was launched or no errors
+                    await next(context).ConfigureAwait(false);
+                }
+                else 
+                {
+                    context.ExitCode = 127; //parse error
+                    //TODO: discuss to make coloring extensions public
+                    //context.Console.ResetTerminalForegroundColor();
+                    //context.Console.SetTerminalForegroundRed();
+                    foreach (var error in context.ParseResult.Errors)
+                    {
+                        context.Console.Error.WriteLine(error.Message);
+                    }
+                    context.Console.Error.WriteLine();
+                    //context.Console.ResetTerminalForegroundColor();
+                    var output = context.Console.Out.CreateTextWriter();
+                    var helpContext = new HelpContext(context.HelpBuilder,
+                                                      context.ParseResult.CommandResult.Command,
+                                                      output,
+                                                      context.ParseResult);
+                    context.HelpBuilder
+                           .Write(helpContext);
+                }
+            }, MiddlewareOrder.ErrorReporting);
+            return builder;
+        }
 
         private static void ExceptionHandler(Exception exception, InvocationContext context)
         {
@@ -166,7 +212,6 @@ namespace Microsoft.DotNet.Cli
                 Reporter.Error.WriteLine(CommandContext.IsVerbose()
                     ? exception.ToString().Red().Bold()
                     : exception.Message.Red().Bold());
-                
             }
             else if (exception is CommandParsingException)
             {
@@ -179,7 +224,7 @@ namespace Microsoft.DotNet.Cli
             {
                 Reporter.Error.Write("Unhandled exception: ".Red().Bold());
                 Reporter.Error.WriteLine(exception.ToString().Red().Bold());
-            }    
+            }
             context.ExitCode = 1;
         }
 
@@ -253,17 +298,34 @@ namespace Microsoft.DotNet.Cli
                 {
                     new MSBuildForwardingApp(helpArgs).Execute();
                 }
-                else if (command.Name.Equals(NewCommandParser.GetCommand().Name))
-                {
-                    NewCommandShim.Run(context.ParseResult.GetArguments());
-                }
                 else if (command.Name.Equals(VSTestCommandParser.GetCommand().Name))
                 {
                     new VSTestForwardingApp(helpArgs).Execute();
                 }
                 else if (command.Name.Equals(FormatCommandParser.GetCommand().Name))
                 {
+                    var argumetns = context.ParseResult.GetValueForArgument(FormatCommandParser.Arguments);
+                    new DotnetFormatForwardingApp(argumetns.Concat(helpArgs).ToArray()).Execute();
+                }
+                else if (command.Name.Equals(FsiCommandParser.GetCommand().Name))
+                {
+                    new FsiForwardingApp(helpArgs).Execute();
+                }
+                else if (command is Microsoft.TemplateEngine.Cli.Commands.ICustomHelp helpCommand)
+                {
+                    var blocks = helpCommand.CustomHelpLayout();
+                    foreach (var block in blocks)
+                    {
+                        block(context);
+                    }
+                }
+                else if (command.Name.Equals(FormatCommandParser.GetCommand().Name))
+                {
                     new DotnetFormatForwardingApp(helpArgs).Execute();
+                }
+                else if (command.Name.Equals(FsiCommandParser.GetCommand().Name))
+                {
+                    new FsiForwardingApp(helpArgs).Execute();
                 }
                 else
                 {

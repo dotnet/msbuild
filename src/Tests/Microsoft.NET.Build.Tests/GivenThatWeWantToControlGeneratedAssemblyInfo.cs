@@ -2,18 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
+using System.Linq;
+using System.Xml.Linq;
+using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using Xunit;
-using FluentAssertions;
-using System.Runtime.InteropServices;
-using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.ProjectConstruction;
-using System.Xml.Linq;
-using Xunit.Sdk;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -105,7 +103,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
-            command.GetValues().ShouldBeEquivalentTo(new[] { "1.0.0" });
+            command.GetValues().Should().BeEquivalentTo(new[] { "1.0.0" });
         }
 
         [Fact]
@@ -136,7 +134,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
-            command.GetValues().ShouldBeEquivalentTo(new[] { "1.0.0" });
+            command.GetValues().Should().BeEquivalentTo(new[] { "1.0.0" });
         }
 
         [Fact]
@@ -168,7 +166,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
-            command.GetValues().ShouldBeEquivalentTo(new[] { "1.0.0" });
+            command.GetValues().Should().BeEquivalentTo(new[] { "1.0.0" });
         }
 
         [Fact]
@@ -204,7 +202,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
-            command.GetValues().ShouldBeEquivalentTo(new[] { "1.0.0+xyz" });
+            command.GetValues().Should().BeEquivalentTo(new[] { "1.0.0+xyz" });
         }
 
         [Fact]
@@ -241,7 +239,7 @@ namespace Microsoft.NET.Build.Tests
             var command = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), testProject.TargetFrameworks, valueName: "InformationalVersion");
             command.Execute().Should().Pass();
 
-            command.GetValues().ShouldBeEquivalentTo(new[] { "1.2.3+abc.xyz" });
+            command.GetValues().Should().BeEquivalentTo(new[] { "1.2.3+abc.xyz" });
         }
 
         [WindowsOnlyTheory]
@@ -758,5 +756,59 @@ namespace Microsoft.NET.Build.Tests
                 AssemblyInfo.Get(assemblyPath).ContainsKey("AssemblyMetadataAttribute").Should().Be(false);
             }
         }
+
+        [Theory]
+        [InlineData("netcoreapp3.1", ".NET Core 3.1")]
+        [InlineData("netcoreapp2.1", ".NET Core 2.1")]
+        [InlineData("netstandard2.1", ".NET Standard 2.1")]
+        [InlineData("net5.0", ".NET 5.0")]
+        public void CheckTargetFrameworkDisplayName(string targetFrameworkVersion, string expectedFrameworkDisplayName)
+        {
+            TestProject libraryProject = new TestProject()
+            {
+                Name = "LibraryProject",
+                TargetFrameworks = targetFrameworkVersion
+            };
+            libraryProject.AdditionalProperties["NoWarn"] = "NETSDK1138";
+            libraryProject.SourceFiles["Class.cs"] = @"
+public class LibraryClass{}
+";
+
+            TestProject testProject = new TestProject()
+            {
+                Name = "HelloWorld",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true
+            };
+
+            testProject.ReferencedProjects.Add(libraryProject);
+            testProject.SourceFiles["Program.cs"] = @"
+using System;
+using System.Reflection;
+using System.Runtime.Versioning;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        var str = typeof(LibraryClass).Assembly.GetCustomAttribute<TargetFrameworkAttribute>().FrameworkDisplayName;
+        Console.WriteLine(str);
+    }
+}";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFrameworkVersion);
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.WithWorkingDirectory(testAsset.Path)
+                .Execute()
+                .Should()
+                .Pass();
+
+            var result = new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(Path.Combine(testAsset.Path, testProject.Name))
+                .Execute();
+            result.Should().Pass();
+            result.StdOut.Should().BeEquivalentTo(expectedFrameworkDisplayName);
+
+        }
+
     }
 }

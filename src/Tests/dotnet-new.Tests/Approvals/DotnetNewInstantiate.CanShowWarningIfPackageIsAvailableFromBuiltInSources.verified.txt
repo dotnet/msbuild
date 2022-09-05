@@ -1,0 +1,9 @@
+﻿The template "dotnet gitignore file" was created successfully.
+
+An update for template package 'Microsoft.DotNet.Common.ItemTemplates::6.0.100' is available.
+To update the package use:
+   dotnet new install Microsoft.DotNet.Common.ItemTemplates::%VERSION%
+
+An update for template package 'Microsoft.DotNet.Common.ItemTemplates::%VERSION%' is available in the '.NET SDK' provider.
+To use built-in template package, uninstall manually installed template package using:
+   dotnet new uninstall Microsoft.DotNet.Common.ItemTemplates

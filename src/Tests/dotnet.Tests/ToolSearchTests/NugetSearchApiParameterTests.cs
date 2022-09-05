@@ -19,7 +19,7 @@ namespace dotnet.Tests.ToolSearchTests
         {
             var result = Parser.Instance.Parse("dotnet tool search mytool --skip wrongtype");
             Action a = () => new NugetSearchApiParameter(result);
-            a.ShouldThrow<GracefulException>();
+            a.Should().Throw<GracefulException>();
         }
         
         [Fact]
@@ -28,7 +28,7 @@ namespace dotnet.Tests.ToolSearchTests
             var result = Parser.Instance.Parse("dotnet tool search mytool --take wrongtype");
 
             Action a = () => new NugetSearchApiParameter(result);
-            a.ShouldThrow<GracefulException>();
+            a.Should().Throw<GracefulException>();
         }
         
         [Fact]

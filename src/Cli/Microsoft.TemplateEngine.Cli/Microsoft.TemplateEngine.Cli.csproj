@@ -1,0 +1,69 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>$(SdkTargetFramework)</TargetFrameworks>
+    <Description>Template creation for the dotnet CLI</Description>
+    <IsPackable>true</IsPackable>
+    <IsShippingPackage>false</IsShippingPackage>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <DefineConstants>$(DefineConstants);WCWIDTH_VISIBILITY_INTERNAL</DefineConstants>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.TemplateEngine.Edge" Version="$(MicrosoftTemplateEngineEdgePackageVersion)" />
+    <PackageReference Include="Microsoft.TemplateSearch.Common" Version="$(MicrosoftTemplateSearchCommonPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsLoggingConsoleVersion)" />
+    <PackageReference Include="Wcwidth.Sources" Version="0.6.0" ExcludeAssets="all" GeneratePathProperty="true" />
+    <PackageReference Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Microsoft.DotNet.Cli.Utils/Microsoft.DotNet.Cli.Utils.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Update="Commands\HelpStrings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>HelpStrings.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Commands\SymbolStrings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SymbolStrings.resx</DependentUpon>
+    </Compile>
+    <Compile Update="LocalizableStrings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>LocalizableStrings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Commands\HelpStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>HelpStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Commands\SymbolStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>SymbolStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="LocalizableStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LocalizableStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <Target Name="CopyExternalSourceFilesIntoProject" BeforeTargets="BeforeBuild">
+    <ItemGroup>
+      <WcwidthFiles Include="$(PkgWcwidth_Sources)\contentFiles\cs\net5.0\External\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(WcwidthFiles)" DestinationFolder="$(BaseIntermediateOutputPath)/External/%(RecursiveDir)" />
+    <ItemGroup>
+      <Compile Include="$(BaseIntermediateOutputPath)/External/**/*.cs" />
+    </ItemGroup> 
+  </Target>
+</Project>

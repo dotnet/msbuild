@@ -29,6 +29,7 @@ function InitializeCustomSDKToolset {
   InstallDotNetSharedFramework "2.2.8"
   InstallDotNetSharedFramework "3.1.0"
   InstallDotNetSharedFramework "5.0.0"
+  InstallDotNetSharedFramework "6.0.0"
 
   CreateBuildEnvScript
 }
@@ -57,8 +58,7 @@ function CreateBuildEnvScript {
   mkdir -p $artifacts_dir
   scriptPath="$artifacts_dir/sdk-build-env.sh"
   scriptContents="
-#!/bin/bash
-export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+#!/usr/bin/env bash
 export DOTNET_MULTILEVEL_LOOKUP=0
 
 export DOTNET_ROOT=$DOTNET_INSTALL_DIR

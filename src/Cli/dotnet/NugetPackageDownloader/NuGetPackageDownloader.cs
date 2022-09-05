@@ -59,8 +59,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             _reporter = reporter ?? Reporter.Output;
             _verboseLogger = verboseLogger ?? new NuGetConsoleLogger();
             _firstPartyNuGetPackageSigningVerifier = firstPartyNuGetPackageSigningVerifier ??
-                                                     new FirstPartyNuGetPackageSigningVerifier(
-                                                         tempDirectory: packageInstallDir, logger: _verboseLogger);
+                                                     new FirstPartyNuGetPackageSigningVerifier();
             _filePermissionSetter = filePermissionSetter ?? new FilePermissionSetter();
             _restoreActionConfig = restoreActionConfig ?? new RestoreActionConfig();
             _retryTimer = timer;

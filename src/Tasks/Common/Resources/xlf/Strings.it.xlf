@@ -7,6 +7,11 @@
         <target state="translated">NETSDK1076: è possibile usare AddResource solo con tipi di risorsa integer.</target>
         <note>{StrBegin="NETSDK1076: "}</note>
       </trans-unit>
+      <trans-unit id="AotNoValidRuntimePackageError">
+        <source>NETSDK1183: Unable to optimize assemblies for Ahead of time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing. When targeting .NET 7 or higher, make sure to restore packages with the PublishAot property set to true.</source>
+        <target state="translated">NETSDK1183: non è possibile ottimizzare gli assembly per la compilazione Ahead Of Time perché non è stato trovato alcun pacchetto di runtime valido. Impostare la proprietà PublishAot su false oppure usare un identificatore di runtime supportato durante la pubblicazione. Quando si usa .NET 7 o versioni successive, assicurarsi di ripristinare i pacchetti con la proprietà PublishAot impostata su true.</target>
+        <note>{StrBegin="NETSDK1183: "}</note>
+      </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
         <source>NETSDK1070: The application configuration file must have root configuration element.</source>
         <target state="translated">NETSDK1070: il file di configurazione dell'applicazione deve avere un elemento di configurazione radice.</target>
@@ -449,9 +454,14 @@
         <target state="translated">NETSDK1102: l'ottimizzazione degli assembly per le dimensioni non è supportata per la configurazione di pubblicazione selezionata. Assicurarsi di pubblicare un'app indipendente.</target>
         <note>{StrBegin="NETSDK1102: "}</note>
       </trans-unit>
-      <trans-unit id="ILLink_Info">
-        <source>Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
-        <target state="new">Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</target>
+      <trans-unit id="ILLinkOptimizedAssemblies">
+        <source>Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
+        <target state="translated">L'ottimizzazione degli assembly per le dimensioni potrebbe comportare la modifica del comportamento dell'app. Assicurarsi di testarla dopo la pubblicazione. Vedere: https://aka.ms/dotnet-illink</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ILLinkRunning">
+        <source>Optimizing assemblies for size. This process might take a while.</source>
+        <target state="translated">Ottimizzazione degli assembly per le dimensioni. Questo processo potrebbe richiedere del tempo.</target>
         <note />
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
@@ -508,8 +518,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1173: "}</note>
       </trans-unit>
       <trans-unit id="InvalidTypeLibraryId">
-        <source>NETSDK1170: The provided type library ID '{0}' for type libary '{1}' is invalid. The ID must be a positive integer less than 65536.</source>
-        <target state="needs-review-translation">NETSDK1170: l'ID '{0}' per la libreria dei tipi specificato '{1}' non è valido. L'ID deve essere un numero positivo intero inferiore a 65536.</target>
+        <source>NETSDK1170: The provided type library ID '{0}' for type library '{1}' is invalid. The ID must be a positive integer less than 65536.</source>
+        <target state="translated">NETSDK1170: l'ID '{0}' per la libreria dei tipi specificato '{1}' non è valido. L'ID deve essere un numero positivo intero inferiore a 65536.</target>
         <note>{StrBegin="NETSDK1170: "}</note>
       </trans-unit>
       <trans-unit id="JitLibraryNotFound">
@@ -640,6 +650,16 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1146: PackAsTool non supporta l'impostazione di TargetPlatformIdentifier. Ad esempio, TargetFramework non può essere essere impostato su net5.0-windows, ma solo su net5.0. PackAsTool non supporta neanche UseWPF o UseWindowsForms quando la destinazione è .NET 5 e versioni successive.</target>
         <note>{StrBegin="NETSDK1146: "}</note>
       </trans-unit>
+      <trans-unit id="PackageContainsIncorrectlyCasedLocale">
+        <source>NETSDK1187: Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</source>
+        <target state="translated">NETSDK1187: il pacchetto {0} {1} include una risorsa con le impostazioni locali '{2}'. Queste impostazioni locali sono state normalizzate nel formato standard '{3}' per evitare problemi di maiuscole e minuscole nella compilazione. È consigliabile informare l'autore del pacchetto in merito a questo problema di maiuscole e minuscole.</target>
+        <note>Error code is NETSDK1187. 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
+      </trans-unit>
+      <trans-unit id="PackageContainsUnknownLocale">
+        <source>NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</source>
+        <target state="translated">NETSDK1188: il pacchetto {0} {1} include una risorsa con le impostazioni locali '{2}'. Queste impostazioni locali non sono riconosciute da .NET. È consigliabile notificare all'autore del pacchetto che sembra usare impostazioni locali non valide.</target>
+        <note>Error code is NETSDK1188. 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
+      </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
         <target state="translated">NETSDK1064: il pacchetto {0} versione {1} non è stato trovato. Potrebbe essere stato eliminato dopo il ripristino di NuGet. In caso contrario, il ripristino di NuGet potrebbe essere stato completato solo parzialmente, a causa delle restrizioni relative alla lunghezza massima del percorso.</target>
@@ -706,8 +726,8 @@ The following are names of parameters or literal values and should not be transl
         <note />
       </trans-unit>
       <trans-unit id="ReadyToRunNoValidRuntimePackageError">
-        <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing.</source>
-        <target state="needs-review-translation">NETSDK1094: non è possibile ottimizzare gli assembly per le prestazioni perché non è stato trovato alcun pacchetto di runtime valido. Impostare la proprietà PublishReadyToRun su false oppure usare un identificatore di runtime supportato durante la pubblicazione. Quando si usa .NET 6 o versioni successive, assicurarsi di ripristinare i pacchetti con la proprietà PublishReadyToRun impostata su true.</target>
+        <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing. When targeting .NET 6 or higher, make sure to restore packages with the PublishReadyToRun property set to true.</source>
+        <target state="translated">NETSDK1094: non è possibile ottimizzare gli assembly per le prestazioni perché non è stato trovato alcun pacchetto di runtime valido. Impostare la proprietà PublishReadyToRun su false oppure usare un identificatore di runtime supportato durante la pubblicazione. Quando si usa .NET 6 o versioni successive, assicurarsi di ripristinare i pacchetti con la proprietà PublishReadyToRun impostata su true.</target>
         <note>{StrBegin="NETSDK1094: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunTargetNotSupportedError">
@@ -741,9 +761,9 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1112: "}</note>
       </trans-unit>
       <trans-unit id="RuntimePackNotRestored_TransitiveDisabled">
-        <source>NETSDK1184: The Runtime Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
-        <target state="needs-review-translation">NETSDK1185: il Runtime Pack per FrameworkReference '{0}' non è disponibile. È possibile che DisableTransitiveFrameworkReferenceDownloads sia stato impostato su true.</target>
-        <note>{StrBegin="NETSDK1184: "}</note>
+        <source>NETSDK1185: The Runtime Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
+        <target state="translated">NETSDK1185: il Runtime Pack per FrameworkReference '{0}' non è disponibile. È possibile che DisableTransitiveFrameworkReferenceDownloads sia stato impostato su true.</target>
+        <note>{StrBegin="NETSDK1185: "}</note>
       </trans-unit>
       <trans-unit id="SelfContainedExeCannotReferenceNonSelfContained">
         <source>NETSDK1150: The referenced project '{0}' is a non self-contained executable.  A non self-contained executable cannot be referenced by a self-contained executable.  For more information, see https://aka.ms/netsdk1150</source>
@@ -781,9 +801,9 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1127: "}</note>
       </trans-unit>
       <trans-unit id="TargetingPackNotRestored_TransitiveDisabled">
-        <source>NETSDK1183: The Targeting Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
-        <target state="needs-review-translation">NETSDK1184: il Targeting Pack per FrameworkReference '{0}' non è disponibile. È possibile che DisableTransitiveFrameworkReferenceDownloads sia stato impostato su true.</target>
-        <note>{StrBegin="NETSDK1183: "}</note>
+        <source>NETSDK1184: The Targeting Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
+        <target state="translated">NETSDK1184: il Targeting Pack per FrameworkReference '{0}' non è disponibile. È possibile che DisableTransitiveFrameworkReferenceDownloads sia stato impostato su true.</target>
+        <note>{StrBegin="NETSDK1184: "}</note>
       </trans-unit>
       <trans-unit id="TrimmingWindowsFormsIsNotSupported">
         <source>NETSDK1175: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</source>
@@ -821,9 +841,9 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1073: "}</note>
       </trans-unit>
       <trans-unit id="UnknownFrameworkReference_MauiEssentials">
-        <source>NETSDK1185: This project depends on Maui Essentials through a project or NuGet package reference, but doesn't declare that dependency explicitly. To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</source>
-        <target state="needs-review-translation">NETSDK1186: questo progetto dipende da Maui Essentials tramite un riferimento al progetto o al pacchetto NuGet, ma non dichiara questa dipendenza in modo esplicito. Per compilare questo progetto, è necessario impostare la proprietà UseMauiEssentials su true e, se necessario, installare il carico di lavoro Maui.</target>
-        <note>{StrBegin="NETSDK1185: "}</note>
+        <source>NETSDK1186: This project depends on Maui Essentials through a project or NuGet package reference, but doesn't declare that dependency explicitly. To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</source>
+        <target state="translated">NETSDK1186: questo progetto dipende da Maui Essentials tramite un riferimento al progetto o al pacchetto NuGet, ma non dichiara questa dipendenza in modo esplicito. Per compilare questo progetto, è necessario impostare la proprietà UseMauiEssentials su true e, se necessario, installare il carico di lavoro Maui.</target>
+        <note>{StrBegin="NETSDK1186: "}</note>
       </trans-unit>
       <trans-unit id="UnnecessaryWindowsDesktopSDK">
         <source>NETSDK1137: It is no longer necessary to use the Microsoft.NET.Sdk.WindowsDesktop SDK. Consider changing the Sdk attribute of the root Project element to 'Microsoft.NET.Sdk'.</source>
@@ -871,8 +891,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1107: "}</note>
       </trans-unit>
       <trans-unit id="UsingPreviewSdk_Info">
-        <source>You are using a preview version of .NET. See: https://aka.ms/dotnet-core-preview</source>
-        <target state="needs-review-translation">NETSDK1057: si sta usando una versione in anteprima di .NET. Vedere https://aka.ms/dotnet-support-policy</target>
+        <source>NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</source>
+        <target state="translated">NETSDK1057: si sta usando una versione in anteprima di .NET. Vedere https://aka.ms/dotnet-support-policy</target>
         <note />
       </trans-unit>
       <trans-unit id="WinMDObjNotSupportedOnTargetFramework">

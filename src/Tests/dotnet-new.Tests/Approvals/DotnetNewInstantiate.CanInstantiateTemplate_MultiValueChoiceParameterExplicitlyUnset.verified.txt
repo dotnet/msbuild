@@ -1,0 +1,15 @@
+﻿
+// This file is generated for platfrom: 
+
+    // NOT Quoted Windows
+        
+        
+    // NOT Windows
+
+    // NOT Quoted MacOS
+
+    // NOT MacOS
+
+    // NOT Quoted iOS
+
+    // NOT iOS

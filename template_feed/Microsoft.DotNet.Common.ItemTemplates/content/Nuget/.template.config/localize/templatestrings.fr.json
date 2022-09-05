@@ -1,0 +1,6 @@
+﻿{
+  "author": "Microsoft",
+  "name": "Configuration NuGet",
+  "description": "Un fichier permettant de configurer les emplacements où NuGet recherche des packages",
+  "postActions/open-file/description": "Ouvre nuget.config dans l’éditeur"
+}

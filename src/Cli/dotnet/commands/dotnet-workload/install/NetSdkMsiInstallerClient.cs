@@ -962,7 +962,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 DirectoryPath tempPackagesDir = new(string.IsNullOrWhiteSpace(tempDirPath) ? Path.GetTempPath() : tempDirPath);
 
                 nugetPackageDownloader = new NuGetPackageDownloader(tempPackagesDir,
-                    filePermissionSetter: null, new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir),
+                    filePermissionSetter: null, new FirstPartyNuGetPackageSigningVerifier(),
                     new NullLogger(), restoreActionConfig: restoreActionConfig);
             }
 

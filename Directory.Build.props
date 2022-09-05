@@ -10,7 +10,7 @@
     <!-- Default to all packages generating a corresponding symbol package -->
     <IncludeSymbols>true</IncludeSymbols>
     <IsShippingPackage>false</IsShippingPackage>
-    <SdkTargetFramework>net6.0</SdkTargetFramework>
+    <SdkTargetFramework>net7.0</SdkTargetFramework>
     <ToolsetTargetFramework>$(SdkTargetFramework)</ToolsetTargetFramework>
 
     <!-- Disable implict package target fallback, and disable warning for when we explicitly add it (currently needed for
@@ -21,12 +21,18 @@
     <!-- <ArtifactsShippingSymbolsDir>$(ArtifactsDir)symbols\$(Configuration)\Shipping</ArtifactsShippingSymbolsDir> -->
 
     <DefineConstants Condition="'$(ContinuousIntegrationBuild)' == 'true'">$(DefineConstants);CI_BUILD</DefineConstants>
+    <DefineConstants Condition="'$(OfficialBuilder)' == 'Microsoft'">$(DefineConstants);MICROSOFT_ENABLE_TELEMETRY</DefineConstants>
+    <DefineConstants Condition="'$(DotNetBuildFromSource)' == 'true'">$(DefineConstants);DOT_NET_BUILD_FROM_SOURCE</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GenerateProgramFile>false</GenerateProgramFile>
     <!-- <TestRunnerAdditionalArguments>-parallel none</TestRunnerAdditionalArguments> -->
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyInformationCachePaths Condition="Exists('$(NetCoreRoot)sdk\$(NetCoreSdkVersion)\SdkPrecomputedAssemblyReferences.cache')">$(AssemblyInformationCachePaths);$(NetCoreRoot)sdk\$(NetCoreSdkVersion)\SDKPrecomputedAssemblyReferences.cache</AssemblyInformationCachePaths>
   </PropertyGroup>
 
   <Import Project="build/GenerateResxSource.targets" />

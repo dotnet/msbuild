@@ -1164,9 +1164,9 @@ For more information on this deploy script visit:	https://go.microsoft.com/fwlin
     <value>Publishing {0} to {1}...</value>
     <comment>{0} - Path of zip to publish, {1} - URL to deploy zip</comment>
   </data>
-  <data name="ZIPDEPLOY_FailedDeploy" xml:space="preserve">
-    <value>The attempt to publish the ZIP file through {0} failed with HTTP status code {1}.</value>
-    <comment>{0} - URL to deploy zip, {1} - HTTP response code</comment>
+  <data name="ZIPDEPLOY_FailedDeployWithLogs" xml:space="preserve">
+    <value>The attempt to publish the ZIP file through '{0}' failed with HTTP status code '{1}'. See the logs at '{2}'.</value>
+    <comment>{0} - URL to deploy zip, {1} - HTTP response code, {2} - Logs URL</comment>
   </data>
   <data name="ZIPDEPLOY_FailedToRetrieveCred" xml:space="preserve">
     <value>Failed to retrieve credentials.</value>
@@ -1198,5 +1198,9 @@ For more information on this deploy script visit:	https://go.microsoft.com/fwlin
   </data>
   <data name="ZIPDEPLOY_Uploaded" xml:space="preserve">
     <value>Uploaded the Zip file to the target.</value>
+  </data>
+  <data name="ZIPDEPLOY_FailedDeploy" xml:space="preserve">
+    <value>The attempt to publish the ZIP file through '{0}' failed with HTTP status code '{1}'.</value>
+    <comment>{0} - URL to deploy zip, {1} - HTTP response code</comment>
   </data>
 </root>

@@ -2,9 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools.Tool.Run;
+using System.Collections.Generic;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Run.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -16,6 +15,8 @@ namespace Microsoft.DotNet.Cli
             Description = LocalizableStrings.CommandNameArgumentDescription
         };
 
+        public static readonly Argument<IEnumerable<string>> CommandArgument = new Argument<IEnumerable<string>>("toolArguments", "arguments forwarded to the tool");
+       
         private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
@@ -28,7 +29,7 @@ namespace Microsoft.DotNet.Cli
             var command = new Command("run", LocalizableStrings.CommandDescription);
 
             command.AddArgument(CommandNameArgument);
-            command.TreatUnmatchedTokensAsErrors = false;
+            command.AddArgument(CommandArgument);
 
             command.SetHandler((parseResult) => new ToolRunCommand(parseResult).Execute());
 

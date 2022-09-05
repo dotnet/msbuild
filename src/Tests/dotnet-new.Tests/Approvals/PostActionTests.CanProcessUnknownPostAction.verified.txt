@@ -1,0 +1,8 @@
+﻿The template "TestAssets.PostActions.UnknownPostAction" was created successfully.
+
+Processing post-creation actions...
+The post action 210d431b-a78b-4d2f-b762-4ed3e3ea9027 is not supported.
+Description: This is not defined post action.
+Manual instructions: Run setup.cmd script manually.
+
+For details on the exit code, refer to https://aka.ms/templating-exit-codes#105

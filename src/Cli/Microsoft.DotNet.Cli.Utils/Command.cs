@@ -188,6 +188,12 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public string CommandArgs => _process.StartInfo.Arguments;
 
+        public ICommand SetCommandArgs(string commandArgs)
+        {
+            _process.StartInfo.Arguments = commandArgs;
+            return this;
+        }
+
         private string FormatProcessInfo(ProcessStartInfo info)
         {
             if (string.IsNullOrWhiteSpace(info.Arguments))
@@ -200,13 +206,13 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private void EnsureStdOut()
         {
-            _stdOut = _stdOut ?? new StreamForwarder();
+            _stdOut ??= new StreamForwarder();
             _process.StartInfo.RedirectStandardOutput = true;
         }
 
         private void EnsureStdErr()
         {
-            _stdErr = _stdErr ?? new StreamForwarder();
+            _stdErr ??= new StreamForwarder();
             _process.StartInfo.RedirectStandardError = true;
         }
 

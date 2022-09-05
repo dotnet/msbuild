@@ -1,0 +1,11 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "Invalid.SameShortName.TemplateA",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "Invalid.SameShortName.TemplateA",
+  "precedence": "100",
+  "identity": "Invalid.SameShortName.TemplateA",
+  "shortName": "sameshortname",
+  "sourceName": "bar",
+}

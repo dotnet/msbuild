@@ -570,11 +570,13 @@ EndGlobal
                 .Should().BeVisuallyEquivalentTo(expectedSlnContents);
         }
 
-        [Fact]
-        public void WhenDirectoryContainingProjectIsGivenProjectIsAdded()
+        [Theory]
+        [InlineData("TestAppWithSlnAndCsprojFiles")]
+        [InlineData("TestAppWithSlnAnd472CsprojFiles")]
+        public void WhenDirectoryContainingProjectIsGivenProjectIsAdded(string testAsset)
         {
             var projectDirectory = _testAssetsManager
-                .CopyTestAsset("TestAppWithSlnAndCsprojFiles")
+                .CopyTestAsset(testAsset)
                 .WithSource()
                 .Path;
 

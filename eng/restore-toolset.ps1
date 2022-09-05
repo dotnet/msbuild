@@ -21,8 +21,9 @@ function InitializeCustomSDKToolset {
   InstallDotNetSharedFramework "2.2.8"
   InstallDotNetSharedFramework "3.1.0"
   InstallDotNetSharedFramework "5.0.0"
+  InstallDotNetSharedFramework "6.0.0"
 
-  CreateBuildEnvScript
+  CreateBuildEnvScripts
   InstallNuget
 }
 
@@ -36,14 +37,13 @@ function InstallNuGet {
   }
 }
 
-function CreateBuildEnvScript()
+function CreateBuildEnvScripts()
 {
   Create-Directory $ArtifactsDir
   $scriptPath = Join-Path $ArtifactsDir "sdk-build-env.bat"
   $scriptContents = @"
 @echo off
 title SDK Build ($RepoRoot)
-set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 set DOTNET_MULTILEVEL_LOOKUP=0
 
 set DOTNET_ROOT=$env:DOTNET_INSTALL_DIR
@@ -53,6 +53,27 @@ set PATH=$env:DOTNET_INSTALL_DIR;%PATH%
 set NUGET_PACKAGES=$env:NUGET_PACKAGES
 
 DOSKEY killdotnet=taskkill /F /IM dotnet.exe /T ^& taskkill /F /IM VSTest.Console.exe /T ^& taskkill /F /IM msbuild.exe /T
+"@
+
+  Out-File -FilePath $scriptPath -InputObject $scriptContents -Encoding ASCII
+
+  Create-Directory $ArtifactsDir
+  $scriptPath = Join-Path $ArtifactsDir "sdk-build-env.ps1"
+  $scriptContents = @"
+`$host.ui.RawUI.WindowTitle = "SDK Build ($RepoRoot)"
+`$env:DOTNET_MULTILEVEL_LOOKUP=0
+
+`$env:DOTNET_ROOT="$env:DOTNET_INSTALL_DIR"
+`$env:DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR="$env:DOTNET_INSTALL_DIR"
+
+`$env:PATH="$env:DOTNET_INSTALL_DIR;" + `$env:PATH
+`$env:NUGET_PACKAGES="$env:NUGET_PACKAGES"
+
+function killdotnet {
+  taskkill /F /IM dotnet.exe /T
+  taskkill /F /IM VSTest.Console.exe /T
+  taskkill /F /IM msbuild.exe /T
+}
 "@
 
   Out-File -FilePath $scriptPath -InputObject $scriptContents -Encoding ASCII

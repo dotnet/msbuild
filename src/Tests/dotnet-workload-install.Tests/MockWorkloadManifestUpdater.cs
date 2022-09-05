@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             return _manifestUpdates;
         }
 
-        public Task<IEnumerable<WorkloadDownload>> GetManifestPackageDownloadsAsync(bool includePreviews)
+        public Task<IEnumerable<WorkloadDownload>> GetManifestPackageDownloadsAsync(bool includePreviews, SdkFeatureBand providedSdkFeatureBand, SdkFeatureBand installedSdkFeatureBand)
         {
             GetManifestPackageDownloadsCallCount++;
             return Task.FromResult<IEnumerable<WorkloadDownload>>(new List<WorkloadDownload>()

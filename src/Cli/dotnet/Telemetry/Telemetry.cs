@@ -23,7 +23,6 @@ namespace Microsoft.DotNet.Cli.Telemetry
         private Task _trackEventTask = null;
 
         private const string InstrumentationKey = "74cc1c9e-3e6e-4d05-b3fc-dde9101d0254";
-        private const string TelemetryOptout = "DOTNET_CLI_TELEMETRY_OPTOUT";
 
         public bool Enabled { get; }
 
@@ -49,7 +48,8 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 environmentProvider = new EnvironmentProvider();
             }
 
-            Enabled = !environmentProvider.GetEnvironmentVariableAsBool(TelemetryOptout, false) && PermissionExists(sentinel);
+            Enabled = !environmentProvider.GetEnvironmentVariableAsBool(EnvironmentVariableNames.TELEMETRY_OPTOUT, defaultValue: CompileOptions.TelemetryOptOutDefault)
+                        && PermissionExists(sentinel);
 
             if (!Enabled)
             {
@@ -115,6 +115,16 @@ namespace Microsoft.DotNet.Cli.Telemetry
             _trackEventTask.Wait();
         }
 
+        // Adding dispose on graceful shutdown per https://github.com/microsoft/ApplicationInsights-dotnet/issues/1152#issuecomment-518742922
+        public void Dispose()
+        {
+            if (_client != null)
+            {
+                _client.TelemetryConfiguration.Dispose();
+                _client = null;
+            }
+        }
+
         public void ThreadBlockingTrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)
         {
             if (!Enabled)
@@ -130,9 +140,10 @@ namespace Microsoft.DotNet.Cli.Telemetry
             {
                 var persistenceChannel = new PersistenceChannel.PersistenceChannel(sendersCount: _senderCount);
                 persistenceChannel.SendingInterval = TimeSpan.FromMilliseconds(1);
-                TelemetryConfiguration.Active.TelemetryChannel = persistenceChannel;
 
-                _client = new TelemetryClient();
+                var config = TelemetryConfiguration.CreateDefault();
+                config.TelemetryChannel = persistenceChannel;
+                _client = new TelemetryClient(config);
                 _client.InstrumentationKey = InstrumentationKey;
                 _client.Context.Session.Id = CurrentSessionId;
                 _client.Context.Device.OperatingSystem = RuntimeEnvironment.OperatingSystem;

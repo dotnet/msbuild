@@ -41,7 +41,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.targets"
           Condition="'$(IsCrossTargetingBuild)' != 'true'"/>
 
-  <Import Project="$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Compatibility.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.ApiCompat.targets" />
 
   <!-- Import targets from NuGet.Build.Tasks.Pack package/Sdk -->
   <PropertyGroup Condition="'$(NuGetBuildTasksPackTargets)' == '' AND '$(ImportNuGetBuildTasksPackTargetsFromSdk)' != 'false'">

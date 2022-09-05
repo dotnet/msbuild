@@ -17,10 +17,10 @@ namespace Microsoft.DotNet.Cli
             Console.WriteLine(reparsed.Diagram());
 
 
-            if (reparsed.UnparsedTokens.Any())
+            if (reparsed.UnmatchedTokens.Any())
             {
-                Console.WriteLine("Unparsed Tokens: ");
-                Console.WriteLine(string.Join(" ", reparsed.UnparsedTokens));
+                Console.WriteLine("Unmatched Tokens: ");
+                Console.WriteLine(string.Join(" ", reparsed.UnmatchedTokens));
             }
 
             var optionValuesToBeForwarded = reparsed.OptionValuesToBeForwarded(ParseCommandParser.GetCommand());

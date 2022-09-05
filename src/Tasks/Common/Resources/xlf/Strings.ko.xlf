@@ -7,6 +7,11 @@
         <target state="translated">NETSDK1076: AddResource는 정수 리소스 형식에만 사용할 수 있습니다.</target>
         <note>{StrBegin="NETSDK1076: "}</note>
       </trans-unit>
+      <trans-unit id="AotNoValidRuntimePackageError">
+        <source>NETSDK1183: Unable to optimize assemblies for Ahead of time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing. When targeting .NET 7 or higher, make sure to restore packages with the PublishAot property set to true.</source>
+        <target state="translated">NETSDK1183: Ahead of Time 컴파일을 위해 어셈블리를 최적화할 수 없습니다. 유효한 런타임 패키지를 찾을 수 없습니다. PublishAot 속성을 false로 설정하거나 게시할 때 지원되는 런타임 식별자를 사용하세요. .NET 7 이상을 대상으로 하는 경우 PublishAot 속성이 true로 설정된 패키지를 복원해야 합니다.</target>
+        <note>{StrBegin="NETSDK1183: "}</note>
+      </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
         <source>NETSDK1070: The application configuration file must have root configuration element.</source>
         <target state="translated">NETSDK1070: 애플리케이션 구성 파일에는 루트 구성 요소가 있어야 합니다.</target>
@@ -449,9 +454,14 @@
         <target state="translated">NETSDK1102: 선택한 게시 구성에서는 크기에 대한 어셈블리 최적화가 지원되지 않습니다. 자체 포함 앱을 게시하고 있는지 확인하세요.</target>
         <note>{StrBegin="NETSDK1102: "}</note>
       </trans-unit>
-      <trans-unit id="ILLink_Info">
-        <source>Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
-        <target state="new">Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</target>
+      <trans-unit id="ILLinkOptimizedAssemblies">
+        <source>Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
+        <target state="translated">크기에 맞게 어셈블리를 최적화하면 앱의 동작이 변경될 수 있습니다. 퍼블리싱 후 꼭 테스트 해보세요. 참조: https://aka.ms/dotnet-illink</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ILLinkRunning">
+        <source>Optimizing assemblies for size. This process might take a while.</source>
+        <target state="translated">크기에 맞게 어셈블리 최적화. 이 프로세스는 시간이 걸릴 수 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
@@ -508,8 +518,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1173: "}</note>
       </trans-unit>
       <trans-unit id="InvalidTypeLibraryId">
-        <source>NETSDK1170: The provided type library ID '{0}' for type libary '{1}' is invalid. The ID must be a positive integer less than 65536.</source>
-        <target state="needs-review-translation">NETSDK1170: '{1}' 형식 라이브러리에 대해 제공된 형식 라이브러리 ID '{0}'이(가) 잘못되었습니다. ID는 65536보다 작은 양의 정수여야 합니다.</target>
+        <source>NETSDK1170: The provided type library ID '{0}' for type library '{1}' is invalid. The ID must be a positive integer less than 65536.</source>
+        <target state="translated">NETSDK1170: '{1}' 형식 라이브러리에 대해 제공된 형식 라이브러리 ID '{0}'이(가) 잘못되었습니다. ID는 65536보다 작은 양의 정수여야 합니다.</target>
         <note>{StrBegin="NETSDK1170: "}</note>
       </trans-unit>
       <trans-unit id="JitLibraryNotFound">
@@ -640,6 +650,16 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1146: PackAsTool은 설정 중인 TargetPlatformIdentifier를 지원하지 않습니다. 예를 들어, TargetFramework는 net5.0-windows를 사용할 수 없으며 net5.0만 지원합니다. 또한 PackAsTool은 .NET 5 이상을 대상으로 하는 경우 UseWPF 또는 UseWindowsForms를 지원하지 않습니다.</target>
         <note>{StrBegin="NETSDK1146: "}</note>
       </trans-unit>
+      <trans-unit id="PackageContainsIncorrectlyCasedLocale">
+        <source>NETSDK1187: Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</source>
+        <target state="translated">NETSDK1187: 패키지 {0} {1}에 로캘이 '{2}'인 리소스가 있습니다. 이 로캘은 빌드에서 대/소문자 문제를 방지하기 위해 표준 형식 '{3}'(으)로 정규화되었습니다. 패키지 작성자에게 이 대/소문자 문제에 대해 알리는 것이 좋습니다.</target>
+        <note>Error code is NETSDK1187. 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
+      </trans-unit>
+      <trans-unit id="PackageContainsUnknownLocale">
+        <source>NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</source>
+        <target state="translated">NETSDK1188: 패키지 {0} {1}에는 로캘이 '{2}'인 리소스가 있습니다. 이 로캘은 .NET에서 인식할 수 없습니다. 패키지 작성자에게 잘못된 로캘을 사용하는 것 같다고 알리는 것이 좋습니다.</target>
+        <note>Error code is NETSDK1188. 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
+      </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
         <target state="translated">NETSDK1064: 패키지 {0}, 버전 {1}을(를) 찾을 수 없습니다. NuGet 복원 이후 삭제되었을 수 있습니다. 아니면, 최대 경로 길이 제한으로 인해 NuGet 복원이 부분적으로만 완료되었을 수 있습니다.</target>
@@ -706,8 +726,8 @@ The following are names of parameters or literal values and should not be transl
         <note />
       </trans-unit>
       <trans-unit id="ReadyToRunNoValidRuntimePackageError">
-        <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing.</source>
-        <target state="needs-review-translation">NETSDK1094: 성능을 위해 어셈블리를 최적화할 수 없습니다. 유효한 런타임 패키지를 찾을 수 없습니다. PublishReadyToRun 속성을 false로 설정하거나 게시할 때 지원되는 런타임 식별자를 사용하세요. .NET 6 이상을 대상으로 하는 경우 PublishReadyToRun 속성이 true로 설정된 패키지를 복원해야 합니다.</target>
+        <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing. When targeting .NET 6 or higher, make sure to restore packages with the PublishReadyToRun property set to true.</source>
+        <target state="translated">NETSDK1094: 성능을 위해 어셈블리를 최적화할 수 없습니다. 유효한 런타임 패키지를 찾을 수 없습니다. PublishReadyToRun 속성을 false로 설정하거나 게시할 때 지원되는 런타임 식별자를 사용하세요. .NET 6 이상을 대상으로 하는 경우 PublishReadyToRun 속성이 true로 설정된 패키지를 복원해야 합니다.</target>
         <note>{StrBegin="NETSDK1094: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunTargetNotSupportedError">
@@ -741,9 +761,9 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1112: "}</note>
       </trans-unit>
       <trans-unit id="RuntimePackNotRestored_TransitiveDisabled">
-        <source>NETSDK1184: The Runtime Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
-        <target state="needs-review-translation">NETSDK1185: FrameworkReference '{0}'용 런타임 팩을 사용할 수 없습니다. DisableTransitiveFrameworkReferenceDownloads가 true로 설정되었기 때문일 수 있습니다.</target>
-        <note>{StrBegin="NETSDK1184: "}</note>
+        <source>NETSDK1185: The Runtime Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
+        <target state="translated">NETSDK1185: FrameworkReference '{0}'용 런타임 팩을 사용할 수 없습니다. DisableTransitiveFrameworkReferenceDownloads가 true로 설정되었기 때문일 수 있습니다.</target>
+        <note>{StrBegin="NETSDK1185: "}</note>
       </trans-unit>
       <trans-unit id="SelfContainedExeCannotReferenceNonSelfContained">
         <source>NETSDK1150: The referenced project '{0}' is a non self-contained executable.  A non self-contained executable cannot be referenced by a self-contained executable.  For more information, see https://aka.ms/netsdk1150</source>
@@ -781,9 +801,9 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1127: "}</note>
       </trans-unit>
       <trans-unit id="TargetingPackNotRestored_TransitiveDisabled">
-        <source>NETSDK1183: The Targeting Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
-        <target state="needs-review-translation">NETSDK1184: FrameworkReference '{0}'에 대한 대상 지정 팩을 사용할 수 없습니다. DisableTransitiveFrameworkReferenceDownloads가 true로 설정되었기 때문일 수 있습니다.</target>
-        <note>{StrBegin="NETSDK1183: "}</note>
+        <source>NETSDK1184: The Targeting Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
+        <target state="translated">NETSDK1184: FrameworkReference '{0}'에 대한 대상 지정 팩을 사용할 수 없습니다. DisableTransitiveFrameworkReferenceDownloads가 true로 설정되었기 때문일 수 있습니다.</target>
+        <note>{StrBegin="NETSDK1184: "}</note>
       </trans-unit>
       <trans-unit id="TrimmingWindowsFormsIsNotSupported">
         <source>NETSDK1175: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</source>
@@ -821,9 +841,9 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1073: "}</note>
       </trans-unit>
       <trans-unit id="UnknownFrameworkReference_MauiEssentials">
-        <source>NETSDK1185: This project depends on Maui Essentials through a project or NuGet package reference, but doesn't declare that dependency explicitly. To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</source>
-        <target state="needs-review-translation">NETSDK1186: 이 프로젝트는 프로젝트 또는 NuGet 패키지 참조를 통해 Maui Essentials에 종속되지만 해당 종속성을 명시적으로 선언하지 않습니다. 이 프로젝트를 빌드하려면 UseMauiEssentials 속성을 true로 설정해야 합니다(필요한 경우 Maui 워크로드 설치).</target>
-        <note>{StrBegin="NETSDK1185: "}</note>
+        <source>NETSDK1186: This project depends on Maui Essentials through a project or NuGet package reference, but doesn't declare that dependency explicitly. To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</source>
+        <target state="translated">NETSDK1186: 이 프로젝트는 프로젝트 또는 NuGet 패키지 참조를 통해 Maui Essentials에 종속되지만 해당 종속성을 명시적으로 선언하지 않습니다. 이 프로젝트를 빌드하려면 UseMauiEssentials 속성을 true로 설정해야 합니다(필요한 경우 Maui 워크로드 설치).</target>
+        <note>{StrBegin="NETSDK1186: "}</note>
       </trans-unit>
       <trans-unit id="UnnecessaryWindowsDesktopSDK">
         <source>NETSDK1137: It is no longer necessary to use the Microsoft.NET.Sdk.WindowsDesktop SDK. Consider changing the Sdk attribute of the root Project element to 'Microsoft.NET.Sdk'.</source>
@@ -871,8 +891,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1107: "}</note>
       </trans-unit>
       <trans-unit id="UsingPreviewSdk_Info">
-        <source>You are using a preview version of .NET. See: https://aka.ms/dotnet-core-preview</source>
-        <target state="needs-review-translation">NETSDK1057: .NET의 미리 보기 버전을 사용하고 있습니다. 참조: https://aka.ms/dotnet-support-policy</target>
+        <source>NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</source>
+        <target state="translated">NETSDK1057: .NET의 미리 보기 버전을 사용하고 있습니다. 참조: https://aka.ms/dotnet-support-policy</target>
         <note />
       </trans-unit>
       <trans-unit id="WinMDObjNotSupportedOnTargetFramework">

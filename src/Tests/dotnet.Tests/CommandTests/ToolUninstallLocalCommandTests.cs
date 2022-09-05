@@ -69,15 +69,15 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             _fileSystem.File.Delete(_manifestFilePath);
             Action a = () => _defaultToolUninstallLocalCommand.Execute().Should().Be(0);
 
-            a.ShouldThrow<GracefulException>()
+            a.Should().Throw<GracefulException>()
                .And.Message.Should()
                .Contain(Tools.Tool.Common.LocalizableStrings.NoManifestGuide);
 
-            a.ShouldThrow<GracefulException>()
+            a.Should().Throw<GracefulException>()
                 .And.Message.Should()
                 .Contain(ToolManifest.LocalizableStrings.CannotFindAManifestFile);
 
-            a.ShouldThrow<GracefulException>()
+            a.Should().Throw<GracefulException>()
                 .And.VerboseMessage.Should().Contain(string.Format(ToolManifest.LocalizableStrings.ListOfSearched, ""));
         }
 
@@ -89,7 +89,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             Action a = () => _defaultToolUninstallLocalCommand.Execute().Should().Be(0);
 
-            a.ShouldThrow<GracefulException>()
+            a.Should().Throw<GracefulException>()
                .And.Message.Should()
                .Contain(string.Format(LocalizableStrings.NoManifestFileContainPackageId, _packageIdDotnsay));
         }
