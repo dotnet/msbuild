@@ -32,7 +32,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         protected internal virtual IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings)
         {
-            return GetCompletions(context);
+#pragma warning disable SA1100 // Do not prefix calls with base unless local implementation exists
+            return base.GetCompletions(context);
+#pragma warning restore SA1100 // Do not prefix calls with base unless local implementation exists
         }
 
         protected IEngineEnvironmentSettings CreateEnvironmentSettings(GlobalArgs args, ParseResult parseResult)
