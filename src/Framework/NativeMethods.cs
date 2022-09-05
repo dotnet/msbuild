@@ -478,15 +478,21 @@ internal static class NativeMethods
 
     public static int GetLogicalCoreCount()
     {
+        int numberOfCpus = Environment.ProcessorCount;
 #if !MONO
         // .NET Core on Windows returns a core count limited to the current NUMA node
         //     https://github.com/dotnet/runtime/issues/29686
         if (IsWindows)
         {
-            return GetLogicalCoreCountOnWindows();
+            var result = GetLogicalCoreCountOnWindows();
+
+            if (result != 0)
+            {
+                numberOfCpus = result;
+            }
         }
 #endif
-        return Environment.ProcessorCount;
+        return numberOfCpus;
     }
 
     /// <summary>
