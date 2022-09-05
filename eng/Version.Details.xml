@@ -68,11 +68,11 @@
     </Dependency>
     <Dependency Name="Microsoft.Build" Version="17.3.1">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>2badb37d109910fbd3155cf8743224b7a27494d8</Sha>
+      <Sha>80f618ad45d38475773fd1a6eaa059f118a0ad5a</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build.Localization" Version="17.3.1-preview-22415-01">
+    <Dependency Name="Microsoft.Build.Localization" Version="17.3.1-preview-22451-04">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>2badb37d109910fbd3155cf8743224b7a27494d8</Sha>
+      <Sha>80f618ad45d38475773fd1a6eaa059f118a0ad5a</Sha>
     </Dependency>
     <Dependency Name="Microsoft.FSharp.Compiler" Version="12.0.4-beta.22410.1">
       <Uri>https://github.com/dotnet/fsharp</Uri>
@@ -129,9 +129,9 @@
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>222ff7a5329be15520034b76fa1a84098d2ae9fd</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Test.Sdk" Version="17.3.0">
+    <Dependency Name="Microsoft.NET.Test.Sdk" Version="17.3.1">
       <Uri>https://github.com/microsoft/vstest</Uri>
-      <Sha>c7ba2ca721808f830482ace6be06ae93077e0e7b</Sha>
+      <Sha>83d2f8162d29a66a8ff323c4bba93c8250013511</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="6.0.200-1.22219.3">
       <Uri>https://github.com/dotnet/linker</Uri>
