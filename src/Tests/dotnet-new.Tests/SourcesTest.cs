@@ -1,18 +1,13 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.IO;
-using System.Linq;
-using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using Microsoft.TemplateEngine.TestHelper;
-using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.New.Tests
+namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
-    public class SourcesTest : SdkTest
+    public class SourcesTest : BaseIntegrationTest
     {
         private readonly ITestOutputHelper _log;
 
@@ -24,9 +19,9 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void EnsureItsPossibleToIncludePackagesLockJson()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("SourceWithExcludeAndWithout", _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate("SourceWithExcludeAndWithout", _log, home, workingDirectory);
             new DotnetNewCommand(_log, "withexclude")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
@@ -37,7 +32,7 @@ namespace Microsoft.DotNet.New.Tests
                 new[] { "packages.lock.json", "foo.cs", "bar.cs" }.OrderBy(s => s),
                 Directory.EnumerateFiles(workingDirectory, "*", SearchOption.AllDirectories).Select(Path.GetFileName).OrderBy(s => s));
 
-            workingDirectory = TestUtils.CreateTemporaryFolder();
+            workingDirectory = CreateTemporaryFolder();
             new DotnetNewCommand(_log, "withoutexclude")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)

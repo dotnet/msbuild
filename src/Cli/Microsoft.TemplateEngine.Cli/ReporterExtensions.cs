@@ -18,7 +18,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// <param name="reporter"></param>
         /// <param name="command"></param>
         /// <param name="indentLevel"></param>
-        internal static void WriteCommand(this Reporter reporter, string command, int indentLevel = 0)
+        internal static void WriteCommand(this IReporter reporter, string command, int indentLevel = 0)
         {
             reporter.WriteLine(command.Indent(indentLevel + 1));
         }
@@ -45,7 +45,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// <summary>
         /// Writes string <paramref name="output"/> formatted as standard output.
         /// </summary>
-        internal static void WriteStdOut(this Reporter reporter, string output)
+        internal static void WriteStdOut(this IReporter reporter, string output)
         {
             reporter.WriteLine("StdOut:");
             reporter.WriteLine(string.IsNullOrWhiteSpace(output) ? LocalizableStrings.Generic_Empty : output);
@@ -54,7 +54,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// <summary>
         /// Writes string <paramref name="output"/> formatted as standard error.
         /// </summary>
-        internal static void WriteStdErr(this Reporter reporter, string output)
+        internal static void WriteStdErr(this IReporter reporter, string output)
         {
             reporter.WriteLine("StdErr:");
             reporter.WriteLine(string.IsNullOrWhiteSpace(output) ? LocalizableStrings.Generic_Empty : output);

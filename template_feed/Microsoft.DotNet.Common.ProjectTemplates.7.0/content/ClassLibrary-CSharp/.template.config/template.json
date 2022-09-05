@@ -90,7 +90,7 @@
       "generator": "regexMatch",
       "datatype": "bool",
       "parameters": {
-        "pattern": "^(|10\\.0|10|preview|latest|default|latestMajor)$",
+        "pattern": "^(|11|11\\.0|10\\.0|10|preview|latest|default|latestMajor)$",
         "source": "langVersion"
       }
     },
@@ -99,7 +99,7 @@
       "generator": "regexMatch",
       "datatype": "bool",
       "parameters": {
-        "pattern": "^(|8|8\\.0|9|9\\.0|10\\.0|10|preview|latest|default|latestMajor)$",
+        "pattern": "^(|8|8\\.0|9|9\\.0|10\\.0|10|11|11\\.0|preview|latest|default|latestMajor)$",
         "source": "langVersion"
       }
     },

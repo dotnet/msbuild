@@ -183,6 +183,11 @@ If command is specified without the argument, it lists all the template packages
         <target state="translated">Фильтрация шаблонов по идентификатору пакета NuGet.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Option_ProjectPath">
+        <source>The project that should be used for context evaluation.</source>
+        <target state="new">The project that should be used for context evaluation.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Option_TagFilter">
         <source>Filters the templates based on the tag.</source>
         <target state="translated">Фильтрация шаблонов по тегу.</target>

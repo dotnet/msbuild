@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         public void GivenNonWindowsMachineWhenCallWithWpfDllItCanCreateShimWithoutThrow()
         {
             Action a = () => CreateApphostAndReturnShimPath();
-            a.ShouldNotThrow("It should skip copying PE bits without throw");
+            a.Should().NotThrow("It should skip copying PE bits without throw");
         }
 
         private static string CreateApphostAndReturnShimPath()

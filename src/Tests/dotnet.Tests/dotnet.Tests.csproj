@@ -155,7 +155,6 @@
     <ProjectReference Include="..\..\Cli\Microsoft.DotNet.Cli.Sln.Internal\Microsoft.DotNet.Cli.Sln.Internal.csproj" />
     <ProjectReference Include="..\..\Cli\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
     <ProjectReference Include="..\Msbuild.Tests.Utilities\Msbuild.Tests.Utilities.csproj" />
-    <ProjectReference Include="..\Microsoft.TemplateEngine.TestHelper\Microsoft.TemplateEngine.TestHelper.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -163,6 +162,7 @@
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <PackageReference Include="Microsoft.Build.Tasks.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Mocks" Version="$(MicrosoftTemplateEngineMocksPackageVersion)" />
+    <PackageReference Include="Microsoft.TemplateEngine.TestHelper" Version="$(MicrosoftTemplateEngineTestHelperPackageVersion)" />
     <!-- This package comes from dotnet/runtime-assets -->
     <PackageReference Include="Microsoft.DotNet.Installer.Windows.Security.TestData" Version="$(MicrosoftDotNetInstallerWindowsSecurityTestDataPackageVersion)" GeneratePathProperty="true" />
   </ItemGroup>

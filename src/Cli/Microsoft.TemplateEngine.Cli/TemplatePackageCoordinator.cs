@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Parsing;
+using System.ComponentModel.DataAnnotations;
+using System.Runtime.CompilerServices;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Constraints;
@@ -23,18 +26,15 @@ namespace Microsoft.TemplateEngine.Cli
     /// </summary>
     internal class TemplatePackageCoordinator
     {
-        private readonly ITelemetryLogger _telemetryLogger;
         private readonly IEngineEnvironmentSettings _engineEnvironmentSettings;
         private readonly TemplatePackageManager _templatePackageManager;
         private readonly TemplateConstraintManager _constraintsManager;
         private readonly HostSpecificDataLoader _hostSpecificDataLoader;
 
         internal TemplatePackageCoordinator(
-            ITelemetryLogger telemetryLogger,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager)
         {
-            _telemetryLogger = telemetryLogger ?? throw new ArgumentNullException(nameof(telemetryLogger));
             _engineEnvironmentSettings = environmentSettings ?? throw new ArgumentNullException(nameof(environmentSettings));
             _templatePackageManager = templatePackageManager ?? throw new ArgumentNullException(nameof(templatePackageManager));
             _constraintsManager = new TemplateConstraintManager(_engineEnvironmentSettings);
@@ -64,7 +64,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             catch (Exception)
             {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Error_PackageForTemplateNotFound, args.Template.Identity));
+                Reporter.Error.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Error_PackageForTemplateNotFound, args.Template.Identity);
                 return null;
             }
 
@@ -90,7 +90,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             catch (Exception)
             {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Error_PackageForTemplateNotFound, template.Identity));
+                Reporter.Error.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Error_PackageForTemplateNotFound, template.Identity);
                 return default;
             }
 
@@ -140,7 +140,7 @@ namespace Microsoft.TemplateEngine.Cli
                 if (!versionCheckResult.IsLatestVersion)
                 {
                     string displayString = $"{versionCheckResult.TemplatePackage?.Identifier}::{versionCheckResult.TemplatePackage?.Version}";         // the package::version currently installed
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateAvailable, displayString));
+                    Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateAvailable, displayString);
 
                     Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateSingleCommandHeader);
                     Reporter.Output.WriteCommand(
@@ -160,11 +160,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         internal void DisplayBuiltInPackagesCheckResult(string packageId, string version, string provider, ICommandArgs args)
         {
-            Reporter.Output.WriteLine(
-                string.Format(
-                    LocalizableStrings.TemplatePackageCoordinator_BuiltInCheck_Info_BuiltInPackageAvailable,
-                    $"{packageId}::{version}",
-                    provider));
+            Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_BuiltInCheck_Info_BuiltInPackageAvailable, $"{packageId}::{version}", provider);
             Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_BuiltInCheck_Info_UninstallPackage);
             Reporter.Output.WriteCommand(
                 Example
@@ -188,7 +184,7 @@ namespace Microsoft.TemplateEngine.Cli
             InitializeNuGetCredentialService(args.Interactive);
 
             NewCommandStatus resultStatus = NewCommandStatus.Success;
-            _telemetryLogger.TrackEvent(args.RootCommand.Name + TelemetryConstants.InstallEventSuffix, new Dictionary<string, string?> { { TelemetryConstants.ToInstallCount, args.TemplatePackages.Count.ToString() } });
+            TelemetryEventEntry.TrackEvent(TelemetryConstants.InstallEvent, new Dictionary<string, string?> { { TelemetryConstants.ToInstallCount, args.TemplatePackages.Count.ToString() } });
 
             var details = new Dictionary<string, string>();
             if (args.AdditionalSources?.Count > 0)
@@ -229,7 +225,7 @@ namespace Microsoft.TemplateEngine.Cli
                 {
                     continue;
                 }
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Install_Error_SameInstallRequests, installRequest.PackageIdentifier));
+                Reporter.Error.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Install_Error_SameInstallRequests, installRequest.PackageIdentifier);
                 return NewCommandStatus.InstallFailed;
             }
 
@@ -348,14 +344,11 @@ namespace Microsoft.TemplateEngine.Cli
                 {
                     if (uninstallResult.Success)
                     {
-                        Reporter.Output.WriteLine(
-                            string.Format(
-                                LocalizableStrings.TemplatePackageCoordinator_Uninstall_Info_Success,
-                                uninstallResult.TemplatePackage.DisplayName));
+                        Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Uninstall_Info_Success, uninstallResult.TemplatePackage.DisplayName);
                     }
                     else
                     {
-                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Uninstall_Error_GenericError, uninstallResult.TemplatePackage.DisplayName, uninstallResult.ErrorMessage));
+                        Reporter.Error.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Uninstall_Error_GenericError, uninstallResult.TemplatePackage.DisplayName, uninstallResult.ErrorMessage);
                         result = NewCommandStatus.InstallFailed;
                     }
                 }
@@ -373,10 +366,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             catch (Exception ex)
             {
-                Reporter.Verbose.WriteLine(
-                    string.Format(
-                        LocalizableStrings.TemplatePackageCoordinator_Verbose_NuGetCredentialServiceError,
-                        ex.ToString()));
+                Reporter.Verbose.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Verbose_NuGetCredentialServiceError, ex.ToString());
             }
         }
 
@@ -414,14 +404,12 @@ namespace Microsoft.TemplateEngine.Cli
 
                 if (!args.Force)
                 {
-                    Option forceOption = SharedOptionsFactory.CreateForceOption();
-
-                    reporter.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Install_Info_UseForceToOverride, forceOption.Aliases.First()));
+                    reporter.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Install_Info_UseForceToOverride, SharedOptions.ForceOption.Aliases.First());
                     reporter.WriteCommand(
                         Example
                             .For<InstallCommand>(args.ParseResult)
                             .WithArgument(InstallCommand.NameArgument, installRequests.Select(ir => ir.DisplayName).ToArray())
-                            .WithOption(forceOption));
+                            .WithOption(SharedOptions.ForceOption));
                     return false;
                 }
             }
@@ -502,10 +490,7 @@ namespace Microsoft.TemplateEngine.Cli
                     var managedPackages = packages.OfType<IManagedTemplatePackage>();
                     if (managedPackages.Any())
                     {
-                        Reporter.Error.WriteLine(
-                              string.Format(
-                                  LocalizableStrings.TemplatePackageCoordinator_Error_TemplateIncludedToPackages,
-                                  notFoundPackage));
+                        Reporter.Error.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Error_TemplateIncludedToPackages, notFoundPackage);
                         foreach (IManagedTemplatePackage managedPackage in managedPackages)
                         {
                             IEnumerable<ITemplateInfo> templates = await _templatePackageManager.GetTemplatesAsync(managedPackage, cancellationToken).ConfigureAwait(false);
@@ -729,10 +714,7 @@ namespace Microsoft.TemplateEngine.Cli
                 IEnumerable<ITemplateInfo> templates = await _templatePackageManager.GetTemplatesAsync(result.TemplatePackage, cancellationToken).ConfigureAwait(false);
                 if (templates.Any())
                 {
-                    Reporter.Output.WriteLine(
-                        string.Format(
-                            LocalizableStrings.TemplatePackageCoordinator_lnstall_Info_Success,
-                            result.TemplatePackage.DisplayName));
+                    Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_lnstall_Info_Success, result.TemplatePackage.DisplayName);
                     TemplateGroupDisplay.DisplayTemplateList(
                         _engineEnvironmentSettings,
                         templates,
@@ -742,9 +724,7 @@ namespace Microsoft.TemplateEngine.Cli
                 }
                 else
                 {
-                    Reporter.Output.WriteLine(string.Format(
-                            LocalizableStrings.TemplatePackageCoordinator_lnstall_Warning_No_Templates_In_Package,
-                            result.TemplatePackage.DisplayName));
+                    Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_lnstall_Warning_No_Templates_In_Package, result.TemplatePackage.DisplayName);
                 }
             }
             else
@@ -781,7 +761,7 @@ namespace Microsoft.TemplateEngine.Cli
                               string.Format(
                                   LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled,
                                   packageToInstall).Bold().Red());
-                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled_Hint, InstallCommand.ForceOption.Aliases.First()));
+                        Reporter.Error.WriteLine(LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled_Hint, InstallCommand.ForceOption.Aliases.First());
                         Reporter.Error.WriteCommand(Example.For<InstallCommand>(parseResult).WithArgument(BaseInstallCommand.NameArgument, packageToInstall).WithOption(BaseInstallCommand.ForceOption));
 
                         break;

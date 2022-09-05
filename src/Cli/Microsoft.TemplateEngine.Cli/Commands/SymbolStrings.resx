@@ -225,6 +225,9 @@ If command is specified without the argument, it lists all the template packages
   <data name="Option_PackageFilter" xml:space="preserve">
     <value>Filters the templates based on NuGet package ID.</value>
   </data>
+  <data name="Option_ProjectPath" xml:space="preserve">
+    <value>The project that should be used for context evaluation.</value>
+  </data>
   <data name="Option_TagFilter" xml:space="preserve">
     <value>Filters the templates based on the tag.</value>
   </data>

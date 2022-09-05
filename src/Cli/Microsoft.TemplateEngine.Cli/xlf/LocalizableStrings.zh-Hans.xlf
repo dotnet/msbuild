@@ -403,6 +403,16 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">警告: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="Generic_CommandHints_List">
+        <source>To list installed templates, run:</source>
+        <target state="new">To list installed templates, run:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_CommandHints_Search">
+        <source>To search for the templates on NuGet.org, run:</source>
+        <target state="new">To search for the templates on NuGet.org, run:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Generic_Details">
         <source>Details: {0}</source>
         <target state="translated">详细信息: {0}</target>
@@ -423,6 +433,11 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">示例: </target>
         <note />
       </trans-unit>
+      <trans-unit id="Generic_Info_NoMatchingTemplates">
+        <source>No templates found matching: {0}.</source>
+        <target state="new">No templates found matching: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Generic_NoCallbackError">
         <source>No callback is configured. Running post action is not possible.</source>
         <target state="translated">未配置回调。无法运行发布操作。</target>
@@ -437,6 +452,21 @@ The header is followed by the list of parameters and their errors (might be seve
         <source>Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</source>
         <target state="translated">无法从 {1} 加载模板 {0} 的 dotnet CLI 主机数据。将忽略主机数据。</target>
         <note>{0} - template short name, {1} - file path to host data.</note>
+      </trans-unit>
+      <trans-unit id="InstantiateCommand_Info_NoMatchingTemplatesSubCommands">
+        <source>No templates or subcommands found matching: '{0}'.</source>
+        <target state="new">No templates or subcommands found matching: '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstantiateCommand_Info_TypoCorrection_Subcommands">
+        <source>Did you mean one of the following subcommands?</source>
+        <target state="new">Did you mean one of the following subcommands?</target>
+        <note>Followed by the list of suggestions</note>
+      </trans-unit>
+      <trans-unit id="InstantiateCommand_Info_TypoCorrection_Templates">
+        <source>Did you mean one of the following templates?</source>
+        <target state="new">Did you mean one of the following templates?</target>
+        <note>Followed by the list of suggestions</note>
       </trans-unit>
       <trans-unit id="InvalidCommandOptions">
         <source>Error: Invalid option(s):</source>
@@ -473,11 +503,6 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">命令语法无效: 请改用 "{0}"。</target>
         <note>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</note>
       </trans-unit>
-      <trans-unit id="ListTemplatesCommand">
-        <source>To list installed templates, run:</source>
-        <target state="translated">若要列出已安装的模板，请运行:</target>
-        <note />
-      </trans-unit>
       <trans-unit id="MissingRequiredParameter">
         <source>Mandatory option '{0}' is missing for the template '{1}'.</source>
         <target state="translated">模板“{1}”缺少必备选项“{0}”。</target>
@@ -501,11 +526,6 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="NoTemplatesFound">
         <source>No templates installed.</source>
         <target state="translated">未安装模板。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NoTemplatesMatchingInputParameters">
-        <source>No templates found matching: {0}.</source>
-        <target state="translated">找不到匹配的模板: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionalWorkloadsSyncFailed">
@@ -674,11 +694,6 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="RunningCommand">
         <source>Running command '{0}'...</source>
         <target state="translated">正在运行命令:“{0}”...</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SearchTemplatesCommand">
-        <source>To search for the templates on NuGet.org, run:</source>
-        <target state="translated">要在 NuGet.org 上搜索模板，请运行:</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">

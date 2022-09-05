@@ -183,6 +183,11 @@ Si el comando se especifica sin el argumento, muestra todos los paquetes de plan
         <target state="translated">Filtra las plantillas en función del id. del paquete NuGet.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Option_ProjectPath">
+        <source>The project that should be used for context evaluation.</source>
+        <target state="new">The project that should be used for context evaluation.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Option_TagFilter">
         <source>Filters the templates based on the tag.</source>
         <target state="translated">Filtra las plantillas en función de la etiqueta.</target>

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using FakeItEasy;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Constraints;
 using Microsoft.TemplateEngine.Cli.Commands;
@@ -11,11 +10,10 @@ using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Mocks;
 using Microsoft.TemplateEngine.TestHelper;
-using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 {
-    public class ListTemplateResolverTests
+    public class ListTemplateResolverTests : BaseTest
     {
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_UniqueNameMatchesCorrectly))]
         public async Task TestGetTemplateResolutionResult_UniqueNameMatchesCorrectly()
@@ -26,7 +24,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockTemplateInfo("console2", name: "Long name for Console App #2", identity: "Console.App2")
             };
 
-            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
+            ListTemplateResolver resolver = new(templatesToSearch, new MockHostSpecificDataLoader());
             TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
                 GetListCommandArgsFor("new list console2"),
                 defaultLanguage: null,
@@ -42,11 +40,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_ExactMatchOnShortNameMatchesCorrectly))]
         public async Task TestGetTemplateResolutionResult_ExactMatchOnShortNameMatchesCorrectly()
         {
-            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App"));
-            templatesToSearch.Add(new MockTemplateInfo("console2", name: "Long name for Console App #2", identity: "Console.App2"));
+            List<ITemplateInfo> templatesToSearch = new()
+            {
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App"),
+                new MockTemplateInfo("console2", name: "Long name for Console App #2", identity: "Console.App2")
+            };
 
-            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
+            ListTemplateResolver resolver = new(templatesToSearch, new MockHostSpecificDataLoader());
             TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
                 GetListCommandArgsFor("new list console"),
                 defaultLanguage: null,
@@ -62,12 +62,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_UnambiguousGroupIsFound))]
         public async Task TestGetTemplateResolutionResult_UnambiguousGroupIsFound()
         {
-            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L1", groupIdentity: "Console.App.Test").WithTag("language", "L1"));
-            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L2", groupIdentity: "Console.App.Test").WithTag("language", "L2"));
-            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L3", groupIdentity: "Console.App.Test").WithTag("language", "L3"));
+            List<ITemplateInfo> templatesToSearch = new()
+            {
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L1", groupIdentity: "Console.App.Test").WithTag("language", "L1"),
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L2", groupIdentity: "Console.App.Test").WithTag("language", "L2"),
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L3", groupIdentity: "Console.App.Test").WithTag("language", "L3")
+            };
 
-            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
+            ListTemplateResolver resolver = new(templatesToSearch, new MockHostSpecificDataLoader());
             TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
                 GetListCommandArgsFor("new list console"),
                 defaultLanguage: null,
@@ -83,14 +85,16 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_MultipleGroupsAreFound))]
         public async Task TestGetTemplateResolutionResult_MultipleGroupsAreFound()
         {
-            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L1", groupIdentity: "Console.App.Test").WithTag("language", "L1"));
-            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L2", groupIdentity: "Console.App.Test").WithTag("language", "L2"));
-            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L3", groupIdentity: "Console.App.Test").WithTag("language", "L3"));
-            templatesToSearch.Add(new MockTemplateInfo("classlib", name: "Long name for Class Library App", identity: "Class.Library.L1", groupIdentity: "Class.Library.Test").WithTag("language", "L1"));
-            templatesToSearch.Add(new MockTemplateInfo("classlib", name: "Long name for Class Library App", identity: "Class.Library.L2", groupIdentity: "Class.Library.Test").WithTag("language", "L2"));
+            List<ITemplateInfo> templatesToSearch = new()
+            {
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L1", groupIdentity: "Console.App.Test").WithTag("language", "L1"),
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L2", groupIdentity: "Console.App.Test").WithTag("language", "L2"),
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L3", groupIdentity: "Console.App.Test").WithTag("language", "L3"),
+                new MockTemplateInfo("classlib", name: "Long name for Class Library App", identity: "Class.Library.L1", groupIdentity: "Class.Library.Test").WithTag("language", "L1"),
+                new MockTemplateInfo("classlib", name: "Long name for Class Library App", identity: "Class.Library.L2", groupIdentity: "Class.Library.Test").WithTag("language", "L2")
+            };
 
-            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
+            ListTemplateResolver resolver = new(templatesToSearch, new MockHostSpecificDataLoader());
             TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
                 GetListCommandArgsFor("new list c"),
                 defaultLanguage: null,
@@ -105,11 +109,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_DefaultLanguageDisambiguates))]
         public async Task TestGetTemplateResolutionResult_DefaultLanguageDisambiguates()
         {
-            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L1", groupIdentity: "Console.App.Test").WithTag("language", "L1"));
-            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L2", groupIdentity: "Console.App.Test").WithTag("language", "L2"));
+            List<ITemplateInfo> templatesToSearch = new()
+            {
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L1", groupIdentity: "Console.App.Test").WithTag("language", "L1"),
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L2", groupIdentity: "Console.App.Test").WithTag("language", "L2")
+            };
 
-            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
+            ListTemplateResolver resolver = new(templatesToSearch, new MockHostSpecificDataLoader());
             TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
                 GetListCommandArgsFor("new list console"),
                 defaultLanguage: null,
@@ -126,11 +132,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_InputLanguageIsPreferredOverDefault))]
         public async Task TestGetTemplateResolutionResult_InputLanguageIsPreferredOverDefault()
         {
-            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L1", groupIdentity: "Console.App.Test").WithTag("language", "L1"));
-            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L2", groupIdentity: "Console.App.Test").WithTag("language", "L2"));
+            List<ITemplateInfo> templatesToSearch = new()
+            {
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L1", groupIdentity: "Console.App.Test").WithTag("language", "L1"),
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L2", groupIdentity: "Console.App.Test").WithTag("language", "L2")
+            };
 
-            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
+            ListTemplateResolver resolver = new(templatesToSearch, new MockHostSpecificDataLoader());
             TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
                 GetListCommandArgsFor("new list console --language L2"),
                 defaultLanguage: null,
@@ -145,14 +153,15 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_PartialMatch_HasLanguageMismatch))]
         public async Task TestGetTemplateResolutionResult_PartialMatch_HasLanguageMismatch()
         {
-            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(
-              new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
+            List<ITemplateInfo> templatesToSearch = new()
+            {
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
                   .WithTag("language", "L1")
                   .WithTag("type", "project")
-                  .WithBaselineInfo("app", "standard"));
+                  .WithBaselineInfo("app", "standard")
+            };
 
-            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
+            ListTemplateResolver resolver = new(templatesToSearch, new MockHostSpecificDataLoader());
             TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
                 GetListCommandArgsFor("new list console --language L2"),
                 defaultLanguage: null,
@@ -171,14 +180,15 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_PartialMatch_HasContextMismatch))]
         public async Task TestGetTemplateResolutionResult_PartialMatch_HasContextMismatch()
         {
-            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(
-                   new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
+            List<ITemplateInfo> templatesToSearch = new()
+            {
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
                        .WithTag("language", "L1")
                        .WithTag("type", "project")
-                       .WithBaselineInfo("app", "standard"));
+                       .WithBaselineInfo("app", "standard")
+            };
 
-            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
+            ListTemplateResolver resolver = new(templatesToSearch, new MockHostSpecificDataLoader());
             TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
                 GetListCommandArgsFor("new list console --type item"),
                 defaultLanguage: null,
@@ -197,14 +207,15 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_PartialMatch_HasBaselineMismatch))]
         public async Task TestGetTemplateResolutionResult_PartialMatch_HasBaselineMismatch()
         {
-            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(
-                   new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
+            List<ITemplateInfo> templatesToSearch = new()
+            {
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
                        .WithTag("language", "L1")
                        .WithTag("type", "project")
-                       .WithBaselineInfo("app", "standard"));
+                       .WithBaselineInfo("app", "standard")
+            };
 
-            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
+            ListTemplateResolver resolver = new(templatesToSearch, new MockHostSpecificDataLoader());
             TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
                 GetListCommandArgsFor("new list console --baseline core"),
                 defaultLanguage: null,
@@ -223,14 +234,15 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_PartialMatch_HasMultipleMismatches))]
         public async Task TestGetTemplateResolutionResult_PartialMatch_HasMultipleMismatches()
         {
-            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(
-                   new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
+            List<ITemplateInfo> templatesToSearch = new()
+            {
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
                        .WithTag("language", "L1")
                        .WithTag("type", "project")
-                       .WithBaselineInfo("app", "standard"));
+                       .WithBaselineInfo("app", "standard")
+            };
 
-            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
+            ListTemplateResolver resolver = new(templatesToSearch, new MockHostSpecificDataLoader());
             TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
                 GetListCommandArgsFor("new list console --language L2 --type item --baseline core"),
                 defaultLanguage: null,
@@ -249,14 +261,15 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_NoMatch))]
         public async Task TestGetTemplateResolutionResult_NoMatch()
         {
-            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(
-                   new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
+            List<ITemplateInfo> templatesToSearch = new()
+            {
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
                        .WithTag("language", "L1")
                        .WithTag("type", "project")
-                       .WithBaselineInfo("app", "standard"));
+                       .WithBaselineInfo("app", "standard")
+            };
 
-            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
+            ListTemplateResolver resolver = new(templatesToSearch, new MockHostSpecificDataLoader());
             TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
                      GetListCommandArgsFor("new list zzzzz --language L1 --type project --baseline app"),
                      defaultLanguage: null,
@@ -276,15 +289,16 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_MatchByTags))]
         public async Task TestGetTemplateResolutionResult_MatchByTags()
         {
-            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(
+            List<ITemplateInfo> templatesToSearch = new()
+            {
                 new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test1")
                     .WithTag("language", "L1")
                     .WithTag("type", "project")
                     .WithClassifications("Common", "Test")
-                    .WithBaselineInfo("app", "standard"));
+                    .WithBaselineInfo("app", "standard")
+            };
 
-            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
+            ListTemplateResolver resolver = new(templatesToSearch, new MockHostSpecificDataLoader());
             TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
                      GetListCommandArgsFor("new list --tag Common"),
                      defaultLanguage: null,
@@ -302,21 +316,21 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_MatchByTagsIgnoredOnNameMatch))]
         public async Task TestGetTemplateResolutionResult_MatchByTagsIgnoredOnNameMatch()
         {
-            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(
+            List<ITemplateInfo> templatesToSearch = new()
+            {
                 new MockTemplateInfo("console1", name: "Long name for Console App Test", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
                     .WithTag("language", "L1")
                     .WithTag("type", "project")
                     .WithClassifications("Common", "Test")
-                    .WithBaselineInfo("app", "standard"));
-            templatesToSearch.Add(
-              new MockTemplateInfo("console2", name: "Long name for Console App", identity: "Console.App.T2", groupIdentity: "Console.App.Test2")
+                    .WithBaselineInfo("app", "standard"),
+                new MockTemplateInfo("console2", name: "Long name for Console App", identity: "Console.App.T2", groupIdentity: "Console.App.Test2")
                   .WithTag("language", "L1")
                   .WithTag("type", "project")
                   .WithClassifications("Common", "Test")
-                  .WithBaselineInfo("app", "standard"));
+                  .WithBaselineInfo("app", "standard")
+            };
 
-            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
+            ListTemplateResolver resolver = new(templatesToSearch, new MockHostSpecificDataLoader());
             TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
                      GetListCommandArgsFor("new list Test"),
                      defaultLanguage: null,
@@ -335,21 +349,21 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_MatchByTagsIgnoredOnShortNameMatch))]
         public async Task TestGetTemplateResolutionResult_MatchByTagsIgnoredOnShortNameMatch()
         {
-            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(
-              new MockTemplateInfo("console", name: "Long name for Console App Test", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
+            List<ITemplateInfo> templatesToSearch = new()
+            {
+                new MockTemplateInfo("console", name: "Long name for Console App Test", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
                   .WithTag("language", "L1")
                   .WithTag("type", "project")
                   .WithClassifications("Common", "Test", "Console")
-                  .WithBaselineInfo("app", "standard"));
-            templatesToSearch.Add(
-              new MockTemplateInfo("cons", name: "Long name for Cons App", identity: "Console.App.T2", groupIdentity: "Console.App.Test2")
+                  .WithBaselineInfo("app", "standard"),
+                new MockTemplateInfo("cons", name: "Long name for Cons App", identity: "Console.App.T2", groupIdentity: "Console.App.Test2")
                   .WithTag("language", "L1")
                   .WithTag("type", "project")
                   .WithClassifications("Common", "Test", "Console")
-                  .WithBaselineInfo("app", "standard"));
+                  .WithBaselineInfo("app", "standard")
+            };
 
-            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
+            ListTemplateResolver resolver = new(templatesToSearch, new MockHostSpecificDataLoader());
             TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
                      GetListCommandArgsFor("new list Console"),
                      defaultLanguage: null,
@@ -368,15 +382,16 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_MatchByTagsAndMismatchByOtherFilter))]
         public async Task TestGetTemplateResolutionResult_MatchByTagsAndMismatchByOtherFilter()
         {
-            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(
-               new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
+            List<ITemplateInfo> templatesToSearch = new()
+            {
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
                    .WithTag("language", "L1")
                    .WithTag("type", "project")
                    .WithClassifications("Common", "Test")
-                   .WithBaselineInfo("app", "standard"));
+                   .WithBaselineInfo("app", "standard")
+            };
 
-            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
+            ListTemplateResolver resolver = new(templatesToSearch, new MockHostSpecificDataLoader());
             TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
                      GetListCommandArgsFor("new list --language L2 --type item --tag Common"),
                      defaultLanguage: null,
@@ -401,16 +416,16 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         [InlineData("input", "İnput", false)]
         public async Task TestGetTemplateResolutionResult_AuthorMatch(string templateAuthor, string commandAuthor, bool matchExpected)
         {
-            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-
-            templatesToSearch.Add(
-               new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test", author: templateAuthor)
+            List<ITemplateInfo> templatesToSearch = new()
+            {
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test", author: templateAuthor)
                    .WithTag("language", "L1")
                    .WithTag("type", "project")
                    .WithClassifications("Common", "Test")
-                   .WithBaselineInfo("app", "standard"));
+                   .WithBaselineInfo("app", "standard")
+            };
 
-            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
+            ListTemplateResolver resolver = new(templatesToSearch, new MockHostSpecificDataLoader());
             TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
                      GetListCommandArgsFor($"new list console --author {commandAuthor}"),
                      defaultLanguage: null,
@@ -453,16 +468,16 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             const string separator = "||";
             string[] templateTagsArray = templateTags.Split(separator);
 
-            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-
-            templatesToSearch.Add(
-               new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test", author: "TemplateAuthor")
+            List<ITemplateInfo> templatesToSearch = new()
+            {
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test", author: "TemplateAuthor")
                    .WithTag("language", "L1")
                    .WithTag("type", "project")
                    .WithClassifications(templateTagsArray)
-                   .WithBaselineInfo("app", "standard"));
+                   .WithBaselineInfo("app", "standard")
+            };
 
-            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
+            ListTemplateResolver resolver = new(templatesToSearch, new MockHostSpecificDataLoader());
             TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
                      GetListCommandArgsFor($"new list console --tag {commandTag}"),
                      defaultLanguage: null,
@@ -494,12 +509,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_TemplateWithoutTypeShouldNotBeMatchedForContextFilter))]
         public async Task TestGetTemplateResolutionResult_TemplateWithoutTypeShouldNotBeMatchedForContextFilter()
         {
-            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(
+            List<ITemplateInfo> templatesToSearch = new()
+            {
                 new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
-                    .WithClassifications("Common", "Test"));
+                    .WithClassifications("Common", "Test")
+            };
 
-            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader());
+            ListTemplateResolver resolver = new(templatesToSearch, new MockHostSpecificDataLoader());
             TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
                      GetListCommandArgsFor("new list console --type item"),
                      defaultLanguage: null,
@@ -518,23 +534,23 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         [Fact]
         public async Task TestGetTemplateResolutionResult_ConstraintsMismatch()
         {
-            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(
+            List<ITemplateInfo> templatesToSearch = new()
+            {
                 new MockTemplateInfo("console", identity: "Console.App.T1")
-                    .WithConstraints(new TemplateConstraintInfo("test", "no")));
-            templatesToSearch.Add(
-             new MockTemplateInfo("console2", identity: "Console.App.T2")
-                 .WithConstraints(new TemplateConstraintInfo("test", "bad-param")));
+                    .WithConstraints(new TemplateConstraintInfo("test", "no")),
+                new MockTemplateInfo("console2", identity: "Console.App.T2")
+                 .WithConstraints(new TemplateConstraintInfo("test", "bad-param"))
+            };
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: new[] { (typeof(ITemplateConstraintFactory), (IIdentifiedComponent)new TestConstraintFactory("test")) });
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: new[] { (typeof(ITemplateConstraintFactory), (IIdentifiedComponent)new TestConstraintFactory("test")) });
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse("new list");
+            ParseResult parseResult = myCommand.Parse("new list");
             var args = new ListCommandArgs((ListCommand)parseResult.CommandResult.Command, parseResult);
 
-            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader(), new TemplateConstraintManager(settings));
+            ListTemplateResolver resolver = new(templatesToSearch, new MockHostSpecificDataLoader(), new TemplateConstraintManager(settings));
             TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
                      args,
                      defaultLanguage: null,
@@ -549,23 +565,23 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         [Fact]
         public async Task TestGetTemplateResolutionResult_IgnoreConstraintsMismatch()
         {
-            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(
+            List<ITemplateInfo> templatesToSearch = new()
+            {
                 new MockTemplateInfo("console", identity: "Console.App.T1")
-                    .WithConstraints(new TemplateConstraintInfo("test", "no")));
-            templatesToSearch.Add(
-             new MockTemplateInfo("console2", identity: "Console.App.T2")
-                 .WithConstraints(new TemplateConstraintInfo("test", "bad-param")));
+                    .WithConstraints(new TemplateConstraintInfo("test", "no")),
+                new MockTemplateInfo("console2", identity: "Console.App.T2")
+                 .WithConstraints(new TemplateConstraintInfo("test", "bad-param"))
+            };
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: new[] { (typeof(ITemplateConstraintFactory), (IIdentifiedComponent)new TestConstraintFactory("test")) });
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: new[] { (typeof(ITemplateConstraintFactory), (IIdentifiedComponent)new TestConstraintFactory("test")) });
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse("new list --ignore-constraints");
+            ParseResult parseResult = myCommand.Parse("new list --ignore-constraints");
             var args = new ListCommandArgs((ListCommand)parseResult.CommandResult.Command, parseResult);
 
-            ListTemplateResolver resolver = new ListTemplateResolver(templatesToSearch, new MockHostSpecificDataLoader(), new TemplateConstraintManager(settings));
+            ListTemplateResolver resolver = new(templatesToSearch, new MockHostSpecificDataLoader(), new TemplateConstraintManager(settings));
             TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(
                      args,
                      defaultLanguage: null,
@@ -579,10 +595,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
         private static ListCommandArgs GetListCommandArgsFor(string commandInput)
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            RootCommand rootCommand = new();
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            rootCommand.Add(myCommand);
 
-            var parseResult = myCommand.Parse(commandInput);
+            ParseResult parseResult = rootCommand.Parse(commandInput);
             return new ListCommandArgs((ListCommand)parseResult.CommandResult.Command, parseResult);
         }
     }

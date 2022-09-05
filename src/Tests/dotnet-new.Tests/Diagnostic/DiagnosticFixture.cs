@@ -3,7 +3,7 @@
 
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.New.Tests
+namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     public class DiagnosticFixture
     {

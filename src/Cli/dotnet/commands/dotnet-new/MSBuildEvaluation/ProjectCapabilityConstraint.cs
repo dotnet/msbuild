@@ -13,6 +13,7 @@ using Microsoft.DotNet.Cli;
 using Microsoft.Extensions.Logging;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Constraints;
+using Microsoft.TemplateEngine.Cli.Commands;
 using Newtonsoft.Json.Linq;
 using LocalizableStrings = Microsoft.DotNet.Tools.New.LocalizableStrings;
 
@@ -120,7 +121,7 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
                     return TemplateConstraintResult.CreateRestricted(
                         this,
                         _evaluationResult.ErrorMessage ?? string.Format(LocalizableStrings.MultipleProjectsEvaluationResult_Error, foundProjects),
-                        string.Format(LocalizableStrings.ProjectCapabilityConstraint_Restricted_MultipleProjectsFound_CTA, NewCommandParser.ProjectPathOption.Aliases.First()));
+                        string.Format(LocalizableStrings.ProjectCapabilityConstraint_Restricted_MultipleProjectsFound_CTA, SharedOptions.ProjectPathOption.Aliases.First()));
                 }
                 if (_evaluationResult.Status == MSBuildEvaluationResult.EvalStatus.NoRestore)
                 {
@@ -161,9 +162,9 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
                 }
             }
 
-            private IReadOnlyList<string> GetProjectCapabilities(MSBuildEvaluationResult result)
+            private static IReadOnlyList<string> GetProjectCapabilities(MSBuildEvaluationResult result)
             {
-                HashSet<string> capabilities = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                HashSet<string> capabilities = new(StringComparer.OrdinalIgnoreCase);
                 AddProjectCapabilities(capabilities, result.EvaluatedProject);
 
                 //in case of multi-target project, consider project capabilities for all target frameworks
@@ -176,7 +177,7 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
                 }
                 return capabilities.ToArray();
 
-                void AddProjectCapabilities (HashSet<string> collection, Project? evaluatedProject)
+                static void AddProjectCapabilities (HashSet<string> collection, Project? evaluatedProject)
                 {
                     if (evaluatedProject == null)
                     {

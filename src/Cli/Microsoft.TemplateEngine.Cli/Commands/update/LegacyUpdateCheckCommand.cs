@@ -12,9 +12,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         public LegacyUpdateCheckCommand(
             NewCommand parentCommand,
-            Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
-            : base(parentCommand, hostBuilder, telemetryLoggerBuilder, "--update-check", SymbolStrings.Command_Update_Description)
+            Func<ParseResult, ITemplateEngineHost> hostBuilder)
+            : base(parentCommand, hostBuilder, "--update-check", SymbolStrings.Command_Update_Description)
         {
             this.IsHidden = true;
             parentCommand.AddNoLegacyUsageValidators(this, except: new Option[] { InteractiveOption, AddSourceOption });
@@ -24,11 +23,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal override Option<string[]> AddSourceOption => ParentCommand.AddSourceOption;
 
-        protected override Task<NewCommandStatus> ExecuteAsync(UpdateCommandArgs args, IEngineEnvironmentSettings environmentSettings, ITelemetryLogger telemetryLogger, InvocationContext context)
+        protected override Task<NewCommandStatus> ExecuteAsync(UpdateCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
         {
             PrintDeprecationMessage<LegacyUpdateCheckCommand, UpdateCommand>(args.ParseResult, additionalOption: UpdateCommand.CheckOnlyOption);
 
-            return base.ExecuteAsync(args, environmentSettings, telemetryLogger, context);
+            return base.ExecuteAsync(args, environmentSettings, context);
         }
     }
 }

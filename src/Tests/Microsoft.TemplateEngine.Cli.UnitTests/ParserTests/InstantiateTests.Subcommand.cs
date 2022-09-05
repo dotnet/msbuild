@@ -4,14 +4,13 @@
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using FakeItEasy;
+using FluentAssertions;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Mocks;
-//using Microsoft.TemplateEngine.Mocks;
 using Microsoft.TemplateEngine.TestHelper;
-using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 {
@@ -20,13 +19,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void Create_CanParseTemplateWithOptions()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse("new create console --framework net5.0");
-            InstantiateCommandArgs args = new InstantiateCommandArgs((InstantiateCommand)parseResult.CommandResult.Command, parseResult);
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse("new create console --framework net5.0");
+            InstantiateCommandArgs args = new((InstantiateCommand)parseResult.CommandResult.Command, parseResult);
 
             Assert.Equal("console", args.ShortName);
-            Assert.Equal(2, args.RemainingArguments.Count());
+            Assert.Equal(2, args.RemainingArguments.Length);
             Assert.Contains("--framework", args.RemainingArguments);
             Assert.Contains("net5.0", args.RemainingArguments);
         }
@@ -47,20 +46,24 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                 defaultParams["prefs:language"] = defaultLanguage;
             }
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost(defaultParameters: defaultParams);
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(defaultParameters: defaultParams);
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($"new create {command}");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($"new create {command}");
             var instantiateCommand = (InstantiateCommand)parseResult.CommandResult.Command;
             var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            var templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
-            Assert.Equal(expectedIdentities.Count(), templateCommands.Count);
+            HashSet<TemplateCommand> templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            Assert.Equal(expectedIdentities.Length, templateCommands.Count);
             Assert.Equal(expectedIdentities.OrderBy(s => s), templateCommands.Select(templateCommand => templateCommand.Template.Identity).OrderBy(s => s));
         }
 
         [Theory]
-        [MemberData(nameof(CanParseNameOptionData))]
+        [InlineData("new create foo --name name", "name")]
+        [InlineData("new create foo -n name", "name")]
+        [InlineData("new create foo", null)]
+        [InlineData("new create --name name foo ", "name")]
+        [InlineData("new create -n name foo", "name")]
         internal void Create_CanParseNameOption(string command, string? expectedValue)
         {
             var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group");
@@ -69,20 +72,54 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                 CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
                 .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($"new create {command}");
+            RootCommand rootCommand = new();
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            rootCommand.Add(myCommand);
+
+            ParseResult parseResult = rootCommand.Parse(command);
+
             var instantiateCommand = (InstantiateCommand)parseResult.CommandResult.Command;
             var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
             Parser parser = ParserFactory.CreateParser(templateCommand);
-            ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
+            ParseResult templateParseResult = parser.Parse(args.TokensToInvoke ?? Array.Empty<string>());
             var templateArgs = new TemplateCommandArgs(templateCommand, instantiateCommand, templateParseResult);
 
             Assert.Equal(expectedValue, templateArgs.Name);
+        }
+
+        [Theory]
+        [InlineData("new --name name create foo", "Unrecognized command or argument(s): '--name','name'.")]
+        [InlineData("--name name new create foo", "Unrecognized command or argument '--name'.|Unrecognized command or argument 'name'.")]
+        [InlineData("new --output name create foo", "Unrecognized command or argument(s): '--output','name'.")]
+        [InlineData("new --project name create foo", "Unrecognized command or argument(s): '--project','name'.|File does not exist: 'name'.")]
+        [InlineData("new --force create foo", "Unrecognized command or argument(s): '--force'.")]
+        [InlineData("new --dry-run create foo", "Unrecognized command or argument(s): '--dry-run'.")]
+        [InlineData("new --no-update-check create foo", "Unrecognized command or argument(s): '--no-update-check'.")]
+        internal void Create_CanValidateOptionUsage_InNewCommand(string command, string? expectedErrors)
+        {
+            string[] expectedErrorsParsed = expectedErrors?.Split("|") ?? Array.Empty<string>();
+            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group");
+
+            TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
+                CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
+                .Single();
+
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
+            IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
+            TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
+
+            RootCommand rootCommand = new();
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            rootCommand.Add(myCommand);
+
+            ParseResult parseResult = rootCommand.Parse(command);
+
+            parseResult.Errors.Select(e => e.Message).Should().BeEquivalentTo(expectedErrorsParsed);
         }
 
         [Theory]
@@ -95,22 +132,22 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                 command = "foo -i 30"; //for dotnet new create "-i" is not occupied, so we can use it.
             }
 
-            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithParameter(parameterName, parameterType, defaultValue: defaultValue, defaultIfNoOptionValue: defaultIfNoOptionValue);
 
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
                 .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));  
-            var parseResult = myCommand.Parse($"new create {command}");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($"new create {command}");
             var instantiateCommand = (InstantiateCommand)parseResult.CommandResult.Command;
             var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
             Parser parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
             var templateArgs = new TemplateCommandArgs(templateCommand, instantiateCommand, templateParseResult);
@@ -130,22 +167,22 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [MemberData(nameof(CanParseChoiceTemplateOptionsData))]
         internal void Create_CanParseChoiceTemplateOptions(string command, string parameterName, string parameterValues, string? defaultIfNoOptionValue, string? expectedValue)
         {
-            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithChoiceParameter(parameterName, parameterValues.Split("|"), defaultIfNoOptionValue: defaultIfNoOptionValue);
 
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
                 .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($"new create {command}");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($"new create {command}");
             var instantiateCommand = (InstantiateCommand)parseResult.CommandResult.Command;
             var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
             Parser parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
             var templateArgs = new TemplateCommandArgs(templateCommand, instantiateCommand, templateParseResult);
@@ -172,23 +209,23 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             string? defaultIfNoOptionValue,
             string expectedError)
         {
-            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithParameter(parameterName, parameterType, isRequired, defaultValue: defaultValue, defaultIfNoOptionValue: defaultIfNoOptionValue);
 
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
                 .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($"new create {command}");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($"new create {command}");
             var instantiateCommand = (InstantiateCommand)parseResult.CommandResult.Command;
             var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
 
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
             Parser parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
             Assert.True(templateParseResult.Errors.Any());
@@ -206,23 +243,23 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
               string? defaultIfNoOptionValue,
               string expectedError)
         {
-            var template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            MockTemplateInfo template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
                 .WithChoiceParameter(parameterName, parameterValues.Split("|"), isRequired, defaultValue, defaultIfNoOptionValue);
 
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
                 .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($" new create {command}");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($" new create {command}");
             var instantiateCommand = (InstantiateCommand)parseResult.CommandResult.Command;
             var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
 
-            TemplateCommand templateCommand = new TemplateCommand(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+            TemplateCommand templateCommand = new(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
             Parser parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
             Assert.True(templateParseResult.Errors.Any());
@@ -234,22 +271,22 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("list", "listTemplate")]
         internal void Create_CanEvaluateTemplateWithSubcommandShortName(string command, string? expectedIdentitiesStr)
         {
-            MockTemplateInfo template = new MockTemplateInfo(command, identity: $"{command}Template");
+            MockTemplateInfo template = new(command, identity: $"{command}Template");
 
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                 CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
                 .Single();
 
             string[] expectedIdentities = expectedIdentitiesStr?.Split("|") ?? Array.Empty<string>();
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($"new create {command}");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($"new create {command}");
             var instantiateCommand = (InstantiateCommand)parseResult.CommandResult.Command;
             var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
-            var templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
-            Assert.Equal(expectedIdentities.Count(), templateCommands.Count);
+            HashSet<TemplateCommand> templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            Assert.Equal(expectedIdentities.Length, templateCommands.Count);
             Assert.Equal(expectedIdentities.OrderBy(s => s), templateCommands.Select(templateCommand => templateCommand.Template.Identity).OrderBy(s => s));
         }
     }

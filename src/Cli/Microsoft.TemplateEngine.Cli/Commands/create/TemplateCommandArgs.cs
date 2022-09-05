@@ -18,11 +18,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             ParentCommand = parentCommand ?? throw new ArgumentNullException(nameof(parentCommand));
             RootCommand = GetRootCommand(parentCommand);
 
-            Name = parseResult.GetValueForOptionOrNull(command.NameOption);
-            OutputPath = parseResult.GetValueForOptionOrNull(command.OutputOption);
-            IsForceFlagSpecified = parseResult.GetValueForOption(TemplateCommand.ForceOption);
-            IsDryRun = parseResult.GetValueForOption(command.DryRunOption);
-            NoUpdateCheck = parseResult.GetValueForOption(command.NoUpdateCheckOption);
+            Name = parseResult.GetValueForOptionOrNull(SharedOptions.NameOption);
+            IsForceFlagSpecified = parseResult.GetValueForOption(SharedOptions.ForceOption);
+            IsDryRun = parseResult.GetValueForOption(SharedOptions.DryRunOption);
+            NoUpdateCheck = parseResult.GetValueForOption(SharedOptions.NoUpdateCheckOption);
 
             if (command.LanguageOption != null)
             {
@@ -53,8 +52,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         public string? Name { get; }
 
-        public string? OutputPath { get; }
-
         public bool IsForceFlagSpecified { get; }
 
         public string? Language { get; }
@@ -79,7 +76,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     .Where(kvp => kvp.Item2 != null)
                     .ToDictionary(kvp => kvp.Key, kvp => kvp.Item2);
             }
-
         }
 
         public ParseResult ParseResult { get; }

@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Commands;
-using Xunit.Abstractions;
 
 partial class Program
 {

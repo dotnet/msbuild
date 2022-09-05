@@ -1,23 +1,18 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
-using VerifyTests;
-using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.New.Tests
+namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
-    public partial class DotnetNewInstantiate : SdkTest, IClassFixture<SharedHomeDirectory>
+    public partial class DotnetNewInstantiate : BaseIntegrationTest, IClassFixture<SharedHomeDirectory>
     {
         private readonly SharedHomeDirectory _fixture;
         private readonly ITestOutputHelper _log;
@@ -31,7 +26,7 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void CanInstantiateTemplate()
         {
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string workingDirectory = CreateTemporaryFolder();
 
             new DotnetNewCommand(_log, "console")
                 .WithCustomHive(_fixture.HomeDirectory)
@@ -48,8 +43,8 @@ namespace Microsoft.DotNet.New.Tests
 #pragma warning restore xUnit1004 // Test methods should not be skipped
         public void CanInstantiateTemplate_WithAlias()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
 
             new DotnetNewCommand(_log, "console", "--alias", "csharpconsole")
                 .WithCustomHive(home)
@@ -89,9 +84,9 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void CanInstantiateTemplate_WithSingleNonDefaultLanguageChoice()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, "basic")
                 .WithCustomHive(home)
@@ -106,9 +101,9 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void CanOverwriteFilesWithForce()
         {
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string workingDirectory = CreateTemporaryFolder();
 
-            var commandResult = new DotnetNewCommand(_log, "console", "--no-restore")
+            Utils.CommandResult commandResult = new DotnetNewCommand(_log, "console", "--no-restore")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -118,7 +113,7 @@ namespace Microsoft.DotNet.New.Tests
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("The template \"Console App\" was created successfully.");
 
-            var forceCommandResult = new DotnetNewCommand(_log, "console", "--no-restore", "--force")
+            Utils.CommandResult forceCommandResult = new DotnetNewCommand(_log, "console", "--no-restore", "--force")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -134,9 +129,9 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void CanInstantiateTemplateWithSecondShortName()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallNuGetTemplate("Microsoft.DotNet.Web.ProjectTemplates.5.0", _log, home, workingDirectory);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallNuGetTemplate("Microsoft.DotNet.Web.ProjectTemplates.5.0", _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, "webapp", "-o", "webapp")
                 .WithCustomHive(home)
@@ -160,11 +155,11 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void CanInstantiateTemplate_WithBinaryFile_FromFolder()
         {
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string templateLocation = TestUtils.GetTestTemplateLocation("TemplateWithBinaryFile");
+            string workingDirectory = CreateTemporaryFolder();
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string templateLocation = GetTestTemplateLocation("TemplateWithBinaryFile");
 
-            Helpers.InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, "TestAssets.TemplateWithBinaryFile")
                 .WithCustomHive(home)
@@ -186,13 +181,12 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void CanInstantiateTemplate_WithBinaryFile_FromPackage()
         {
-            string templateLocation = TestUtils.GetTestTemplateLocation("TemplateWithBinaryFile");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            string home = TestUtils.CreateTemporaryFolder("Home");
+            string templateLocation = GetTestTemplateLocation("TemplateWithBinaryFile");
+            string workingDirectory = CreateTemporaryFolder();
+            string home = CreateTemporaryFolder(folderName: "Home");
 
-            using var packageManager = new PackageManager();
-            string packageLocation = packageManager.PackTestTemplatesNuGetPackage(new DotnetPackCommand(_log));
-            Helpers.InstallNuGetTemplate(packageLocation, _log, home, workingDirectory);
+            string packageLocation = PackTestNuGetPackage(_log);
+            InstallNuGetTemplate(packageLocation, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, "TestAssets.TemplateWithBinaryFile")
                 .WithCustomHive(home)
@@ -214,12 +208,14 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void CanInstantiateTemplate_Angular_CanReplaceTextInLargeFile()
         {
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = CreateTemporaryFolder();
+            string home = CreateTemporaryFolder(folderName: "Home");
             string dotnetRoot = TestContext.Current.ToolsetUnderTest.DotNetRoot;
             string templatesLocation = Path.Combine(dotnetRoot, "templates");
-            var packagePaths = Directory.EnumerateFiles(templatesLocation, "microsoft.dotnet.web.spa.projecttemplates.*.nupkg", SearchOption.AllDirectories);
-            string packageLocation = packagePaths.FirstOrDefault();
+            IEnumerable<string> packagePaths = Directory.EnumerateFiles(templatesLocation, "microsoft.dotnet.web.spa.projecttemplates.*.nupkg", SearchOption.AllDirectories);
+            string? packageLocation = packagePaths.FirstOrDefault();
+
+            Assert.NotNull(packageLocation);
 
             new DotnetNewCommand(_log, "angular", "-o", "angular")
                .WithCustomHive(home)
@@ -228,14 +224,14 @@ namespace Microsoft.DotNet.New.Tests
                .Should().Pass();
 
             string reactPackageLockJson = Path.Combine(workingDirectory, "angular", "ClientApp", "package-lock.json");
-            var targetText = File.ReadAllText(reactPackageLockJson);
+            string targetText = File.ReadAllText(reactPackageLockJson);
 
-            using (ZipArchive archive = ZipFile.OpenRead(packageLocation))
+            using (ZipArchive archive = ZipFile.OpenRead(packageLocation!))
             {
-                var reactPackageLockJsonEntry = archive.GetEntry("content/Angular-CSharp/ClientApp/package-lock.json");
+                ZipArchiveEntry? reactPackageLockJsonEntry = archive.GetEntry("content/Angular-CSharp/ClientApp/package-lock.json");
                 Assert.NotNull(reactPackageLockJsonEntry);
                 using var sourceStream = new StreamReader(reactPackageLockJsonEntry!.Open());
-                var sourceText = sourceStream.ReadToEnd();
+                string sourceText = sourceStream.ReadToEnd();
                 sourceText = sourceText.Replace("company.webapplication1", "angular");
                 Assert.Equal(sourceText, targetText);
             }
@@ -267,8 +263,8 @@ namespace Microsoft.DotNet.New.Tests
             //sln always has CRLF line ending, as per .gitattributes settings
             string expectedEol = testCase == "sln" ? "\r\n" : Environment.NewLine;
 
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
 
             //The template has the following conditions defined in various file types: non actionable on parameter A and actionable on parameter B
             //#if (A)
@@ -282,7 +278,7 @@ namespace Microsoft.DotNet.New.Tests
             //baz
             //For extension test cases the template has 'test.<extension>' file defined.
 
-            Helpers.InstallTestTemplate("TemplateWithConditions", _log, home, workingDirectory);
+            InstallTestTemplate("TemplateWithConditions", _log, home, workingDirectory);
             new DotnetNewCommand(_log, "TestAssets.TemplateWithConditions", "--A", "true")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
@@ -296,7 +292,7 @@ namespace Microsoft.DotNet.New.Tests
             Assert.True(File.Exists(testFile));
             Assert.Equal($"{string.Format(expectedCommandFormat, "foo")}{expectedEol}foo{expectedEol}baz{expectedEol}", File.ReadAllText(testFile));
 
-            workingDirectory = TestUtils.CreateTemporaryFolder();
+            workingDirectory = CreateTemporaryFolder();
             new DotnetNewCommand(_log, "TestAssets.TemplateWithConditions", "--A", "false")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
@@ -310,7 +306,7 @@ namespace Microsoft.DotNet.New.Tests
             Assert.True(File.Exists(testFile));
             Assert.Equal($"baz{expectedEol}", File.ReadAllText(testFile));
 
-            workingDirectory = TestUtils.CreateTemporaryFolder();
+            workingDirectory = CreateTemporaryFolder();
             new DotnetNewCommand(_log, "TestAssets.TemplateWithConditions", "--B", "true")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
@@ -333,11 +329,11 @@ namespace Microsoft.DotNet.New.Tests
             string nugetFullName = $"{nugetName}::{nugetVersion}";
             string nugetFileName = $"{nugetName}.{nugetVersion}.nupkg";
             string templateName = "nupkginstall";
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            var home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = CreateTemporaryFolder();
+            string home = CreateTemporaryFolder(folderName: "Home");
 
-            Helpers.InstallNuGetTemplate(
-                TestUtils.GetTestNugetLocation(nugetFileName),
+            InstallNuGetTemplate(
+                Path.Combine(DotnetNewTestPackagesBasePath, nugetFileName),
                 _log,
                 home,
                 workingDirectory);
@@ -350,6 +346,167 @@ namespace Microsoft.DotNet.New.Tests
                 .Pass()
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("File actions would have been taken:");
+        }
+
+        [Fact]
+        public void WhenSwitchIsSkippedThenItPrintsError()
+        {
+            Utils.CommandResult cmd = new DotnetNewCommand(Log)
+                .WithVirutalHive()
+                .Execute("Web1.1");
+
+            cmd.ExitCode.Should().NotBe(0);
+
+            if (!TestContext.IsLocalized())
+            {
+                cmd.StdErr.Should().StartWith("No templates or subcommands found");
+            }
+        }
+
+        [Fact]
+        public void ItCanCreateTemplate()
+        {
+            string tempDir = CreateTemporaryFolder();
+            Utils.CommandResult cmd = new DotnetNewCommand(Log)
+                .WithVirutalHive()
+                .Execute("console", "-o", tempDir);
+            cmd.Should().Pass();
+        }
+
+        [Fact]
+        public void ItCanShowHelp()
+        {
+            Utils.CommandResult cmd = new DotnetNewCommand(Log)
+                .WithVirutalHive()
+                .Execute("--help");
+            cmd.Should().Pass()
+                .And.HaveStdOutContaining("Usage:")
+                .And.HaveStdOutContaining("dotnet new [command] [options]");
+        }
+
+        [Fact]
+        public void ItCanShowHelpForTemplate()
+        {
+            Utils.CommandResult cmd = new DotnetNewCommand(Log)
+                .WithVirutalHive()
+                .Execute("classlib", "--help");
+
+            cmd.Should().Pass()
+                .And.NotHaveStdOutContaining("Usage: new [options]")
+                .And.HaveStdOutContaining("Class Library (C#)")
+                .And.HaveStdOutContaining("--framework");
+        }
+
+        [Fact]
+        public void ItCanShowParseError()
+        {
+            Utils.CommandResult cmd = new DotnetNewCommand(Log)
+                .WithVirutalHive()
+                .Execute("update", "--bla");
+            cmd.Should().ExitWith(127)
+                .And.HaveStdErrContaining("Unrecognized command or argument '--bla'")
+                .And.HaveStdOutContaining("dotnet new update [options]");
+        }
+
+        [Fact]
+        public void WhenTemplateNameIsNotUniquelyMatchedThenItIndicatesProblemToUser()
+        {
+            Utils.CommandResult cmd = new DotnetNewCommand(Log)
+                .WithVirutalHive()
+                .Execute("c");
+
+            cmd.ExitCode.Should().NotBe(0);
+
+            if (!TestContext.IsLocalized())
+            {
+                cmd.StdErr.Should().StartWith("No templates or subcommands found matching: 'c'.");
+            }
+        }
+
+        [Fact]
+        public void When_dotnet_new_is_invoked_multiple_times_it_should_fail()
+        {
+            string rootPath = CreateTemporaryFolder();
+
+            new DotnetNewCommand(Log)
+                .WithVirutalHive()
+                .WithWorkingDirectory(rootPath)
+                .Execute($"console", "--no-restore");
+
+            DateTime expectedState = Directory.GetLastWriteTime(rootPath);
+
+            CommandResult result = new DotnetNewCommand(Log)
+                .WithVirutalHive()
+                .WithWorkingDirectory(rootPath)
+                .Execute($"console", "--no-restore");
+
+            DateTime actualState = Directory.GetLastWriteTime(rootPath);
+
+            Assert.Equal(expectedState, actualState);
+
+            result.Should().Fail();
+        }
+
+        [Fact]
+        public void When_dotnet_new_is_invoked_with_preferred_lang_env_var_set()
+        {
+            string rootPath = CreateTemporaryFolder();
+
+            new DotnetNewCommand(Log)
+                .WithVirutalHive()
+                .WithWorkingDirectory(rootPath)
+                .WithEnvironmentVariable("DOTNET_NEW_PREFERRED_LANG", "F#")
+                .Execute($"console", "--no-restore", "-n", "f1")
+                .Should().Pass();
+
+            string expectedFsprojPath = Path.Combine(rootPath, "f1", "f1.fsproj");
+            Assert.True(File.Exists(expectedFsprojPath), $"expected '{expectedFsprojPath}' but was not found");
+        }
+
+        [Fact]
+        public void When_dotnet_new_is_invoked_default_is_csharp()
+        {
+            string rootPath = CreateTemporaryFolder();
+
+            new DotnetNewCommand(Log)
+                .WithVirutalHive()
+                .WithWorkingDirectory(rootPath)
+                .Execute($"console", "--no-restore", "-n", "c1")
+                .Should().Pass();
+
+            string expectedCsprojPath = Path.Combine(rootPath, "c1", "c1.csproj");
+            Assert.True(File.Exists(expectedCsprojPath), $"expected '{expectedCsprojPath}' but was not found");
+        }
+
+        [Fact]
+        public void Dotnet_new_can_be_invoked_with_lang_option()
+        {
+            string rootPath = CreateTemporaryFolder();
+
+            new DotnetNewCommand(Log)
+                .WithVirutalHive()
+                .WithWorkingDirectory(rootPath)
+                .Execute($"console", "--no-restore", "-n", "vb1", "-lang", "vb")
+                .Should().Pass();
+
+            string expectedCsprojPath = Path.Combine(rootPath, "vb1", "vb1.vbproj");
+            Assert.True(File.Exists(expectedCsprojPath), $"expected '{expectedCsprojPath}' but was not found");
+        }
+
+        [Fact]
+        public void When_dotnet_new_is_invoked_with_preferred_lang_env_var_empty()
+        {
+            string rootPath = CreateTemporaryFolder();
+
+            new DotnetNewCommand(Log)
+                .WithVirutalHive()
+                .WithWorkingDirectory(rootPath)
+                .WithEnvironmentVariable("DOTNET_NEW_PREFERRED_LANG", "")
+                .Execute($"console", "--no-restore", "-n", "c1")
+                .Should().Pass();
+
+            string expectedCsprojPath = Path.Combine(rootPath, "c1", "c1.csproj");
+            Assert.True(File.Exists(expectedCsprojPath), $"expected '{expectedCsprojPath}' but was not found");
         }
     }
 }

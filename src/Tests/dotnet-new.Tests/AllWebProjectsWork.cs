@@ -1,22 +1,16 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.IO;
-using System.Threading.Tasks;
-using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
-using VerifyTests;
-using VerifyXunit;
-using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.New.Tests
+namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     [UsesVerify]
     [Collection("Verify Tests")]
-    public class AllWebProjectsWork : SdkTest, IClassFixture<WebProjectsFixture>
+    public class AllWebProjectsWork : BaseIntegrationTest, IClassFixture<WebProjectsFixture>
     {
         private readonly WebProjectsFixture _fixture;
         private readonly ITestOutputHelper _log;
@@ -50,7 +44,7 @@ namespace Microsoft.DotNet.New.Tests
                 .And
                 .NotHaveStdErr();
 
-            new DotnetCommand(_log, "restore")
+            new DotnetRestoreCommand(_log)
                 .WithWorkingDirectory(workingDir)
                 .Execute()
                 .Should()
@@ -58,7 +52,7 @@ namespace Microsoft.DotNet.New.Tests
                 .And
                 .NotHaveStdErr();
 
-            new DotnetCommand(_log, "build")
+            new DotnetBuildCommand(_log)
                 .WithWorkingDirectory(workingDir)
                 .Execute()
                 .Should()
@@ -131,8 +125,7 @@ namespace Microsoft.DotNet.New.Tests
     {
         public WebProjectsFixture(IMessageSink messageSink) : base(messageSink)
         {
-            BaseWorkingDirectory = TestUtils.CreateTemporaryFolder(nameof(AllWebProjectsWork));
- 
+            BaseWorkingDirectory = Utilities.CreateTemporaryFolder(nameof(AllWebProjectsWork));
             InstallPackage(TemplatePackagesPaths.MicrosoftDotNetWebProjectTemplates31Path, BaseWorkingDirectory);
             InstallPackage(TemplatePackagesPaths.MicrosoftDotNetWebProjectTemplates50Path, BaseWorkingDirectory);
         }

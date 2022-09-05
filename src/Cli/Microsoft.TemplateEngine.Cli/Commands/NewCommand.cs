@@ -4,7 +4,6 @@
 using System.CommandLine;
 using System.CommandLine.Completions;
 using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Settings;
 
@@ -14,22 +13,21 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         internal NewCommand(
             string commandName,
-            Func<ParseResult, ITemplateEngineHost> hostBuilder,
-            Func<ParseResult, ITelemetryLogger> telemetryLoggerBuilder)
-            : base(hostBuilder, telemetryLoggerBuilder, commandName, SymbolStrings.Command_New_Description)
+            Func<ParseResult, ITemplateEngineHost> hostBuilder)
+            : base(hostBuilder, commandName, SymbolStrings.Command_New_Description)
         {
             this.TreatUnmatchedTokensAsErrors = true;
 
             //it is important that legacy commands are built before non-legacy, as non legacy commands are building validators that rely on legacy stuff
-            BuildLegacySymbols(hostBuilder, telemetryLoggerBuilder);
+            BuildLegacySymbols(hostBuilder);
 
-            this.Add(new InstantiateCommand(hostBuilder, telemetryLoggerBuilder));
-            this.Add(new InstallCommand(this, hostBuilder, telemetryLoggerBuilder));
-            this.Add(new UninstallCommand(this, hostBuilder, telemetryLoggerBuilder));
-            this.Add(new UpdateCommand(this, hostBuilder, telemetryLoggerBuilder));
-            this.Add(new SearchCommand(this, hostBuilder, telemetryLoggerBuilder));
-            this.Add(new ListCommand(this, hostBuilder, telemetryLoggerBuilder));
-            this.Add(new AliasCommand(hostBuilder, telemetryLoggerBuilder));
+            this.Add(new InstantiateCommand(this, hostBuilder));
+            this.Add(new InstallCommand(this, hostBuilder));
+            this.Add(new UninstallCommand(this, hostBuilder));
+            this.Add(new UpdateCommand(this, hostBuilder));
+            this.Add(new SearchCommand(this, hostBuilder));
+            this.Add(new ListCommand(this, hostBuilder));
+            this.Add(new AliasCommand(hostBuilder));
 
             this.AddGlobalOption(DebugCustomSettingsLocationOption);
             this.AddGlobalOption(DebugVirtualizeSettingsOption);
@@ -37,6 +35,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.AddGlobalOption(DebugReinitOption);
             this.AddGlobalOption(DebugRebuildCacheOption);
             this.AddGlobalOption(DebugShowConfigOption);
+
+            this.AddOption(SharedOptions.OutputOption);
+            this.AddOption(SharedOptions.NameOption);
+            this.AddOption(SharedOptions.DryRunOption);
+            this.AddOption(SharedOptions.ForceOption);
+            this.AddOption(SharedOptions.NoUpdateCheckOption);
+            this.AddOption(SharedOptions.ProjectPathOption);
         }
 
         internal static Option<string?> DebugCustomSettingsLocationOption { get; } = new("--debug:custom-hive")
@@ -89,6 +94,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IsHidden = true
         };
 
+        internal IReadOnlyList<Option> PassByOptions { get; } = new Option[]
+        {
+            SharedOptions.ForceOption,
+            SharedOptions.NameOption,
+            SharedOptions.DryRunOption,
+            SharedOptions.NoUpdateCheckOption
+        };
+   
+
         protected internal override IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings)
         {
             if (context is not TextCompletionContext textCompletionContext)
@@ -133,10 +147,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override Task<NewCommandStatus> ExecuteAsync(
             NewCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
-            ITelemetryLogger telemetryLogger,
             InvocationContext context)
         {
-            return InstantiateCommand.ExecuteAsync(args, environmentSettings, telemetryLogger, context);
+            return InstantiateCommand.ExecuteAsync(args, environmentSettings, context);
         }
 
         protected override NewCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);

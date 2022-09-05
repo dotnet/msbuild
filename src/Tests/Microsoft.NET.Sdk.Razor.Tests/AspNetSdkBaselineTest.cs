@@ -190,7 +190,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                     .OrderBy(f => f, StringComparer.Ordinal)
                     .ToArray();
 
-                existingFiles.ShouldBeEquivalentTo(expected);
+                existingFiles.Should().BeEquivalentTo(expected);
             }
             else
             {
@@ -250,7 +250,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 existingFiles = existingFiles.Select(f => Regex.Replace(f, DotNetJSHashRegexPattern, DotNetJSHashTemplate)).ToArray();
 
                 var expected = LoadExpectedFilesBaseline(manifest.ManifestType, publishFolder, intermediateOutputPath, suffix, name);
-                existingFiles.ShouldBeEquivalentTo(expected);
+                existingFiles.Should().BeEquivalentTo(expected);
             }
             else
             {
@@ -352,12 +352,46 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 manifest.BasePath.Should().Be(expected.BasePath);
                 manifest.Mode.Should().Be(expected.Mode);
                 manifest.ManifestType.Should().Be(expected.ManifestType);
-                manifest.ReferencedProjectsConfiguration.OrderBy(cm => cm.Identity)
-                    .Should()
-                    .BeEquivalentTo(expected.ReferencedProjectsConfiguration.OrderBy(cm => cm.Identity));
-                manifest.DiscoveryPatterns.OrderBy(dp => dp.Name).ShouldBeEquivalentTo(expected.DiscoveryPatterns.OrderBy(dp => dp.Name));
-                manifest.Assets.OrderBy(a => a.BasePath).ThenBy(a => a.RelativePath).ThenBy(a => a.AssetKind)
-                    .ShouldBeEquivalentTo(expected.Assets.OrderBy(a => a.BasePath).ThenBy(a => a.RelativePath).ThenBy(a => a.AssetKind));
+                 
+                manifest.ReferencedProjectsConfiguration.Count().Should().Be(expected.ReferencedProjectsConfiguration.Count());
+
+                // Relax the check for project reference configuration items see
+                // https://github.com/dotnet/sdk/pull/27381#issuecomment-1228764471
+                // for details.
+                //manifest.ReferencedProjectsConfiguration.OrderBy(cm => cm.Identity)
+                //    .Should()
+                //    .BeEquivalentTo(expected.ReferencedProjectsConfiguration.OrderBy(cm => cm.Identity));
+
+                manifest.DiscoveryPatterns.OrderBy(dp => dp.Name).Should().BeEquivalentTo(expected.DiscoveryPatterns.OrderBy(dp => dp.Name));
+                var manifestAssets = manifest.Assets.OrderBy(a => a.BasePath).ThenBy(a => a.RelativePath).ThenBy(a => a.AssetKind);
+                var expectedAssets = expected.Assets.OrderBy(a => a.BasePath).ThenBy(a => a.RelativePath).ThenBy(a => a.AssetKind);
+                
+                manifestAssets.Should().BeEquivalentTo(expectedAssets, AssetDifferencesDetails(manifestAssets, expectedAssets));
+
+                static string AssetDifferencesDetails(IEnumerable<StaticWebAsset> manifestAssets, IEnumerable<StaticWebAsset> expectedAssets)
+                {
+                    var missingAssets = expectedAssets.Except(manifestAssets);
+                    var unexpectedAssets = manifestAssets.Except(expectedAssets);
+
+                    var differences = new List<string>();
+
+                    if (missingAssets.Any())
+                    {
+                        differences.Add($"The following expected assets weren't found in the manifest {string.Join(", ", missingAssets.Select(a => a.Identity))}.");
+                    }
+
+                    if (unexpectedAssets.Any())
+                    {
+                        differences.Add($"The following additional unexpected assets were found in the manifest {string.Join(", ", unexpectedAssets.Select(a => a.Identity))}.");
+                    }
+
+                    if (differences.Any())
+                    {
+                        differences.Add("If the difference in baselines is expected, please re-generate the baselines. Instructions are available at https://aka.ms/aspnet/blazor/blazor-wasm-sdk-baselines");
+                    }
+
+                    return string.Join(Environment.NewLine, differences);
+                }
             }
             else
             {

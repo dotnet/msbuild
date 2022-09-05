@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="AssemblyCultureDoesNotMatch">
         <source>{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</source>
-        <target state="translated">{2} 어셈블리 문화권 '{0}'이(가) {3} 어셈블리 문화권 '{1}'과(와) 일치하지 않습니다.</target>
+        <target state="new">{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyLoadError">
@@ -44,12 +44,12 @@
       </trans-unit>
       <trans-unit id="AssemblyVersionDoesNotMatch">
         <source>{3} assembly version '{1}' should be equal to {2} version '{0}'.</source>
-        <target state="translated">{3} 어셈블리 버전 '{1}'이(는) {2} 버전 '{0}'과(와) 같아야 합니다.</target>
+        <target state="new">{3} assembly version '{1}' should be equal to {2} version '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyVersionIsNotCompatible">
         <source>{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</source>
-        <target state="translated">{2} 어셈블리 버전 '{0}'은(는) {3} 버전 '{1}'보다 크거나 같아야 합니다.</target>
+        <target state="new">{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotAddAbstractMember">
@@ -199,7 +199,7 @@
       </trans-unit>
       <trans-unit id="TypeMissingOnSide">
         <source>Type '{0}' exists on {1} but not on {2}</source>
-        <target state="translated">'{0}' 유형이 {1}에 있지만 {2}에 없음</target>
+        <target state="new">Type '{0}' exists on {1} but not on {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="VisitorRightCountShouldMatchMappersSetSize">

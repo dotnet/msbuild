@@ -55,7 +55,7 @@ namespace Microsoft.NET.Build.Tasks
             else
             {
                 var normalizedTargetFrameworkVersion = ProcessFrameworkReferences.NormalizeVersion(new Version(TargetFrameworkVersion));
-
+                
                 var knownFrameworkReferencesByWindowsSdkVersion = new Dictionary<Version, List<(Version minimumNetVersion, TaskItem knownFrameworkReference)>>();
 
                 foreach (var supportedWindowsVersion in WindowsSdkSupportedTargetPlatformVersions)
@@ -86,10 +86,9 @@ namespace Microsoft.NET.Build.Tasks
                         }
 
                         knownFrameworkReferencesByWindowsSdkVersion[windowsSdkVersionParsed].Add((normalizedMinimumVersion, CreateKnownFrameworkReference(windowsSdkPackageVersion, TargetFrameworkVersion, supportedWindowsVersion.ItemSpec)));
-
                     }
                 }
-
+                
                 foreach (var knownFrameworkReferencesForSdkVersion in knownFrameworkReferencesByWindowsSdkVersion.Values)
                 {
                     //  If there are multiple WindowsSdkSupportedTargetPlatformVersion items for the same Windows SDK version, choose the one with the highest minimum version.

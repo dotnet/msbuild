@@ -50,11 +50,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 AddAlias(item);
             }
 
-            this.AddOption(OutputOption);
-            this.AddOption(NameOption);
-            this.AddOption(DryRunOption);
-            this.AddOption(ForceOption);
-            this.AddOption(NoUpdateCheckOption);
+            this.AddOption(SharedOptions.OutputOption);
+            this.AddOption(SharedOptions.NameOption);
+            this.AddOption(SharedOptions.DryRunOption);
+            this.AddOption(SharedOptions.ForceOption);
+            this.AddOption(SharedOptions.NoUpdateCheckOption);
 
             string? templateLanguage = template.GetLanguage();
             string? defaultLanguage = environmentSettings.GetDefaultLanguage();
@@ -115,32 +115,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal static IReadOnlyList<string> KnownHelpAliases => _helpAliases;
 
-        internal static Option<bool> ForceOption { get; } = new Option<bool>("--force")
-        {
-            Description = SymbolStrings.TemplateCommand_Option_Force,
-            Arity = new ArgumentArity(0, 1)
-        };
-
-        internal Option<string> OutputOption { get; } = SharedOptionsFactory.CreateOutputOption();
-
-        internal Option<string> NameOption { get; } = new Option<string>(new string[] { "-n", "--name" })
-        {
-            Description = SymbolStrings.TemplateCommand_Option_Name,
-            Arity = new ArgumentArity(1, 1)
-        };
-
-        internal Option<bool> DryRunOption { get; } = new Option<bool>("--dry-run")
-        {
-            Description = SymbolStrings.TemplateCommand_Option_DryRun,
-            Arity = new ArgumentArity(0, 1)
-        };
-
-        internal Option<bool> NoUpdateCheckOption { get; } = new Option<bool>("--no-update-check")
-        {
-            Description = SymbolStrings.TemplateCommand_Option_NoUpdateCheck,
-            Arity = new ArgumentArity(0, 1)
-        };
-
         internal Option<AllowRunScripts>? AllowScriptsOption { get; }
 
         internal Option<string>? LanguageOption { get; }
@@ -170,11 +144,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return templateConstraints.Where(cr => cr.EvaluationStatus != TemplateConstraintResult.Status.Allowed).ToList();
         }
 
-        internal async Task<NewCommandStatus> InvokeAsync(ParseResult parseResult, ITelemetryLogger telemetryLogger, CancellationToken cancellationToken)
+        internal async Task<NewCommandStatus> InvokeAsync(ParseResult parseResult, CancellationToken cancellationToken)
         {
             TemplateCommandArgs args = new TemplateCommandArgs(this, _instantiateCommand, parseResult);
-            TemplateInvoker invoker = new TemplateInvoker(_environmentSettings, telemetryLogger, () => Console.ReadLine() ?? string.Empty);
-            TemplatePackageCoordinator packageCoordinator = new TemplatePackageCoordinator(telemetryLogger, _environmentSettings, _templatePackageManager);
+            TemplateInvoker invoker = new TemplateInvoker(_environmentSettings, () => Console.ReadLine() ?? string.Empty);
+            TemplatePackageCoordinator packageCoordinator = new TemplatePackageCoordinator(_environmentSettings, _templatePackageManager);
             TemplateConstraintManager constraintManager = new TemplateConstraintManager(_environmentSettings);
 
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
@@ -247,11 +221,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             if (templateArgs.IsForceFlagSpecified)
             {
-                reporter.WriteLine(string.Format(LocalizableStrings.TemplateCommand_DisplayConstraintResults_Warning, templateArgs.Template.Name));
+                reporter.WriteLine(LocalizableStrings.TemplateCommand_DisplayConstraintResults_Warning, templateArgs.Template.Name);
             }
             else
             {
-                reporter.WriteLine(string.Format(LocalizableStrings.TemplateCommand_DisplayConstraintResults_Error, templateArgs.Template.Name));
+                reporter.WriteLine(LocalizableStrings.TemplateCommand_DisplayConstraintResults_Error, templateArgs.Template.Name);
             }
 
             foreach (var constraint in constraintResults.Where(cr => cr.EvaluationStatus != TemplateConstraintResult.Status.Allowed))
@@ -262,8 +236,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             if (!templateArgs.IsForceFlagSpecified)
             {
-                reporter.WriteLine(string.Format(LocalizableStrings.TemplateCommand_DisplayConstraintResults_Hint, TemplateCommand.ForceOption.Aliases.First()));
-                reporter.WriteCommand(Example.FromExistingTokens(templateArgs.ParseResult).WithOption(TemplateCommand.ForceOption));
+                reporter.WriteLine(LocalizableStrings.TemplateCommand_DisplayConstraintResults_Hint, SharedOptions.ForceOption.Aliases.First());
+                reporter.WriteCommand(Example.FromExistingTokens(templateArgs.ParseResult).WithOption(SharedOptions.ForceOption));
             }
             else
             {
