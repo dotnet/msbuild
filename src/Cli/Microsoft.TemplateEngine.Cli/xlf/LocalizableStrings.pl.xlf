@@ -455,17 +455,17 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="InstantiateCommand_Info_NoMatchingTemplatesSubCommands">
         <source>No templates or subcommands found matching: '{0}'.</source>
-        <target state="new">No templates or subcommands found matching: '{0}'.</target>
+        <target state="translated">Nie znaleziono zgodnych szablonów ani poleceń podrzędnych: „{0}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstantiateCommand_Info_TypoCorrection_Subcommands">
         <source>Did you mean one of the following subcommands?</source>
-        <target state="new">Did you mean one of the following subcommands?</target>
+        <target state="translated">Czy chodziło Ci o jedno z następujących poleceń podrzędnych?</target>
         <note>Followed by the list of suggestions</note>
       </trans-unit>
       <trans-unit id="InstantiateCommand_Info_TypoCorrection_Templates">
         <source>Did you mean one of the following templates?</source>
-        <target state="new">Did you mean one of the following templates?</target>
+        <target state="translated">Czy chodziło Ci o jeden z następujących szablonów?</target>
         <note>Followed by the list of suggestions</note>
       </trans-unit>
       <trans-unit id="InvalidCommandOptions">

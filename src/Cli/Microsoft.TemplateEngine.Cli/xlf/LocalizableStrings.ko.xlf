@@ -455,17 +455,17 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="InstantiateCommand_Info_NoMatchingTemplatesSubCommands">
         <source>No templates or subcommands found matching: '{0}'.</source>
-        <target state="new">No templates or subcommands found matching: '{0}'.</target>
+        <target state="translated">일치하는 템플릿 또는 하위 명령이 없습니다. '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstantiateCommand_Info_TypoCorrection_Subcommands">
         <source>Did you mean one of the following subcommands?</source>
-        <target state="new">Did you mean one of the following subcommands?</target>
+        <target state="translated">다음 하위 명령 중 하나를 의미했나요?</target>
         <note>Followed by the list of suggestions</note>
       </trans-unit>
       <trans-unit id="InstantiateCommand_Info_TypoCorrection_Templates">
         <source>Did you mean one of the following templates?</source>
-        <target state="new">Did you mean one of the following templates?</target>
+        <target state="translated">다음 템플릿 중 하나를 의미했나요?</target>
         <note>Followed by the list of suggestions</note>
       </trans-unit>
       <trans-unit id="InvalidCommandOptions">
