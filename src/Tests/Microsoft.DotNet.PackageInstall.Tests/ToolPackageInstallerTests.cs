@@ -738,7 +738,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             var installer = new ToolPackageInstaller(
                 store: store,
                 projectRestorer: new Stage2ProjectRestorer(Log, reporter),
-                tempProject: GetUniqueTempProjectPathEachTest(), // <-- is this a concern?
+                tempProject: GetUniqueTempProjectPathEachTest(),
                 offlineFeed: new DirectoryPath("does not exist"));
 
             var package = installer.InstallPackage(new PackageLocation(nugetConfig: nugetConfigPath),
@@ -1059,7 +1059,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         private readonly string _testTargetframework = BundledTargetFramework.GetTargetFrameworkMoniker();
         private const string TestPackageVersion = "1.0.4";
         private static readonly PackageId TestPackageId = new PackageId("global.tool.console.demo");
-        private static readonly IEnumerable<NuGetFramework> TestFrameworks = new NuGetFramework[] { NuGetFramework.Parse("netcoreapp2.1")};
+        private static readonly IEnumerable<NuGetFramework> TestFrameworks = new NuGetFramework[] { NuGetFramework.Parse("netcoreapp2.1") };
 
         public ToolPackageInstallerTests(ITestOutputHelper log) : base(log)
         {

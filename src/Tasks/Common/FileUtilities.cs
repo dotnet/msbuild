@@ -16,7 +16,7 @@ namespace Microsoft.NET.Build.Tasks
         static int S_IRUSR = 256;
         static int S_IWUSR = 128;
         static int S_IXUSR = 64;
-        static int PERMISSIONS_OCTAL_700 = S_IRUSR | S_IWUSR | S_IXUSR;
+        static int S_IRWXU = S_IRUSR | S_IWUSR | S_IXUSR; // 700 (octal) Permissions 
 
         public static Version GetFileVersion(string sourcePath)
         {
@@ -48,7 +48,7 @@ namespace Microsoft.NET.Build.Tasks
             string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                mkdir(path, PERMISSIONS_OCTAL_700);
+                mkdir(path, S_IRWXU);
             }
             else
             {
@@ -56,39 +56,5 @@ namespace Microsoft.NET.Build.Tasks
             }
             return path;
         }
-
-        public static string CreateTempFile(string tempDirectory, string extension = "")
-        {
-            if (extension == "")
-                extension = Path.GetExtension(Path.GetRandomFileName());
-
-            string fileName = Path.ChangeExtension(Path.Combine(tempDirectory, Path.GetTempFileName()), extension);
-            var fstream = File.Create(fileName.ToString());
-            fstream.Close();
-
-            ResetTempFilePermissions(fileName);
-            return fileName;
-        }
-
-        /// <summary>
-        ///  
-        /// </summary>
-        /// <returns>The full path of a newly created temp file with OK permissions.</returns>
-        public static string CreateTempFile()
-        {
-            return Path.GetTempFileName();
-        }
-
-
-        [DllImport("libc", SetLastError = true)]
-        private static extern int chmod(string pathname, int mode);
-        private static void ResetTempFilePermissions(string path)
-        {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                chmod(path, PERMISSIONS_OCTAL_700);
-            }
-        }
-
     }
 }

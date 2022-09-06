@@ -165,9 +165,15 @@ namespace Microsoft.DotNet.ToolPackage
             DirectoryPath? rootConfigDirectory,
             string[] additionalFeeds)
         {
-            string tempProject = _tempProject != null && _tempProject.HasValue ? _tempProject.Value.Value : FileUtilities.CreateTempFile(FileUtilities.CreateTempPath(), "csproj");
+            string tempProject;
+            if (_tempProject != null && _tempProject.HasValue)
+            {
+                tempProject = _tempProject.Value.Value;
+                Directory.CreateDirectory(Path.GetDirectoryName(tempProject));
+            }
+            else
+                tempProject = Path.Combine(FileUtilities.CreateTempPath(), "restore.csproj");
 
-            Directory.CreateDirectory(Path.GetDirectoryName(tempProject));
             var tempProjectContent = new XDocument(
                 new XElement("Project",
                     new XElement("PropertyGroup",

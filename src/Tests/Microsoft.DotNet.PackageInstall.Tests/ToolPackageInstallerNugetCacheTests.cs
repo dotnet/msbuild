@@ -167,7 +167,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                 installer = new ToolPackageInstaller(
                     store: store,
                     projectRestorer: new Stage2ProjectRestorer(Log, reporter),
-                    tempProject: tempProject ?? GetUniqueTempProjectPathEachTest(testDirectory), // <-- is this a concern?
+                    tempProject: tempProject ?? GetUniqueTempProjectPathEachTest(testDirectory),
                     offlineFeed: offlineFeed ?? new DirectoryPath("does not exist"));
             }
 

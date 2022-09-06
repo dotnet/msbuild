@@ -94,31 +94,5 @@ namespace Microsoft.DotNet.Cli
 
         private static bool IsRunningWorkloadCommand(ParseResult parseResult) =>
             parseResult.RootSubCommandResult() == (WorkloadCommandParser.GetCommand().Name);
-
-        private static bool TempHomeIsOnlyRootWritable(string path)
-        {
-            if (StatInterop.LStat(path, out StatInterop.FileStatus fileStat) != 0)
-            {
-                return false;
-            }
-
-            return IsOwnedByRoot(fileStat) && GroupCannotWrite(fileStat) &&
-                   OtherUserCannotWrite(fileStat);
-        }
-
-        private static bool OtherUserCannotWrite(StatInterop.FileStatus fileStat)
-        {
-            return (fileStat.Mode & (int)StatInterop.Permissions.S_IWOTH) == 0;
-        }
-
-        private static bool GroupCannotWrite(StatInterop.FileStatus fileStat)
-        {
-            return (fileStat.Mode & (int)StatInterop.Permissions.S_IWGRP) == 0;
-        }
-
-        private static bool IsOwnedByRoot(StatInterop.FileStatus fileStat)
-        {
-            return fileStat.Uid == 0;
-        }
     }
 }

@@ -99,7 +99,6 @@ namespace Microsoft.DotNet.Workloads.Workload
                 if (!skipManifestUpdate)
                 {
                     DirectoryPath folderForManifestDownloads;
-                    // This path would've been secured earlier.
                     tempPath = new DirectoryPath(Path.Combine(TempDirectoryPath, "dotnet-manifest-extraction"));
                     string extractedManifestsPath = Path.Combine(tempPath.Value.Value, "manifests");
 

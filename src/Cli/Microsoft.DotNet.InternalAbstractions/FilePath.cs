@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
 
         public string ToQuotedString()
         {
-            return $"\"{Value}\"";
+            return Value;
         }
 
         public override string ToString()

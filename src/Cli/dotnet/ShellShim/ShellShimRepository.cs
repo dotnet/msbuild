@@ -105,7 +105,6 @@ namespace Microsoft.DotNet.ShellShim
                     {
                         foreach (var file in GetShimFiles(commandName).Where(f => _fileSystem.File.Exists(f.Value)))
                         {
-                            // v This should call FileUtilities for a secure directory, or call the mock temp path creator.
                             var tempPath = Path.Combine(_fileSystem.Directory.CreateTempPath(), Path.GetRandomFileName());
                             FileAccessRetrier.RetryOnMoveAccessFailure(() => _fileSystem.File.Move(file.Value, tempPath));
                             files[file.Value] = tempPath;
