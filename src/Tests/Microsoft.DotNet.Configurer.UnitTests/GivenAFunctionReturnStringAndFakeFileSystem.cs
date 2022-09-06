@@ -173,7 +173,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 throw new UnauthorizedAccessException();
             }
 
-            public string CreateTempPath()
+            public string CreateTemporarySubdirectory()
             {
                 throw new NotImplementedException();
             }

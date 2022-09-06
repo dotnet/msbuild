@@ -174,7 +174,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 throw new NotImplementedException();
             }
 
-            public string CreateTempPath()
+            public string CreateTemporarySubdirectory()
             {
                 throw new NotImplementedException();
             }

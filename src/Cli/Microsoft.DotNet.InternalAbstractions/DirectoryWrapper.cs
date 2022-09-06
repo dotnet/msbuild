@@ -19,7 +19,7 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
             return new TemporaryDirectory();
         }
 
-        public string CreateTempPath()
+        public string CreateTemporarySubdirectory()
         {
             return CreateTemporaryDirectory().DirectoryPath;
         }

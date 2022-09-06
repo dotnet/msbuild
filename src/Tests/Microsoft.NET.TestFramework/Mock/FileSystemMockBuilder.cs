@@ -579,7 +579,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                 _files.CreateDirectory(path);
             }
 
-            public string CreateTempPath()
+            public string CreateTemporarySubdirectory()
             {
                 return CreateTemporaryDirectory().DirectoryPath;
             }

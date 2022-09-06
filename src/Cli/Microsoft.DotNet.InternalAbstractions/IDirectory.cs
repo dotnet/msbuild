@@ -27,6 +27,6 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
 
 
         /// <Summary>Returns a new directory created under the temp folder. Can be on the mock under test or the real temp file folder.</Summary>
-        string CreateTempPath();
+        string CreateTemporarySubdirectory();
     }
 }
