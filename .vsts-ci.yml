@@ -40,7 +40,7 @@ stages:
   - job: Publish_Build_Configuration
     pool:
       ${{ if eq(variables['System.TeamProject'], 'public') }}:
-        name: NetCore1ESPool-Svc-Public
+        name: NetCore-Svc-Public
         demands: ImageOverride -equals build.windows.10.amd64.vs2019.open
       ${{ if eq(variables['System.TeamProject'], 'internal') }}:
         name: NetCore1ESPool-Svc-Internal
@@ -54,7 +54,7 @@ stages:
       agentOs: Windows_NT
       pool:
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          name: NetCore1ESPool-Svc-Public
+          name: NetCore-Svc-Public
           demands: ImageOverride -equals Build.Windows.Amd64.VS2022.Pre.Open
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
           name: NetCore1ESPool-Svc-Internal
@@ -85,7 +85,7 @@ stages:
         agentOs: Windows_NT_FullFramework
         pool:
           ${{ if eq(variables['System.TeamProject'], 'public') }}:
-            name: NetCore1ESPool-Svc-Public
+            name: NetCore-Svc-Public
             demands: ImageOverride -equals Build.Windows.Amd64.VS2022.Pre.Open
           ${{ if ne(variables['System.TeamProject'], 'public') }}:
             name: NetCore1ESPool-Svc-Internal
@@ -112,7 +112,7 @@ stages:
         agentOs: Windows_NT_TestAsTools
         pool:
           ${{ if eq(variables['System.TeamProject'], 'public') }}:
-            name: NetCore1ESPool-Svc-Public
+            name: NetCore-Svc-Public
             demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre.Open
           ${{ if ne(variables['System.TeamProject'], 'public') }}:
             name: NetCore1ESPool-Svc-Internal
@@ -129,7 +129,7 @@ stages:
         agentOs: Ubuntu_20_04
         pool:
           ${{ if eq(variables['System.TeamProject'], 'public') }}:
-            name: NetCore1ESPool-Svc-Public
+            name: NetCore-Svc-Public
             demands: ImageOverride -equals 1es-ubuntu-2004-open
           ${{ if ne(variables['System.TeamProject'], 'public') }}:
             name: NetCore1ESPool-Svc-Internal
