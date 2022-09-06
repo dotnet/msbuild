@@ -11,10 +11,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Tools;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using NuGet.ProjectModel;
 using NuGet.Versioning;
-using Microsoft.NET.Build.Tasks;
-using System.Diagnostics;
 
 namespace Microsoft.DotNet.ToolPackage
 {
@@ -130,7 +127,7 @@ namespace Microsoft.DotNet.ToolPackage
             string targetFramework = null,
             string verbosity = null)
         {
-            var tempDirectoryForAssetJson = FileUtilities.CreateTempSubdirectory();
+            var tempDirectoryForAssetJson = PathUtilities.CreateTempSubdirectory();
 
             string tempProject = CreateDirectoryWithTempProject(
                 packageId: packageId,
@@ -172,7 +169,7 @@ namespace Microsoft.DotNet.ToolPackage
                 Directory.CreateDirectory(Path.GetDirectoryName(tempProject));
             }
             else
-                tempProject = Path.Combine(FileUtilities.CreateTempSubdirectory(), "restore.csproj");
+                tempProject = Path.Combine(PathUtilities.CreateTempSubdirectory(), "restore.csproj");
 
             var tempProjectContent = new XDocument(
                 new XElement("Project",

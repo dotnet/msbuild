@@ -2,13 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.IO;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using Microsoft.NET.Build.Tasks;
 using NuGet.Common;
 
 namespace Microsoft.DotNet.Workloads.Workload
@@ -105,7 +103,7 @@ namespace Microsoft.DotNet.Workloads.Workload
                 ? tempDirPath
                 : !string.IsNullOrWhiteSpace(parseResult.GetValueForOption(WorkloadInstallCommandParser.TempDirOption))
                 ? parseResult.GetValueForOption(WorkloadInstallCommandParser.TempDirOption)
-                : FileUtilities.CreateTempSubdirectory();
+                : PathUtilities.CreateTempSubdirectory();
 
             TempPackagesDirectory = new DirectoryPath(Path.Combine(TempDirectoryPath, "dotnet-sdk-advertising-temp"));
 

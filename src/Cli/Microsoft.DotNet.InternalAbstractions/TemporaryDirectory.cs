@@ -1,9 +1,9 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Extensions.EnvironmentAbstractions;
 using System.IO;
-using Microsoft.NET.Build.Tasks;
+using Microsoft.Extensions.EnvironmentAbstractions;
+using Microsoft.DotNet;
 
 namespace Microsoft.DotNet.InternalAbstractions
 {
@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.InternalAbstractions
 
         public TemporaryDirectory()
         {
-            DirectoryPath = Path.Combine(FileUtilities.CreateTempSubdirectory());
+            DirectoryPath = Path.Combine(PathUtilities.CreateTempSubdirectory());
         }
 
         public void Dispose()

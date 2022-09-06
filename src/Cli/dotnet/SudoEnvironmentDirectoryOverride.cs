@@ -3,13 +3,9 @@
 
 using System;
 using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.Common;
-using Microsoft.NET.Build.Tasks;
 using NuGet.Common;
 using NuGet.Configuration;
 
@@ -38,7 +34,7 @@ namespace Microsoft.DotNet.Cli
         {
             if (!OperatingSystem.IsWindows() && IsRunningUnderSudo() && IsRunningWorkloadCommand(parseResult))
             {
-                string sudoHome = FileUtilities.CreateTempSubdirectory();
+                string sudoHome = PathUtilities.CreateTempSubdirectory();
                 var homeBeforeOverride = Path.Combine(Environment.GetEnvironmentVariable("HOME"));
                 Environment.SetEnvironmentVariable("HOME", sudoHome);
 

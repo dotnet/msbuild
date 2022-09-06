@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli;
@@ -17,7 +16,6 @@ using Microsoft.DotNet.MSBuildSdkResolver;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using NuGet.Common;
 using NuGet.Versioning;
@@ -70,7 +68,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             var sdkVersion = Product.Version;
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, sdkVersion, userProfileDir);
             var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetPath, sdkVersion, userProfileDir);
-            var tempPackagesDir = new DirectoryPath(FileUtilities.CreateTempSubdirectory());
+            var tempPackagesDir = new DirectoryPath(PathUtilities.CreateTempSubdirectory());
             var nugetPackageDownloader = new NuGetPackageDownloader(tempPackagesDir,
                                           filePermissionSetter: null,
                                           new FirstPartyNuGetPackageSigningVerifier(),
@@ -263,7 +261,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         var newPackageId = _workloadManifestInstaller.GetManifestPackageId(new ManifestId(manifest.Id), installedSdkFeatureBand);
 
                         (success, latestVersion) = await GetPackageVersion(newPackageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreviews);
-                        
+
                         if (success)
                         {
                             downloads.Add(new WorkloadDownload(manifest.Id, newPackageId.ToString(), latestVersion.ToString()));
@@ -558,9 +556,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
 
         }
-        
 
-private string GetAdvertisingManifestPath(SdkFeatureBand featureBand, ManifestId manifestId) =>
-            Path.Combine(_userProfileDir, "sdk-advertising", featureBand.ToString(), manifestId.ToString());
+
+        private string GetAdvertisingManifestPath(SdkFeatureBand featureBand, ManifestId manifestId) =>
+                    Path.Combine(_userProfileDir, "sdk-advertising", featureBand.ToString(), manifestId.ToString());
     }
 }

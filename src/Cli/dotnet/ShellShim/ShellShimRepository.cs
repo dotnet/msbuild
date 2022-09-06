@@ -9,7 +9,6 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using Microsoft.NET.Build.Tasks;
 
 namespace Microsoft.DotNet.ShellShim
 {

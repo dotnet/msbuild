@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -19,7 +18,6 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Common;
 using NuGet.Frameworks;
 using NuGet.Versioning;
-using Microsoft.NET.Build.Tasks;
 
 namespace Microsoft.DotNet.Tools.Tool.Install
 {
@@ -73,7 +71,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             _environmentPathInstruction = environmentPathInstruction
                 ?? EnvironmentPathFactory.CreateEnvironmentPathInstruction();
             _createShellShimRepository = createShellShimRepository ?? ShellShimRepositoryFactory.CreateShellShimRepository;
-            var tempDir = new DirectoryPath(FileUtilities.CreateTempSubdirectory());
+            var tempDir = new DirectoryPath(PathUtilities.CreateTempSubdirectory());
             var configOption = parseResult.GetValueForOption(ToolInstallCommandParser.ConfigOption);
             var sourceOption = parseResult.GetValueForOption(ToolInstallCommandParser.AddSourceOption);
             var packageSourceLocation = new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), additionalSourceFeeds: sourceOption);
