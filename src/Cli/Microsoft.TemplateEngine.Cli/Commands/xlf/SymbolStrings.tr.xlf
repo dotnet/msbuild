@@ -185,7 +185,7 @@ Eğer komut bağımsız değişken olmadan belirtilirse yüklü tüm şablon pak
       </trans-unit>
       <trans-unit id="Option_ProjectPath">
         <source>The project that should be used for context evaluation.</source>
-        <target state="new">The project that should be used for context evaluation.</target>
+        <target state="translated">Bağlam değerlendirmesi için kullanılacak proje.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_TagFilter">

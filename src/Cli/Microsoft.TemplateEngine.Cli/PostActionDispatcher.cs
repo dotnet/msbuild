@@ -1,5 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
@@ -71,7 +72,7 @@ namespace Microsoft.TemplateEngine.Cli
             _ = creationResult.CreationEffects ?? throw new ArgumentNullException(nameof(creationResult.CreationEffects));
             if (!isDryRun)
             {
-            _ = creationResult.CreationResult ?? throw new ArgumentNullException(nameof(creationResult.CreationResult));
+                _ = creationResult.CreationResult ?? throw new ArgumentNullException(nameof(creationResult.CreationResult));
             }
             if (string.IsNullOrWhiteSpace(creationResult.OutputBaseDirectory))
             {

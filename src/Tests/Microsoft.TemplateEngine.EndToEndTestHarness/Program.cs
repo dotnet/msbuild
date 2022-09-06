@@ -1,5 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using System.CommandLine.Parsing;
@@ -21,7 +22,11 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
         private const string HostIdentifier = "endtoendtestharness";
         private const string HostVersion = "v1.0.0";
         private const string CommandName = "test-test";
+#pragma warning disable SA1308 // Variable names should not be prefixed
+#pragma warning disable SA1311 // Static readonly fields should begin with upper-case letter
         private static readonly Dictionary<string, Func<IPhysicalFileSystem, JObject, string, bool>> s_verificationLookup = new(StringComparer.OrdinalIgnoreCase);
+#pragma warning restore SA1311 // Static readonly fields should begin with upper-case letter
+#pragma warning restore SA1308 // Variable names should not be prefixed
 
         private static int Main(string[] args)
         {
