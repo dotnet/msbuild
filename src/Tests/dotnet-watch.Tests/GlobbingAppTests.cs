@@ -16,7 +16,6 @@ namespace Microsoft.DotNet.Watcher.Tools
     public class GlobbingAppTests
     {
         private const string AppName = "WatchGlobbingApp";
-        private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(60);
         private readonly TestAssetsManager _testAssetsManager;
         private readonly ITestOutputHelper _logger;
 
@@ -38,18 +37,18 @@ namespace Microsoft.DotNet.Watcher.Tools
             using var app = new WatchableApp(testAsset, _logger);
 
             app.UsePollingWatcher = usePollingWatcher;
-            await app.StartWatcherAsync().TimeoutAfter(DefaultTimeout);
+            await app.StartWatcherAsync();
 
-            var types = await GetCompiledAppDefinedTypes(app).TimeoutAfter(DefaultTimeout);
+            var types = await GetCompiledAppDefinedTypes(app);
             Assert.Equal(2, types);
 
             var fileToChange = Path.Combine(app.SourceDirectory, "include", "Foo.cs");
             var programCs = File.ReadAllText(fileToChange);
             File.WriteAllText(fileToChange, programCs);
 
-            await app.HasFileChanged().TimeoutAfter(DefaultTimeout);
-            await app.HasRestarted().TimeoutAfter(DefaultTimeout);
-            types = await GetCompiledAppDefinedTypes(app).TimeoutAfter(DefaultTimeout);
+            await app.HasFileChanged();
+            await app.HasRestarted();
+            types = await GetCompiledAppDefinedTypes(app);
             Assert.Equal(2, types);
         }
 
@@ -62,16 +61,16 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             using var app = new WatchableApp(testAsset, _logger);
 
-            await app.StartWatcherAsync().TimeoutAfter(DefaultTimeout);
+            await app.StartWatcherAsync();
 
-            var types = await GetCompiledAppDefinedTypes(app).TimeoutAfter(DefaultTimeout);
+            var types = await GetCompiledAppDefinedTypes(app);
             Assert.Equal(2, types);
 
             var fileToChange = Path.Combine(app.SourceDirectory, "include", "Foo.cs");
             File.Delete(fileToChange);
 
-            await app.HasRestarted().TimeoutAfter(DefaultTimeout);
-            types = await GetCompiledAppDefinedTypes(app).TimeoutAfter(DefaultTimeout);
+            await app.HasRestarted();
+            types = await GetCompiledAppDefinedTypes(app);
             Assert.Equal(1, types);
         }
 
@@ -84,16 +83,16 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             using var app = new WatchableApp(testAsset, _logger);
 
-            await app.StartWatcherAsync().TimeoutAfter(DefaultTimeout);
+            await app.StartWatcherAsync();
 
-            var types = await GetCompiledAppDefinedTypes(app).TimeoutAfter(DefaultTimeout);
+            var types = await GetCompiledAppDefinedTypes(app);
             Assert.Equal(2, types);
 
             var folderToDelete = Path.Combine(app.SourceDirectory, "include");
             Directory.Delete(folderToDelete, recursive: true);
 
-            await app.HasRestarted().TimeoutAfter(DefaultTimeout);
-            types = await GetCompiledAppDefinedTypes(app).TimeoutAfter(DefaultTimeout);
+            await app.HasRestarted();
+            types = await GetCompiledAppDefinedTypes(app);
             Assert.Equal(1, types);
         }
 
@@ -106,13 +105,13 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             using var app = new WatchableApp(testAsset, _logger);
 
-            await app.StartWatcherAsync().TimeoutAfter(DefaultTimeout);
+            await app.StartWatcherAsync();
 
             var oldFile = Path.Combine(app.SourceDirectory, "include", "Foo.cs");
             var newFile = Path.Combine(app.SourceDirectory, "include", "Foo_new.cs");
             File.Move(oldFile, newFile);
 
-            await app.HasRestarted().TimeoutAfter(DefaultTimeout);
+            await app.HasRestarted();
         }
 
         [Fact]
@@ -124,7 +123,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             using var app = new WatchableApp(testAsset, _logger);
 
-            await app.StartWatcherAsync().TimeoutAfter(DefaultTimeout);
+            await app.StartWatcherAsync();
 
             var changedFile = Path.Combine(app.SourceDirectory, "exclude", "Baz.cs");
             File.WriteAllText(changedFile, "");
@@ -147,7 +146,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             app.Start(new[] { "--list" });
             var cts = new CancellationTokenSource();
             cts.CancelAfter(TimeSpan.FromSeconds(30));
-            var lines = await app.Process.GetAllOutputLinesAsync(cts.Token).TimeoutAfter(DefaultTimeout);
+            var lines = await app.Process.GetAllOutputLinesAsync(cts.Token);
             var files = lines.Where(l => !l.StartsWith("watch :"));
 
             AssertEx.EqualFileList(
@@ -163,7 +162,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         private async Task<int> GetCompiledAppDefinedTypes(WatchableApp app)
         {
-            var definedTypesMessage = await app.Process.GetOutputLineStartsWithAsync("Defined types = ", TimeSpan.FromSeconds(30));
+            var definedTypesMessage = await app.Process.GetOutputLineStartsWithAsync("Defined types = ");
             return int.Parse(definedTypesMessage.Split('=').Last());
         }
     }
