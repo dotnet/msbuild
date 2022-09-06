@@ -3,15 +3,14 @@
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <TargetFrameworks Condition="'$(MSBuildRuntimeType)' != 'Core' and '$(MonoBuild)' != 'true'">$(LibraryTargetFrameworks);net35</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <WarningsAsErrors>true</WarningsAsErrors>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <IsPackable>true</IsPackable>
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <LangVersion>8.0</LangVersion>
     <PackageId>Microsoft.NET.StringTools</PackageId>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-    <VersionPrefix>1.0.0</VersionPrefix>
-    <AssemblyVersion></AssemblyVersion>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <SemanticVersioningV1>true</SemanticVersioningV1>
 
     <AssemblyName>Microsoft.NET.StringTools</AssemblyName>

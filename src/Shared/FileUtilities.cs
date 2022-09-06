@@ -174,6 +174,8 @@ namespace Microsoft.Build.Shared
             try
             {
                 string testFilePath = Path.Combine(directory, $"MSBuild_{Guid.NewGuid().ToString("N")}_testFile.txt");
+                FileInfo file = new(testFilePath);
+                file.Directory.Create(); // If the directory already exists, this method does nothing.
                 File.WriteAllText(testFilePath, $"MSBuild process {Process.GetCurrentProcess().Id} successfully wrote to file.");
                 File.Delete(testFilePath);
                 return true;

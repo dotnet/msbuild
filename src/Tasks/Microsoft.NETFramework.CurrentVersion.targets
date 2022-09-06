@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 Microsoft.NETFramework.CurrentVersion.targets
 
@@ -12,7 +12,6 @@ these two files are used to encapsulate the multi-targeting and framework specif
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
-
 <Project>
 
   <PropertyGroup>
@@ -30,7 +29,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       DependsOnTargets="$(GetFrameworkPathsDependsOn)">
 
     <!-- For backwards compatibility of targets who replaced this target we cannot move these values outside the target even though they
-             now only depend on statically availiable values-->
+        now only depend on statically availiable values-->
 
     <ItemGroup>
       <_TargetFramework40DirectoryItem Include="$(MSBuildFrameworkToolsRoot)v4.0.30319"/>

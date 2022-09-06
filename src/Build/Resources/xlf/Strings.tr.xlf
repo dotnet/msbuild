@@ -63,13 +63,13 @@
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
-        <source>MSB4271: Environment variable MSBuildDisableFeaturesFromVersion is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
-        <target state="translated">MSB4271: MSBuildDisableFeaturesFromVersion ortam değişkeni geçersiz bir biçime ayarlandı. Tüm değişiklik dalgası sürümleri etkinleştiriliyor. Girilen değer: {0}. Geçerli Değişiklik Dalgaları: {1}.</target>
+        <source>MSB4271: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
+        <target state="needs-review-translation">MSB4271: MSBuildDisableFeaturesFromVersion ortam değişkeni geçersiz bir biçime ayarlandı. Tüm değişiklik dalgası sürümleri etkinleştiriliyor. Girilen değer: {0}. Geçerli Değişiklik Dalgaları: {1}.</target>
         <note>{StrBegin="MSB4271: "}UE: Value should be of the format: xx.yy</note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">
-        <source>MSB4272: Environment variable MSBuildDisableFeaturesFromVersion is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
-        <target state="translated">MSB4272: MSBuildDisableFeaturesFromVersion ortam değişkeni, düzenli değişiklik dışı bir sürüme ayarlandı. Varsayılan Değişiklik Dalgası sürümüne dönülüyor: {0}. Girilen değer: {1}. Geçerli Değişiklik Dalgaları: {2}.</target>
+        <source>MSB4272: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
+        <target state="needs-review-translation">MSB4272: MSBuildDisableFeaturesFromVersion ortam değişkeni, düzenli değişiklik dışı bir sürüme ayarlandı. Varsayılan Değişiklik Dalgası sürümüne dönülüyor: {0}. Girilen değer: {1}. Geçerli Değişiklik Dalgaları: {2}.</target>
         <note>{StrBegin="MSB4272: "}</note>
       </trans-unit>
       <trans-unit id="CircularDependency">
@@ -100,6 +100,11 @@
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
         <target state="translated">MSB4257: Belirtilen çıkış sonucu önbellek dosyası boş.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentDerivedPropertyRead">
+        <source>Property '{0}' with value '{1}' expanded from the environment.</source>
+        <target state="new">Property '{0}' with value '{1}' expanded from the environment.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
@@ -143,9 +148,8 @@
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
-        <source>Loading the following project cache plugin:
-    {0}</source>
-        <target state="translated">Şu proje önbelleği eklentisi yükleniyor:
+        <source>Loading the following project cache plugin: {0}</source>
+        <target state="needs-review-translation">Şu proje önbelleği eklentisi yükleniyor:
     {0}</target>
         <note />
       </trans-unit>
@@ -174,11 +178,6 @@
       <trans-unit id="NoProjectCachePluginFoundInAssembly">
         <source>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</source>
         <target state="translated">MSB4270: "{0}" bütünleştirilmiş kodunda proje önbelleği eklentisi bulunamadı. Bir eklenti bekleniyordu.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NotAllNodesDefineACacheItem">
-        <source>MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</source>
-        <target state="translated">MSB4269: Herhangi bir statik graf düğümünde proje önbelleği tanımlandığında tüm düğümler aynı proje önbelleğini tanımlamalıdır. Şu projeler "{0}" öğe bildirimini içermiyor: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -219,19 +218,9 @@
         <target state="translated">{0} metosu null veya boş hedef adları içeren bir koleksiyonla çağrılamaz.</target>
         <note />
       </trans-unit>
-      <trans-unit id="OnlyOneCachePluginMustBeSpecified">
-        <source>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</source>
-        <target state="translated">MSB4265: Tek bir proje önbellek eklentisi belirtilmelidir ancak birden çok eklenti bulundu: {0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
         <source>Created an override using task: {0} at {1}</source>
         <target state="translated">{0} görevi kullanılarak geçersiz kılma işlemi oluşturuldu, saat: {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectCacheBeginBuild">
-        <source>Initializing project cache plugin.</source>
-        <target state="translated">Proje önbellek eklentisi başlatılıyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheEndBuild">

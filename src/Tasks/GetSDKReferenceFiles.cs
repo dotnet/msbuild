@@ -24,7 +24,9 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Resolves an SDKReference to a full path on disk
     /// </summary>
+#pragma warning disable RS0022 // Constructor make noninheritable base class inheritable: Longstanding API design that we shouldn't change now
     public class GetSDKReferenceFiles : TaskExtension
+#pragma warning restore RS0022 // Constructor make noninheritable base class inheritable
     {
         /// <summary>
         /// Set of resolvedSDK references which we will use to find the reference assemblies.
@@ -225,6 +227,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override bool Execute()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(GetSDKReferenceFiles));
+                return false;
+            }
             return Execute(AssemblyNameExtension.GetAssemblyNameEx, AssemblyInformation.GetRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: false);
         }
 
@@ -1084,7 +1091,11 @@ namespace Microsoft.Build.Tasks
                 string currentAssembly = String.Empty;
                 try
                 {
+#if NETCOREAPP
+                    currentAssembly = Assembly.GetExecutingAssembly().Location;
+#else
                     currentAssembly = Assembly.GetExecutingAssembly().CodeBase;
+#endif
                     var codeBase = new Uri(currentAssembly);
                     DateTime currentCodeLastWriteTime = File.GetLastWriteTimeUtc(codeBase.LocalPath);
                     if (FileSystems.Default.FileExists(referencesCacheFile) && currentCodeLastWriteTime < referencesCacheFileLastWriteTimeUtc)

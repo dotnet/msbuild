@@ -19,7 +19,9 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Resolves an SDKReference to a full path on disk
     /// </summary>
+#pragma warning disable RS0022 // Constructor make noninheritable base class inheritable: Longstanding API design that we shouldn't change now
     public class ResolveSDKReference : TaskExtension
+#pragma warning restore RS0022 // Constructor make noninheritable base class inheritable
     {
         #region fields
 
@@ -257,6 +259,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override bool Execute()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(ResolveSDKReference));
+                return false;
+            }
+
             ResolvedSDKReferences = Array.Empty<ITaskItem>();
 
             if (InstalledSDKs.Length == 0)

@@ -86,10 +86,8 @@
     <value>MSBUILD : error MSB1027: The -noAutoResponse switch cannot be specified in the MSBuild.rsp auto-response file, nor in any response file that is referenced by the auto-response file.</value>
     <comment>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</comment>
   </data>
-  <data name="CopyrightMessage" UESanitized="true" Visibility="Public">
-    <value>Microsoft (R) Build Engine version {0} for {1}
-Copyright (C) Microsoft Corporation. All rights reserved.
-</value>
+  <data name="MSBuildVersionMessage" UESanitized="true" Visibility="Public">
+    <value>MSBuild version {0} for {1}</value>
     <comment>LOCALIZATION: {0} contains the DLL version number. {1} contains the name of a runtime, like ".NET Framework", ".NET Core", or "Mono"</comment>
   </data>
   <data name="DuplicateProjectSwitchError" UESanitized="true" Visibility="Public">
@@ -319,7 +317,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                             mode. This logging style is on by default.
                         ForceConsoleColor--Use ANSI console colors even if
                             console does not support it
-                        Verbosity--overrides the -verbosity setting for this
+                        PreferConsoleColor--Use ANSI console colors only if
+                            target console does support it
+                     Verbosity--overrides the -verbosity setting for this
                             logger.
                      Example:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;

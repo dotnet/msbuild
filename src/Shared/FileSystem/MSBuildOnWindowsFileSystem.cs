@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Versioning;
 
 #nullable disable
 
@@ -13,6 +14,7 @@ namespace Microsoft.Build.Shared.FileSystem
     /// Implementation of file system operations on windows. Combination of native and managed implementations.
     /// TODO Remove this class and replace with WindowsFileSystem. Test perf to ensure no regressions.
     /// </summary>
+    [SupportedOSPlatform("windows")]
     internal class MSBuildOnWindowsFileSystem : IFileSystem
     {
         private static readonly MSBuildOnWindowsFileSystem Instance = new MSBuildOnWindowsFileSystem();

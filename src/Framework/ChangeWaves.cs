@@ -107,7 +107,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Read from environment variable `MSBuildDisableFeaturesFromVersion`, correct it if required, cache it and its ConversionState.
+        /// Read from environment variable `MSBUILDDISABLEFEATURESFROMVERSION`, correct it if required, cache it and its ConversionState.
         /// </summary>
         internal static void ApplyChangeWave()
         {
@@ -119,7 +119,7 @@ namespace Microsoft.Build.Framework
 
             string msbuildDisableFeaturesFromVersion = Environment.GetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION");
 
-            // Most common case, `MSBuildDisableFeaturesFromVersion` unset
+            // Most common case, `MSBUILDDISABLEFEATURESFROMVERSION` unset
             if (string.IsNullOrEmpty(msbuildDisableFeaturesFromVersion))
             {
                 ConversionState = ChangeWaveConversionState.Valid;

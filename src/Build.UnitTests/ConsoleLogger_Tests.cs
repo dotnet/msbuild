@@ -20,6 +20,7 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 using Microsoft.Build.Execution;
+using System.Runtime.Versioning;
 
 #nullable disable
 
@@ -2461,6 +2462,7 @@ namespace Microsoft.Build.UnitTests
         /// Check to see what kind of device we are outputting the log to, is it a character device, a file, or something else
         /// this can be used by loggers to modify their outputs based on the device they are writing to
         /// </summary>
+        [SupportedOSPlatform("windows")]
         internal bool IsRunningWithCharacterFileType()
         {
             // Get the std out handle

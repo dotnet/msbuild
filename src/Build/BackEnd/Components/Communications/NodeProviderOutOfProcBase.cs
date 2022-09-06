@@ -20,11 +20,8 @@ using System.Security.Principal;
 #if FEATURE_APM
 using Microsoft.Build.Eventing;
 #endif
-using Microsoft.Build.Exceptions;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.FileSystem;
-using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 using Task = System.Threading.Tasks.Task;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
@@ -332,7 +329,8 @@ namespace Microsoft.Build.BackEnd
                     }
 #endif
                     // Create the node process
-                    Process msbuildProcess = LaunchNode(msbuildLocation, commandLineArgs);
+                    NodeLauncher nodeLauncher = new NodeLauncher();
+                    Process msbuildProcess = nodeLauncher.Start(msbuildLocation, commandLineArgs);
                     _processesToIgnore.TryAdd(GetProcessesToIgnoreKey(hostHandshake, msbuildProcess.Id), default);
 
                     // Note, when running under IMAGEFILEEXECUTIONOPTIONS registry key to debug, the process ID
@@ -398,7 +396,7 @@ namespace Microsoft.Build.BackEnd
                 msbuildLocation = "MSBuild.exe";
             }
 
-            var expectedProcessName = Path.GetFileNameWithoutExtension(GetCurrentHost() ?? msbuildLocation);
+            var expectedProcessName = Path.GetFileNameWithoutExtension(CurrentHost.GetCurrentHost() ?? msbuildLocation);
 
             var processes = Process.GetProcessesByName(expectedProcessName);
             Array.Sort(processes, (left, right) => left.Id.CompareTo(right.Id));
@@ -418,7 +416,7 @@ namespace Microsoft.Build.BackEnd
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
         // This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
         //  on non-Windows operating systems
-        private void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
+        private static void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
         {
             SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
 #if FEATURE_PIPE_SECURITY
@@ -442,7 +440,7 @@ namespace Microsoft.Build.BackEnd
         private Stream TryConnectToProcess(int nodeProcessId, int timeout, Handshake handshake)
         {
             // Try and connect to the process.
-            string pipeName = NamedPipeUtil.GetPipeNameOrPath(nodeProcessId);
+            string pipeName = NamedPipeUtil.GetPlatformSpecificPipeName(nodeProcessId);
 
             NamedPipeClientStream nodeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
@@ -453,40 +451,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                nodeStream.Connect(timeout);
-
-#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                if (NativeMethodsShared.IsWindows && !NativeMethodsShared.IsMono)
-                {
-                    // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
-                    // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to
-                    // us, potentially causing us to execute builds that do harmful or unexpected things.  The pipe owner can
-                    // only be set to the user's own SID by a normal, unprivileged process.  The conditions where a faked up
-                    // remote node could set the owner to something else would also let it change owners on other objects, so
-                    // this would be a security flaw upstream of us.
-                    ValidateRemotePipeSecurityOnWindows(nodeStream);
-                }
-#endif
-
-                int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
-                for (int i = 0; i < handshakeComponents.Length; i++)
-                {
-                    CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", i, handshakeComponents[i], pipeName);
-                    nodeStream.WriteIntForHandshake(handshakeComponents[i]);
-                }
-
-                // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
-                nodeStream.WriteEndOfHandshakeSignal();
-
-                CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
-
-#if NETCOREAPP2_1_OR_GREATER || MONO
-                nodeStream.ReadEndOfHandshakeSignal(true, timeout);
-#else
-                nodeStream.ReadEndOfHandshakeSignal(true);
-#endif
-                // We got a connection.
-                CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
+                ConnectToPipeStream(nodeStream, pipeName, handshake, timeout);
                 return nodeStream;
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
@@ -506,196 +471,47 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Creates a new MSBuild process
+        /// Connect to named pipe stream and ensure validate handshake and security.
         /// </summary>
-        private Process LaunchNode(string msbuildLocation, string commandLineArgs)
+        /// <remarks>
+        /// Reused by MSBuild server client <see cref="Microsoft.Build.Experimental.MSBuildClient"/>.
+        /// </remarks>
+        internal static void ConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, Handshake handshake, int timeout)
         {
-            // Should always have been set already.
-            ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, nameof(msbuildLocation));
+            nodeStream.Connect(timeout);
 
-            if (!FileSystems.Default.FileExists(msbuildLocation))
+#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+            if (NativeMethodsShared.IsWindows && !NativeMethodsShared.IsMono)
             {
-                throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotFindMSBuildExe", msbuildLocation));
-            }
-
-            // Repeat the executable name as the first token of the command line because the command line
-            // parser logic expects it and will otherwise skip the first argument
-            commandLineArgs = $"\"{msbuildLocation}\" {commandLineArgs}";
-
-            BackendNativeMethods.STARTUP_INFO startInfo = new();
-            startInfo.cb = Marshal.SizeOf<BackendNativeMethods.STARTUP_INFO>();
-
-            // Null out the process handles so that the parent process does not wait for the child process
-            // to exit before it can exit.
-            uint creationFlags = 0;
-            if (Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
-            {
-                creationFlags = BackendNativeMethods.NORMALPRIORITYCLASS;
-            }
-
-            if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDNODEWINDOW")))
-            {
-                if (!Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
-                {
-                    // Redirect the streams of worker nodes so that this MSBuild.exe's
-                    // parent doesn't wait on idle worker nodes to close streams
-                    // after the build is complete.
-                    startInfo.hStdError = BackendNativeMethods.InvalidHandle;
-                    startInfo.hStdInput = BackendNativeMethods.InvalidHandle;
-                    startInfo.hStdOutput = BackendNativeMethods.InvalidHandle;
-                    startInfo.dwFlags = BackendNativeMethods.STARTFUSESTDHANDLES;
-                    creationFlags |= BackendNativeMethods.CREATENOWINDOW;
-                }
-            }
-            else
-            {
-                creationFlags |= BackendNativeMethods.CREATE_NEW_CONSOLE;
-            }
-
-            CommunicationsUtilities.Trace("Launching node from {0}", msbuildLocation);
-
-            string exeName = msbuildLocation;
-
-#if RUNTIME_TYPE_NETCORE || MONO
-            // Mono automagically uses the current mono, to execute a managed assembly
-            if (!NativeMethodsShared.IsMono)
-            {
-                // Run the child process with the same host as the currently-running process.
-                exeName = GetCurrentHost();
+                // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
+                // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to
+                // us, potentially causing us to execute builds that do harmful or unexpected things.  The pipe owner can
+                // only be set to the user's own SID by a normal, unprivileged process.  The conditions where a faked up
+                // remote node could set the owner to something else would also let it change owners on other objects, so
+                // this would be a security flaw upstream of us.
+                ValidateRemotePipeSecurityOnWindows(nodeStream);
             }
 #endif
 
-            if (!NativeMethodsShared.IsWindows)
+            int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
+            for (int i = 0; i < handshakeComponents.Length; i++)
             {
-                ProcessStartInfo processStartInfo = new ProcessStartInfo();
-                processStartInfo.FileName = exeName;
-                processStartInfo.Arguments = commandLineArgs;
-                if (!Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
-                {
-                    // Redirect the streams of worker nodes so that this MSBuild.exe's
-                    // parent doesn't wait on idle worker nodes to close streams
-                    // after the build is complete.
-                    processStartInfo.RedirectStandardInput = true;
-                    processStartInfo.RedirectStandardOutput = true;
-                    processStartInfo.RedirectStandardError = true;
-                    processStartInfo.CreateNoWindow = (creationFlags | BackendNativeMethods.CREATENOWINDOW) == BackendNativeMethods.CREATENOWINDOW;
-                }
-                processStartInfo.UseShellExecute = false;
-
-                Process process;
-                try
-                {
-                    process = Process.Start(processStartInfo);
-                }
-                catch (Exception ex)
-                {
-                    CommunicationsUtilities.Trace
-                       (
-                           "Failed to launch node from {0}. CommandLine: {1}" + Environment.NewLine + "{2}",
-                           msbuildLocation,
-                           commandLineArgs,
-                           ex.ToString()
-                       );
-
-                    throw new NodeFailedToLaunchException(ex);
-                }
-
-                CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", process.Id, exeName);
-                return process;
-            }
-            else
-            {
-#if RUNTIME_TYPE_NETCORE
-                // Repeat the executable name in the args to suit CreateProcess
-                commandLineArgs = $"\"{exeName}\" {commandLineArgs}";
-#endif
-
-                BackendNativeMethods.PROCESS_INFORMATION processInfo = new();
-                BackendNativeMethods.SECURITY_ATTRIBUTES processSecurityAttributes = new();
-                BackendNativeMethods.SECURITY_ATTRIBUTES threadSecurityAttributes = new();
-                processSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
-                threadSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
-
-                bool result = BackendNativeMethods.CreateProcess
-                    (
-                        exeName,
-                        commandLineArgs,
-                        ref processSecurityAttributes,
-                        ref threadSecurityAttributes,
-                        false,
-                        creationFlags,
-                        BackendNativeMethods.NullPtr,
-                        null,
-                        ref startInfo,
-                        out processInfo
-                    );
-
-                if (!result)
-                {
-                    // Creating an instance of this exception calls GetLastWin32Error and also converts it to a user-friendly string.
-                    System.ComponentModel.Win32Exception e = new System.ComponentModel.Win32Exception();
-
-                    CommunicationsUtilities.Trace
-                        (
-                            "Failed to launch node from {0}. System32 Error code {1}. Description {2}. CommandLine: {2}",
-                            msbuildLocation,
-                            e.NativeErrorCode.ToString(CultureInfo.InvariantCulture),
-                            e.Message,
-                            commandLineArgs
-                        );
-
-                    throw new NodeFailedToLaunchException(e.NativeErrorCode.ToString(CultureInfo.InvariantCulture), e.Message);
-                }
-
-                int childProcessId = processInfo.dwProcessId;
-
-                if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != NativeMethods.InvalidHandle)
-                {
-                    NativeMethodsShared.CloseHandle(processInfo.hProcess);
-                }
-
-                if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != NativeMethods.InvalidHandle)
-                {
-                    NativeMethodsShared.CloseHandle(processInfo.hThread);
-                }
-
-                CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", childProcessId, exeName);
-                return Process.GetProcessById(childProcessId);
-            }
-        }
-
-#if RUNTIME_TYPE_NETCORE || MONO
-        private static string CurrentHost;
-#endif
-
-        /// <summary>
-        /// Identify the .NET host of the current process.
-        /// </summary>
-        /// <returns>The full path to the executable hosting the current process, or null if running on Full Framework on Windows.</returns>
-        private static string GetCurrentHost()
-        {
-#if RUNTIME_TYPE_NETCORE || MONO
-            if (CurrentHost == null)
-            {
-                string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, 2),
-                    NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet");
-                if (File.Exists(dotnetExe))
-                {
-                    CurrentHost = dotnetExe;
-                }
-                else
-                {
-                    using (Process currentProcess = Process.GetCurrentProcess())
-                    {
-                        CurrentHost = currentProcess.MainModule.FileName;
-                    }
-                }
+                CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", i, handshakeComponents[i], pipeName);
+                nodeStream.WriteIntForHandshake(handshakeComponents[i]);
             }
 
-            return CurrentHost;
+            // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
+            nodeStream.WriteEndOfHandshakeSignal();
+
+            CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
+
+#if NETCOREAPP2_1_OR_GREATER || MONO
+            nodeStream.ReadEndOfHandshakeSignal(true, timeout);
 #else
-            return null;
+            nodeStream.ReadEndOfHandshakeSignal(true);
 #endif
+            // We got a connection.
+            CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
         }
 
         /// <summary>

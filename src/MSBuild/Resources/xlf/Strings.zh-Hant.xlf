@@ -28,13 +28,9 @@
         <target state="translated">MSBUILD : error MSB1027: -noAutoResponse 參數不能在 MSBuild.rsp 自動回應檔中指定，也不能在自動回應檔所參考的任何回應檔中指定。</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
-      <trans-unit id="CopyrightMessage">
-        <source>Microsoft (R) Build Engine version {0} for {1}
-Copyright (C) Microsoft Corporation. All rights reserved.
-</source>
-        <target state="translated">Microsoft (R) Build Engine for {1} {0} 版
-Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
-</target>
+      <trans-unit id="MSBuildVersionMessage">
+        <source>MSBuild version {0} for {1}</source>
+        <target state="new">MSBuild version {0} for {1}</target>
         <note>LOCALIZATION: {0} contains the DLL version number. {1} contains the name of a runtime, like ".NET Framework", ".NET Core", or "Mono"</note>
       </trans-unit>
       <trans-unit id="CurrentDirectory">
@@ -509,13 +505,15 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                             mode. This logging style is on by default.
                         ForceConsoleColor--Use ANSI console colors even if
                             console does not support it
-                        Verbosity--overrides the -verbosity setting for this
+                        PreferConsoleColor--Use ANSI console colors only if
+                            target console does support it
+                     Verbosity--overrides the -verbosity setting for this
                             logger.
                      Example:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="translated">  -consoleLoggerParameters:&lt;參數&gt;
+        <target state="needs-review-translation">  -consoleLoggerParameters:&lt;參數&gt;
                      主控台記錄器的參數。(簡短形式: -clp)
                      可用的參數為:
                         PerformanceSummary--顯示工作、目標

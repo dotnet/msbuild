@@ -67,11 +67,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             SdkResult response = null;
 
+            // Create an SdkReference from the request; the SdkReference constructor below never throws.
+            SdkReference sdkReference = new SdkReference(request.Name, request.Version, request.MinimumVersion);
             try
             {
-                // Create an SdkReference from the request
-                SdkReference sdkReference = new SdkReference(request.Name, request.Version, request.MinimumVersion);
-
                 ILoggingService loggingService = Host.GetComponent(BuildComponentType.LoggingService) as ILoggingService;
 
                 // This call is usually cached so is very fast but can take longer for a new SDK that is downloaded.  Other queued threads for different SDKs will complete sooner and continue on which unblocks evaluations
@@ -90,7 +89,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 // Get the node manager and send the response back to the node that requested the SDK
                 INodeManager nodeManager = Host.GetComponent(BuildComponentType.NodeManager) as INodeManager;
 
-                nodeManager.SendData(request.NodeId, response);
+                nodeManager.SendData(request.NodeId, response ?? new SdkResult(sdkReference, null, null));
             }
         }
 
