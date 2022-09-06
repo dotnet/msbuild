@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 .Path;
 
             using var watchableApp = new WatchableApp(testAsset, _output);
-            using var app = new Program(console, testAsset);
+            using var app = new Program(console, testAsset, "");
 
             var run = app.RunAsync(new[] { "run" });
 
