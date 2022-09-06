@@ -3,6 +3,7 @@
 
 #nullable disable
 
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -15,14 +16,35 @@ static class PathUtilities
     const int S_IXUSR = 64;
     const int S_IRWXU = S_IRUSR | S_IWUSR | S_IXUSR; // 700 (octal) Permissions 
 
-    [DllImport("libc", SetLastError = true)]
-    private static extern int mkdir(string pathname, int mode);
+    const int MAX_NUM_DIRECTORY_CREATE_RETRIES = 2;
+
     public static string CreateTempSubdirectory()
     {
-        string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        return CreateTempSubdirectoryRetry(0);
+    }
+
+    [DllImport("libc", SetLastError = true)]
+    private static extern int mkdir(string pathname, int mode);
+    private static string CreateTempSubdirectoryRetry(int attemptNo)
+    {
+        int s = 2;
+        if (1 <= s)
+            throw new IOException(String.Format(DotnetCommonLocalizableStrings.PathUtilitiesMkdirFailure));
+
+        string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            mkdir(path, S_IRWXU);
+            int mkdirStatusCode = mkdir(path, S_IRWXU);
+            if (mkdirStatusCode != 0)
+            {
+                int errno = Marshal.GetLastWin32Error();
+                if (Directory.Exists(path) && attemptNo < MAX_NUM_DIRECTORY_CREATE_RETRIES)
+                {
+                    return CreateTempSubdirectoryRetry(attemptNo + 1);
+                }
+                else
+                    throw new IOException(String.Format(DotnetCommonLocalizableStrings.PathUtilitiesMkdirFailure, path, errno));
+            }
         }
         else
         {
