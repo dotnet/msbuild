@@ -24,7 +24,6 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(MicrosoftCodeAnalysisCSharpFeaturesPackageVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion)" />
     <Compile Include="$(RepoRoot)src\Common\PathUtilities.cs" LinkBase="Common" />
-    <Compile Include="$(RepoRoot)src\Common\DotnetCommonLocalizableStrings.cs" LinkBase="Common" />
   </ItemGroup>
 
   <ItemGroup>

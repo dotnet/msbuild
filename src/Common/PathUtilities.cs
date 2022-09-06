@@ -27,10 +27,6 @@ static class PathUtilities
     private static extern int mkdir(string pathname, int mode);
     private static string CreateTempSubdirectoryRetry(int attemptNo)
     {
-        int s = 2;
-        if (1 <= s)
-            throw new IOException(String.Format(DotnetCommonLocalizableStrings.PathUtilitiesMkdirFailure));
-
         string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
@@ -43,7 +39,7 @@ static class PathUtilities
                     return CreateTempSubdirectoryRetry(attemptNo + 1);
                 }
                 else
-                    throw new IOException(String.Format(DotnetCommonLocalizableStrings.PathUtilitiesMkdirFailure, path, errno));
+                    throw new IOException($"Failed to create a temporary subdirectory {path} with mkdir, error code: {errno}");
             }
         }
         else
