@@ -310,8 +310,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </Target>
 
     <PropertyGroup>
-        <!-- Design-time builds require a newer version than 1.0 to succeed, so override back to inbox in that case -->
-        <CSharpCoreTargetsPath Condition="'$(CSharpCoreTargetsPath)' == '' or ('$(DesignTimeBuild)' == 'true' and $(CSharpCoreTargetsPath.Contains('Microsoft.Net.Compilers.1.0.0')))">$(RoslynTargetsPath)\Microsoft.CSharp.Core.targets</CSharpCoreTargetsPath>
+      <!-- If the SDK specified a path to a .NET Core version of the targets (from the SDK), use that so we align with their version but allow the user to override this. -->
+      <CSharpCoreTargetsPath Condition="'$(CSharpCoreTargetsPath)' == ''">$(CSharpCoreTargetsFromSdkPath)</CSharpCoreTargetsPath>
+
+      <!-- Design-time builds require a newer version than 1.0 to succeed, so override back to inbox in that case -->
+      <CSharpCoreTargetsPath Condition="'$(CSharpCoreTargetsPath)' == '' or ('$(DesignTimeBuild)' == 'true' and $(CSharpCoreTargetsPath.Contains('Microsoft.Net.Compilers.1.0.0')))">$(RoslynTargetsPath)\Microsoft.CSharp.Core.targets</CSharpCoreTargetsPath>
     </PropertyGroup>
 
     <Import Project="$(CSharpCoreTargetsPath)" />
