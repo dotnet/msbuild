@@ -493,7 +493,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         public async Task ExtractManifestAsync(string nupkgPath, string targetPath)
         {
             Log?.LogMessage($"ExtractManifestAsync: Extracting '{nupkgPath}' to '{targetPath}'");
-            string extractionPath = FileUtilities.CreateTempPath();
+            string extractionPath = FileUtilities.CreateTempSubdirectory();
 
             try
             {
@@ -953,7 +953,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             if (nugetPackageDownloader == null)
             {
-                DirectoryPath tempPackagesDir = new(string.IsNullOrWhiteSpace(tempDirPath) ? FileUtilities.CreateTempPath() : tempDirPath);
+                DirectoryPath tempPackagesDir = new(string.IsNullOrWhiteSpace(tempDirPath) ? FileUtilities.CreateTempSubdirectory() : tempDirPath);
 
                 nugetPackageDownloader = new NuGetPackageDownloader(tempPackagesDir,
                     filePermissionSetter: null, new FirstPartyNuGetPackageSigningVerifier(),

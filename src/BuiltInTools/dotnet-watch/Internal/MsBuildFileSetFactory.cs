@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Watcher.Internal
 
         public async Task<FileSet> CreateAsync(CancellationToken cancellationToken)
         {
-            var watchList = Path.Combine(FileUtilities.CreateTempPath(), Path.GetRandomFileName());
+            var watchList = Path.Combine(FileUtilities.CreateTempSubdirectory(), Path.GetRandomFileName());
             try
             {
                 var projectDir = Path.GetDirectoryName(_projectFile);

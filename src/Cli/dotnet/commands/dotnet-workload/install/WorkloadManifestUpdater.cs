@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             var sdkVersion = Product.Version;
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, sdkVersion, userProfileDir);
             var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetPath, sdkVersion, userProfileDir);
-            var tempPackagesDir = new DirectoryPath(FileUtilities.CreateTempPath());
+            var tempPackagesDir = new DirectoryPath(FileUtilities.CreateTempSubdirectory());
             var nugetPackageDownloader = new NuGetPackageDownloader(tempPackagesDir,
                                           filePermissionSetter: null,
                                           new FirstPartyNuGetPackageSigningVerifier(),

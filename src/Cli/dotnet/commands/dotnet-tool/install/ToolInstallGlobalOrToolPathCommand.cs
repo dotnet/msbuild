@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             _environmentPathInstruction = environmentPathInstruction
                 ?? EnvironmentPathFactory.CreateEnvironmentPathInstruction();
             _createShellShimRepository = createShellShimRepository ?? ShellShimRepositoryFactory.CreateShellShimRepository;
-            var tempDir = new DirectoryPath(FileUtilities.CreateTempPath());
+            var tempDir = new DirectoryPath(FileUtilities.CreateTempSubdirectory());
             var configOption = parseResult.GetValueForOption(ToolInstallCommandParser.ConfigOption);
             var sourceOption = parseResult.GetValueForOption(ToolInstallCommandParser.AddSourceOption);
             var packageSourceLocation = new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), additionalSourceFeeds: sourceOption);

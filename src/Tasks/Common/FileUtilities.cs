@@ -42,8 +42,8 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         [DllImport("libc", SetLastError = true)]
-        public static extern int mkdir(string pathname, int mode);
-        public static string CreateTempPath()
+        private static extern int mkdir(string pathname, int mode);
+        public static string CreateTempSubdirectory()
         {
             string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

@@ -130,7 +130,7 @@ namespace Microsoft.DotNet.ToolPackage
             string targetFramework = null,
             string verbosity = null)
         {
-            var tempDirectoryForAssetJson = FileUtilities.CreateTempPath();
+            var tempDirectoryForAssetJson = FileUtilities.CreateTempSubdirectory();
 
             string tempProject = CreateDirectoryWithTempProject(
                 packageId: packageId,
@@ -172,7 +172,7 @@ namespace Microsoft.DotNet.ToolPackage
                 Directory.CreateDirectory(Path.GetDirectoryName(tempProject));
             }
             else
-                tempProject = Path.Combine(FileUtilities.CreateTempPath(), "restore.csproj");
+                tempProject = Path.Combine(FileUtilities.CreateTempSubdirectory(), "restore.csproj");
 
             var tempProjectContent = new XDocument(
                 new XElement("Project",

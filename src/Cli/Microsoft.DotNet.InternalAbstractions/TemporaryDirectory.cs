@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.InternalAbstractions
 
         public TemporaryDirectory()
         {
-            DirectoryPath = Path.Combine(FileUtilities.CreateTempPath());
+            DirectoryPath = Path.Combine(FileUtilities.CreateTempSubdirectory());
         }
 
         public void Dispose()
