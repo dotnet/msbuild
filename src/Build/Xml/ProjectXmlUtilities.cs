@@ -7,6 +7,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Construction;
 using System.IO;
 using System.Xml;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -91,7 +92,7 @@ namespace Microsoft.Build.Internal
             }
             else if (string.IsNullOrEmpty(element.NamespaceURI))
             {
-                if (Path.GetExtension(element.Location.File).Equals(".dwproj", StringComparison.OrdinalIgnoreCase))
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4) && Path.GetExtension(element.Location.File).Equals(".dwproj", StringComparison.OrdinalIgnoreCase))
                 {
                     bool validMSBuildProject = true;
                     foreach (XmlNode child in element.ChildNodes)
