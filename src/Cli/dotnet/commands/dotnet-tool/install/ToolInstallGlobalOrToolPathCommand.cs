@@ -24,8 +24,8 @@ namespace Microsoft.DotNet.Tools.Tool.Install
 {
     internal delegate IShellShimRepository CreateShellShimRepository(string appHostSourceDirectory, DirectoryPath? nonGlobalLocation = null);
     internal delegate (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller) CreateToolPackageStoresAndInstaller(
-		DirectoryPath? nonGlobalLocation = null,
-		IEnumerable<string> forwardRestoreArguments = null);
+        DirectoryPath? nonGlobalLocation = null,
+        IEnumerable<string> forwardRestoreArguments = null);
 
     internal class ToolInstallGlobalOrToolPathCommand : CommandBase
     {
@@ -67,14 +67,14 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             _architectureOption = parseResult.ValueForOption<string>(ToolInstallCommandParser.ArchitectureOption);
 
             _createToolPackageStoresAndInstaller = createToolPackageStoreAndInstaller ?? ToolPackageFactory.CreateToolPackageStoresAndInstaller;
-			_forwardRestoreArguments = parseResult.OptionValuesToBeForwarded(ToolInstallCommandParser.GetCommand());
+            _forwardRestoreArguments = parseResult.OptionValuesToBeForwarded(ToolInstallCommandParser.GetCommand());
 
             _environmentPathInstruction = environmentPathInstruction
                 ?? EnvironmentPathFactory.CreateEnvironmentPathInstruction();
             _createShellShimRepository = createShellShimRepository ?? ShellShimRepositoryFactory.CreateShellShimRepository;
             var tempDir = new DirectoryPath(PathUtilities.CreateTempSubdirectory());
-            var configOption = parseResult.GetValueForOption(ToolInstallCommandParser.ConfigOption);
-            var sourceOption = parseResult.GetValueForOption(ToolInstallCommandParser.AddSourceOption);
+            var configOption = parseResult.ValueForOption(ToolInstallCommandParser.ConfigOption);
+            var sourceOption = parseResult.ValueForOption(ToolInstallCommandParser.AddSourceOption);
             var packageSourceLocation = new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), additionalSourceFeeds: sourceOption);
             var restoreAction = new RestoreActionConfig(DisableParallel: parseResult.ValueForOption(ToolCommandRestorePassThroughOptions.DisableParallelOption),
                 NoCache: parseResult.ValueForOption(ToolCommandRestorePassThroughOptions.NoCacheOption),
@@ -167,7 +167,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             {
                 throw new GracefulException(
                     messages: InstallToolCommandLowLevelErrorConverter.GetUserFacingMessages(ex, _packageId),
-                    verboseMessages: new[] {ex.ToString()},
+                    verboseMessages: new[] { ex.ToString() },
                     isUserError: false);
             }
         }
