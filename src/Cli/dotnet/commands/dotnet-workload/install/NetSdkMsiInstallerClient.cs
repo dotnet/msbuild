@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 Log?.LogMessage("Starting garbage collection.");
                 IEnumerable<SdkFeatureBand> installedFeatureBands = GetInstalledFeatureBands();
                 IEnumerable<WorkloadId> installedWorkloads = RecordRepository.GetInstalledWorkloads(_sdkFeatureBand);
-                Dictionary<(WorkloadPackId id, string version),PackInfo> expectedWorkloadPacks = installedWorkloads
+                Dictionary<(WorkloadPackId id, string version), PackInfo> expectedWorkloadPacks = installedWorkloads
                     .SelectMany(workload => _workloadResolver.GetPacksInWorkload(workload))
                     .Distinct()
                     .Select(pack => _workloadResolver.TryGetPackInfo(pack))
@@ -409,9 +409,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 {
                     RollBackMsiInstall(msiToInstall);
                 });
-                
+
             }
-    
+
         }
 
         void RollBackMsiInstall(AcquirableMsi msiToRollback, DirectoryPath? offlineCache = null)
@@ -865,7 +865,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             if (nugetPackageDownloader == null)
             {
-                DirectoryPath tempPackagesDir = new(string.IsNullOrWhiteSpace(tempDirPath) ? Path.GetTempPath() : tempDirPath);
+                DirectoryPath tempPackagesDir = new(string.IsNullOrWhiteSpace(tempDirPath) ? PathUtilities.CreateTempSubdirectory() : tempDirPath);
 
                 nugetPackageDownloader = new NuGetPackageDownloader(tempPackagesDir,
                     filePermissionSetter: null, new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir),
