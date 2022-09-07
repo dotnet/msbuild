@@ -208,6 +208,8 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager.CreateTestProject(_testProject, identifier: identifier);
 
             new DotnetNewCommand(Log, "sln", "--debug:ephemeral-hive")
+                //  WithEphemeralHive doesn't exist in this branch, so pass it explicitly and then use WithoutCustomHive to stop the DotnetNewCommand from throwing an error
+                .WithoutCustomHive()
                 .WithWorkingDirectory(testAsset.TestRoot)
                 .Execute()
                 .Should()
