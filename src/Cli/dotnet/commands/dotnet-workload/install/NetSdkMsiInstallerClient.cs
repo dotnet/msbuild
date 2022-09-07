@@ -670,7 +670,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             // Extract the contents to a random folder to avoid potential file injection/hijacking
             // shenanigans before moving it to the final cache directory.
-            string extractionDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            string extractionDirectory = Path.Combine(PathUtilities.CreateTempSubdirectory(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(extractionDirectory);
             Log?.LogMessage($"Extracting '{packageId}' to '{extractionDirectory}'");
             _ = _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(extractionDirectory)).Result;

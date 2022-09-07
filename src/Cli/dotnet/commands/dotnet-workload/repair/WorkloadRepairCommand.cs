@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, _sdkVersion.ToString(), userProfileDir);
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadInstallCommandParser.TempDirOption)) ?
-                Path.GetTempPath() :
+                PathUtilities.CreateTempSubdirectory() :
                 parseResult.ValueForOption<string>(WorkloadInstallCommandParser.TempDirOption));
             var tempPackagesDir = new DirectoryPath(Path.Combine(tempDirPath, "dotnet-sdk-advertising-temp"));
             NullLogger nullLogger = new NullLogger();

@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.ValueForOption<string>(WorkloadInstallCommandParser.VersionOption), version, _dotnetPath, _userProfileDir);
             _sdkFeatureBand = new SdkFeatureBand(string.Join('.', _sdkVersion.Major, _sdkVersion.Minor, _sdkVersion.SdkFeatureBand));
             _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadInstallCommandParser.TempDirOption)) ?
-                PathUtilities.GetTempPath() :
+                PathUtilities.CreateTempSubdirectory() :
                 parseResult.ValueForOption<string>(WorkloadInstallCommandParser.TempDirOption));
             _fromRollbackDefinition = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.FromRollbackFileOption);
 
