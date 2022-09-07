@@ -185,7 +185,7 @@ If command is specified without the argument, it lists all the template packages
       </trans-unit>
       <trans-unit id="Option_ProjectPath">
         <source>The project that should be used for context evaluation.</source>
-        <target state="new">The project that should be used for context evaluation.</target>
+        <target state="translated">應該用於內容評估的專案。</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_TagFilter">

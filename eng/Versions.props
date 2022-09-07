@@ -30,6 +30,7 @@
     <NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-26011-01</NETStandardLibraryNETFrameworkVersion>
     <NewtonsoftJsonPackageVersion>13.0.1</NewtonsoftJsonPackageVersion>
     <NewtonsoftJsonVersion>$(NewtonsoftJsonPackageVersion)</NewtonsoftJsonVersion>
+    <StyleCopAnalyzersPackageVersion>1.2.0-beta.435</StyleCopAnalyzersPackageVersion>
     <SystemCollectionsImmutableVersion>6.0.0</SystemCollectionsImmutableVersion>
     <SystemDiagnosticsFileVersionInfoVersion>4.0.0</SystemDiagnosticsFileVersionInfoVersion>
     <SystemReflectionMetadataVersion>6.0.0</SystemReflectionMetadataVersion>
@@ -142,6 +143,7 @@
     <MicrosoftNetCompilersToolsetPackageVersion>4.4.0-3.22430.19</MicrosoftNetCompilersToolsetPackageVersion>
     <MicrosoftCodeAnalysisPackageVersion>4.4.0-3.22430.19</MicrosoftCodeAnalysisPackageVersion>
     <MicrosoftCodeAnalysisCSharpPackageVersion>4.4.0-3.22430.19</MicrosoftCodeAnalysisCSharpPackageVersion>
+    <MicrosoftCodeAnalysisCSharpCodeStylePackageVersion>4.4.0-3.22430.19</MicrosoftCodeAnalysisCSharpCodeStylePackageVersion>
     <MicrosoftCodeAnalysisCSharpFeaturesPackageVersion>4.4.0-3.22430.19</MicrosoftCodeAnalysisCSharpFeaturesPackageVersion>
     <MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>4.4.0-3.22430.19</MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>
     <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>4.4.0-3.22430.19</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>

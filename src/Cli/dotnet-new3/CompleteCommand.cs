@@ -1,15 +1,17 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using System.CommandLine.Completions;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
-using Microsoft.TemplateEngine.Cli;
-using Microsoft.TemplateEngine.Edge;
 
 namespace Dotnet_new3
 {
+    /// <summary>
+    /// Represents completion action to the command.
+    /// </summary>
     /// <remark>
     /// this implementation is for test purpose only.
     /// Keep in sync with https://github.com/dotnet/sdk/blob/main/src/Cli/dotnet/commands/dotnet-complete/CompleteCommand.cs.

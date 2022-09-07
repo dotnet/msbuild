@@ -1,5 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using System.CommandLine.Completions;
@@ -32,7 +33,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         }
 
 #pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact (Skip = "doesn't work at the moment; it matches with legacy --language option which cannot be completed; to discuss how to avoid that")]
+        [Fact(Skip = "doesn't work at the moment; it matches with legacy --language option which cannot be completed; to discuss how to avoid that")]
 #pragma warning restore xUnit1004 // Test methods should not be skipped
         public void Instantiate_CanSuggestLanguages()
         {

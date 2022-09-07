@@ -8,6 +8,7 @@ trigger:
     - internal/release/3.*
     - internal/release/5.*
     - internal/release/6.*
+    - internal/release/7.*
   paths:
     exclude:
     - "*.md"

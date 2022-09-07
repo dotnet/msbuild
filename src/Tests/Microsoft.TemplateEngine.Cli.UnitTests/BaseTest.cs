@@ -58,7 +58,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
         private static string GetAndVerifyRepoRoot()
         {
-            string repoRoot = Path.GetFullPath(Path.Combine(TestContext.Current.TestAssetsDirectory, "..", "..")); 
+            string repoRoot = Path.GetFullPath(Path.Combine(TestContext.Current.TestAssetsDirectory, "..", ".."));
             if (!Directory.Exists(repoRoot))
             {
                 Assert.False(true, $"The repo root cannot be evaluated.");

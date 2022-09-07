@@ -405,12 +405,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="Generic_CommandHints_List">
         <source>To list installed templates, run:</source>
-        <target state="new">To list installed templates, run:</target>
+        <target state="translated">インストールされているテンプレートを一覧表示するには、次を実行してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_CommandHints_Search">
         <source>To search for the templates on NuGet.org, run:</source>
-        <target state="new">To search for the templates on NuGet.org, run:</target>
+        <target state="translated">NuGet.org のテンプレートを検索するには、次を実行してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_Details">
@@ -435,7 +435,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="Generic_Info_NoMatchingTemplates">
         <source>No templates found matching: {0}.</source>
-        <target state="new">No templates found matching: {0}.</target>
+        <target state="translated">テンプレートが見つかりません: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_NoCallbackError">
@@ -455,17 +455,17 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="InstantiateCommand_Info_NoMatchingTemplatesSubCommands">
         <source>No templates or subcommands found matching: '{0}'.</source>
-        <target state="new">No templates or subcommands found matching: '{0}'.</target>
+        <target state="translated">'{0}' に一致するテンプレートまたはサブコマンドが見つかりませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="InstantiateCommand_Info_TypoCorrection_Subcommands">
         <source>Did you mean one of the following subcommands?</source>
-        <target state="new">Did you mean one of the following subcommands?</target>
+        <target state="translated">次のいずれかのサブコマンドを意味しましたか?</target>
         <note>Followed by the list of suggestions</note>
       </trans-unit>
       <trans-unit id="InstantiateCommand_Info_TypoCorrection_Templates">
         <source>Did you mean one of the following templates?</source>
-        <target state="new">Did you mean one of the following templates?</target>
+        <target state="translated">次のテンプレートのいずれかを意味しましたか?</target>
         <note>Followed by the list of suggestions</note>
       </trans-unit>
       <trans-unit id="InvalidCommandOptions">
