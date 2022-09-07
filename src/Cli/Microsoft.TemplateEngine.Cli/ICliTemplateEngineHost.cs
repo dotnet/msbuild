@@ -8,7 +8,6 @@ namespace Microsoft.TemplateEngine.Cli
 {
     public interface ICliTemplateEngineHost : ITemplateEngineHost
     {
-
         /// <summary>
         /// True when output path was specified additionally (i.e. no fallback to default(current directory)).
         /// </summary>

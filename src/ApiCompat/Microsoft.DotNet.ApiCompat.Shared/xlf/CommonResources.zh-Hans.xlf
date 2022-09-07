@@ -4,27 +4,27 @@
     <body>
       <trans-unit id="CreateWorkItemPerAssemblyAssembliesNotEqual">
         <source>When enqueuing work items per assembly, the number of passed in left and right assemblies must be equal.</source>
-        <target state="new">When enqueuing work items per assembly, the number of passed in left and right assemblies must be equal.</target>
+        <target state="translated">按程序集对工作项进行排队时，左侧和右侧程序集的传递数必须相等。</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidRexegStringTransformationPattern">
         <source>Invalid transformation pattern provided: '{0} - {1}'.</source>
-        <target state="new">Invalid transformation pattern provided: '{0} - {1}'.</target>
+        <target state="translated">提供的转换模式无效:“{0} - {1}”。</target>
         <note />
       </trans-unit>
       <trans-unit id="SuppressionsFileNotSpecified">
         <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
-        <target state="new">A file path must be passed in to successfully generate a compatibility suppression file.</target>
+        <target state="translated">必须传入文件路径才能成功生成兼容性抑制文件。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateSdkVersion">
         <source>The minimum version required of Roslyn is '{1}' and you are using '{0}' version of the Roslyn. You can update the sdk to get the latest version.</source>
-        <target state="new">The minimum version required of Roslyn is '{1}' and you are using '{0}' version of the Roslyn. You can update the sdk to get the latest version.</target>
+        <target state="translated">所需的 Roslyn 最低版本为“{1}”，而你使用的是“{0}”版本的 Roslyn。可以更新 SDK，以获取最新版本。</target>
         <note />
       </trans-unit>
       <trans-unit id="WroteSuppressions">
         <source>Successfully wrote compatibility suppressions to '{0}'.</source>
-        <target state="new">Successfully wrote compatibility suppressions to '{0}'.</target>
+        <target state="translated">已成功将兼容性抑制写入“{0}”。</target>
         <note />
       </trans-unit>
     </body>

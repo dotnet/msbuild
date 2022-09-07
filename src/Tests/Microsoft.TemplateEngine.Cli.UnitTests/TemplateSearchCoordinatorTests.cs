@@ -1,5 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using FakeItEasy;
@@ -21,6 +22,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 {
     public class TemplateSearchCoordinatorTests : BaseTest
     {
+#pragma warning disable SA1308 // Variable names should not be prefixed
+#pragma warning disable SA1311 // Static readonly fields should begin with upper-case letter
         private static readonly ITemplatePackageInfo s_packOneInfo = new MockTemplatePackageInfo("PackOne", "1.0.0");
 
         private static readonly ITemplatePackageInfo s_packTwoInfo = new MockTemplatePackageInfo("PackTwo", "1.6.0");
@@ -53,6 +56,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 .WithClassifications("FSharp")
                 .WithDescription("Mock Bar FSharp template")
                 .WithTag("language", "F#");
+#pragma warning restore SA1311 // Static readonly fields should begin with upper-case letter
+#pragma warning restore SA1308 // Variable names should not be prefixed
 
         [Fact]
         public async Task CacheSearchNameMatchTest()
@@ -100,7 +105,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         // The _fooOneTemplate is a non-match because of a framework choice param value mismatch.
         // But the _fooTwoTemplate matches because the framework choice is valid for that template.
 #pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact (Skip = "Fails due to matching on template options is not implemented.")]
+        [Fact(Skip = "Fails due to matching on template options is not implemented.")]
 #pragma warning restore xUnit1004 // Test methods should not be skipped
         public async Task CacheSearchCliSymbolNameFilterTest()
         {

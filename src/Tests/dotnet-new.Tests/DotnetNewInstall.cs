@@ -1,5 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -347,7 +348,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string basicFSharp = GetTestTemplateLocation("TemplateResolution/DifferentLanguagesGroup/BasicFSharp");
             string basicVB = GetTestTemplateLocation("TemplateResolution/DifferentLanguagesGroup/BasicVB");
 
-            new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Web.ProjectTemplates.5.0",  "Microsoft.DotNet.Common.ProjectTemplates.5.0", basicFSharp, basicVB)
+            new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "Microsoft.DotNet.Common.ProjectTemplates.5.0", basicFSharp, basicVB)
                 .WithCustomHive(home).WithDebug()
                 .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute()

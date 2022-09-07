@@ -185,7 +185,7 @@ Se il comando è specificato senza l'argomento, vengono elencati tutti i pacchet
       </trans-unit>
       <trans-unit id="Option_ProjectPath">
         <source>The project that should be used for context evaluation.</source>
-        <target state="new">The project that should be used for context evaluation.</target>
+        <target state="translated">Progetto da usare per la valutazione del contesto.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_TagFilter">

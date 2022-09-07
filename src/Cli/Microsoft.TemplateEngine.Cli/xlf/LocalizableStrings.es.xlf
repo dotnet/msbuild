@@ -405,12 +405,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="Generic_CommandHints_List">
         <source>To list installed templates, run:</source>
-        <target state="new">To list installed templates, run:</target>
+        <target state="translated">Para mostrar la lista de plantillas instaladas, ejecute:</target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_CommandHints_Search">
         <source>To search for the templates on NuGet.org, run:</source>
-        <target state="new">To search for the templates on NuGet.org, run:</target>
+        <target state="translated">Para buscar las plantillas en NuGet.org, ejecute:</target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_Details">
@@ -435,7 +435,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="Generic_Info_NoMatchingTemplates">
         <source>No templates found matching: {0}.</source>
-        <target state="new">No templates found matching: {0}.</target>
+        <target state="translated">No se encontró ninguna plantilla que coincida con: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_NoCallbackError">
@@ -455,17 +455,17 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="InstantiateCommand_Info_NoMatchingTemplatesSubCommands">
         <source>No templates or subcommands found matching: '{0}'.</source>
-        <target state="new">No templates or subcommands found matching: '{0}'.</target>
+        <target state="translated">No se encontraron plantillas ni subcomandos que coincidan: "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="InstantiateCommand_Info_TypoCorrection_Subcommands">
         <source>Did you mean one of the following subcommands?</source>
-        <target state="new">Did you mean one of the following subcommands?</target>
+        <target state="translated">¿Se refiere a uno de los siguientes subcomandos?</target>
         <note>Followed by the list of suggestions</note>
       </trans-unit>
       <trans-unit id="InstantiateCommand_Info_TypoCorrection_Templates">
         <source>Did you mean one of the following templates?</source>
-        <target state="new">Did you mean one of the following templates?</target>
+        <target state="translated">¿Se refiere a una de las siguientes plantillas?</target>
         <note>Followed by the list of suggestions</note>
       </trans-unit>
       <trans-unit id="InvalidCommandOptions">

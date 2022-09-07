@@ -30,17 +30,18 @@
     <NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-26011-01</NETStandardLibraryNETFrameworkVersion>
     <NewtonsoftJsonPackageVersion>13.0.1</NewtonsoftJsonPackageVersion>
     <NewtonsoftJsonVersion>$(NewtonsoftJsonPackageVersion)</NewtonsoftJsonVersion>
+    <StyleCopAnalyzersPackageVersion>1.2.0-beta.435</StyleCopAnalyzersPackageVersion>
     <SystemCollectionsImmutableVersion>6.0.0</SystemCollectionsImmutableVersion>
     <SystemDiagnosticsFileVersionInfoVersion>4.0.0</SystemDiagnosticsFileVersionInfoVersion>
     <SystemReflectionMetadataVersion>6.0.0</SystemReflectionMetadataVersion>
-    <MicrosoftDotNetSignToolVersion>7.0.0-beta.22411.2</MicrosoftDotNetSignToolVersion>
+    <MicrosoftDotNetSignToolVersion>7.0.0-beta.22418.4</MicrosoftDotNetSignToolVersion>
     <MicrosoftWebXdtPackageVersion>7.0.0-preview.22423.2</MicrosoftWebXdtPackageVersion>
-    <SystemSecurityCryptographyProtectedDataPackageVersion>7.0.0-rc.2.22430.3</SystemSecurityCryptographyProtectedDataPackageVersion>
+    <SystemSecurityCryptographyProtectedDataPackageVersion>7.0.0-rc.2.22451.11</SystemSecurityCryptographyProtectedDataPackageVersion>
     <SystemCollectionsSpecializedPackageVersion>4.3.0</SystemCollectionsSpecializedPackageVersion>
     <SystemXmlXmlDocumentPackageVersion>4.3.0</SystemXmlXmlDocumentPackageVersion>
     <WebDeploymentPackageVersion>4.0.5</WebDeploymentPackageVersion>
     <SystemTextJsonVersion>6.0.0</SystemTextJsonVersion>
-    <SystemReflectionMetadataLoadContextVersion>7.0.0-rc.2.22430.3</SystemReflectionMetadataLoadContextVersion>
+    <SystemReflectionMetadataLoadContextVersion>7.0.0-rc.2.22451.11</SystemReflectionMetadataLoadContextVersion>
     <SystemManagementPackageVersion>4.6.0</SystemManagementPackageVersion>
     <SystemCommandLineVersion>2.0.0-beta4.22402.1</SystemCommandLineVersion>
     <MicrosoftDeploymentDotNetReleasesVersion>1.0.0-preview5.1.22263.1</MicrosoftDeploymentDotNetReleasesVersion>
@@ -48,13 +49,13 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/runtime -->
-    <MicrosoftNETCoreAppRefPackageVersion>7.0.0-rc.2.22430.3</MicrosoftNETCoreAppRefPackageVersion>
-    <VSRedistCommonNetCoreSharedFrameworkx6470PackageVersion>7.0.0-rc.2.22430.3</VSRedistCommonNetCoreSharedFrameworkx6470PackageVersion>
-    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>7.0.0-rc.2.22430.3</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
+    <MicrosoftNETCoreAppRefPackageVersion>7.0.0-rc.2.22451.11</MicrosoftNETCoreAppRefPackageVersion>
+    <VSRedistCommonNetCoreSharedFrameworkx6470PackageVersion>7.0.0-rc.2.22451.11</VSRedistCommonNetCoreSharedFrameworkx6470PackageVersion>
+    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>7.0.0-rc.2.22451.11</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
     <MicrosoftNETCoreAppRuntimePackageVersion>$(MicrosoftNETCoreAppRuntimewinx64PackageVersion)</MicrosoftNETCoreAppRuntimePackageVersion>
-    <MicrosoftExtensionsDependencyModelPackageVersion>7.0.0-rc.2.22430.3</MicrosoftExtensionsDependencyModelPackageVersion>
-    <MicrosoftNETCoreDotNetHostResolverPackageVersion>7.0.0-rc.2.22430.3</MicrosoftNETCoreDotNetHostResolverPackageVersion>
-    <MicrosoftNETHostModelVersion>7.0.0-rc.2.22430.3</MicrosoftNETHostModelVersion>
+    <MicrosoftExtensionsDependencyModelPackageVersion>7.0.0-rc.2.22451.11</MicrosoftExtensionsDependencyModelPackageVersion>
+    <MicrosoftNETCoreDotNetHostResolverPackageVersion>7.0.0-rc.2.22451.11</MicrosoftNETCoreDotNetHostResolverPackageVersion>
+    <MicrosoftNETHostModelVersion>7.0.0-rc.2.22451.11</MicrosoftNETHostModelVersion>
     <MicrosoftExtensionsFileSystemGlobbingPackageVersion>6.0.0-preview.7.21363.9</MicrosoftExtensionsFileSystemGlobbingPackageVersion>
     <MicrosoftExtensionsDependencyModelVersion>$(MicrosoftExtensionsDependencyModelPackageVersion)</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftExtensionsLoggingConsoleVersion>6.0.0</MicrosoftExtensionsLoggingConsoleVersion>
@@ -79,33 +80,33 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/Microsoft/vstest -->
-    <MicrosoftNETTestSdkPackageVersion>17.4.0-preview-20220830-01</MicrosoftNETTestSdkPackageVersion>
+    <MicrosoftNETTestSdkPackageVersion>17.4.0-preview-20220906-02</MicrosoftNETTestSdkPackageVersion>
     <MicrosoftTestPlatformCLIPackageVersion>$(MicrosoftNETTestSdkPackageVersion)</MicrosoftTestPlatformCLIPackageVersion>
     <MicrosoftTestPlatformBuildPackageVersion>$(MicrosoftNETTestSdkPackageVersion)</MicrosoftTestPlatformBuildPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/mono/linker -->
-    <MicrosoftNETILLinkTasksPackageVersion>7.0.100-1.22423.4</MicrosoftNETILLinkTasksPackageVersion>
+    <MicrosoftNETILLinkTasksPackageVersion>7.0.100-1.22452.1</MicrosoftNETILLinkTasksPackageVersion>
     <MicrosoftNETILLinkAnalyzerPackageVersion>$(MicrosoftNETILLinkTasksPackageVersion)</MicrosoftNETILLinkAnalyzerPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/runtime -->
-    <SystemCodeDomPackageVersion>7.0.0-rc.2.22430.3</SystemCodeDomPackageVersion>
-    <SystemTextEncodingCodePagesPackageVersion>7.0.0-rc.2.22430.3</SystemTextEncodingCodePagesPackageVersion>
-    <SystemResourcesExtensionsPackageVersion>7.0.0-rc.2.22430.3</SystemResourcesExtensionsPackageVersion>
-    <MicrosoftDotNetILCompilerPackageVersion>7.0.0-rc.2.22430.3</MicrosoftDotNetILCompilerPackageVersion>
+    <SystemCodeDomPackageVersion>7.0.0-rc.2.22451.11</SystemCodeDomPackageVersion>
+    <SystemTextEncodingCodePagesPackageVersion>7.0.0-rc.2.22451.11</SystemTextEncodingCodePagesPackageVersion>
+    <SystemResourcesExtensionsPackageVersion>7.0.0-rc.2.22451.11</SystemResourcesExtensionsPackageVersion>
+    <MicrosoftDotNetILCompilerPackageVersion>7.0.0-rc.2.22451.11</MicrosoftDotNetILCompilerPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/format -->
-    <dotnetformatVersion>7.0.343001</dotnetformatVersion>
+    <dotnetformatVersion>7.0.345601</dotnetformatVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/roslyn-analyzers -->
-    <MicrosoftCodeAnalysisNetAnalyzersVersion>7.0.0-preview1.22429.1</MicrosoftCodeAnalysisNetAnalyzersVersion>
+    <MicrosoftCodeAnalysisNetAnalyzersVersion>7.0.0-preview1.22452.2</MicrosoftCodeAnalysisNetAnalyzersVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/Microsoft/msbuild -->
-    <MicrosoftBuildPackageVersion>17.4.0-preview-22426-02</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildPackageVersion>17.4.0-preview-22451-06</MicrosoftBuildPackageVersion>
     <!-- .NET Framework-targeted tasks will need to run in an MSBuild that is older than the very latest,
           so target one that matches the version in minimumMSBuildVersion.
 
@@ -113,7 +114,7 @@
     <MicrosoftBuildPackageVersion Condition=" '$([MSBuild]::GetTargetFrameworkIdentifier($(TargetFramework)))' == '.NETFramework' and exists('$(RepoRoot)\src\Layout\redist\minimumMSBuildVersion')">$([System.IO.File]::ReadAllText('$(RepoRoot)\src\Layout\redist\minimumMSBuildVersion').Trim())</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
-    <MicrosoftBuildLocalizationPackageVersion>17.4.0-preview-22426-02</MicrosoftBuildLocalizationPackageVersion>
+    <MicrosoftBuildLocalizationPackageVersion>17.4.0-preview-22451-06</MicrosoftBuildLocalizationPackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
     <MicrosoftBuildTasksCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildTasksCorePackageVersion>
     <MicrosoftBuildVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildVersion>
@@ -124,7 +125,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/templating -->
-    <MicrosoftTemplateEngineAbstractionsPackageVersion>7.0.100-rc.2.22429.1</MicrosoftTemplateEngineAbstractionsPackageVersion>
+    <MicrosoftTemplateEngineAbstractionsPackageVersion>7.0.100-rc.2.22456.9</MicrosoftTemplateEngineAbstractionsPackageVersion>
     <MicrosoftTemplateEngineEdgePackageVersion>$(MicrosoftTemplateEngineAbstractionsPackageVersion)</MicrosoftTemplateEngineEdgePackageVersion>
     <MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>$(MicrosoftTemplateEngineAbstractionsPackageVersion)</MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>
     <MicrosoftTemplateEngineUtilsPackageVersion>$(MicrosoftTemplateEngineAbstractionsPackageVersion)</MicrosoftTemplateEngineUtilsPackageVersion>
@@ -135,13 +136,14 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/Microsoft/visualfsharp -->
-    <MicrosoftFSharpCompilerPackageVersion>12.0.5-beta.22430.3</MicrosoftFSharpCompilerPackageVersion>
+    <MicrosoftFSharpCompilerPackageVersion>12.0.5-beta.22456.1</MicrosoftFSharpCompilerPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/roslyn -->
     <MicrosoftNetCompilersToolsetPackageVersion>4.4.0-2.22451.9</MicrosoftNetCompilersToolsetPackageVersion>
     <MicrosoftCodeAnalysisPackageVersion>4.4.0-2.22451.9</MicrosoftCodeAnalysisPackageVersion>
     <MicrosoftCodeAnalysisCSharpPackageVersion>4.4.0-2.22451.9</MicrosoftCodeAnalysisCSharpPackageVersion>
+    <MicrosoftCodeAnalysisCSharpCodeStylePackageVersion>4.4.0-3.22430.19</MicrosoftCodeAnalysisCSharpCodeStylePackageVersion>
     <MicrosoftCodeAnalysisCSharpFeaturesPackageVersion>4.4.0-2.22451.9</MicrosoftCodeAnalysisCSharpFeaturesPackageVersion>
     <MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>4.4.0-2.22451.9</MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>
     <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>4.4.0-2.22451.9</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
@@ -149,12 +151,12 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore -->
-    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>7.0.0-rc.2.22430.21</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
-    <MicrosoftAspNetCoreComponentsSdkAnalyzersPackageVersion>7.0.0-rc.2.22430.21</MicrosoftAspNetCoreComponentsSdkAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>7.0.0-rc.2.22430.21</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>7.0.0-rc.2.22430.21</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreAnalyzersPackageVersion>7.0.0-rc.2.22430.21</MicrosoftAspNetCoreAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreTestHostPackageVersion>7.0.0-rc.2.22430.21</MicrosoftAspNetCoreTestHostPackageVersion>
+    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>7.0.0-rc.2.22456.19</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
+    <MicrosoftAspNetCoreComponentsSdkAnalyzersPackageVersion>7.0.0-rc.2.22456.19</MicrosoftAspNetCoreComponentsSdkAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>7.0.0-rc.2.22456.19</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>7.0.0-rc.2.22456.19</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreAnalyzersPackageVersion>7.0.0-rc.2.22456.19</MicrosoftAspNetCoreAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreTestHostPackageVersion>7.0.0-rc.2.22456.19</MicrosoftAspNetCoreTestHostPackageVersion>
   </PropertyGroup>
   <!-- Dependencies from https://github.com/dotnet/razor-compiler -->
   <PropertyGroup>
@@ -165,7 +167,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/wpf -->
-    <MicrosoftNETSdkWindowsDesktopPackageVersion>7.0.0-rc.2.22430.8</MicrosoftNETSdkWindowsDesktopPackageVersion>
+    <MicrosoftNETSdkWindowsDesktopPackageVersion>7.0.0-rc.2.22431.4</MicrosoftNETSdkWindowsDesktopPackageVersion>
   </PropertyGroup>
   <PropertyGroup Label="Manually updated">
     <!-- Dependencies from https://github.com/microsoft/MSBuildLocator -->
@@ -174,7 +176,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/xliff-tasks -->
-    <MicrosoftDotNetXliffTasksVersion>1.0.0-beta.22409.1</MicrosoftDotNetXliffTasksVersion>
+    <MicrosoftDotNetXliffTasksVersion>1.0.0-beta.22415.3</MicrosoftDotNetXliffTasksVersion>
   </PropertyGroup>
   <!-- Get .NET Framework reference assemblies from NuGet packages -->
   <PropertyGroup>
@@ -184,7 +186,7 @@
   <PropertyGroup>
     <FluentAssertionsVersion>6.7.0</FluentAssertionsVersion>
     <FluentAssertionsJsonVersion>6.1.0</FluentAssertionsJsonVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>7.0.0-beta.22411.2</MicrosoftDotNetXUnitExtensionsVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>7.0.0-beta.22418.4</MicrosoftDotNetXUnitExtensionsVersion>
     <MoqPackageVersion>4.8.2</MoqPackageVersion>
     <MicrosoftDotNetInstallerWindowsSecurityTestDataPackageVersion>6.0.0-beta.22262.1</MicrosoftDotNetInstallerWindowsSecurityTestDataPackageVersion>
   </PropertyGroup>

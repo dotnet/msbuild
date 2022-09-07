@@ -1,5 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.Runtime.CompilerServices;
 using Microsoft.TemplateEngine.Abstractions;
@@ -534,15 +535,16 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
         private class CaptureMePostAction : IPostActionProcessor
         {
-            private bool _expectedResult;
-            private string _testName;
-            private Guid _guid;
             private readonly List<(
                 IEngineEnvironmentSettings EngineEnvironmentSettings,
                 IPostAction PostAction,
                 ICreationEffects CreationEffects,
                 ICreationResult CreationResult,
                 string OutputPath)> _receivedCalls = new();
+
+            private bool _expectedResult;
+            private string _testName;
+            private Guid _guid;
 
             public CaptureMePostAction([CallerMemberName] string test = "", bool expectedResult = true, Guid guid = default)
             {

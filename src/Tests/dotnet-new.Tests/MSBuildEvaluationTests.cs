@@ -1,13 +1,13 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
+//
 
 using FluentAssertions;
-using Microsoft.NET.TestFramework.Commands;
-using Xunit.Abstractions;
-using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
@@ -72,7 +72,6 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .WithWorkingDirectory(tempDir)
                 .Execute("xunit", "--name", "MyTestProject");
             cmd.Should().Pass();
-
 
             string projectPath = Path.Combine(tempDir, "MyTestProject");
 

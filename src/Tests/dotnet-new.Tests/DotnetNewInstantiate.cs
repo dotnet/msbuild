@@ -1,5 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.IO.Compression;
 using FluentAssertions;
@@ -352,7 +353,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         public void WhenSwitchIsSkippedThenItPrintsError()
         {
             Utils.CommandResult cmd = new DotnetNewCommand(Log)
-                .WithVirutalHive()
+                .WithVirtualHive()
                 .Execute("Web1.1");
 
             cmd.ExitCode.Should().NotBe(0);
@@ -368,7 +369,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string tempDir = CreateTemporaryFolder();
             Utils.CommandResult cmd = new DotnetNewCommand(Log)
-                .WithVirutalHive()
+                .WithVirtualHive()
                 .Execute("console", "-o", tempDir);
             cmd.Should().Pass();
         }
@@ -377,7 +378,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         public void ItCanShowHelp()
         {
             Utils.CommandResult cmd = new DotnetNewCommand(Log)
-                .WithVirutalHive()
+                .WithVirtualHive()
                 .Execute("--help");
             cmd.Should().Pass()
                 .And.HaveStdOutContaining("Usage:")
@@ -388,7 +389,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         public void ItCanShowHelpForTemplate()
         {
             Utils.CommandResult cmd = new DotnetNewCommand(Log)
-                .WithVirutalHive()
+                .WithVirtualHive()
                 .Execute("classlib", "--help");
 
             cmd.Should().Pass()
@@ -401,7 +402,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         public void ItCanShowParseError()
         {
             Utils.CommandResult cmd = new DotnetNewCommand(Log)
-                .WithVirutalHive()
+                .WithVirtualHive()
                 .Execute("update", "--bla");
             cmd.Should().ExitWith(127)
                 .And.HaveStdErrContaining("Unrecognized command or argument '--bla'")
@@ -412,7 +413,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         public void WhenTemplateNameIsNotUniquelyMatchedThenItIndicatesProblemToUser()
         {
             Utils.CommandResult cmd = new DotnetNewCommand(Log)
-                .WithVirutalHive()
+                .WithVirtualHive()
                 .Execute("c");
 
             cmd.ExitCode.Should().NotBe(0);
@@ -429,14 +430,14 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string rootPath = CreateTemporaryFolder();
 
             new DotnetNewCommand(Log)
-                .WithVirutalHive()
+                .WithVirtualHive()
                 .WithWorkingDirectory(rootPath)
                 .Execute($"console", "--no-restore");
 
             DateTime expectedState = Directory.GetLastWriteTime(rootPath);
 
             CommandResult result = new DotnetNewCommand(Log)
-                .WithVirutalHive()
+                .WithVirtualHive()
                 .WithWorkingDirectory(rootPath)
                 .Execute($"console", "--no-restore");
 
@@ -453,7 +454,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string rootPath = CreateTemporaryFolder();
 
             new DotnetNewCommand(Log)
-                .WithVirutalHive()
+                .WithVirtualHive()
                 .WithWorkingDirectory(rootPath)
                 .WithEnvironmentVariable("DOTNET_NEW_PREFERRED_LANG", "F#")
                 .Execute($"console", "--no-restore", "-n", "f1")
@@ -469,7 +470,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string rootPath = CreateTemporaryFolder();
 
             new DotnetNewCommand(Log)
-                .WithVirutalHive()
+                .WithVirtualHive()
                 .WithWorkingDirectory(rootPath)
                 .Execute($"console", "--no-restore", "-n", "c1")
                 .Should().Pass();
@@ -484,7 +485,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string rootPath = CreateTemporaryFolder();
 
             new DotnetNewCommand(Log)
-                .WithVirutalHive()
+                .WithVirtualHive()
                 .WithWorkingDirectory(rootPath)
                 .Execute($"console", "--no-restore", "-n", "vb1", "-lang", "vb")
                 .Should().Pass();
@@ -499,7 +500,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string rootPath = CreateTemporaryFolder();
 
             new DotnetNewCommand(Log)
-                .WithVirutalHive()
+                .WithVirtualHive()
                 .WithWorkingDirectory(rootPath)
                 .WithEnvironmentVariable("DOTNET_NEW_PREFERRED_LANG", "")
                 .Execute($"console", "--no-restore", "-n", "c1")
