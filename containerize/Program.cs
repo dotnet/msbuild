@@ -62,7 +62,7 @@ return await rootCommand.InvokeAsync(args);
 
 async Task Containerize(DirectoryInfo folder, string workingDir, string registryName, string baseName, string baseTag, string[] entrypoint, string imageName, string imageTag)
 {
-    Registry registry = new Registry(new Uri($"http://{registryName}"));
+    Registry registry = new Registry(new Uri($"https://{registryName}"));
 
     Console.WriteLine($"Reading from {registry.BaseUri}");
 
@@ -84,7 +84,8 @@ async Task Containerize(DirectoryInfo folder, string workingDir, string registry
     // File.WriteAllTextAsync("manifest.json", x.manifest.ToJsonString(options));
     // File.WriteAllTextAsync("config.json", x.config.ToJsonString(options));
 
-    await LocalDocker.Load(x, imageName, imageTag, baseName);
+    //await LocalDocker.Load(x, imageName, imageTag, baseName);
+    await registry.Push(x, imageName, imageTag, baseName);
 
     Console.WriteLine($"Loaded image into local Docker daemon. Use 'docker run --rm -it --name {imageName} {registryName}/{imageName}:{imageTag}' to run the application.");
 }

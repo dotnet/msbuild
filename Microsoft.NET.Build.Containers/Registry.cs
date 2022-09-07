@@ -11,6 +11,8 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Xml.Linq;
 
+using Valleysoft.DockerCredsProvider;
+
 namespace Microsoft.NET.Build.Containers;
 
 public record struct Registry(Uri BaseUri)
@@ -20,7 +22,7 @@ public record struct Registry(Uri BaseUri)
 
     public async Task<Image> GetImageManifest(string name, string reference)
     {
-        using HttpClient client = GetClient();
+        using HttpClient client = await GetClient();
 
         var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{reference}"));
 
@@ -71,7 +73,7 @@ public record struct Registry(Uri BaseUri)
 
         // No local copy, so download one
 
-        using HttpClient client = GetClient();
+        using HttpClient client = await GetClient();
 
         var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{name}/blobs/{descriptor.Digest}"));
 
@@ -110,7 +112,7 @@ public record struct Registry(Uri BaseUri)
 
     private readonly async Task UploadBlob(string name, string digest, Stream contents)
     {
-        using HttpClient client = GetClient();
+        using HttpClient client = await GetClient();
 
         if (await BlobAlreadyUploaded(name, digest, client))
         {
@@ -125,7 +127,15 @@ public record struct Registry(Uri BaseUri)
         //Uri uploadUri = new(BaseUri, pushResponse.Headers.GetValues("location").Single() + $"?digest={layer.Descriptor.Digest}");
         Debug.Assert(pushResponse.Headers.Location is not null);
 
-        var x = new UriBuilder(pushResponse.Headers.Location);
+        UriBuilder x;
+        if (pushResponse.Headers.Location.IsAbsoluteUri)
+        {
+            x = new UriBuilder(pushResponse.Headers.Location);
+        }
+        else
+        {
+            x = new UriBuilder(BaseUri + pushResponse.Headers.Location.OriginalString);
+        }
 
         x.Query += $"&digest={Uri.EscapeDataString(digest)}";
 
@@ -152,7 +162,7 @@ public record struct Registry(Uri BaseUri)
         return false;
     }
 
-    private static HttpClient GetClient()
+    private readonly async Task<HttpClient> GetClient()
     {
         HttpClient client = new(new HttpClientHandler() { UseDefaultCredentials = true });
 
@@ -164,6 +174,18 @@ public record struct Registry(Uri BaseUri)
         client.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue(DockerContainerV1));
 
+        try
+        {
+            DockerCredentials privateRepoCreds = await CredsProvider.GetCredentialsAsync(BaseUri.Host);
+
+            byte[] byteArray = Encoding.ASCII.GetBytes($"{privateRepoCreds.Username}:{privateRepoCreds.Password}");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+        }
+        catch (CredsNotFoundException)
+        {
+            // TODO: log?
+        }
+
         client.DefaultRequestHeaders.Add("User-Agent", ".NET Container Library");
 
         return client;
@@ -173,7 +195,7 @@ public record struct Registry(Uri BaseUri)
     {
         tag ??= "latest";
 
-        using HttpClient client = GetClient();
+        using HttpClient client = await GetClient();
 
         foreach (var descriptor in x.LayerDescriptors)
         {
