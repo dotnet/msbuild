@@ -72,9 +72,9 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             _environmentPathInstruction = environmentPathInstruction
                 ?? EnvironmentPathFactory.CreateEnvironmentPathInstruction();
             _createShellShimRepository = createShellShimRepository ?? ShellShimRepositoryFactory.CreateShellShimRepository;
-            var tempDir = new DirectoryPath(Path.Combine(Path.GetTempPath(), "dotnet-tool-install"));
-            var configOption = parseResult.ValueForOption(ToolInstallCommandParser.ConfigOption);
-            var sourceOption = parseResult.ValueForOption(ToolInstallCommandParser.AddSourceOption);
+            var tempDir = new DirectoryPath(PathUtilities.CreateTempSubdirectory());
+            var configOption = parseResult.GetValueForOption(ToolInstallCommandParser.ConfigOption);
+            var sourceOption = parseResult.GetValueForOption(ToolInstallCommandParser.AddSourceOption);
             var packageSourceLocation = new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), additionalSourceFeeds: sourceOption);
             var restoreAction = new RestoreActionConfig(DisableParallel: parseResult.ValueForOption(ToolCommandRestorePassThroughOptions.DisableParallelOption),
                 NoCache: parseResult.ValueForOption(ToolCommandRestorePassThroughOptions.NoCacheOption),
