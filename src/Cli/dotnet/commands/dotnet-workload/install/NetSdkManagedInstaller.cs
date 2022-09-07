@@ -145,7 +145,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                         WritePackInstallationRecord(packInfo, sdkFeatureBand);
                     },
-                    rollback: () => {
+                    rollback: () =>
+                    {
                         try
                         {
                             _reporter.WriteLine(string.Format(LocalizableStrings.RollingBackPackInstall, packInfo.Id));
@@ -165,22 +166,16 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 {
                     if (File.Exists(file))
                     {
-                        // Delete leftover dirs and files
-                        foreach (var file in tempFilesToDelete)
-                        {
-                            if (File.Exists(file))
-                            {
-                                File.Delete(file);
-                            }
-                        }
-                        foreach (var dir in tempDirsToDelete)
-                        {
-                            if (Directory.Exists(dir))
-                            {
-                                Directory.Delete(dir, true);
-                            }
-                        }
-                    });
+                        File.Delete(file);
+                    }
+                }
+                foreach (var dir in tempDirsToDelete)
+                {
+                    if (Directory.Exists(dir))
+                    {
+                        Directory.Delete(dir, true);
+                    }
+                }
             }
         }
 
