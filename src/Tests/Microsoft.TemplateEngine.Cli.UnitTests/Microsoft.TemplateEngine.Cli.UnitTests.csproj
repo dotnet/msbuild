@@ -6,6 +6,9 @@
     <Nullable>enable</Nullable>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <IsUnitTestProject>true</IsUnitTestProject>
+    <EnableAnalyzers>true</EnableAnalyzers>
+    <EnableStyleCopAnalyzer>true</EnableStyleCopAnalyzer>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

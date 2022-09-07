@@ -22,7 +22,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tool
 
             var compressionLevelOption = new Option<CompressionLevel>(
                 "-c",
-                getDefaultValue: () => CompressionLevel.Optimal,
+                getDefaultValue: () => CompressionLevel.SmallestSize,
                 description: "System.IO.Compression.CompressionLevel for the Brotli compression algorithm.");
             var sourcesOption = new Option<List<string>>(
                 "-s",

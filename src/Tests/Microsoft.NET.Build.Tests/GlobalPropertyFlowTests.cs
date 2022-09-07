@@ -208,7 +208,7 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager.CreateTestProject(_testProject, identifier: identifier);
 
             new DotnetNewCommand(Log, "sln")
-                .WithVirutalHive()
+                .WithVirtualHive()
                 .WithWorkingDirectory(testAsset.TestRoot)
                 .Execute()
                 .Should()

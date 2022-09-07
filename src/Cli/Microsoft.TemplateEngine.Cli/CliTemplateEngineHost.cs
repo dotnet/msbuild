@@ -1,5 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
@@ -19,10 +20,10 @@ namespace Microsoft.TemplateEngine.Cli
             string? outputPath = null,
             bool enableVerboseLogging = false)
             : base(
-                  hostIdentifier, 
-                  version, 
-                  preferences, 
-                  builtIns, 
+                  hostIdentifier,
+                  version,
+                  preferences,
+                  builtIns,
                   fallbackHostNames,
                   loggerFactory: Microsoft.Extensions.Logging.LoggerFactory.Create(builder =>
                     builder
@@ -86,21 +87,21 @@ namespace Microsoft.TemplateEngine.Cli
         void ITemplateEngineHost.LogDiagnosticMessage(string message, string category, params string[] details)
         {
             //do nothing if used
-            //DefaultTemplateEngineHost may log these messages to Console 
+            //DefaultTemplateEngineHost may log these messages to Console
         }
 
         [Obsolete("Use " + nameof(Logger) + " instead")]
         void ITemplateEngineHost.LogTiming(string label, TimeSpan duration, int depth)
         {
             //do nothing if used
-            //DefaultTemplateEngineHost may log these messages to Console 
+            //DefaultTemplateEngineHost may log these messages to Console
         }
 
         [Obsolete("Use " + nameof(Logger) + " instead")]
         void ITemplateEngineHost.LogMessage(string message)
         {
             //do nothing if used
-            //DefaultTemplateEngineHost may log these messages to Console 
+            //DefaultTemplateEngineHost may log these messages to Console
         }
 
         [Obsolete("Use CreationStatusResult instead")]

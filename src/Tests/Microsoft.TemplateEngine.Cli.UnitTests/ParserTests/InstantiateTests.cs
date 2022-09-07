@@ -1,5 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using System.CommandLine.Parsing;
@@ -161,48 +162,48 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             new object?[][]
             {
                 //invalid choice parameter value
-                new [] { "foo --MyChoice value", "MultipleTemplatesWithChoiceParameter", null, null },
+                new[] { "foo --MyChoice value", "MultipleTemplatesWithChoiceParameter", null, null },
                 //higher precedence template is preferred
-                new [] { "foo --MyChoice value --OtherChoice foo", "MultipleTemplatesWithMultipleChoiceParameters", null, "foo.test_2" },
+                new[] { "foo --MyChoice value --OtherChoice foo", "MultipleTemplatesWithMultipleChoiceParameters", null, "foo.test_2" },
                //in case there is only one template  in the group, language mismatch is ignored
-                new [] { "foo", "SingleFSharpTemplate", null, "foo.test_1" },
+                new[] { "foo", "SingleFSharpTemplate", null, "foo.test_1" },
                 //in case there is multiple templates in the group of different languages, the higher precedence template is preferred
-                new [] { "foo", "FSharpVBTemplatesWithDifferentPrecedence", null, "foo.test_1.VB" },
+                new[] { "foo", "FSharpVBTemplatesWithDifferentPrecedence", null, "foo.test_1.VB" },
                 //in case there is multiple templates in the group of different languages with same language, both are selected
-                new [] { "foo", "FSharpVBTemplatesWithSamePrecedence", null, "foo.test_1.VB|foo.test_1.FSharp" },
-                new [] { "foo", "FSharpVBTemplatesWithSamePrecedence", "C#", "foo.test_1.VB|foo.test_1.FSharp" },
-                new [] { "foo", "FSharpVBTemplatesWithSamePrecedence", "VB", "foo.test_1.VB" },
-                new [] { "foo", "FSharpVBTemplatesWithSamePrecedence", "F#", "foo.test_1.FSharp" },
+                new[] { "foo", "FSharpVBTemplatesWithSamePrecedence", null, "foo.test_1.VB|foo.test_1.FSharp" },
+                new[] { "foo", "FSharpVBTemplatesWithSamePrecedence", "C#", "foo.test_1.VB|foo.test_1.FSharp" },
+                new[] { "foo", "FSharpVBTemplatesWithSamePrecedence", "VB", "foo.test_1.VB" },
+                new[] { "foo", "FSharpVBTemplatesWithSamePrecedence", "F#", "foo.test_1.FSharp" },
                 //in case there is multiple templates in the group, higher precedence is selected
-                new [] { "Template", "BasicSet2Templates", null, "Template2" },
+                new[] { "Template", "BasicSet2Templates", null, "Template2" },
                 //in case there is group has multiple shortnames, any name can be used, and still higher precedence is selected
-                new [] { "ShortName1", "2TemplatesWithDifferentShortName", null, "Template2" },
-                new [] { "ShortName2", "2TemplatesWithDifferentShortName", null, "Template2" },
+                new[] { "ShortName1", "2TemplatesWithDifferentShortName", null, "Template2" },
+                new[] { "ShortName2", "2TemplatesWithDifferentShortName", null, "Template2" },
                 //in case there is group has multiple shortnames but same preference, any name can be used, and both templates are selected
-                new [] { "ShortName1", "2TemplatesWithDifferentShortNameSamePrecedence", null, "Template1|Template2" },
-                new [] { "ShortName2", "2TemplatesWithDifferentShortNameSamePrecedence", null, "Template1|Template2" },
+                new[] { "ShortName1", "2TemplatesWithDifferentShortNameSamePrecedence", null, "Template1|Template2" },
+                new[] { "ShortName2", "2TemplatesWithDifferentShortNameSamePrecedence", null, "Template1|Template2" },
                 //cases for single template in group vs default language
-                new [] { "foo", "SinglePerlTemplate", "Perl", "foo.Perl" },
-                new [] { "foo", "SinglePerlTemplate", null, "foo.Perl" },
-                new [] { "foo --language Perl", "SinglePerlTemplate", "Perl", "foo.Perl" },
-                new [] { "foo --language Perl", "SinglePerlTemplate", null, "foo.Perl" },
-                new [] { "foo", "SinglePerlTemplate", "C#", "foo.Perl" },
-                new [] { "foo --language Perl", "SinglePerlTemplate", "C#", "foo.Perl" },
-                new [] { "foo --language C#", "SinglePerlTemplate", "C#", null },
+                new[] { "foo", "SinglePerlTemplate", "Perl", "foo.Perl" },
+                new[] { "foo", "SinglePerlTemplate", null, "foo.Perl" },
+                new[] { "foo --language Perl", "SinglePerlTemplate", "Perl", "foo.Perl" },
+                new[] { "foo --language Perl", "SinglePerlTemplate", null, "foo.Perl" },
+                new[] { "foo", "SinglePerlTemplate", "C#", "foo.Perl" },
+                new[] { "foo --language Perl", "SinglePerlTemplate", "C#", "foo.Perl" },
+                new[] { "foo --language C#", "SinglePerlTemplate", "C#", null },
                 //cases for multiple languages templates in group vs default language
-                new [] { "foo", "LispPerlTemplates", "Perl", "foo.Perl" },
-                new [] { "foo", "LispPerlTemplates", null, "foo.Perl|foo.Lisp" },
-                new [] { "foo --language LISP", "LispPerlTemplates", "Perl", "foo.Lisp" },
-                new [] { "foo --language lisp", "LispPerlTemplates", "Perl", "foo.Lisp" },      //argument case doesn't matter
+                new[] { "foo", "LispPerlTemplates", "Perl", "foo.Perl" },
+                new[] { "foo", "LispPerlTemplates", null, "foo.Perl|foo.Lisp" },
+                new[] { "foo --language LISP", "LispPerlTemplates", "Perl", "foo.Lisp" },
+                new[] { "foo --language lisp", "LispPerlTemplates", "Perl", "foo.Lisp" },      //argument case doesn't matter
                 //cases for non-choice parameters: same precedence but different parameters templates
-                new [] { "foo --baz whatever", "2TemplatesWithDifferentParameters", null, "foo.baz" },
-                new [] { "foo --bar whatever", "2TemplatesWithDifferentParameters", null, "foo.bar" },
-                new [] { "foo --bat whatever", "2TemplatesWithDifferentParameters", null, null },
+                new[] { "foo --baz whatever", "2TemplatesWithDifferentParameters", null, "foo.baz" },
+                new[] { "foo --bar whatever", "2TemplatesWithDifferentParameters", null, "foo.bar" },
+                new[] { "foo --bat whatever", "2TemplatesWithDifferentParameters", null, null },
                 //cases for choice parameters: same precedence but different choice templates (same parameter)
-                new [] { "foo --framework net5.0", "2TemplatesWithDifferentChoiceOptions", null, "foo.2" },
-                new [] { "foo --framework NET5.0", "2TemplatesWithDifferentChoiceOptions", null, "foo.2" },     //argument case doesn't matter
-                new [] { "foo --framework netcoreapp2.1", "2TemplatesWithDifferentChoiceOptions", null, "foo.1" },
-                new [] { "foo --framework netcoreapp2.0", "2TemplatesWithDifferentChoiceOptions", null, null },
+                new[] { "foo --framework net5.0", "2TemplatesWithDifferentChoiceOptions", null, "foo.2" },
+                new[] { "foo --framework NET5.0", "2TemplatesWithDifferentChoiceOptions", null, "foo.2" },     //argument case doesn't matter
+                new[] { "foo --framework netcoreapp2.1", "2TemplatesWithDifferentChoiceOptions", null, "foo.1" },
+                new[] { "foo --framework netcoreapp2.0", "2TemplatesWithDifferentChoiceOptions", null, null },
             };
 
         [Theory]
@@ -267,39 +268,39 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             new object?[][]
             {
                 //bool
-                new [] { "foo --bool", "bool", "bool", null, null, "True" },
-                new [] { "foo -b", "bool", "bool", null, null, "True" },
-                new [] { "foo --bool true", "bool", "bool", null, null, "True" },
-                new [] { "foo -b true", "bool", "bool", null, null, "True" },
-                new [] { "foo --bool false", "bool", "bool", null, null, "False" },
-                new [] { "foo -b false", "bool", "bool", null, null, "False" },
+                new[] { "foo --bool", "bool", "bool", null, null, "True" },
+                new[] { "foo -b", "bool", "bool", null, null, "True" },
+                new[] { "foo --bool true", "bool", "bool", null, null, "True" },
+                new[] { "foo -b true", "bool", "bool", null, null, "True" },
+                new[] { "foo --bool false", "bool", "bool", null, null, "False" },
+                new[] { "foo -b false", "bool", "bool", null, null, "False" },
                 //the default values are ignored when creating args - they are processed by template engine core
-                new [] { "foo", "bool", "bool", null, null, null },
-                new [] { "foo", "bool", "bool", "true", null, null },
-                new [] { "foo", "bool", "bool", "false", null, null },
+                new[] { "foo", "bool", "bool", null, null, null },
+                new[] { "foo", "bool", "bool", "true", null, null },
+                new[] { "foo", "bool", "bool", "false", null, null },
                 //text
-                new [] { "foo --text val", "text", "string", null, null, "val" },
-                new [] { "foo -t val", "text", "string", null, null, "val" },
-                new [] { "foo --text val", "text", "text", null, null, "val" },
-                new [] { "foo", "text", "text", "def", null, null },
-                new [] { "foo --text", "text", "text", null, "defIfNoOpValue", "defIfNoOpValue" },
+                new[] { "foo --text val", "text", "string", null, null, "val" },
+                new[] { "foo -t val", "text", "string", null, null, "val" },
+                new[] { "foo --text val", "text", "text", null, null, "val" },
+                new[] { "foo", "text", "text", "def", null, null },
+                new[] { "foo --text", "text", "text", null, "defIfNoOpValue", "defIfNoOpValue" },
                 //int
-                new [] { "foo --int 30", "int", "int", null, null, "30" },
-                new [] { "foo --int 30", "int", "integer", null, null, "30" },
-                new [] { "foo -in 30", "int", "integer", null, null, "30" }, //-i is already defined for legacy install command
-                new [] { "foo", "int", "integer", "50", null, null },
-                new [] { "foo --int", "int", "int", null, "550", "550" },
+                new[] { "foo --int 30", "int", "int", null, null, "30" },
+                new[] { "foo --int 30", "int", "integer", null, null, "30" },
+                new[] { "foo -in 30", "int", "integer", null, null, "30" }, //-i is already defined for legacy install command
+                new[] { "foo", "int", "integer", "50", null, null },
+                new[] { "foo --int", "int", "int", null, "550", "550" },
                 //float
-                new [] { "foo --float 30.9", "float", "float", null, null, "30.9" },
-                new [] { "foo -f 30.9", "float", "float", null, null, "30.9" },
-                new [] { "foo", "float", "float", "50.9", null, null },
-                new [] { "foo --float", "float", "float", null, "5.501", "5.501" },
+                new[] { "foo --float 30.9", "float", "float", null, null, "30.9" },
+                new[] { "foo -f 30.9", "float", "float", null, null, "30.9" },
+                new[] { "foo", "float", "float", "50.9", null, null },
+                new[] { "foo --float", "float", "float", null, "5.501", "5.501" },
 
                 //hex
-                new [] { "foo --hex 0xABCDEF", "hex", "hex", null, null, "0xABCDEF" },
-                new [] { "foo -he 0xABCDEF", "hex", "hex", null, null, "0xABCDEF" }, //-h is already defined for help
-                new [] { "foo", "hex", "hex", "0xABCDE", null, null },
-                new [] { "foo --hex", "hex", "hex", null, "0xABCD", "0xABCD" },
+                new[] { "foo --hex 0xABCDEF", "hex", "hex", null, null, "0xABCDEF" },
+                new[] { "foo -he 0xABCDEF", "hex", "hex", null, null, "0xABCDEF" }, //-h is already defined for help
+                new[] { "foo", "hex", "hex", "0xABCDE", null, null },
+                new[] { "foo --hex", "hex", "hex", null, "0xABCD", "0xABCD" },
             };
 
         [Theory]
@@ -340,10 +341,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public static IEnumerable<object?[]> CanParseChoiceTemplateOptionsData =>
             new object?[][]
             {
-                new [] { "foo --framework net5.0", "framework", "net5.0|net6.0", null, "net5.0" },
-                new [] { "foo -f net5.0", "framework", "net5.0|net6.0", null, "net5.0" },
-                new [] { "foo --framework net6.0", "framework", "net5.0|net6.0", null, "net6.0" },
-                new [] { "foo --framework ", "framework", "net5.0|net6.0", "net6.0", "net6.0" },
+                new[] { "foo --framework net5.0", "framework", "net5.0|net6.0", null, "net5.0" },
+                new[] { "foo -f net5.0", "framework", "net5.0|net6.0", null, "net5.0" },
+                new[] { "foo --framework net6.0", "framework", "net5.0|net6.0", null, "net6.0" },
+                new[] { "foo --framework ", "framework", "net5.0|net6.0", "net6.0", "net6.0" },
             };
 
         [Theory]
@@ -383,11 +384,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public static IEnumerable<object?[]> CanParseMultiChoiceTemplateOptionsData =>
             new object?[][]
             {
-                new [] { "foo --framework net5.0 --framework net7.0", "framework", "net5.0|net6.0|net7.0", null, "net5.0|net7.0" },
-                new [] { "foo -f net5.0", "framework", "net5.0|net6.0|net7.0", null, "net5.0" },
-                new [] { "foo -f net5.0 -f net7.0 -f net6.0", "framework", "net5.0|net6.0|net7.0", null, "net5.0|net7.0|net6.0" },
-                new [] { "foo --framework net6.0", "framework", "net5.0|net6.0|net7.0", null, "net6.0" },
-                new [] { "foo --framework ", "framework", "net5.0|net6.0|net7.0", "net5.0|net6.0", "net5.0|net6.0" },
+                new[] { "foo --framework net5.0 --framework net7.0", "framework", "net5.0|net6.0|net7.0", null, "net5.0|net7.0" },
+                new[] { "foo -f net5.0", "framework", "net5.0|net6.0|net7.0", null, "net5.0" },
+                new[] { "foo -f net5.0 -f net7.0 -f net6.0", "framework", "net5.0|net6.0|net7.0", null, "net5.0|net7.0|net6.0" },
+                new[] { "foo --framework net6.0", "framework", "net5.0|net6.0|net7.0", null, "net6.0" },
+                new[] { "foo --framework ", "framework", "net5.0|net6.0|net7.0", "net5.0|net6.0", "net5.0|net6.0" },
             };
 
         [Theory]
@@ -556,7 +557,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         }
 
         [Theory]
-        [InlineData ("foo", AllowRunScripts.Prompt)]
+        [InlineData("foo", AllowRunScripts.Prompt)]
         [InlineData("foo --allow-scripts prompt", AllowRunScripts.Prompt)]
         [InlineData("foo --allow-scripts Prompt", AllowRunScripts.Prompt)]
         [InlineData("foo --allow-scripts yes", AllowRunScripts.Yes)]
@@ -588,7 +589,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             Assert.Equal(result, templateArgs.AllowScripts);
         }
 
-        #region MultiShortNameResolutionTests 
+        #region MultiShortNameResolutionTests
         [Theory]
         [InlineData("aaa")]
         [InlineData("bbb")]

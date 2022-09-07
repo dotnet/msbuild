@@ -185,7 +185,7 @@ Si la commande est spécifiée sans l’argument, elle répertorie tous les pack
       </trans-unit>
       <trans-unit id="Option_ProjectPath">
         <source>The project that should be used for context evaluation.</source>
-        <target state="new">The project that should be used for context evaluation.</target>
+        <target state="translated">Projet à utiliser pour l’évaluation du contexte</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_TagFilter">

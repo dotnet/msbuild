@@ -185,7 +185,7 @@ Wenn der Befehl ohne Argument angegeben wird, werden alle installierten Vorlagen
       </trans-unit>
       <trans-unit id="Option_ProjectPath">
         <source>The project that should be used for context evaluation.</source>
-        <target state="new">The project that should be used for context evaluation.</target>
+        <target state="translated">Das Projekt, das für die Kontextauswertung verwendet werden soll.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_TagFilter">

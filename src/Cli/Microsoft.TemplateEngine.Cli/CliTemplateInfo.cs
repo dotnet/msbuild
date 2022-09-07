@@ -1,5 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Constraints;
@@ -88,7 +89,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             get
             {
-                if (_parameters == null )
+                if (_parameters == null)
                 {
                     Dictionary<string, CliTemplateParameter> parameters = new();
                     foreach (ITemplateParameter parameter in ParameterDefinitions.Where(param => param.Type == "parameter"))
