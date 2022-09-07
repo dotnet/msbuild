@@ -48,17 +48,8 @@ namespace Microsoft.DotNet.Cli.Utils
                 await t;
                 T result = default;
                 count++;
-                try
-                {
-                    result = await action();
-                }
-                catch
-                {
-                    if (count == maxRetryCount)
-                    {
-                        throw;
-                    }
-                }
+
+                result = await action();
 
                 if (shouldStopRetry(result))
                 {
