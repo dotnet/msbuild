@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             };
 
         private readonly HashSet<string> _upperFirstPartyCertificateThumbprints =
-            new(StringComparer.OrdinalIgnoreCase) {"51044706BD237B91B89B781337E6D62656C69F0FCFFBE8E43741367948127862"};
+            new(StringComparer.OrdinalIgnoreCase) { "51044706BD237B91B89B781337E6D62656C69F0FCFFBE8E43741367948127862" };
 
         private const string FirstPartyCertificateSubject =
             "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US";
@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
         public FirstPartyNuGetPackageSigningVerifier(DirectoryPath? tempDirectory = null, ILogger logger = null)
         {
-            _tempDirectory = tempDirectory ?? new DirectoryPath(Path.GetTempPath());
+            _tempDirectory = tempDirectory ?? new DirectoryPath(PathUtilities.CreateTempSubdirectory());
             _logger = logger ?? new NullLogger();
         }
 
@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
         private static bool NuGetVerify(FilePath nupkgToVerify, out string commandOutput)
         {
-            var args = new[] {"verify", "--all", nupkgToVerify.Value};
+            var args = new[] { "verify", "--all", nupkgToVerify.Value };
             var command = new DotNetCommandFactory(alwaysRunOutOfProc: true)
                 .Create("nuget", args);
 
