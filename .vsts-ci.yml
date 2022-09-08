@@ -23,7 +23,7 @@ variables:
   - name: _DotNetValidationArtifactsCategory
     value: .NETCore
   - name: PostBuildSign
-    value: true
+    value: false
   - ${{ if eq(variables['System.TeamProject'], 'public') }}:
     - name: _InternalRuntimeDownloadArgs
       value: ''
