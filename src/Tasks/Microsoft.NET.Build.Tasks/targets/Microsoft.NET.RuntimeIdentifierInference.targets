@@ -61,7 +61,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeIdentifier Condition="'$(PlatformTarget)' == 'x86' or '$(PlatformTarget)' == ''">win7-x86</RuntimeIdentifier>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(UseCurrentRuntimeIdentifier)' == 'true'">
+  <PropertyGroup Condition="'$(UseCurrentRuntimeIdentifier)' == 'true' or
+                 (
+                 '$(RuntimeIdentifier)' == '' and
+                 '$(RuntimeIdentifiers)' == '' and
+                   (
+                   '$(SelfContained)' == 'true' or
+                   '$(PublishReadyToRun)' == 'true' or
+                   '$(PublishSingleFile)' == 'true' or
+                   '$(PublishAot)' == 'true'
+                   )
+                 )">
     <RuntimeIdentifier>$(NETCoreSdkPortableRuntimeIdentifier)</RuntimeIdentifier>
   </PropertyGroup>
 
@@ -151,9 +161,24 @@ Copyright (c) .NET Foundation. All rights reserved.
           BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
           Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(HasRuntimeOutput)' == 'true'">
 
+    <!-- The following RID errors are asserts, and we don't expect them to ever occur. The error message is added as a safeguard.-->
     <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(RuntimeIdentifier)' == ''"
-                 ResourceName="CannotHaveSelfContainedWithoutRuntimeIdentifier" />
+                 ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
+                 FormatArguments="SelfContained"/>
 
+    <NETSdkError Condition="'$(PublishReadyToRun)' == 'true' and '$(RuntimeIdentifier)' == ''"
+                 ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
+                 FormatArguments="PublishReadyToRun"/>
+
+    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(RuntimeIdentifier)' == ''"
+                ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
+                FormatArguments="PublishSingleFile"/>
+
+    <NETSdkError Condition="'$(PublishAot)' == 'true' and '$(RuntimeIdentifier)' == ''"
+                ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
+                FormatArguments="PublishAot"/>
+
+    <!-- End of implicit RID resolver checks.-->
     <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(UseAppHost)' != 'true' and '$(_RuntimeIdentifierUsesAppHost)' == 'true'"
                  ResourceName="CannotUseSelfContainedWithoutAppHost" />
 

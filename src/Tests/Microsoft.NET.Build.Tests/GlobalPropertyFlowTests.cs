@@ -207,8 +207,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(_testProject, identifier: identifier);
 
-            new DotnetNewCommand(Log, "sln")
-                .WithVirtualHive()
+            new DotnetCommand(Log, "new", "sln")
                 .WithWorkingDirectory(testAsset.TestRoot)
                 .Execute()
                 .Should()
@@ -228,7 +227,7 @@ namespace Microsoft.NET.Build.Tests
 
             var arguments = GetDotnetArguments(passSelfContained, passRuntimeIdentifier);
 
-            if (passSelfContained || passRuntimeIdentifier)
+            if (passRuntimeIdentifier)
             {
                 new DotnetBuildCommand(Log, arguments.ToArray())
                     .WithWorkingDirectory(testAsset.TestRoot)
