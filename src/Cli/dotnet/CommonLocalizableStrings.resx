@@ -524,8 +524,9 @@
     <value>Command '{0}' uses unsupported runner '{1}'."</value>
   </data>
   <data name="SolutionExecutableConfigurationMismatchError" xml:space="preserve">
-    <value>Multiple executable projects in the solution contain conflicting '{0}' values. Make the values match. Consider using a Directory.build.props file to set all project configurations.  Conflicting projects:
-{1}</value>
+    <value>Multiple executable projects in the solution contain conflicting '{0}' values. Ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
+    '{1}'.
+  </value>
   </data>
   <data name="ShellShimConflict" xml:space="preserve">
     <value>Command '{0}' conflicts with an existing command from another tool.</value>

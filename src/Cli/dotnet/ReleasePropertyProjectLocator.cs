@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Cli
             var globalProperties = GetGlobalPropertiesFromUserArgs(userPropertyArgs);
 
             if (parseResult.HasOption(configOption) || globalProperties.ContainsKey(MSBuildPropertyNames.CONFIGURATION))
-                return Enumerable.Empty<string>();
+                yield break;
 
             // CLI Configuration values take precedence over ones in the project. Passing PublishRelease as a global property allows it to take precedence.
             project = GetTargetedProject(slnOrProjectArgs, globalProperties, defaultedConfigurationProperty);
@@ -55,9 +55,9 @@ namespace Microsoft.DotNet.Cli
                     configurationToUse = releasePropertyFlag.Equals("true", StringComparison.OrdinalIgnoreCase) ? MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE : "";
 
                 if (!string.IsNullOrEmpty(configurationToUse) && !ProjectHasUserCustomizedConfiguration(project, defaultedConfigurationProperty))
-                    return new List<string> { $"-property:{MSBuildPropertyNames.CONFIGURATION}={configurationToUse}" };
+                    yield return $"-property:{MSBuildPropertyNames.CONFIGURATION}={configurationToUse}";
             }
-            return Enumerable.Empty<string>();
+            yield break;
         }
 
 
@@ -90,7 +90,9 @@ namespace Microsoft.DotNet.Cli
                         string potentialSln = Directory.GetFiles(arg, "*.sln", SearchOption.TopDirectoryOnly).FirstOrDefault();
 
                         if (!string.IsNullOrEmpty(potentialSln))
+                        {
                             return GetSlnProject(potentialSln, globalProps, slnProjectPropertytoCheck);
+                        }
                     } // If nothing can be found: that's caught by MSBuild XMake::ProcessProjectSwitch -- don't change the behavior by failing here. 
                 }
             }
@@ -164,7 +166,7 @@ namespace Microsoft.DotNet.Cli
             return shouldReturnNull ? null : configuredProjects.FirstOrDefault();
         }
 
-        /// <returns>Creates a ProjectInstance if the project is valid, elsewise, fails..</returns>
+        /// <returns>Creates a ProjectInstance if the project is valid, elsewise, fails.</returns>
         private ProjectInstance TryGetProjectInstance(string projectPath, Dictionary<string, string> globalProperties)
         {
             try
