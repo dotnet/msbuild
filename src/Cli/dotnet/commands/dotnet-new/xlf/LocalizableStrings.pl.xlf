@@ -63,7 +63,7 @@
     to solution file: {1}
     solution folder: {2}</source>
         <target state="translated">Dodawanie
-    projektów: {0}
+    projektu (-ów): {0}
     do pliku rozwiązania: {1}
     folder rozwiązania: {2}</target>
         <note />
@@ -231,11 +231,6 @@
       <trans-unit id="ProjectContextSymbolSource_DisplayName">
         <source>Project context</source>
         <target state="translated">Kontekst projektu</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectPath_OptionDescription">
-        <source>The project that should be used for context evaluation.</source>
-        <target state="translated">Projekt, który powinien być używany do oceny kontekstu.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkInfoProvider_Message_InstallSdk">

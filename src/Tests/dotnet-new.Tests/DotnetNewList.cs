@@ -1,24 +1,16 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using Microsoft.TemplateEngine.TestHelper;
-using VerifyTests;
-using VerifyXunit;
-using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.New.Tests
+namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     [UsesVerify]
     [Collection("Verify Tests")]
-    public partial class DotnetNewList : SdkTest, IClassFixture<SharedHomeDirectory>
+    public partial class DotnetNewList : BaseIntegrationTest, IClassFixture<SharedHomeDirectory>
     {
         private readonly SharedHomeDirectory _sharedHome;
         private readonly ITestOutputHelper _log;
@@ -109,8 +101,8 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void CanShowMultipleShortNames()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
 
             new DotnetNewCommand(_log, "--install", "Microsoft.DotNet.Web.ProjectTemplates.5.0")
                   .WithCustomHive(home)
@@ -157,7 +149,7 @@ namespace Microsoft.DotNet.New.Tests
         }
 
 #pragma warning disable xUnit1004 // Test methods should not be skipped
-        [Fact (Skip = "Template options filtering is not implemented.")]
+        [Fact(Skip = "Template options filtering is not implemented.")]
 #pragma warning restore xUnit1004 // Test methods should not be skipped
         public void CanFilterByChoiceParameter()
         {
@@ -535,9 +527,9 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public void TemplateGroupingTest()
         {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDir = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("TemplateGrouping", _log, home, workingDir);
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDir = CreateTemporaryFolder();
+            InstallTestTemplate("TemplateGrouping", _log, home, workingDir);
 
             new DotnetNewCommand(_log, "--list", "--columns-all")
                 .WithCustomHive(home)

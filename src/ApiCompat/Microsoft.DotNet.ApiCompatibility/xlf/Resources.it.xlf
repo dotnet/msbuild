@@ -57,14 +57,39 @@
         <target state="translated">Non è possibile aggiungere il membro astratto '{0}' a {1} perché non esiste in {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotAddAttribute">
+        <source>Cannot add attribute '{0}' to '{1}'.</source>
+        <target state="new">Cannot add attribute '{0}' to '{1}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotAddMemberToInterface">
         <source>Cannot add interface member '{0}' to {1} because it does not exist on {2}</source>
         <target state="translated">Non è possibile aggiungere il membro di interfaccia '{0}' a {1} perché non esiste in {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotAddSealedToInterfaceMember">
+        <source>Cannot add sealed keyword to default interface member '{0}'.</source>
+        <target state="new">Cannot add sealed keyword to default interface member '{0}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotAddVirtualToMember">
         <source>Cannot add virtual keyword to member '{0}'.</source>
         <target state="translated">Non è possibile aggiungere la parola chiave virtuale nel membro '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotChangeAttribute">
+        <source>Cannot change arguments of attribute '{0}' on '{1}'.</source>
+        <target state="new">Cannot change arguments of attribute '{0}' on '{1}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotChangeParameterName">
+        <source>Parameter name on member '{0}' changed from '{1}' to '{2}'.</source>
+        <target state="new">Parameter name on member '{0}' changed from '{1}' to '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotRemoveAttribute">
+        <source>Cannot remove attribute '{0}' from '{1}'.</source>
+        <target state="new">Cannot remove attribute '{0}' from '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">

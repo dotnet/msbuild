@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="DisableProjectContextEval_OptionDescription">
         <source>Disables evaluating project context using MSBuild.</source>
-        <target state="new">Disables evaluating project context using MSBuild.</target>
+        <target state="translated">Désactive l'évaluation du contexte du projet à l'aide de MSBuild.</target>
         <note />
       </trans-unit>
       <trans-unit id="DisableSdkTemplates_OptionDescription">
@@ -62,10 +62,10 @@
     project(s): {0}
     to solution file: {1}
     solution folder: {2}</source>
-        <target state="new">Adding
-    project(s): {0}
-    to solution file: {1}
-    solution folder: {2}</target>
+        <target state="translated">Ajout
+    du ou des projets :{0}
+    au fichier de solution{1}
+    Dossier de solution :{2}</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Succeeded">
@@ -231,11 +231,6 @@
       <trans-unit id="ProjectContextSymbolSource_DisplayName">
         <source>Project context</source>
         <target state="translated">Contexte du projet</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectPath_OptionDescription">
-        <source>The project that should be used for context evaluation.</source>
-        <target state="translated">Projet à utiliser pour l’évaluation du contexte</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkInfoProvider_Message_InstallSdk">

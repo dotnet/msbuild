@@ -52,6 +52,11 @@
         <target state="translated">Não há mais suporte para o .NET {0}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="VersionCheckFailure">
+        <source>No version found to check if this is up to date. Please check for updates manually.</source>
+        <target state="translated">Nenhuma versão encontrada para verificar se isso está atualizado. Verifique se há atualizações manualmente.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ReleasesLibraryFailed">
         <source>Unable to get releases information: {0}</source>
         <target state="translated">Não é possível obter informações sobre versões: {0}</target>

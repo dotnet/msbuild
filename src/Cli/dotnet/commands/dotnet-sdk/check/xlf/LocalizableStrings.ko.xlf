@@ -52,6 +52,11 @@
         <target state="translated">.NET {0}은(는) 지원되지 않습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="VersionCheckFailure">
+        <source>No version found to check if this is up to date. Please check for updates manually.</source>
+        <target state="translated">최신 버전인지 확인할 버전이 없습니다. 업데이트를 수동으로 확인하세요.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ReleasesLibraryFailed">
         <source>Unable to get releases information: {0}</source>
         <target state="translated">릴리스 정보를 가져올 수 없음: {0}</target>

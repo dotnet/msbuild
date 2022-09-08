@@ -1,15 +1,14 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
-using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.TestHelper;
-using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 {
-    public class UninstallTests
+    public class UninstallTests : BaseTest
     {
         [Theory]
         [InlineData("--uninstall")]
@@ -17,11 +16,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("uninstall")]
         public void Uninstall_NoArguments(string commandName)
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse($"new {commandName}");
-            UninstallCommandArgs args = new UninstallCommandArgs((BaseUninstallCommand)parseResult.CommandResult.Command, parseResult);
+            ParseResult parseResult = myCommand.Parse($"new {commandName}");
+            UninstallCommandArgs args = new((BaseUninstallCommand)parseResult.CommandResult.Command, parseResult);
 
             Assert.Empty(parseResult.Errors);
             Assert.Empty(args.TemplatePackages);
@@ -33,11 +32,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("uninstall")]
         public void Uninstall_WithArgument(string commandName)
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse($"new {commandName} source");
-            UninstallCommandArgs args = new UninstallCommandArgs((BaseUninstallCommand)parseResult.CommandResult.Command, parseResult);
+            ParseResult parseResult = myCommand.Parse($"new {commandName} source");
+            UninstallCommandArgs args = new((BaseUninstallCommand)parseResult.CommandResult.Command, parseResult);
 
             Assert.Empty(parseResult.Errors);
             Assert.Single(args.TemplatePackages);
@@ -50,11 +49,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("new uninstall source1 source2")]
         public void Uninstall_WithMultipleArgument(string command)
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse(command);
-            UninstallCommandArgs args = new UninstallCommandArgs((BaseUninstallCommand)parseResult.CommandResult.Command, parseResult);
+            ParseResult parseResult = myCommand.Parse(command);
+            UninstallCommandArgs args = new((BaseUninstallCommand)parseResult.CommandResult.Command, parseResult);
 
             Assert.Empty(parseResult.Errors);
             Assert.Equal(2, args.TemplatePackages.Count);
@@ -71,17 +70,17 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("new source1 --uninstall source", "'source1'")]
         public void Uninstall_CanReturnParseError(string command, string expectedInvalidTokens)
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            var parseResult = myCommand.Parse(command);
-            var errorMessages = parseResult.Errors.Select(error => error.Message);
+            ParseResult parseResult = myCommand.Parse(command);
+            IEnumerable<string> errorMessages = parseResult.Errors.Select(error => error.Message);
 
-            var expectedInvalidTokenSets = expectedInvalidTokens.Split("|");
+            string[] expectedInvalidTokenSets = expectedInvalidTokens.Split("|");
 
             Assert.NotEmpty(parseResult.Errors);
             Assert.Equal(expectedInvalidTokenSets.Length, parseResult.Errors.Count);
-            foreach (var tokenSet in expectedInvalidTokenSets)
+            foreach (string tokenSet in expectedInvalidTokenSets)
             {
                 Assert.True(errorMessages.Contains($"Unrecognized command or argument(s): {tokenSet}.") || errorMessages.Contains($"Unrecognized command or argument {tokenSet}."));
             }
@@ -90,14 +89,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void CommandExampleCanShowParentCommandsBeyondNew()
         {
-            ITemplateEngineHost host = TestHost.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(includeTestTemplates: false));
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            Command rootCommand = new Command("dotnet")
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            Command rootCommand = new("dotnet")
             {
                 myCommand
             };
 
-            var parseResult = rootCommand.Parse("dotnet new uninstall source");
+            ParseResult parseResult = rootCommand.Parse("dotnet new uninstall source");
             Assert.Equal("dotnet new uninstall my-source", Example.For<NewCommand>(parseResult).WithSubcommand<UninstallCommand>().WithArgument(UninstallCommand.NameArgument, "my-source"));
         }
     }

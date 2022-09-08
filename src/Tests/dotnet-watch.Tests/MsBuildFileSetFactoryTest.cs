@@ -21,11 +21,13 @@ namespace Microsoft.DotNet.Watcher.Tools
     {
         private readonly IReporter _reporter;
         private readonly TestAssetsManager _testAssets;
+        private readonly string _muxerPath;
 
         public MsBuildFileSetFactoryTest(ITestOutputHelper output)
         {
             _reporter = new TestReporter(output);
             _testAssets = new TestAssetsManager(output);
+            _muxerPath = DotnetMuxerLocator.MuxerPath;
         }
 
         [Fact]
@@ -326,7 +328,7 @@ $@"<ItemGroup>
 
             var output = new OutputSink();
             var options = GetWatchOptions();
-            var filesetFactory = new MsBuildFileSetFactory(options, _reporter, projectA, output, waitOnError: false, trace: true);
+            var filesetFactory = new MsBuildFileSetFactory(options, _reporter, _muxerPath, projectA, output, waitOnError: false, trace: true);
 
             var fileset = await GetFileSet(filesetFactory);
 
@@ -361,7 +363,7 @@ $@"<ItemGroup>
         private Task<FileSet> GetFileSet(string projectPath)
         {
             DotNetWatchOptions options = GetWatchOptions();
-            return GetFileSet(new MsBuildFileSetFactory(options, _reporter, projectPath, new OutputSink(), waitOnError: false, trace: false));
+            return GetFileSet(new MsBuildFileSetFactory(options, _reporter, _muxerPath, projectPath, new OutputSink(), waitOnError: false, trace: false));
         }
 
         private static DotNetWatchOptions GetWatchOptions() => 

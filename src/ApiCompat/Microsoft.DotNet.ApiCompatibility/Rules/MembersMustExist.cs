@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Extensions;
@@ -87,7 +88,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             }
         }
 
-        private static bool ShouldReportMissingMember(ISymbol symbol, ITypeSymbol containingType)
+        private bool ShouldReportMissingMember(ISymbol symbol, ITypeSymbol containingType)
         {
             // Events and properties are handled via their accessors.
             if (symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Event)
@@ -107,7 +108,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             return true;
         }
 
-        private static bool FindMatchingOnBaseType(IMethodSymbol method, ITypeSymbol containingType)
+        private bool FindMatchingOnBaseType(IMethodSymbol method, ITypeSymbol containingType)
         {
             // Constructors cannot be promoted
             if (method.MethodKind == MethodKind.Constructor)
@@ -128,7 +129,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             return false;
         }
 
-        private static bool IsMatchingMethod(IMethodSymbol method, IMethodSymbol candidate)
+        private bool IsMatchingMethod(IMethodSymbol method, IMethodSymbol candidate)
         {
             if (method.Name == candidate.Name)
             {
@@ -142,17 +143,17 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             return false;
         }
 
-        private static bool ReturnTypesMatch(IMethodSymbol method, IMethodSymbol candidate) =>
-            method.ReturnType.ToComparisonDisplayString() == candidate.ReturnType.ToComparisonDisplayString();
+        private bool ReturnTypesMatch(IMethodSymbol method, IMethodSymbol candidate) =>
+            _settings.SymbolComparer.Equals(method.ReturnType, candidate.ReturnType);
 
-        private static bool ParametersMatch(IMethodSymbol method, IMethodSymbol candidate)
+        private bool ParametersMatch(IMethodSymbol method, IMethodSymbol candidate)
         {
             if (method.Parameters.Length != candidate.Parameters.Length)
                 return false;
 
             for (int i = 0; i < method.Parameters.Length; i++)
             {
-                if (method.Parameters[i].Type.ToComparisonDisplayString() != method.Parameters[i].Type.ToComparisonDisplayString())
+                if (!_settings.SymbolComparer.Equals(method.Parameters[i].Type, method.Parameters[i].Type))
                     return false;
             }
 

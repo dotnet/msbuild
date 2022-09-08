@@ -63,9 +63,9 @@
     to solution file: {1}
     solution folder: {2}</source>
         <target state="translated">
-    プロジェクトの追加 対象: {0}
-    対応するソリューション ファイル: {1}
-    ソリューション フォルダー: {2}</target>
+ プロジェクトの追加 対象: {0}
+ 対応するソリューション ファイル: {1}
+ ソリューション フォルダー: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Succeeded">
@@ -231,11 +231,6 @@
       <trans-unit id="ProjectContextSymbolSource_DisplayName">
         <source>Project context</source>
         <target state="translated">プロジェクト コンテキスト</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectPath_OptionDescription">
-        <source>The project that should be used for context evaluation.</source>
-        <target state="translated">コンテキストの評価に使用する必要があるプロジェクトです。</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkInfoProvider_Message_InstallSdk">

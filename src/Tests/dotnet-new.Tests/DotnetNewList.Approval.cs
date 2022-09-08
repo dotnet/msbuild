@@ -1,20 +1,12 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using Microsoft.TemplateEngine.TestHelper;
-using VerifyXunit;
-using Xunit;
 
-namespace Microsoft.DotNet.New.Tests
+namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     public partial class DotnetNewList
     {
@@ -25,7 +17,7 @@ namespace Microsoft.DotNet.New.Tests
         {
             var commandResult = new DotnetNewCommand(_log, commandName)
                 .WithCustomHive(_sharedHome.HomeDirectory)
-                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute();
 
             commandResult
@@ -43,7 +35,7 @@ namespace Microsoft.DotNet.New.Tests
         {
             var commandResult = new DotnetNewCommand(_log, "list")
                 .WithCustomHive(_sharedHome.HomeDirectory)
-                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute();
 
             commandResult
@@ -56,9 +48,9 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task Constraints_CanShowMessageIfTemplateGroupIsRestricted()
         {
-            var customHivePath = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("Constraints/RestrictedTemplate", _log, customHivePath);
-            Helpers.InstallTestTemplate("TemplateWithSourceName", _log, customHivePath);
+            var customHivePath = CreateTemporaryFolder(folderName: "Home");
+            InstallTestTemplate("Constraints/RestrictedTemplate", _log, customHivePath);
+            InstallTestTemplate("TemplateWithSourceName", _log, customHivePath);
 
             var commandResult = new DotnetNewCommand(_log, "list", "RestrictedTemplate")
                   .WithCustomHive(customHivePath)
@@ -74,9 +66,9 @@ namespace Microsoft.DotNet.New.Tests
         [Fact]
         public Task Constraints_CanIgnoreConstraints()
         {
-            var customHivePath = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("Constraints/RestrictedTemplate", _log, customHivePath);
-            Helpers.InstallTestTemplate("TemplateWithSourceName", _log, customHivePath);
+            var customHivePath = CreateTemporaryFolder(folderName: "Home");
+            InstallTestTemplate("Constraints/RestrictedTemplate", _log, customHivePath);
+            InstallTestTemplate("TemplateWithSourceName", _log, customHivePath);
 
             var commandResult = new DotnetNewCommand(_log, "list", "RestrictedTemplate", "--ignore-constraints")
                   .WithCustomHive(customHivePath)

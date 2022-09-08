@@ -1,5 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.Diagnostics;
 using Microsoft.DotNet.Cli.Utils;
@@ -52,7 +53,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
                         if (commandResult == null)
                         {
-                            Reporter.Error.WriteLine(string.Format(LocalizableStrings.UnableToSetPermissions, entry.Key, file));
+                            Reporter.Error.WriteLine(LocalizableStrings.UnableToSetPermissions, entry.Key, file);
                             Reporter.Verbose.WriteLine("Unable to start sub-process.");
                             allSucceeded = false;
                             continue;
@@ -62,14 +63,14 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
                         if (commandResult.ExitCode != 0)
                         {
-                            Reporter.Error.WriteLine(string.Format(LocalizableStrings.UnableToSetPermissions, entry.Key, file));
+                            Reporter.Error.WriteLine(LocalizableStrings.UnableToSetPermissions, entry.Key, file);
                             allSucceeded = false;
                         }
                     }
                     catch (Exception ex)
                     {
-                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.UnableToSetPermissions, entry.Key, file));
-                        Reporter.Verbose.WriteLine(string.Format(LocalizableStrings.Generic_Details, ex.ToString()));
+                        Reporter.Error.WriteLine(LocalizableStrings.UnableToSetPermissions, entry.Key, file);
+                        Reporter.Verbose.WriteLine(LocalizableStrings.Generic_Details, ex.ToString());
                         allSucceeded = false;
                     }
                 }

@@ -63,9 +63,9 @@
     to solution file: {1}
     solution folder: {2}</source>
         <target state="translated">Добавление
-    проектов {0}
-    в файл решения {1}
-    папки решения {2}</target>
+    проекта: {0}
+    в файл решения: {1}
+    папка решения: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Succeeded">
@@ -231,11 +231,6 @@
       <trans-unit id="ProjectContextSymbolSource_DisplayName">
         <source>Project context</source>
         <target state="translated">Контекст проекта</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectPath_OptionDescription">
-        <source>The project that should be used for context evaluation.</source>
-        <target state="translated">Проект, который следует использовать для оценки контекста.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkInfoProvider_Message_InstallSdk">

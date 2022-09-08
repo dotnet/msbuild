@@ -1,5 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using System.CommandLine.Parsing;
@@ -19,6 +20,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             ParseResult = parseResult;
             Command = command;
             RootCommand = GetNewCommandFromParseResult(parseResult);
+            HasHelpOption = parseResult.CommandResult
+                .Children
+                .OfType<OptionResult>()
+                .Select(r => r.Option)
+                .Any(o => o.HasAlias(Constants.KnownHelpAliases[0]));
         }
 
         protected GlobalArgs(GlobalArgs args) : this(args.Command, args.ParseResult) { }
@@ -42,6 +48,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal bool DebugShowConfig { get; private set; }
 
         internal string? DebugCustomSettingsLocation { get; private set; }
+
+        internal bool HasHelpOption { get; private set; }
 
         protected static (bool, IReadOnlyList<string>?) ParseTabularOutputSettings(ITabularOutputCommand command, ParseResult parseResult)
         {

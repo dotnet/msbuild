@@ -1,5 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using FakeItEasy;
@@ -8,8 +9,6 @@ using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Mocks;
-using Microsoft.TemplateEngine.TestHelper;
-using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 {
@@ -148,21 +147,21 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                 CliTemplateInfo.FromTemplateInfo(templates, A.Fake<IHostSpecificDataLoader>()))
                 .Single();
 
-            ITemplateEngineHost host = TestHost.GetVirtualHost();
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager templatePackageManager = A.Fake<TemplatePackageManager>();
 
-            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host, _ => new TelemetryLogger(null, false));
-            var parseResult = myCommand.Parse($" new {command}");
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            ParseResult parseResult = myCommand.Parse($" new {command}");
             var args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
-            var templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            HashSet<TemplateCommand> templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
             Assert.Empty(templateCommands);
 
-            var templateMatchInfos = InstantiateCommand.CollectTemplateMatchInfo(args, settings, templatePackageManager, templateGroup);
-            var invalidOptions = InstantiateCommand.GetInvalidOptions(templateMatchInfos);
+            List<TemplateResult> templateMatchInfos = InstantiateCommand.CollectTemplateMatchInfo(args, settings, templatePackageManager, templateGroup);
+            List<InvalidTemplateOptionResult> invalidOptions = InstantiateCommand.GetInvalidOptions(templateMatchInfos);
             Assert.Equal(expectedInvalidParams.Length, invalidOptions.Count);
 
-            foreach (var invalidParam in expectedInvalidParams)
+            foreach (string?[] invalidParam in expectedInvalidParams)
             {
                 InvalidTemplateOptionResult.Kind expectedErrorKind = invalidParam[0] == "name"
                     ? InvalidTemplateOptionResult.Kind.InvalidName
@@ -177,7 +176,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                     expectedErrorMessage = invalidParam[4];
                 }
 
-                var actualParam = invalidOptions.Single(param => param.InputFormat == expectedInputFormat);
+                InvalidTemplateOptionResult actualParam = invalidOptions.Single(param => param.InputFormat == expectedInputFormat);
 
                 Assert.Equal(expectedErrorKind, actualParam.ErrorKind);
                 Assert.Equal(expectedCanonicalName, actualParam.TemplateOption?.TemplateParameter.Name);

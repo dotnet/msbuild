@@ -1,17 +1,15 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using FluentAssertions;
-using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using Microsoft.TemplateEngine.TestHelper;
-using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.New.Tests
+namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
-    public class DotnetNewUpdateCheck : SdkTest
+    public class DotnetNewUpdateCheck : BaseIntegrationTest
     {
         private readonly ITestOutputHelper _log;
 
@@ -26,10 +24,10 @@ namespace Microsoft.DotNet.New.Tests
         [InlineData("update --dry-run")]
         public void CanCheckForUpdate(string testCase)
         {
-            var home = TestUtils.CreateTemporaryFolder("Home");
+            var home = CreateTemporaryFolder(folderName: "Home");
             new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home).WithoutBuiltInTemplates()
-                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -41,7 +39,7 @@ namespace Microsoft.DotNet.New.Tests
 
             new DotnetNewCommand(_log, testCase.Split(" "))
                 .WithCustomHive(home).WithoutBuiltInTemplates()
-                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -62,11 +60,11 @@ namespace Microsoft.DotNet.New.Tests
             string nugetVersion = "0.0.1";
             string nugetFullName = $"{nugetName}::{nugetVersion}";
             string nugetFileName = $"{nugetName}.{nugetVersion}.nupkg";
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            var home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = CreateTemporaryFolder();
+            var home = CreateTemporaryFolder(folderName: "Home");
 
-            Helpers.InstallNuGetTemplate(
-                TestUtils.GetTestNugetLocation(nugetFileName),
+            InstallNuGetTemplate(
+                Path.Combine(DotnetNewTestPackagesBasePath, nugetFileName),
                 _log,
                 home,
                 workingDirectory);
@@ -89,12 +87,12 @@ For details on the exit code, refer to https://aka.ms/templating-exit-codes#106"
         [InlineData("update --dry-run")]
         public void DoesNotShowUpdatesWhenAllTemplatesAreUpToDate(string testCase)
         {
-            var home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, home, workingDirectory);
+            var home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, home, workingDirectory);
             new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0")
                 .WithCustomHive(home)
-                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -106,7 +104,7 @@ For details on the exit code, refer to https://aka.ms/templating-exit-codes#106"
 
             new DotnetNewCommand(_log, testCase.Split(" "))
                 .WithCustomHive(home)
-                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -118,10 +116,10 @@ For details on the exit code, refer to https://aka.ms/templating-exit-codes#106"
         [Fact]
         public void PrintInfoOnUpdateOnCreation()
         {
-            var home = TestUtils.CreateTemporaryFolder("Home");
+            var home = CreateTemporaryFolder(folderName: "Home");
             new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home).WithoutBuiltInTemplates()
-                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -133,7 +131,7 @@ For details on the exit code, refer to https://aka.ms/templating-exit-codes#106"
 
             new DotnetNewCommand(_log, "console")
                   .WithCustomHive(home).WithoutBuiltInTemplates()
-                  .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                  .WithWorkingDirectory(CreateTemporaryFolder())
                   .Execute()
                   .Should()
                   .ExitWith(0)
@@ -148,10 +146,10 @@ For details on the exit code, refer to https://aka.ms/templating-exit-codes#106"
         [Fact]
         public void DoesNotPrintUpdateInfoOnCreation_WhenNoUpdateCheckOption()
         {
-            var home = TestUtils.CreateTemporaryFolder("Home");
+            var home = CreateTemporaryFolder(folderName: "Home");
             new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home).WithoutBuiltInTemplates()
-                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -163,7 +161,7 @@ For details on the exit code, refer to https://aka.ms/templating-exit-codes#106"
 
             new DotnetNewCommand(_log, "console", "--no-update-check", "-o", "no-update-check")
                   .WithCustomHive(home).WithoutBuiltInTemplates()
-                  .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                  .WithWorkingDirectory(CreateTemporaryFolder())
                   .Execute()
                   .Should()
                   .ExitWith(0)
@@ -176,7 +174,7 @@ For details on the exit code, refer to https://aka.ms/templating-exit-codes#106"
 
             new DotnetNewCommand(_log, "console", "-o", "update-check")
                   .WithCustomHive(home).WithoutBuiltInTemplates()
-                  .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                  .WithWorkingDirectory(CreateTemporaryFolder())
                   .Execute()
                   .Should()
                   .ExitWith(0)
@@ -191,10 +189,10 @@ For details on the exit code, refer to https://aka.ms/templating-exit-codes#106"
         [Fact]
         public void DoesNotPrintUpdateInfoOnCreation_WhenLatestVersionIsInstalled()
         {
-            var home = TestUtils.CreateTemporaryFolder("Home");
+            var home = CreateTemporaryFolder(folderName: "Home");
             new DotnetNewCommand(_log, "install", "Microsoft.DotNet.Common.ProjectTemplates.5.0")
                 .WithCustomHive(home).WithoutBuiltInTemplates()
-                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -206,7 +204,7 @@ For details on the exit code, refer to https://aka.ms/templating-exit-codes#106"
 
             new DotnetNewCommand(_log, "console")
                   .WithCustomHive(home).WithoutBuiltInTemplates()
-                  .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                  .WithWorkingDirectory(CreateTemporaryFolder())
                   .Execute()
                   .Should()
                   .ExitWith(0)
@@ -226,7 +224,7 @@ For details on the exit code, refer to https://aka.ms/templating-exit-codes#106"
 For more information, run: 
    dotnet new update -h";
 
-            var home = TestUtils.CreateTemporaryFolder("Home");
+            var home = CreateTemporaryFolder(folderName: "Home");
             var commandResult = new DotnetNewCommand(_log, "--update-check")
                 .WithCustomHive(home)
                 .Execute();
@@ -241,7 +239,7 @@ For more information, run:
         [Fact]
         public void DoNotShowDeprecationMessage_WhenNewCommandIsUsed()
         {
-            var home = TestUtils.CreateTemporaryFolder("Home");
+            var home = CreateTemporaryFolder(folderName: "Home");
             var commandResult = new DotnetNewCommand(_log, "update", "--check-only")
                 .WithCustomHive(home)
                 .Execute();

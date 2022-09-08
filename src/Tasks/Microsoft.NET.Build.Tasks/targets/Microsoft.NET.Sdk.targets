@@ -83,6 +83,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PredefinedCulturesOnly Condition="'$(PredefinedCulturesOnly)' == '' and '$(InvariantGlobalization)' == 'true'">true</PredefinedCulturesOnly>
   </PropertyGroup>
 
+  <!-- Set the IsRidAgnostic property if this project should NOT accept global RuntimeIdentifier and SelfContained
+       property values from referencing projects. -->
+  <PropertyGroup Condition="'$(IsRidAgnostic)' == ''">
+    <IsRidAgnostic Condition="('$(_IsExecutable)' == 'true' And '$(IsTestProject)' != 'true') Or
+                              '$(RuntimeIdentifier)' != '' Or
+                              '$(RuntimeIdentifiers)' != ''">false</IsRidAgnostic>
+    <IsRidAgnostic Condition="'$(IsRidAgnostic)' == ''">true</IsRidAgnostic>
+  </PropertyGroup>
+
   <!-- Opt into .NET Core resource-serialization strategy by default when targeting frameworks
        that support it by default.
        -->
@@ -1073,9 +1082,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   <ItemGroup>
     <AdditionalTargetFrameworkInfoProperty Include="SelfContained"/>
     <AdditionalTargetFrameworkInfoProperty Include="_IsExecutable"/>
+    <AdditionalTargetFrameworkInfoProperty Include="IsRidAgnostic"/>
     <AdditionalTargetFrameworkInfoProperty Include="ShouldBeValidatedAsExecutableReference"/>
+    <AdditionalTargetFrameworkInfoProperty Include="_SelfContainedWasSpecified"/>
   </ItemGroup>
-
+  
   <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'browser-wasm'">
     <!-- Don't generate a NETSDK1151 error if a non self-contained Exe references a Blazor wasm Exe -->
     <ShouldBeValidatedAsExecutableReference>false</ShouldBeValidatedAsExecutableReference>
@@ -1124,6 +1135,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <NETSdkWarning Condition="'$(_SelfContainedWasSpecified)' != 'true' and
                    '$(_CommandLineDefinedRuntimeIdentifier)' == 'true' and
+                   '$(RuntimeIdentifier)' != '' and
                    '$(PublishAot)' != 'true' and
                    '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
                    $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '6.0'))"

@@ -22,8 +22,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <_IsExecutable Condition="'$(OutputType)' == 'Exe' or '$(OutputType)'=='WinExe'">true</_IsExecutable>
-  </PropertyGroup>
 
+  </PropertyGroup>
+  
   <PropertyGroup Condition="'$(HasRuntimeOutput)' == ''">
     <HasRuntimeOutput>$(_IsExecutable)</HasRuntimeOutput>
     <_UsingDefaultForHasRuntimeOutput>true</_UsingDefaultForHasRuntimeOutput>

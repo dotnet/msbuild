@@ -141,6 +141,9 @@
   <data name="MaintenanceMessage" xml:space="preserve">
     <value>.NET {0} is going out of support soon.</value>
   </data>
+  <data name="VersionCheckFailure" xml:space="preserve">
+    <value>No version found to check if this is up to date. Please check for updates manually.</value>
+  </data>
   <data name="NewFeatureBandMessage" xml:space="preserve">
     <value>Try out the newest .NET SDK features with .NET {0}.</value>
   </data>

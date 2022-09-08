@@ -157,9 +157,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <!-- Remove dotnet.js/wasm from runtime pack, in favor of the relinked ones in @(WasmNativeAsset) -->
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)"
                                Condition="@(WasmNativeAsset->Count()) > 0 and '%(FileName)' == 'dotnet' and ('%(Extension)' == '.wasm' or '%(Extension)' == '.js')" />
-
-      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)"
-                               Condition="@(WasmNativeAsset->Count()) > 0 and '%(FileName)' == 'dotnet-crypto-worker' and '%(Extension)' == '.js'" />
     </ItemGroup>
 
     <ComputeBlazorBuildAssets
@@ -406,7 +403,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
       <_DotNetJsItem Include="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.DestinationSubPath)' == 'dotnet.js' AND '%(ResolvedFileToPublish.AssetType)' == 'native'" />
-      <_DotNetJsItem Include="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.DestinationSubPath)' == 'dotnet-crypto-worker.js' AND '%(ResolvedFileToPublish.AssetType)' == 'native'" />
     </ItemGroup>
 
     <PropertyGroup>

@@ -211,7 +211,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                 .Distinct()
                 .Select(packId => workloadResolver.TryGetPackInfo(packId))
                 .Where(pack => pack != null);
-            installer.RolledBackPacks.ShouldBeEquivalentTo(expectedPacks);
+            installer.RolledBackPacks.Should().BeEquivalentTo(expectedPacks);
             installer.InstallationRecordRepository.WorkloadInstallRecord.Should().BeEmpty();
         }
 

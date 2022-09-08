@@ -1,5 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using System.CommandLine.Parsing;
@@ -11,7 +12,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         public InstantiateCommandArgs(InstantiateCommand command, ParseResult parseResult) : base(command, parseResult)
         {
             RemainingArguments = parseResult.GetValueForArgument(command.RemainingArguments) ?? Array.Empty<string>();
-            ShortName = parseResult.GetValueForArgument(command.ShortNameArgument);
+            ShortName = parseResult.GetValueForArgument(InstantiateCommand.ShortNameArgument);
 
             var tokens = new List<string>();
             if (!string.IsNullOrWhiteSpace(ShortName))
@@ -19,6 +20,18 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 tokens.Add(ShortName);
             }
             tokens.AddRange(RemainingArguments);
+
+            foreach (OptionResult optionResult in parseResult.CommandResult.Children.OfType<OptionResult>())
+            {
+                if (command.PassByOptions.Contains(optionResult.Option))
+                {
+                    if (optionResult.Token is { } token)
+                    {
+                        tokens.Add(token.Value);
+                    }
+                    tokens.AddRange(optionResult.Tokens.Select(t => t.Value));
+                }
+            }
             TokensToInvoke = tokens.ToArray();
         }
 

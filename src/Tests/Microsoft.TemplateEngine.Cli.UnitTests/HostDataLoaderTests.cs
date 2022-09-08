@@ -1,5 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using FakeItEasy;
 using Microsoft.TemplateEngine.Abstractions;
@@ -9,7 +10,6 @@ using Microsoft.TemplateEngine.TestHelper;
 using Microsoft.TemplateEngine.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests
 {
@@ -40,7 +40,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             Assert.False(data.IsHidden);
             Assert.Equal(2, data.UsageExamples?.Count);
-            Assert.Contains("--framework netcoreapp3.1 --langVersion '9.0'", data.UsageExamples);
+            Assert.Contains("--framework netcoreapp3.1 --langVersion '9.0'", data.UsageExamples!);
             Assert.Equal(4, data.SymbolInfo?.Count);
             Assert.Contains("TargetFrameworkOverride", data.HiddenParameterNames);
             Assert.Contains("Framework", data.ParametersToAlwaysShow);
@@ -54,7 +54,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         //This is duplicated from JExtensions, problem is that we are referencing
         //Cli and Edge assembly both have JExtensions referenced, hence ambigous reference error
         //having copy here solves that...
-        static JObject ReadJObjectFromIFile(IFile file)
+        private static JObject ReadJObjectFromIFile(IFile file)
         {
             using (Stream s = file.OpenRead())
             using (TextReader tr = new StreamReader(s, System.Text.Encoding.UTF8, true))
@@ -83,7 +83,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             Assert.False(data.IsHidden);
             Assert.Equal(2, data.UsageExamples?.Count);
-            Assert.Contains("--framework netcoreapp3.1 --langVersion '9.0'", data.UsageExamples);
+            Assert.Contains("--framework netcoreapp3.1 --langVersion '9.0'", data.UsageExamples!);
             Assert.Equal(4, data.SymbolInfo?.Count);
             Assert.Contains("TargetFrameworkOverride", data.HiddenParameterNames);
             Assert.Contains("Framework", data.ParametersToAlwaysShow);

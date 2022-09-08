@@ -1,5 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.Diagnostics;
 using System.Text;
@@ -18,7 +19,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// <param name="reporter"></param>
         /// <param name="command"></param>
         /// <param name="indentLevel"></param>
-        internal static void WriteCommand(this Reporter reporter, string command, int indentLevel = 0)
+        internal static void WriteCommand(this IReporter reporter, string command, int indentLevel = 0)
         {
             reporter.WriteLine(command.Indent(indentLevel + 1));
         }
@@ -45,7 +46,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// <summary>
         /// Writes string <paramref name="output"/> formatted as standard output.
         /// </summary>
-        internal static void WriteStdOut(this Reporter reporter, string output)
+        internal static void WriteStdOut(this IReporter reporter, string output)
         {
             reporter.WriteLine("StdOut:");
             reporter.WriteLine(string.IsNullOrWhiteSpace(output) ? LocalizableStrings.Generic_Empty : output);
@@ -54,7 +55,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// <summary>
         /// Writes string <paramref name="output"/> formatted as standard error.
         /// </summary>
-        internal static void WriteStdErr(this Reporter reporter, string output)
+        internal static void WriteStdErr(this IReporter reporter, string output)
         {
             reporter.WriteLine("StdErr:");
             reporter.WriteLine(string.IsNullOrWhiteSpace(output) ? LocalizableStrings.Generic_Empty : output);

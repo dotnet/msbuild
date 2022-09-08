@@ -1,9 +1,10 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.New.Tests
+namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     public class DiagnosticFixture
     {
@@ -11,7 +12,7 @@ namespace Microsoft.DotNet.New.Tests
 
         public DiagnosticFixture(IMessageSink sink)
         {
-           _diagnosticMessageSink = sink;
+            _diagnosticMessageSink = sink;
         }
 
         public IMessageSink DiagnosticSink => _diagnosticMessageSink;

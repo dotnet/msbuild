@@ -1,9 +1,9 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using System.CommandLine.Help;
-using System.CommandLine.Parsing;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
@@ -25,23 +25,24 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 return;
             }
 
-            using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
-            HostSpecificDataLoader hostSpecificDataLoader = new HostSpecificDataLoader(environmentSettings);
+            using TemplatePackageManager templatePackageManager = new(environmentSettings);
+            HostSpecificDataLoader hostSpecificDataLoader = new(environmentSettings);
 
             //TODO: consider use cache only for help
-            var selectedTemplateGroups = Task.Run(
-                async () => await GetMatchingTemplateGroupsAsync(
-                    instantiateCommandArgs,
+            IEnumerable<TemplateGroup> allTemplateGroups = Task.Run(
+                async () => await GetTemplateGroupsAsync(
                     templatePackageManager,
                     hostSpecificDataLoader,
                     default).ConfigureAwait(false))
                 .GetAwaiter()
                 .GetResult();
 
+            IEnumerable<TemplateGroup> selectedTemplateGroups = allTemplateGroups.Where(template => template.ShortNames.Contains(instantiateCommandArgs.ShortName));
+
             if (!selectedTemplateGroups.Any())
             {
                 //help do not return error exit code, so we write error to StdOut instead
-                HandleNoMatchingTemplateGroup(instantiateCommandArgs, Reporter.Output);
+                HandleNoMatchingTemplateGroup(instantiateCommandArgs, allTemplateGroups, Reporter.Output);
                 return;
             }
             if (selectedTemplateGroups.Take(2).Count() > 1)
@@ -76,12 +77,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 return;
             }
 
-            var preferredTemplate = templatesToShow.OrderByDescending(x => x.Template.Precedence).First();
+            TemplateCommand preferredTemplate = templatesToShow.OrderByDescending(x => x.Template.Precedence).First();
 
             ShowTemplateDetailHeaders(preferredTemplate.Template, context.Output);
             //we need to show all possible short names (not just the one specified)
             ShowUsage(instantiateCommandArgs.Command, templateGroup.ShortNames, context);
-            ShowCommandOptions(templatesToShow, preferredTemplate, context);
+            ShowCommandOptions(templatesToShow, context);
             ShowTemplateSpecificOptions(templatesToShow, context);
             ShowHintForOtherTemplates(templateGroup, preferredTemplate.Template, instantiateCommandArgs, context.Output);
         }
@@ -90,7 +91,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             yield return (context) =>
             {
-                InstantiateCommandArgs instantiateCommandArgs = new InstantiateCommandArgs(this, context.ParseResult);
+                InstantiateCommandArgs instantiateCommandArgs = new(this, context.ParseResult);
                 using IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(instantiateCommandArgs, context.ParseResult);
                 WriteHelp(context, instantiateCommandArgs, environmentSettings);
             };
@@ -109,10 +110,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IEnumerable<string?> languages = matchingTemplates.Select(c => c.Template.GetLanguage()).Distinct();
             if (languages.Count() > 1)
             {
-                var defaultLanguage = environmentSettings.GetDefaultLanguage();
+                string? defaultLanguage = environmentSettings.GetDefaultLanguage();
                 if (languages.Contains(defaultLanguage, StringComparer.OrdinalIgnoreCase))
                 {
-                    var templatesForDefaultLanguage = filteredTemplates.Where(c => string.Equals(c.Template.GetLanguage(), defaultLanguage, StringComparison.OrdinalIgnoreCase));
+                    IEnumerable<TemplateCommand> templatesForDefaultLanguage = filteredTemplates.Where(c => string.Equals(c.Template.GetLanguage(), defaultLanguage, StringComparison.OrdinalIgnoreCase));
                     if (templatesForDefaultLanguage.Any())
                     {
                         filteredTemplates = templatesForDefaultLanguage;
@@ -194,7 +195,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             string? preferredLanguage = preferredtemplate.GetLanguage();
 
-            List<string> supportedLanguages = new List<string>();
+            List<string> supportedLanguages = new();
             foreach (string? language in templateGroup.Languages)
             {
                 if (string.IsNullOrWhiteSpace(language))
@@ -230,7 +231,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             string? preferredType = preferredtemplate.GetTemplateType();
 
-            List<string> supportedTypes = new List<string>();
+            List<string> supportedTypes = new();
             foreach (string? type in templateGroup.Types)
             {
                 if (string.IsNullOrWhiteSpace(type))
@@ -278,19 +279,19 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal static void ShowCommandOptions(
             IEnumerable<TemplateCommand> templatesToShow,
-            TemplateCommand preferredTemplate,
             HelpContext context)
         {
-            List<Option> optionsToShow = new List<Option>()
+            List<Option> optionsToShow = new()
             {
-                preferredTemplate.NameOption,
-                preferredTemplate.OutputOption,
-                preferredTemplate.DryRunOption,
-                TemplateCommand.ForceOption,
-                preferredTemplate.NoUpdateCheckOption
+                SharedOptions.NameOption,
+                SharedOptions.OutputOption,
+                SharedOptions.DryRunOption,
+                SharedOptions.ForceOption,
+                SharedOptions.NoUpdateCheckOption,
+                SharedOptions.ProjectPathOption
             };
 
-            foreach (var template in templatesToShow)
+            foreach (TemplateCommand template in templatesToShow)
             {
                 if (template.LanguageOption != null)
                 {
@@ -298,7 +299,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     break;
                 }
             }
-            foreach (var template in templatesToShow)
+            foreach (TemplateCommand template in templatesToShow)
             {
                 if (template.TypeOption != null)
                 {
@@ -306,7 +307,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     break;
                 }
             }
-            foreach (var template in templatesToShow)
+            foreach (TemplateCommand template in templatesToShow)
             {
                 if (template.AllowScriptsOption != null)
                 {
@@ -357,7 +358,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal static void ShowUsage(Command? command, IReadOnlyList<string> shortNames, HelpContext context)
         {
-            List<string> usageParts = new List<string>();
+            List<string> usageParts = new();
             while (command is not null)
             {
                 if (!string.IsNullOrWhiteSpace(command.Name))
@@ -371,7 +372,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             context.Output.WriteLine(context.HelpBuilder.LocalizationResources.HelpUsageTitle());
             foreach (string shortName in shortNames)
             {
-                var parts = usageParts.Concat(
+                IEnumerable<string> parts = usageParts.Concat(
                     new[]
                     {
                         shortName,
@@ -418,7 +419,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 }
             }
 
-            foreach (var option in optionsToShow)
+            foreach (TemplateOption option in optionsToShow)
             {
                 context.HelpBuilder.CustomizeSymbol(
                     option.Option,
@@ -461,7 +462,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             bool showArguments = true,
             bool showOptions = true)
         {
-            List<Command> parentCommands = new List<Command>();
+            List<Command> parentCommands = new();
             Command? nextCommand = command;
             while (nextCommand is not null)
             {

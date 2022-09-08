@@ -37,7 +37,7 @@ Possible reasons for this include:
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
         <source>Waiting for debugger to attach. Press ENTER to continue</source>
-        <target state="translated">디버거가 연결될 때까지 대기하는 중입니다. 계속하려면 &lt;Enter&gt; 키를 누르세요.</target>
+        <target state="translated">디버거가 연결되기를 기다리는 중입니다. 계속하려면 Enter 키를 누르세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessId">

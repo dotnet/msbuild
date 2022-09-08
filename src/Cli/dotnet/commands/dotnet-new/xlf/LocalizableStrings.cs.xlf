@@ -63,7 +63,7 @@
     to solution file: {1}
     solution folder: {2}</source>
         <target state="translated">Přidávání
-    projektů: {0}
+    projektu/ů: {0}
     do souboru řešení: {1}
     složka řešení: {2}</target>
         <note />
@@ -231,11 +231,6 @@
       <trans-unit id="ProjectContextSymbolSource_DisplayName">
         <source>Project context</source>
         <target state="translated">Kontext projektu</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectPath_OptionDescription">
-        <source>The project that should be used for context evaluation.</source>
-        <target state="translated">Projekt, který by se měl použít pro vyhodnocení kontextu.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkInfoProvider_Message_InstallSdk">

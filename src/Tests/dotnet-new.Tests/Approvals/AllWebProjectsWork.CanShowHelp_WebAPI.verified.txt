@@ -11,6 +11,7 @@ Options:
   --dry-run               Displays a summary of what would happen if the given command line were run if it would result in a template creation.
   --force                 Forces content to be generated even if it would change existing files.
   --no-update-check       Disables checking for the template package updates when instantiating a template.
+  --project <project>     The project that should be used for context evaluation.
   -lang, --language <C#>  Specifies the template language to instantiate.
   --type <project>        Specifies the template type to instantiate.
 
@@ -49,7 +50,7 @@ Template options:
   --exclude-launch-settings                           Whether to exclude launchSettings.json in the generated template.
                                                       Type: bool
                                                       Default: false
-  --no-https                                          Whether to turn off HTTPS. This option only applies if Individual, IndividualB2C, SingleOrg, or MultiOrg aren't used for --auth.
+  --no-https                                          Whether to turn off HTTPS. This option only applies if IndividualB2C, SingleOrg, or MultiOrg aren't used for --auth.
                                                       Type: bool
                                                       Default: false
   -uld, --use-local-db                                Whether to use LocalDB instead of SQLite. This option only applies if --auth Individual or --auth IndividualB2C is specified.

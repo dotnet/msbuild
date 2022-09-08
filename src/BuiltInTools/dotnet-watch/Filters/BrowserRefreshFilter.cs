@@ -17,12 +17,14 @@ namespace Microsoft.DotNet.Watcher.Tools
     {
         private readonly bool _suppressBrowserRefresh;
         private readonly IReporter _reporter;
+        private readonly string _muxerPath;
         private BrowserRefreshServer? _refreshServer;
 
-        public BrowserRefreshFilter(DotNetWatchOptions dotNetWatchOptions, IReporter reporter)
+        public BrowserRefreshFilter(DotNetWatchOptions dotNetWatchOptions, IReporter reporter, string muxerPath)
         {
             _suppressBrowserRefresh = dotNetWatchOptions.SuppressBrowserRefresh;
             _reporter = reporter;
+            _muxerPath = muxerPath;
         }
 
         public async ValueTask ProcessAsync(DotNetWatchContext context, CancellationToken cancellationToken)
@@ -49,7 +51,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                     return;
                 }
 
-                _refreshServer = new BrowserRefreshServer(context.Reporter);
+                _refreshServer = new BrowserRefreshServer(context.Reporter, _muxerPath);
                 context.BrowserRefreshServer = _refreshServer;
                 var serverUrls = string.Join(',', await _refreshServer.StartAsync(cancellationToken));
                 context.Reporter.Verbose($"Refresh server running at {serverUrls}.");

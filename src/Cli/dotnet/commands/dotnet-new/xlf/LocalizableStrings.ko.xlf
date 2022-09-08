@@ -63,7 +63,7 @@
     to solution file: {1}
     solution folder: {2}</source>
         <target state="translated">
-    프로젝트 추가: {0}
+    프로젝트 추가 {0}
     대상 솔루션 파일: {1}
     솔루션 폴더: {2}</target>
         <note />
@@ -231,11 +231,6 @@
       <trans-unit id="ProjectContextSymbolSource_DisplayName">
         <source>Project context</source>
         <target state="translated">프로젝트 컨텍스트</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectPath_OptionDescription">
-        <source>The project that should be used for context evaluation.</source>
-        <target state="translated">컨텍스트 평가에 사용해야 하는 프로젝트입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkInfoProvider_Message_InstallSdk">

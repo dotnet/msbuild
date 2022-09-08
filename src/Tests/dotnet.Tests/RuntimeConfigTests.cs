@@ -88,7 +88,7 @@ namespace Microsoft.DotNet.Tests
             var tempPath = GetTempPath();
             File.WriteAllText(tempPath, "");
             Action a = () => new RuntimeConfig(tempPath);
-            a.ShouldThrow<System.Text.Json.JsonException>();
+            a.Should().Throw<System.Text.Json.JsonException>();
         }
 
         [Fact]

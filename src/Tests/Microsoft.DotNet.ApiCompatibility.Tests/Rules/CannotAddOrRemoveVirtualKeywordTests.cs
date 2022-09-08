@@ -203,5 +203,39 @@ namespace CompatTests
             };
             Assert.Equal(expected, differences);
         }
+
+        // Don't run this test on .NET Framework, because default interface methods weren't introduced until C# 8.
+#if !NETFRAMEWORK
+        [Fact]
+        public static void EnsureDiagnosticWhenAddingSealedToInterfaceMember()
+        {
+            string leftSyntax = @"
+namespace CompatTests
+{
+  public interface First {
+    public void F() {}
+  }
+}
+";
+            string rightSyntax = @"
+namespace CompatTests
+{
+  public interface First {
+    public sealed void F() {}
+  }
+}
+";
+            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
+            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory);
+
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
+
+            Assert.Equal(new CompatDifference[]
+            {
+                CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.CannotAddSealedToInterfaceMember, string.Empty, DifferenceType.Added, "M:CompatTests.First.F")
+            }, differences);
+        }
+#endif
     }
 }

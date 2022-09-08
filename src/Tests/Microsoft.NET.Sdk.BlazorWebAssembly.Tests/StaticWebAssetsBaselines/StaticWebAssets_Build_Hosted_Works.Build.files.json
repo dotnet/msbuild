@@ -388,8 +388,6 @@
   "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\blazorwasm.dll.gz",
   "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\blazorwasm.pdb",
   "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\blazorwasm.pdb.gz",
-  "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\dotnet-crypto-worker.${RuntimeVersion}.[[hash]].js",
-  "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\dotnet-crypto-worker.${RuntimeVersion}.[[hash]].js.gz",
   "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js",
   "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.[[hash]].js.gz",
   "${ProjectPath}\\blazorhosted\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\dotnet.timezones.blat",

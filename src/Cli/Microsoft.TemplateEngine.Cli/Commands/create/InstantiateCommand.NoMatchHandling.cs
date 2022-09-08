@@ -1,8 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
@@ -143,8 +143,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
             else
             {
-                var tokens = args.ParseResult.Tokens.Select(t => t.Value);
-                reporter.WriteLine(string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, string.Join(" ", tokens)).Bold().Red());
+                var tokens = args.ParseResult.Tokens.Select(t => $"'{t.Value}'");
+                reporter.WriteLine(string.Format(LocalizableStrings.Generic_Info_NoMatchingTemplates, string.Join(" ", tokens)).Bold().Red());
             }
             reporter.WriteLine();
             //TODO: if we were not able to match the errors, print all the errors template by template.
@@ -189,7 +189,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 }
             }
 
-            Reporter.Error.WriteLine(string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, baseInputParameters).Bold().Red());
+            Reporter.Error.WriteLine(string.Format(LocalizableStrings.Generic_Info_NoMatchingTemplates, baseInputParameters).Bold().Red());
             foreach (var option in new[]
                 {
                     new { Option = languageOption, Condition = matchInfos.All(mi => !mi.IsLanguageMatch), AllowedValues = templateGroup.Languages },
@@ -206,14 +206,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             Reporter.Error.WriteLine();
 
-            Reporter.Error.WriteLine(LocalizableStrings.ListTemplatesCommand);
+            Reporter.Error.WriteLine(LocalizableStrings.Generic_CommandHints_List);
 
             Reporter.Error.WriteCommand(
                  Example
                      .For<NewCommand>(args.ParseResult)
                      .WithSubcommand<ListCommand>());
 
-            Reporter.Error.WriteLine(LocalizableStrings.SearchTemplatesCommand);
+            Reporter.Error.WriteLine(LocalizableStrings.Generic_CommandHints_Search);
             Reporter.Error.WriteCommand(
                   Example
                       .For<NewCommand>(args.ParseResult)

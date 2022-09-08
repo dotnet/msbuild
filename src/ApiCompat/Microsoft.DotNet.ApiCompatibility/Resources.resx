@@ -225,4 +225,19 @@
   <data name="AssemblyLoadError" xml:space="preserve">
     <value>Could not load assembly symbols for '{0}'. Skipping the assembly.</value>
   </data>
+  <data name="CannotAddAttribute" xml:space="preserve">
+    <value>Cannot add attribute '{0}' to '{1}'.</value>
+  </data>
+  <data name="CannotChangeAttribute" xml:space="preserve">
+    <value>Cannot change arguments of attribute '{0}' on '{1}'.</value>
+  </data>
+  <data name="CannotRemoveAttribute" xml:space="preserve">
+    <value>Cannot remove attribute '{0}' from '{1}'.</value>
+  </data>
+  <data name="CannotChangeParameterName" xml:space="preserve">
+    <value>Parameter name on member '{0}' changed from '{1}' to '{2}'.</value>
+  </data>
+  <data name="CannotAddSealedToInterfaceMember" xml:space="preserve">
+    <value>Cannot add sealed keyword to default interface member '{0}'.</value>
+  </data>
 </root>

@@ -40,6 +40,21 @@ namespace Microsoft.DotNet.ApiCompat.Task
         public string? NoWarn { get; set; }
 
         /// <summary>
+        /// Enables rule to check that attributes match.
+        /// </summary>
+        public bool EnableRuleAttributesMustMatch { get; set; }
+
+        /// <summary>
+        /// Set of files with types in DocId format of which attributes to exclude.
+        /// </summary>
+        public string[]? ExcludeAttributesFiles { get; set; }
+
+        /// <summary>
+        /// Enables rule to check that the parameter names between public methods do not change.
+        /// </summary>
+        public bool EnableRuleCannotChangeParameterName { get; set; }
+
+        /// <summary>
         /// If true, performs api compatibility checks on the package assets.
         /// </summary>
         public bool RunApiCompat { get; set; } = true;
@@ -120,6 +135,9 @@ namespace Microsoft.DotNet.ApiCompat.Task
                 GenerateCompatibilitySuppressionFile,
                 CompatibilitySuppressionFilePath,
                 NoWarn,
+                EnableRuleAttributesMustMatch,
+                ExcludeAttributesFiles,
+                EnableRuleCannotChangeParameterName,
                 PackageTargetPath!,
                 RunApiCompat,
                 EnableStrictModeForCompatibleTfms,

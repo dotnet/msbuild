@@ -78,10 +78,10 @@ namespace Microsoft.DotNet.Cli.New.Tests
 
             Assert.True(DotnetSlnPostActionProcessor.TryGetProjectFilesToAdd( postAction, creationResult, outputBasePath, out IReadOnlyList<string>? foundProjectFiles));
             Assert.Equal(2, foundProjectFiles?.Count);
-            Assert.Contains(creationResult.PrimaryOutputs[0].Path, foundProjectFiles?.ToList());
-            Assert.Contains(creationResult.PrimaryOutputs[2].Path, foundProjectFiles?.ToList());
+            Assert.Contains(creationResult.PrimaryOutputs[0].Path, foundProjectFiles?.ToList()!);
+            Assert.Contains(creationResult.PrimaryOutputs[2].Path, foundProjectFiles?.ToList()!);
 
-            Assert.DoesNotContain(creationResult.PrimaryOutputs[1].Path, foundProjectFiles?.ToList());
+            Assert.DoesNotContain(creationResult.PrimaryOutputs[1].Path, foundProjectFiles?.ToList()!);
         }
 
         [Fact(DisplayName = nameof(AddProjectToSolutionPostActionDoesntFindProjectOutOfRange))]
@@ -129,10 +129,10 @@ namespace Microsoft.DotNet.Cli.New.Tests
 
             Assert.True(DotnetSlnPostActionProcessor.TryGetProjectFilesToAdd( postAction, creationResult, outputBasePath, out IReadOnlyList<string>? foundProjectFiles));
             Assert.Equal(2, foundProjectFiles?.Count);
-            Assert.Contains(outputFileFullPath0, foundProjectFiles?.ToList());
-            Assert.Contains(outputFileFullPath2, foundProjectFiles?.ToList());
+            Assert.Contains(outputFileFullPath0, foundProjectFiles?.ToList()!);
+            Assert.Contains(outputFileFullPath2, foundProjectFiles?.ToList()!);
 
-            Assert.DoesNotContain(dontFindMeFullPath1, foundProjectFiles?.ToList());
+            Assert.DoesNotContain(dontFindMeFullPath1, foundProjectFiles?.ToList()!);
         }
 
         [Fact(DisplayName = nameof(AddProjectToSolutionPostActionWithoutPrimaryOutputIndexesWithOutputBasePath))]
@@ -157,8 +157,8 @@ namespace Microsoft.DotNet.Cli.New.Tests
 
             Assert.True(DotnetSlnPostActionProcessor.TryGetProjectFilesToAdd( postAction, creationResult, outputBasePath, out IReadOnlyList<string>? foundProjectFiles));
             Assert.Equal(2, foundProjectFiles?.Count);
-            Assert.Contains(outputFileFullPath0, foundProjectFiles?.ToList());
-            Assert.Contains(outputFileFullPath1, foundProjectFiles?.ToList());
+            Assert.Contains(outputFileFullPath0, foundProjectFiles?.ToList()!);
+            Assert.Contains(outputFileFullPath1, foundProjectFiles?.ToList()!);
         }
 
         [Fact(DisplayName = nameof(AddProjectToSolutionCanTargetASingleProjectWithAJsonArray))]
