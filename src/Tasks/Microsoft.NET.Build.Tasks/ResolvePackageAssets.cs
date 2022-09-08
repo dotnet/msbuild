@@ -1127,7 +1127,7 @@ namespace Microsoft.NET.Build.Tasks
 
             private void WriteLogMessages()
             {
-                string GetSeverity(LogLevel level)
+                static string GetSeverity(LogLevel level)
                 {
                     switch (level)
                     {
@@ -1178,7 +1178,7 @@ namespace Microsoft.NET.Build.Tasks
 
             private void WriteMismatchedPlatformPackageVersionMessageIfNecessary()
             {
-                bool hasTwoPeriods(string s)
+                static bool hasTwoPeriods(string s)
                 {
                     int firstPeriodIndex = s.IndexOf('.');
                     if (firstPeriodIndex < 0)

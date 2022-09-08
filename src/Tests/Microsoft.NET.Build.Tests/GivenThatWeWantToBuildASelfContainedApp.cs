@@ -241,7 +241,7 @@ namespace Microsoft.NET.Build.Tests
         [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_resolves_pack_versions_from_workload_manifest()
         {
-            string GetVersionBand(string sdkVersion)
+            static string GetVersionBand(string sdkVersion)
             {
                 if (!Version.TryParse(sdkVersion.Split('-')[0], out var sdkVersionParsed))
                 {
