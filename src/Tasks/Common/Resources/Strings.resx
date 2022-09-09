@@ -860,7 +860,7 @@ You may need to build the project on another operating system or architecture, o
     <comment>Error code is NETSDK1188. 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</comment>
   </data>
   <data name="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed" xml:space="preserve">
-    <value>NETSDK1189: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</value>
+    <value>NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</value>
     <comment>{StrBegin="NETSDK1191: "}</comment>
   </data>
 </root>
