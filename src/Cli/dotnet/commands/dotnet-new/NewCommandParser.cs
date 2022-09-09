@@ -56,7 +56,10 @@ namespace Microsoft.DotNet.Cli
             ArgumentHelpName = CommonLocalizableStrings.LevelArgumentName
         };
 
-        private static readonly Option<bool> s_diagnosticOption = CommonOptionsFactory.CreateDiagnosticsOption();
+        private static readonly Option<bool> s_diagnosticOption =
+            CommonOptionsFactory
+                .CreateDiagnosticsOption()
+                .WithDescription(LocalizableStrings.Diagnostics_OptionDescription);
 
         internal static readonly Command s_command = GetCommand();
 

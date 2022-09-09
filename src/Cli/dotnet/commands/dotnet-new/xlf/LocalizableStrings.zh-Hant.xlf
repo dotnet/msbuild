@@ -7,6 +7,11 @@
         <target state="translated">運算式無效，位置: {0}。</target>
         <note />
       </trans-unit>
+      <trans-unit id="Diagnostics_OptionDescription">
+        <source>Enables diagnostic output.</source>
+        <target state="new">Enables diagnostic output.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisableProjectContextEval_OptionDescription">
         <source>Disables evaluating project context using MSBuild.</source>
         <target state="translated">使用 MSBuild 停用評估專案內容。</target>

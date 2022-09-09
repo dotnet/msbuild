@@ -17,7 +17,7 @@ Options:
   --no-update-check        Disables checking for the template package updates when instantiating a template.
   --project <project>      The project that should be used for context evaluation.
   -v, --verbosity <LEVEL>  Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic]. [default: normal]
-  -d, --diagnostics        Enable diagnostic output.
+  -d, --diagnostics        Enables diagnostic output.
   -?, -h, --help           Show command line help.
 
 Commands:

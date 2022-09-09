@@ -94,8 +94,8 @@ Si la commande est spécifiée sans l’argument, elle répertorie tous les pack
         <note />
       </trans-unit>
       <trans-unit id="Command_Update_Option_CheckOnly">
-        <source>Only check for updates and display the template packages to be updated without applying update.</source>
-        <target state="translated">Recherchez uniquement les mises à jour et affichez les packages de modèles à mettre à jour sans appliquer la mise à jour.</target>
+        <source>Only checks for updates and display the template packages to be updated without applying update.</source>
+        <target state="needs-review-translation">Recherchez uniquement les mises à jour et affichez les packages de modèles à mettre à jour sans appliquer la mise à jour.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
@@ -124,8 +124,8 @@ Si la commande est spécifiée sans l’argument, elle répertorie tous les pack
         <note />
       </trans-unit>
       <trans-unit id="Option_ColumnsAll">
-        <source>Display all columns in the output.</source>
-        <target state="translated">Afficher toutes les colonnes dans la sortie</target>
+        <source>Displays all columns in the output.</source>
+        <target state="needs-review-translation">Afficher toutes les colonnes dans la sortie</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_Debug_Attach">

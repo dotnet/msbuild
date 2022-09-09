@@ -7,6 +7,11 @@
         <target state="translated">式が無効です、位置: {0}。</target>
         <note />
       </trans-unit>
+      <trans-unit id="Diagnostics_OptionDescription">
+        <source>Enables diagnostic output.</source>
+        <target state="new">Enables diagnostic output.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisableProjectContextEval_OptionDescription">
         <source>Disables evaluating project context using MSBuild.</source>
         <target state="translated">MSBuild を使用してプロジェクト コンテキストの評価を無効にします。</target>

@@ -94,8 +94,8 @@ Se il comando è specificato senza l'argomento, vengono elencati tutti i pacchet
         <note />
       </trans-unit>
       <trans-unit id="Command_Update_Option_CheckOnly">
-        <source>Only check for updates and display the template packages to be updated without applying update.</source>
-        <target state="translated">Controlla solo la disponibilità di aggiornamenti e visualizza i pacchetti di modelli da aggiornare senza applicare l'aggiornamento.</target>
+        <source>Only checks for updates and display the template packages to be updated without applying update.</source>
+        <target state="needs-review-translation">Controlla solo la disponibilità di aggiornamenti e visualizza i pacchetti di modelli da aggiornare senza applicare l'aggiornamento.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
@@ -124,8 +124,8 @@ Se il comando è specificato senza l'argomento, vengono elencati tutti i pacchet
         <note />
       </trans-unit>
       <trans-unit id="Option_ColumnsAll">
-        <source>Display all columns in the output.</source>
-        <target state="translated">Visualizza tutte le colonne nell'output.</target>
+        <source>Displays all columns in the output.</source>
+        <target state="needs-review-translation">Visualizza tutte le colonne nell'output.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_Debug_Attach">

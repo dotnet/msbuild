@@ -217,7 +217,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Only check for updates and display the template packages to be updated without applying update..
+        ///   Looks up a localized string similar to Only checks for updates and display the template packages to be updated without applying update..
         /// </summary>
         internal static string Command_Update_Option_CheckOnly {
             get {
@@ -271,7 +271,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Display all columns in the output..
+        ///   Looks up a localized string similar to Displays all columns in the output..
         /// </summary>
         internal static string Option_ColumnsAll {
             get {

@@ -11,14 +11,14 @@
     Kind: Keyword,
     SortText: --check-only,
     InsertText: --check-only,
-    Detail: Only check for updates and display the template packages to be updated without applying update.
+    Detail: Only checks for updates and display the template packages to be updated without applying update.
   },
   {
     Label: --dry-run,
     Kind: Keyword,
     SortText: --dry-run,
     InsertText: --dry-run,
-    Detail: Only check for updates and display the template packages to be updated without applying update.
+    Detail: Only checks for updates and display the template packages to be updated without applying update.
   },
   {
     Label: --interactive,

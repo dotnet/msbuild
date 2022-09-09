@@ -15,8 +15,8 @@ Options:
   --ignore-constraints                   Disables checking if the template meets the constraints to be run.
   -o, --output <output>                  Location to place the generated output.
   --project <project>                    The project that should be used for context evaluation.
-  --columns-all                          Display all columns in the output.
+  --columns-all                          Displays all columns in the output.
   --columns <author|language|tags|type>  Specifies the columns to display in the output.
   -v, --verbosity <LEVEL>                Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic]. [default: normal]
-  -d, --diagnostics                      Enable diagnostic output.
+  -d, --diagnostics                      Enables diagnostic output.
   -?, -h, --help                         Show command line help.

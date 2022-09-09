@@ -120,6 +120,9 @@
   <data name="CapabilityExpressionEvaluator_Exception_InvalidExpression" xml:space="preserve">
     <value>Invalid expression, position: {0}.</value>
   </data>
+  <data name="Diagnostics_OptionDescription" xml:space="preserve">
+    <value>Enables diagnostic output.</value>
+  </data>
   <data name="DisableProjectContextEval_OptionDescription" xml:space="preserve">
     <value>Disables evaluating project context using MSBuild.</value>
   </data>

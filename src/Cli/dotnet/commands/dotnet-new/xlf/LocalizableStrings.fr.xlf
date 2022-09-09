@@ -7,6 +7,11 @@
         <target state="translated">Expression non valide, position : {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="Diagnostics_OptionDescription">
+        <source>Enables diagnostic output.</source>
+        <target state="new">Enables diagnostic output.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisableProjectContextEval_OptionDescription">
         <source>Disables evaluating project context using MSBuild.</source>
         <target state="translated">Désactive l'évaluation du contexte du projet à l'aide de MSBuild.</target>
