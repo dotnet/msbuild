@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         {
             _reporter = new TestReporter(output);
             _testAssets = new TestAssetsManager(output);
-            _muxerPath = DotnetMuxerLocator.MuxerPath;
+            _muxerPath = TestContext.Current.ToolsetUnderTest.DotNetHostPath;
         }
 
         [Fact]
