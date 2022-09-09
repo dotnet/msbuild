@@ -8,7 +8,9 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+#if FEATURE_APPDOMAIN
 using System.Security;
+#endif
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
