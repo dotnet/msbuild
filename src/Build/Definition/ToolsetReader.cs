@@ -439,16 +439,43 @@ namespace Microsoft.Build.Evaluation
                     Toolset toolset = ReadToolset(toolsVersion, globalProperties, initialPropertiesClone, accumulateProperties);
 
                     // Register toolset paths into list of immutable directories
-                    //   example: C:\Windows\Microsoft.NET\Framework\v4.0.30319\
-                    FileClassifier.Shared.RegisterImmutableDirectory(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPath32")?.EvaluatedValue?.Trim());
-                    // example:  C:\Windows\Microsoft.NET\Framework64\v4.0.30319\
-                    FileClassifier.Shared.RegisterImmutableDirectory(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPath64")?.EvaluatedValue?.Trim());
+                    // example: C:\Windows\Microsoft.NET\Framework
+                    string frameworksPathPrefix32 = rootOrNull(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPath32")?.EvaluatedValue?.Trim());
+                    FileClassifier.Shared.RegisterImmutableDirectory(frameworksPathPrefix32);
+                    // example: C:\Windows\Microsoft.NET\Framework64
+                    string frameworksPathPrefix64 = rootOrNull(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPath64")?.EvaluatedValue?.Trim());
+                    FileClassifier.Shared.RegisterImmutableDirectory(frameworksPathPrefix64);
+                    // example: C:\Windows\Microsoft.NET\FrameworkArm64
+                    // TODO: Apply MSBuildFrameworkToolsPathArm64 or equivalent as soon as there is one
+                    string frameworksPathPrefixArm64 = rootOrNull(frameworksPathPrefix32 ?? frameworksPathPrefix64);
+                    if (!string.IsNullOrEmpty(frameworksPathPrefixArm64))
+                    {
+                        frameworksPathPrefixArm64 = Path.Combine(frameworksPathPrefixArm64, "FrameworkArm64");
+                    }
+                    FileClassifier.Shared.RegisterImmutableDirectory(frameworksPathPrefixArm64);
 
                     if (toolset != null)
                     {
                         toolsets[toolset.ToolsVersion] = toolset;
                     }
                 }
+            }
+
+            string rootOrNull(string path)
+            {
+                if (!string.IsNullOrEmpty(path))
+                {
+                    try
+                    {
+                        path = Directory.GetParent(FileUtilities.EnsureNoTrailingSlash(path))?.FullName;
+                    }
+                    catch
+                    {
+                        path = null;
+                    }
+                }
+
+                return path;
             }
         }
 
