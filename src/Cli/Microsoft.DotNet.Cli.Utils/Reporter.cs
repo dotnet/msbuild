@@ -3,12 +3,15 @@
 
 #nullable enable
 
+using System;
+using System.Threading;
+
 namespace Microsoft.DotNet.Cli.Utils
 {
     // Stupid-simple console manager
     public class Reporter : IReporter
     {
-        private static readonly object s_lock = new();
+        private static SpinLock s_spinlock = new();
 
         //cannot use auto properties, as those are static
 #pragma warning disable IDE0032 // Use auto property
@@ -45,12 +48,12 @@ namespace Microsoft.DotNet.Cli.Utils
         /// </summary>
         public static void Reset()
         {
-            lock (s_lock)
+            UseSpinLock(() =>
             {
                 ResetOutput();
                 ResetError();
                 ResetVerbose();
-            }
+            });
         }
 
         /// <summary>
@@ -60,11 +63,11 @@ namespace Microsoft.DotNet.Cli.Utils
         /// <param name="reporter"></param>
         public static void SetOutput(IReporter reporter)
         {
-            lock (s_lock)
+            UseSpinLock(() =>
             {
                 s_outputReporter = reporter;
                 ResetOutput();
-            }
+            });
         }
 
         /// <summary>
@@ -73,11 +76,11 @@ namespace Microsoft.DotNet.Cli.Utils
         /// </summary>
         public static void SetError(IReporter reporter)
         {
-            lock (s_lock)
+            UseSpinLock(() =>
             {
                 s_errorReporter = reporter;
                 ResetError();
-            }
+            });
         }
 
         /// <summary>
@@ -86,11 +89,11 @@ namespace Microsoft.DotNet.Cli.Utils
         /// </summary>
         public static void SetVerbose(IReporter reporter)
         {
-            lock (s_lock)
+            UseSpinLock(() =>
             {
                 s_verboseReporter = reporter;
                 ResetVerbose();
-            }
+            });
         }
 
         private static void ResetOutput()
@@ -110,7 +113,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public void WriteLine(string message)
         {
-            lock (s_lock)
+            UseSpinLock(() =>
             {
                 if (CommandLoggingContext.ShouldPassAnsiCodesThrough)
                 {
@@ -120,20 +123,17 @@ namespace Microsoft.DotNet.Cli.Utils
                 {
                     _console?.WriteLine(message);
                 }
-            }
+            });
         }
 
         public void WriteLine()
         {
-            lock (s_lock)
-            {
-                _console?.Writer?.WriteLine();
-            }
+            UseSpinLock(() => _console?.Writer?.WriteLine());
         }
 
         public void Write(string message)
         {
-            lock (s_lock)
+            UseSpinLock(() =>
             {
                 if (CommandLoggingContext.ShouldPassAnsiCodesThrough)
                 {
@@ -143,10 +143,27 @@ namespace Microsoft.DotNet.Cli.Utils
                 {
                     _console?.Write(message);
                 }
-            }
+            });
         }
 
         public void WriteLine(string format, params object?[] args) => WriteLine(string.Format(format, args));
 
+
+        public static void UseSpinLock(Action action)
+        {
+            bool lockTaken = false;
+            try
+            {
+                s_spinlock.Enter(ref lockTaken);
+                action();
+            }
+            finally
+            {
+                if (lockTaken)
+                {
+                    s_spinlock.Exit(false);
+                }
+            }
+        }
     }
 }
