@@ -122,7 +122,7 @@ namespace Microsoft.NET.Publish.Tests
             {
                 "/p:SelfContained=true",
                 $"/p:TargetFramework={ToolsetInfo.CurrentTargetFramework}",
-                $"/p:RuntimeIdentifier={EnvironmentInfo.GetCompatibleRid(ToolsetInfo.CurrentTargetFramework)}",
+                $"/p:RuntimeIdentifier={EnvironmentInfo.GetCompatibleRid(ToolsetInfo.CurrentTargetFramework)}"
             };
 
             new RestoreCommand(testAsset, "main").Execute(args);

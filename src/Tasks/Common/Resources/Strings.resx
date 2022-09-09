@@ -864,7 +864,7 @@ You may need to build the project on another operating system or architecture, o
     <comment>{StrBegin="NETSDK1189: "}</comment>
   </data>
   <data name="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed" xml:space="preserve">
-    <value>NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</value>
-    <comment>{StrBegin="NETSDK1191: "}</comment>
+    <value>NETSDK1190: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</value>
+    <comment>{StrBegin="NETSDK1190: "}</comment>
   </data>
 </root>

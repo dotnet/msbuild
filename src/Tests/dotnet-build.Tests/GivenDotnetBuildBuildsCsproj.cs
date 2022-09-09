@@ -271,7 +271,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                .And
                .NotHaveStdOutContaining("NETSDK1031") // Self Contained Checks
                .And
-               .NotHaveStdErrContaining("NETSDK1191"); // Check that publish properties don't interfere with build either 
+               .NotHaveStdErrContaining("NETSDK1190"); // Check that publish properties don't interfere with build either 
         }
 
         [RequiresMSBuildVersionFact("17.4.0.41702")]
