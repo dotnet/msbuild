@@ -3052,7 +3052,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void PropertyFunctionStaticMethodDirectoryNameOfFileAbove()
         {
-            string tempPath = Path.GetTempPath();
+            string tempPath = FileUtilities.TempFileDirectory;
             string tempFile = Path.GetFileName(FileUtilities.GetTemporaryFile());
 
             try

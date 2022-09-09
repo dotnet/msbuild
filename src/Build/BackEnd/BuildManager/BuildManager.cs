@@ -404,6 +404,12 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public void BeginBuild(BuildParameters parameters, IEnumerable<DeferredBuildMessage> deferredBuildMessages)
         {
+            // TEMP can be modified from the environment. We don't generally support changing environment variables in the middle of a build, but
+            // do support changing them between builds. BuildManager in Visual Studio or with the MSBuild Server lasts for multiple builds, so
+            // keeping the cached temp file directory prevents the user from changing it between builds. This resets the cache, allowing the user
+            // to change it between builds.
+            FileUtilities.ClearTempFileDirectory();
+
             // deferredBuildMessages cannot be an optional parameter on a single BeginBuild method because it would break binary compatibility.
             _deferredBuildMessages = deferredBuildMessages;
             BeginBuild(parameters);
