@@ -1,9 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Tests;
@@ -341,8 +339,8 @@ namespace CompatTests
 
             CompatDifference[] expected =
             {
-                    new CompatDifference(left.MetadataInformation, right.ElementAt(1).MetadataInformation, DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.First"),
-                    new CompatDifference(left.MetadataInformation, right.ElementAt(2).MetadataInformation, DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.Second"),
+                    new CompatDifference(left.MetadataInformation, right[1].MetadataInformation, DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.First"),
+                    new CompatDifference(left.MetadataInformation, right[2].MetadataInformation, DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.Second"),
             };
             Assert.Equal(expected, differences);
         }
@@ -416,10 +414,10 @@ namespace CompatTests
 
             CompatDifference[] expected =
             {
-                new CompatDifference(left.MetadataInformation, right.ElementAt(0).MetadataInformation, DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.First.FirstNested.SecondNested.ThirdNested"),
-                new CompatDifference(left.MetadataInformation, right.ElementAt(1).MetadataInformation, DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.First.FirstNested"),
-                new CompatDifference(left.MetadataInformation, right.ElementAt(2).MetadataInformation, DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.First.FirstNested.SecondNested"),
-                new CompatDifference(left.MetadataInformation, right.ElementAt(3).MetadataInformation, DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.First"),
+                new CompatDifference(left.MetadataInformation, right[0].MetadataInformation, DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.First.FirstNested.SecondNested.ThirdNested"),
+                new CompatDifference(left.MetadataInformation, right[1].MetadataInformation, DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.First.FirstNested"),
+                new CompatDifference(left.MetadataInformation, right[2].MetadataInformation, DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.First.FirstNested.SecondNested"),
+                new CompatDifference(left.MetadataInformation, right[3].MetadataInformation, DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.First"),
             };
             Assert.Equal(expected, differences);
         }
@@ -503,7 +501,7 @@ namespace CompatTests
 
             CompatDifference[] expected =
             {
-                new CompatDifference(left.MetadataInformation, right.ElementAt(1).MetadataInformation, DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.ForwardedTestType"),
+                new CompatDifference(left.MetadataInformation, right[1].MetadataInformation, DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.ForwardedTestType"),
             };
 
             Assert.Equal(expected, differences);
