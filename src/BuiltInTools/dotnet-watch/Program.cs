@@ -70,19 +70,6 @@ Examples:
 
         public Program(IConsole console, string workingDirectory, string muxerPath)
         {
-            // We can register the MSBuild that is bundled with the SDK to perform MSBuild things. dotnet-watch is in
-            // a nested folder of the SDK's root, we'll back up to it.
-            // AppContext.BaseDirectory = $sdkRoot\$sdkVersion\DotnetTools\dotnet-watch\$version\tools\net6.0\any\
-            // MSBuild.dll is located at $sdkRoot\$sdkVersion\MSBuild.dll
-            var sdkRootDirectory = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "..");
-#if DEBUG
-            // In the usual case, use the SDK that contains the dotnet-watch. However during local testing, it's
-            // much more common to run dotnet-watch from a different SDK. Use the ambient SDK in that case.
-            MSBuildLocator.RegisterDefaults();
-#else
-            MSBuildLocator.RegisterMSBuildPath(sdkRootDirectory);
-#endif
-
             Ensure.NotNull(console, nameof(console));
             Ensure.NotNullOrEmpty(workingDirectory, nameof(workingDirectory));
 
@@ -95,9 +82,6 @@ Examples:
             var suppressEmojis = ShouldSuppressEmojis();
             _reporter = CreateReporter(verbose: true, quiet: false, console: _console, suppressEmojis);
             _requester = new ConsoleRequester(_console, quiet: false, suppressEmojis);
-
-            // Register listeners that load Roslyn-related assemblies from the `Rosyln/bincore` directory.
-            RegisterAssemblyResolutionEvents(sdkRootDirectory);
         }
 
         public static async Task<int> Main(string[] args)
@@ -106,6 +90,17 @@ Examples:
             {
                 var muxerPath = Environment.ProcessPath;
                 Debug.Assert(Path.GetFileNameWithoutExtension(muxerPath) == "dotnet", $"Invalid muxer path {muxerPath}");
+
+                // We can register the MSBuild that is bundled with the SDK to perform MSBuild things. dotnet-watch is in
+                // a nested folder of the SDK's root, we'll back up to it.
+                // AppContext.BaseDirectory = $sdkRoot\$sdkVersion\DotnetTools\dotnet-watch\$version\tools\net6.0\any\
+                // MSBuild.dll is located at $sdkRoot\$sdkVersion\MSBuild.dll
+                var sdkRootDirectory = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "..");
+
+                MSBuildLocator.RegisterMSBuildPath(sdkRootDirectory);
+
+                // Register listeners that load Roslyn-related assemblies from the `Rosyln/bincore` directory.
+                RegisterAssemblyResolutionEvents(sdkRootDirectory);
 
                 using var program = new Program(PhysicalConsole.Singleton, Directory.GetCurrentDirectory(), muxerPath);
                 return await program.RunAsync(args);
