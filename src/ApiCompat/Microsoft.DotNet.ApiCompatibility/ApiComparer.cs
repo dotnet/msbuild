@@ -108,8 +108,7 @@ namespace Microsoft.DotNet.ApiCompatibility
             IDifferenceVisitor visitor = _differenceVisitorFactory.Create();
             visitor.Visit(mapper);
 
-            // Sort the compat differences by the order of the passed in rights.
-            return right.Join(visitor.CompatDifferences, i => i.MetadataInformation, d => d.Right, (i, d) => d).ToArray();
+            return SortCompatDifferencesByInputMetadata(visitor.CompatDifferences.ToLookup(c => c.Right, t => t), right);
         }
 
         /// <inheritdoc />
@@ -126,8 +125,33 @@ namespace Microsoft.DotNet.ApiCompatibility
             IDifferenceVisitor visitor = _differenceVisitorFactory.Create();
             visitor.Visit(mapper);
 
-            // Sort the compat differences by the order of the passed in left assemblies.
-            return left.Join(visitor.CompatDifferences, i => i.MetadataInformation, d => d.Left, (i, d) => d).ToArray();
+            return SortCompatDifferencesByInputMetadata(visitor.CompatDifferences.ToLookup(c => c.Left, t => t), left);
+        }
+
+        /// <summary>
+        /// Sort the compat differences by the order of the passed in metadata.
+        /// </summary>
+        private static IEnumerable<CompatDifference> SortCompatDifferencesByInputMetadata(ILookup<MetadataInformation, CompatDifference> compatDifferencesLookup,
+            IEnumerable<ElementContainer<IAssemblySymbol>> inputMetadata)
+        {
+            HashSet<MetadataInformation> processedMetadata = new();
+            List<CompatDifference> sortedCompatDifferences = new();
+
+            foreach (ElementContainer<IAssemblySymbol> elementContainer in inputMetadata)
+            {
+                sortedCompatDifferences.AddRange(compatDifferencesLookup[elementContainer.MetadataInformation]);
+                processedMetadata.Add(elementContainer.MetadataInformation);
+            }
+
+            foreach (IGrouping<MetadataInformation, CompatDifference> compatDifferenceGroup in compatDifferencesLookup)
+            {
+                if (processedMetadata.Contains(compatDifferenceGroup.Key))
+                    continue;
+
+                sortedCompatDifferences.AddRange(compatDifferenceGroup);
+            }
+
+            return sortedCompatDifferences;
         }
     }
 }
