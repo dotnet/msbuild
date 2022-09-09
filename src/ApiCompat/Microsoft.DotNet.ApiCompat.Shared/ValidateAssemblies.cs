@@ -2,9 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using Jab;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Logging;
 using Microsoft.DotNet.ApiCompatibility.Rules;
@@ -12,34 +10,12 @@ using Microsoft.DotNet.ApiCompatibility.Runner;
 
 namespace Microsoft.DotNet.ApiCompat
 {
-    [ServiceProvider(RootServices = new[] { typeof(IEnumerable<IRule>) })]
-    [Import(typeof(IApiCompatServiceProviderModule))]
-    internal partial class ValidateAssembliesServiceProvider : IApiCompatServiceProviderModule
-    {
-        public Func<ICompatibilityLogger> LogFactory { get; }
-
-        public Func<ISuppressionEngine> SuppressionEngineFactory { get; }
-
-        public RuleFactory RuleFactory { get; }
-
-        public ValidateAssembliesServiceProvider(Func<ISuppressionEngine, ICompatibilityLogger> logFactory,
-            Func<ISuppressionEngine> suppressionEngineFactory,
-            RuleFactory ruleFactory)
-        {
-            // It's important to use GetService<T> here instead of directly invoking the factory
-            // to avoid two instances being created when retrieving a singleton.
-            LogFactory = () => logFactory(GetService<ISuppressionEngine>());
-            SuppressionEngineFactory = suppressionEngineFactory;
-            RuleFactory = ruleFactory;
-        }
-    }
-
     internal static class ValidateAssemblies
     {
         public static void Run(Func<ISuppressionEngine, ICompatibilityLogger> logFactory,
             bool generateSuppressionFile,
             string? suppressionFile,
-            string? noWarn, 
+            string? noWarn,
             string[] leftAssemblies,
             string[] rightAssemblies,
             bool enableStrictMode,
@@ -53,11 +29,11 @@ namespace Microsoft.DotNet.ApiCompat
             string? suppressionFileForEngine = generateSuppressionFile && !File.Exists(suppressionFile) ? null : suppressionFile;
 
             // Initialize the service provider
-            ValidateAssembliesServiceProvider serviceProvider = new(logFactory,
+            ApiCompatServiceProvider serviceProvider = new(logFactory,
                 () => new SuppressionEngine(suppressionFileForEngine, noWarn, generateSuppressionFile),
                 new RuleFactory());
 
-            IApiCompatRunner apiCompatRunner = serviceProvider.GetService<IApiCompatRunner>();
+            IApiCompatRunner apiCompatRunner = serviceProvider.ApiCompatRunner;
             ApiCompatRunnerOptions apiCompatOptions = new(enableStrictMode);
 
             // Optionally provide a string transformer if a transformation pattern is passed in.
@@ -107,8 +83,8 @@ namespace Microsoft.DotNet.ApiCompat
 
             if (generateSuppressionFile)
             {
-                SuppressionFileHelper.GenerateSuppressionFile(serviceProvider.GetService<ISuppressionEngine>(),
-                    serviceProvider.GetService<ICompatibilityLogger>(),
+                SuppressionFileHelper.GenerateSuppressionFile(serviceProvider.SuppressionEngine,
+                    serviceProvider.CompatibilityLogger,
                     suppressionFile);
             }
         }
