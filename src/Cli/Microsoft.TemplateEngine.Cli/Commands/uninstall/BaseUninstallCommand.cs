@@ -28,7 +28,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override Task<NewCommandStatus> ExecuteAsync(
             UninstallCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
-            TemplatePackageManager templatePackageManager, 
+            TemplatePackageManager templatePackageManager,
             InvocationContext context)
         {
             TemplatePackageCoordinator templatePackageCoordinator = new TemplatePackageCoordinator(

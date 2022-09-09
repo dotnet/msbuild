@@ -52,7 +52,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override Task<NewCommandStatus> ExecuteAsync(
             SearchCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
-            TemplatePackageManager templatePackageManager, 
+            TemplatePackageManager templatePackageManager,
             InvocationContext context)
         {
             return CliTemplateSearchCoordinator.SearchForTemplateMatchesAsync(

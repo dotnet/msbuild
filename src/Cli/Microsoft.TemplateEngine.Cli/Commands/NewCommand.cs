@@ -145,7 +145,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override Task<NewCommandStatus> ExecuteAsync(
             NewCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
-            TemplatePackageManager templatePackageManager, 
+            TemplatePackageManager templatePackageManager,
             InvocationContext context)
         {
             return InstantiateCommand.ExecuteAsync(args, environmentSettings, templatePackageManager, context);

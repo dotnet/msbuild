@@ -132,6 +132,49 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return GetCompletions(context, environmentSettings, templatePackageManager).ToList();
         }
 
+        /// <summary>
+        /// Checks if the template with same short name as used command alias exists, and if so prints the example on how to run the template using dotnet new create.
+        /// </summary>
+        /// <remarks>
+        /// This method uses <see cref="TemplatePackageManager.GetTemplatesAsync(CancellationToken)"/>, however this should not take long as templates normally at least once
+        /// are queried before and results are cached.
+        /// Alternatively we can think of caching template groups early in <see cref="BaseCommand{TArgs}"/> later on.
+        /// </remarks>
+        protected internal static async Task CheckTemplatesWithSubCommandName(
+            TArgs args,
+            TemplatePackageManager templatePackageManager,
+            CancellationToken cancellationToken)
+        {
+            IReadOnlyList<ITemplateInfo> availableTemplates = await templatePackageManager.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
+            string usedCommandAlias = args.ParseResult.CommandResult.Token.Value;
+            if (!availableTemplates.Any(t => t.ShortNameList.Any(sn => string.Equals(sn, usedCommandAlias, StringComparison.OrdinalIgnoreCase))))
+            {
+                return;
+            }
+
+            Reporter.Output.WriteLine(LocalizableStrings.Commands_TemplateShortNameCommandConflict_Info, usedCommandAlias);
+            Reporter.Output.WriteCommand(Example.For<InstantiateCommand>(args.ParseResult).WithArgument(InstantiateCommand.ShortNameArgument, usedCommandAlias));
+            Reporter.Output.WriteLine();
+        }
+
+        protected static void PrintDeprecationMessage<TDepr, TNew>(ParseResult parseResult, Option? additionalOption = null) where TDepr : Command where TNew : Command
+        {
+            var newCommandExample = Example.For<TNew>(parseResult);
+            if (additionalOption != null)
+            {
+                newCommandExample.WithOption(additionalOption);
+            }
+
+            Reporter.Output.WriteLine(string.Format(
+             LocalizableStrings.Commands_Warning_DeprecatedCommand,
+             Example.For<TDepr>(parseResult),
+             newCommandExample).Yellow());
+
+            Reporter.Output.WriteLine(LocalizableStrings.Commands_Warning_DeprecatedCommand_Info.Yellow());
+            Reporter.Output.WriteCommand(Example.For<TNew>(parseResult).WithHelpOption().ToString().Yellow());
+            Reporter.Output.WriteLine();
+        }
+
         protected abstract Task<NewCommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager, InvocationContext context);
 
         protected abstract TArgs ParseContext(ParseResult parseResult);
@@ -162,54 +205,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.AddOption(command.ColumnsOption);
         }
 
-        protected static void PrintDeprecationMessage<TDepr, TNew>(ParseResult parseResult, Option? additionalOption = null) where TDepr : Command where TNew : Command
-        {
-            var newCommandExample = Example.For<TNew>(parseResult);
-            if (additionalOption != null)
-            {
-                newCommandExample.WithOption(additionalOption);
-            }
-
-            Reporter.Output.WriteLine(string.Format(
-             LocalizableStrings.Commands_Warning_DeprecatedCommand,
-             Example.For<TDepr>(parseResult),
-             newCommandExample).Yellow());
-
-            Reporter.Output.WriteLine(LocalizableStrings.Commands_Warning_DeprecatedCommand_Info.Yellow());
-            Reporter.Output.WriteCommand(Example.For<TNew>(parseResult).WithHelpOption().ToString().Yellow());
-            Reporter.Output.WriteLine();
-
-        }
-
-        /// <summary>
-        /// Checks if the template with same short name as used command alias exists, and if so prints the example on how to run the template using dotnet new create.
-        /// </summary>
-        /// <remarks>
-        /// This method uses <see cref="TemplatePackageManager.GetTemplatesAsync(CancellationToken)"/>, however this should not take long as templates normally at least once
-        /// are queried before and results are cached.
-        /// Alternatively we can think of caching template groups early in <see cref="BaseCommand{TArgs}"/> later on.
-        /// </remarks>
-        protected internal static async Task CheckTemplatesWithSubCommandName(
-            TArgs args,
-            TemplatePackageManager templatePackageManager,
-            CancellationToken cancellationToken)
-        {
-            IReadOnlyList<ITemplateInfo> availableTemplates = await templatePackageManager.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
-            string usedCommandAlias = args.ParseResult.CommandResult.Token.Value;
-            if (!availableTemplates.Any(t => t.ShortNameList.Any(sn => string.Equals(sn, usedCommandAlias, StringComparison.OrdinalIgnoreCase))))
-            {
-                return;
-            }
-
-            Reporter.Output.WriteLine(LocalizableStrings.Commands_TemplateShortNameCommandConflict_Info, usedCommandAlias);
-            Reporter.Output.WriteCommand(Example.For<InstantiateCommand>(args.ParseResult).WithArgument(InstantiateCommand.ShortNameArgument, usedCommandAlias));
-            Reporter.Output.WriteLine();
-        }
-
         private static async Task HandleGlobalOptionsAsync(
-            TArgs args, 
-            IEngineEnvironmentSettings environmentSettings, 
-            TemplatePackageManager templatePackageManager, 
+            TArgs args,
+            IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager,
             CancellationToken cancellationToken)
         {
             HandleDebugAttach(args);

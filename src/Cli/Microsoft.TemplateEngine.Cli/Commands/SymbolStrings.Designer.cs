@@ -126,7 +126,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Instantiates a template with given short name. Same as &apos;dotnet new &lt;template name&gt;&apos;..
+        ///   Looks up a localized string similar to Instantiates a template with given short name. An alias of &apos;dotnet new &lt;template name&gt;&apos;..
         /// </summary>
         internal static string Command_Instantiate_Description {
             get {

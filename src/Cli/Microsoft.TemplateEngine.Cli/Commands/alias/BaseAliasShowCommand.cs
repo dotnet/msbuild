@@ -19,7 +19,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override Task<NewCommandStatus> ExecuteAsync(
             AliasShowCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
-            TemplatePackageManager templatePackageManager, InvocationContext context) => throw new NotImplementedException();
+            TemplatePackageManager templatePackageManager,
+            InvocationContext context) => throw new NotImplementedException();
 
         protected override AliasShowCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);
     }

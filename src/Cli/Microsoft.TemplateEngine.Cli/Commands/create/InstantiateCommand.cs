@@ -62,8 +62,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         };
 
         internal static Task<NewCommandStatus> ExecuteAsync(
-            NewCommandArgs newCommandArgs, 
-            IEngineEnvironmentSettings environmentSettings, 
+            NewCommandArgs newCommandArgs,
+            IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
             InvocationContext context)
         {
@@ -196,7 +196,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override async Task<NewCommandStatus> ExecuteAsync(
             InstantiateCommandArgs instantiateArgs,
             IEngineEnvironmentSettings environmentSettings,
-            TemplatePackageManager templatePackageManager, 
+            TemplatePackageManager templatePackageManager,
             InvocationContext context)
         {
             NewCommandStatus status = await ExecuteIntAsync(instantiateArgs, environmentSettings, templatePackageManager, context).ConfigureAwait(false);

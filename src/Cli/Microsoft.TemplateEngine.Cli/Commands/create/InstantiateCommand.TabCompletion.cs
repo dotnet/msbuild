@@ -14,7 +14,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal partial class InstantiateCommand : BaseCommand<InstantiateCommandArgs>
     {
-        private static readonly TimeSpan s_constraintEvaluationTimeout = TimeSpan.FromMilliseconds(1000);
+        private static readonly TimeSpan ConstraintEvaluationTimeout = TimeSpan.FromMilliseconds(1000);
 
         internal static IEnumerable<CompletionItem> GetTemplateNameCompletions(string? tempalteName, IEnumerable<TemplateGroup> templateGroups, IEngineEnvironmentSettings environmentSettings)
         {
@@ -143,7 +143,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             if (templateGroup.Templates.SelectMany(t => t.Constraints).Any())
             {
                 CancellationTokenSource cancellationTokenSource = new();
-                cancellationTokenSource.CancelAfter(s_constraintEvaluationTimeout);
+                cancellationTokenSource.CancelAfter(ConstraintEvaluationTimeout);
                 Task<IEnumerable<CliTemplateInfo>> constraintEvaluationTask = templateGroup.GetAllowedTemplatesAsync(constraintManager, cancellationTokenSource.Token);
                 Task.Run(async () =>
                 {
@@ -173,7 +173,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             List<TemplateGroup> allowedTemplateGroups = new();
             List<(TemplateGroup TemplateGroup, Task<IEnumerable<CliTemplateInfo>> Task)> tasksToWait = new();
             CancellationTokenSource cancellationTokenSource = new();
-            cancellationTokenSource.CancelAfter(s_constraintEvaluationTimeout);
+            cancellationTokenSource.CancelAfter(ConstraintEvaluationTimeout);
             foreach (TemplateGroup group in templateGroups)
             {
                 //if all the templates in a group have constraints, they must be evaluated

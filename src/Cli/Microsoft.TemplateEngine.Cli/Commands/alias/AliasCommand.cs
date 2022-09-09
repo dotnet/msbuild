@@ -23,7 +23,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override Task<NewCommandStatus> ExecuteAsync(
             AliasCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
-            TemplatePackageManager templatePackageManager, 
+            TemplatePackageManager templatePackageManager,
             InvocationContext context) => throw new NotImplementedException();
 
         protected override AliasCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);

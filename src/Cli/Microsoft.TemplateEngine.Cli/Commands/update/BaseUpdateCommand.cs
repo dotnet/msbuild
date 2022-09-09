@@ -32,7 +32,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override Task<NewCommandStatus> ExecuteAsync(
             UpdateCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
-            TemplatePackageManager templatePackageManager, InvocationContext context)
+            TemplatePackageManager templatePackageManager,
+            InvocationContext context)
         {
             TemplatePackageCoordinator templatePackageCoordinator = new TemplatePackageCoordinator(
                 environmentSettings,

@@ -102,8 +102,8 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             IEnumerable<List<string>> microsoftPackages = tableOutput.Where(row => row[2] == "Microsoft" && row[4].StartsWith("Microsoft", StringComparison.OrdinalIgnoreCase));
             IEnumerable<string> installationCommands = microsoftPackages.Select(package => $"new install {package[4]}");
 
-            bool containsOneOfInstallationCommands(string output) => installationCommands.Any(command => output.Contains(command));
-            commandResult.Should().HaveStdOutContaining(containsOneOfInstallationCommands, "Checks if the output contains one of the expected installation commands");
+            bool ContainsOneOfInstallationCommands(string output) => installationCommands.Any(command => output.Contains(command));
+            commandResult.Should().HaveStdOutContaining(ContainsOneOfInstallationCommands, "Checks if the output contains one of the expected installation commands");
         }
 
         [Theory]

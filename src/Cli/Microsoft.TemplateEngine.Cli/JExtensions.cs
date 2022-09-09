@@ -7,8 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 #endif
-using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Abstractions.Mount;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -189,7 +187,6 @@ namespace Microsoft.TemplateEngine
             {
                 token = token.Get<JArray>(propertyName);
             }
-
 
             if (token is not JArray arr)
             {
