@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                 Arity = ArgumentArity.ZeroOrMore,
                 ArgumentHelpName = "file1,file2,..."
             };
-            Option<bool> createWorkItemPerAssemblyOption = new("--create-workitem-per-assembly",
+            Option<bool> createWorkItemPerAssemblyOption = new("--create-work-item-per-assembly",
                 "If true, enqueues a work item per passed in left and right assembly.");
             Option<(string, string)[]?> leftAssembliesTransformationPatternOption = new("--left-assemblies-transformation-pattern",
                 description: "A transformation pattern for the left side assemblies.",
