@@ -206,19 +206,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             Reporter.Error.WriteLine();
 
-            Reporter.Error.WriteLine(LocalizableStrings.Generic_CommandHints_List);
-
-            Reporter.Error.WriteCommand(
-                 Example
-                     .For<NewCommand>(args.ParseResult)
-                     .WithSubcommand<ListCommand>());
-
-            Reporter.Error.WriteLine(LocalizableStrings.Generic_CommandHints_Search);
-            Reporter.Error.WriteCommand(
-                  Example
-                      .For<NewCommand>(args.ParseResult)
-                      .WithSubcommand<SearchCommand>()
-                      .WithArgument(SearchCommand.NameArgument, args.ShortName ?? string.Empty));
+            WriteListCommandExample(args, Reporter.Error);
+            WriteSearchCommandExample(args, Reporter.Error);
             Reporter.Error.WriteLine();
         }
     }

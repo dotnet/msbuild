@@ -767,6 +767,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to To list installed templates similar to &apos;{0}&apos;, run:.
+        /// </summary>
+        internal static string Generic_CommandHints_List_Template {
+            get {
+                return ResourceManager.GetString("Generic_CommandHints_List_Template", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to To search for the templates on NuGet.org, run:.
         /// </summary>
         internal static string Generic_CommandHints_Search {
