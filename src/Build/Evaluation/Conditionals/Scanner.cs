@@ -5,9 +5,7 @@ using System.Globalization;
 using System;
 using System.Diagnostics;
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 
 #nullable disable
 

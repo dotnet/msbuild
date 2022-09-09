@@ -10,10 +10,6 @@ using System.Configuration.Assemblies;
 using System.Runtime.Serialization;
 using System.IO;
 using Microsoft.Build.BackEnd;
-#if FEATURE_ASSEMBLYLOADCONTEXT
-using System.Reflection.PortableExecutable;
-using System.Reflection.Metadata;
-#endif
 
 #nullable disable
 

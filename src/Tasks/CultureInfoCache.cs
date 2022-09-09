@@ -4,7 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+#if NET5_0_OR_GREATER
 using System.Linq;
+#endif
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 

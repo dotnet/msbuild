@@ -6,9 +6,10 @@ using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Collections;
+#if !RUNTIME_TYPE_NETCORE
 using Microsoft.Build.Framework;
+#endif
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 using Microsoft.NET.StringTools;
 
 #nullable disable

@@ -3,7 +3,6 @@
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;

@@ -3,7 +3,6 @@
 
 using System;
 using System.Runtime.InteropServices.ComTypes;
-using System.Text;
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;

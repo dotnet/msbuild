@@ -4,7 +4,6 @@
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
