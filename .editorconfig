@@ -201,4 +201,4 @@ end_of_line = crlf
 
 [src/**/*.{cs,vb}]
 # IDE0005: Remove unnecessary usings/imports
-dotnet_diagnostic.IDE0005.severity = warning
+dotnet_diagnostic.IDE0005.severity = error
