@@ -42,7 +42,7 @@ Para instalar o pacote NuGet de determinada versão, utilize &lt;package ID&gt;:
         <note />
       </trans-unit>
       <trans-unit id="Command_Instantiate_Description">
-        <source>Instantiates a template with given short name. Same as 'dotnet new &lt;template name&gt;'.</source>
+        <source>Instantiates a template with given short name. An alias of 'dotnet new &lt;template name&gt;'.</source>
         <target state="needs-review-translation">Instancia um modelo com um nome curto.</target>
         <note>do not translate 'dotnet new &lt;template name&gt;'</note>
       </trans-unit>

@@ -165,7 +165,7 @@
     Kind: Keyword,
     SortText: create,
     InsertText: create,
-    Detail: Instantiates a template with given short name. Same as 'dotnet new <template name>'.
+    Detail: Instantiates a template with given short name. An alias of 'dotnet new <template name>'.
   },
   {
     Label: install,

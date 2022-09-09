@@ -19,7 +19,7 @@ Options:
   -?, -h, --help         Show command line help.
 
 Commands:
-  create <template-short-name> <template-args>  Instantiates a template with given short name. Same as 'dotnet new <template name>'.
+  create <template-short-name> <template-args>  Instantiates a template with given short name. An alias of 'dotnet new <template name>'.
   install <package>                             Installs a template package.
   uninstall <package>                           Uninstalls a template package.
   update                                        Checks the currently installed template packages for update, and install the updates.

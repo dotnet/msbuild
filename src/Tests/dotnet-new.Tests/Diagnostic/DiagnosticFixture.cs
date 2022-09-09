@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
     {
         public DiagnosticFixture(IMessageSink sink)
         {
-           DiagnosticSink = sink;
+            DiagnosticSink = sink;
         }
 
         public IMessageSink DiagnosticSink { get; }

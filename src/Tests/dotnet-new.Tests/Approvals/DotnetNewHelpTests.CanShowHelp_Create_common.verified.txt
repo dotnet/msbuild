@@ -1,5 +1,5 @@
 ﻿Description:
-  Instantiates a template with given short name. Same as 'dotnet new <template name>'.
+  Instantiates a template with given short name. An alias of 'dotnet new <template name>'.
 
 Usage:
   dotnet new create [<template-short-name> [<template-args>...]] [options]
