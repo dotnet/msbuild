@@ -4,6 +4,7 @@
 
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
@@ -57,7 +58,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string finalProjectName = Regex.Escape(Path.Combine(workingDir, $"{workingDirName}.{extension}"));
             Console.WriteLine($"Expected project location: {finalProjectName}");
 
-            List<string> args = new List<string>() { templateShortName };
+            List<string> args = new() { templateShortName };
             if (!string.IsNullOrWhiteSpace(language))
             {
                 args.Add("--language");
@@ -147,7 +148,7 @@ Restore succeeded\.",
         {
             string workingDir = CreateTemporaryFolder(folderName: $"{templateShortName}-{language?.Replace("#", "Sharp") ?? "null"}-{framework ?? "null"}");
 
-            List<string> args = new List<string>() { templateShortName, "--no-restore" };
+            List<string> args = new() { templateShortName, "--no-restore" };
             if (!string.IsNullOrWhiteSpace(language))
             {
                 args.Add("--language");
@@ -292,9 +293,9 @@ Restore succeeded\.",
 
             foreach (var template in templatesToTest)
             {
-                foreach (var langVersion in unsupportedLanguageVersions)
+                foreach (string langVersion in unsupportedLanguageVersions)
                 {
-                    foreach (var framework in template.Frameworks)
+                    foreach (string? framework in template.Frameworks)
                     {
                         yield return new object?[]
                         {
@@ -306,9 +307,9 @@ Restore succeeded\.",
                         };
                     }
                 }
-                foreach (var langVersion in supportedLanguageVersions)
+                foreach (string? langVersion in supportedLanguageVersions)
                 {
-                    foreach (var framework in template.Frameworks)
+                    foreach (string? framework in template.Frameworks)
                     {
                         yield return new object?[]
                         {
@@ -330,7 +331,7 @@ Restore succeeded\.",
         {
             string workingDir = CreateTemporaryFolder(folderName: $"{name}-{langVersion ?? "null"}-{framework ?? "null"}");
 
-            List<string> args = new List<string>() { name, "-o", "MyProject" };
+            List<string> args = new() { name, "-o", "MyProject" };
             if (!string.IsNullOrWhiteSpace(framework))
             {
                 args.Add("--framework");
@@ -350,7 +351,7 @@ Restore succeeded\.",
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            var buildResult = new DotnetBuildCommand(_log, "MyProject")
+            CommandResult buildResult = new DotnetBuildCommand(_log, "MyProject")
                 .WithWorkingDirectory(workingDir)
                 .Execute();
 
@@ -404,7 +405,7 @@ Restore succeeded\.",
         {
             string workingDir = CreateTemporaryFolder(folderName: $"{langVersion ?? "null"}");
 
-            List<string> args = new List<string>() { "console", "-o", "MyProject", "--use-program-main" };
+            List<string> args = new() { "console", "-o", "MyProject", "--use-program-main" };
             if (!string.IsNullOrEmpty(langVersion))
             {
                 args.Add("--langVersion");
@@ -419,7 +420,7 @@ Restore succeeded\.",
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            var buildResult = new DotnetBuildCommand(_log, "MyProject")
+            new DotnetBuildCommand(_log, "MyProject")
                 .WithWorkingDirectory(workingDir)
                 .Execute()
                 .Should().ExitWith(0).And.NotHaveStdErr();
@@ -446,7 +447,7 @@ class Program
         {
             string workingDir = CreateTemporaryFolder(folderName: $"{langVersion ?? "null"}");
 
-            List<string> args = new List<string>() { "console", "-o", "MyProject", "--use-program-main" };
+            List<string> args = new() { "console", "-o", "MyProject", "--use-program-main" };
             if (!string.IsNullOrEmpty(langVersion))
             {
                 args.Add("--langVersion");
@@ -461,7 +462,7 @@ class Program
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            var buildResult = new DotnetBuildCommand(_log, "MyProject")
+            new DotnetBuildCommand(_log, "MyProject")
                 .WithWorkingDirectory(workingDir)
                 .Execute()
                 .Should().ExitWith(0).And.NotHaveStdErr();
@@ -502,9 +503,9 @@ class Program
 
             foreach (var template in templatesToTest)
             {
-                foreach (var langVersion in unsupportedLanguageVersions)
+                foreach (string? langVersion in unsupportedLanguageVersions)
                 {
-                    foreach (var framework in template.Frameworks)
+                    foreach (string? framework in template.Frameworks)
                     {
                         yield return new object?[]
                         {
@@ -517,9 +518,9 @@ class Program
                         };
                     }
                 }
-                foreach (var langVersion in supportedLanguageVersions)
+                foreach (string? langVersion in supportedLanguageVersions)
                 {
-                    foreach (var framework in template.Frameworks)
+                    foreach (string? framework in template.Frameworks)
                     {
                         yield return new object?[]
                         {
@@ -542,7 +543,7 @@ class Program
         {
             string workingDir = CreateTemporaryFolder(folderName: $"{name}-{langVersion ?? "null"}-{framework ?? "null"}");
 
-            List<string> args = new List<string>() { name, "-o", "MyProject" };
+            List<string> args = new() { name, "-o", "MyProject" };
             if (!string.IsNullOrWhiteSpace(framework))
             {
                 args.Add("--framework");
@@ -562,7 +563,7 @@ class Program
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            var buildResult = new DotnetBuildCommand(_log, "MyProject")
+            CommandResult buildResult = new DotnetBuildCommand(_log, "MyProject")
                 .WithWorkingDirectory(workingDir)
                 .Execute();
 
@@ -606,9 +607,9 @@ class Program
 
             foreach (var template in templatesToTest)
             {
-                foreach (var langVersion in unsupportedLanguageVersions)
+                foreach (string langVersion in unsupportedLanguageVersions)
                 {
-                    foreach (var framework in template.Frameworks)
+                    foreach (string? framework in template.Frameworks)
                     {
                         yield return new object?[]
                         {
@@ -620,9 +621,9 @@ class Program
                         };
                     }
                 }
-                foreach (var langVersion in supportedLanguageVersions)
+                foreach (string? langVersion in supportedLanguageVersions)
                 {
-                    foreach (var framework in template.Frameworks)
+                    foreach (string? framework in template.Frameworks)
                     {
                         yield return new object?[]
                         {
@@ -644,7 +645,7 @@ class Program
         {
             string workingDir = CreateTemporaryFolder(folderName: $"{name}-{langVersion ?? "null"}-{framework ?? "null"}");
 
-            List<string> args = new List<string>() { name, "-o", "MyProject" };
+            List<string> args = new() { name, "-o", "MyProject" };
             if (!string.IsNullOrWhiteSpace(framework))
             {
                 args.Add("--framework");
@@ -664,7 +665,7 @@ class Program
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            var buildResult = new DotnetBuildCommand(_log, "MyProject")
+            CommandResult buildResult = new DotnetBuildCommand(_log, "MyProject")
                 .WithWorkingDirectory(workingDir)
                 .Execute();
 
@@ -707,16 +708,16 @@ class Program
 
             foreach (var template in templatesToTest)
             {
-                foreach (var langVersion in unsupportedLanguageVersions)
+                foreach (string? langVersion in unsupportedLanguageVersions)
                 {
-                    foreach (var framework in template.Frameworks)
+                    foreach (string? framework in template.Frameworks)
                     {
                         yield return new object?[] { template.Template, false, framework, langVersion, fileScopedNamespacesSupportedLanguages.Contains(langVersion) || langVersion == null && supportedFrameworks.Contains(framework) };
                     }
                 }
-                foreach (var langVersion in supportedLanguageVersions)
+                foreach (string? langVersion in supportedLanguageVersions)
                 {
-                    foreach (var framework in template.Frameworks)
+                    foreach (string? framework in template.Frameworks)
                     {
                         yield return new object?[] { template.Template, true, framework, langVersion, fileScopedNamespacesSupportedLanguages.Contains(langVersion) || langVersion == null && supportedFrameworks.Contains(framework) };
                     }
@@ -731,7 +732,7 @@ class Program
         {
             string workingDir = CreateTemporaryFolder(folderName: $"{name}-{langVersion ?? "null"}-{framework ?? "null"}");
 
-            List<string> args = new List<string>() { name, "-o", "MyProject" };
+            List<string> args = new() { name, "-o", "MyProject" };
             if (!string.IsNullOrWhiteSpace(framework))
             {
                 args.Add("--framework");
@@ -751,7 +752,7 @@ class Program
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            var buildResult = new DotnetBuildCommand(_log, "MyProject")
+            CommandResult buildResult = new DotnetBuildCommand(_log, "MyProject")
                 .WithWorkingDirectory(workingDir)
                 .Execute();
 
@@ -837,7 +838,7 @@ public class Class1
         public void SetPropertiesByDefault(string propertyName, string? propertyValue, string expectedTemplateName, string templateShortName, string? language, string? framework)
         {
             string workingDir = CreateTemporaryFolder(folderName: $"{propertyName}-{templateShortName}-{templateShortName.Replace("#", "Sharp") ?? "null"}-{framework ?? "null"}");
-            List<string> args = new List<string>() { templateShortName, "--no-restore" };
+            List<string> args = new() { templateShortName, "--no-restore" };
             if (!string.IsNullOrWhiteSpace(language))
             {
                 args.Add("--language");
@@ -903,7 +904,7 @@ public class Class1
         public void CanSetProperty(string propertyName, string? propertyValue, string argName, string argValue, string expectedTemplateName, string templateShortName, string? language, string? framework)
         {
             string workingDir = CreateTemporaryFolder(folderName: $"{propertyName}-{templateShortName}-{templateShortName.Replace("#", "Sharp") ?? "null"}-{framework ?? "null"}");
-            List<string> args = new List<string>() { templateShortName, "--no-restore" };
+            List<string> args = new() { templateShortName, "--no-restore" };
             if (!string.IsNullOrWhiteSpace(language))
             {
                 args.Add("--language");

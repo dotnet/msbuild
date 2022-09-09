@@ -9,12 +9,12 @@ using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
-    public partial class DotnetNewHelp : IClassFixture<SharedHomeDirectory>
+    public partial class DotnetNewHelpTests : IClassFixture<SharedHomeDirectory>
     {
         private readonly ITestOutputHelper _log;
         private readonly SharedHomeDirectory _fixture;
 
-        public DotnetNewHelp(SharedHomeDirectory fixture, ITestOutputHelper log) : base(log)
+        public DotnetNewHelpTests(SharedHomeDirectory fixture, ITestOutputHelper log) : base(log)
         {
             _log = log;
             _fixture = fixture;

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
@@ -10,12 +11,12 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     [UsesVerify]
     [Collection("Verify Tests")]
-    public partial class DotnetNewList : BaseIntegrationTest, IClassFixture<SharedHomeDirectory>
+    public partial class DotnetNewListTests : BaseIntegrationTest, IClassFixture<SharedHomeDirectory>
     {
         private readonly SharedHomeDirectory _sharedHome;
         private readonly ITestOutputHelper _log;
 
-        public DotnetNewList(SharedHomeDirectory sharedHome, ITestOutputHelper log) : base(log)
+        public DotnetNewListTests(SharedHomeDirectory sharedHome, ITestOutputHelper log) : base(log)
         {
             _sharedHome = sharedHome;
             _sharedHome.InstallPackage("Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0");
@@ -547,11 +548,11 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("c --list --columns-all", "--list c --columns-all")]
         public void CanFallbackToListOption(string command1, string command2)
         {
-            var commandResult1 = new DotnetNewCommand(_log, command1.Split())
+            CommandResult commandResult1 = new DotnetNewCommand(_log, command1.Split())
              .WithCustomHive(_sharedHome.HomeDirectory)
              .Execute();
 
-            var commandResult2 = new DotnetNewCommand(_log, command2.Split())
+            CommandResult commandResult2 = new DotnetNewCommand(_log, command2.Split())
                .WithCustomHive(_sharedHome.HomeDirectory)
                .Execute();
 
@@ -572,7 +573,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("foo --list --columns-all -other-param --framework net6.0 bar", "bar|--framework|net6.0|foo", "-other-param")]
         public void CannotShowListOnParseError(string command, string invalidArguments, string validArguments)
         {
-            var commandResult = new DotnetNewCommand(_log, command.Split())
+            CommandResult commandResult = new DotnetNewCommand(_log, command.Split())
              .WithCustomHive(_sharedHome.HomeDirectory)
              .Execute();
 

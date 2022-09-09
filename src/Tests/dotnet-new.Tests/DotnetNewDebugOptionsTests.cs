@@ -13,11 +13,11 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     [UsesVerify]
     [Collection("Verify Tests")]
-    public class DotnetNewDebugOptions : BaseIntegrationTest
+    public class DotnetNewDebugOptionsTests : BaseIntegrationTest
     {
         private readonly ITestOutputHelper _log;
 
-        public DotnetNewDebugOptions(ITestOutputHelper log) : base(log)
+        public DotnetNewDebugOptionsTests(ITestOutputHelper log) : base(log)
         {
             _log = log;
         }

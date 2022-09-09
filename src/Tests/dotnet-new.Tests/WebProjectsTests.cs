@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
@@ -10,12 +11,12 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     [UsesVerify]
     [Collection("Verify Tests")]
-    public class AllWebProjectsWork : BaseIntegrationTest, IClassFixture<WebProjectsFixture>
+    public class WebProjectsTests : BaseIntegrationTest, IClassFixture<WebProjectsFixture>
     {
         private readonly WebProjectsFixture _fixture;
         private readonly ITestOutputHelper _log;
 
-        public AllWebProjectsWork(WebProjectsFixture fixture, ITestOutputHelper log) : base(log)
+        public WebProjectsTests(WebProjectsFixture fixture, ITestOutputHelper log) : base(log)
         {
             _fixture = fixture;
             _log = log;
@@ -66,7 +67,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public Task CanShowHelp_WebAPI()
         {
-            var commandResult = new DotnetNewCommand(_log, "webapi", "-h")
+            CommandResult commandResult = new DotnetNewCommand(_log, "webapi", "-h")
                .WithCustomHive(_fixture.HomeDirectory)
                .WithWorkingDirectory(_fixture.BaseWorkingDirectory)
                .Execute();
@@ -83,7 +84,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public Task CanShowHelp_Mvc()
         {
-            var commandResult = new DotnetNewCommand(_log, "mvc", "-h")
+            CommandResult commandResult = new DotnetNewCommand(_log, "mvc", "-h")
                .WithCustomHive(_fixture.HomeDirectory)
                .WithWorkingDirectory(_fixture.BaseWorkingDirectory)
                .Execute();
@@ -103,7 +104,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("razor")]
         public Task CanShowHelp_Webapp(string templateName)
         {
-            var commandResult = new DotnetNewCommand(_log, templateName, "-h")
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName, "-h")
                .WithCustomHive(_fixture.HomeDirectory)
                .WithWorkingDirectory(_fixture.BaseWorkingDirectory)
                .Execute();
@@ -125,7 +126,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
     {
         public WebProjectsFixture(IMessageSink messageSink) : base(messageSink)
         {
-            BaseWorkingDirectory = Utilities.CreateTemporaryFolder(nameof(AllWebProjectsWork));
+            BaseWorkingDirectory = Utilities.CreateTemporaryFolder(nameof(WebProjectsTests));
             InstallPackage(TemplatePackagesPaths.MicrosoftDotNetWebProjectTemplates31Path, BaseWorkingDirectory);
             InstallPackage(TemplatePackagesPaths.MicrosoftDotNetWebProjectTemplates50Path, BaseWorkingDirectory);
         }

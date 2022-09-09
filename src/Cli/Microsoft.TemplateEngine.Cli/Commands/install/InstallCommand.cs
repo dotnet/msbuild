@@ -3,7 +3,9 @@
 //
 
 using System.CommandLine;
+using System.CommandLine.Invocation;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Edge.Settings;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -15,6 +17,17 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             : base(parentCommand, hostBuilder, "install")
         {
             parentCommand.AddNoLegacyUsageValidators(this);
+        }
+
+        protected override async Task<NewCommandStatus> ExecuteAsync(
+            InstallCommandArgs args,
+            IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager,
+            InvocationContext context)
+        {
+            NewCommandStatus status = await base.ExecuteAsync(args, environmentSettings, templatePackageManager, context).ConfigureAwait(false);
+            await CheckTemplatesWithSubCommandName(args, templatePackageManager, context.GetCancellationToken()).ConfigureAwait(false);
+            return status;
         }
     }
 }
