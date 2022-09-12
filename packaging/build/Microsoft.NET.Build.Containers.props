@@ -2,18 +2,18 @@
     <PropertyGroup>
          <!-- A flag representing this package existing in a project.  -->
         <SDKContainerSupportEnabled>true</SDKContainerSupportEnabled>
-        <taskFoldername>tasks</taskFoldername>
-        <taskFramework Condition="'$(MSBuildRuntimeType)' == 'Core'">net7.0</taskFramework>
-        <taskFramework Condition="'$(MSBuildRuntimeType)' == 'Full'">net472</taskFramework>
+        <ContainerTaskFolderName>tasks</ContainerTaskFolderName>
+        <ContainerTaskFramework Condition="'$(MSBuildRuntimeType)' == 'Core'">net7.0</ContainerTaskFramework>
+        <ContainerTaskFramework Condition="'$(MSBuildRuntimeType)' == 'Full'">net472</ContainerTaskFramework>
         <ContainerizeFolderName>containerize</ContainerizeFolderName>
         <!--The folder where the custom task will be present. It points to inside the nuget package. -->
-        <CustomTasksFolder>$(MSBuildThisFileDirectory)..\$(taskFoldername)\$(taskFramework)\</CustomTasksFolder>
+        <ContainerCustomTasksFolder>$(MSBuildThisFileDirectory)..\$(ContainerTaskFolderName)\$(ContainerTaskFramework)\</ContainerCustomTasksFolder>
         <ContainerizeFolder>$(MSBuildThisFileDirectory)..\$(ContainerizeFolderName)\</ContainerizeFolder>
         <!--Reference to the assembly which contains the MSBuild Task-->
-        <CustomTasksAssembly Condition="'$(CustomTasksAssembly)' == ''">$(CustomTasksFolder)$(MSBuildThisFileName).dll</CustomTasksAssembly>
+        <ContainerCustomTasksAssembly Condition="'$(ContainerCustomTasksAssembly)' == ''">$(ContainerCustomTasksFolder)$(MSBuildThisFileName).dll</ContainerCustomTasksAssembly>
     </PropertyGroup>
 
     <!--Register our custom task-->
-    <UsingTask TaskName="$(MSBuildThisFileName).Tasks.ParseContainerProperties" AssemblyFile="$(CustomTasksAssembly)"/>
-    <UsingTask TaskName="$(MSBuildThisFileName).Tasks.CreateNewImage" AssemblyFile="$(CustomTasksAssembly)"/>
+    <UsingTask TaskName="$(MSBuildThisFileName).Tasks.CreateNewImage" AssemblyFile="$(ContainerCustomTasksAssembly)"/>
+    <UsingTask TaskName="$(MSBuildThisFileName).Tasks.ParseContainerProperties" AssemblyFile="$(ContainerCustomTasksAssembly)"/>
 </Project>
