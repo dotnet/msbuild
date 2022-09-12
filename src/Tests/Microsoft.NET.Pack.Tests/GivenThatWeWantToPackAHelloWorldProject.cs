@@ -158,7 +158,7 @@ namespace Microsoft.NET.Pack.Tests
                 .Should()
                 .Pass()
                 .And
-                .HaveStdOutContaining("NETSDK1189");
+                .HaveStdOutContaining("NETSDK1190");
         }
 
 

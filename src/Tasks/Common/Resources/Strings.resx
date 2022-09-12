@@ -859,8 +859,12 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</value>
     <comment>Error code is NETSDK1188. 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</comment>
   </data>
-  <data name="PReleaseRequiresEnvVarOnSln" xml:space="preserve">
-    <value>NETSDK1189: To use '{0}' in solution projects, you must set the environment variable '{1}' (to true). This will increase the time to complete the operation.</value>
+  <data name="Prefer32BitIgnoredForNetCoreApp" xml:space="preserve">
+    <value>NETSDK1189: Prefer32Bit is not supported and has no effect for netcoreapp target.</value>
     <comment>{StrBegin="NETSDK1189: "}</comment>
+  </data>
+  <data name="PReleaseRequiresEnvVarOnSln" xml:space="preserve">
+    <value>NETSDK1190: To use '{0}' in solution projects, you must set the environment variable '{1}' (to true). This will increase the time to complete the operation.</value>
+    <comment>{StrBegin="NETSDK1190: "}</comment>
   </data>
 </root>
