@@ -1,9 +1,9 @@
 <Project>
     <PropertyGroup>
-        <taskForldername>tasks</taskForldername>
+        <taskFoldername>tasks</taskFoldername>
         <taskFramework>net7.0</taskFramework>
         <!--The folder where the custom task will be present. It points to inside the nuget package. -->
-        <CustomTasksFolder>$(MSBuildThisFileDirectory)..\$(taskForldername)\$(taskFramework)</CustomTasksFolder>
+        <CustomTasksFolder>$(MSBuildThisFileDirectory)..\$(taskFoldername)\$(taskFramework)</CustomTasksFolder>
         <!--Reference to the assembly which contains the MSBuild Task-->
         <CustomTasksAssembly Condition="'$(CustomTasksAssembly)' == ''">$(CustomTasksFolder)\$(MSBuildThisFileName).dll</CustomTasksAssembly>
     </PropertyGroup>

@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.Build.NoTargets/3.5.6">
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <IsPackable>true</IsPackable>
+        <NoWarn>NU5100;NU5128</NoWarn>
+        <VSCompatTargetFramework>net472</VSCompatTargetFramework>
+
+        <!-- MSBuild tasks shouldn't be referenced. This is by design. -->
+        <NoWarn>NU5100;NU5128</NoWarn>
+        <Authors>Microsoft</Authors>
+        <Company>Microsoft</Company>
+        <PackageId>Microsoft.NET.Build.Containers</PackageId>
+        <Description>Tasks and targets to natively publish .NET applications as containers.</Description>
+        <Copyright>&#169; Microsoft Corporation. All rights reserved.</Copyright>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/dotnet/sdk-container-builds</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/dotnet/sdk-container-builds</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>containers;docker;Microsoft.NET.Build.Containers</PackageTags>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Microsoft.NET.Build.Containers/Microsoft.NET.Build.Containers.csproj" 
+                          SetTargetFramework="TargetFramework=$(TargetFramework)" 
+                          OutputItemType="ContainerLibraryOutput"/>
+
+        <ProjectReference Include="../Microsoft.NET.Build.Containers/Microsoft.NET.Build.Containers.csproj" 
+                          SetTargetFramework="TargetFramework=$(VSCompatTargetFramework)" 
+                          OutputItemType="ContainerLibraryOutputNet472"/>
+
+        <ProjectReference Include="../containerize/containerize.csproj" PrivateAssets="all" ReferenceOutputAssembly="true" />
+        <PackageReference Include="System.CommandLine" PrivateAssets="all" IncludeAssets="runtime"/>
+    </ItemGroup>
+
+    <Target Name="AddItemsForPackaging" AfterTargets="Build">
+        <ItemGroup>
+            <!-- root folder -->
+            <Content Include="README.md" Pack="true" PackagePath="" />
+            
+            <!-- containerize folder -->
+            <Content Include="$(OutDir)containerize.dll" Pack="true" PackagePath="containerize/" />
+            <Content Include="$(OutDir)containerize.runtimeconfig.json" Pack="true" PackagePath="containerize/" />
+            <Content Include="$(OutDir)System.CommandLine.dll" Pack="true" PackagePath="containerize/" />
+            <Content Include="@(ContainerLibraryOutput)" Pack="true" PackagePath="containerize/" />
+
+            <!-- tasks folder -->
+            <Content Include="@(ContainerLibraryOutput)" Pack="true" PackagePath="tasks/$(TargetFramework)/" />
+            <Content Include="@(ContainerLibraryOutputNet472)" Pack="true" PackagePath="tasks/$(VSCompatTargetFramework)/" />
+            <Content Include="../Microsoft.NET.Build.Containers/bin/$(Configuration)/$(TargetFramework)/Microsoft.NET.Build.Containers.deps.json" Pack="true" PackagePath="tasks/$(TargetFramework)" />
+            <Content Include="../Microsoft.NET.Build.Containers/bin/$(Configuration)/$(VSCompatTargetFramework)/Microsoft.NET.Build.Containers.deps.json" Pack="true" PackagePath="tasks/$(VSCompatTargetFramework)" />
+
+            <!-- build folder -->
+            <Content Include="build/**" Pack="true" PackagePath="build/" />
+        </ItemGroup>
+    </Target>
+
+    <!-- Hacky workaround for the fact that we don't publish the package yet. -->
+    <Target Name="CopyNupkgToCustomFolder" AfterTargets="Pack">
+        <Copy SourceFiles="$(OutDir)../Microsoft.NET.Build.Containers.$(Version).nupkg"
+            DestinationFiles="../Test.Microsoft.NET.Build.Containers.Filesystem/package/Microsoft.NET.Build.Containers.$(Version).nupkg" />
+    </Target>
+</Project>

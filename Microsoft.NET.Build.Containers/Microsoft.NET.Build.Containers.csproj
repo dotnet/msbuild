@@ -1,34 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <TargetFrameworks>net7.0;net472</TargetFrameworks>
+    <ImplicitUsings Condition="'$(TargetFramework)' != 'net472'">enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-
-    <IsPackable>true</IsPackable>
+    <LangVersion>preview</LangVersion>
 
     <TargetsForTfmSpecificBuildOutput>
       $(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage
     </TargetsForTfmSpecificBuildOutput>
 
-    <BuildOutputTargetFolder>tasks</BuildOutputTargetFolder>
-
     <!-- Tell the SDK to generate a deps.json file -->
     <GenerateDependencyFile>true</GenerateDependencyFile>
 
-    <!-- MSBuild tasks shouldn't be referenced. This is by design. -->
-    <NoWarn>NU5100;NU5128</NoWarn>
-    <Authors>Microsoft</Authors>
-    <Company>Microsoft</Company>
-    <Description>Tasks and targets to natively publish .NET applications as containers.</Description>
-    <Copyright>&#169; Microsoft Corporation. All rights reserved.</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/dotnet/sdk-container-builds</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/dotnet/sdk-container-builds</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageTags>containers;docker;Microsoft.NET.Build.Containers</PackageTags>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <!-- Allow the packaging project to use the name `Microsoft.NET.Build.Containers` for the nuget package -->
+    <Packageid>.</Packageid>
 
     <!-- While in prerelease, ship the symbols to everyone all the time. -->
     <DebugType>embedded</DebugType>
@@ -38,10 +24,9 @@
     <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="all" ExcludeAssets="runtime" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="build\Microsoft.NET.Build.Containers.props" Pack="true" PackagePath="build\" />
-    <Content Include="build\Microsoft.NET.Build.Containers.targets" Pack="true" PackagePath="build\" />
-    <Content Include="README.md" Pack="true" PackagePath="" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
+    <Compile Remove="*.*" />
+    <!-- A separate PR will add the required CreateNewImageToolTask file. -->
   </ItemGroup>
 
   <!-- This target adds all of our PackageReference and ProjectReference's runtime assets to our package output. -->
@@ -58,8 +43,4 @@
     </ItemGroup>
   </Target>
 
-  <!-- Hacky workaround for the fact that we don't publish the package yet. -->
-  <Target Name="CopyNupkgToCustomFolder" AfterTargets="Pack">
-    <Copy SourceFiles="$(OutDir)..\Microsoft.NET.Build.Containers.$(Version).nupkg" DestinationFiles="..\Test.Microsoft.NET.Build.Containers.Filesystem\package\Microsoft.NET.Build.Containers.$(Version).nupkg" />
-  </Target>
 </Project>
