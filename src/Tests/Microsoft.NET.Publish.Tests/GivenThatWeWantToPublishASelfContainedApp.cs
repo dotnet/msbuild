@@ -125,7 +125,8 @@ namespace Microsoft.NET.Publish.Tests
                 $"/p:RuntimeIdentifier={EnvironmentInfo.GetCompatibleRid(ToolsetInfo.CurrentTargetFramework)}"
             };
 
-            new RestoreCommand(testAsset, "main").Execute(args);
+            new RestoreCommand(Log, Path.Combine(testAsset.Path, "main", "main.csproj"))
+                .Execute(args);
 
             new PublishCommand(Log, Path.Combine(testAsset.Path, "main", "main.csproj"))
                 .Execute(args)
