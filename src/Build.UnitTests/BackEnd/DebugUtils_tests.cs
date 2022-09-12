@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 ExceptionHandling.DumpExceptionToFile(new Exception("hello world"));
-                exceptionFiles = Directory.GetFiles(Path.GetTempPath(), "MSBuild_*failure.txt");
+                exceptionFiles = Directory.GetFiles(FileUtilities.TempFileDirectory, "MSBuild_*failure.txt");
             }
             finally
             {

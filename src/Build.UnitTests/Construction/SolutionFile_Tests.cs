@@ -203,7 +203,7 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         public void ParseEtpProject()
         {
-            string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");
+            string proj1Path = Path.Combine(FileUtilities.TempFileDirectory, "someproj.etp");
             try
             {
                 // Create the first .etp project file
@@ -254,8 +254,8 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         public void CanBeMSBuildFile()
         {
-            string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");
-            string proj2Path = Path.Combine(Path.GetTempPath(), "someproja.proj");
+            string proj1Path = Path.Combine(FileUtilities.TempFileDirectory, "someproj.etp");
+            string proj2Path = Path.Combine(FileUtilities.TempFileDirectory, "someproja.proj");
             try
             {
                 // Create the first .etp project file
@@ -379,8 +379,8 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         public void ParseNestedEtpProjectSingleLevel()
         {
-            string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");
-            string proj2Path = Path.Combine(Path.GetTempPath(), "someproj2.etp");
+            string proj1Path = Path.Combine(FileUtilities.TempFileDirectory, "someproj.etp");
+            string proj2Path = Path.Combine(FileUtilities.TempFileDirectory, "someproj2.etp");
             try
             {
                 // Create the first .etp project file
@@ -575,9 +575,9 @@ namespace Microsoft.Build.UnitTests.Construction
         [Trait("Category", "netcore-linux-failing")]
         public void ParseNestedEtpProjectMultipleLevel()
         {
-            string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");
-            string proj2Path = Path.Combine(Path.GetTempPath(), "someproj2.etp");
-            string proj3Path = Path.Combine(Path.GetTempPath(), "ETPProjUpgradeTest", "someproj3.etp");
+            string proj1Path = Path.Combine(FileUtilities.TempFileDirectory, "someproj.etp");
+            string proj2Path = Path.Combine(FileUtilities.TempFileDirectory, "someproj2.etp");
+            string proj3Path = Path.Combine(FileUtilities.TempFileDirectory, "ETPProjUpgradeTest", "someproj3.etp");
             try
             {
                 // Create the first .etp project file
@@ -628,8 +628,9 @@ namespace Microsoft.Build.UnitTests.Construction
                         </References>
                     </GENERAL>
                 </EFPROJECT>";
-                //Create the directory for the third project
-                Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), "ETPProjUpgradeTest"));
+
+                // Create the directory for the third project
+                Directory.CreateDirectory(Path.Combine(FileUtilities.TempFileDirectory, "ETPProjUpgradeTest"));
                 File.WriteAllText(proj3Path, etpProjContent);
 
                 // Create the SolutionFile object
@@ -664,7 +665,7 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         public void MalformedEtpProjFile()
         {
-            string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");
+            string proj1Path = Path.Combine(FileUtilities.TempFileDirectory, "someproj.etp");
             try
             {
                 // Create the .etp project file

@@ -216,7 +216,11 @@ namespace Microsoft.Build.BackEnd
                     PipeDirection.InOut,
                     1, // Only allow one connection at a time.
                     PipeTransmissionMode.Byte,
-                    PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+                    PipeOptions.Asynchronous | PipeOptions.WriteThrough
+#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+                    | PipeOptions.CurrentUserOnly
+#endif
+                    ,
                     PipeBufferSize, // Default input buffer
                     PipeBufferSize,  // Default output buffer
                     security,
@@ -232,7 +236,11 @@ namespace Microsoft.Build.BackEnd
                     PipeDirection.InOut,
                     1, // Only allow one connection at a time.
                     PipeTransmissionMode.Byte,
-                    PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+                    PipeOptions.Asynchronous | PipeOptions.WriteThrough
+#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+                    | PipeOptions.CurrentUserOnly
+#endif
+                    ,
                     PipeBufferSize, // Default input buffer
                     PipeBufferSize  // Default output buffer
                 );
