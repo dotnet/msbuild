@@ -86,11 +86,14 @@ namespace Microsoft.Build.UnitTests
                 string tempPath = Path.GetTempPath();
                 Assert.StartsWith(newTempPath, tempPath);
 
+                FileUtilities.ClearTempFileDirectory();
+
                 // Now run the Exec task on a simple command.
                 Exec exec = PrepareExec("echo Hello World!");
                 exec.Execute().ShouldBeFalse();
 
                 ChangeWaves.ResetStateForTests();
+                FileUtilities.ClearTempFileDirectory();
             }
         }
 
@@ -387,7 +390,7 @@ namespace Microsoft.Build.UnitTests
         public void TempPathContainsAmpersand3()
         {
             string directoryWithAmpersand = "nospace& space";
-            string newTmp = Path.Combine(Path.GetTempPath(), directoryWithAmpersand);
+            string newTmp = Path.Combine(FileUtilities.TempFileDirectory, directoryWithAmpersand);
             string oldTmp = Environment.GetEnvironmentVariable("TMP");
 
             try
@@ -1041,6 +1044,8 @@ echo line 3"" />
                 string tempPath = Path.GetTempPath();
                 Assert.StartsWith(newTempPath, tempPath);
 
+                FileUtilities.ClearTempFileDirectory();
+
                 using (var buildManager = new BuildManager())
                 {
                     MockLogger logger = new MockLogger(_output, profileEvaluation: false, printEventsToStdout: false);
@@ -1073,6 +1078,7 @@ echo line 3"" />
                     result.OverallResult.ShouldBe(BuildResultCode.Failure);
                 }
                 ChangeWaves.ResetStateForTests();
+                FileUtilities.ClearTempFileDirectory();
             }
         }
     }
