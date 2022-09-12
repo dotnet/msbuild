@@ -28,11 +28,18 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_packageValidationBaselinePath Condition="'$(DisablePackageBaselineValidation)' != 'true'">$(PackageValidationBaselinePath)</_packageValidationBaselinePath>
     </PropertyGroup>
 
+    <ItemGroup>
+      <_PackageTargetPath Include="@(NuGetPackOutput->WithMetadataValue('Extension', '.nupkg'))"
+                          Condition="!$([System.String]::new('%(Identity)').EndsWith('.symbols.nupkg'))" />
+    </ItemGroup>
+
     <!-- PackageTargetPath isn't exposed by NuGet: https://github.com/NuGet/Home/issues/6671. -->
     <Microsoft.DotNet.ApiCompat.Task.ValidatePackageTask
-      PackageTargetPath="$([MSBuild]::ValueOrDefault('$(PackageTargetPath)', '$([MSBuild]::NormalizePath('$(PackageOutputPath)', '$(PackageId).$(PackageVersion).nupkg'))'))"
+      PackageTargetPath="@(_PackageTargetPath)"
       RuntimeGraph="$(RuntimeIdentifierGraphPath)"
       NoWarn="$(NoWarn)"
+      ExcludeAttributesFiles="@(ApiCompatExcludeAttributesFile)"
+      EnableRuleCannotChangeParameterName="@(ApiCompatEnableRuleCannotChangeParameterName)"
       RunApiCompat="$(RunApiCompat)"
       EnableStrictModeForCompatibleTfms="$([MSBuild]::ValueOrDefault('$(EnableStrictModeForCompatibleTfms)', 'true'))"
       EnableStrictModeForCompatibleFrameworksInPackage="$(EnableStrictModeForCompatibleFrameworksInPackage)"
@@ -43,14 +50,15 @@ Copyright (c) .NET Foundation. All rights reserved.
       RoslynAssembliesPath="$(RoslynAssembliesPath)"
       PackageAssemblyReferences="@(PackageValidationReferencePath)" />
 
-      <Touch Files="$(ApiCompatValidatePackageSemaphoreFile)" AlwaysCreate="true" />
+    <Touch Files="$(ApiCompatValidatePackageSemaphoreFile)" AlwaysCreate="true" />
   </Target>
 
-  <Target Name="_GetReferencePathForPackageValidation"
-          DependsOnTargets="ResolveReferences"
-          Returns="@(_ReferencePathWithTargetFramework)">
+  <Target Name="GetReferencesForApiCompatValidatePackage"
+          DependsOnTargets="FindReferenceAssembliesForReferences"
+          Returns="@(ApiCompatAssemblyReferencesWithTargetFramework)">
     <ItemGroup>
-      <_ReferencePathWithTargetFramework Include="$(TargetFramework)" ReferencePath="@(ReferencePath, ',')" />
+      <ApiCompatAssemblyReferencesWithTargetFramework Include="$(TargetFramework)"
+                                                      ReferencePath="@(ReferencePathWithRefAssemblies, ',')" />
     </ItemGroup>
   </Target>
 
@@ -59,7 +67,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_GetTargetFrameworksOutput"
           Condition="'$(RunPackageValidationWithoutReferences)' != 'true'">
     <MSBuild Projects="$(MSBuildProjectFullPath)"
-             Targets="_GetReferencePathForPackageValidation"
+             Targets="GetReferencesForApiCompatValidatePackage"
              Properties="TargetFramework=%(_TargetFrameworks.Identity);
                          BuildProjectReferences=false">
       <Output ItemName="PackageValidationReferencePath" TaskParameter="TargetOutputs" />

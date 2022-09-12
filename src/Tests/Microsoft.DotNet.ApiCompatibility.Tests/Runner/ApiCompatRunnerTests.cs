@@ -20,9 +20,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner.Tests
             Mock<IApiComparer> apiComparerMock = new();
             apiComparerMock
                 .Setup(y => y.GetDifferences(It.IsAny<ElementContainer<IAssemblySymbol>>(), It.IsAny<IReadOnlyList<ElementContainer<IAssemblySymbol>>>()))
-                .Returns(new (MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)[]
+                .Returns(new CompatDifference[]
                 {
-                    new ( left, right, new CompatDifference[] { new CompatDifference("CP0001", "Invalid", DifferenceType.Removed, "X01") } )
+                    new CompatDifference(left, right, "CP0001", "Invalid", DifferenceType.Removed, "X01")
                 });
             Mock<IApiComparerFactory> apiComparerFactoryMock = new();
             apiComparerFactoryMock
@@ -35,17 +35,24 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner.Tests
                 .Setup(m => m.IsErrorSuppressed(It.IsAny<Suppression>()))
                 .Returns(false);
 
-            // Mock the assembly symbol loader factory to return a default assembly symbol loader
+            // Mock the assembly symbol loader factory to return a default assembly symbol loader.
+            Mock<IAssemblySymbolLoader> assemblySymbolLoaderMock = new();
+            assemblySymbolLoaderMock
+                .Setup(y => y.LoadAssemblies(It.IsAny<string[]>()))
+                .Returns(new IAssemblySymbol[]
+                {
+                    null
+                });
+
             Mock<IAssemblySymbolLoaderFactory> assemblyLoaderFactoryMock = new();
             assemblyLoaderFactoryMock
                 .Setup(m => m.Create(It.IsAny<bool>()))
-                .Returns(Mock.Of<IAssemblySymbolLoader>());
+                .Returns(assemblySymbolLoaderMock.Object);
 
             return new(Mock.Of<ICompatibilityLogger>(),
                 suppressionEngineMock.Object,
                 apiComparerFactoryMock.Object,
-                assemblyLoaderFactoryMock.Object,
-                Mock.Of<IMetadataStreamProvider>());
+                assemblyLoaderFactoryMock.Object);
         }
 
         [Fact]
@@ -57,10 +64,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner.Tests
             MetadataInformation right1 = new("A.dll", @"lib\netstandard2.0\A.dll");
             MetadataInformation right2 = new("A.dll", @"lib\net462\A.dll");
 
-            apiCompatRunner.EnqueueWorkItem(new ApiCompatRunnerWorkItem(left, new ApiCompatRunnerOptions(), right1, right2));
+            apiCompatRunner.EnqueueWorkItem(new ApiCompatRunnerWorkItem(left, new ApiCompatRunnerOptions(), right1));
+            apiCompatRunner.EnqueueWorkItem(new ApiCompatRunnerWorkItem(left, new ApiCompatRunnerOptions(), right2));
 
             Assert.Single(apiCompatRunner.WorkItems);
-            Assert.Equal(2, apiCompatRunner.WorkItems.First().Rights.Count);
+            Assert.Equal(2, apiCompatRunner.WorkItems.First().Right.Count);
         }
 
         [Fact]
@@ -71,10 +79,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner.Tests
             MetadataInformation left = new("A.dll", @"lib\netstandard2.0\A.dll");
             MetadataInformation right = new("A.dll", @"lib\net462\A.dll");
 
-            apiCompatRunner.EnqueueWorkItem(new ApiCompatRunnerWorkItem(left, new ApiCompatRunnerOptions(), right, right));
+            apiCompatRunner.EnqueueWorkItem(new ApiCompatRunnerWorkItem(left, new ApiCompatRunnerOptions(), right));
+            apiCompatRunner.EnqueueWorkItem(new ApiCompatRunnerWorkItem(left, new ApiCompatRunnerOptions(), right));
 
             Assert.Single(apiCompatRunner.WorkItems);
-            Assert.Single(apiCompatRunner.WorkItems.First().Rights);
+            Assert.Single(apiCompatRunner.WorkItems.First().Right);
         }
 
         [Fact]

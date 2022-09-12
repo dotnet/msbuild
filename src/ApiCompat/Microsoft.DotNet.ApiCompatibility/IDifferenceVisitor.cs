@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// A list of <see cref="DiagnosticBag{CompatDifference}"/>.
         /// One per element compared in the right hand side.
         /// </summary>
-        IReadOnlyList<IReadOnlyCollection<CompatDifference>> DiagnosticCollections { get; }
+        IEnumerable<CompatDifference> CompatDifferences { get; }
 
         /// <summary>
         /// Visits the tree for the given <see cref="ElementMapper{T}"/>.

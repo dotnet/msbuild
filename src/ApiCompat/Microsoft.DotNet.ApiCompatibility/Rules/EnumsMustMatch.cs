@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             context.RegisterOnTypeSymbolAction(RunOnTypeSymbol);
         }
 
-        private void RunOnTypeSymbol(ITypeSymbol? left, ITypeSymbol? right, string leftName, string rightName, IList<CompatDifference> differences)
+        private void RunOnTypeSymbol(ITypeSymbol? left, ITypeSymbol? right, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences)
         {
             // Ensure that this rule only runs on enums.
             if (!IsEnum(left) || !IsEnum(right))
@@ -41,40 +41,49 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 return;
             }
 
-            // Check that the underlying types are equal.
-            if (_settings.SymbolComparer.Equals(leftType, rightType))
+            // Check that the underlying types are equal and if not, emit a diagnostic.
+            if (!_settings.SymbolComparer.Equals(leftType, rightType))
             {
-                // If so, compare their fields.
-                // Build a map of the enum's fields, keyed by the field names.
-                Dictionary<string, IFieldSymbol> leftMembers = left.GetMembers()
-                    .Where(a => a.Kind == SymbolKind.Field)
-                    .Select(a => (IFieldSymbol)a)
-                    .ToDictionary(a => a.Name);
-                Dictionary<string, IFieldSymbol> rightMembers = right.GetMembers()
-                    .Where(a => a.Kind == SymbolKind.Field)
-                    .Select(a => (IFieldSymbol)a)
-                    .ToDictionary(a => a.Name);
-
-                // For each field that is present in the left and right, check that their constant values match.
-                // Otherwise, emit a diagnostic.
-                foreach (KeyValuePair<string, IFieldSymbol> lEntry in leftMembers)
-                {
-                    if (!rightMembers.TryGetValue(lEntry.Key, out IFieldSymbol? rField))
-                    {
-                        continue;
-                    }
-                    if (lEntry.Value.ConstantValue is not object lval || rField.ConstantValue is not object rval || !lval.Equals(rval))
-                    {
-                        string msg = string.Format(Resources.EnumValuesMustMatch, left.Name, lEntry.Key, lEntry.Value.ConstantValue, rField.ConstantValue);
-                        differences.Add(new CompatDifference(DiagnosticIds.EnumValuesMustMatch, msg, DifferenceType.Changed, rField));
-                    }
-                }
+                differences.Add(new CompatDifference(
+                    leftMetadata,
+                    rightMetadata,
+                    DiagnosticIds.EnumTypesMustMatch,
+                    string.Format(Resources.EnumTypesMustMatch, left.Name, leftType, rightType),
+                    DifferenceType.Changed,
+                    right));
+                return;
             }
-            else
+
+            // If so, compare their fields.
+            // Build a map of the enum's fields, keyed by the field names.
+            Dictionary<string, IFieldSymbol> leftMembers = left.GetMembers()
+                .Where(a => a.Kind == SymbolKind.Field)
+                .Select(a => (IFieldSymbol)a)
+                .ToDictionary(a => a.Name);
+            Dictionary<string, IFieldSymbol> rightMembers = right.GetMembers()
+                .Where(a => a.Kind == SymbolKind.Field)
+                .Select(a => (IFieldSymbol)a)
+                .ToDictionary(a => a.Name);
+
+            // For each field that is present in the left and right, check that their constant values match.
+            // Otherwise, emit a diagnostic.
+            foreach (KeyValuePair<string, IFieldSymbol> lEntry in leftMembers)
             {
-                // Otherwise, emit a diagnostic.
-                string msg = string.Format(Resources.EnumTypesMustMatch, left.Name, leftType, rightType);
-                differences.Add(new CompatDifference(DiagnosticIds.EnumTypesMustMatch, msg, DifferenceType.Changed, right));
+                if (!rightMembers.TryGetValue(lEntry.Key, out IFieldSymbol? rField))
+                {
+                    continue;
+                }
+
+                if (lEntry.Value.ConstantValue is not object lval || rField.ConstantValue is not object rval || !lval.Equals(rval))
+                {
+                    differences.Add(new CompatDifference(
+                        leftMetadata,
+                        rightMetadata,
+                        DiagnosticIds.EnumValuesMustMatch,
+                        string.Format(Resources.EnumValuesMustMatch, left.Name, lEntry.Key, lEntry.Value.ConstantValue, rField.ConstantValue),
+                        DifferenceType.Changed,
+                        rField));
+                }
             }
         }
 

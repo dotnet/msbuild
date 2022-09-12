@@ -7,14 +7,14 @@
         <target state="translated">Executando {0} item(ns) de trabalho...</target>
         <note />
       </trans-unit>
-      <trans-unit id="ApiCompatibilityFooter">
-        <source>Performed api validation on '{0}' ({2}) and '{1}' ({3}).</source>
-        <target state="translated">Validação de API realizada em '{0}' ({2}) e ​​'{1}' ({3}).</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ApiCompatibilityHeader">
         <source>API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</source>
         <target state="translated">Erros de compatibilidade de API entre '{0}' ({2}) e ​​'{1}' ({3}):</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyCultureDoesNotMatch">
+        <source>{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</source>
+        <target state="new">{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyLoadError">
@@ -42,17 +42,12 @@
         <target state="translated">O diretório de pesquisa de assembly fornecido '{0}' não existe.</target>
         <note />
       </trans-unit>
-      <trans-unit id="AssembyCultureDoesNotMatch">
-        <source>{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</source>
-        <target state="translated">{2} cultura de assembly '{0}' não corresponde à {3} cultura de assembly '{1}'.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AssembyVersionDoesNotMatch">
+      <trans-unit id="AssemblyVersionDoesNotMatch">
         <source>{3} assembly version '{1}' should be equal to {2} version '{0}'.</source>
-        <target state="translated">{3} versão de assembly '{1}' deve ser igual à {2} versão '{0}'.</target>
+        <target state="new">{3} assembly version '{1}' should be equal to {2} version '{0}'.</target>
         <note />
       </trans-unit>
-      <trans-unit id="AssembyVersionIsNotCompatible">
+      <trans-unit id="AssemblyVersionIsNotCompatible">
         <source>{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</source>
         <target state="translated">{2} versão de assembly '{0}' deve ser igual ou maior que {3} versão '{1}'.</target>
         <note />
@@ -62,14 +57,39 @@
         <target state="translated">Não é possível adicionar o membro abstrato '{0}' ao {1} porque ele não existe no {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotAddAttribute">
+        <source>Cannot add attribute '{0}' to '{1}'.</source>
+        <target state="new">Cannot add attribute '{0}' to '{1}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotAddMemberToInterface">
         <source>Cannot add interface member '{0}' to {1} because it does not exist on {2}</source>
         <target state="translated">Não é possível adicionar o membro de interface '{0}' a {1} porque ele não existe em {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotAddSealedToInterfaceMember">
+        <source>Cannot add sealed keyword to default interface member '{0}'.</source>
+        <target state="new">Cannot add sealed keyword to default interface member '{0}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotAddVirtualToMember">
         <source>Cannot add virtual keyword to member '{0}'.</source>
         <target state="translated">Não é possível adicionar palavra-chave virtual ao membro '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotChangeAttribute">
+        <source>Cannot change arguments of attribute '{0}' on '{1}'.</source>
+        <target state="new">Cannot change arguments of attribute '{0}' on '{1}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotChangeParameterName">
+        <source>Parameter name on member '{0}' changed from '{1}' to '{2}'.</source>
+        <target state="new">Parameter name on member '{0}' changed from '{1}' to '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotRemoveAttribute">
+        <source>Cannot remove attribute '{0}' from '{1}'.</source>
+        <target state="new">Cannot remove attribute '{0}' from '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
@@ -167,16 +187,6 @@
         <target state="translated">A posição do fluxo é maior do que seu comprimento, portanto, não há conteúdo disponível para leitura.</target>
         <note />
       </trans-unit>
-      <trans-unit id="TypeExistsOnLeft">
-        <source>Type '{0}' exists on {1} but not on {2}</source>
-        <target state="translated">O tipo '{0}' existe em {1} mas não em {2}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="TypeExistsOnRight">
-        <source>Type '{0}' exists on {2} but not on {1}</source>
-        <target state="translated">O tipo '{0}' existe em {2} mas não em {1}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="TypeIsActuallySealed">
         <source>Type '{0}' has the sealed modifier on {1} but not on {2}</source>
         <target state="translated">O tipo '{0}' tem o modificador selado em {1}, mas não em {2}</target>
@@ -185,6 +195,11 @@
       <trans-unit id="TypeIsEffectivelySealed">
         <source>Type '{0}' is sealed because it has no visible constructor on {1} but it does on {2}</source>
         <target state="translated">O tipo '{0}' é selado porque não tem um construtor visível no {1} mas sim em {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TypeMissingOnSide">
+        <source>Type '{0}' exists on {1} but not on {2}</source>
+        <target state="new">Type '{0}' exists on {1} but not on {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="VisitorRightCountShouldMatchMappersSetSize">

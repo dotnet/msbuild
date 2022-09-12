@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\Microsoft.DotNet.ApiCompatibility.Tests\TestLogger.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="..\..\ApiCompat\Microsoft.DotNet.PackageValidation\Resources.resx" GenerateSource="true" />
   </ItemGroup>
 

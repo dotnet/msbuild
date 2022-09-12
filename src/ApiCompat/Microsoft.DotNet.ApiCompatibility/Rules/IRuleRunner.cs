@@ -26,6 +26,6 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         /// (<see cref="ElementMapper{T}.Left"/>, <see cref="ElementMapper{T}.Right"/>).
         /// One list of <see cref="CompatDifference"/> per the number of right elements that the <see cref="ElementMapper{T}"/> contains.
         /// </returns>
-        IReadOnlyList<IEnumerable<CompatDifference>> Run<T>(ElementMapper<T> mapper);
+        IEnumerable<CompatDifference> Run<T>(ElementMapper<T> mapper);
     }
 }
