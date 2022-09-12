@@ -56,12 +56,12 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             ReleaseVersion currentSdkReleaseVersion = new(currentSdkVersion ?? Product.Version);
             _currentSdkFeatureBand = new SdkFeatureBand(currentSdkReleaseVersion);
-            
+
             _includePreviews = result.ValueForOption<bool>(WorkloadListCommandParser.IncludePreviewsOption);
             _tempDirPath = tempDirPath ??
                            (string.IsNullOrWhiteSpace(
                                result.ValueForOption<string>(WorkloadListCommandParser.TempDirOption))
-                               ? Path.GetTempPath()
+                               ? PathUtilities.CreateTempSubdirectory()
                                : result.ValueForOption<string>(WorkloadListCommandParser.TempDirOption));
             _targetSdkVersion = result.ValueForOption<string>(WorkloadListCommandParser.VersionOption);
             _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
@@ -110,7 +110,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                 _reporter.WriteLine("==workloadListJsonOutputStart==");
                 _reporter.WriteLine(
                     JsonSerializer.Serialize(listOutput,
-                        new JsonSerializerOptions {PropertyNamingPolicy = JsonNamingPolicy.CamelCase}));
+                        new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
                 _reporter.WriteLine("==workloadListJsonOutputEnd==");
             }
             else

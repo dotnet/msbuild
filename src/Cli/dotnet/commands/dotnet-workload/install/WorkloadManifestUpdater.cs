@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             var sdkVersion = Product.Version;
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, sdkVersion, userProfileDir);
             var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetPath, sdkVersion, userProfileDir);
-            var tempPackagesDir = new DirectoryPath(Path.Combine(Path.GetTempPath(), "dotnet-sdk-advertising-temp"));
+            var tempPackagesDir = new DirectoryPath(PathUtilities.CreateTempSubdirectory());
             var nugetPackageDownloader = new NuGetPackageDownloader(tempPackagesDir,
                                           filePermissionSetter: null,
                                           new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, new NullLogger()),
@@ -447,7 +447,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 else
                 {
                     throw new ArgumentException(string.Format(LocalizableStrings.RollbackDefinitionFileDoesNotExist, rollbackDefinitionFilePath));
-                }           
+                }
             }
             return JsonSerializer.Deserialize<IDictionary<string, string>>(fileContent)
                 .Select(manifest => (new ManifestId(manifest.Key), new ManifestVersion(manifest.Value)));
