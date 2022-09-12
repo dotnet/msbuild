@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -30,9 +30,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
             string? noWarn = null,
             bool baselineAllErrors = false)
         {
-            _validationSuppressions = ParseSuppressionFile(suppressionFile);
-            _noWarn = string.IsNullOrEmpty(noWarn) ? new HashSet<string>() : new HashSet<string>(noWarn!.Split(';'));
             BaselineAllErrors = baselineAllErrors;
+            _noWarn = string.IsNullOrEmpty(noWarn) ? new HashSet<string>() : new HashSet<string>(noWarn!.Split(';'));
+            _validationSuppressions = ParseSuppressionFile(suppressionFile);
         }
 
         /// <inheritdoc/>
@@ -122,12 +122,19 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
         }
 
         /// <inheritdoc/>
-        public bool WriteSuppressionsToFile(string supressionFile)
+        public bool WriteSuppressionsToFile(string suppressionFile)
         {
             if (_validationSuppressions.Count == 0)
                 return false;
 
-            using (Stream writer = GetWritableStream(supressionFile))
+            Suppression[] orderedSuppressions = _validationSuppressions
+                .OrderBy(sup => sup.DiagnosticId)
+                .ThenBy(sup => sup.Left)
+                .ThenBy(sup => sup.Right)
+                .ThenBy(sup => sup.Target)
+                .ToArray();
+
+            using (Stream writer = GetWritableStream(suppressionFile))
             {
                 _readerWriterLock.EnterReadLock();
                 try
@@ -137,7 +144,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
                         Formatting = Formatting.Indented,
                         Indentation = 2
                     };
-                    _serializer.Serialize(xmlWriter, _validationSuppressions.ToArray());
+                    _serializer.Serialize(xmlWriter, orderedSuppressions);
                     AfterWrittingSuppressionsCallback(writer);
                 }
                 finally
@@ -154,26 +161,31 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
             // Do nothing. Used for tests.
         }
 
-        private HashSet<Suppression> ParseSuppressionFile(string? file)
+        private HashSet<Suppression> ParseSuppressionFile(string? suppressionFile)
         {
-            if (string.IsNullOrEmpty(file?.Trim()))
+            if (string.IsNullOrWhiteSpace(suppressionFile))
             {
                 return new HashSet<Suppression>();
             }
 
-            using (Stream reader = GetReadableStream(file!))
+            try
             {
+                using Stream reader = GetReadableStream(suppressionFile!);
                 if (_serializer.Deserialize(reader) is Suppression[] deserializedSuppressions)
                 {
                     return new HashSet<Suppression>(deserializedSuppressions);
                 }
-
-                return new HashSet<Suppression>();
             }
+            catch (FileNotFoundException) when (BaselineAllErrors)
+            {
+                // Throw if the passed in suppression file doesn't exist and errors aren't baselined.
+            }
+
+            return new HashSet<Suppression>();
         }
 
         // FileAccess.Read and FileShare.Read are specified to allow multiple processes to concurrently read from the suppression file.
-        protected virtual Stream GetReadableStream(string supressionFile) => new FileStream(supressionFile, FileMode.Open, FileAccess.Read, FileShare.Read);
+        protected virtual Stream GetReadableStream(string suppressionFile) => new FileStream(suppressionFile, FileMode.Open, FileAccess.Read, FileShare.Read);
 
         protected virtual Stream GetWritableStream(string suppressionFile) => new FileStream(suppressionFile, FileMode.Create);
     }

@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.PackageValidation.Validators
 
             foreach (NuGetFramework framework in compatibleTargetFrameworks)
             {
-                ContentItem? compileTimeAsset = options.Package.FindBestCompileAssetForFramework(framework);
+                IReadOnlyList<ContentItem>? compileTimeAsset = options.Package.FindBestCompileAssetForFramework(framework);
                 if (compileTimeAsset == null)
                 {
                     _log.LogError(
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.PackageValidation.Validators
                     break;
                 }
 
-                ContentItem? runtimeAsset = options.Package.FindBestRuntimeAssetForFramework(framework);
+                IReadOnlyList<ContentItem>? runtimeAsset = options.Package.FindBestRuntimeAssetForFramework(framework);
                 if (runtimeAsset == null)
                 {
                     _log.LogError(
@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.PackageValidation.Validators
                         framework.ToString());
                 }
                 // Invoke ApiCompat to compare the compile time asset with the runtime asset if they are not the same assembly.
-                else if (options.EnqueueApiCompatWorkItems && compileTimeAsset.Path != runtimeAsset.Path)
+                else if (options.EnqueueApiCompatWorkItems)
                 {
                     _apiCompatRunner.QueueApiCompatFromContentItem(_log,
                         compileTimeAsset,
@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.PackageValidation.Validators
 
                 foreach (string rid in options.Package.Rids.Where(t => IsSupportedRidTargetFrameworkPair(framework, t)))
                 {
-                    ContentItem? runtimeRidSpecificAsset = options.Package.FindBestRuntimeAssetForFrameworkAndRuntime(framework, rid);
+                    IReadOnlyList<ContentItem>? runtimeRidSpecificAsset = options.Package.FindBestRuntimeAssetForFrameworkAndRuntime(framework, rid);
                     if (runtimeRidSpecificAsset == null)
                     {
                         _log.LogError(
@@ -93,9 +93,7 @@ namespace Microsoft.DotNet.PackageValidation.Validators
                     }
                     // Invoke ApiCompat to compare the compile time asset with the runtime specific asset if they are not the same and
                     // if the comparison hasn't already happened (when the runtime asset is the same as the runtime specific asset).
-                    else if (options.EnqueueApiCompatWorkItems &&
-                        compileTimeAsset.Path != runtimeRidSpecificAsset.Path &&
-                        (runtimeAsset == null || runtimeAsset.Path != runtimeRidSpecificAsset.Path))
+                    else if (options.EnqueueApiCompatWorkItems)
                     {
                         _apiCompatRunner.QueueApiCompatFromContentItem(_log,
                             compileTimeAsset,

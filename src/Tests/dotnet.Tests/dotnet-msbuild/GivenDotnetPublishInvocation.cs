@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         }
 
         const string ExpectedPrefix = "-maxcpucount -verbosity:m";
-        const string ExpectedProperties = "-property:_IsPublishing=true";
+        const string ExpectedProperties = "--property:_IsPublishing=true";
 
         [Theory]
         [InlineData(new string[] { }, "")]

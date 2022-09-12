@@ -275,7 +275,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
         private IEnumerable<string> EnumerateExpectedTableLines(IToolPackageStoreQuery store)
         {
-            string GetCommandsString(IToolPackage package)
+            static string GetCommandsString(IToolPackage package)
             {
                 return string.Join(ToolListGlobalOrToolPathCommand.CommandDelimiter, package.Commands.Select(c => c.Name));
             }

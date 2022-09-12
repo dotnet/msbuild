@@ -5,6 +5,7 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Edge.Settings;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -21,10 +22,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             parentCommand.AddNoLegacyUsageValidators(this);
         }
 
-        protected override Task<NewCommandStatus> ExecuteAsync(UninstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
+        protected override Task<NewCommandStatus> ExecuteAsync(UninstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager, InvocationContext context)
         {
             PrintDeprecationMessage<LegacyUninstallCommand, UninstallCommand>(args.ParseResult);
-            return base.ExecuteAsync(args, environmentSettings, context);
+            return base.ExecuteAsync(args, environmentSettings, templatePackageManager, context);
         }
     }
 }

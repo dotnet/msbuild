@@ -1,5 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 #nullable enable
 
@@ -36,7 +37,7 @@ namespace Microsoft.DotNet.Tools.New.PostActionProcessors
 
         // The project files to add are a subset of the primary outputs, specifically the primary outputs indicated by the primaryOutputIndexes post action argument (semicolon separated)
         // If any indexes are out of range or non-numeric, this method returns false and projectFiles is set to null.
-        internal static bool TryGetProjectFilesToAdd(IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath, [NotNullWhen(true)]out IReadOnlyList<string>? projectFiles)
+        internal static bool TryGetProjectFilesToAdd(IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath, [NotNullWhen(true)] out IReadOnlyList<string>? projectFiles)
         {
             List<string> filesToAdd = new();
 
@@ -89,7 +90,7 @@ namespace Microsoft.DotNet.Tools.New.PostActionProcessors
             if (projectFiles is null)
             {
                 //If the author didn't opt in to the new behavior by specifying "projectFiles", use the old behavior
-                if (!TryGetProjectFilesToAdd( action, templateCreationResult, outputBasePath, out projectFiles))
+                if (!TryGetProjectFilesToAdd(action, templateCreationResult, outputBasePath, out projectFiles))
                 {
                     Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddProjToSln_Error_NoProjectsToAdd);
                     return false;
@@ -106,7 +107,7 @@ namespace Microsoft.DotNet.Tools.New.PostActionProcessors
             Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostAction_AddProjToSln_Running, string.Join(" ", projectFiles), nearestSlnFilesFound[0], solutionFolder));
             return AddProjectsToSolution(nearestSlnFilesFound[0], projectFiles, solutionFolder);
         }
-        
+
         private bool AddProjectsToSolution(string solutionPath, IReadOnlyList<string> projectsToAdd, string? solutionFolder)
         {
             try

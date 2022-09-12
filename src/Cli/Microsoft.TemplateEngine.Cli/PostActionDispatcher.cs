@@ -246,7 +246,7 @@ namespace Microsoft.TemplateEngine.Cli
                 return;
             }
 
-            Reporter stream = useErrorOutput ? Reporter.Error : Reporter.Output;
+            IReporter stream = useErrorOutput ? Reporter.Error : Reporter.Output;
             stream.WriteLine(LocalizableStrings.PostActionInstructions, action.ManualInstructions);
 
             // if the post action executes the command ('Run script' post action), additionally display command to be executed.

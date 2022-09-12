@@ -7,14 +7,14 @@
         <target state="translated">{0} Arbeitselement(e) wird/werden ausgeführt...</target>
         <note />
       </trans-unit>
-      <trans-unit id="ApiCompatibilityFooter">
-        <source>Performed api validation on '{0}' ({2}) and '{1}' ({3}).</source>
-        <target state="translated">API-Überprüfung für „{0}“ ({2}) und „{1}“ ({3}) wurde durchgeführt.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ApiCompatibilityHeader">
         <source>API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</source>
         <target state="translated">API-Kompatibilitätsfehler zwischen „{0}“ ({2}) und „{1}“ ({3}):</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyCultureDoesNotMatch">
+        <source>{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</source>
+        <target state="new">{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyLoadError">
@@ -42,17 +42,12 @@
         <target state="translated">Das angegebene Assemblysuchverzeichnis "{0}" ist nicht vorhanden.</target>
         <note />
       </trans-unit>
-      <trans-unit id="AssembyCultureDoesNotMatch">
-        <source>{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</source>
-        <target state="translated">{2}-Assemblykultur „{0}“ stimmt nicht mit der {3}-Assemblykultur „{1}“ überein.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AssembyVersionDoesNotMatch">
+      <trans-unit id="AssemblyVersionDoesNotMatch">
         <source>{3} assembly version '{1}' should be equal to {2} version '{0}'.</source>
-        <target state="translated">Die {3}-Assemblyversion „{1}“ sollte gleich der {2}-Version „{0}“ sein.</target>
+        <target state="new">{3} assembly version '{1}' should be equal to {2} version '{0}'.</target>
         <note />
       </trans-unit>
-      <trans-unit id="AssembyVersionIsNotCompatible">
+      <trans-unit id="AssemblyVersionIsNotCompatible">
         <source>{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</source>
         <target state="translated">Die {2}-Assemblyversion „{0}“ sollte gleich sein. oder höher sein als die{3}-Version „{1}“.</target>
         <note />
@@ -62,14 +57,39 @@
         <target state="translated">Das abstrakte Element „{0}“ kann nicht zu {1} hinzugefügt werden, da es in {2} nicht vorhanden ist.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotAddAttribute">
+        <source>Cannot add attribute '{0}' to '{1}'.</source>
+        <target state="new">Cannot add attribute '{0}' to '{1}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotAddMemberToInterface">
         <source>Cannot add interface member '{0}' to {1} because it does not exist on {2}</source>
         <target state="translated">Der Schnittstellenelement „{0}“ kann {1} nicht hinzugefügt werden, da es in {2} nicht vorhanden ist.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotAddSealedToInterfaceMember">
+        <source>Cannot add sealed keyword to default interface member '{0}'.</source>
+        <target state="new">Cannot add sealed keyword to default interface member '{0}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotAddVirtualToMember">
         <source>Cannot add virtual keyword to member '{0}'.</source>
         <target state="translated">Das virtuelle Schlüsselwort kann dem Member „{0}“ nicht hinzugefügt werden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotChangeAttribute">
+        <source>Cannot change arguments of attribute '{0}' on '{1}'.</source>
+        <target state="new">Cannot change arguments of attribute '{0}' on '{1}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotChangeParameterName">
+        <source>Parameter name on member '{0}' changed from '{1}' to '{2}'.</source>
+        <target state="new">Parameter name on member '{0}' changed from '{1}' to '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotRemoveAttribute">
+        <source>Cannot remove attribute '{0}' from '{1}'.</source>
+        <target state="new">Cannot remove attribute '{0}' from '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
@@ -167,16 +187,6 @@
         <target state="translated">Die Datenstromposition ist größer als die Länge, daher sind keine Inhalte zum Lesen verfügbar.</target>
         <note />
       </trans-unit>
-      <trans-unit id="TypeExistsOnLeft">
-        <source>Type '{0}' exists on {1} but not on {2}</source>
-        <target state="translated">Der Typ „{0}“ ist auf {1} vorhanden, aber nicht auf {2}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="TypeExistsOnRight">
-        <source>Type '{0}' exists on {2} but not on {1}</source>
-        <target state="translated">Der Typ „{0}“ ist auf {2} vorhanden, aber nicht auf {1}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="TypeIsActuallySealed">
         <source>Type '{0}' has the sealed modifier on {1} but not on {2}</source>
         <target state="translated">Der Typ „{0}“ verfügt über den versiegelten Modifizierer auf {1}, auf {2} aber nicht.</target>
@@ -185,6 +195,11 @@
       <trans-unit id="TypeIsEffectivelySealed">
         <source>Type '{0}' is sealed because it has no visible constructor on {1} but it does on {2}</source>
         <target state="translated">Der Typ „{0}“ ist versiegelt, da er keinen sichtbaren Konstruktor auf {1} hat, auf {2} aber schon.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TypeMissingOnSide">
+        <source>Type '{0}' exists on {1} but not on {2}</source>
+        <target state="new">Type '{0}' exists on {1} but not on {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="VisitorRightCountShouldMatchMappersSetSize">

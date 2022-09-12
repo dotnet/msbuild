@@ -1,10 +1,5 @@
 <Project>
-  <PropertyGroup>
-    <!-- Disable analyzers in sourcebuild -->
-    <EnableAnalyzers Condition="'$(DotNetBuildFromSource)' == 'true'">false</EnableAnalyzers>
-  </PropertyGroup>
-  <ItemGroup Condition="'$(EnableAnalyzers)' == 'true'">
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="$(MicrosoftCodeAnalysisCSharpCodeStylePackageVersion)" PrivateAssets="all" />
+  <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true'">
     <PackageReference Include="StyleCop.Analyzers" Version="$(StyleCopAnalyzersPackageVersion)" PrivateAssets="all" Condition="'$(EnableStyleCopAnalyzer)' == 'true'" />
   </ItemGroup>
 </Project>

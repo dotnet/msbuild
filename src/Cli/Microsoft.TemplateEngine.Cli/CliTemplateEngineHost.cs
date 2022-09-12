@@ -18,7 +18,7 @@ namespace Microsoft.TemplateEngine.Cli
             IReadOnlyList<(Type InterfaceType, IIdentifiedComponent Instance)> builtIns,
             IReadOnlyList<string>? fallbackHostNames = null,
             string? outputPath = null,
-            bool enableVerboseLogging = false)
+            LogLevel logLevel = LogLevel.Information)
             : base(
                   hostIdentifier,
                   version,
@@ -27,7 +27,7 @@ namespace Microsoft.TemplateEngine.Cli
                   fallbackHostNames,
                   loggerFactory: Microsoft.Extensions.Logging.LoggerFactory.Create(builder =>
                     builder
-                        .SetMinimumLevel(enableVerboseLogging ? LogLevel.Trace : LogLevel.Information)
+                        .SetMinimumLevel(logLevel)
                         .AddConsole(config => config.FormatterName = nameof(CliConsoleFormatter))
                         .AddConsoleFormatter<CliConsoleFormatter, ConsoleFormatterOptions>(config =>
                         {

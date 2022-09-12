@@ -2,6 +2,7 @@
   "solution": {
     "path": "sdk.sln",
     "projects": [
+      "src\\Assets\\TestPackages\\dotnet-new\\Microsoft.TemplateEngine.TestTemplates.csproj",
       "src\\Cli\\Microsoft.DotNet.Cli.Sln.Internal\\Microsoft.DotNet.Cli.Sln.Internal.csproj",
       "src\\Cli\\Microsoft.DotNet.Cli.Utils\\Microsoft.DotNet.Cli.Utils.csproj",
       "src\\Cli\\Microsoft.DotNet.Configurer\\Microsoft.DotNet.Configurer.csproj",

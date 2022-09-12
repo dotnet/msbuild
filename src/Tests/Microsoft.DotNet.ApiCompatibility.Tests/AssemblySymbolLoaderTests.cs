@@ -131,7 +131,7 @@ namespace MyNamespace
             AssemblySymbolLoader loader = new();
             IEnumerable<IAssemblySymbol> symbols = loader.LoadMatchingAssemblies(new[] { assembly }, paths);
             Assert.Empty(symbols);
-            Assert.True(loader.HasLoadWarnings(out IEnumerable<AssemblyLoadWarning> warnings));
+            Assert.True(loader.HasLoadWarnings(out IReadOnlyList<AssemblyLoadWarning> warnings));
 
             IEnumerable<AssemblyLoadWarning> expected = new[]
             {
@@ -182,7 +182,7 @@ namespace MyNamespace
             if (validateIdentities)
             {
                 Assert.Empty(matchingAssemblies);
-                Assert.True(loader.HasLoadWarnings(out IEnumerable<AssemblyLoadWarning> warnings));
+                Assert.True(loader.HasLoadWarnings(out IReadOnlyList<AssemblyLoadWarning> warnings));
 
                 IEnumerable<AssemblyLoadWarning> expected = new[]
                 {
@@ -277,7 +277,7 @@ namespace MyNamespace
 
             if (resolveReferences)
             {
-                Assert.True(loader.HasLoadWarnings(out IEnumerable<AssemblyLoadWarning> warnings));
+                Assert.True(loader.HasLoadWarnings(out IReadOnlyList<AssemblyLoadWarning> warnings));
 
                 string expectedReference = "System.Runtime.dll";
 
@@ -295,7 +295,7 @@ namespace MyNamespace
             }
             else
             {
-                Assert.False(loader.HasLoadWarnings(out IEnumerable<AssemblyLoadWarning> warnings));
+                Assert.False(loader.HasLoadWarnings(out IReadOnlyList<AssemblyLoadWarning> warnings));
                 Assert.Empty(warnings);
             }
         }
@@ -306,11 +306,11 @@ namespace MyNamespace
             var assetInfo = GetSimpleTestAsset();
             AssemblySymbolLoader loader = new(resolveAssemblyReferences: true);
             // AddReferenceSearchDirectories should be able to handle directories as well as full path to assemblies.
-            loader.AddReferenceSearchDirectories(Path.GetDirectoryName(typeof(string).Assembly.Location));
-            loader.AddReferenceSearchDirectories(Path.GetFullPath(typeof(string).Assembly.Location));
+            loader.AddReferenceSearchPaths(Path.GetDirectoryName(typeof(string).Assembly.Location));
+            loader.AddReferenceSearchPaths(Path.GetFullPath(typeof(string).Assembly.Location));
             loader.LoadAssembly(Path.Combine(assetInfo.OutputDirectory, assetInfo.TestAsset.TestProject.Name + ".dll"));
 
-            Assert.False(loader.HasLoadWarnings(out IEnumerable<AssemblyLoadWarning> warnings));
+            Assert.False(loader.HasLoadWarnings(out IReadOnlyList<AssemblyLoadWarning> warnings));
             Assert.Empty(warnings);
 
             // Ensure we loaded more than one assembly since resolveReferences was set to true.
