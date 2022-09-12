@@ -851,7 +851,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                path = FileUtilities.GetTemporaryFile(directory, ".bat");
+                path = FileUtilities.GetTemporaryFile(directory, null, ".bat");
 
                 Assert.EndsWith(".bat", path);
                 Assert.True(File.Exists(path));
@@ -902,18 +902,6 @@ namespace Microsoft.Build.UnitTests
            );
         }
         /// <summary>
-        /// No extension is given
-        /// </summary>
-        [Fact]
-        public void GenerateTempBatchFileWithEmptyExtension()
-        {
-            Assert.Throws<ArgumentException>(() =>
-            {
-                FileUtilities.GetTemporaryFile(String.Empty);
-            }
-           );
-        }
-        /// <summary>
         /// Directory is invalid
         /// </summary>
         [Fact]
@@ -924,7 +912,7 @@ namespace Microsoft.Build.UnitTests
         {
             Assert.Throws<IOException>(() =>
             {
-                FileUtilities.GetTemporaryFile("|", ".tmp");
+                FileUtilities.GetTemporaryFile("|", null, ".tmp");
             }
            );
         }
