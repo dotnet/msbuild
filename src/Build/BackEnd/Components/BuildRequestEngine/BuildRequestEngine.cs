@@ -127,7 +127,7 @@ namespace Microsoft.Build.BackEnd
 
             if (String.IsNullOrEmpty(_debugDumpPath))
             {
-                _debugDumpPath = Path.GetTempPath();
+                _debugDumpPath = FileUtilities.TempFileDirectory;
             }
 
             _status = BuildRequestEngineStatus.Uninitialized;

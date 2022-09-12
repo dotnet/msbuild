@@ -623,9 +623,7 @@ namespace Microsoft.Build.Internal
             {
                 lock (s_traceLock)
                 {
-                    if (s_debugDumpPath == null)
-                    {
-                        s_debugDumpPath =
+                    s_debugDumpPath ??=
 #if CLR2COMPATIBILITY
                         Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
 #else
@@ -634,14 +632,13 @@ namespace Microsoft.Build.Internal
                             : Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
 #endif
 
-                        if (String.IsNullOrEmpty(s_debugDumpPath))
-                        {
-                            s_debugDumpPath = Path.GetTempPath();
-                        }
-                        else
-                        {
-                            Directory.CreateDirectory(s_debugDumpPath);
-                        }
+                    if (String.IsNullOrEmpty(s_debugDumpPath))
+                    {
+                        s_debugDumpPath = FileUtilities.TempFileDirectory;
+                    }
+                    else
+                    {
+                        Directory.CreateDirectory(s_debugDumpPath);
                     }
 
                     try
@@ -654,16 +651,14 @@ namespace Microsoft.Build.Internal
 
                         fileName += ".txt";
 
-                        using (StreamWriter file =
-                               FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), Process.GetCurrentProcess().Id, nodeId),
-                                   append: true))
+                        using (StreamWriter file = FileUtilities.OpenWrite(
+                            String.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), Process.GetCurrentProcess().Id, nodeId), append: true))
                         {
                             string message = String.Format(CultureInfo.CurrentCulture, format, args);
                             long now = DateTime.UtcNow.Ticks;
                             float millisecondsSinceLastLog = (float)(now - s_lastLoggedTicks) / 10000L;
                             s_lastLoggedTicks = now;
-                            file.WriteLine("{0} (TID {1}) {2,15} +{3,10}ms: {4}", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, now, millisecondsSinceLastLog,
-                                message);
+                            file.WriteLine("{0} (TID {1}) {2,15} +{3,10}ms: {4}", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, now, millisecondsSinceLastLog, message);
                         }
                     }
                     catch (IOException)
