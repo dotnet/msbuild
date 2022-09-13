@@ -4207,6 +4207,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void VerifyPlatformAliasesWork()
         {
+            // This verifies that UAP is an alias for windows, so verifying the target platforms align. Other parts of the reference don't matter here.
             SDKReference reference = new(new TaskItem("sdkReference", new Dictionary<string, string>() { { SDKManifest.Attributes.TargetPlatform, "UAP" } }), "sdkName", "1.0.2");
             reference.Resolve(
                 new Dictionary<string, ITaskItem>() { { "sdkName, Version=1.0.2", new TaskItem(Path.GetTempFileName(), new Dictionary<string, string>() { { "PlatformVersion", "1.0.2" } }) } },
@@ -4222,6 +4223,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             reference.ResolutionErrors.ShouldBeEmpty();
             reference.ResolutionWarnings.ShouldBeEmpty();
+            reference.TargetPlatform.ShouldBe("UAP");
         }
 
         [Fact]
