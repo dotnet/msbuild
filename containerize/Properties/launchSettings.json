@@ -2,7 +2,7 @@
   "profiles": {
     "containerize": {
       "commandName": "Project",
-      "commandLineArgs": "S:\\play\\container-demo\\bin\\Debug\\net6.0\\linux-x64\\ --registry localhost:5010 --base \"dotnet/runtime\" --baseTag \"6.0\" --entrypoint \"/app/container-demo\" --name \"showcase/demo\""
+      "commandLineArgs": "bin\\Debug\\net7.0\\ --baseregistry https://mcr.microsoft.com --baseimagename dotnet/runtime --outputregistry docker:// --imagename dotnet-test --imagetags 6.0 --workingdirectory app/ --entrypoint dotnet --entrypointargs run --labels foo=bar hello=world"
     }
   }
 }
