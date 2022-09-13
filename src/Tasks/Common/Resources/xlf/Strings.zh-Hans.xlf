@@ -464,6 +464,11 @@
         <target state="translated">正在优化程序集以调整大小。此过程可能需要一段时间。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed">
+        <source>NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</source>
+        <target state="new">NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</target>
+        <note>{StrBegin="NETSDK1191: "}</note>
+      </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
         <source>NETSDK1020: Package Root {0} was incorrectly given for Resolved library {1}</source>
         <target state="translated">NETSDK1020: 对于“已解析”库 {1}，包根目录 {0} 分配错误</target>
