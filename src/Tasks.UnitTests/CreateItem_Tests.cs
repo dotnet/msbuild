@@ -154,7 +154,7 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.DeleteTempProjectDirectory();
 
             ObjectModelHelpers.CreateFileInTempProjectDirectory("Myapp.proj", @"
-                <Project ToolsVersionresol=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                   <Target Name =`Repro`>
                     <CreateItem Include=`**\*.txt`>
                       <Output TaskParameter=`Include` ItemName=`Text`/>
