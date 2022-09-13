@@ -28,7 +28,6 @@ variables:
   - ${{ else }}:
     - name: PostBuildSign
       value: true
-
   - ${{ if eq(variables['System.TeamProject'], 'public') }}:
     - name: _InternalRuntimeDownloadArgs
       value: ''
