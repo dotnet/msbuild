@@ -21,6 +21,8 @@ namespace Microsoft.Build.UnitTests
         private static readonly string ProjectFileFolder = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "PortableTask");
         private const string ProjectFileName = "portableTaskTest.proj";
         private const string DLLFileName = "PortableTask.dll";
+        private static string PortableTaskFolderPath = Path.GetFullPath(
+                    Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "..", "..", "..", "Samples", "PortableTask"));
 
         private readonly ITestOutputHelper _output;
 
@@ -100,12 +102,10 @@ namespace Microsoft.Build.UnitTests
                 string currentAssembly = Assembly.GetExecutingAssembly().Location;
                 string utilitiesName = "Microsoft.Build.Utilities.Core.dll";
                 string newAssemblyLocation = Path.Combine(folder.Path, Path.GetFileName(currentAssembly));
-                string portableTaskFolderPath = Path.GetFullPath(
-                    Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "..", "..", "..", "Samples", "PortableTask"));
 
                 // The "first" directory is "Debug" or "Release"
-                portableTaskFolderPath = Path.Combine(Directory.GetDirectories(portableTaskFolderPath).First(), "netstandard2.0", "OldMSBuild");
-                string utilities = Path.Combine(portableTaskFolderPath, utilitiesName);
+                string portableTaskPath = Path.Combine(Directory.GetDirectories(PortableTaskFolderPath).First(), "netstandard2.0", "OldMSBuild");
+                string utilities = Path.Combine(portableTaskPath, utilitiesName);
                 File.Copy(utilities, Path.Combine(folder.Path, utilitiesName));
                 File.Copy(currentAssembly, newAssemblyLocation);
                 TypeLoader typeLoader = new(TaskLoader.IsTaskClass);

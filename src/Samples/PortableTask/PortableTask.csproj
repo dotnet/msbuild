@@ -15,7 +15,9 @@
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.5.180" GeneratePathProperty="true" />
   </ItemGroup>
   <Target Name="UpdateXlf" />
-  <Target Name="CopyMSBuildUtilitiesToTemp" AfterTargets="Build">
+
+  <!-- This is only needed for a test in the MSBuild repo; it is unrelated to the PortableTask sample itself. -->
+  <Target Name="CopyMSBuildUtilitiesToNewFolder" AfterTargets="Restore">
     <Copy SourceFiles="$(PkgMicrosoft_Build_Utilities_Core)\lib\net46\Microsoft.Build.Utilities.Core.dll" DestinationFiles="$(OutDir)\OldMSBuild\Microsoft.Build.Utilities.Core.dll" />
   </Target>
 </Project>
