@@ -238,7 +238,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
             else
             {
-                WriteEnvironment(e.BuildEnvironment?.Where(kvp => EnvironmentUtilities.IsReservedProperty(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
+                WriteEnvironment(e.BuildEnvironment?.Where(kvp => EnvironmentUtilities.IsWellKnownEnvironmentDerivedProperty(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
             }
         }
 

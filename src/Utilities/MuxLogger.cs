@@ -866,7 +866,7 @@ namespace Microsoft.Build.Utilities
                         BuildStartedEventArgs startedEvent =
                             new BuildStartedEventArgs(_buildStartedEvent.Message,
                             _buildStartedEvent.HelpKeyword,
-                            Traits.LogAllEnvironmentVariables ? _buildStartedEvent.BuildEnvironment : _buildStartedEvent.BuildEnvironment?.Where(kvp => EnvironmentUtilities.IsReservedProperty(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
+                            Traits.LogAllEnvironmentVariables ? _buildStartedEvent.BuildEnvironment : _buildStartedEvent.BuildEnvironment?.Where(kvp => EnvironmentUtilities.IsWellKnownEnvironmentDerivedProperty(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
                         RaiseBuildStartedEvent(sender, startedEvent);
                     }
 

@@ -254,7 +254,7 @@ Build
             }
             else
             {
-                Write(e.BuildEnvironment?.Where(kvp => EnvironmentUtilities.IsReservedProperty(kvp.Key)));
+                Write(e.BuildEnvironment?.Where(kvp => EnvironmentUtilities.IsWellKnownEnvironmentDerivedProperty(kvp.Key)));
             }
         }
 
