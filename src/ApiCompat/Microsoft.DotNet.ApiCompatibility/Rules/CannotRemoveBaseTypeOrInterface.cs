@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             context.RegisterOnTypeSymbolAction(RunOnTypeSymbol);
         }
 
-        private void RunOnTypeSymbol(ITypeSymbol? left, ITypeSymbol? right, string leftName, string rightName, IList<CompatDifference> differences)
+        private void RunOnTypeSymbol(ITypeSymbol? left, ITypeSymbol? right, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences)
         {
             if (left == null || right == null)
                 return;
@@ -26,19 +26,19 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             if (left.TypeKind != TypeKind.Interface && right.TypeKind != TypeKind.Interface)
             {
                 // if left and right are not interfaces check base types
-                ValidateBaseTypeNotRemoved(left, right, leftName, rightName, differences);
+                ValidateBaseTypeNotRemoved(left, right, leftMetadata.DisplayString, rightMetadata.DisplayString, leftMetadata, rightMetadata, differences);
 
                 if (_settings.StrictMode)
-                    ValidateBaseTypeNotRemoved(right, left, rightName, leftName, differences);
+                    ValidateBaseTypeNotRemoved(right, left, rightMetadata.DisplayString, leftMetadata.DisplayString, leftMetadata, rightMetadata, differences);
             }
 
-            ValidateInterfaceNotRemoved(left, right, leftName, rightName, differences);
+            ValidateInterfaceNotRemoved(left, right, leftMetadata.DisplayString, rightMetadata.DisplayString, leftMetadata, rightMetadata, differences);
 
             if (_settings.StrictMode)
-                ValidateInterfaceNotRemoved(right, left, rightName, leftName, differences);
+                ValidateInterfaceNotRemoved(right, left, rightMetadata.DisplayString, leftMetadata.DisplayString, leftMetadata, rightMetadata, differences);
         }
 
-        private void ValidateBaseTypeNotRemoved(ITypeSymbol left, ITypeSymbol right, string leftName, string rightName, IList<CompatDifference> differences)
+        private void ValidateBaseTypeNotRemoved(ITypeSymbol left, ITypeSymbol right, string leftName, string rightName, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences)
         {
             ITypeSymbol? leftBaseType = left.BaseType;
             ITypeSymbol? rightBaseType = right.BaseType;
@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
             if (leftBaseType.TypeKind == TypeKind.Error && _settings.WithReferences)
             {
-                AddAssemblyLoadError(differences, leftBaseType);
+                AddAssemblyLoadError(leftMetadata, rightMetadata, differences, leftBaseType);
             }
 
             while (rightBaseType != null)
@@ -61,20 +61,22 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
                 if (rightBaseType.TypeKind == TypeKind.Error && _settings.WithReferences)
                 {
-                    AddAssemblyLoadError(differences, rightBaseType);
+                    AddAssemblyLoadError(leftMetadata, rightMetadata, differences, rightBaseType);
                 }
 
                 rightBaseType = rightBaseType.BaseType;
             }
             
             differences.Add(new CompatDifference(
+                leftMetadata,
+                rightMetadata,
                 DiagnosticIds.CannotRemoveBaseType,
                 string.Format(Resources.CannotRemoveBaseType, left.ToDisplayString(), leftBaseType.ToDisplayString(), rightName, leftName),
                 DifferenceType.Changed,
                 right));
         }
 
-        private void ValidateInterfaceNotRemoved(ITypeSymbol left, ITypeSymbol right, string leftName, string rightName, IList<CompatDifference> differences)
+        private void ValidateInterfaceNotRemoved(ITypeSymbol left, ITypeSymbol right, string leftName, string rightName, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences)
         {
             HashSet<ITypeSymbol> rightInterfaces = new(right.GetAllBaseInterfaces(), _settings.SymbolComparer);
 
@@ -82,7 +84,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             {
                 if (leftInterface.TypeKind == TypeKind.Error && _settings.WithReferences)
                 {
-                    AddAssemblyLoadError(differences, leftInterface);
+                    AddAssemblyLoadError(leftMetadata, rightMetadata, differences, leftInterface);
                 }
 
                 // Ignore non visible interfaces based on the run Settings
@@ -95,6 +97,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 if (!rightInterfaces.Contains(leftInterface))
                 {
                     differences.Add(new CompatDifference(
+                        leftMetadata,
+                        rightMetadata,
                         DiagnosticIds.CannotRemoveBaseInterface,
                         string.Format(Resources.CannotRemoveBaseInterface, left.ToDisplayString(), leftInterface.ToDisplayString(), rightName, leftName),
                         DifferenceType.Changed,
@@ -107,18 +111,20 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             {
                 if (rightInterface.TypeKind == TypeKind.Error && _settings.WithReferences)
                 {
-                    AddAssemblyLoadError(differences, rightInterface);
+                    AddAssemblyLoadError(leftMetadata, rightMetadata, differences, rightInterface);
                 }
             }
         }
 
-        private static void AddAssemblyLoadError(IList<CompatDifference> differences, ITypeSymbol type)
+        private static void AddAssemblyLoadError(MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences, ITypeSymbol type)
         {
             differences.Add(new CompatDifference(
+                leftMetadata,
+                rightMetadata,
                 DiagnosticIds.AssemblyReferenceNotFound,
                 string.Format(Resources.MatchingAssemblyNotFound, $"{type.ContainingAssembly.Name}.dll"),
                 DifferenceType.Changed,
-                string.Empty));
+                type.ContainingAssembly.Identity.GetDisplayName()));
         }
     }
 }

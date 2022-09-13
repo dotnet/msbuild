@@ -8,7 +8,7 @@ using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.TemplateEngine.Cli
 {
-    internal static class ReporterExtensions
+    internal static class IReporterExtensions
     {
         private const int IndentSpaceCount = 3;
 

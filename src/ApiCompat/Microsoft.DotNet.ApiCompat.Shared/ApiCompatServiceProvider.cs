@@ -3,7 +3,6 @@
 
 using System;
 using Microsoft.DotNet.ApiCompatibility;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Logging;
 using Microsoft.DotNet.ApiCompatibility.Rules;
 using Microsoft.DotNet.ApiCompatibility.Runner;
@@ -18,12 +17,12 @@ namespace Microsoft.DotNet.ApiCompat
 
         internal ApiCompatServiceProvider(Func<ISuppressionEngine, ICompatibilityLogger> logFactory,
             Func<ISuppressionEngine> suppressionEngineFactory,
-            RuleFactory ruleFactory)
+            Func<ICompatibilityLogger, IRuleFactory> ruleFactory)
         {
             _suppressionEngine = new Lazy<ISuppressionEngine>(suppressionEngineFactory);
             _compatibilityLogger = new Lazy<ICompatibilityLogger>(() => logFactory(SuppressionEngine));
             _apiCompatRunner = new Lazy<IApiCompatRunner>(() =>
-                new ApiCompatRunner(CompatibilityLogger, SuppressionEngine, new ApiComparerFactory(ruleFactory), new AssemblySymbolLoaderFactory(), new MetadataStreamProvider()));
+                new ApiCompatRunner(CompatibilityLogger, SuppressionEngine, new ApiComparerFactory(ruleFactory(CompatibilityLogger)), new AssemblySymbolLoaderFactory()));
         }
 
         public ISuppressionEngine SuppressionEngine => _suppressionEngine.Value;

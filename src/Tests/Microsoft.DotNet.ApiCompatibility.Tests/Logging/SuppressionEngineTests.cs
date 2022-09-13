@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using System.Xml.Serialization;
-using Microsoft.CodeAnalysis.Diagnostics;
 using Xunit;
 
 namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
@@ -140,12 +139,12 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
 
             Assert.Equal(new Suppression("CP0001")
             {
-                Target = "T:A.B",
-                Left = "ref/netstandard2.0/tempValidation.dll",
-                Right = "lib/net6.0/tempValidation.dll"
+                Target = "T:A",
+                Left = "lib/netstandard1.3/tempValidation.dll",
+                Right = "lib/netstandard1.3/tempValidation.dll"
             }, deserializedSuppressions[0]);
 
-            Assert.Equal(newSuppression, deserializedSuppressions[9]);
+            Assert.Equal(newSuppression, deserializedSuppressions[4]);
         }
 
         [Fact]
@@ -207,36 +206,6 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
 {s_suppressionsHeader}
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:A.B</Target>
-    <Left>ref/netstandard2.0/tempValidation.dll</Left>
-    <Right>lib/net6.0/tempValidation.dll</Right>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:tempValidation.Class1.Bar(System.Int32)</Target>
-    <Left>ref/netstandard2.0/tempValidation.dll</Left>
-    <Right>lib/net6.0/tempValidation.dll</Right>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:tempValidation.Class1.SomeOtherGenericMethod``1(``0)</Target>
-    <Left>ref/netstandard2.0/tempValidation.dll</Left>
-    <Right>lib/net6.0/tempValidation.dll</Right>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:tempValidation.Class1.SomeNewBreakingChange</Target>
-    <Left>ref/netstandard2.0/tempValidation.dll</Left>
-    <Right>lib/net6.0/tempValidation.dll</Right>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:tempValidation.SomeGenericType`1</Target>
-    <Left>ref/netstandard2.0/tempValidation.dll</Left>
-    <Right>lib/net6.0/tempValidation.dll</Right>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:A</Target>
     <Left>lib/netstandard1.3/tempValidation.dll</Left>
     <Right>lib/netstandard1.3/tempValidation.dll</Right>
@@ -249,13 +218,43 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
-    <DiagnosticId>PKV004</DiagnosticId>
-    <Target>.NETFramework,Version=v4.8</Target>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:A.B</Target>
+    <Left>ref/netstandard2.0/tempValidation.dll</Left>
+    <Right>lib/net6.0/tempValidation.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:tempValidation.SomeGenericType`1</Target>
+    <Left>ref/netstandard2.0/tempValidation.dll</Left>
+    <Right>lib/net6.0/tempValidation.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:tempValidation.Class1.Bar(System.Int32)</Target>
+    <Left>ref/netstandard2.0/tempValidation.dll</Left>
+    <Right>lib/net6.0/tempValidation.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:tempValidation.Class1.SomeNewBreakingChange</Target>
+    <Left>ref/netstandard2.0/tempValidation.dll</Left>
+    <Right>lib/net6.0/tempValidation.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:tempValidation.Class1.SomeOtherGenericMethod``1(``0)</Target>
+    <Left>ref/netstandard2.0/tempValidation.dll</Left>
+    <Right>lib/net6.0/tempValidation.dll</Right>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP123</DiagnosticId>
     <Target>T:myValidation.Class1</Target>
     <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>PKV004</DiagnosticId>
+    <Target>.NETFramework,Version=v4.8</Target>
   </Suppression>
 </Suppressions>";
 
@@ -263,36 +262,6 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
 {s_suppressionsHeader}
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:A.B</Target>
-    <Left>ref/netstandard2.0/tempValidation.dll</Left>
-    <Right>lib/net6.0/tempValidation.dll</Right>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:tempValidation.Class1.Bar(System.Int32)</Target>
-    <Left>ref/netstandard2.0/tempValidation.dll</Left>
-    <Right>lib/net6.0/tempValidation.dll</Right>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:tempValidation.Class1.SomeOtherGenericMethod``1(``0)</Target>
-    <Left>ref/netstandard2.0/tempValidation.dll</Left>
-    <Right>lib/net6.0/tempValidation.dll</Right>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:tempValidation.Class1.SomeNewBreakingChange</Target>
-    <Left>ref/netstandard2.0/tempValidation.dll</Left>
-    <Right>lib/net6.0/tempValidation.dll</Right>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:tempValidation.SomeGenericType`1</Target>
-    <Left>ref/netstandard2.0/tempValidation.dll</Left>
-    <Right>lib/net6.0/tempValidation.dll</Right>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:A</Target>
     <Left>lib/netstandard1.3/tempValidation.dll</Left>
     <Right>lib/netstandard1.3/tempValidation.dll</Right>
@@ -305,13 +274,43 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
-    <DiagnosticId>PKV004</DiagnosticId>
-    <Target>.NETFramework,Version=v4.8</Target>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:A.B</Target>
+    <Left>ref/netstandard2.0/tempValidation.dll</Left>
+    <Right>lib/net6.0/tempValidation.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:tempValidation.SomeGenericType`1</Target>
+    <Left>ref/netstandard2.0/tempValidation.dll</Left>
+    <Right>lib/net6.0/tempValidation.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:tempValidation.Class1.Bar(System.Int32)</Target>
+    <Left>ref/netstandard2.0/tempValidation.dll</Left>
+    <Right>lib/net6.0/tempValidation.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:tempValidation.Class1.SomeNewBreakingChange</Target>
+    <Left>ref/netstandard2.0/tempValidation.dll</Left>
+    <Right>lib/net6.0/tempValidation.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:tempValidation.Class1.SomeOtherGenericMethod``1(``0)</Target>
+    <Left>ref/netstandard2.0/tempValidation.dll</Left>
+    <Right>lib/net6.0/tempValidation.dll</Right>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP123</DiagnosticId>
     <Target>T:myValidation.Class1</Target>
     <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>PKV004</DiagnosticId>
+    <Target>.NETFramework,Version=v4.8</Target>
   </Suppression>
 </Suppressions>";
 

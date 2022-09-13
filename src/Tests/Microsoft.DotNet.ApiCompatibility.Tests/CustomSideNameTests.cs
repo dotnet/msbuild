@@ -140,7 +140,6 @@ namespace CompatTests
   }
 }
 ";
-
             string[] rightSyntaxes = new[]
             { @"
 namespace CompatTests
@@ -197,10 +196,12 @@ namespace CompatTests
             IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
             ApiComparer differ = new(s_ruleFactory);
 
-            foreach ((MetadataInformation leftMetadata, MetadataInformation rightMetadata, IEnumerable<CompatDifference> differences) in differ.GetDifferences(left, right))
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
+
+            Assert.Equal(right.Count, differences.Count());
+            foreach (CompatDifference difference in differences)
             {
-                Assert.Single(differences);
-                AssertNames(differences.First(), leftMetadata.AssemblyId, rightMetadata.AssemblyId);
+                AssertNames(difference, difference.Left.AssemblyId, difference.Right.AssemblyId);
             }
         }
 

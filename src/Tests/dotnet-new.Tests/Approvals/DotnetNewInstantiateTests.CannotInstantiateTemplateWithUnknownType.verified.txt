@@ -1,10 +1,5 @@
 ﻿No templates found matching: 'console', --type='item'.
 Allowed values for '--type' option are: 'project'.
 
-To list installed templates, run:
-   dotnet new list
-To search for the templates on NuGet.org, run:
-   dotnet new search console
-
 
 For details on the exit code, refer to https://aka.ms/templating-exit-codes#103

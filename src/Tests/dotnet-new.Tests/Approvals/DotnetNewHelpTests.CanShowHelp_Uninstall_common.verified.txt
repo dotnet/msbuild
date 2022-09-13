@@ -9,4 +9,6 @@ Arguments:
              If command is specified without the argument, it lists all the template packages installed.
 
 Options:
-  -?, -h, --help  Show command line help.
+  -v, --verbosity <LEVEL>  Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic]. [default: normal]
+  -d, --diagnostics        Enables diagnostic output.
+  -?, -h, --help           Show command line help.

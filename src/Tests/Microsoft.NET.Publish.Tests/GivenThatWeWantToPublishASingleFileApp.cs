@@ -870,7 +870,7 @@ class C
                 .And
                 .HaveStdOutContaining("Hello World");
 
-            void VerifyPrepareForBundle(XDocument project)
+            static void VerifyPrepareForBundle(XDocument project)
             {
                 var ns = project.Root.Name.Namespace;
                 var targetName = "CheckPrepareForBundleData";
@@ -920,7 +920,7 @@ class C
                 .Should()
                 .Pass();
 
-            void VerifyPrepareForBundle(XDocument project)
+            static void VerifyPrepareForBundle(XDocument project)
             {
                 var ns = project.Root.Name.Namespace;
                 var targetName = "CheckPrepareForBundleData";

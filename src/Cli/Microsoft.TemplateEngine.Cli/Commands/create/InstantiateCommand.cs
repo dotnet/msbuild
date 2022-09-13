@@ -126,27 +126,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             SuggestTypoCorrections(instantiateArgs, templateGroups, reporter);
             reporter.WriteLine();
 
-            reporter.WriteLine(LocalizableStrings.Generic_CommandHints_List);
-            reporter.WriteCommand(Example.For<NewCommand>(instantiateArgs.ParseResult).WithSubcommand<ListCommand>());
-
-            reporter.WriteLine(LocalizableStrings.Generic_CommandHints_Search);
-
-            if (string.IsNullOrWhiteSpace(instantiateArgs.ShortName))
-            {
-                reporter.WriteCommand(
-                    Example
-                        .For<NewCommand>(instantiateArgs.ParseResult)
-                        .WithSubcommand<SearchCommand>()
-                        .WithArgument(SearchCommand.NameArgument));
-            }
-            else
-            {
-                reporter.WriteCommand(
-                  Example
-                      .For<NewCommand>(instantiateArgs.ParseResult)
-                      .WithSubcommand<SearchCommand>()
-                      .WithArgument(SearchCommand.NameArgument, instantiateArgs.ShortName));
-            }
+            WriteListCommandExample(instantiateArgs, reporter);
+            WriteSearchCommandExample(instantiateArgs, reporter);
             reporter.WriteLine();
         }
 
@@ -154,7 +135,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
             IEnumerable<TemplateGroup> templateGroups,
-            Reporter reporter,
+            IReporter reporter,
             CancellationToken cancellationToken = default)
         {
             IEnvironment environment = environmentSettings.Environment;
@@ -313,7 +294,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
             IEnumerable<CliTemplateInfo> templates,
-            Reporter reporter,
+            IReporter reporter,
             CancellationToken cancellationToken = default)
         {
             if (!templates.Any(t => string.IsNullOrWhiteSpace(t.GetLanguage()))
@@ -517,6 +498,40 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     }
                     reporter.WriteCommand(example);
                 }
+            }
+        }
+
+        private static void WriteListCommandExample(InstantiateCommandArgs instantiateArgs, IReporter reporter)
+        {
+            if (!string.IsNullOrWhiteSpace(instantiateArgs.ShortName))
+            {
+                reporter.WriteLine(LocalizableStrings.Generic_CommandHints_List_Template, instantiateArgs.ShortName);
+                reporter.WriteCommand(
+                  Example
+                      .For<NewCommand>(instantiateArgs.ParseResult)
+                      .WithSubcommand<ListCommand>()
+                      .WithArgument(ListCommand.NameArgument, instantiateArgs.ShortName));
+            }
+            else
+            {
+                reporter.WriteLine(LocalizableStrings.Generic_CommandHints_List);
+                reporter.WriteCommand(
+                    Example
+                        .For<NewCommand>(instantiateArgs.ParseResult)
+                        .WithSubcommand<ListCommand>());
+            }
+        }
+
+        private static void WriteSearchCommandExample(InstantiateCommandArgs instantiateArgs, IReporter reporter)
+        {
+            if (!string.IsNullOrWhiteSpace(instantiateArgs.ShortName))
+            {
+                reporter.WriteLine(LocalizableStrings.Generic_CommandHints_Search);
+                reporter.WriteCommand(
+                    Example
+                        .For<NewCommand>(instantiateArgs.ParseResult)
+                        .WithSubcommand<SearchCommand>()
+                        .WithArgument(SearchCommand.NameArgument, instantiateArgs.ShortName));
             }
         }
     }

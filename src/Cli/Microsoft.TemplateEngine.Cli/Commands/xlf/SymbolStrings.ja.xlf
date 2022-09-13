@@ -94,8 +94,8 @@ If command is specified without the argument, it lists all the template packages
         <note />
       </trans-unit>
       <trans-unit id="Command_Update_Option_CheckOnly">
-        <source>Only check for updates and display the template packages to be updated without applying update.</source>
-        <target state="translated">更新プログラムを確認し、更新プログラムを適用せずに更新されたテンプレート パッケージのみを表示します。</target>
+        <source>Only checks for updates and display the template packages to be updated without applying update.</source>
+        <target state="needs-review-translation">更新プログラムを確認し、更新プログラムを適用せずに更新されたテンプレート パッケージのみを表示します。</target>
         <note />
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
@@ -124,8 +124,8 @@ If command is specified without the argument, it lists all the template packages
         <note />
       </trans-unit>
       <trans-unit id="Option_ColumnsAll">
-        <source>Display all columns in the output.</source>
-        <target state="translated">出力にすべての列を表示します。</target>
+        <source>Displays all columns in the output.</source>
+        <target state="needs-review-translation">出力にすべての列を表示します。</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_Debug_Attach">

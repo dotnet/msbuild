@@ -24,8 +24,9 @@ namespace Microsoft.DotNet.ApiCompat.Task
         public string? PackageTargetPath { get; set; }
 
         /// <summary>
-        /// If provided, the path to the roslyn assemblies that should be loaded.
+        /// The path to the roslyn assemblies that should be loaded.
         /// </summary>
+        [Required]
         public string? RoslynAssembliesPath { get; set; }
 
         /// <summary>
@@ -37,6 +38,21 @@ namespace Microsoft.DotNet.ApiCompat.Task
         /// A NoWarn string contains the error codes that should be ignored.
         /// </summary>
         public string? NoWarn { get; set; }
+
+        /// <summary>
+        /// Enables rule to check that attributes match.
+        /// </summary>
+        public bool EnableRuleAttributesMustMatch { get; set; }
+
+        /// <summary>
+        /// Set of files with types in DocId format of which attributes to exclude.
+        /// </summary>
+        public string[]? ExcludeAttributesFiles { get; set; }
+
+        /// <summary>
+        /// Enables rule to check that the parameter names between public methods do not change.
+        /// </summary>
+        public bool EnableRuleCannotChangeParameterName { get; set; }
 
         /// <summary>
         /// If true, performs api compatibility checks on the package assets.
@@ -85,12 +101,7 @@ namespace Microsoft.DotNet.ApiCompat.Task
 
         public override bool Execute()
         {
-            if (RoslynAssembliesPath == null)
-            {
-                return base.Execute();
-            }
-
-            RoslynResolver roslynResolver = RoslynResolver.Register(RoslynAssembliesPath);
+            RoslynResolver roslynResolver = RoslynResolver.Register(RoslynAssembliesPath!);
             try
             {
                 return base.Execute();
@@ -124,6 +135,9 @@ namespace Microsoft.DotNet.ApiCompat.Task
                 GenerateCompatibilitySuppressionFile,
                 CompatibilitySuppressionFilePath,
                 NoWarn,
+                EnableRuleAttributesMustMatch,
+                ExcludeAttributesFiles,
+                EnableRuleCannotChangeParameterName,
                 PackageTargetPath!,
                 RunApiCompat,
                 EnableStrictModeForCompatibleTfms,
