@@ -17,7 +17,7 @@
   <Target Name="UpdateXlf" />
 
   <!-- This is only needed for a test in the MSBuild repo; it is unrelated to the PortableTask sample itself. -->
-  <Target Name="CopyMSBuildUtilitiesToNewFolder" AfterTargets="Restore">
+  <Target Name="CopyMSBuildUtilitiesToNewFolder" AfterTargets="Build">
     <Copy SourceFiles="$(PkgMicrosoft_Build_Utilities_Core)\lib\net46\Microsoft.Build.Utilities.Core.dll" DestinationFiles="$(OutDir)\OldMSBuild\Microsoft.Build.Utilities.Core.dll" />
   </Target>
 </Project>
