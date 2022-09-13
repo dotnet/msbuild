@@ -1351,9 +1351,14 @@ namespace Microsoft.Build.Shared
             }
         }
 
-#endregion
+        #endregion
 
-#region PInvoke
+        #region PInvoke
+        [DllImport("libc", SetLastError = true)]
+        internal static extern int chmod(string pathname, int mode);
+
+        [DllImport("libc", SetLastError = true)]
+        internal static extern int mkdir(string path, int mode);
 
         /// <summary>
         /// Gets the current OEM code page which is used by console apps

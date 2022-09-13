@@ -569,7 +569,16 @@ namespace Microsoft.Build.Internal
 
                     if (String.IsNullOrEmpty(s_debugDumpPath))
                     {
-                        s_debugDumpPath = Path.GetTempPath();
+                        // These debug files can be seen by other users on linux, hence putting them in a special directory.
+                        // Task hosts are only on windows, so no need to worry about the security concern for them. It's a
+                        // bit more annoying to use FileUtilities.TempFileDirectory, so ifdeffing around that here unless we
+                        // decide it's necessary.
+                        s_debugDumpPath =
+#if CLR2COMPATIBILITY
+                            Path.GetTempPath();
+#else
+                            FileUtilities.TempFileDirectory;
+#endif
                     }
                     else
                     {

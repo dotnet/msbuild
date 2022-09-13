@@ -127,7 +127,7 @@ namespace Microsoft.Build.UnitTests.Logging
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/Microsoft/msbuild/issues/282")]
         public void TestShutDown()
         {
-            SendDataDelegate transportDelegate = PacketProcessor;
+            SendDataDelegate transportDelegate = new SendDataDelegate(PacketProcessor);
             var weakTransportDelegateReference = new WeakReference(transportDelegate);
             var transportSink = new BuildEventArgTransportSink(transportDelegate);
 

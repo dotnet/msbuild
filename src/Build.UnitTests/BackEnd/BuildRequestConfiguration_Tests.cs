@@ -434,6 +434,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Environment.SetEnvironmentVariable("TEMP", problematicTmpPath);
 
                 FileUtilities.ClearCacheDirectoryPath();
+                FileUtilities.ClearTempFileDirectory();
                 string cacheFilePath = configuration.GetCacheFile();
                 Assert.StartsWith(problematicTmpPath, cacheFilePath);
             }
@@ -442,6 +443,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Environment.SetEnvironmentVariable("TMP", originalTmp);
                 Environment.SetEnvironmentVariable("TEMP", originalTemp);
                 FileUtilities.ClearCacheDirectoryPath();
+                FileUtilities.ClearTempFileDirectory();
             }
         }
 

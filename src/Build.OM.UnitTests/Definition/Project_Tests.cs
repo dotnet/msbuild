@@ -654,9 +654,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 project.ReevaluateIfNecessary();
 
                 Assert.Equal(
-                    NativeMethodsShared.IsWindows
-                        ? Path.Combine(Path.GetTempPath(), @"obj\i386\foo.dll")
-                        : Path.Combine(Path.GetTempPath(), @"obj/i386/foo.dll"),
+                        Path.Combine(FileUtilities.TempFileDirectory, "obj", "i386", "foo.dll"),
                     project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
             }
             finally
@@ -731,10 +729,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectInstance projectInstance = new ProjectInstance(xml);
 
                 Assert.Equal(
-                        Path.Combine(Path.GetTempPath(), "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar,
+                        Path.Combine(FileUtilities.TempFileDirectory, "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar,
                         project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
                 Assert.Equal(
-                        Path.Combine(Path.GetTempPath(), "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar,
+                        Path.Combine(FileUtilities.TempFileDirectory, "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar,
                         projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
             }
             finally
@@ -770,10 +768,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectInstance projectInstance = new ProjectInstance(xml);
 
                 Assert.Equal(
-                        Path.Combine(Path.GetTempPath(), "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar,
+                        Path.Combine(FileUtilities.TempFileDirectory, "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar,
                         project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
                 Assert.Equal(
-                        Path.Combine(Path.GetTempPath(), "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar,
+                        Path.Combine(FileUtilities.TempFileDirectory, "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar,
                         projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
             }
             finally
@@ -812,10 +810,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 // Should be the full path to the directory
                 Assert.Equal(
-                    Path.Combine(Path.GetTempPath() /* remove c:\ */, "obj" + Path.DirectorySeparatorChar + "i386"),
+                    Path.Combine(FileUtilities.TempFileDirectory /* remove c:\ */, "obj", "i386"),
                     project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
                 Assert.Equal(
-                    Path.Combine(Path.GetTempPath() /* remove c:\ */, "obj" + Path.DirectorySeparatorChar + "i386"),
+                    Path.Combine(FileUtilities.TempFileDirectory /* remove c:\ */, "obj", "i386"),
                     projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
             }
             finally

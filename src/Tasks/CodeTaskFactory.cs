@@ -809,17 +809,17 @@ namespace Microsoft.Build.Tasks
                 {
                     // Invokes compilation. 
 
-                    // Note: CompileAssemblyFromSource uses Path.GetTempPath() directory, but will not create it. In some cases 
+                    // Note: CompileAssemblyFromSource uses FileUtilities.TempFileDirectory directory, but will not create it. In some cases 
                     // this will throw inside CompileAssemblyFromSource. To work around this, ensure the temp directory exists. 
                     // See: https://github.com/Microsoft/msbuild/issues/328
-                    Directory.CreateDirectory(Path.GetTempPath());
+                    Directory.CreateDirectory(FileUtilities.TempFileDirectory);
 
                     CompilerResults compilerResults = provider.CompileAssemblyFromSource(compilerParameters, fullCode);
 
                     string outputPath = null;
                     if (compilerResults.Errors.Count > 0 || Environment.GetEnvironmentVariable("MSBUILDLOGCODETASKFACTORYOUTPUT") != null)
                     {
-                        string tempDirectory = Path.GetTempPath();
+                        string tempDirectory = FileUtilities.TempFileDirectory;
                         string fileName = Guid.NewGuid().ToString() + ".txt";
                         outputPath = Path.Combine(tempDirectory, fileName);
                         File.WriteAllText(outputPath, fullCode);

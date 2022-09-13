@@ -42,9 +42,18 @@ namespace Microsoft.Build.Shared
         private static string GetDebugDumpPath()
         {
             string debugPath = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+
+            // These debug files can be seen by other users on linux, hence putting them in a special directory.
+            // Task hosts are only on windows, so no need to worry about the security concern for them. It's a
+            // bit more annoying to use FileUtilities.TempFileDirectory, so ifdeffing around that here unless we
+            // decide it's necessary.
             return !string.IsNullOrEmpty(debugPath)
-                    ? debugPath
-                    : Path.GetTempPath();
+                    ? debugPath :
+#if CLR2COMPATIBILITY
+                    Path.GetTempPath();
+#else
+                    FileUtilities.TempFileDirectory;
+#endif
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Shared;
 using System;
 using System.Collections;
 using System.Diagnostics;
@@ -135,7 +136,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 Stream s = null;
 
                 // If path is in temp then we immediately know we can skip the first two checks...
-                if (!uri.LocalPath.StartsWith(Path.GetTempPath(), StringComparison.Ordinal))
+                if (!uri.LocalPath.StartsWith(FileUtilities.TempFileDirectory, StringComparison.Ordinal))
                 {
                     // First look in assembly resources...
                     Assembly a = Assembly.GetExecutingAssembly();

@@ -14,6 +14,56 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static partial class FileUtilities
     {
+        // For the current user, these correspond to read, write, and execute permissions.
+        // Lower order bits correspond to the same for "group" or "other" users.
+        private const int userRWX = 0x100 | 0x80 | 0x40;
+        private static string tempFileDirectory = null;
+        internal static string TempFileDirectory
+        {
+            get
+            {
+                return tempFileDirectory ??= CreateFolderUnderTemp();
+            }
+        }
+
+        internal static void ClearTempFileDirectory()
+        {
+            tempFileDirectory = null;
+        }
+
+        // For all native calls, directly check their return values to prevent bad actors from getting in between checking if a directory exists and returning it.
+        private static string CreateFolderUnderTemp()
+        {
+            string basePath = Path.Combine(Path.GetTempPath(), $"MSBuildTemp{Environment.UserName}");
+
+            if (NativeMethodsShared.IsLinux && NativeMethodsShared.mkdir(basePath, userRWX) != 0)
+            {
+                if (NativeMethodsShared.chmod(basePath, userRWX) == 0)
+                {
+                    // Current user owns this file; we can read and write to it. It is reasonable here to assume it was created properly by MSBuild and can be used
+                    // for temporary files.
+                    return basePath;
+                }
+                else
+                {
+                    // Another user created a folder pretending to be us! Find a folder we can actually use.
+                    int extraBits = 0;
+                    string pathToCheck = basePath + extraBits;
+                    while (NativeMethodsShared.mkdir(pathToCheck, userRWX) != 0 && NativeMethodsShared.chmod(pathToCheck, userRWX) != 0)
+                    {
+                        extraBits++;
+                        pathToCheck = basePath + extraBits;
+                    }
+
+                    return pathToCheck;
+                }
+            }
+            else
+            {
+                return basePath;
+            }
+        }
+
         /// <summary>
         /// Generates a unique directory name in the temporary folder.  
         /// Caller must delete when finished. 
@@ -21,7 +71,7 @@ namespace Microsoft.Build.Shared
         /// <param name="createDirectory"></param>
         internal static string GetTemporaryDirectory(bool createDirectory = true)
         {
-            string temporaryDirectory = Path.Combine(Path.GetTempPath(), "Temporary" + Guid.NewGuid().ToString("N"));
+            string temporaryDirectory = Path.Combine(TempFileDirectory, "Temporary" + Guid.NewGuid().ToString("N"));
 
             if (createDirectory)
             {
@@ -40,7 +90,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string GetTemporaryFileName(string extension)
         {
-            return GetTemporaryFile(null, extension, false);
+            return GetTemporaryFile(null, null, extension, false);
         }
 
         /// <summary>
@@ -63,7 +113,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string GetTemporaryFile(string extension)
         {
-            return GetTemporaryFile(null, extension);
+            return GetTemporaryFile(null, null, extension);
         }
 
         /// <summary>
@@ -74,23 +124,33 @@ namespace Microsoft.Build.Shared
         /// Caller must delete it when finished.
         /// May throw IOException.
         /// </summary>
-        internal static string GetTemporaryFile(string directory, string extension, bool createFile = true)
+        internal static string GetTemporaryFile(string directory, string fileName, string extension, bool createFile = true)
         {
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(directory, nameof(directory));
-            ErrorUtilities.VerifyThrowArgumentLength(extension, nameof(extension));
-
-            if (extension[0] != '.')
-            {
-                extension = '.' + extension;
-            }
 
             try
             {
-                directory = directory ?? Path.GetTempPath();
+                directory ??= TempFileDirectory;
+
+                // If the extension needs a dot prepended, do so.
+                if (extension is null)
+                {
+                    extension = string.Empty;
+                }
+                else if (extension.Length > 0 && extension[0] != '.')
+                {
+                    extension = '.' + extension;
+                }
+
+                // If the fileName is null, use tmp{Guid}; otherwise use fileName.
+                if (string.IsNullOrEmpty(fileName))
+                {
+                    fileName = $"tmp{Guid.NewGuid():N}";
+                }
 
                 Directory.CreateDirectory(directory);
 
-                string file = Path.Combine(directory, $"tmp{Guid.NewGuid():N}{extension}");
+                string file = Path.Combine(directory, $"{fileName}{extension}");
 
                 ErrorUtilities.VerifyThrow(!FileSystems.Default.FileExists(file), "Guid should be unique");
 
@@ -132,7 +192,7 @@ namespace Microsoft.Build.Shared
             {
                 Path = name == null
                     ? GetTemporaryDirectory()
-                    : System.IO.Path.Combine(System.IO.Path.GetTempPath(), name);
+                    : System.IO.Path.Combine(TempFileDirectory, name);
 
                 if (FileSystems.Default.DirectoryExists(Path))
                 {
