@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Xml;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
@@ -225,7 +226,9 @@ namespace Microsoft.Build.Construction
                 text = String.Empty;
             }
 
-            string interned = StringCache.Add(text, this);
+            // Remove string interning in ChangeWave 17.4
+            // Note: When ready to remove the ChangeWaves under 17.4, please follow the PR https://github.com/dotnet/msbuild/pull/7952 to remove all related and no more used code.
+            string interned = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4) ? text : StringCache.Add(text, this);
             return base.CreateWhitespace(interned);
         }
 
@@ -241,7 +244,7 @@ namespace Microsoft.Build.Construction
                 text = String.Empty;
             }
 
-            string interned = StringCache.Add(text, this);
+            string interned = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4) ? text : StringCache.Add(text, this);
             return base.CreateSignificantWhitespace(interned);
         }
 
@@ -251,7 +254,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public override XmlText CreateTextNode(string text)
         {
-            string textNode = StringCache.Add(text, this);
+            string textNode = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4) ? text : StringCache.Add(text, this);
             return base.CreateTextNode(textNode);
         }
 
@@ -266,7 +269,7 @@ namespace Microsoft.Build.Construction
                 data = String.Empty;
             }
 
-            string interned = StringCache.Add(data, this);
+            string interned = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4) ? data : StringCache.Add(data, this);
             return base.CreateComment(interned);
         }
 
