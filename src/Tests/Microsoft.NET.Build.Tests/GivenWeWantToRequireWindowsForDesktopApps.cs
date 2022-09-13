@@ -210,7 +210,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            void Assert(DirectoryInfo outputDir)
+            static void Assert(DirectoryInfo outputDir)
             {
                 outputDir.File("Microsoft.Windows.SDK.NET.dll").Exists.Should().BeTrue("The output has cswinrt dll");
                 outputDir.File("WinRT.Runtime.dll").Exists.Should().BeTrue("The output has cswinrt dll");

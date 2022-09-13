@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
                 .And.HaveStdOutContainingIgnoreSpaces("Microsoft.NETCore.App(A)")
                 .And.HaveStdOutContainingIgnoreSpaces("(A):Auto-referencedpackage");
 
-            void ChangeTargetFrameworkTo2_1(XDocument project)
+            static void ChangeTargetFrameworkTo2_1(XDocument project)
             {
                 project.Descendants()
                        .Single(e => e.Name.LocalName == "TargetFramework")

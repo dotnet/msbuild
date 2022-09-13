@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
     /// </summary>
     public class SharedHomeDirectory : IDisposable
     {
-        private readonly HashSet<string> _installedPackages = new HashSet<string>();
+        private readonly HashSet<string> _installedPackages = new();
 
         public SharedHomeDirectory(IMessageSink messageSink)
         {

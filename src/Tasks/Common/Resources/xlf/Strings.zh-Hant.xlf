@@ -640,6 +640,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1162: PDB 產生: 找不到 R2R 可執行檔 '{0}'。</target>
         <note>{StrBegin="NETSDK1162: "}</note>
       </trans-unit>
+      <trans-unit id="PReleaseRequiresEnvVarOnSln">
+        <source>NETSDK1190: To use '{0}' in solution projects, you must set the environment variable '{1}' (to true). This will increase the time to complete the operation.</source>
+        <target state="new">NETSDK1190: To use '{0}' in solution projects, you must set the environment variable '{1}' (to true). This will increase the time to complete the operation.</target>
+        <note>{StrBegin="NETSDK1190: "}</note>
+      </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>
         <target state="translated">NETSDK1053: 封裝為工具不支援包含本身。</target>

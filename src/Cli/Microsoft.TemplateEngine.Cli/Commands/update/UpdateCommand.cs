@@ -3,7 +3,9 @@
 //
 
 using System.CommandLine;
+using System.CommandLine.Invocation;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Edge.Settings;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -22,5 +24,16 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             Description = SymbolStrings.Command_Update_Option_CheckOnly
         };
+
+        protected override async Task<NewCommandStatus> ExecuteAsync(
+            UpdateCommandArgs args,
+            IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager,
+            InvocationContext context)
+        {
+            NewCommandStatus status = await base.ExecuteAsync(args, environmentSettings, templatePackageManager, context).ConfigureAwait(false);
+            await CheckTemplatesWithSubCommandName(args, templatePackageManager, context.GetCancellationToken()).ConfigureAwait(false);
+            return status;
+        }
     }
 }

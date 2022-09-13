@@ -1,7 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+//Microsoft.NET.Build.Extensions.Tasks (net7.0) has nullables disabled
+#pragma warning disable IDE0240 // Remove redundant nullable directive
 #nullable disable
+#pragma warning restore IDE0240 // Remove redundant nullable directive
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -131,5 +134,12 @@ namespace Microsoft.NET.Build.Tasks
         public const string IsVersion5 = "IsVersion5";
         public const string CreateCompositeImage = "CreateCompositeImage";
         public const string PerfmapFormatVersion = "PerfmapFormatVersion";
+
+        // Debug symbols
+        public const string RelatedProperty = "related";
+        public const string XmlExtension = ".xml";
+        public const string XmlFilePath = "XmlFilePath";
+        public const string PdbExtension = ".pdb";
+        public const string PdbFilePath = "PdbFilePath";
     }
 }

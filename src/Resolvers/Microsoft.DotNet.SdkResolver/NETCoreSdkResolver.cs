@@ -7,7 +7,10 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.NativeWrapper;
 
+//Microsoft.DotNet.SdkResolver (net7.0) has nullables disabled
+#pragma warning disable IDE0240 // Remove redundant nullable directive
 #nullable disable
+#pragma warning restore IDE0240 // Remove redundant nullable directive
 
 namespace Microsoft.DotNet.DotNetSdkResolver
 {

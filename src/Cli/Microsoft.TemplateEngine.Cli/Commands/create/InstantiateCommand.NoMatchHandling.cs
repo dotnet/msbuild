@@ -126,7 +126,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
             TemplateGroup templateGroup,
-            Reporter reporter)
+            IReporter reporter)
         {
             List<TemplateResult> matchInfos = CollectTemplateMatchInfo(args, environmentSettings, templatePackageManager, templateGroup);
             //process language, type and baseline errors

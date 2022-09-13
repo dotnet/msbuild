@@ -8,8 +8,32 @@ using Microsoft.TemplateEngine.Cli.TabularOutput;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal static class SharedOptionsFactory
+    public static class SharedOptionsFactory
     {
+        public static Option AsHidden(this Option o)
+        {
+            o.IsHidden = true;
+            return o;
+        }
+
+        public static Option<T> AsHidden<T>(this Option<T> o)
+        {
+            o.IsHidden = true;
+            return o;
+        }
+
+        public static Option<T> WithDescription<T>(this Option<T> o, string description)
+        {
+            o.Description = description;
+            return o;
+        }
+
+        public static Option<T> DisableAllowMultipleArgumentsPerToken<T>(this Option<T> o)
+        {
+            o.AllowMultipleArgumentsPerToken = false;
+            return o;
+        }
+
         internal static Option<bool> CreateInteractiveOption()
         {
             return new Option<bool>("--interactive")
@@ -126,30 +150,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 values.AddRange(value.Split(",", StringSplitOptions.TrimEntries).Where(s => !string.IsNullOrWhiteSpace(s)));
             }
             return values.ToArray();
-        }
-
-        internal static Option AsHidden(this Option o)
-        {
-            o.IsHidden = true;
-            return o;
-        }
-
-        internal static Option<T> AsHidden<T>(this Option<T> o)
-        {
-            o.IsHidden = true;
-            return o;
-        }
-
-        internal static Option<T> WithDescription<T>(this Option<T> o, string description)
-        {
-            o.Description = description;
-            return o;
-        }
-
-        internal static Option<T> DisableAllowMultipleArgumentsPerToken<T>(this Option<T> o)
-        {
-            o.AllowMultipleArgumentsPerToken = false;
-            return o;
         }
     }
 }

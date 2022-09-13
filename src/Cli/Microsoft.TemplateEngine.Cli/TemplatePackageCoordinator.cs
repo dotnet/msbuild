@@ -390,7 +390,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (invalidTemplatePackages.Any())
             {
-                Reporter reporter = args.Force ? Reporter.Output : Reporter.Error;
+                IReporter reporter = args.Force ? Reporter.Output : Reporter.Error;
 
                 reporter.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Install_Info_OverrideNotice);
                 reporter.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Install_Info_PackageIsAvailable);

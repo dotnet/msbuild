@@ -12,7 +12,6 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NuGet.Common;
-using NuGet.Frameworks;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
 
@@ -156,6 +155,9 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string DotNetAppHostExecutableNameWithoutExtension { get; set; }
 
+        /// <summary>
+        /// True indicates we are doing a design-time build. Otherwise we are in a build.
+        /// </summary>
         public bool DesignTimeBuild { get; set; }
 
         /// <summary>
@@ -230,6 +232,24 @@ namespace Microsoft.NET.Build.Tasks
 
         [Output]
         public ITaskItem[] PackageDependencies { get; private set; }
+
+        /// <summary>
+        /// List of symbol files (.pdb) related to NuGet packages.
+        /// </summary>
+        /// <remarks>
+        /// Pdb files to be copied to the output directory
+        /// </remarks>
+        [Output]
+        public ITaskItem[] DebugSymbolsFiles { get; private set;}
+
+        /// <summary>
+        /// List of xml files related to NuGet packages.
+        /// </summary>
+        /// <remarks>
+        ///  The XML files should only be included in the publish output if PublishReferencesDocumentationFiles is true
+        /// </remarks>
+        [Output]
+        public ITaskItem[] ReferenceDocumentationFiles { get; private set; }
 
         /// <summary>
         /// Messages from the assets file.
@@ -311,11 +331,13 @@ namespace Microsoft.NET.Build.Tasks
                 ApphostsForShimRuntimeIdentifiers = reader.ReadItemGroup();
                 CompileTimeAssemblies = reader.ReadItemGroup();
                 ContentFilesToPreprocess = reader.ReadItemGroup();
+                DebugSymbolsFiles = reader.ReadItemGroup();
                 FrameworkAssemblies = reader.ReadItemGroup();
                 FrameworkReferences = reader.ReadItemGroup();
                 NativeLibraries = reader.ReadItemGroup();
                 PackageDependencies = reader.ReadItemGroup();
                 PackageFolders = reader.ReadItemGroup();
+                ReferenceDocumentationFiles = reader.ReadItemGroup();
                 ResourceAssemblies = reader.ReadItemGroup();
                 RuntimeAssemblies = reader.ReadItemGroup();
                 RuntimeTargets = reader.ReadItemGroup();
@@ -510,7 +532,7 @@ namespace Microsoft.NET.Build.Tasks
                 BinaryReader reader = null;
                 try
                 {
-                    if (File.GetLastWriteTimeUtc(task.ProjectAssetsCacheFile) > File.GetLastWriteTimeUtc(task.ProjectAssetsFile))
+                    if (IsCacheFileUpToDate())
                     {
                         reader = OpenCacheFile(task.ProjectAssetsCacheFile, settingsHash);
                     }
@@ -537,6 +559,8 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 return reader;
+
+                bool IsCacheFileUpToDate() => File.GetLastWriteTimeUtc(task.ProjectAssetsCacheFile) > File.GetLastWriteTimeUtc(task.ProjectAssetsFile);
             }
 
             private static BinaryReader OpenCacheStream(Stream stream, byte[] settingsHash)
@@ -650,6 +674,8 @@ namespace Microsoft.NET.Build.Tasks
             private bool MismatchedAssetsFile => !CanWriteToCacheFile;
 
             private const string NetCorePlatformLibrary = "Microsoft.NETCore.App";
+
+            private const char RelatedPropertySeparator = ';';
 
             public CacheWriter(ResolvePackageAssets task)
             {
@@ -776,11 +802,13 @@ namespace Microsoft.NET.Build.Tasks
                 WriteItemGroup(WriteApphostsForShimRuntimeIdentifiers);
                 WriteItemGroup(WriteCompileTimeAssemblies);
                 WriteItemGroup(WriteContentFilesToPreprocess);
+                WriteItemGroup(WriteDebugSymbolsFiles);
                 WriteItemGroup(WriteFrameworkAssemblies);
                 WriteItemGroup(WriteFrameworkReferences);
                 WriteItemGroup(WriteNativeLibraries);
                 WriteItemGroup(WritePackageDependencies);
-                WriteItemGroup(WritePackageFolders);                
+                WriteItemGroup(WritePackageFolders);
+                WriteItemGroup(WriteReferenceDocumentationFiles);
                 WriteItemGroup(WriteResourceAssemblies);
                 WriteItemGroup(WriteRuntimeAssemblies);
                 WriteItemGroup(WriteRuntimeTargets);
@@ -1091,6 +1119,61 @@ namespace Microsoft.NET.Build.Tasks
                     });
             }
 
+            private void WriteDebugSymbolsFiles()
+            {
+                WriteDebugItems(
+                    p => p.RuntimeAssemblies,
+                    MetadataKeys.PdbExtension);
+            }
+
+            private void WriteReferenceDocumentationFiles()
+            {
+                WriteDebugItems(
+                    p => p.CompileTimeAssemblies,
+                    MetadataKeys.XmlExtension);
+            }
+
+            private void WriteDebugItems(
+                Func<LockFileTargetLibrary, IEnumerable<LockFileItem>> getAssets,
+                string extension)
+            {
+                foreach (var library in _runtimeTarget.Libraries)
+                {
+                    if (!library.IsPackage())
+                    {
+                        continue;
+                    }
+
+                    foreach (LockFileItem asset in getAssets(library))
+                    {
+                        if (asset.IsPlaceholderFile() || !asset.Properties.ContainsKey(MetadataKeys.RelatedProperty))
+                        {
+                            continue;
+                        }
+
+                        string itemSpec = _packageResolver.ResolvePackageAssetPath(library, asset.Path);
+
+                        string relatedExtensions = asset.Properties[MetadataKeys.RelatedProperty];
+
+                        foreach (string fileExtension in relatedExtensions.Split(RelatedPropertySeparator))
+                        {
+                            if (fileExtension.ToLower() == extension)
+                            {
+                                string xmlFilePath = Path.ChangeExtension(itemSpec, fileExtension);
+                                if (File.Exists(xmlFilePath))
+                                {
+                                    WriteItem(xmlFilePath, library);
+                                }
+                                else
+                                {
+                                    _task.Log.LogWarning(Strings.AssetsFileNotFound, xmlFilePath);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             private void WriteFrameworkAssemblies()
             {
                 if (_task.DisableFrameworkAssemblies)
@@ -1127,7 +1210,7 @@ namespace Microsoft.NET.Build.Tasks
 
             private void WriteLogMessages()
             {
-                string GetSeverity(LogLevel level)
+                static string GetSeverity(LogLevel level)
                 {
                     switch (level)
                     {
@@ -1178,7 +1261,7 @@ namespace Microsoft.NET.Build.Tasks
 
             private void WriteMismatchedPlatformPackageVersionMessageIfNecessary()
             {
-                bool hasTwoPeriods(string s)
+                static bool hasTwoPeriods(string s)
                 {
                     int firstPeriodIndex = s.IndexOf('.');
                     if (firstPeriodIndex < 0)
