@@ -28,7 +28,7 @@ stages:
   jobs:
   - job: Windows_NT
     pool:
-      name: VSEng-MicroBuildVS2019
+      name: VSEngSS-MicroBuild2022-1ES
       demands:
       - agent.os -equals Windows_NT
 
@@ -73,10 +73,9 @@ stages:
       displayName: 'Install OptProf Plugin'
 
     # Required by MicroBuildBuildVSBootstrapper
-    - task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
+    - task: MicroBuildSwixPlugin@4
       inputs:
         dropName: $(VisualStudio.DropName)
-        feedSource: 'https://devdiv-test.pkgs.visualstudio.com/_packaging/MicroBuildToolset/nuget/v3/index.json'
 
     - script: eng/CIBuild.cmd
                 -configuration $(BuildConfiguration)
@@ -105,7 +104,7 @@ stages:
         buildNumber: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
         sourcePath: '$(Build.SourcesDirectory)\artifacts\OptProf\$(BuildConfiguration)\Data'
         toLowerCase: false
-        usePat: false
+        usePat: true
       displayName: 'OptProf - Publish to Artifact Services - ProfilingInputs'
       condition: succeeded()
 
@@ -156,11 +155,14 @@ stages:
 
     # Publishes setup VSIXes to a drop.
     # Note: The insertion tool looks for the display name of this task in the logs.
-    - task: ms-vseng.MicroBuildTasks.4305a8de-ba66-4d8b-b2d1-0dc4ecbbf5e8.MicroBuildUploadVstsDropFolder@1
+    - task: MicroBuildUploadVstsDropFolder@2
       displayName: Upload VSTS Drop
       inputs:
         DropName: $(VisualStudio.DropName)
         DropFolder: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+        AccessToken: $(System.AccessToken)
+        DropServiceUri: 'https://devdiv.artifacts.visualstudio.com'
+        VSDropServiceUri: 'https://vsdrop.corp.microsoft.com/file/v1'
       condition: succeeded()
 
     # Publish an artifact that the RoslynInsertionTool is able to find by its name.
@@ -207,7 +209,7 @@ stages:
       dependsOn:
         - Windows_NT
       pool:
-        vmImage: vs2017-win2016
+        vmImage: windows-latest
 
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: eng\common\templates\post-build\post-build.yml
