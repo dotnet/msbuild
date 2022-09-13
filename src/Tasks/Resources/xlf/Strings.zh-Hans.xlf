@@ -1362,9 +1362,14 @@
         <note>{StrBegin="MSB3981: "}</note>
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.NoPlatformsListed">
-        <source>MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' metadata set. It will be built without a specified platform.</source>
-        <target state="translated">MSB3982: EnableDynamicPlatformResolution 为 true，但引用的项目 "{0}" 没有设置 "Platforms" 元数据。它将在没有指定平台的情况下生成。</target>
+        <source>MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</source>
+        <target state="new">MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</target>
         <note>{StrBegin="MSB3982: "}</note>
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform">
+        <source>Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</source>
+        <target state="new">Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</target>
+        <note />
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.SamePlatform">
         <source>ProjectReference and current project have the same platform.</source>
@@ -1546,6 +1551,11 @@
         <source>MSB3216: Cannot register assembly "{0}" - access denied. Please make sure you're running the application as administrator. {1}</source>
         <target state="translated">MSB3216: 无法注册程序集“{0}”- 拒绝访问。请确保您正在以管理员身份运行应用程序。{1}</target>
         <note>{StrBegin="MSB3216: "}</note>
+      </trans-unit>
+      <trans-unit id="RemoveDir.EmptyPath">
+        <source>MSB3232: An empty directory was passed to RemoveDir and was ignored.</source>
+        <target state="new">MSB3232: An empty directory was passed to RemoveDir and was ignored.</target>
+        <note>{StrBegin="MSB3232: "}</note>
       </trans-unit>
       <trans-unit id="RemoveDir.Error">
         <source>MSB3231: Unable to remove directory "{0}". {1}</source>
