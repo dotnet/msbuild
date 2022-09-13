@@ -155,8 +155,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 command.GetArgumentsToMSBuild()
                     .Should()
                     .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary " +
-                    $"-property:SelfContained=True -property:_CommandLineDefinedSelfContained=true " +
-                    $"-property:RuntimeIdentifier={currentRid} -property:_CommandLineDefinedRuntimeIdentifier=true");
+                    $"-property:SelfContained=True -property:_CommandLineDefinedSelfContained=true");
             });
         }
 

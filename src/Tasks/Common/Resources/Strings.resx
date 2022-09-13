@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!--
     Microsoft ResX Schema
@@ -866,5 +866,9 @@ You may need to build the project on another operating system or architecture, o
   <data name="PReleaseRequiresEnvVarOnSln" xml:space="preserve">
     <value>NETSDK1190: To use '{0}' in solution projects, you must set the environment variable '{1}' (to true). This will increase the time to complete the operation.</value>
     <comment>{StrBegin="NETSDK1190: "}</comment>
+  </data>
+  <data name="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed" xml:space="preserve">
+    <value>NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</value>
+      <comment>{StrBegin="NETSDK1191: "}</comment>
   </data>
 </root>
