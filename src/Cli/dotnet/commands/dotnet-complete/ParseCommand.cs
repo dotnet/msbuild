@@ -7,41 +7,33 @@ namespace Microsoft.DotNet.Cli
 {
     public class ParseCommand
     {
-        public static int Run(string[] args)
+        public static int Run(ParseResult result)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
+            result.HandleDebugSwitch();
 
-            ParseResult result;
-            try
-            {
-                result = Parser.Instance.Parse(
-                    args.Single());
-            }
-            catch (Exception e)
-            {
-                throw new InvalidOperationException("The parser threw an exception.", e);
-            }
+            var tokens = result.Tokens.Skip(1).Select(t => t.Value).ToArray();
+            var reparsed = Microsoft.DotNet.Cli.Parser.Instance.Parse(tokens);
+            Console.WriteLine(reparsed.Diagram());
 
-            Console.WriteLine(result.Diagram());
 
-            if (result.UnparsedTokens.Any())
+            if (reparsed.UnparsedTokens.Any())
             {
                 Console.WriteLine("Unparsed Tokens: ");
-                Console.WriteLine(string.Join(" ", result.UnparsedTokens));
+                Console.WriteLine(string.Join(" ", reparsed.UnparsedTokens));
             }
 
-            var optionValuesToBeForwarded = result.OptionValuesToBeForwarded(ParseCommandParser.GetCommand());
+            var optionValuesToBeForwarded = reparsed.OptionValuesToBeForwarded(ParseCommandParser.GetCommand());
             if (optionValuesToBeForwarded.Any())
             {
                 Console.WriteLine("Option values to be forwarded: ");
                 Console.WriteLine(string.Join(" ", optionValuesToBeForwarded));
             }
-            if (result.Errors.Any())
+            if (reparsed.Errors.Any())
             {
                 Console.WriteLine();
                 Console.WriteLine("ERRORS");
                 Console.WriteLine();
-                foreach (var error in result.Errors)
+                foreach (var error in reparsed.Errors)
                 {
                     Console.WriteLine(error?.Message);
                 }

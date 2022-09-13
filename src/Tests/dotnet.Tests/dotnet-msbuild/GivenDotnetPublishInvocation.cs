@@ -6,9 +6,11 @@ using System.Linq;
 using Microsoft.DotNet.Tools.Publish;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.NET.TestFramework;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
+    [Collection(TestConstants.UsesStaticTelemetryState)]
     public class GivenDotnetPublishInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
         private static readonly string WorkingDirectory =
@@ -102,7 +104,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
             command.GetArgumentsToMSBuild()
                .Should()
-               .Be($"{ExpectedPrefix} -restore -target:Publish -property:Prop1=prop1 -property:Prop2=prop2");
+               .Be($"{ExpectedPrefix} -restore -target:Publish --property:Prop1=prop1 --property:Prop2=prop2");
         }
     }
 }

@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="RepairSucceeded">
         <source>Successfully repaired workloads: {0}</source>
-        <target state="new">Successfully repaired workloads: {0}</target>
+        <target state="translated">Cargas de trabalho reparadas com êxito: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RepairingWorkloads">

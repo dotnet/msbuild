@@ -94,6 +94,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.NET.ILLink.Analyzers.props"
           Condition="'$(EnableSingleFileAnalyzer)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true'" />
 
+  <Import Project="$(MSBuildThisFileDirectory)..\codestyle\cs\build\Microsoft.CodeAnalysis.CSharp.CodeStyle.targets"
+          Condition="$(EnforceCodeStyleInBuild) And '$(Language)' == 'C#'" />
+  <Import Project="$(MSBuildThisFileDirectory)..\codestyle\vb\build\Microsoft.CodeAnalysis.VisualBasic.CodeStyle.targets"
+          Condition="$(EnforceCodeStyleInBuild) And '$(Language)' == 'VB'" />
+
   <!-- .NET Analyzers -->
   <ItemGroup Condition="$(EnableNETAnalyzers)">
     <Analyzer

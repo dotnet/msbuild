@@ -1,6 +1,6 @@
 {
   "tools": {
-    "dotnet": "6.0.103",
+    "dotnet": "6.0.201",
     "runtimes": {
       "dotnet": [
         "$(VSRedistCommonNetCoreSharedFrameworkx6460PackageVersion)"

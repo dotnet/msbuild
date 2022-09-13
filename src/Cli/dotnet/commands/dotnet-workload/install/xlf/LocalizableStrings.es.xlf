@@ -17,6 +17,16 @@
         <target state="translated">El paquete {0}, versión {1} no existe en la caché sin conexión {2}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
+        <target state="translated">No se pueden usar las opciones {0} y {1} juntas. Si se instala desde un archivo de reversión, quite {0}. De lo contrario, quite {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CheckForUpdatedWorkloadManifests">
+        <source>Checking for updated workload manifests.</source>
+        <target state="translated">Comprobando si hay manifiestos de carga de trabajo actualizados.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}…</source>
         <target state="translated">Desinstalando el paquete de carga de trabajo {0} versión{1}...</target>
@@ -207,6 +217,11 @@
         <target state="translated">Omitir la actualización de los manifiestos de carga de trabajo.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SkipSignCheckOptionDescription">
+        <source>Skip signature verification of workload packages and installers.</source>
+        <target state="translated">Omita la comprobación de firma de los paquetes de carga de trabajo y los instaladores.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippingManifestUpdate">
         <source>Manifest packages were not found. Skipping manifest update...</source>
         <target state="translated">No se encontraron los paquetes de manifiesto. Se omitirá la actualización del manifiesto...</target>
@@ -278,8 +293,8 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadAlreadyInstalled">
-        <source>Workload '{0}' is already installed.</source>
-        <target state="translated">La carga de trabajo "{0}" ya está instalada.</target>
+        <source>Workload(s) '{0}' are already installed.</source>
+        <target state="translated">Las cargas de trabajo "{0}" ya están instaladas.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadCacheDownloadFailed">

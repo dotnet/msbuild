@@ -7,6 +7,7 @@ using FluentAssertions;
 using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Utilities;
 using Moq;
 using Xunit;
@@ -15,6 +16,7 @@ using static Microsoft.DotNet.Configurer.UnitTests.GivenADotnetFirstTimeUseConfi
 
 namespace Microsoft.DotNet.Configurer.UnitTests
 {
+    [Collection(TestConstants.UsesStaticTelemetryState)]
     public class GivenADotnetFirstTimeUseConfigurerWithStateSetup
     {
         private const string CliFallbackFolderPath = "some path";
@@ -38,6 +40,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 
         private void ResetObjectState()
         {
+            Telemetry.EnableForTests();
             _firstTimeUseNoticeSentinelMock = new MockBasicSentinel();
             _aspNetCertificateSentinelMock = new MockBasicSentinel();
             _aspNetCoreCertificateGeneratorMock = new Mock<IAspNetCoreCertificateGenerator>(MockBehavior.Strict);

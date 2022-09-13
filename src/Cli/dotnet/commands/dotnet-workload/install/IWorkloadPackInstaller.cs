@@ -6,16 +6,15 @@ using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using System.Collections.Generic;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
+using Microsoft.DotNet.Cli;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
     internal interface IWorkloadPackInstaller : IInstaller
     {
-        void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null);
+        void InstallWorkloadPacks(IEnumerable<PackInfo> packInfos, SdkFeatureBand sdkFeatureBand, ITransactionContext transactionContext, DirectoryPath? offlineCache = null);
 
-        void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null);
-
-        void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null);
+        void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, ITransactionContext transactionContext, DirectoryPath? offlineCache = null);
 
         void DownloadToOfflineCache(PackInfo packInfo, DirectoryPath offlineCache, bool includePreviews);
 
