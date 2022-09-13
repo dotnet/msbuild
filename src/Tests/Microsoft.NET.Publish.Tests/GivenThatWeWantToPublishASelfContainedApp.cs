@@ -127,7 +127,7 @@ namespace Microsoft.NET.Publish.Tests
 
             new RestoreCommand(testAsset, "main").Execute(args);
 
-            new PublishCommand(Log, Path.Combine(testAsset.Path, "main", "main.csproj"))
+            new PublishCommand(testAsset, "main")
                 .Execute(args)
                 .Should()
                 .Pass();
