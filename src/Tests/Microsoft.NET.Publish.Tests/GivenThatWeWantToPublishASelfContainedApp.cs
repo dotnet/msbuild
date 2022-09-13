@@ -111,7 +111,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Be(2);
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.4.0.41702")]
         public void It_publishes_an_app_with_a_netcoreapp_lib_reference()
         {
             var testAsset = _testAssetsManager
