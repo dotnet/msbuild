@@ -6,7 +6,9 @@ parameters:
   pool: {}
 
   # Additional variables
-  variables: {}
+  variables:
+    - name: CIBuild
+    value: -restore -build -sign -pack -ci
 
   # Build strategy - matrix
   strategy: ''
@@ -67,7 +69,8 @@ jobs:
           env:
             Token: $(dn-bot-dnceng-artifact-feeds-rw)
       - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
-        - script: eng\CIBuild.cmd
+        - script: eng\common\build.cmd
+                    $(CIBuild)
                     -configuration $(_BuildConfig)
                     $(_PublishArgs)
                     $(_SignArgs)
@@ -98,7 +101,8 @@ jobs:
               RunAoTTests: 'false'
   
       - ${{ if eq(parameters.agentOs, 'Windows_NT_FullFramework') }}:
-        - script: eng\CIBuild.cmd
+        - script: eng\common\build.cmd
+                    $(CIBuild)
                     -configuration $(_BuildConfig)
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)
@@ -128,7 +132,8 @@ jobs:
               HelixAccessToken: $(_HelixApiToken)
   
       - ${{ if eq(parameters.agentOs, 'Windows_NT_TestAsTools') }}:
-        - script: eng\CIBuild.cmd
+        - script: eng\common\build.cmd
+                    $(CIBuild)
                     -configuration $(_BuildConfig)
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)
@@ -140,7 +145,8 @@ jobs:
             BuildConfig: $(_BuildConfig)
   
       - ${{ if notIn(parameters.agentOs, 'Windows_NT', 'Windows_NT_FullFramework', 'Windows_NT_TestAsTools') }}:
-        - script: eng/common/cibuild.sh
+        - script: eng/common/build.sh
+                    $(CIBuild)
                     --configuration $(_BuildConfig)
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)
@@ -241,7 +247,8 @@ jobs:
           env:
             Token: $(dn-bot-dnceng-artifact-feeds-rw)
       - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
-        - script: eng\CIBuild.cmd
+        - script: eng\common\build.cmd
+                    $(CIBuild)
                     -configuration $(_BuildConfig)
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)
@@ -368,7 +375,8 @@ jobs:
           env:
             Token: $(dn-bot-dnceng-artifact-feeds-rw)
       - ${{ if contains(parameters.agentOs, 'Windows_NT') }}:
-        - script: eng\CIBuild.cmd
+        - script: eng\common\build.cmd
+                    $(CIBuild)
                     -configuration $(_BuildConfig)
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)

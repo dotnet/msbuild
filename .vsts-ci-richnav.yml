@@ -52,7 +52,12 @@ stages:
           - _SignArgs: ''
           - _InternalRuntimeDownloadArgs: ''
         steps:
-        - script: eng\CIBuild.cmd
+        - script: eng\common\build.cmd
+                    -restore
+                    -ci
+                    -build
+                    -pack
+                    -sign
                     -configuration $(_BuildConfig)
                     $(_PublishArgs)
                     $(_SignArgs)
