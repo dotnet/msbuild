@@ -53,9 +53,7 @@ namespace Microsoft.Build.Logging
         //   - TargetSkippedEventArgs: added OriginallySucceeded, Condition, EvaluatedCondition
         // version 14:
         //   - TargetSkippedEventArgs: added SkipReason, OriginalBuildEventContext
-        // version 15:
-        //   - Log our own environment variables by default. (This affects the message in the structured log viewer.)
-        internal const int FileFormatVersion = 15;
+        internal const int FileFormatVersion = 14;
 
         private Stream stream;
         private BinaryWriter binaryWriter;
