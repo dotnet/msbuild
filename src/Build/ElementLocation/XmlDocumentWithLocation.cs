@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using System.Xml;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
