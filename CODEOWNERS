@@ -12,19 +12,19 @@
 /src/Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests/ @vijayrkn
 
 # Area-AspNetCore
-/src/BlazorWasmSdk/ @captainsafia @mkArtakMSFT @TanayParikh @javiercn
-/src/Tests/Microsoft.NET.Sdk.BlazorWebAssembly.Tests/ @captainsafia @mkArtakMSFT
-/src/Assets/TestProjects/BlazorHosted/ @captainsafia @mkArtakMSFT
-/src/Assets/TestProjects/BlazorHostedRID/ @captainsafia @mkArtakMSFT
-/src/Assets/TestProjects/BlazorWasmMinimal/ @captainsafia @mkArtakMSFT
-/src/Assets/TestProjects/BlazorWasmWithLibrary/ @captainsafia @mkArtakMSFT
-/src/RazorSdk/ @captainsafia @mkArtakMSFT
-/src/Tests/Microsoft.NET.Sdk.BlazorWebAssembly.AoT.Tests/ @mkArtakMSFT @TanayParikh @javiercn
-/src/Tests/Microsoft.NET.Sdk.Razor.Tests/ @captainsafia @mkArtakMSFT
-/src/Tests/Microsoft.NET.Sdk.Razor.Tool.Tests/ @captainsafia @mkArtakMSFT
-/src/Assets/TestPackages/PackageLibraryDirectDependency/ @captainsafia @mkArtakMSFT
-/src/Assets/TestPackages/PackageLibraryTransitiveDependency/ @captainsafia @mkArtakMSFT
-/src/src/Assets/TestProjects/Razor*/ @captainsafia @mkArtakMSFT
+/src/BlazorWasmSdk/ @dotnet/aspnet-blazor-eng
+/src/Tests/Microsoft.NET.Sdk.BlazorWebAssembly.Tests/ @dotnet/aspnet-blazor-eng
+/src/Assets/TestProjects/BlazorHosted/ @dotnet/aspnet-blazor-eng
+/src/Assets/TestProjects/BlazorHostedRID/ @dotnet/aspnet-blazor-eng
+/src/Assets/TestProjects/BlazorWasmMinimal/ @dotnet/aspnet-blazor-eng
+/src/Assets/TestProjects/BlazorWasmWithLibrary/ @dotnet/aspnet-blazor-eng
+/src/RazorSdk/ @dotnet/aspnet-blazor-eng
+/src/Tests/Microsoft.NET.Sdk.BlazorWebAssembly.AoT.Tests/ @dotnet/aspnet-blazor-eng
+/src/Tests/Microsoft.NET.Sdk.Razor.Tests/ @dotnet/aspnet-blazor-eng
+/src/Tests/Microsoft.NET.Sdk.Razor.Tool.Tests/ @dotnet/aspnet-blazor-eng
+/src/Assets/TestPackages/PackageLibraryDirectDependency/ @dotnet/aspnet-blazor-eng
+/src/Assets/TestPackages/PackageLibraryTransitiveDependency/ @dotnet/aspnet-blazor-eng
+/src/src/Assets/TestProjects/Razor*/ @dotnet/aspnet-blazor-eng
 
 # Area-Format
 /src/Cli/dotnet/commands/dotnet-format @jmarolf @JoeRobich
