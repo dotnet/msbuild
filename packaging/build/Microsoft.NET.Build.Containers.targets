@@ -93,6 +93,7 @@
                         WorkingDirectory="$(ContainerWorkingDirectory)"
                         Entrypoint="@(ContainerEntrypoint)"
                         EntrypointArgs="@(ContainerEntrypointArgs)"
-						Labels="@(ContainerLabel)"/>
+                        Labels="@(ContainerLabel)"
+                        ExposedPorts="@(ContainerPort)" />
     </Target>
 </Project>

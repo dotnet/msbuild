@@ -67,9 +67,18 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
     public ITaskItem[] EntrypointArgs { get; set; }
 
     /// <summary>
+    /// Ports that the application declares that it will use.
+    /// Note that this means nothing to container hosts, by default -
+    /// it's mostly documentation.
+    /// </summary>
+    public ITaskItem[] ExposedPorts { get; set; }
+
+    /// <summary>
     /// Labels that the image configuration will include in metadata
     /// </summary>
     public ITaskItem[] Labels { get; set; }
+
+    private bool IsDockerPush { get => OutputRegistry == "docker://"; }
 
     public CreateNewImage()
     {
@@ -84,8 +93,55 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
         Entrypoint = Array.Empty<ITaskItem>();
         EntrypointArgs = Array.Empty<ITaskItem>();
         Labels = Array.Empty<ITaskItem>();
+        ExposedPorts = Array.Empty<ITaskItem>();
     }
 
+    private void SetPorts(Image image, ITaskItem[] exposedPorts)
+    {
+        foreach (var port in exposedPorts)
+        {
+            var portNo = port.ItemSpec;
+            var portTy = port.GetMetadata("Type");
+            if (ContainerHelpers.TryParsePort(portNo, portTy, out var parsedPort, out var errors))
+            {
+                image.ExposePort(parsedPort.number, parsedPort.type);
+            }
+            else
+            {
+                ContainerHelpers.ParsePortError parsedErrors = (ContainerHelpers.ParsePortError)errors!;
+                var portString = portTy == null ? portNo : $"{portNo}/{portTy}";
+                if (parsedErrors.HasFlag(ContainerHelpers.ParsePortError.MissingPortNumber))
+                {
+                    Log.LogError("ContainerPort item '{0}' does not specify the port number. Please ensure the item's Include is a port number, for example '<ContainerPort Include=\"80\" />'", port.ItemSpec);
+                }
+                else
+                {
+                    var message = "A ContainerPort item was provided with ";
+                    var arguments = new List<string>(2);
+                    if (parsedErrors.HasFlag(ContainerHelpers.ParsePortError.InvalidPortNumber) && parsedErrors.HasFlag(ContainerHelpers.ParsePortError.InvalidPortNumber))
+                    {
+                        message += "an invalid port number '{0}' and an invalid port type '{1}'";
+                        arguments.Add(portNo);
+                        arguments.Add(portTy!);
+                    }
+                    else if (parsedErrors.HasFlag(ContainerHelpers.ParsePortError.InvalidPortNumber))
+                    {
+                        message += "an invalid port number '{0}'";
+                        arguments.Add(portNo);
+                    }
+                    else if (parsedErrors.HasFlag(ContainerHelpers.ParsePortError.InvalidPortNumber))
+                    {
+                        message += "an invalid port type '{0}'";
+                        arguments.Add(portTy!);
+                    }
+                    message += ". ContainerPort items must have an Include value that is an integer, and a Type value that is either 'tcp' or 'udp'";
+
+                    Log.LogError(message, arguments);
+                }
+            }
+        }
+
+    }
 
     public override bool Execute()
     {
@@ -121,6 +177,14 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
         foreach (var label in Labels)
         {
             image.Label(label.ItemSpec, label.GetMetadata("Value"));
+        }
+
+        SetPorts(image, ExposedPorts);
+
+        // at the end of this step, if any failed then bail out.
+        if (Log.HasLoggedErrors)
+        {
+            return false;
         }
 
         var isDockerPush = OutputRegistry.StartsWith("docker://");
@@ -160,7 +224,6 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
                     }
                 }
             }
-
         }
 
         return !Log.HasLoggedErrors;

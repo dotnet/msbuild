@@ -2,6 +2,7 @@
 using Microsoft.NET.Build.Containers;
 using System.Text.Json;
 using System.CommandLine.Parsing;
+using System.Text;
 
 var publishDirectoryArg = new Argument<DirectoryInfo>(
     name: "PublishDirectory",
@@ -84,6 +85,45 @@ var labelsOpt = new Option<string[]>(
     AllowMultipleArgumentsPerToken = true
 };
 
+var portsOpt = new Option<Port[]>(
+    name: "--ports",
+    description: "Ports that the application declares that it will use. Note that this means nothing to container hosts, by default - it's mostly documentation. Ports should be of the form {number}/{type}, where {type} is tcp or udp",
+    parseArgument: result => {
+        var ports = result.Tokens.Select(x => x.Value).ToArray();
+        var goodPorts = new List<Port>();
+        var badPorts = new List<(string, ContainerHelpers.ParsePortError)>();
+        
+        foreach (var port in ports) {
+            var split = port.Split('/');
+            if (split.Length != 2) {
+                badPorts.Add((port, ContainerHelpers.ParsePortError.UnknownPortFormat));
+                continue;
+            }
+            if (ContainerHelpers.TryParsePort(split[0], split[1], out var portInfo, out var portError)) {
+                goodPorts.Add(portInfo);
+            } else {
+                var pe = (ContainerHelpers.ParsePortError)portError!;
+                badPorts.Add((port, pe));
+            }
+        }
+
+        if (badPorts.Count() != 0)
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine("Incorrectly formatted ports:");
+            foreach (var (badPort, error) in badPorts){
+                var errors = Enum.GetValues<ContainerHelpers.ParsePortError>().Where(e => error.HasFlag(e));
+                builder.AppendLine($"\t{badPort}:\t({string.Join(", ", errors)})");
+            }
+            result.ErrorMessage = builder.ToString();
+            return new Port[] { };
+        }
+        return goodPorts.ToArray();
+    }
+){
+    AllowMultipleArgumentsPerToken = true
+};
+
 RootCommand root = new RootCommand("Containerize an application without Docker.")
 {
     publishDirectoryArg,
@@ -96,7 +136,8 @@ RootCommand root = new RootCommand("Containerize an application without Docker."
     workingDirectoryOpt,
     entrypointOpt,
     entrypointArgsOpt,
-    labelsOpt
+    labelsOpt,
+    portsOpt
 };
 
 root.SetHandler(async (context) =>
@@ -112,8 +153,8 @@ root.SetHandler(async (context) =>
     string[] _entrypoint = context.ParseResult.GetValueForOption(entrypointOpt) ?? Array.Empty<string>();
     string[] _entrypointArgs = context.ParseResult.GetValueForOption(entrypointArgsOpt) ?? Array.Empty<string>();
     string[] _labels = context.ParseResult.GetValueForOption(labelsOpt) ?? Array.Empty<string>();
-
-    await ContainerHelpers.Containerize(_publishDir, _workingDir, _baseReg, _baseName, _baseTag, _entrypoint, _entrypointArgs, _name, _tags, _outputReg, _labels);
+    Port[] _ports = context.ParseResult.GetValueForOption(portsOpt) ?? Array.Empty<Port>();
+    await ContainerHelpers.Containerize(_publishDir, _workingDir, _baseReg, _baseName, _baseTag, _entrypoint, _entrypointArgs, _name, _tags, _outputReg, _labels, _ports);
 });
 
 return await root.InvokeAsync(args);

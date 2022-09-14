@@ -144,7 +144,73 @@ public static class ContainerHelpers
         }
     }
 
-    public static async Task Containerize(DirectoryInfo folder, string workingDir, string registryName, string baseName, string baseTag, string[] entrypoint, string[] entrypointArgs, string imageName, string[] imageTags, string outputRegistry, string[] labels)
+    [Flags]
+    public enum ParsePortError
+    {
+        MissingPortNumber,
+        InvalidPortNumber,
+        InvalidPortType,
+        UnknownPortFormat
+    }
+
+    public static bool TryParsePort(string? portNumber, string? portType, [NotNullWhen(true)] out Port? port, [NotNullWhen(false)] out ParsePortError? error)
+    {
+        var portNo = 0;
+        error = null;
+        if (String.IsNullOrEmpty(portNumber))
+        {
+            error = ParsePortError.MissingPortNumber;
+        }
+        else if (!int.TryParse(portNumber, out portNo))
+        {
+            error = ParsePortError.InvalidPortNumber;
+        }
+
+        if (!Enum.TryParse<PortType>(portType, out PortType t))
+        {
+            if (portType is not null)
+            {
+                error = (error ?? ParsePortError.InvalidPortType) | ParsePortError.InvalidPortType;
+            }
+            else
+            {
+                t = PortType.tcp;
+            }
+        }
+
+        if (error is null)
+        {
+            port = new Port(portNo, t);
+            return true;
+        }
+        else
+        {
+            port = null;
+            return false;
+        }
+
+    }
+
+    public static bool TryParsePort(string input, [NotNullWhen(true)] out Port? port, [NotNullWhen(false)] out ParsePortError? error)
+    {
+        var parts = input.Split('/');
+        if (parts is [var portNumber, var type])
+        {
+            return TryParsePort(portNumber, type, out port, out error);
+        }
+        else if (parts is [var portNo])
+        {
+            return TryParsePort(portNo, null, out port, out error);
+        }
+        else
+        {
+            error = ParsePortError.UnknownPortFormat;
+            port = null;
+            return false;
+        }
+    }
+
+    public static async Task Containerize(DirectoryInfo folder, string workingDir, string registryName, string baseName, string baseTag, string[] entrypoint, string[] entrypointArgs, string imageName, string[] imageTags, string outputRegistry, string[] labels, Port[] exposedPorts)
     {
         Registry baseRegistry = new Registry(new Uri(registryName));
 
@@ -172,8 +238,14 @@ public static class ContainerHelpers
         {
             string[] labelPieces = label.Split('=');
 
-            // labels are validated by System.Commandline API
+            // labels are validated by System.CommandLine API
             img.Label(labelPieces[0], labelPieces[1]);
+        }
+
+        foreach (var (number, type) in exposedPorts)
+        {
+            // ports are validated by System.CommandLine API
+            img.ExposePort(number, type);
         }
 
         foreach (var tag in imageTags)
@@ -206,6 +278,5 @@ public static class ContainerHelpers
                 }
             }
         }
-
     }
 }
