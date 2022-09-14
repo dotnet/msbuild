@@ -8,7 +8,7 @@ parameters:
   # Additional variables
   variables:
     - name: CIBuild
-    value: -restore -build -sign -pack -ci
+      value: -restore -build -sign -pack -ci
 
   # Build strategy - matrix
   strategy: ''
