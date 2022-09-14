@@ -123,7 +123,6 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public async Task WaitForClientConnectionAsync(CancellationToken cancellationToken)
         {
-            _reporter.Verbose("Waiting for a browser to connect");
             await _clientConnected.Task.WaitAsync(cancellationToken);
         }
 

@@ -22,8 +22,7 @@ namespace Microsoft.DotNet.Watcher.Tools
     {
         private static readonly string _namedPipeName = Guid.NewGuid().ToString();
         private readonly IReporter _reporter;
-        private Task? _connectionTask;
-        private Task<ImmutableArray<string>>? _capabilities;
+        private Task<ImmutableArray<string>>? _capabilitiesTask;
         private NamedPipeServerStream? _pipe;
 
         public DefaultDeltaApplier(IReporter reporter)
@@ -38,24 +37,16 @@ namespace Microsoft.DotNet.Watcher.Tools
             if (!SuppressNamedPipeForTests)
             {
                 _pipe = new NamedPipeServerStream(_namedPipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
-                _connectionTask = _pipe.WaitForConnectionAsync(cancellationToken);
-
-                _capabilities = Task.Run(async () =>
+                _capabilitiesTask = Task.Run(async () =>
                 {
-                    try
-                    {
-                        await _connectionTask;
-                        // When the client connects, the first payload it sends is the initialization payload which includes the apply capabilities.
-                        var capabiltiies = ClientInitializationPayload.Read(_pipe).Capabilities;
-                        _reporter.Verbose($"Application supports the following capabilities {capabiltiies}.");
-                        return capabiltiies.Split(' ').ToImmutableArray();
-                    }
-                    catch
-                    {
-                        // Do nothing. This is awaited by Apply which will surface the error.
-                    }
+                    _reporter.Verbose($"Connecting to the application.");
 
-                    return ImmutableArray<string>.Empty;
+                    await _pipe.WaitForConnectionAsync(cancellationToken);
+
+                    // When the client connects, the first payload it sends is the initialization payload which includes the apply capabilities.
+
+                    var capabilities = ClientInitializationPayload.Read(_pipe).Capabilities;
+                    return capabilities.Split(' ').ToImmutableArray();
                 });
             }
 
@@ -72,11 +63,11 @@ namespace Microsoft.DotNet.Watcher.Tools
         }
 
         public Task<ImmutableArray<string>> GetApplyUpdateCapabilitiesAsync(DotNetWatchContext context, CancellationToken cancellationToken)
-            => _capabilities ?? Task.FromResult(ImmutableArray<string>.Empty);
+            => _capabilitiesTask ?? Task.FromResult(ImmutableArray<string>.Empty);
 
         public async ValueTask<bool> Apply(DotNetWatchContext context, ImmutableArray<WatchHotReloadService.Update> solutionUpdate, CancellationToken cancellationToken)
         {
-            if (_connectionTask is null || !_connectionTask.IsCompletedSuccessfully || _pipe is null || !_pipe.IsConnected)
+            if (_capabilitiesTask is null || !_capabilitiesTask.IsCompletedSuccessfully || _pipe is null || !_pipe.IsConnected)
             {
                 // The client isn't listening
                 _reporter.Verbose("No client connected to receive delta updates.");
@@ -101,15 +92,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             var bytes = ArrayPool<byte>.Shared.Rent(1);
             try
             {
-                var timeout =
-#if DEBUG
-                 Timeout.InfiniteTimeSpan;
-#else
-                 TimeSpan.FromSeconds(5);
-#endif
-
-                using var cancellationTokenSource = new CancellationTokenSource(timeout);
-                var numBytes = await _pipe.ReadAsync(bytes, cancellationTokenSource.Token);
+                var numBytes = await _pipe.ReadAsync(bytes, cancellationToken);
 
                 if (numBytes == 1)
                 {
