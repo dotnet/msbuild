@@ -370,6 +370,11 @@
         <target state="translated">Wystąpił błąd programu do rozpoznawania zestawu SDK „{0}” podczas próby rozpoznania zestawu SDK „{1}”. Wyjątek: „{2}”</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKResolverReturnedNull">
+        <source>SDK resolver "{0}" returned null. SDK resolvers should always return success or failure. This is a bug in the SDK resolver.</source>
+        <target state="new">SDK resolver "{0}" returned null. SDK resolvers should always return success or failure. This is a bug in the SDK resolver.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: W przypadku projektu „{0}” pominięto ograniczenia izolacji grafu dla przywoływanego projektu „{1}”</target>

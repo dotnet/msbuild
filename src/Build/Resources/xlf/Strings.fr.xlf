@@ -370,6 +370,11 @@
         <target state="translated">Échec du programme de résolution SDK «{0}» lors de la tentative de résolution du kit de développement logiciel (SDK) «{1}». Exception : "{2}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKResolverReturnedNull">
+        <source>SDK resolver "{0}" returned null. SDK resolvers should always return success or failure. This is a bug in the SDK resolver.</source>
+        <target state="new">SDK resolver "{0}" returned null. SDK resolvers should always return success or failure. This is a bug in the SDK resolver.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: le projet "{0}" a ignoré les contraintes d'isolement de graphe dans le projet référencé "{1}"</target>

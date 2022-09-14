@@ -370,6 +370,11 @@
         <target state="translated">SDK "{1}" を解決しようとしているときに、SDK リゾルバー "{0}" に失敗しました。例外: "{2}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKResolverReturnedNull">
+        <source>SDK resolver "{0}" returned null. SDK resolvers should always return success or failure. This is a bug in the SDK resolver.</source>
+        <target state="new">SDK resolver "{0}" returned null. SDK resolvers should always return success or failure. This is a bug in the SDK resolver.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: プロジェクト "{0}" は、参照先のプロジェクト "{1}" で、グラフの分離制約をスキップしました</target>
