@@ -661,7 +661,9 @@ namespace Microsoft.NET.Publish.Tests
                 });
                 break;
             case "net7.0":
+            case "net8.0":
                 expectedOutput.AddRange(new string[] {
+                    "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssembly(IntPtr, IntPtr",
                     "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssemblyInContextWhenSupported(IntPtr, IntPtr",
                 });
                 break;
@@ -708,8 +710,10 @@ namespace Microsoft.NET.Publish.Tests
                 });
                 break;
             case "net7.0":
+            case "net8.0":
                 expectedOutput.AddRange(new string[] {
                     "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.ComActivator.GetClassFactoryForTypeInternal(ComActivationContextInternal*",
+                    "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssembly(IntPtr, IntPtr",
                     "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssemblyInContextWhenSupported(IntPtr, IntPtr",
                     "ILLink : Trim analysis warning IL2026: System.Linq.Queryable: Using member 'System.Linq.EnumerableRewriter.s_seqMethods' which has 'RequiresUnreferencedCodeAttribute'",
                     "ILLink : Trim analysis warning IL2026: System.Transactions.DtcProxyShim.DtcProxyShimFactory.ConnectToProxyCore(String, Guid, Object, Boolean&, Byte[]&, ResourceManagerShim&",
@@ -1733,7 +1737,7 @@ namespace Microsoft.NET.Publish.Tests
   </assembly>
 </linker>
 ";
-            
+
             testProject.AddItem("EmbeddedResource", new Dictionary<string, string> {
                 ["Include"] = substitutionsFilename,
                 ["LogicalName"] = substitutionsFilename
@@ -1768,7 +1772,7 @@ namespace Microsoft.NET.Publish.Tests
             // actually an important failure, so don't error out here.
             // If we're actually testing that we build with no warnings, the test will still fail.
             testProject.AdditionalProperties["WarningsNotAsErrors"] = "CS9057;";
-            
+
             testProject.SourceFiles[$"{projectName}.cs"] = @"
 using System;
 using System.Reflection;
