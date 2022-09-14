@@ -385,8 +385,8 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="InvalidParameterTemplateHint" xml:space="preserve">
     <value>For more information, run:</value>
   </data>
-  <data name="Generic_CommandHints_List" xml:space="preserve">
-    <value>To list installed templates, run:</value>
+  <data name="Generic_CommandHints_List_Template" xml:space="preserve">
+    <value>To list installed templates similar to '{0}', run:</value>
   </data>
   <data name="ColumnNameAuthor" xml:space="preserve">
     <value>Author</value>
@@ -792,5 +792,18 @@ The header is followed by the list of parameters and their errors (might be seve
   <data name="InstantiateCommand_Info_TypoCorrection_Subcommands" xml:space="preserve">
     <value>Did you mean one of the following subcommands?</value>
     <comment>Followed by the list of suggestions</comment>
+  </data>
+  <data name="InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplate" xml:space="preserve">
+    <value>Failed to get information about template packages for the template with identity '{0}'.</value>
+  </data>
+  <data name="InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplateGroup" xml:space="preserve">
+    <value>Failed to get information about template packages for template group '{0}'.</value>
+  </data>
+  <data name="Commands_TemplateShortNameCommandConflict_Info" xml:space="preserve">
+    <value>To instantiate the template with short name '{0}', run:</value>
+    <comment>Followed by command example from new line.</comment>
+  </data>
+  <data name="Generic_CommandHints_List" xml:space="preserve">
+    <value>To list installed templates, run:</value>
   </data>
 </root>

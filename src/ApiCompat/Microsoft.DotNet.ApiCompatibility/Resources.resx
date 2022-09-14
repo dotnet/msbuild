@@ -132,13 +132,13 @@
   <data name="CannotAddAbstractMember" xml:space="preserve">
     <value>Cannot add abstract member '{0}' to {1} because it does not exist on {2}</value>
   </data>
-  <data name="AssembyCultureDoesNotMatch" xml:space="preserve">
+  <data name="AssemblyCultureDoesNotMatch" xml:space="preserve">
     <value>{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</value>
   </data>
-  <data name="AssembyVersionDoesNotMatch" xml:space="preserve">
+  <data name="AssemblyVersionDoesNotMatch" xml:space="preserve">
     <value>{3} assembly version '{1}' should be equal to {2} version '{0}'.</value>
   </data>
-  <data name="AssembyVersionIsNotCompatible" xml:space="preserve">
+  <data name="AssemblyVersionIsNotCompatible" xml:space="preserve">
     <value>{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</value>
   </data>
   <data name="CouldNotResolveReference" xml:space="preserve">
@@ -183,11 +183,8 @@
   <data name="StreamPositionGreaterThanLength" xml:space="preserve">
     <value>Stream position is greater than it's length, so there are no contents available to read.</value>
   </data>
-  <data name="TypeExistsOnLeft" xml:space="preserve">
+  <data name="TypeMissingOnSide" xml:space="preserve">
     <value>Type '{0}' exists on {1} but not on {2}</value>
-  </data>
-  <data name="TypeExistsOnRight" xml:space="preserve">
-    <value>Type '{0}' exists on {2} but not on {1}</value>
   </data>
   <data name="VisitorRightCountShouldMatchMappersSetSize" xml:space="preserve">
     <value>The provided right count when creating the visitor should match the right set size specified for the mappers.</value>
@@ -222,13 +219,25 @@
   <data name="ApiCompatibilityHeader" xml:space="preserve">
     <value>API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</value>
   </data>
-  <data name="ApiCompatibilityFooter" xml:space="preserve">
-    <value>Performed api validation on '{0}' ({2}) and '{1}' ({3}).</value>
-  </data>
   <data name="ApiCompatRunnerExecutingWorkItems" xml:space="preserve">
     <value>Executing {0} work item(s)...</value>
   </data>
   <data name="AssemblyLoadError" xml:space="preserve">
     <value>Could not load assembly symbols for '{0}'. Skipping the assembly.</value>
+  </data>
+  <data name="CannotAddAttribute" xml:space="preserve">
+    <value>Cannot add attribute '{0}' to '{1}'.</value>
+  </data>
+  <data name="CannotChangeAttribute" xml:space="preserve">
+    <value>Cannot change arguments of attribute '{0}' on '{1}'.</value>
+  </data>
+  <data name="CannotRemoveAttribute" xml:space="preserve">
+    <value>Cannot remove attribute '{0}' from '{1}'.</value>
+  </data>
+  <data name="CannotChangeParameterName" xml:space="preserve">
+    <value>Parameter name on member '{0}' changed from '{1}' to '{2}'.</value>
+  </data>
+  <data name="CannotAddSealedToInterfaceMember" xml:space="preserve">
+    <value>Cannot add sealed keyword to default interface member '{0}'.</value>
   </data>
 </root>

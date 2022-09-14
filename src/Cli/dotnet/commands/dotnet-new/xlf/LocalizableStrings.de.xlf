@@ -7,6 +7,11 @@
         <target state="translated">Ungültiger Ausdruck, Position: {0}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Diagnostics_OptionDescription">
+        <source>Enables diagnostic output.</source>
+        <target state="new">Enables diagnostic output.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisableProjectContextEval_OptionDescription">
         <source>Disables evaluating project context using MSBuild.</source>
         <target state="translated">Deaktiviert die Auswertung des Projektkontexts mit MSBuilds.</target>
@@ -242,6 +247,11 @@
         <source>You have other SDK version(s) installed that can be used to run this template. Switch to any of the following SDK(s) on your system to run this template: '{0}'. Details on selecting SDK version to run: https://docs.microsoft.com/dotnet/core/tools/global-json.</source>
         <target state="translated">Sie haben andere SDK-Versionen installiert, die zum Ausführen dieser Vorlage verwendet werden können. Wechseln Sie zu einem der folgenden SDK(s) auf Ihrem System, um diese Vorlage auszuführen: „{0}“. Details zum Auswählen der auszuführenden SDK-Version: https://docs.microsoft.com/dotnet/core/tools/global-json.</target>
         <note>{0} is the list of installed and supported versions.</note>
+      </trans-unit>
+      <trans-unit id="Verbosity_OptionDescription">
+        <source>Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</source>
+        <target state="new">Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</target>
+        <note />
       </trans-unit>
       <trans-unit id="WorkloadInfoProvider_Message_AddWorkloads">
         <source>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</source>

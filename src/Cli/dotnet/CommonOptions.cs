@@ -164,14 +164,6 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<string> TestLoggerOption = new Option<string>("--logger");
 
-        public static bool VerbosityIsDetailedOrDiagnostic(this VerbosityOptions verbosity)
-        {
-            return verbosity.Equals(VerbosityOptions.diag) ||
-                verbosity.Equals(VerbosityOptions.diagnostic) ||
-                verbosity.Equals(VerbosityOptions.d) ||
-                verbosity.Equals(VerbosityOptions.detailed);
-        }
-
         public static void ValidateSelfContainedOptions(bool hasSelfContainedOption, bool hasNoSelfContainedOption)
         {
             if (hasSelfContainedOption && hasNoSelfContainedOption)
@@ -269,13 +261,6 @@ namespace Microsoft.DotNet.Cli
         private static IEnumerable<string> ForwardSelfContainedOptions(bool isSelfContained, ParseResult parseResult)
         {
             IEnumerable<string> selfContainedProperties = new string[] { $"-property:SelfContained={isSelfContained}", "-property:_CommandLineDefinedSelfContained=true" };
-            
-            if (!UserSpecifiedRidOption(parseResult) && isSelfContained)
-            {
-                var ridProperties = RuntimeArgFunc(GetCurrentRuntimeId());
-                selfContainedProperties = selfContainedProperties.Concat(ridProperties);
-            }
-            
             return selfContainedProperties;
         }
 

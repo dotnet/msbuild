@@ -1,11 +1,11 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
+using System.IO;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Extensions;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
@@ -29,15 +29,27 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         /// </summary>
         /// <param name="mapper">The <see cref="TypeMapper"/> to evaluate.</param>
         /// <param name="differences">The list of <see cref="CompatDifference"/> to add differences to.</param>
-        private void RunOnTypeSymbol(ITypeSymbol? left, ITypeSymbol? right, string leftName, string rightName, IList<CompatDifference> differences)
+        private void RunOnTypeSymbol(ITypeSymbol? left, ITypeSymbol? right, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences)
         {
             if (left != null && right == null)
             {
-                differences.Add(CreateDifference(left, DiagnosticIds.TypeMustExist, DifferenceType.Removed, Resources.TypeExistsOnLeft, leftName, rightName));
+                differences.Add(new CompatDifference(
+                    leftMetadata,
+                    rightMetadata,
+                    DiagnosticIds.TypeMustExist,
+                    string.Format(Resources.TypeMissingOnSide, left.ToDisplayString(), leftMetadata, rightMetadata),
+                    DifferenceType.Removed,
+                    left));
             }
             else if (_settings.StrictMode && left == null && right != null)
             {
-                differences.Add(CreateDifference(right, DiagnosticIds.TypeMustExist, DifferenceType.Added, Resources.TypeExistsOnRight, leftName, rightName));
+                differences.Add(new CompatDifference(
+                    leftMetadata,
+                    rightMetadata,
+                    DiagnosticIds.TypeMustExist,
+                    string.Format(Resources.TypeMissingOnSide, right.ToDisplayString(), rightMetadata, leftMetadata),
+                    DifferenceType.Added,
+                    right));
             }
         }
 
@@ -46,29 +58,37 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         /// </summary>
         /// <param name="mapper">The <see cref="MemberMapper"/> to evaluate.</param>
         /// <param name="differences">The list of <see cref="CompatDifference"/> to add differences to.</param>
-        private void RunOnMemberSymbol(ISymbol? left, ISymbol? right, ITypeSymbol leftContainingType, ITypeSymbol rightContainingType, string leftName, string rightName, IList<CompatDifference> differences)
+        private void RunOnMemberSymbol(ISymbol? left, ISymbol? right, ITypeSymbol leftContainingType, ITypeSymbol rightContainingType, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences)
         {
             if (left != null && right == null)
             {
                 if (ShouldReportMissingMember(left, rightContainingType))
                 {
-                    differences.Add(CreateDifference(left, DiagnosticIds.MemberMustExist, DifferenceType.Removed, Resources.MemberExistsOnLeft, leftName, rightName));
+                    differences.Add(new CompatDifference(
+                        leftMetadata,
+                        rightMetadata,
+                        DiagnosticIds.MemberMustExist,
+                        string.Format(Resources.MemberExistsOnLeft, left.ToDisplayString(), leftMetadata, rightMetadata),
+                        DifferenceType.Removed,
+                        left));
                 }
             }
             else if (_settings.StrictMode && left == null && right != null)
             {
                 if (ShouldReportMissingMember(right, leftContainingType))
                 {
-                    differences.Add(CreateDifference(right, DiagnosticIds.MemberMustExist, DifferenceType.Added, Resources.MemberExistsOnRight, leftName, rightName));
+                    differences.Add(new CompatDifference(
+                        leftMetadata,
+                        rightMetadata,
+                        DiagnosticIds.MemberMustExist,
+                        string.Format(Resources.MemberExistsOnRight, right.ToDisplayString(), leftMetadata, rightMetadata),
+                        DifferenceType.Added,
+                        right));
                 }
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static CompatDifference CreateDifference(ISymbol symbol, string id, DifferenceType type, string format, string leftName, string rightName) =>
-            new(id, string.Format(format, symbol.ToDisplayString(), leftName, rightName), type, symbol);
-
-        private static bool ShouldReportMissingMember(ISymbol symbol, ITypeSymbol containingType)
+        private bool ShouldReportMissingMember(ISymbol symbol, ITypeSymbol containingType)
         {
             // Events and properties are handled via their accessors.
             if (symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Event)
@@ -88,7 +108,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             return true;
         }
 
-        private static bool FindMatchingOnBaseType(IMethodSymbol method, ITypeSymbol containingType)
+        private bool FindMatchingOnBaseType(IMethodSymbol method, ITypeSymbol containingType)
         {
             // Constructors cannot be promoted
             if (method.MethodKind == MethodKind.Constructor)
@@ -109,7 +129,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             return false;
         }
 
-        private static bool IsMatchingMethod(IMethodSymbol method, IMethodSymbol candidate)
+        private bool IsMatchingMethod(IMethodSymbol method, IMethodSymbol candidate)
         {
             if (method.Name == candidate.Name)
             {
@@ -123,17 +143,17 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             return false;
         }
 
-        private static bool ReturnTypesMatch(IMethodSymbol method, IMethodSymbol candidate) =>
-            method.ReturnType.ToComparisonDisplayString() == candidate.ReturnType.ToComparisonDisplayString();
+        private bool ReturnTypesMatch(IMethodSymbol method, IMethodSymbol candidate) =>
+            _settings.SymbolComparer.Equals(method.ReturnType, candidate.ReturnType);
 
-        private static bool ParametersMatch(IMethodSymbol method, IMethodSymbol candidate)
+        private bool ParametersMatch(IMethodSymbol method, IMethodSymbol candidate)
         {
             if (method.Parameters.Length != candidate.Parameters.Length)
                 return false;
 
             for (int i = 0; i < method.Parameters.Length; i++)
             {
-                if (method.Parameters[i].Type.ToComparisonDisplayString() != method.Parameters[i].Type.ToComparisonDisplayString())
+                if (!_settings.SymbolComparer.Equals(method.Parameters[i].Type, method.Parameters[i].Type))
                     return false;
             }
 

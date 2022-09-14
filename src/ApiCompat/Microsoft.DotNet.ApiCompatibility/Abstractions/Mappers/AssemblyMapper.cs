@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
     public class AssemblyMapper : ElementMapper<ElementContainer<IAssemblySymbol>>
     {
         private Dictionary<INamespaceSymbol, NamespaceMapper>? _namespaces;
-        private readonly List<CompatDifference>[] _assemblyLoadErrors;
+        private readonly List<CompatDifference> _assemblyLoadErrors = new();
 
         /// <summary>
         /// The containing assembly set of this assembly. Null if the assembly is not part of a set.
@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// <summary>
         /// Gets the assembly load errors that happened when trying to follow type forwards.
         /// </summary>
-        public IReadOnlyList<IReadOnlyList<CompatDifference>> AssemblyLoadErrors => _assemblyLoadErrors;
+        public IEnumerable<CompatDifference> AssemblyLoadErrors => _assemblyLoadErrors;
 
         /// <summary>
         /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
@@ -40,9 +40,6 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             : base(ruleRunner, settings, rightSetSize)
         {
             ContainingAssemblySet = containingAssemblySet;
-            _assemblyLoadErrors = new List<CompatDifference>[rightSetSize];
-            for (int i = 0; i < rightSetSize; i++)
-                _assemblyLoadErrors[i] = new List<CompatDifference>();
         }
 
         /// <summary>
@@ -69,7 +66,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                         return;
                     }
 
-                    Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> typeForwards = ResolveTypeForwards(assemblyContainer.Element, Settings.EqualityComparer, setIndex);
+                    Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> typeForwards = ResolveTypeForwards(assemblyContainer, side, Settings.EqualityComparer, setIndex);
 
                     Stack<INamespaceSymbol> stack = new();
                     stack.Push(assemblyContainer.Element.GlobalNamespace);
@@ -122,10 +119,13 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                     }
                 }
 
-                Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> ResolveTypeForwards(IAssemblySymbol assembly, IEqualityComparer<ISymbol> comparer, int index)
+                Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> ResolveTypeForwards(ElementContainer<IAssemblySymbol> assembly,
+                    ElementSide side,
+                    IEqualityComparer<ISymbol> comparer,
+                    int index)
                 {
                     Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> typeForwards = new(comparer);
-                    foreach (INamedTypeSymbol symbol in assembly.GetForwardedTypes())
+                    foreach (INamedTypeSymbol symbol in assembly.Element.GetForwardedTypes())
                     {
                         if (symbol.TypeKind != TypeKind.Error)
                         {
@@ -142,11 +142,13 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                             // If we should warn on missing references and we are unable to resolve the type forward, then we should log a diagnostic
                             if (Settings.WarnOnMissingReferences)
                             {
-                                _assemblyLoadErrors[index].Add(new CompatDifference(
-                                        DiagnosticIds.AssemblyReferenceNotFound,
-                                        string.Format(Resources.MatchingAssemblyNotFound, $"{symbol.ContainingAssembly.Name}.dll"),
-                                        DifferenceType.Changed,
-                                        string.Empty));
+                                _assemblyLoadErrors.Add(new CompatDifference(
+                                    side == ElementSide.Left ? assembly.MetadataInformation : MetadataInformation.DefaultLeft,
+                                    side == ElementSide.Right ? assembly.MetadataInformation : MetadataInformation.DefaultRight,
+                                    DiagnosticIds.AssemblyReferenceNotFound,
+                                    string.Format(Resources.MatchingAssemblyNotFound, $"{symbol.ContainingAssembly.Name}.dll"),
+                                    DifferenceType.Changed,
+                                    symbol.ContainingAssembly.Identity.GetDisplayName()));
                             }
                         }
                     }

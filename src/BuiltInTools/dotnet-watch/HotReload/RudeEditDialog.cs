@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                     return;
             }
 
-            bool KeyPressed(ConsoleKey key)
+            static bool KeyPressed(ConsoleKey key)
             {
                 return key is ConsoleKey.Y or ConsoleKey.N or ConsoleKey.A or ConsoleKey.V;
             }

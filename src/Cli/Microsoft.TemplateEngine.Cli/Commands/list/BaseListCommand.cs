@@ -48,7 +48,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Arity = new ArgumentArity(0, 1)
         };
 
-        internal Argument<string> NameArgument { get; } = new("template-name")
+        internal static Argument<string> NameArgument { get; } = new("template-name")
         {
             Description = SymbolStrings.Command_List_Argument_Name,
             Arity = new ArgumentArity(0, 1)
@@ -56,19 +56,18 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal NewCommand ParentCommand { get; }
 
-        protected override async Task<NewCommandStatus> ExecuteAsync(
+        protected override Task<NewCommandStatus> ExecuteAsync(
             ListCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager,
             InvocationContext context)
         {
-            using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
             TemplateListCoordinator templateListCoordinator = new TemplateListCoordinator(
                 environmentSettings,
                 templatePackageManager,
                 new HostSpecificDataLoader(environmentSettings));
 
-            //we need to await, otherwise templatePackageManager will be disposed.
-            return await templateListCoordinator.DisplayTemplateGroupListAsync(args, default).ConfigureAwait(false);
+            return templateListCoordinator.DisplayTemplateGroupListAsync(args, default);
         }
 
         protected override ListCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);

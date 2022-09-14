@@ -464,6 +464,11 @@
         <target state="translated">Ottimizzazione degli assembly per le dimensioni. Questo processo potrebbe richiedere del tempo.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed">
+        <source>NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</source>
+        <target state="new">NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</target>
+        <note>{StrBegin="NETSDK1191: "}</note>
+      </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
         <source>NETSDK1020: Package Root {0} was incorrectly given for Resolved library {1}</source>
         <target state="translated">NETSDK1020: la radice {0} del pacchetto specificata per la libreria risolta {1} non è corretta</target>
@@ -640,6 +645,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1162: generazione PDB: l'eseguibile '{0}' di R2R non è stato trovato.</target>
         <note>{StrBegin="NETSDK1162: "}</note>
       </trans-unit>
+      <trans-unit id="PReleaseRequiresEnvVarOnSln">
+        <source>NETSDK1190: To use '{0}' in solution projects, you must set the environment variable '{1}' (to true). This will increase the time to complete the operation.</source>
+        <target state="new">NETSDK1190: To use '{0}' in solution projects, you must set the environment variable '{1}' (to true). This will increase the time to complete the operation.</target>
+        <note>{StrBegin="NETSDK1190: "}</note>
+      </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>
         <target state="translated">NETSDK1053: la creazione di pacchetti come strumenti non prevede elementi autonomi.</target>
@@ -679,6 +689,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1174: Placeholder</source>
         <target state="translated">NETSDK1174: Placeholder</target>
         <note>{StrBegin="NETSDK1174: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</note>
+      </trans-unit>
+      <trans-unit id="Prefer32BitIgnoredForNetCoreApp">
+        <source>NETSDK1189: Prefer32Bit is not supported and has no effect for netcoreapp target.</source>
+        <target state="new">NETSDK1189: Prefer32Bit is not supported and has no effect for netcoreapp target.</target>
+        <note>{StrBegin="NETSDK1189: "}</note>
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>NETSDK1011: Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>

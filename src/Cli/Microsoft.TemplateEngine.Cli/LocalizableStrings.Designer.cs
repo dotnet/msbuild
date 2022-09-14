@@ -594,6 +594,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to To instantiate the template with short name &apos;{0}&apos;, run:.
+        /// </summary>
+        internal static string Commands_TemplateShortNameCommandConflict_Info {
+            get {
+                return ResourceManager.GetString("Commands_TemplateShortNameCommandConflict_Info", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Argument(s) {0} are not recognized. Must be one of: {1}..
         /// </summary>
         internal static string Commands_Validator_WrongArgumentValue {
@@ -758,6 +767,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to To list installed templates similar to &apos;{0}&apos;, run:.
+        /// </summary>
+        internal static string Generic_CommandHints_List_Template {
+            get {
+                return ResourceManager.GetString("Generic_CommandHints_List_Template", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to To search for the templates on NuGet.org, run:.
         /// </summary>
         internal static string Generic_CommandHints_Search {
@@ -880,6 +898,24 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string InstantiateCommand_Info_TypoCorrection_Templates {
             get {
                 return ResourceManager.GetString("InstantiateCommand_Info_TypoCorrection_Templates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to get information about template packages for the template with identity &apos;{0}&apos;..
+        /// </summary>
+        internal static string InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplate {
+            get {
+                return ResourceManager.GetString("InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to get information about template packages for template group &apos;{0}&apos;..
+        /// </summary>
+        internal static string InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplateGroup {
+            get {
+                return ResourceManager.GetString("InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplateGroup", resourceCulture);
             }
         }
         

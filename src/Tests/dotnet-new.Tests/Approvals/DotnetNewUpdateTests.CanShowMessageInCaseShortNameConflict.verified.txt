@@ -1,0 +1,3 @@
+﻿All template packages are up-to-date.
+To instantiate the template with short name 'update', run:
+   dotnet new create update

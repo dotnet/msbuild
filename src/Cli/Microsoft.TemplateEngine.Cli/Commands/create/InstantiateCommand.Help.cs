@@ -452,7 +452,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             context.Output.WriteLine(context.HelpBuilder.LocalizationResources.HelpUsageTitle());
             context.Output.WriteLine(Indent + string.Join(" ", GetCustomUsageParts(context, command, showSubcommands: false)));
-            context.Output.WriteLine(Indent + string.Join(" ", GetCustomUsageParts(context, command, showArguments: false)));
+
+            if (command is NewCommand)
+            {
+                context.Output.WriteLine(Indent + string.Join(" ", GetCustomUsageParts(context, command, showArguments: false)));
+            }
         }
 
         private static IEnumerable<string> GetCustomUsageParts(

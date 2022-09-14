@@ -71,7 +71,7 @@ namespace Microsoft.NET.TestFramework
         public static void Initialize(TestCommandLine commandLine)
         {
             //  Show verbose debugging output for tests
-            CommandContext.SetVerbose(true);
+            CommandLoggingContext.SetVerbose(true);
             Reporter.Reset();
 
             Environment.SetEnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0");

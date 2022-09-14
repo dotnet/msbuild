@@ -7,14 +7,14 @@
         <target state="translated">{0} 件の作業項目を移動しています...</target>
         <note />
       </trans-unit>
-      <trans-unit id="ApiCompatibilityFooter">
-        <source>Performed api validation on '{0}' ({2}) and '{1}' ({3}).</source>
-        <target state="translated">'{0}' ({2}) と '{1}' ({3}) に API 検証を実行しました。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ApiCompatibilityHeader">
         <source>API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</source>
         <target state="translated">'{0}' ({2}) と '{1}' ({3}) の API 互換性エラーは、以下のとおりです。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyCultureDoesNotMatch">
+        <source>{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</source>
+        <target state="new">{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyLoadError">
@@ -42,17 +42,12 @@
         <target state="translated">指定済みのアセンブリ検索ディレクトリ '{0}' は存在しません。</target>
         <note />
       </trans-unit>
-      <trans-unit id="AssembyCultureDoesNotMatch">
-        <source>{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</source>
-        <target state="translated">{2} アセンブリ カルチャ '{0}' が {3} アセンブリ カルチャ '{1}' と一致しません。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AssembyVersionDoesNotMatch">
+      <trans-unit id="AssemblyVersionDoesNotMatch">
         <source>{3} assembly version '{1}' should be equal to {2} version '{0}'.</source>
-        <target state="translated">{3} アセンブリバージョン '{1}' は {2} バージョン '{0}' と等しい必要があります。</target>
+        <target state="new">{3} assembly version '{1}' should be equal to {2} version '{0}'.</target>
         <note />
       </trans-unit>
-      <trans-unit id="AssembyVersionIsNotCompatible">
+      <trans-unit id="AssemblyVersionIsNotCompatible">
         <source>{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</source>
         <target state="translated">{2} アセンブリバージョン '{0}' は {3} バージョン '{1}' 以上である必要があります。</target>
         <note />
@@ -62,14 +57,39 @@
         <target state="translated">抽象メンバーが {2} に存在しないため、抽象メンバー '{0}' を {1} に追加できません</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotAddAttribute">
+        <source>Cannot add attribute '{0}' to '{1}'.</source>
+        <target state="new">Cannot add attribute '{0}' to '{1}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotAddMemberToInterface">
         <source>Cannot add interface member '{0}' to {1} because it does not exist on {2}</source>
         <target state="translated">インターフェイス メンバーが {2} に存在しないため、インターフェイス メンバー '{0}' を {1} に追加できません</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotAddSealedToInterfaceMember">
+        <source>Cannot add sealed keyword to default interface member '{0}'.</source>
+        <target state="new">Cannot add sealed keyword to default interface member '{0}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotAddVirtualToMember">
         <source>Cannot add virtual keyword to member '{0}'.</source>
         <target state="translated">メンバー '{0}' に仮想キーワードを追加できません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotChangeAttribute">
+        <source>Cannot change arguments of attribute '{0}' on '{1}'.</source>
+        <target state="new">Cannot change arguments of attribute '{0}' on '{1}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotChangeParameterName">
+        <source>Parameter name on member '{0}' changed from '{1}' to '{2}'.</source>
+        <target state="new">Parameter name on member '{0}' changed from '{1}' to '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotRemoveAttribute">
+        <source>Cannot remove attribute '{0}' from '{1}'.</source>
+        <target state="new">Cannot remove attribute '{0}' from '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
@@ -167,16 +187,6 @@
         <target state="translated">ストリームの位置が長さより大きいため、読み取り可能なコンテンツがありません。</target>
         <note />
       </trans-unit>
-      <trans-unit id="TypeExistsOnLeft">
-        <source>Type '{0}' exists on {1} but not on {2}</source>
-        <target state="translated">タイプ '{0}' は {1} に存在していますが、{2} には存在しません</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="TypeExistsOnRight">
-        <source>Type '{0}' exists on {2} but not on {1}</source>
-        <target state="translated">タイプ '{0}' は {2} に存在していますが、{1} には存在しません</target>
-        <note />
-      </trans-unit>
       <trans-unit id="TypeIsActuallySealed">
         <source>Type '{0}' has the sealed modifier on {1} but not on {2}</source>
         <target state="translated">型 '{0}' は {1} に sealed 修飾子がありますが、{2} にはありません</target>
@@ -185,6 +195,11 @@
       <trans-unit id="TypeIsEffectivelySealed">
         <source>Type '{0}' is sealed because it has no visible constructor on {1} but it does on {2}</source>
         <target state="translated">型 '{0}' iは、{1} に参照可能なコンストラクターがないため sealed ですが、{2} にはあります</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TypeMissingOnSide">
+        <source>Type '{0}' exists on {1} but not on {2}</source>
+        <target state="new">Type '{0}' exists on {1} but not on {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="VisitorRightCountShouldMatchMappersSetSize">

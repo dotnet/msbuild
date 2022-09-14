@@ -155,7 +155,7 @@ namespace ManifestReaderTests
         [Fact]
         public void ItChecksDependencies()
         {
-            string MakeManifest(string version, params (string id, string version)[] dependsOn)
+            static string MakeManifest(string version, params (string id, string version)[] dependsOn)
             {
                 var sb = new StringBuilder();
                 sb.AppendLine("{");

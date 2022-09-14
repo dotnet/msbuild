@@ -69,7 +69,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             }
 
             // try to parse the argument as json; if it is not valid json, use it as a string
-            if (JTokenExtensions.TryParse(targetFiles, out JToken? config))
+            if (targetFiles.TryParse(out JToken? config))
             {
                 if (config == null)
                 {

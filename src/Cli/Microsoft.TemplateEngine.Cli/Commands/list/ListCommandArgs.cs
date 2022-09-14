@@ -10,7 +10,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         internal ListCommandArgs(BaseListCommand command, ParseResult parseResult) : base(command, parseResult)
         {
-            string? nameCriteria = parseResult.GetValueForArgument(command.NameArgument);
+            string? nameCriteria = parseResult.GetValueForArgument(ListCommand.NameArgument);
             if (!string.IsNullOrWhiteSpace(nameCriteria))
             {
                 ListNameCriteria = nameCriteria;

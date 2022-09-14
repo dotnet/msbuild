@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!--
     Microsoft ResX Schema
@@ -823,7 +823,7 @@ To install these workloads, run the following command: dotnet workload restore</
 You may need to build the project on another operating system or architecture, or update the .NET SDK.</value>
     <comment>{StrBegin="NETSDK1178: "}</comment>
   </data>
-    <data name="SelfContainedOptionShouldBeUsedWithRuntime" xml:space="preserve">
+  <data name="SelfContainedOptionShouldBeUsedWithRuntime" xml:space="preserve">
     <value>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</value>
     <comment>{StrBegin="NETSDK1179: "}</comment>
   </data>
@@ -858,5 +858,17 @@ You may need to build the project on another operating system or architecture, o
   <data name="PackageContainsUnknownLocale" xml:space="preserve">
     <value>NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</value>
     <comment>Error code is NETSDK1188. 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</comment>
+  </data>
+  <data name="Prefer32BitIgnoredForNetCoreApp" xml:space="preserve">
+    <value>NETSDK1189: Prefer32Bit is not supported and has no effect for netcoreapp target.</value>
+    <comment>{StrBegin="NETSDK1189: "}</comment>
+  </data>
+  <data name="PReleaseRequiresEnvVarOnSln" xml:space="preserve">
+    <value>NETSDK1190: To use '{0}' in solution projects, you must set the environment variable '{1}' (to true). This will increase the time to complete the operation.</value>
+    <comment>{StrBegin="NETSDK1190: "}</comment>
+  </data>
+  <data name="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed" xml:space="preserve">
+    <value>NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</value>
+      <comment>{StrBegin="NETSDK1191: "}</comment>
   </data>
 </root>

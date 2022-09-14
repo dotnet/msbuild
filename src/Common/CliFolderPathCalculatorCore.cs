@@ -5,7 +5,10 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
+//only Microsoft.DotNet.MSBuildSdkResolver (net7.0) has nullables enabled
+#pragma warning disable IDE0240 // Remove redundant nullable directive
 #nullable enable
+#pragma warning restore IDE0240 // Remove redundant nullable directive
 
 namespace Microsoft.DotNet.Configurer
 {

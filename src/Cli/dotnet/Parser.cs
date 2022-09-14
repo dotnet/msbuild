@@ -62,8 +62,7 @@ namespace Microsoft.DotNet.Cli
             WorkloadCommandParser.GetCommand()
         };
 
-        // Options
-        public static readonly Option<bool> DiagOption = new Option<bool>(new[] { "-d", "--diagnostics" });
+        public static readonly Option<bool> DiagOption = CommonOptionsFactory.CreateDiagnosticsOption();
 
         public static readonly Option<bool> VersionOption = new Option<bool>("--version");
 
@@ -209,13 +208,13 @@ namespace Microsoft.DotNet.Cli
 
             if (exception is Utils.GracefulException)
             {
-                Reporter.Error.WriteLine(CommandContext.IsVerbose()
+                Reporter.Error.WriteLine(CommandLoggingContext.IsVerbose
                     ? exception.ToString().Red().Bold()
                     : exception.Message.Red().Bold());
             }
             else if (exception is CommandParsingException)
             {
-                Reporter.Error.WriteLine(CommandContext.IsVerbose()
+                Reporter.Error.WriteLine(CommandLoggingContext.IsVerbose
                     ? exception.ToString().Red().Bold()
                     : exception.Message.Red().Bold());
                 context.ParseResult.ShowHelp();

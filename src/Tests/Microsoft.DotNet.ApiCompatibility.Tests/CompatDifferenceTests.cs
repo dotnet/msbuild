@@ -1,9 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Xunit;
 
@@ -16,23 +14,25 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             {
                 new object[]
                 {
-                    DiagnosticIds.TypeMustExist, "Type Foo exists on left but not on right", "T:Foo", DifferenceType.Added,
+                    MetadataInformation.DefaultLeft, MetadataInformation.DefaultRight, DiagnosticIds.TypeMustExist, "Type Foo exists on left but not on right", "T:Foo", DifferenceType.Added,
                 },
                 new object[]
                 {
-                    DiagnosticIds.MemberMustExist, "Member Foo.Blah exists on right but not on left", "M:Foo.Blah", DifferenceType.Removed,
+                    MetadataInformation.DefaultLeft, MetadataInformation.DefaultRight, DiagnosticIds.MemberMustExist, "Member Foo.Blah exists on right but not on left", "M:Foo.Blah", DifferenceType.Removed,
                 },
                 new object[]
                 {
-                    "CP320", string.Empty, "F:Blah.Blah", DifferenceType.Changed
+                    MetadataInformation.DefaultLeft, MetadataInformation.DefaultRight, "CP320", string.Empty, "F:Blah.Blah", DifferenceType.Changed
                 }
             };
 
         [Theory]
         [MemberData(nameof(CompatDifferencesData))]
-        public void PropertiesAreCorrect(string diagId, string message, string memberId, DifferenceType type)
+        public void PropertiesAreCorrect(MetadataInformation left, MetadataInformation right, string diagId, string message, string memberId, DifferenceType type)
         {
-            CompatDifference difference = new(diagId, message, type, memberId);
+            CompatDifference difference = new(left, right, diagId, message, type, memberId);
+            Assert.Equal(left, difference.Left);
+            Assert.Equal(right, difference.Right);
             Assert.Equal(diagId, difference.DiagnosticId);
             Assert.Equal(message, difference.Message);
             Assert.Equal(memberId, difference.ReferenceId);
@@ -44,12 +44,12 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
         [Fact]
         public void IsEquatableWorksAsExpected()
         {
-            CompatDifference difference = new(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:Foo");
-            CompatDifference otherEqual = new(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:Foo");
-            CompatDifference differentDiagId = new(DiagnosticIds.CannotAddMemberToInterface, string.Empty, DifferenceType.Removed, "T:Foo");
-            CompatDifference differentType = new(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:Foo");
-            CompatDifference differentMemberId = new(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:FooBar");
-            CompatDifference differentMessage = new(DiagnosticIds.TypeMustExist, "Hello", DifferenceType.Removed, "T:Foo");
+            CompatDifference difference = CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:Foo");
+            CompatDifference otherEqual = CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:Foo");
+            CompatDifference differentDiagId = CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.CannotAddMemberToInterface, string.Empty, DifferenceType.Removed, "T:Foo");
+            CompatDifference differentType = CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:Foo");
+            CompatDifference differentMemberId = CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:FooBar");
+            CompatDifference differentMessage = CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.TypeMustExist, "Hello", DifferenceType.Removed, "T:Foo");
 
             Assert.False(difference.Equals(null));
             Assert.True(difference.Equals(otherEqual));

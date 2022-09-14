@@ -12,6 +12,19 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
     /// </summary>
     public readonly struct MetadataInformation : IEquatable<MetadataInformation>
     {
+        private const string DEFAULT_LEFT_NAME = "left";
+        private const string DEFAULT_RIGHT_NAME = "right";
+
+        /// <summary>
+        /// A default metadata information for left hand side comparison elements.
+        /// </summary>
+        public static readonly MetadataInformation DefaultLeft = new(DEFAULT_LEFT_NAME, DEFAULT_LEFT_NAME);
+
+        /// <summary>
+        /// A default metadata information for right hand side comparison elements.
+        /// </summary>
+        public static readonly MetadataInformation DefaultRight = new(DEFAULT_RIGHT_NAME, DEFAULT_RIGHT_NAME);
+
         /// <summary>
         /// The name of the assembly.
         /// </summary>
@@ -68,5 +81,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 
         /// <inheritdoc />
         public override string ToString() => DisplayString;
+
+        /// <inheritdoc />
+        public static bool operator ==(MetadataInformation left, MetadataInformation right) => left.Equals(right);
+
+        /// <inheritdoc />
+        public static bool operator !=(MetadataInformation left, MetadataInformation right) => !(left == right);
     }
 }

@@ -1,5 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 #nullable enable
 
@@ -110,8 +111,8 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
                 {
                     _logger.LogDebug("No project found. This template can only be created inside the project.");
                     return TemplateConstraintResult.CreateRestricted(
-                        this, 
-                        _evaluationResult.ErrorMessage ?? LocalizableStrings.MSBuildEvaluationResult_Error_NoProjectFound, 
+                        this,
+                        _evaluationResult.ErrorMessage ?? LocalizableStrings.MSBuildEvaluationResult_Error_NoProjectFound,
                         LocalizableStrings.ProjectCapabilityConstraint_Restricted_NoProjectFound_CTA);
                 }
                 if (_evaluationResult.Status == MSBuildEvaluationResult.EvalStatus.MultipleProjectFound)
@@ -177,7 +178,7 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
                 }
                 return capabilities.ToArray();
 
-                static void AddProjectCapabilities (HashSet<string> collection, Project? evaluatedProject)
+                static void AddProjectCapabilities(HashSet<string> collection, Project? evaluatedProject)
                 {
                     if (evaluatedProject == null)
                     {

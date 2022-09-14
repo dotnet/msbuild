@@ -1,7 +1,6 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -41,7 +40,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
 
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
-            CompatDifference difference = new(DiagnosticIds.CannotSealType, string.Empty, DifferenceType.Changed, "T:CompatTests.First");
+            CompatDifference difference = CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.CannotSealType, string.Empty, DifferenceType.Changed, "T:CompatTests.First");
             Assert.Contains(difference, differences);
         }
 
@@ -82,7 +81,7 @@ namespace CompatTests
             {
                 CompatDifference[] expected = new[]
                 {
-                     new CompatDifference(DiagnosticIds.CannotSealType, string.Empty, DifferenceType.Changed, "T:CompatTests.First")
+                     CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.CannotSealType, string.Empty, DifferenceType.Changed, "T:CompatTests.First")
                 };
 
                 Assert.Equal(expected, differences);
@@ -101,7 +100,6 @@ namespace CompatTests
     }
 }
 ";
-
             string[] rightSyntaxes = new[]
             {
                 @"
@@ -133,34 +131,23 @@ namespace CompatTests
     {
         private First() { }
     }
-}",
-            };
-
-            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
-            MetadataInformation leftMetadata = new("left", @"ref\a.dll");
-            ElementContainer<IAssemblySymbol> leftContainer = new(left, leftMetadata);
+}
+"};
+            ElementContainer<IAssemblySymbol> left = new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax),
+                new MetadataInformation("left", @"ref\a.dll"));
             IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
             // Register CannotSealType and MemberMustExist rules as this test validates both.
             ApiComparer differ = new(s_ruleFactory.WithRule((settings, context) => new MembersMustExist(settings, context)));
 
-            IEnumerable<(MetadataInformation left, MetadataInformation right, IEnumerable<CompatDifference> differences)> result =
-                differ.GetDifferences(leftContainer, right);
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
-            CompatDifference[][] expectedDiffs =
+            CompatDifference[] expectedDiffs =
             {
-                Array.Empty<CompatDifference>(),
-                Array.Empty<CompatDifference>(),
-                new[]
-                {
-                    new CompatDifference(DiagnosticIds.CannotSealType, string.Empty, DifferenceType.Changed, "T:CompatTests.First"),
-                },
-                new[]
-                {
-                    new CompatDifference(DiagnosticIds.CannotSealType, string.Empty, DifferenceType.Changed, "T:CompatTests.First"),
-                    new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.#ctor"),
-                },
+                new CompatDifference(left.MetadataInformation, right.ElementAt(2).MetadataInformation, DiagnosticIds.CannotSealType, string.Empty, DifferenceType.Changed, "T:CompatTests.First"),
+                new CompatDifference(left.MetadataInformation, right.ElementAt(3).MetadataInformation, DiagnosticIds.CannotSealType, string.Empty, DifferenceType.Changed, "T:CompatTests.First"),
+                new CompatDifference(left.MetadataInformation, right.ElementAt(3).MetadataInformation, DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.#ctor"),
             };
-            AssertExtensions.MultiRightResult(leftMetadata, expectedDiffs, result);
+            Assert.Equal(expectedDiffs, differences);
         }
 
         [Fact]
@@ -174,7 +161,6 @@ namespace CompatTests
     }
 }
 ";
-
             string[] rightSyntaxes = new[]
             {
                 @"
@@ -202,16 +188,14 @@ namespace CompatTests
 }"
             };
 
-            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
-            MetadataInformation leftMetadata = new("left", @"ref\a.dll");
-            ElementContainer<IAssemblySymbol> leftContainer = new(left, leftMetadata);
+            ElementContainer<IAssemblySymbol> leftContainer = new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax),
+                new MetadataInformation("left", @"ref\a.dll"));
             IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
             ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(includeInternalSymbols: true));
 
-            IEnumerable<(MetadataInformation left, MetadataInformation right, IEnumerable<CompatDifference> differences)> result =
-                differ.GetDifferences(leftContainer, right);
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(leftContainer, right);
 
-            AssertExtensions.MultiRightEmptyDifferences(leftMetadata, 3, result);
+            Assert.Empty(differences);
         }
 
         [Theory]
@@ -224,8 +208,8 @@ namespace CompatTests
 
             CompatDifference[] differences = differ.GetDifferences(left, right).ToArray();
 
-            CompatDifference difference = new(DiagnosticIds.CannotSealType, string.Empty, DifferenceType.Changed, "T:CompatTests.First");
-            Assert.Contains(difference, differences);
+            CompatDifference expectedDifference = CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.CannotSealType, string.Empty, DifferenceType.Changed, "T:CompatTests.First");
+            Assert.Contains(expectedDifference, differences);
             Assert.True(differences[0].Message.IndexOf("left") < differences[0].Message.IndexOf("right"));
         }
 

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.DotNet.ApiCompatibility.Runner;
+using Microsoft.DotNet.ApiCompatibility.Tests;
 using Microsoft.DotNet.PackageValidation.Tests;
 using Moq;
 using Xunit;

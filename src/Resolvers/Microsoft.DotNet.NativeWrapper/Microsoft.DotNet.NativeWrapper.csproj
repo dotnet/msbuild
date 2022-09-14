@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">$(SdkTargetFramework)</TargetFrameworks>
+    <TargetFrameworks>$(ResolverTargetFramework);net472</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">$(ResolverTargetFramework)</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <RuntimeIdentifiers Condition="'$(OS)' == 'Windows_NT'">win-x86;win-x64</RuntimeIdentifiers>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
