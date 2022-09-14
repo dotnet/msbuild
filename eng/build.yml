@@ -6,9 +6,7 @@ parameters:
   pool: {}
 
   # Additional variables
-  variables:
-    - name: CIBuild
-      value: -restore -build -sign -pack -ci
+  variables: {}
 
   # Build strategy - matrix
   strategy: ''
@@ -69,7 +67,7 @@ jobs:
           env:
             Token: $(dn-bot-dnceng-artifact-feeds-rw)
       - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
-        - script: eng\common\build.cmd
+        - powershell: eng\common\build.ps1
                     $(CIBuild)
                     -configuration $(_BuildConfig)
                     $(_PublishArgs)
@@ -101,7 +99,7 @@ jobs:
               RunAoTTests: 'false'
   
       - ${{ if eq(parameters.agentOs, 'Windows_NT_FullFramework') }}:
-        - script: eng\common\build.cmd
+        - powershell: eng\common\build.ps1
                     $(CIBuild)
                     -configuration $(_BuildConfig)
                     $(_SignArgs)
@@ -132,7 +130,7 @@ jobs:
               HelixAccessToken: $(_HelixApiToken)
   
       - ${{ if eq(parameters.agentOs, 'Windows_NT_TestAsTools') }}:
-        - script: eng\common\build.cmd
+        - powershell: eng\common\build.ps1
                     $(CIBuild)
                     -configuration $(_BuildConfig)
                     $(_SignArgs)
@@ -247,7 +245,7 @@ jobs:
           env:
             Token: $(dn-bot-dnceng-artifact-feeds-rw)
       - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
-        - script: eng\common\build.cmd
+        - powershell: eng\common\build.ps1
                     $(CIBuild)
                     -configuration $(_BuildConfig)
                     $(_SignArgs)
@@ -375,7 +373,7 @@ jobs:
           env:
             Token: $(dn-bot-dnceng-artifact-feeds-rw)
       - ${{ if contains(parameters.agentOs, 'Windows_NT') }}:
-        - script: eng\common\build.cmd
+        - powershell: eng\common\build.ps1
                     $(CIBuild)
                     -configuration $(_BuildConfig)
                     $(_SignArgs)
