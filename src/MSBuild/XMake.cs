@@ -342,10 +342,10 @@ namespace Microsoft.Build.CommandLine
                 // split each <prop>=<value> string into 2 pieces, breaking on the first = that is found
                 string[] parameterSections = parameter.Split(s_propertyValueSeparator, 2);
 
-                // check that the property name is not blank, and the property has a value
-                CommandLineSwitchException.VerifyThrow((parameterSections[0].Length > 0) && (parameterSections.Length == 2), "InvalidPropertyError", parameter);
-
-                if (string.Equals("NuGetInteractive", parameterSections[0], StringComparison.OrdinalIgnoreCase))
+                if (parameterSections.Length > 0 &&
+                    parameterSections[0].Length > 0 &&
+                    parameterSections.Length == 2 &&
+                    string.Equals("NuGetInteractive", parameterSections[0], StringComparison.OrdinalIgnoreCase))
                 {
                     string nuGetInteractiveValue = parameterSections[1].Trim('"', ' ');
                     if (!string.Equals("false", nuGetInteractiveValue, StringComparison.OrdinalIgnoreCase))
