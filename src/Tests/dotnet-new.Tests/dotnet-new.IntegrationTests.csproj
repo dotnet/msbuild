@@ -6,7 +6,6 @@
     <OutputType>Exe</OutputType>
     <IsUnitTestProject>true</IsUnitTestProject>
     <Nullable>enable</Nullable>
-    <EnableAnalyzers>true</EnableAnalyzers>
     <EnableStyleCopAnalyzer>true</EnableStyleCopAnalyzer>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>

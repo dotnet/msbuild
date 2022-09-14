@@ -39,8 +39,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.ForceOption));
             this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.NoUpdateCheckOption));
             this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.ProjectPathOption));
-
-            IsHidden = true;
         }
 
         internal static Argument<string> ShortNameArgument { get; } = new Argument<string>("template-short-name")
@@ -63,9 +61,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             SharedOptions.NoUpdateCheckOption
         };
 
-        internal static Task<NewCommandStatus> ExecuteAsync(NewCommandArgs newCommandArgs, IEngineEnvironmentSettings environmentSettings, InvocationContext context)
+        internal static Task<NewCommandStatus> ExecuteAsync(
+            NewCommandArgs newCommandArgs,
+            IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager,
+            InvocationContext context)
         {
-            return ExecuteIntAsync(InstantiateCommandArgs.FromNewCommandArgs(newCommandArgs), environmentSettings, context);
+            return ExecuteIntAsync(InstantiateCommandArgs.FromNewCommandArgs(newCommandArgs), environmentSettings, templatePackageManager, context);
         }
 
         internal static async Task<IEnumerable<TemplateGroup>> GetTemplateGroupsAsync(
@@ -152,7 +154,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
             IEnumerable<TemplateGroup> templateGroups,
-            Reporter reporter,
+            IReporter reporter,
             CancellationToken cancellationToken = default)
         {
             IEnvironment environment = environmentSettings.Environment;
@@ -184,19 +186,22 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 }
                 catch (Exception ex)
                 {
-                    environmentSettings.Host.Logger.LogWarning("Failed to get information about template packages for template group {groupIdentity}.", templateGroup.GroupIdentity);
-                    environmentSettings.Host.Logger.LogDebug("Details: {ex}", ex);
+                    environmentSettings.Host.Logger.LogWarning(LocalizableStrings.InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplateGroup, templateGroup.GroupIdentity);
+                    environmentSettings.Host.Logger.LogDebug("Details: {exception}.", ex);
                     return string.Empty;
                 }
             }
         }
 
-        protected override Task<NewCommandStatus> ExecuteAsync(
+        protected override async Task<NewCommandStatus> ExecuteAsync(
             InstantiateCommandArgs instantiateArgs,
             IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager,
             InvocationContext context)
         {
-            return ExecuteIntAsync(instantiateArgs, environmentSettings, context);
+            NewCommandStatus status = await ExecuteIntAsync(instantiateArgs, environmentSettings, templatePackageManager, context).ConfigureAwait(false);
+            await CheckTemplatesWithSubCommandName(instantiateArgs, templatePackageManager, context.GetCancellationToken()).ConfigureAwait(false);
+            return status;
         }
 
         protected override InstantiateCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);
@@ -204,10 +209,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         private static async Task<NewCommandStatus> ExecuteIntAsync(
             InstantiateCommandArgs instantiateArgs,
             IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager,
             InvocationContext context)
         {
             CancellationToken cancellationToken = context.GetCancellationToken();
-            using TemplatePackageManager templatePackageManager = new(environmentSettings);
             HostSpecificDataLoader hostSpecificDataLoader = new(environmentSettings);
             if (string.IsNullOrWhiteSpace(instantiateArgs.ShortName))
             {
@@ -308,7 +313,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
             IEnumerable<CliTemplateInfo> templates,
-            Reporter reporter,
+            IReporter reporter,
             CancellationToken cancellationToken = default)
         {
             if (!templates.Any(t => string.IsNullOrWhiteSpace(t.GetLanguage()))
@@ -368,8 +373,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 }
                 catch (Exception ex)
                 {
-                    environmentSettings.Host.Logger.LogWarning("Failed to get information about template packages for template group {identity}.", template.Identity);
-                    environmentSettings.Host.Logger.LogDebug("Details: {ex}.", ex);
+                    environmentSettings.Host.Logger.LogWarning(LocalizableStrings.InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplate, template.Identity);
+                    environmentSettings.Host.Logger.LogDebug("Details: {exception}.", ex);
                     return string.Empty;
                 }
             }

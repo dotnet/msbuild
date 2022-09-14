@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.Cli
                 }
                 catch (Exception e) when (e.ShouldBeDisplayedAsError())
                 {
-                    Reporter.Error.WriteLine(CommandContext.IsVerbose()
+                    Reporter.Error.WriteLine(CommandLoggingContext.IsVerbose
                         ? e.ToString().Red().Bold()
                         : e.Message.Red().Bold());
 
@@ -145,8 +145,8 @@ namespace Microsoft.DotNet.Cli
                             ToolPathSentinelFileName)));
                 if (parseResult.GetValueForOption(Parser.DiagOption) && parseResult.IsDotnetBuiltInCommand())
                 {
-                    Environment.SetEnvironmentVariable(CommandContext.Variables.Verbose, bool.TrueString);
-                    CommandContext.SetVerbose(true);
+                    Environment.SetEnvironmentVariable(CommandLoggingContext.Variables.Verbose, bool.TrueString);
+                    CommandLoggingContext.SetVerbose(true);
                     Reporter.Reset();
                 }
                 if (parseResult.HasOption(Parser.VersionOption) && parseResult.IsTopLevelDotnetCommand())
@@ -214,7 +214,7 @@ namespace Microsoft.DotNet.Cli
                 PerformanceLogEventSource.Log.TelemetryRegistrationStop();
             }
 
-            if (CommandContext.IsVerbose())
+            if (CommandLoggingContext.IsVerbose)
             {
                 Console.WriteLine($"Telemetry is: {(telemetryClient.Enabled ? "Enabled" : "Disabled")}");
             }

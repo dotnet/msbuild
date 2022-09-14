@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public void FirstRunSuccess()
         {
-            var home = CreateTemporaryFolder(folderName: "Home");
+            string home = CreateTemporaryFolder(folderName: "Home");
             new DotnetNewCommand(_log)
                 .WithCustomHive(home)
                 .Execute()

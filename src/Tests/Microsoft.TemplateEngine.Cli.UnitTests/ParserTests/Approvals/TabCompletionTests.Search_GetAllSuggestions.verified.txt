@@ -18,7 +18,7 @@
     Kind: Keyword,
     SortText: --columns-all,
     InsertText: --columns-all,
-    Detail: Display all columns in the output.
+    Detail: Displays all columns in the output.
   },
   {
     Label: --language,

@@ -491,7 +491,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(source));
 
-            void FailedStepAfterSuccessRestore() => throw new GracefulException("simulated error");
+            static void FailedStepAfterSuccessRestore() => throw new GracefulException("simulated error");
 
             Action a = () =>
             {

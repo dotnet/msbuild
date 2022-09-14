@@ -4,7 +4,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <OutputType>Exe</OutputType>
     <IsUnitTestProject>true</IsUnitTestProject>
-    <EnableAnalyzers>true</EnableAnalyzers>
     <EnableStyleCopAnalyzer>true</EnableStyleCopAnalyzer>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>

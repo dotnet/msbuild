@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _userProfileDir = userProfileDir;
             _dotnetDir = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _tempPackagesDir = new DirectoryPath(tempDirPath ?? Path.GetTempPath());
-            ILogger logger = verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger();
+            ILogger logger = verbosity.IsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger();
             _restoreActionConfig = restoreActionConfig;
             _nugetPackageDownloader = nugetPackageDownloader ??
                                       new NuGetPackageDownloader(_tempPackagesDir, filePermissionSetter: null,

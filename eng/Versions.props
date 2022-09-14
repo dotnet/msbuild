@@ -20,7 +20,6 @@
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
-    <JabVersion>0.8.4</JabVersion>
     <MicrosoftBuildVersion>15.4.8</MicrosoftBuildVersion>
     <MicrosoftBuildFrameworkVersion>15.4.8</MicrosoftBuildFrameworkVersion>
     <MicrosoftBuildUtilitiesCoreVersion>15.4.8</MicrosoftBuildUtilitiesCoreVersion>
