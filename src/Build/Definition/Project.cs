@@ -600,10 +600,19 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         public IDictionary<string, string> GlobalProperties => implementation.GlobalProperties;
 
+        /// <summary>
+        /// Indicates whether the global properties dictionary contains the specified key.
+        /// </summary>
         internal bool GlobalPropertiesContains(string key) => implementation.GlobalPropertiesContains(key);
 
+        /// <summary>
+        /// Indicates how many elements are in the global properties dictionary.
+        /// </summary>
         internal int GlobalPropertiesCount => implementation.GlobalPropertiesCount();
 
+        /// <summary>
+        /// Enumerates the values in the global properties dictionary.
+        /// </summary>
         internal IEnumerable<KeyValuePair<string, string>> GlobalPropertiesEnumerable => implementation.GlobalPropertiesEnumerable();
 
         /// <summary>
@@ -2093,16 +2102,29 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
+            /// <summary>
+            /// See <see cref="ProjectLink.GlobalPropertiesContains(string)"/>.
+            /// </summary>
+            /// <param name="key">The key to check for its value.</param>
+            /// <returns>Whether the key is in the global properties dictionary.</returns>
             public override bool GlobalPropertiesContains(string key)
             {
                 return _data.GlobalPropertiesDictionary.Contains(key);
             }
 
+            /// <summary>
+            /// See <see cref="ProjectLink.GlobalPropertiesCount()"/>.
+            /// </summary>
+            /// <returns>The number of properties in the global properties dictionary</returns>
             public override int GlobalPropertiesCount()
             {
                 return _data.GlobalPropertiesDictionary.Count;
             }
 
+            /// <summary>
+            /// See <see cref="ProjectLink.GlobalPropertiesEnumerable()"/>.
+            /// </summary>
+            /// <returns>An IEnumerable of the keys and values of the global properties dictionary</returns>
             public override IEnumerable<KeyValuePair<string, string>> GlobalPropertiesEnumerable()
             {
                 foreach (ProjectPropertyInstance property in _data.GlobalPropertiesDictionary)
