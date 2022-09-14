@@ -52,7 +52,7 @@ stages:
           - _SignArgs: ''
           - _InternalRuntimeDownloadArgs: ''
         steps:
-        - script: eng\common\build.cmd
+        - powershell: eng\common\build.ps1
                     -restore
                     -ci
                     -build
