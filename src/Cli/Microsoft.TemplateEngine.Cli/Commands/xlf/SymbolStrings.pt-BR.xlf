@@ -43,7 +43,7 @@ Para instalar o pacote NuGet de determinada versão, utilize &lt;package ID&gt;:
       </trans-unit>
       <trans-unit id="Command_Instantiate_Description">
         <source>Instantiates a template with given short name. An alias of 'dotnet new &lt;template name&gt;'.</source>
-        <target state="needs-review-translation">Instancia um modelo com um nome curto.</target>
+        <target state="translated">Instancia um modelo com o nome abreviado fornecido. Um alias 'dotnet new &lt;template name&gt;'.</target>
         <note>do not translate 'dotnet new &lt;template name&gt;'</note>
       </trans-unit>
       <trans-unit id="Command_Legacy_Update_Check_Description">
@@ -95,7 +95,7 @@ Se o comando for especificado sem o argumento, ele listará todos os pacotes de 
       </trans-unit>
       <trans-unit id="Command_Update_Option_CheckOnly">
         <source>Only checks for updates and display the template packages to be updated without applying update.</source>
-        <target state="needs-review-translation">Verificar apenas se há atualizações e exibir os pacotes de modelos a serem atualizados sem aplicar a atualização.</target>
+        <target state="translated">Somente verifica se há atualizações e exibe os pacotes de modelo a serem atualizados sem aplicar a atualização.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
@@ -125,7 +125,7 @@ Se o comando for especificado sem o argumento, ele listará todos os pacotes de 
       </trans-unit>
       <trans-unit id="Option_ColumnsAll">
         <source>Displays all columns in the output.</source>
-        <target state="needs-review-translation">Exibir todas as colunas na saída.</target>
+        <target state="translated">Exibe todas as colunas na saída.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_Debug_Attach">
