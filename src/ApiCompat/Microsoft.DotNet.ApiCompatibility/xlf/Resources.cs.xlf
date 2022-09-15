@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="CannotAddAttribute">
         <source>Cannot add attribute '{0}' to '{1}'.</source>
-        <target state="new">Cannot add attribute '{0}' to '{1}'.</target>
+        <target state="translated">Atribut {0} nelze přidat do {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotAddMemberToInterface">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="CannotAddSealedToInterfaceMember">
         <source>Cannot add sealed keyword to default interface member '{0}'.</source>
-        <target state="new">Cannot add sealed keyword to default interface member '{0}'.</target>
+        <target state="translated">Do výchozího člena rozhraní {0} nelze přidat klíčové slovo sealed.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotAddVirtualToMember">
@@ -79,17 +79,17 @@
       </trans-unit>
       <trans-unit id="CannotChangeAttribute">
         <source>Cannot change arguments of attribute '{0}' on '{1}'.</source>
-        <target state="new">Cannot change arguments of attribute '{0}' on '{1}'.</target>
+        <target state="translated">Argumenty atributu {0} v {1} nelze změnit.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotChangeParameterName">
         <source>Parameter name on member '{0}' changed from '{1}' to '{2}'.</source>
-        <target state="new">Parameter name on member '{0}' changed from '{1}' to '{2}'.</target>
+        <target state="translated">Název parametru u člena {0} se změnil z {1} na {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveAttribute">
         <source>Cannot remove attribute '{0}' from '{1}'.</source>
-        <target state="new">Cannot remove attribute '{0}' from '{1}'.</target>
+        <target state="translated">Atribut {0} nelze odebrat z {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
