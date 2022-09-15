@@ -1,31 +1,27 @@
 jobs:
-  - template: /eng/build.yml
-    parameters:
-      agentOs: Windows_NT_TemplateEngine
-      pool:
+  - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+    - template: /eng/build.yml
+      parameters:
+        agentOs: Windows_NT_TemplateEngine
+        pool:
+          ${{ if eq(variables['System.TeamProject'], 'public') }}:
+            name: NetCore-Public
+            demands: ImageOverride -equals Build.Windows.Amd64.VS2022.Pre.Open
+          ${{ if ne(variables['System.TeamProject'], 'public') }}:
+            name: NetCore1ESPool-Internal
+            demands: ImageOverride -equals Build.Windows.Amd64.VS2022.Pre
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          name: NetCore-Public
-          demands: ImageOverride -equals Build.Windows.Amd64.VS2022.Pre.Open
+          helixTargetQueue: Windows.Amd64.VS2022.Pre.Open
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
-          name: NetCore1ESPool-Internal
-          demands: ImageOverride -equals Build.Windows.Amd64.VS2022.Pre
-      ${{ if eq(variables['System.TeamProject'], 'public') }}:
-        helixTargetQueue: Windows.Amd64.VS2022.Pre.Open
-      ${{ if ne(variables['System.TeamProject'], 'public') }}:
-        helixTargetQueue: Windows.Amd64.VS2022.Pre
-      strategy:
-        matrix:
-          Build_Release:
-            _BuildConfig: Release
-            _PublishArgs: '-publish /p:DotNetPublishUsingPipelines=true'
-            ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+          helixTargetQueue: Windows.Amd64.VS2022.Pre
+        strategy:
+          matrix:
+            Build_Release:
+              _BuildConfig: Release
+              _PublishArgs: '-publish /p:DotNetPublishUsingPipelines=true'
               _SignType: test
               _Test: -test
-            ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-              _SignType: real
-              _Test: ''
 
-  - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
     - template: /eng/build.yml
       parameters:
         agentOs: Ubuntu_20_04_TemplateEngine

@@ -464,6 +464,11 @@
         <target state="translated">Оптимизация сборок по размеру. Этот процесс может занять некоторое время.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed">
+        <source>NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</source>
+        <target state="new">NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</target>
+        <note>{StrBegin="NETSDK1191: "}</note>
+      </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
         <source>NETSDK1020: Package Root {0} was incorrectly given for Resolved library {1}</source>
         <target state="translated">NETSDK1020: корневой каталог пакета {0} указан некорректно для разрешенной библиотеки {1}</target>

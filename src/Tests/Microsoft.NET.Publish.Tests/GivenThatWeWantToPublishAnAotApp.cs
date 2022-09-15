@@ -243,10 +243,10 @@ namespace Microsoft.NET.Publish.Tests
                     .WithProjectChanges(project => AddRuntimeConfigOption(project));
 
                 var buildCommand = new BuildCommand(testAsset);
-                buildCommand.Execute()
+                buildCommand.Execute($"/p:RuntimeIdentifier={rid}")
                     .Should().Pass();
 
-                var outputDirectory = buildCommand.GetOutputDirectory(targetFramework).FullName;
+                var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: rid).FullName;
                 var assemblyPath = Path.Combine(outputDirectory, $"{projectName}{Constants.ExeSuffix}");
                 var runtimeConfigPath = Path.Combine(outputDirectory, $"{projectName}.runtimeconfig.json");
                 var depsPath = Path.Combine(outputDirectory, $"{projectName}.deps.json");
@@ -679,6 +679,24 @@ namespace Microsoft.NET.Publish.Tests
                 // The lib exist and should be native
                 File.Exists(publishedDll).Should().BeTrue();
                 IsNativeImage(publishedDll).Should().BeTrue();
+            }
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
+        public void It_publishes_with_implicit_rid_with_NativeAotApp(string targetFramework)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                var projectName = "ImplicitRidNativeAotApp";
+                var testProject = CreateHelloWorldTestProject(targetFramework, projectName, true);
+                testProject.AdditionalProperties["PublishAot"] = "true";
+                var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                publishCommand
+                    .Execute()
+                    .Should().Pass();
             }
         }
 

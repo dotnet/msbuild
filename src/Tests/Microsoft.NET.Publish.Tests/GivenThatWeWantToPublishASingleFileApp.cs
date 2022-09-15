@@ -126,17 +126,6 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Fact]
-        public void It_errors_when_publishing_single_file_app_without_rid()
-        {
-            GetPublishCommand()
-                .Execute(PublishSingleFile)
-                .Should()
-                .Fail()
-                .And
-                .HaveStdOutContaining(Strings.CannotHaveSingleFileWithoutRuntimeIdentifier);
-        }
-
-        [Fact]
         public void It_errors_when_publishing_single_file_without_apphost()
         {
             GetPublishCommand()

@@ -204,7 +204,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
             testProject.AdditionalProperties["SelfContained"] = "true";
-            
+
             var testInstance = _testAssetsManager.CreateTestProject(testProject);
 
             new DotnetBuildCommand(Log)
@@ -252,8 +252,11 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                .NotHaveStdOutContaining("NETSDK1179");
         }
 
-        [Fact]
-        public void It_builds_with_implicit_rid_with_self_contained_option()
+        [Theory]
+        [InlineData("--self-contained")]
+        [InlineData("-p:PublishTrimmed=true")]
+        [InlineData("")]
+        public void It_builds_with_implicit_rid_with_rid_specific_properties(string executeOptionsAndProperties)
         {
             var testInstance = _testAssetsManager.CopyTestAsset("HelloWorld")
                 .WithSource()
@@ -262,11 +265,13 @@ namespace Microsoft.DotNet.Cli.Build.Tests
 
             new DotnetBuildCommand(Log)
                .WithWorkingDirectory(testInstance.Path)
-               .Execute("--self-contained")
+               .Execute(executeOptionsAndProperties)
                .Should()
                .Pass()
                .And
-               .NotHaveStdOutContaining("NETSDK1031");
+               .NotHaveStdOutContaining("NETSDK1031") // Self Contained Checks
+               .And
+               .NotHaveStdErrContaining("NETSDK1190"); // Check that publish properties don't interfere with build either 
         }
 
         [RequiresMSBuildVersionFact("17.4.0.41702")]
