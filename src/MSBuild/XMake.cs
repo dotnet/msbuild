@@ -342,9 +342,8 @@ namespace Microsoft.Build.CommandLine
                 // split each <prop>=<value> string into 2 pieces, breaking on the first = that is found
                 string[] parameterSections = parameter.Split(s_propertyValueSeparator, 2);
 
-                if (parameterSections.Length > 0 &&
+                if (parameterSections.Length == 2 &&
                     parameterSections[0].Length > 0 &&
-                    parameterSections.Length == 2 &&
                     string.Equals("NuGetInteractive", parameterSections[0], StringComparison.OrdinalIgnoreCase))
                 {
                     string nuGetInteractiveValue = parameterSections[1].Trim('"', ' ');
