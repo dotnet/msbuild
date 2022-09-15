@@ -95,7 +95,7 @@ If command is specified without the argument, it lists all the template packages
       </trans-unit>
       <trans-unit id="Command_Update_Option_CheckOnly">
         <source>Only checks for updates and display the template packages to be updated without applying update.</source>
-        <target state="new">Only checks for updates and display the template packages to be updated without applying update.</target>
+        <target state="translated">只檢查更新並顯示要更新的範本套件，而不套用更新。</target>
         <note />
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
@@ -125,7 +125,7 @@ If command is specified without the argument, it lists all the template packages
       </trans-unit>
       <trans-unit id="Option_ColumnsAll">
         <source>Displays all columns in the output.</source>
-        <target state="new">Displays all columns in the output.</target>
+        <target state="translated">顯示輸出中所有資料行。</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_Debug_Attach">

@@ -95,7 +95,7 @@ Pokud je příkaz zadán bez argumentu, zobrazí seznam všech nainstalovaných 
       </trans-unit>
       <trans-unit id="Command_Update_Option_CheckOnly">
         <source>Only checks for updates and display the template packages to be updated without applying update.</source>
-        <target state="new">Only checks for updates and display the template packages to be updated without applying update.</target>
+        <target state="translated">Zkontroluje pouze aktualizace a zobrazte balíčky šablon, které se mají aktualizovat bez použití aktualizace.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
@@ -125,7 +125,7 @@ Pokud je příkaz zadán bez argumentu, zobrazí seznam všech nainstalovaných 
       </trans-unit>
       <trans-unit id="Option_ColumnsAll">
         <source>Displays all columns in the output.</source>
-        <target state="new">Displays all columns in the output.</target>
+        <target state="translated">Zobrazí všechny sloupce ve výstupu.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_Debug_Attach">
