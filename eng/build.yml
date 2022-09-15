@@ -68,7 +68,7 @@ jobs:
             Token: $(dn-bot-dnceng-artifact-feeds-rw)
       - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
         - powershell: eng\common\build.ps1
-                    $(CIBuild)
+                    $(_CIBuild)
                     -configuration $(_BuildConfig)
                     $(_PublishArgs)
                     $(_SignArgs)
@@ -100,7 +100,7 @@ jobs:
   
       - ${{ if eq(parameters.agentOs, 'Windows_NT_FullFramework') }}:
         - powershell: eng\common\build.ps1
-                    $(CIBuild)
+                    $(_CIBuild)
                     -configuration $(_BuildConfig)
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)
@@ -131,7 +131,7 @@ jobs:
   
       - ${{ if eq(parameters.agentOs, 'Windows_NT_TestAsTools') }}:
         - powershell: eng\common\build.ps1
-                    $(CIBuild)
+                    $(_CIBuild)
                     -configuration $(_BuildConfig)
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)
@@ -144,7 +144,7 @@ jobs:
   
       - ${{ if notIn(parameters.agentOs, 'Windows_NT', 'Windows_NT_FullFramework', 'Windows_NT_TestAsTools') }}:
         - script: eng/common/build.sh
-                    $(CIBuild)
+                    $(_CIBuild)
                     --configuration $(_BuildConfig)
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)
@@ -246,7 +246,7 @@ jobs:
             Token: $(dn-bot-dnceng-artifact-feeds-rw)
       - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
         - powershell: eng\common\build.ps1
-                    $(CIBuild)
+                    $(_CIBuild)
                     -configuration $(_BuildConfig)
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)
@@ -374,7 +374,7 @@ jobs:
             Token: $(dn-bot-dnceng-artifact-feeds-rw)
       - ${{ if contains(parameters.agentOs, 'Windows_NT') }}:
         - powershell: eng\common\build.ps1
-                    $(CIBuild)
+                    $(_CIBuild)
                     -configuration $(_BuildConfig)
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)
