@@ -463,6 +463,11 @@ namespace Microsoft.Build.Evaluation
                     try
                     {
                         path = Directory.GetParent(FileUtilities.EnsureNoTrailingSlash(path))?.FullName;
+
+                        if (!Directory.Exists(path))
+                        {
+                            path = null;
+                        }
                     }
                     catch
                     {
