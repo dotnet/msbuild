@@ -3,9 +3,9 @@
     "allowPrerelease": true
   },
   "tools": {
-    "dotnet": "6.0.200",
+    "dotnet": "6.0.401",
     "vs": {
-      "version": "17.0"
+      "version": "17.2.1"
     }
   },
   "msbuild-sdks": {
