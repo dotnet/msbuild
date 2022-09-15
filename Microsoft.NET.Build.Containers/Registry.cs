@@ -177,9 +177,12 @@ public record struct Registry(Uri BaseUri)
         try
         {
             DockerCredentials privateRepoCreds = await CredsProvider.GetCredentialsAsync(BaseUri.Host);
-
-            byte[] byteArray = Encoding.ASCII.GetBytes($"{privateRepoCreds.Username}:{privateRepoCreds.Password}");
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+            if (privateRepoCreds.Username == "<token>") {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", privateRepoCreds.Password);
+            } else {
+                byte[] byteArray = Encoding.ASCII.GetBytes($"{privateRepoCreds.Username}:{privateRepoCreds.Password}");
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+            }
         }
         catch (CredsNotFoundException)
         {
