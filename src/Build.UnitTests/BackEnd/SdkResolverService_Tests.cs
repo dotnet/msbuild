@@ -63,7 +63,13 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolverWithResolvableSdkPattern2 running");
 
             // First error is a generic "we failed" message.
-            _logger.Errors.Skip(1).Select(i => i.Message).ShouldBe(new[] { "ERROR4", "ERROR1", "ERROR2" });
+            _logger.Errors.Skip(1).Select(i => i.Message).ShouldBe(new[] {
+                "ERROR4",
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SDKResolverReturnedNull", "MockResolverReturnsNull"),
+                "ERROR1",
+                "ERROR2",
+                "notfound"
+            });
             _logger.Warnings.Select(i => i.Message).ShouldBe(new[] { "WARNING4", "WARNING2" });
         }
 
@@ -780,7 +786,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             {
                 if (sdkReference.Name.Equals("notfound"))
                 {
-                    return null;
+                    return factory.IndicateFailure(new string[] { "notfound" });
                 }
                 if (resolverContext.State != null)
                 {

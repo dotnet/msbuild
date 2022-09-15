@@ -124,11 +124,17 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 // Warnings are already logged on success.
                 if (!result.Success)
                 {
-                    LogWarnings(loggingContext, sdkReferenceLocation, warnings);
+                    if (throwExceptions)
+                    {
+                        loggingContext.LogError(new BuildEventFileInfo(sdkReferenceLocation), "FailedToResolveSDK", sdk.Name);
+                    }
+
                     foreach (string error in errors)
                     {
                         loggingContext.LogErrorFromText(subcategoryResourceName: null, errorCode: null, helpKeyword: null, new BuildEventFileInfo(sdkReferenceLocation), message: error);
                     }
+
+                    LogWarnings(loggingContext, sdkReferenceLocation, warnings);
                 }
 
                 return result;
@@ -226,11 +232,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 loggingContext.LogError(new BuildEventFileInfo(sdkReferenceLocation), "FailedToResolveSDK", sdk.Name);
             }
 
-            LogWarnings(loggingContext, sdkReferenceLocation, warnings);
             foreach (string error in errors)
             {
                 loggingContext.LogErrorFromText(subcategoryResourceName: null, errorCode: null, helpKeyword: null, file: new BuildEventFileInfo(sdkReferenceLocation), message: error);
             }
+
+            LogWarnings(loggingContext, sdkReferenceLocation, warnings);
 
             // No resolvers resolved the sdk.
             return new SdkResult(sdk, null, null);
