@@ -1539,6 +1539,9 @@ namespace Microsoft.Build.Evaluation
                         case ProjectChooseElement choose:
                             EvaluateChooseElement(choose);
                             break;
+                        case ProjectItemDefinitionGroupElement itemDefinition:
+                            _itemDefinitionGroupElements.Add(itemDefinition);
+                            break;
                         default:
                             ErrorUtilities.ThrowInternalError("Unexpected child type");
                             break;
