@@ -133,6 +133,7 @@ stages:
               _BuildConfig: Debug
               _PublishArgs: ''
               _SignType: test
+              _Test: -test
 
     - template: /eng/build.yml
       parameters:
