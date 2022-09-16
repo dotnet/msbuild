@@ -466,7 +466,7 @@
       </trans-unit>
       <trans-unit id="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed">
         <source>NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</source>
-        <target state="new">NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</target>
+        <target state="translated">NETSDK1191: 無法推斷屬性 '{0}' 的執行階段識別碼。請明確指定 rid。</target>
         <note>{StrBegin="NETSDK1191: "}</note>
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
