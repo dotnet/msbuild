@@ -5,7 +5,7 @@ specifying the `DefaultContainer` PublishProfile. You can learn more about Publi
 
 ```shell
 >dotnet add package Microsoft.NET.Build.Containers --prerelease
->dotnet publish --os linux --arch x64 -p:ProfileName=DefaultContainer
+>dotnet publish --os linux --arch x64 -p:PublishProfile=DefaultContainer
 ...
 Pushed container '<your app name>:<your app version>' to registry 'docker://'
 ...
