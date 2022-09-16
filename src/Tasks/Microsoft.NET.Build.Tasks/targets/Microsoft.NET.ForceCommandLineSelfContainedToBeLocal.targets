@@ -1,0 +1,6 @@
+﻿<Project TreatAsLocalProperty="SelfContained">
+  <PropertyGroup>
+    <SelfContained Condition=" '$(_IsPublishing)' == 'true' and '$(PublishSelfContained)' != '' and '$(PublishSelfContained)' != 'true'">false</SelfContained>
+    <SelfContained Condition=" '$(_IsPublishing)' == 'true' and '$(PublishSelfContained)' == 'true'">true</SelfContained>
+  </PropertyGroup>
+</Project>

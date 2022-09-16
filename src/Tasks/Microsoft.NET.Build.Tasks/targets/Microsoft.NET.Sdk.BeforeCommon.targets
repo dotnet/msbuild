@@ -22,7 +22,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <_IsExecutable Condition="'$(OutputType)' == 'Exe' or '$(OutputType)'=='WinExe'">true</_IsExecutable>
-
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(HasRuntimeOutput)' == ''">
@@ -34,6 +33,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Set default intermediate and output paths -->
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultOutputPaths.targets" Condition="'$(UsingNETSdkDefaults)' == 'true'"/>
+
+  <!-- Allow targets to edit SelfContained.-->
+  <Import Project="Microsoft.NET.ForceCommandLineSelfContainedToBeLocal.targets" Condition=" '$(PublishSelfContained)' != '' "/>
 
   <!-- Before any additional SDK targets are imported, import the publish profile.
        This allows the publish profile to set properties like RuntimeIdentifier and them be

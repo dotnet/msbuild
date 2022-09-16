@@ -70,7 +70,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                     '$(SelfContained)' == 'true' or
                     '$(PublishReadyToRun)' == 'true' or
                     '$(PublishSingleFile)' == 'true' or
-                    '$(PublishAot)' == 'true'
+                    '$(PublishAot)' == 'true' or
+                    '$(PublishSelfContained)' == 'true'
                   )">true</UseCurrentRuntimeIdentifier>
   </PropertyGroup>
 
@@ -168,6 +169,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(RuntimeIdentifier)' == ''"
                  ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
                  FormatArguments="SelfContained"/>
+
+    <NETSdkError Condition="'$(PublishSelfContained)' == 'true' and '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == ''"
+                 ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
+                 FormatArguments="PublishSelfContained"/>
 
     <NETSdkError Condition="'$(PublishReadyToRun)' == 'true' and '$(RuntimeIdentifier)' == ''"
                  ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
