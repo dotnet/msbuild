@@ -128,6 +128,8 @@ namespace Microsoft.Build.Framework
         public readonly bool DebugScheduler;
         public readonly bool DebugNodeCommunication;
 
+        public readonly bool InProcNodeDisabled = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
+
         private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
         {
             return int.TryParse(Environment.GetEnvironmentVariable(environmentVariable), out int result)

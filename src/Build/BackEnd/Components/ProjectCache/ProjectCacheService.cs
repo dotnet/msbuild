@@ -645,7 +645,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 });
             }
 
-            await Task.WhenAll(cleanupTasks);
+            await Task.WhenAll(cleanupTasks).ConfigureAwait(false);
 
             if (pluginLogger.HasLoggedErrors)
             {

@@ -1,4 +1,4 @@
-<!--
+﻿<!--
 ***********************************************************************************************
 Microsoft.Common.CurrentVersion.targets
 
@@ -1788,7 +1788,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         BuildInParallel="$(BuildInParallel)"
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform)"
         ContinueOnError="!$(BuildingProject)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier$(_GlobalPropertiesToRemoveFromProjectReferences)"
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier;SelfContained;$(_GlobalPropertiesToRemoveFromProjectReferences)"
         Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true' and '$(EnableDynamicPlatformResolution)' != 'true'"
         SkipNonexistentTargets="true">
       <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetFrameworkPossibilities" />
@@ -1804,7 +1804,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Targets="GetTargetFrameworks"
         BuildInParallel="$(BuildInParallel)"
         ContinueOnError="!$(BuildingProject)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier;Platform;Configuration$(_GlobalPropertiesToRemoveFromProjectReferences)"
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier;SelfContained;Platform;Configuration;$(_GlobalPropertiesToRemoveFromProjectReferences)"
         Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true' and '$(EnableDynamicPlatformResolution)' == 'true'"
         SkipNonexistentTargets="true">
       <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetFrameworkPossibilities" />
@@ -1859,6 +1859,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                          Condition="'$(ReferringTargetFrameworkForProjectReferences)' == '' or
                                     ('$(EnableDynamicPlatformResolution)' == 'true' and '%(_ProjectReferenceTargetFrameworkPossibilities.IsVcxOrNativeProj)' == 'true')" />
 
+    </ItemGroup>
+
+    <!-- IsRidAgnostic metadata is used to determine whether global properties such as RuntimeIdentifier and SelfContained flow to a referenced project.
+         However, for multi-targeted projects there may be a different IsRidAgnostic value for each TargetFramework.  In that case, this task selects
+         the IsRidAgnostic value for the NearestTargetFramework for the project. -->
+    <SetRidAgnosticValueForProjects Projects="@(AnnotatedProjects)">
+      <Output ItemName="UpdatedAnnotatedProjects" TaskParameter="UpdatedProjects" />
+    </SetRidAgnosticValueForProjects>
+    
+    <ItemGroup>
+      <AnnotatedProjects Remove="@(AnnotatedProjects)" />
+      <AnnotatedProjects Include="@(UpdatedAnnotatedProjects)" />
+      <UpdatedAnnotatedProjects Remove="@(UpdatedAnnotatedProjects)" />
+
       <!-- If the NearestTargetFramework property was set and the project multi-targets, SetTargetFramework must be set. -->
       <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.NearestTargetFramework)' != '' and '%(AnnotatedProjects.HasSingleTargetFramework)' != 'true'">
         <SetTargetFramework>TargetFramework=%(AnnotatedProjects.NearestTargetFramework)</SetTargetFramework>
@@ -1872,9 +1886,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <UndefineProperties>%(AnnotatedProjects.UndefineProperties);TargetFramework</UndefineProperties>
       </AnnotatedProjects>
 
-      <!-- If the project is RID agnostic, undefine the RuntimeIdentifier property to avoid another evaluation. -->
-      <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.IsRidAgnostic)' == 'true'">
-        <UndefineProperties>%(AnnotatedProjects.UndefineProperties);RuntimeIdentifier</UndefineProperties>
+      <!-- Add RuntimeIdentifier and SelfContained to the list of global properties that should not flow to the referenced project,
+           unless the project is expecting those properties to flow. -->
+      <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.IsRidAgnostic)' != 'false'">
+        <UndefineProperties>%(AnnotatedProjects.UndefineProperties);RuntimeIdentifier;SelfContained</UndefineProperties>
       </AnnotatedProjects>
 
       <!--
@@ -1907,9 +1922,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetPlatformMonikers>@(_TargetFrameworkInfo->'%(TargetPlatformMonikers)')</TargetPlatformMonikers>
         <AdditionalPropertiesFromProject>$(_AdditionalPropertiesFromProject)</AdditionalPropertiesFromProject>
         <HasSingleTargetFramework>true</HasSingleTargetFramework>
-        <!-- indicate to caller that project is RID agnostic so that a global property RuntimeIdentifier value can be removed -->
-        <IsRidAgnostic>false</IsRidAgnostic>
-        <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
+        <IsRidAgnostic>@(_TargetFrameworkInfo->'%(IsRidAgnostic)')</IsRidAgnostic>
         <!-- Extract necessary information for SetPlatform negotiation -->
         <IsVcxOrNativeProj Condition="'$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj'">true</IsVcxOrNativeProj>
         <Platform Condition="$([MSBuild]::AreFeaturesEnabled('17.4'))">$(Platform)</Platform>
@@ -1950,6 +1963,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetPlatformMonikers>$(TargetPlatformMoniker)</TargetPlatformMonikers>
         <TargetPlatformMonikers Condition="'$(TargetPlatformMoniker)' == ''">None</TargetPlatformMonikers>
         <AdditionalPropertiesFromProject>$(_AdditionalTargetFrameworkInfoProperties)</AdditionalPropertiesFromProject>
+
+        <!-- Determine whether a project is "RID agnostic" for each TargetFramework.  "RID agnostic" means that global properties such as SelfContained and RuntimeIdentifier should
+             not flow across project references.
+
+             Generally this value will come from the IsRidAgnostic property set by the .NET SDK.  If that's not set, then the fallback logic here will be that the project
+             is RID agnostic if it doesn't have RuntimeIdentifier or RuntimeIdentifiers properties set. -->
+        <IsRidAgnostic>$(IsRidAgnostic)</IsRidAgnostic>
+        <IsRidAgnostic Condition=" '$(IsRidAgnostic)' == '' and '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
+        <IsRidAgnostic Condition=" '$(IsRidAgnostic)' == ''">false</IsRidAgnostic>
+
       </_TargetFrameworkInfo>
     </ItemGroup>
 

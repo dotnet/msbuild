@@ -240,9 +240,7 @@ namespace Microsoft.Build.Execution
         /// <returns>The reason for shutting down.</returns>
         public NodeEngineShutdownReason Run(bool enableReuse, bool lowPriority, out Exception shutdownException)
         {
-            // Console.WriteLine("Run called at {0}", DateTime.Now);
-
-            _nodeEndpoint = new NodeEndpointOutOfProc(this, enableReuse, lowPriority);
+            _nodeEndpoint = new NodeEndpointOutOfProc(enableReuse, lowPriority);
             _nodeEndpoint.OnLinkStatusChanged += OnLinkStatusChanged;
             _nodeEndpoint.Listen(this);
 

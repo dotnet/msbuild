@@ -322,11 +322,11 @@
     </comment>
   </data>
   <data name="ChangeWave_InvalidFormat" xml:space="preserve">
-    <value>MSB4271: Environment variable MSBuildDisableFeaturesFromVersion is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</value>
+    <value>MSB4271: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</value>
     <comment>{StrBegin="MSB4271: "}UE: Value should be of the format: xx.yy</comment>
   </data>
   <data name="ChangeWave_OutOfRotation" xml:space="preserve">
-    <value>MSB4272: Environment variable MSBuildDisableFeaturesFromVersion is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</value>
+    <value>MSB4272: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</value>
     <comment>{StrBegin="MSB4272: "}</comment>
   </data>
   <data name="SearchPathsForMSBuildExtensionsPath" xml:space="preserve">
