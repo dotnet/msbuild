@@ -125,20 +125,19 @@ namespace Microsoft.NET.Build.Tasks
 
         private void WriteDepsFile(string depsFilePath)
         {
-            ProjectContext projectContext;
-            if (AssetsFilePath == null)
-            {
-                projectContext = null;
-            }
-            else
+            ProjectContext projectContext = null;
+            LockFileLookup lockFileLookup = null;
+            if (AssetsFilePath != null)
             {
                 LockFile lockFile = new LockFileCache(this).GetLockFile(AssetsFilePath);
                 projectContext = lockFile.CreateProjectContext(
-                 TargetFramework,
-                 RuntimeIdentifier,
-                 PlatformLibraryName,
-                 RuntimeFrameworks,
-                 IsSelfContained);
+                    TargetFramework,
+                    RuntimeIdentifier,
+                    PlatformLibraryName,
+                    RuntimeFrameworks,
+                    IsSelfContained);
+
+                lockFileLookup = new LockFileLookup(lockFile);
             }
 
             CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
@@ -156,13 +155,14 @@ namespace Microsoft.NET.Build.Tasks
             IEnumerable<ReferenceInfo> referenceAssemblyInfos =
                 ReferenceInfo.CreateReferenceInfos(ReferenceAssemblies);
 
-            // If there is a generated asset file. The projectContext will have project reference.
-            // So remove it from directReferences to avoid duplication
-            var projectContextHasProjectReferences = projectContext != null;
+            // If there is a generated asset file. The projectContext will have most project references.
+            // So remove any project reference contained within projectContext from directReferences to avoid duplication
             IEnumerable<ReferenceInfo> directReferences =
-                ReferenceInfo.CreateDirectReferenceInfos(ReferencePaths,
+                ReferenceInfo.CreateDirectReferenceInfos(
+                    ReferencePaths,
                     ReferenceSatellitePaths,
-                    projectContextHasProjectReferences, isUserRuntimeAssembly);
+                    lockFileLookup,
+                    isUserRuntimeAssembly);
 
             IEnumerable<ReferenceInfo> dependencyReferences =
                 ReferenceInfo.CreateDependencyReferenceInfos(ReferenceDependencyPaths, ReferenceSatellitePaths, isUserRuntimeAssembly);
@@ -210,7 +210,7 @@ namespace Microsoft.NET.Build.Tasks
                 RuntimeGraph runtimeGraph =
                     IsSelfContained ? new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath) : null;
 
-                builder = new DependencyContextBuilder(mainProject, IncludeRuntimeFileVersions, runtimeGraph, projectContext);
+                builder = new DependencyContextBuilder(mainProject, IncludeRuntimeFileVersions, runtimeGraph, projectContext, lockFileLookup);
             }
             else
             {
