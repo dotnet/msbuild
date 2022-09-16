@@ -33,7 +33,7 @@ namespace Microsoft.NET.StringTools
             /// </summary>
             private int _charIndex;
 
-            internal Enumerator(scoped ref InternableString str)
+            internal Enumerator(ref InternableString str)
             {
                 _string = str;
                 _spanIndex = -1;
