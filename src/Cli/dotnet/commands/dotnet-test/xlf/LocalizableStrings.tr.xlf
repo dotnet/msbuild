@@ -200,6 +200,16 @@ Belirtilen dizin yoksa oluşturulur.</target>
         <target state="translated">DÖKÜM_TÜRÜ</target>
         <note />
       </trans-unit>
+      <trans-unit id="ForwardedArguments">
+        <source>FORWARDED_ARGS</source>
+        <target state="new">FORWARDED_ARGS</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ForwardedArgumentsDescription">
+        <source>Arguments to forward to MSBuild.</source>
+        <target state="new">Arguments to forward to MSBuild.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="HangDumpTypeArgumentName">
         <source>DUMP_TYPE</source>
         <target state="translated">DÖKÜM_TÜRÜ</target>

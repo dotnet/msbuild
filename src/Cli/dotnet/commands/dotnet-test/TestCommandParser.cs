@@ -23,6 +23,12 @@ namespace Microsoft.DotNet.Cli
             Arity = ArgumentArity.ZeroOrOne
         };
 
+        public static readonly Argument<string[]> ForwardedArguments = new Argument<string[]>(LocalizableStrings.ForwardedArguments)
+        {
+            Description = LocalizableStrings.ForwardedArgumentsDescription,
+            Arity = ArgumentArity.ZeroOrMore
+        };
+
         public static readonly Option<string> SettingsOption = new ForwardedOption<string>(new string[] { "-s", "--settings" }, LocalizableStrings.CmdSettingsDescription)
         {
             ArgumentHelpName = LocalizableStrings.CmdSettingsFile
@@ -159,6 +165,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(CommonOptions.ArchitectureOption);
             command.AddOption(CommonOptions.OperatingSystemOption);
+            command.AddArgument(ForwardedArguments);
 
             command.SetHandler(TestCommand.Run);
 

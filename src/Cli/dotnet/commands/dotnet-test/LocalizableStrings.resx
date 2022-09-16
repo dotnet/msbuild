@@ -277,4 +277,10 @@ Examples:
   <data name="CmdEnvironmentVariableExpression" xml:space="preserve">
     <value>NAME="VALUE"</value>
   </data>
+  <data name="ForwardedArguments" xml:space="preserve">
+    <value>FORWARDED_ARGS</value>
+  </data>
+  <data name="ForwardedArgumentsDescription" xml:space="preserve">
+    <value>Arguments to forward to MSBuild.</value>
+  </data>
 </root>
