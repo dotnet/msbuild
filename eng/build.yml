@@ -135,7 +135,6 @@ jobs:
                     -configuration $(_BuildConfig)
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)
-                    $(_Test)
                     $(_InternalRuntimeDownloadArgs)
                     /p:RunTestsAsTool=true
           displayName: Build
