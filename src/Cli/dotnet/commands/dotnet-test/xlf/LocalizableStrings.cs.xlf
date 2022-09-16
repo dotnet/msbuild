@@ -200,16 +200,6 @@ Pokud zadaný adresář neexistuje, bude vytvořen.</target>
         <target state="translated">DUMP_TYPE</target>
         <note />
       </trans-unit>
-      <trans-unit id="ForwardedArguments">
-        <source>FORWARDED_ARGS</source>
-        <target state="new">FORWARDED_ARGS</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ForwardedArgumentsDescription">
-        <source>Arguments to forward to MSBuild.</source>
-        <target state="new">Arguments to forward to MSBuild.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="HangDumpTypeArgumentName">
         <source>DUMP_TYPE</source>
         <target state="translated">DUMP_TYPE</target>
