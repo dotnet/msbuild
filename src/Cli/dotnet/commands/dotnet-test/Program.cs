@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Tools.Test
             // from the VSTest side.
             string testSessionCorrelationId = $"{Environment.ProcessId}_{Guid.NewGuid()}";
 
-            string[] args = parseResult.GetArguments();
+            string[] args = parseResult.GetArguments().Concat(parseResult.UnmatchedTokens).ToArray();
 
             if (VSTestTrace.TraceEnabled)
             {
