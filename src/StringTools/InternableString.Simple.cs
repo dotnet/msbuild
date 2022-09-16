@@ -51,7 +51,7 @@ namespace Microsoft.NET.StringTools
             /// </summary>
             private int _charIndex;
 
-            public Enumerator(scoped ref InternableString spanBuilder)
+            public Enumerator(ref InternableString spanBuilder)
             {
                 _string = spanBuilder;
                 _charIndex = -1;
