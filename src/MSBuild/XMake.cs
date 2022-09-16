@@ -678,6 +678,7 @@ namespace Microsoft.Build.CommandLine
                 Dictionary<string, string> restoreProperties = null;
                 ILogger[] loggers = Array.Empty<ILogger>();
                 LoggerVerbosity verbosity = LoggerVerbosity.Normal;
+                LoggerVerbosity originalVerbosity = LoggerVerbosity.Normal;
                 List<DistributedLoggerRecord> distributedLoggerRecords = null;
 #if FEATURE_XML_SCHEMA_VALIDATION
                 bool needToValidateProject = false;
@@ -715,6 +716,7 @@ namespace Microsoft.Build.CommandLine
                                             ref globalProperties,
                                             ref loggers,
                                             ref verbosity,
+                                            ref originalVerbosity,
                                             ref distributedLoggerRecords,
 #if FEATURE_XML_SCHEMA_VALIDATION
                                             ref needToValidateProject,
@@ -2176,6 +2178,7 @@ namespace Microsoft.Build.CommandLine
             ref Dictionary<string, string> globalProperties,
             ref ILogger[] loggers,
             ref LoggerVerbosity verbosity,
+            ref LoggerVerbosity originalVerbosity,
             ref List<DistributedLoggerRecord> distributedLoggerRecords,
 #if FEATURE_XML_SCHEMA_VALIDATION
             ref bool needToValidateProject,
@@ -2291,6 +2294,7 @@ namespace Microsoft.Build.CommandLine
                                                            ref globalProperties,
                                                            ref loggers,
                                                            ref verbosity,
+                                                           ref originalVerbosity,
                                                            ref distributedLoggerRecords,
 #if FEATURE_XML_SCHEMA_VALIDATION
                                                            ref needToValidateProject,
@@ -2398,6 +2402,7 @@ namespace Microsoft.Build.CommandLine
                         groupedFileLoggerParameters,
                         out distributedLoggerRecords,
                         out verbosity,
+                        out originalVerbosity,
                         cpuCount,
                         out profilerLogger,
                         out enableProfiler
@@ -2428,7 +2433,7 @@ namespace Microsoft.Build.CommandLine
                         Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("PickedUpSwitchesFromAutoResponse", autoResponseFileName));
                     }
 
-                    if (verbosity == LoggerVerbosity.Diagnostic)
+                    if (verbosity == LoggerVerbosity.Diagnostic && originalVerbosity != LoggerVerbosity.Quiet)
                     {
                         string equivalentCommandLine = commandLineSwitches.GetEquivalentCommandLineExceptProjectFile();
                         Console.WriteLine($"{Path.Combine(s_exePath, s_exeName)} {equivalentCommandLine} {projectFile}");
@@ -3181,18 +3186,19 @@ namespace Microsoft.Build.CommandLine
             string[][] groupedFileLoggerParameters,
             out List<DistributedLoggerRecord> distributedLoggerRecords,
             out LoggerVerbosity verbosity,
+            out LoggerVerbosity originalVerbosity,
             int cpuCount,
             out ProfilerLogger profilerLogger,
             out bool enableProfiler
         )
         {
             // if verbosity level is not specified, use the default
-            verbosity = LoggerVerbosity.Normal;
+            originalVerbosity = verbosity = LoggerVerbosity.Normal;
 
             if (verbositySwitchParameters.Length > 0)
             {
                 // Read the last verbosity switch found
-                verbosity = ProcessVerbositySwitch(verbositySwitchParameters[verbositySwitchParameters.Length - 1]);
+                originalVerbosity = verbosity = ProcessVerbositySwitch(verbositySwitchParameters[verbositySwitchParameters.Length - 1]);
             }
 
             var loggers = ProcessLoggerSwitch(loggerSwitchParameters, verbosity);
