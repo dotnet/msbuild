@@ -228,7 +228,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
 
             public IReadOnlyList<string?>? Projects { get; private set; }
 
-            public bool AddProjectToSolution(string solution, IReadOnlyList<string?> projects, string? targetFolder)
+            public bool AddProjectToSolution(string solution, IReadOnlyList<string?> projects, string? targetFolder, bool? inRoot)
             {
                 Solution = solution;
                 Projects = projects;

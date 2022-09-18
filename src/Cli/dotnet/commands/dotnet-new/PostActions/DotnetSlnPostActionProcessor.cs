@@ -19,9 +19,9 @@ namespace Microsoft.DotNet.Tools.New.PostActionProcessors
 {
     internal class DotnetSlnPostActionProcessor : PostActionProcessorBase
     {
-        private readonly Func<string, IReadOnlyList<string>, string?, bool> _addProjToSolutionCallback;
+        private readonly Func<string, IReadOnlyList<string>, string?, bool?, bool> _addProjToSolutionCallback;
 
-        public DotnetSlnPostActionProcessor(Func<string, IReadOnlyList<string>, string?, bool>? addProjToSolutionCallback = null)
+        public DotnetSlnPostActionProcessor(Func<string, IReadOnlyList<string>, string?, bool?, bool>? addProjToSolutionCallback = null)
         {
             _addProjToSolutionCallback = addProjToSolutionCallback ?? DotnetCommandCallbacks.AddProjectsToSolution;
         }
@@ -103,16 +103,17 @@ namespace Microsoft.DotNet.Tools.New.PostActionProcessors
             }
 
             string solutionFolder = GetSolutionFolder(action);
+            bool? inRoot = GetInRoot(action);
 
             Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostAction_AddProjToSln_Running, string.Join(" ", projectFiles), nearestSlnFilesFound[0], solutionFolder));
-            return AddProjectsToSolution(nearestSlnFilesFound[0], projectFiles, solutionFolder);
+            return AddProjectsToSolution(nearestSlnFilesFound[0], projectFiles, solutionFolder, inRoot);
         }
 
-        private bool AddProjectsToSolution(string solutionPath, IReadOnlyList<string> projectsToAdd, string? solutionFolder)
+        private bool AddProjectsToSolution(string solutionPath, IReadOnlyList<string> projectsToAdd, string? solutionFolder, bool? inRoot)
         {
             try
             {
-                bool succeeded = _addProjToSolutionCallback(solutionPath, projectsToAdd, solutionFolder);
+                bool succeeded = _addProjToSolutionCallback(solutionPath, projectsToAdd, solutionFolder, inRoot);
                 if (!succeeded)
                 {
                     Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddProjToSln_Failed_NoReason);
@@ -138,6 +139,18 @@ namespace Microsoft.DotNet.Tools.New.PostActionProcessors
                 return solutionFolder;
             }
             return string.Empty;
+        }
+
+        private static bool? GetInRoot(IPostAction actionConfig)
+        {
+            if (actionConfig.Args != null && actionConfig.Args.TryGetValue("inRoot", out string? inRoot))
+            {
+                if (bool.TryParse(inRoot, out bool result))
+                {
+                    return result;
+                }
+            }
+            return null;
         }
     }
 }
