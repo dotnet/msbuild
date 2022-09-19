@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             WriteTestOutput($"{DateTime.Now}: process started: '{_process.StartInfo.FileName} {_process.StartInfo.Arguments}'");
         }
 
-        public Task<string> GetOutputLineAsyncWithConsoleHistoryAsync(string message, TimeSpan timeout)
+        public Task<string> GetOutputLineAsyncWithConsoleHistoryAsync(string message)
         {
             if (_lines.Contains(message))
             {
@@ -84,23 +84,19 @@ namespace Microsoft.DotNet.Watcher.Tools
             }
             
             WriteTestOutput($"Did not find [msg == '{message}'] in console history.");
-            return GetOutputLineAsync(message, timeout);
+            return GetOutputLineAsync(message);
         }
 
-        public async Task<string> GetOutputLineAsync(string message, TimeSpan timeout)
+        public async Task<string> GetOutputLineAsync(string message)
         {
-            WriteTestOutput($"Waiting for output line [msg == '{message}']. Will wait for {timeout.TotalSeconds} sec.");
-            var cts = new CancellationTokenSource();
-            cts.CancelAfter(timeout);
-            return await GetOutputLineAsync($"[msg == '{message}']", m => string.Equals(m, message, StringComparison.Ordinal), cts.Token);
+            WriteTestOutput($"Waiting for output line [msg == '{message}']");
+            return await GetOutputLineAsync($"[msg == '{message}']", m => string.Equals(m, message, StringComparison.Ordinal), CancellationToken.None);
         }
 
-        public async Task<string> GetOutputLineStartsWithAsync(string message, TimeSpan timeout)
+        public async Task<string> GetOutputLineStartsWithAsync(string message)
         {
-            WriteTestOutput($"Waiting for output line [msg.StartsWith('{message}')]. Will wait for {timeout.TotalSeconds} sec.");
-            var cts = new CancellationTokenSource();
-            cts.CancelAfter(timeout);
-            return await GetOutputLineAsync($"[msg.StartsWith('{message}')]", m => m != null && m.StartsWith(message, StringComparison.Ordinal), cts.Token);
+            WriteTestOutput($"Waiting for output line [msg.StartsWith('{message}')].");
+            return await GetOutputLineAsync($"[msg.StartsWith('{message}')]", m => m != null && m.StartsWith(message, StringComparison.Ordinal), CancellationToken.None);
         }
 
         private async Task<string> GetOutputLineAsync(string predicateName, Predicate<string> predicate, CancellationToken cancellationToken)

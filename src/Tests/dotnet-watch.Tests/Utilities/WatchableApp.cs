@@ -15,8 +15,6 @@ namespace Microsoft.DotNet.Watcher.Tools
 {
     internal sealed class WatchableApp : IDisposable
     {
-        private static readonly TimeSpan DefaultMessageTimeOut = TimeSpan.FromSeconds(30);
-
         private const string StartedMessage = "Started";
         private const string ExitingMessage = "Exiting";
         private const string WatchStartedMessage = "dotnet watch 🚀 Started";
@@ -44,25 +42,22 @@ namespace Microsoft.DotNet.Watcher.Tools
         public string WorkingDirectory { get; set; }
 
         public Task HasRestarted()
-            => HasRestarted(DefaultMessageTimeOut);
-
-        public Task HasRestarted(TimeSpan timeout)
-            => Process.GetOutputLineAsync(StartedMessage, timeout);
+            => Process.GetOutputLineAsync(StartedMessage);
 
         public async Task HasExited()
         {
-            await Process.GetOutputLineAsync(ExitingMessage, DefaultMessageTimeOut);
-            await Process.GetOutputLineStartsWithAsync(WatchExitedMessage, DefaultMessageTimeOut);
+            await Process.GetOutputLineAsync(ExitingMessage);
+            await Process.GetOutputLineStartsWithAsync(WatchExitedMessage);
         }
 
         public Task IsWaitingForFileChange()
         {
-            return Process.GetOutputLineStartsWithAsync(WaitingForFileChangeMessage, DefaultMessageTimeOut);
+            return Process.GetOutputLineStartsWithAsync(WaitingForFileChangeMessage);
         }
 
         public Task HasFileChanged()
         {
-            return Process.GetOutputLineStartsWithAsync(WatchFileChanged, DefaultMessageTimeOut);
+            return Process.GetOutputLineStartsWithAsync(WatchFileChanged);
         }
 
         public bool UsePollingWatcher { get; set; }
@@ -71,7 +66,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         {
             // Process ID is insufficient because PID's may be reused. Process identifier also includes other info to distinguish
             // between different process instances.
-            var line = await Process.GetOutputLineStartsWithAsync("Process identifier =", DefaultMessageTimeOut);
+            var line = await Process.GetOutputLineStartsWithAsync("Process identifier =");
             return line.Split('=').Last();
         }
 
@@ -125,7 +120,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             // Make this timeout long because it depends much on the MSBuild compilation speed.
             // Slow machines may take a bit to compile and boot test apps
-            await Process.GetOutputLineAsync(WatchStartedMessage, TimeSpan.FromMinutes(2));
+            await Process.GetOutputLineAsync(WatchStartedMessage);
         }
 
         public void Dispose()
