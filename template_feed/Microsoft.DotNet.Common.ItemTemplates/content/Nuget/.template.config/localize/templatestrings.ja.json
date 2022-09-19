@@ -2,5 +2,7 @@
   "author": "Microsoft",
   "name": "NuGet Config",
   "description": "NuGet がパッケージが検索する場所を構成するためのファイル",
+  "postActions/chmod/description": "Apply permissions",
+  "postActions/chmod/manualInstructions/default/text": "Run 'chmod 600 nuget.config'",
   "postActions/open-file/description": "エディターで nuget.config を開く"
 }

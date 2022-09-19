@@ -43,7 +43,7 @@ Per installare il pacchetto NuGet di una determinata versione, usare &lt;package
       </trans-unit>
       <trans-unit id="Command_Instantiate_Description">
         <source>Instantiates a template with given short name. An alias of 'dotnet new &lt;template name&gt;'.</source>
-        <target state="needs-review-translation">Crea un'istanza di un modello con il nome breve specificato.</target>
+        <target state="translated">Creare un'istanza di un modello con il nome breve specificato. Alias di 'dotnet new &lt;template name&gt;'.</target>
         <note>do not translate 'dotnet new &lt;template name&gt;'</note>
       </trans-unit>
       <trans-unit id="Command_Legacy_Update_Check_Description">
@@ -95,7 +95,7 @@ Se il comando è specificato senza l'argomento, vengono elencati tutti i pacchet
       </trans-unit>
       <trans-unit id="Command_Update_Option_CheckOnly">
         <source>Only checks for updates and display the template packages to be updated without applying update.</source>
-        <target state="needs-review-translation">Controlla solo la disponibilità di aggiornamenti e visualizza i pacchetti di modelli da aggiornare senza applicare l'aggiornamento.</target>
+        <target state="translated">Controlla solo la disponibilità di aggiornamenti e visualizza i pacchetti di modelli da aggiornare senza applicare l'aggiornamento.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
@@ -125,7 +125,7 @@ Se il comando è specificato senza l'argomento, vengono elencati tutti i pacchet
       </trans-unit>
       <trans-unit id="Option_ColumnsAll">
         <source>Displays all columns in the output.</source>
-        <target state="needs-review-translation">Visualizza tutte le colonne nell'output.</target>
+        <target state="translated">Visualizza tutte le colonne nell'output.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_Debug_Attach">

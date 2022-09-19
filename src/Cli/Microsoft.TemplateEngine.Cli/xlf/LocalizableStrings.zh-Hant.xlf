@@ -310,7 +310,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="Commands_TemplateShortNameCommandConflict_Info">
         <source>To instantiate the template with short name '{0}', run:</source>
-        <target state="new">To instantiate the template with short name '{0}', run:</target>
+        <target state="translated">若要以簡短名稱 '{0}' 來具現化範本，請執行:</target>
         <note>Followed by command example from new line.</note>
       </trans-unit>
       <trans-unit id="Commands_Validator_WrongArgumentValue">
@@ -415,7 +415,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="Generic_CommandHints_List_Template">
         <source>To list installed templates similar to '{0}', run:</source>
-        <target state="new">To list installed templates similar to '{0}', run:</target>
+        <target state="translated">若要列出類似 '{0}' 的已安裝範本，請執行:</target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_CommandHints_Search">
@@ -480,12 +480,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplate">
         <source>Failed to get information about template packages for the template with identity '{0}'.</source>
-        <target state="new">Failed to get information about template packages for the template with identity '{0}'.</target>
+        <target state="translated">無法取得具有身分識別 '{0}' 範本的範本套件相關資訊。</target>
         <note />
       </trans-unit>
       <trans-unit id="InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplateGroup">
         <source>Failed to get information about template packages for template group '{0}'.</source>
-        <target state="new">Failed to get information about template packages for template group '{0}'.</target>
+        <target state="translated">無法取得範本群組 '{0}' 的範本套件相關資訊。</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidCommandOptions">
