@@ -352,7 +352,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         public void ItUsesVerbosityPassedToDefineVerbosityOfConsoleLoggerOfTheTests(string verbosity, bool shouldShowPassedTests)
         {
             // Copy and restore VSTestCore project in output directory of project dotnet-vstest.Tests
-            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("9");
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp($"9_{verbosity}");
 
             // Call test
             CommandResult result = new DotnetTestCommand(Log)
