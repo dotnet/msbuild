@@ -23,6 +23,8 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
 
+    <Reference Include="System.IO.Compression" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
