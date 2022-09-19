@@ -267,6 +267,20 @@ namespace Microsoft.Build.Engine.UnitTests
             pidOfInitialProcess.ShouldBe(pidOfServerProcess, "We started a server node even when nodereuse is false.");
         }
 
+        [Fact]
+        public void ServerShouldNotStartWhenBuildIsInteractive()
+        {
+            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+
+            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -interactive", out bool success, false, _output);
+            int pidOfInitialProcess = ParseNumber(output, "Process ID is ");
+            int pidOfServerProcess = ParseNumber(output, "Server ID is ");
+
+            success.ShouldBeTrue();
+            pidOfInitialProcess.ShouldBe(pidOfServerProcess, "We started a server node even when build is interactive.");
+        }
+
         private int ParseNumber(string searchString, string toFind)
         {
             Regex regex = new(@$"{toFind}(\d+)");
