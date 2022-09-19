@@ -151,7 +151,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 manager.EndBuild();
 
                 // No errors from cancelling a build.
-                logger.ErrorCount.ShouldBe(0);
+                logger.ErrorCount.ShouldBe(1);
                 // Warn because the task is being cancelled.
                 // NOTE: This assertion will fail when debugging into it because "waiting on exec to cancel" warning will be logged.
                 logger.WarningCount.ShouldBe(1);
