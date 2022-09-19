@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net7.0;net472</TargetFrameworks>
@@ -26,7 +26,15 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
     <Compile Remove="*.*" />
-    <!-- A separate PR will add the required CreateNewImageToolTask file. -->
+    <Compile Include="ParseContainerProperties.cs" />
+    <Compile Include="CreateNewImageToolTask.cs" />
+    <Compile Include="ContainerHelpers.cs" />
+    <Compile Include="net472Definitions.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net472'">
+    <Compile Remove="CreateNewImageToolTask.cs" />
+    <Compile Remove="net472Definitions.cs" />
   </ItemGroup>
 
   <!-- This target adds all of our PackageReference and ProjectReference's runtime assets to our package output. -->

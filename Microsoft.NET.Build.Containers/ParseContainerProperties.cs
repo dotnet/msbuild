@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Framework;
 
@@ -161,8 +164,8 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
         {
             if (!ContainerHelpers.NormalizeImageName(ContainerImageName, out string? normalizedImageName))
             {
-                Log.LogWarning(null, "CONTAINER001", "Container.InvalidImageName", null, 0, 0, 0, 0, $"{nameof(ContainerImageName)} was not a valid container image name, it was normalized to {normalizedImageName}");
-                NewContainerImageName = normalizedImageName;
+                Log.LogMessage(MessageImportance.High, $"{nameof(ContainerImageName)}:'{ContainerImageName}' was not a valid container image name, it was normalized to {normalizedImageName}");
+                NewContainerImageName = normalizedImageName ?? "";
             }
             else
             {
@@ -176,9 +179,9 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
             return !Log.HasLoggedErrors;
         }
 
-        ParsedContainerRegistry = outputReg;
-        ParsedContainerImage = outputImage;
-        ParsedContainerTag = outputTag;
+        ParsedContainerRegistry = outputReg ?? "";
+        ParsedContainerImage = outputImage ?? "";
+        ParsedContainerTag = outputTag ?? "";
         NewContainerRegistry = registryToUse;
         NewContainerTags = validTags;
 

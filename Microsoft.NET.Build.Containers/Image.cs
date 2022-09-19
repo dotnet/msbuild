@@ -6,18 +6,6 @@ using System.Text.Json.Nodes;
 
 namespace Microsoft.NET.Build.Containers;
 
-record Label(string name, string value);
-
-// Explicitly lowercase to ease parsing - the incoming values are
-// lowercased by spec
-public enum PortType
-{
-    tcp,
-    udp
-}
-
-public record Port(int number, PortType type);
-
 public class Image
 {
     public JsonNode manifest;

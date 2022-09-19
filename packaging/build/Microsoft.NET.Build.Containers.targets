@@ -83,7 +83,17 @@
     </PropertyGroup>
 
     <Target Name="PublishContainer" DependsOnTargets="$(PublishContainerDependsOn)">
-        <CreateNewImage BaseRegistry="$(ContainerBaseRegistry)"
+
+        <PropertyGroup Condition="'$(DOTNET_HOST_PATH)' == ''">
+            <DotNetHostDirectory>$(NetCoreRoot)</DotNetHostDirectory>
+            <DotNetHostFileName>dotnet</DotNetHostFileName>
+            <DotNetHostFileName Condition="'$(OS)' == 'Windows_NT'">dotnet.exe</DotNetHostFileName>
+        </PropertyGroup>
+
+        <CreateNewImage ContainerizeDirectory="$(ContainerizeFolder)"
+                        ToolPath="$(DotNetHostDirectory)"
+                        ToolExe="$(DotNetHostFileName)"
+                        BaseRegistry="$(ContainerBaseRegistry)"
                         BaseImageName="$(ContainerBaseName)"
                         BaseImageTag="$(ContainerBaseTag)"
                         OutputRegistry="$(ContainerRegistry)"

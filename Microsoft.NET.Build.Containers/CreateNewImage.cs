@@ -4,6 +4,22 @@ namespace Microsoft.NET.Build.Containers.Tasks;
 
 public class CreateNewImage : Microsoft.Build.Utilities.Task
 {
+
+    /// <summary>
+    /// Unused. This exists so we can call a single task invocation in PublishContainer.
+    /// </summary>
+    public string ContainerizeDirectory { get; set; }
+
+    /// <summary>
+    /// Unused. See above.
+    /// </summary>
+    public string ToolExe { get; set; }
+
+    /// <summary>
+    /// Unused. See above.
+    /// </summary>
+    public string ToolPath { get; set; }
+
     /// <summary>
     /// The base registry to pull from.
     /// Ex: https://mcr.microsoft.com
@@ -82,6 +98,9 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
 
     public CreateNewImage()
     {
+        ContainerizeDirectory = "";
+        ToolExe = "";
+        ToolPath = "";
         BaseRegistry = "";
         BaseImageName = "";
         BaseImageTag = "";

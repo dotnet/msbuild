@@ -44,7 +44,10 @@ var imageNameOpt = new Option<string>(
 
 var imageTagsOpt = new Option<string[]>(
     name: "--imagetags",
-    description: "The tags to associate with the new image.");
+    description: "The tags to associate with the new image.")
+{
+    AllowMultipleArgumentsPerToken = true
+};
 
 var workingDirectoryOpt = new Option<string>(
     name: "--workingdirectory",
@@ -57,12 +60,16 @@ var entrypointOpt = new Option<string[]>(
     name: "--entrypoint",
     description: "The entrypoint application of the container.")
 {
-    IsRequired = true
+    IsRequired = true,
+    AllowMultipleArgumentsPerToken = true
 };
 
 var entrypointArgsOpt = new Option<string[]>(
     name: "--entrypointargs",
-    description: "Arguments to pass alongside Entrypoint.");
+    description: "Arguments to pass alongside Entrypoint.")
+{
+    AllowMultipleArgumentsPerToken = true
+};
 
 var labelsOpt = new Option<string[]>(
     name: "--labels",
@@ -154,7 +161,7 @@ root.SetHandler(async (context) =>
     string[] _entrypointArgs = context.ParseResult.GetValueForOption(entrypointArgsOpt) ?? Array.Empty<string>();
     string[] _labels = context.ParseResult.GetValueForOption(labelsOpt) ?? Array.Empty<string>();
     Port[] _ports = context.ParseResult.GetValueForOption(portsOpt) ?? Array.Empty<Port>();
-    await ContainerHelpers.Containerize(_publishDir, _workingDir, _baseReg, _baseName, _baseTag, _entrypoint, _entrypointArgs, _name, _tags, _outputReg, _labels, _ports);
+    await ContainerBuilder.Containerize(_publishDir, _workingDir, _baseReg, _baseName, _baseTag, _entrypoint, _entrypointArgs, _name, _tags, _outputReg, _labels, _ports);
 });
 
 return await root.InvokeAsync(args);
