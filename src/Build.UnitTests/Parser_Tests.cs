@@ -215,16 +215,16 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine("ItemFuncParseTest()");
 
             Parser p = new Parser();
-            GenericExpressionNode tree = p.Parse("@(item->foo('ab'))", 
+            GenericExpressionNode tree = p.Parse("@(item->foo('ab'))",
                 ParserOptions.AllowProperties | ParserOptions.AllowItemLists, _elementLocation);
             Assert.IsType<StringExpressionNode>(tree);
             Assert.Equal("@(item->foo('ab'))", tree.GetUnexpandedValue(null));
 
-            tree = p.Parse("!@(item->foo())", 
+            tree = p.Parse("!@(item->foo())",
                 ParserOptions.AllowProperties | ParserOptions.AllowItemLists, _elementLocation);
             Assert.IsType<NotExpressionNode>(tree);
 
-            tree = p.Parse("(@(item->foo('ab')) and @(item->foo('bc')))", 
+            tree = p.Parse("(@(item->foo('ab')) and @(item->foo('bc')))",
                 ParserOptions.AllowProperties | ParserOptions.AllowItemLists, _elementLocation);
             Assert.IsType<AndExpressionNode>(tree);
         }
@@ -526,6 +526,30 @@ namespace Microsoft.Build.UnitTests
 
             // Make sure the log contains the correct strings.
             Assert.DoesNotContain("MSB4130:", ml.FullLog); // "No need to warn for this expression - ($(a) == 1 or $(b) == 2) and $(c) == 3."
+        }
+
+        // see https://github.com/dotnet/msbuild/issues/5436
+        [Fact]
+        public void SupportItemDefinationGroupInWhenOtherwise()
+        {
+            MockLogger ml = ObjectModelHelpers.BuildProjectExpectSuccess(@"
+                    <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                        <Choose>
+                            <When Condition=` '$(OutputType)'=='Library' `>
+                                <ItemDefinitionGroup>
+                                </ItemDefinitionGroup>
+                            </When>
+                            <Otherwise>
+                                <ItemDefinitionGroup>
+                                </ItemDefinitionGroup>
+                            </Otherwise>
+                        </Choose>
+                        <Target Name=`Build`>
+                        </Target>
+                    </Project>
+                ");
+
+            Assert.Equal(0, ml.ErrorCount);
         }
     }
 }
