@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net6.0;net472</TargetFrameworks>
+    <TargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">net7.0;net472</TargetFrameworks>
     <StrongNameKeyId>Open</StrongNameKeyId>
     <Nullable>enable</Nullable>
     <!-- We need to compare ISymbols in a special way (by name) and roslyn symbol comparers take more heuristics into consideration.-->
