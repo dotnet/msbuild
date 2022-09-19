@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="CustomConfigurationDisablesPublishAndPackReleaseProperties">
         <source>A custom configuration was detected in the project '{0}', so the property '{1}' will not take effect.</source>
-        <target state="new">A custom configuration was detected in the project '{0}', so the property '{1}' will not take effect.</target>
+        <target state="translated">В проекте "{0}" обнаружена настраиваемая конфигурация, поэтому свойство "{1}" не вступит в силу.</target>
         <note />
       </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
@@ -200,7 +200,7 @@ The default is 'true' if a runtime identifier is specified.</source>
       <trans-unit id="SolutionExecutableConfigurationMismatchError">
         <source>Multiple executable projects in the solution contain conflicting '{0}' values. Ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
 {1}.</source>
-        <target state="new">Multiple executable projects in the solution contain conflicting '{0}' values. Ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
+        <target state="translated">Несколько исполняемых проектов в решении содержат конфликтующие значения "{0}". Убедитесь, что значения совпадают. Рассмотрите возможность использования файла Directory.build.props для настройки всех конфигураций проекта. Конфликтующие проекты:
 {1}.</target>
         <note />
       </trans-unit>

@@ -43,7 +43,7 @@ Belirli bir sürümün NuGet paketini yüklemek için &lt;package ID&gt;::&lt;ve
       </trans-unit>
       <trans-unit id="Command_Instantiate_Description">
         <source>Instantiates a template with given short name. An alias of 'dotnet new &lt;template name&gt;'.</source>
-        <target state="needs-review-translation">Verilen kısa ada sahip bir şablon örneği oluşturur.</target>
+        <target state="translated">Verilen kısa ada sahip bir şablonun örneğini oluşturur. 'dotnet new &lt;template name&gt;' diğer adı.</target>
         <note>do not translate 'dotnet new &lt;template name&gt;'</note>
       </trans-unit>
       <trans-unit id="Command_Legacy_Update_Check_Description">
@@ -95,7 +95,7 @@ Eğer komut bağımsız değişken olmadan belirtilirse yüklü tüm şablon pak
       </trans-unit>
       <trans-unit id="Command_Update_Option_CheckOnly">
         <source>Only checks for updates and display the template packages to be updated without applying update.</source>
-        <target state="needs-review-translation">Yalnızca güncelleştirmeleri denetleyin ve güncelleştirmeyi uygulamadan, sadece güncelleştirilecek şablon paketlerini görüntüleyin.</target>
+        <target state="translated">Yalnızca güncelleştirmeleri denetler ve güncelleştirmeyi uygulamadan, sadece güncelleştirilecek şablon paketlerini görüntüler.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
@@ -125,7 +125,7 @@ Eğer komut bağımsız değişken olmadan belirtilirse yüklü tüm şablon pak
       </trans-unit>
       <trans-unit id="Option_ColumnsAll">
         <source>Displays all columns in the output.</source>
-        <target state="needs-review-translation">Çıktıdaki tüm sütunları görüntüleyin.</target>
+        <target state="translated">Çıktıdaki tüm sütunları görüntüler.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_Debug_Attach">
