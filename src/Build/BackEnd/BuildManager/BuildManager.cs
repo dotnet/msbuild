@@ -974,6 +974,18 @@ namespace Microsoft.Build.Execution
                             _overallBuildSuccess = false;
                         }
 
+                        if (loggingService is LoggingService logService)
+                        {
+                            if (_overallBuildSuccess)
+                            {
+                                Debug.Assert(logService.HasLoggedErrors() != _overallBuildSuccess, "Build succeeded but logged errors.");
+                            }
+                            else
+                            {
+                                Debug.Assert(logService.HasLoggedErrors() != _overallBuildSuccess, "Build failed but did not log errors.");
+                            }
+                        }
+
                         loggingService.LogBuildFinished(_overallBuildSuccess);
 
                         if (KnownTelemetry.BuildTelemetry != null)
