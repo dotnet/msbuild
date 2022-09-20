@@ -563,6 +563,29 @@ public static class Program
                 .HaveStdOutContaining("NETSDK1190");
         }
 
+        [Theory]
+        [InlineData("-f net7.0")]
+        [InlineData("/p:TargetFramework=net7.0")]
+        public void It_publishes_correctly_with_different_property_formats_despite_PublishRelease_code(string paramsToPublish)
+        {
+            var helloWorldAsset = _testAssetsManager
+               .CopyTestAsset("HelloWorld", $"PublishesWithProperyFormats{paramsToPublish}")
+               .WithSource()
+               .WithTargetFramework(ToolsetInfo.CurrentTargetFramework);
+
+            new BuildCommand(helloWorldAsset)
+           .Execute()
+           .Should()
+           .Pass();
+
+            var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
+
+            publishCommand
+            .Execute(paramsToPublish.Split(" "))
+            .Should()
+            .Pass();
+        }
+
         [Fact]
         public void It_publishes_on_release_if_PublishRelease_property_set_in_csproj()
         {

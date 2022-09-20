@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Cli
             )
         {
             ProjectInstance project = null;
-            var globalProperties = GetGlobalPropertiesFromUserArgs(userPropertyArgs);
+            var globalProperties = GetGlobalPropertiesFromUserArgs(parseResult);
 
             if (parseResult.HasOption(configOption) || globalProperties.ContainsKey(MSBuildPropertyNames.CONFIGURATION))
                 yield break;
@@ -186,17 +186,14 @@ namespace Microsoft.DotNet.Cli
         }
 
         /// <returns>A case-insensitive dictionary of any properties passed from the user and their values.</returns>
-        private Dictionary<string, string> GetGlobalPropertiesFromUserArgs(IEnumerable<string> userPropertyArgs)
+        private Dictionary<string, string> GetGlobalPropertiesFromUserArgs(ParseResult parseResult)
         {
             Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-            var forwardingFunction = (CommonOptions.PropertiesOption as ForwardedOption<string[]>).GetForwardingFunction();
-            IEnumerable<string> globalPropEnumerable = forwardingFunction(CommonOptions.PropertiesOption.Parse(String.Join(";", userPropertyArgs)));
+            string[] globalPropEnumerable = parseResult.GetValueForOption(CommonOptions.PropertiesOption);
 
-            foreach (var propertyString in globalPropEnumerable)
+            foreach (var keyEqVal in globalPropEnumerable)
             {
-                // The parser puts keys into the format --property:Key=Value no matter the user input, so we can expect that pattern and extract the key.
-                string keyEqVal = propertyString.Split("--property:").Last();
                 string[] keyValuePair = keyEqVal.Split("=");
                 globalProperties[keyValuePair.First()] = keyValuePair.Last();
             }
