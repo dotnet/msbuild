@@ -69,7 +69,7 @@ else {
 if ($runtime -eq "Desktop") {
     $targetFramework = "net472"
 } else {
-    $targetFramework = "net6.0"
+    $targetFramework = "net7.0"
 }
 
 $bootstrapBinDirectory = "artifacts\bin\MSBuild.Bootstrap\$configuration\$targetFramework"
