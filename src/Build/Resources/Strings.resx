@@ -919,6 +919,10 @@
     <value>MSB4160: A circular dependency involving project "{0}" has been detected.</value>
     <comment>{StrBegin="MSB4160: "}</comment>
   </data>
+  <data name="SolutionFilterAccessedBeforeParse" xml:space="preserve">
+    <value>Cannot access whether a solution filter filtered out a particular project until the solution has been parsed. Call SolutionFile.Parse before ProjectShouldBuild.</value>
+    <comment>SolutionFile.Parse and ProjectShouldBuild should not be localized.</comment>
+  </data>
   <data name="SolutionInvalidSolutionConfiguration" xml:space="preserve">
     <value>MSB4126: The specified solution configuration "{0}" is invalid. Please specify a valid solution configuration using the Configuration and Platform properties (e.g. MSBuild.exe Solution.sln /p:Configuration=Debug /p:Platform="Any CPU") or leave those properties blank to use the default solution configuration.</value>
     <comment>{StrBegin="MSB4126: "}UE: The solution filename is provided separately to loggers.</comment>

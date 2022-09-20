@@ -252,8 +252,9 @@ namespace Microsoft.Build.Construction
 
         #region Methods
 
-        internal bool ProjectShouldBuild(string projectFile)
+        public bool ProjectShouldBuild(string projectFile)
         {
+            ErrorUtilities.VerifyThrowInvalidOperation(_solutionFile is not null, "SolutionFilterAccessedBeforeParse");
             return _solutionFilter?.Contains(FileUtilities.FixFilePath(projectFile)) != false;
         }
 

@@ -351,6 +351,11 @@
       LOCALIZATION: {0} and {1} are file paths
     </note>
       </trans-unit>
+      <trans-unit id="SolutionFilterAccessedBeforeParse">
+        <source>Cannot access whether a solution filter filtered out a particular project until the solution has been parsed. Call SolutionFile.Parse before ProjectShouldBuild.</source>
+        <target state="new">Cannot access whether a solution filter filtered out a particular project until the solution has been parsed. Call SolutionFile.Parse before ProjectShouldBuild.</target>
+        <note>SolutionFile.Parse and ProjectShouldBuild should not be localized.</note>
+      </trans-unit>
       <trans-unit id="SolutionPathPropertyMustBeSetOnVSSubmissions">
         <source>"MSB4264: Invalid $(SolutionPath) property: {0}"</source>
         <target state="translated">"MSB4264: propriété $(SolutionPath) non valide : {0}"</target>
