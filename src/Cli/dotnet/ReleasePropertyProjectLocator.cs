@@ -34,8 +34,7 @@ namespace Microsoft.DotNet.Cli
             ParseResult parseResult,
             string defaultedConfigurationProperty,
             IEnumerable<string> slnOrProjectArgs,
-            Option<string> configOption,
-            IEnumerable<string> userPropertyArgs
+            Option<string> configOption
             )
         {
             ProjectInstance project = null;
