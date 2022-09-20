@@ -3193,12 +3193,14 @@ namespace Microsoft.Build.CommandLine
         )
         {
             // if verbosity level is not specified, use the default
-            originalVerbosity = verbosity = LoggerVerbosity.Normal;
+            originalVerbosity = LoggerVerbosity.Normal;
+            verbosity = originalVerbosity;
 
             if (verbositySwitchParameters.Length > 0)
             {
                 // Read the last verbosity switch found
-                originalVerbosity = verbosity = ProcessVerbositySwitch(verbositySwitchParameters[verbositySwitchParameters.Length - 1]);
+                originalVerbosity = ProcessVerbositySwitch(verbositySwitchParameters[verbositySwitchParameters.Length - 1]);
+                verbosity = originalVerbosity;
             }
 
             var loggers = ProcessLoggerSwitch(loggerSwitchParameters, verbosity);
