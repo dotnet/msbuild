@@ -978,11 +978,11 @@ namespace Microsoft.Build.Execution
                         {
                             if (_overallBuildSuccess)
                             {
-                                Debug.Assert(logService.HasLoggedErrors() != _overallBuildSuccess, "Build succeeded but logged errors.");
+                                Debug.Assert(logService.HasLoggedErrors() == false, "Build succeeded but logged errors.");
                             }
                             else
                             {
-                                Debug.Assert(logService.HasLoggedErrors() != _overallBuildSuccess, "Build failed but did not log errors.");
+                                Debug.Assert(logService.HasLoggedErrors() == true, "Build failed but did not log errors.");
                             }
                         }
 
