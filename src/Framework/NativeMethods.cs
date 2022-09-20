@@ -509,13 +509,7 @@ internal static class NativeMethods
         // .NET Core on Windows returns a core count limited to the current NUMA node
         //     https://github.com/dotnet/runtime/issues/29686
         // so always double-check it.
-        if (IsWindows
-#if NETFRAMEWORK
-            // .NET Framework calls Windows APIs that have a core count limit (32/64 depending on process bitness).
-            // So if we get a high core count on full framework, double-check it.
-            && (numberOfCpus >= 32)
-#endif
-            )
+        if (IsWindows)
         {
             var result = GetLogicalCoreCountOnWindows();
             if (result != -1)
