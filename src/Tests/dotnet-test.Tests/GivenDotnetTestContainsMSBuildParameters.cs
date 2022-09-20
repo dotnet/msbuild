@@ -23,8 +23,10 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         {
         }
 
-        [Fact]
-        public void ItPassesEnvironmentVariablesFromCommandLineParametersWhenRunningViaCsproj()
+        [InlineData($"{TestAppName}.csproj")]
+        [InlineData(null)]
+        [Theory]
+        public void ItPassesEnvironmentVariablesFromCommandLineParametersWhenRunningViaCsproj(string projectName)
         {
             var testAsset = _testAssetsManager.CopyTestAsset(TestAppName)
                 .WithSource()
@@ -32,9 +34,9 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             var testRoot = testAsset.Path;
 
-            CommandResult result = new DotnetTestCommand(Log)
-                                        .WithWorkingDirectory(testRoot)
-                                        .Execute("--logger", "console;verbosity=detailed", MSBuildParameter);
+            CommandResult result = (projectName is null ? new DotnetTestCommand(Log) : new DotnetTestCommand(Log, projectName))
+                                    .WithWorkingDirectory(testRoot)
+                                    .Execute("--logger", "console;verbosity=detailed", MSBuildParameter);
 
             if (!TestContext.IsLocalized())
             {

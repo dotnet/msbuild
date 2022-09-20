@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Tools.Test
             // from the VSTest side.
             string testSessionCorrelationId = $"{Environment.ProcessId}_{Guid.NewGuid()}";
 
-            string[] args = parseResult.GetArguments().Concat(parseResult.UnmatchedTokens).ToArray();
+            string[] args = parseResult.GetArguments();
 
             if (VSTestTrace.TraceEnabled)
             {
@@ -118,7 +118,13 @@ namespace Microsoft.DotNet.Tools.Test
                 "-nologo"
             };
 
-            msbuildArgs.AddRange(result.OptionValuesToBeForwarded(TestCommandParser.GetCommand()));
+
+            var parsedArgs =
+                    result.OptionValuesToBeForwarded(TestCommandParser.GetCommand()) // all msbuild-recognized tokens
+                    .Concat(result.UnmatchedTokens); // all tokens that the test-parser doesn't explicitly track
+
+            VSTestTrace.SafeWriteTrace(() => $"MSBuild args from forwarded options: {String.Join(", ", parsedArgs)}" );
+            msbuildArgs.AddRange(parsedArgs);
 
             if (settings.Any())
             {
@@ -126,7 +132,7 @@ namespace Microsoft.DotNet.Tools.Test
                 var commandArgument = result.GetValueForArgument(TestCommandParser.SlnOrProjectArgument);
                 if(!string.IsNullOrWhiteSpace(commandArgument) && !settings.Contains(commandArgument))
                 {
-                    msbuildArgs.Add(result.GetValueForArgument(TestCommandParser.SlnOrProjectArgument));
+                    msbuildArgs.Add(commandArgument);
                 }
 
                 // skip '--' and escape every \ to be \\ and every " to be \" to survive the next hop
@@ -138,8 +144,10 @@ namespace Microsoft.DotNet.Tools.Test
             else
             {
                 var argument = result.GetValueForArgument(TestCommandParser.SlnOrProjectArgument);
-                if(!string.IsNullOrWhiteSpace(argument))
+                if (!string.IsNullOrWhiteSpace(argument))
+                {
                     msbuildArgs.Add(argument);
+                }
             }
 
             string verbosityArg = result.ForwardedOptionValues<IReadOnlyCollection<string>>(TestCommandParser.GetCommand(), "verbosity")?.SingleOrDefault() ?? null;
