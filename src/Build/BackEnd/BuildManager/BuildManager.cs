@@ -974,7 +974,7 @@ namespace Microsoft.Build.Execution
                             _overallBuildSuccess = false;
                         }
 
-                        if (loggingService is LoggingService logService)
+                        if (loggingService is LoggingService logService && !BuildEnvironmentState.s_runningTests)
                         {
                             if (_overallBuildSuccess)
                             {
