@@ -309,6 +309,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="TransitiveProjectReferences" ItemName="_TransitiveProjectReferences" />
       <Output TaskParameter="PackageFolders" ItemName="AssetsFilePackageFolder" />
       <Output TaskParameter="PackageDependencies" ItemName="PackageDependencies" />
+      <Output TaskParameter="PackageDefinitions" ItemName="PackageDefinitions" />
     </ResolvePackageAssets>
 
     <ItemGroup Condition="'$(CopyDebugSymbolFilesFromPackages)' == 'true'">

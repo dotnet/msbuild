@@ -12,6 +12,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NuGet.Common;
+using NuGet.Frameworks;
+using NuGet.Packaging;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
 
@@ -230,6 +232,12 @@ namespace Microsoft.NET.Build.Tasks
         [Output]
         public ITaskItem[] ApphostsForShimRuntimeIdentifiers { get; private set; }
 
+        /// <summary>
+        /// All the libraries/packages in the lock file.
+        /// </summary>
+        [Output]
+        public ITaskItem[] PackageDefinitions { get; private set; }
+
         [Output]
         public ITaskItem[] PackageDependencies { get; private set; }
 
@@ -335,6 +343,7 @@ namespace Microsoft.NET.Build.Tasks
                 FrameworkAssemblies = reader.ReadItemGroup();
                 FrameworkReferences = reader.ReadItemGroup();
                 NativeLibraries = reader.ReadItemGroup();
+                PackageDefinitions = reader.ReadItemGroup();
                 PackageDependencies = reader.ReadItemGroup();
                 PackageFolders = reader.ReadItemGroup();
                 ReferenceDocumentationFiles = reader.ReadItemGroup();
@@ -806,6 +815,7 @@ namespace Microsoft.NET.Build.Tasks
                 WriteItemGroup(WriteFrameworkAssemblies);
                 WriteItemGroup(WriteFrameworkReferences);
                 WriteItemGroup(WriteNativeLibraries);
+                WriteItemGroup(WritePackageDefinitions);
                 WriteItemGroup(WritePackageDependencies);
                 WriteItemGroup(WritePackageFolders);
                 WriteItemGroup(WriteReferenceDocumentationFiles);
@@ -1157,16 +1167,12 @@ namespace Microsoft.NET.Build.Tasks
 
                         foreach (string fileExtension in relatedExtensions.Split(RelatedPropertySeparator))
                         {
-                            if (fileExtension.ToLower() == extension)
+                            if (fileExtension.ToLowerInvariant() == extension)
                             {
                                 string xmlFilePath = Path.ChangeExtension(itemSpec, fileExtension);
                                 if (File.Exists(xmlFilePath))
                                 {
                                     WriteItem(xmlFilePath, library);
-                                }
-                                else
-                                {
-                                    _task.Log.LogWarning(Strings.AssetsFileNotFound, xmlFilePath);
                                 }
                             }
                         }
@@ -1391,6 +1397,72 @@ namespace Microsoft.NET.Build.Tasks
                 foreach (var packageFolder in _lockFile.PackageFolders)
                 {
                     WriteItem(packageFolder.Path);
+                }
+            }
+
+            private void WritePackageDefinitions()
+            {
+                // Get library and file definitions
+                foreach (var package in _lockFile.Libraries)
+                {
+                    var packageName = package.Name;
+                    var packageVersion = package.Version.ToNormalizedString();
+                    string packageId = $"{packageName}/{packageVersion}";
+
+                    WriteItem(packageId);
+                    WriteMetadata(MetadataKeys.Name, packageName);
+                    WriteMetadata(MetadataKeys.Type, package.Type);
+                    WriteMetadata(MetadataKeys.Version, packageVersion);
+                    WriteMetadata(MetadataKeys.Path, package.Path ?? string.Empty);
+
+                    string resolvedPackagePath = ResolvePackagePath(package);
+                    WriteMetadata(MetadataKeys.ResolvedPath, resolvedPackagePath ?? string.Empty);
+
+                    WriteMetadata(MetadataKeys.DiagnosticLevel, GetPackageDiagnosticLevel(package));
+                }
+
+                string ResolvePackagePath(LockFileLibrary package)
+                {
+                    if (package.IsProject())
+                    {
+                        var relativeMSBuildProjectPath = package.MSBuildProject;
+
+                        if (string.IsNullOrEmpty(relativeMSBuildProjectPath))
+                        {
+                            throw new BuildErrorException(Strings.ProjectAssetsConsumedWithoutMSBuildProjectPath, package.Name, _task.ProjectAssetsFile);
+                        }
+
+                        return GetAbsolutePathFromProjectRelativePath(relativeMSBuildProjectPath);
+                    }
+                    else
+                    {
+                        return _packageResolver.GetPackageDirectory(package.Name, package.Version);
+                    }
+                }
+
+                string GetAbsolutePathFromProjectRelativePath(string path)
+                {
+                    return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(_task.ProjectPath), path));
+                }
+
+                string GetPackageDiagnosticLevel(LockFileLibrary package)
+                {
+                    string target = _task.TargetFramework ?? "";
+
+                    var messages = _lockFile.LogMessages.Where(log => log.LibraryId == package.Name && log.TargetGraphs
+                                    .Select(tg =>
+                                    {
+                                        var parsedTargetGraph = NuGetFramework.Parse(tg);
+                                        var alias = _lockFile.PackageSpec.TargetFrameworks.FirstOrDefault(tf => tf.FrameworkName == parsedTargetGraph)?.TargetAlias;
+                                        return alias ?? tg;
+                                    }).Contains(target));
+
+                    if (!messages.Any())
+                    {
+                        return string.Empty;
+                    }
+
+                    return messages.Max(log => log.Level).ToString();
                 }
             }
 
