@@ -42,9 +42,9 @@ Belirli bir sürümün NuGet paketini yüklemek için &lt;package ID&gt;::&lt;ve
         <note />
       </trans-unit>
       <trans-unit id="Command_Instantiate_Description">
-        <source>Instantiates a template with given short name.</source>
-        <target state="translated">Verilen kısa ada sahip bir şablon örneği oluşturur.</target>
-        <note />
+        <source>Instantiates a template with given short name. An alias of 'dotnet new &lt;template name&gt;'.</source>
+        <target state="needs-review-translation">Verilen kısa ada sahip bir şablon örneği oluşturur.</target>
+        <note>do not translate 'dotnet new &lt;template name&gt;'</note>
       </trans-unit>
       <trans-unit id="Command_Legacy_Update_Check_Description">
         <source>Checks the currently installed template packages for updates.</source>
@@ -94,8 +94,8 @@ Eğer komut bağımsız değişken olmadan belirtilirse yüklü tüm şablon pak
         <note />
       </trans-unit>
       <trans-unit id="Command_Update_Option_CheckOnly">
-        <source>Only check for updates and display the template packages to be updated without applying update.</source>
-        <target state="translated">Yalnızca güncelleştirmeleri denetleyin ve güncelleştirmeyi uygulamadan, sadece güncelleştirilecek şablon paketlerini görüntüleyin.</target>
+        <source>Only checks for updates and display the template packages to be updated without applying update.</source>
+        <target state="needs-review-translation">Yalnızca güncelleştirmeleri denetleyin ve güncelleştirmeyi uygulamadan, sadece güncelleştirilecek şablon paketlerini görüntüleyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
@@ -124,8 +124,8 @@ Eğer komut bağımsız değişken olmadan belirtilirse yüklü tüm şablon pak
         <note />
       </trans-unit>
       <trans-unit id="Option_ColumnsAll">
-        <source>Display all columns in the output.</source>
-        <target state="translated">Çıktıdaki tüm sütunları görüntüleyin.</target>
+        <source>Displays all columns in the output.</source>
+        <target state="needs-review-translation">Çıktıdaki tüm sütunları görüntüleyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_Debug_Attach">
@@ -185,7 +185,7 @@ Eğer komut bağımsız değişken olmadan belirtilirse yüklü tüm şablon pak
       </trans-unit>
       <trans-unit id="Option_ProjectPath">
         <source>The project that should be used for context evaluation.</source>
-        <target state="new">The project that should be used for context evaluation.</target>
+        <target state="translated">Bağlam değerlendirmesi için kullanılacak proje.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_TagFilter">

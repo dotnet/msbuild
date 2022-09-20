@@ -1,5 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.Reflection;
 using Microsoft.TemplateEngine.Cli.Commands;
@@ -98,7 +99,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                        new MockEnvironment()
                        {
                            ConsoleBufferWidth = 100
-                 });
+                       });
 
             IEnumerable<Tuple<string, string, string>> data = new List<Tuple<string, string, string>>()
             {
@@ -279,7 +280,7 @@ Dotnet 本地...  tool-manifest
             string result = formatter.Layout();
             Assert.Equal(expectedOutput, result);
         }
-        
+
         [Fact]
         public void VerifyColumnsOptionHasAllColumnNamesDefined()
         {
@@ -293,7 +294,7 @@ Dotnet 本地...  tool-manifest
             List<string?> columnNamesConstants = (typeof(TabularOutputSettings.ColumnNames))
                 .GetFields(BindingFlags.NonPublic | BindingFlags.Static)
                 .Where(fi => fi.IsLiteral && !fi.IsInitOnly)
-                .Select(fi => (string?)fi.GetValue(null)) 
+                .Select(fi => (string?)fi.GetValue(null))
                 .ToList();
             columnNamesConstants.Sort();
 

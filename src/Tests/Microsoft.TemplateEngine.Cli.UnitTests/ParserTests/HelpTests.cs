@@ -1,5 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using System.CommandLine.Help;
@@ -16,6 +17,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
     public partial class HelpTests
     {
         [Theory]
+#pragma warning disable SA1117 // Parameters should be on same line or separate lines
         [InlineData("Template Name", "Language", "Me", "Template Description",
 @"Template Name (Language)
 Author: Me
@@ -42,6 +44,7 @@ Author: Me
 @"Template Name
 
 ")]
+#pragma warning restore SA1117 // Parameters should be on same line or separate lines
         public void CanShowTemplateDescription(string name, string? language, string? author, string? description, string expected)
         {
             MockTemplateInfo templateInfo = new(
@@ -184,7 +187,7 @@ Author: Me
         public Task CanShowTemplateOptions_SingleTemplate_Choice()
         {
             MockTemplateInfo template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
-                .WithChoiceParameter("choice", new[] { "val1", "val2" }, description: "my description", defaultValue: "def-val", defaultIfNoOptionValue: "def-val-no-arg" );
+                .WithChoiceParameter("choice", new[] { "val1", "val2" }, description: "my description", defaultValue: "def-val", defaultIfNoOptionValue: "def-val-no-arg");
             TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
                CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
                .Single();

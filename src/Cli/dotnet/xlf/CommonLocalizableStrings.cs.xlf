@@ -37,6 +37,11 @@
         <target state="translated">V {0} se nenašel žádný projekt.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CustomConfigurationDisablesPublishAndPackReleaseProperties">
+        <source>A custom configuration was detected in the project '{0}', so the property '{1}' will not take effect.</source>
+        <target state="new">A custom configuration was detected in the project '{0}', so the property '{1}' will not take effect.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
         <source>Force the command to ignore any persistent build servers.</source>
         <target state="translated">Vynuťte, aby příkaz ignoroval všechny trvalé buildovací servery.</target>
@@ -190,6 +195,13 @@ Pokud se zadá identifikátor modulu runtime, výchozí hodnota je true.</target
       <trans-unit id="Solution">
         <source>Solution</source>
         <target state="translated">Řešení</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionExecutableConfigurationMismatchError">
+        <source>Multiple executable projects in the solution contain conflicting '{0}' values. Ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
+{1}.</source>
+        <target state="new">Multiple executable projects in the solution contain conflicting '{0}' values. Ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
+{1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">

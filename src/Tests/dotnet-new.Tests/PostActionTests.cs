@@ -1,8 +1,10 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.Runtime.InteropServices;
 using FluentAssertions;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
@@ -258,7 +260,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string workingDirectory = CreateTemporaryFolder();
             InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -291,7 +293,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string workingDirectory = CreateTemporaryFolder();
             InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -316,7 +318,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string workingDirectory = CreateTemporaryFolder();
             InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -341,7 +343,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string workingDirectory = CreateTemporaryFolder();
             InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -564,7 +566,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string workingDirectory = CreateTemporaryFolder();
             InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, templateName)
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName)
                    .WithCustomHive(home)
                    .WithWorkingDirectory(workingDirectory)
                    .Execute();
@@ -746,7 +748,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string workingDirectory = CreateTemporaryFolder();
             InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, templateName)
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -767,7 +769,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string workingDirectory = CreateTemporaryFolder();
             string tempSettingsDir = CreateTemporaryFolder("Home");
             string templateLocation = GetTestTemplateLocation("AddProjectReference");
-            var cmd = new DotnetNewCommand(Log)
+            CommandResult cmd = new DotnetNewCommand(Log)
                 .WithCustomHive(tempSettingsDir)
                 .Execute("install", templateLocation);
             cmd.Should().Pass();
@@ -788,7 +790,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string workingDirectory = CreateTemporaryFolder();
             string tempSettingsDir = CreateTemporaryFolder("Home");
             string templateLocation = GetTestTemplateLocation("AddPackageReference");
-            var cmd = new DotnetNewCommand(Log)
+            CommandResult cmd = new DotnetNewCommand(Log)
                 .WithCustomHive(tempSettingsDir)
                 .Execute("install", templateLocation);
             cmd.Should().Pass();
@@ -807,7 +809,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string workingDirectory = CreateTemporaryFolder();
             string tempSettingsDir = CreateTemporaryFolder("Home");
             string templateLocation = GetTestTemplateLocation("AddProjectToSolution");
-            var cmd = new DotnetNewCommand(Log)
+            CommandResult cmd = new DotnetNewCommand(Log)
                 .WithCustomHive(tempSettingsDir)
                 .Execute("install", templateLocation);
             cmd.Should().Pass();
@@ -825,7 +827,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string workingDirectory = CreateTemporaryFolder();
             string tempSettingsDir = CreateTemporaryFolder("Home");
 
-            var cmd = new DotnetNewCommand(Log)
+            CommandResult cmd = new DotnetNewCommand(Log)
                 .WithCustomHive(tempSettingsDir)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute("console");

@@ -23,7 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jab" Version="$(JabVersion)" PrivateAssets="all" />
     <!-- ExcludeAssets="Runtime" is being set to avoid adding package references and dependencies of package and project references into the package. -->
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCoreVersion)" ExcludeAssets="Runtime" />
     <ProjectReference Include="..\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" ExcludeAssets="Runtime" />

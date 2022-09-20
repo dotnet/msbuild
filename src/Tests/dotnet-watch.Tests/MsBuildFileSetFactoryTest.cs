@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         {
             _reporter = new TestReporter(output);
             _testAssets = new TestAssetsManager(output);
-            _muxerPath = DotnetMuxerLocator.MuxerPath;
+            _muxerPath = TestContext.Current.ToolsetUnderTest.DotNetHostPath;
         }
 
         [Fact]
@@ -310,7 +310,7 @@ $@"<ItemGroup>
             Assert.All(fileset, f => Assert.False(f.IsStaticFile, $"File {f.FilePath} should not be a static file."));
         }
 
-        [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/29213")]
+        [Fact]
         public async Task ProjectReferences_Graph()
         {
             // A->B,F,W(Watch=False)
@@ -330,7 +330,7 @@ $@"<ItemGroup>
             var options = GetWatchOptions();
             var filesetFactory = new MsBuildFileSetFactory(options, _reporter, _muxerPath, projectA, output, waitOnError: false, trace: true);
 
-            var fileset = await GetFileSet(filesetFactory);
+            var fileset = await filesetFactory.CreateAsync(CancellationToken.None);
 
             Assert.NotNull(fileset);
 
@@ -363,20 +363,13 @@ $@"<ItemGroup>
         private Task<FileSet> GetFileSet(string projectPath)
         {
             DotNetWatchOptions options = GetWatchOptions();
-            return GetFileSet(new MsBuildFileSetFactory(options, _reporter, _muxerPath, projectPath, new OutputSink(), waitOnError: false, trace: false));
+            return new MsBuildFileSetFactory(options, _reporter, _muxerPath, projectPath, new OutputSink(), waitOnError: false, trace: false).CreateAsync(CancellationToken.None);
         }
 
         private static DotNetWatchOptions GetWatchOptions() => 
             new DotNetWatchOptions(false, false, false, false, false, false);
 
         private static string GetTestProjectPath(TestAsset target) => Path.Combine(GetTestProjectDirectory(target), target.TestProject.Name + ".csproj");
-
-        private async Task<FileSet> GetFileSet(MsBuildFileSetFactory filesetFactory)
-        {
-            return await filesetFactory
-                .CreateAsync(CancellationToken.None)
-                .TimeoutAfter(TimeSpan.FromSeconds(30));
-        }
 
         private static string WriteFile(TestAsset testAsset, string name, string contents = "")
         {

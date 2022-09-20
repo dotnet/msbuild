@@ -1,0 +1,9 @@
+﻿Currently installed items:
+   %TEMPLATE FOLDER%
+      Templates:
+         TemplateWithConflictShortName (list,search,install,uninstall,update,create)
+      Uninstall Command:
+         dotnet new uninstall %TEMPLATE FOLDER%
+
+To instantiate the template with short name 'uninstall', run:
+   dotnet new create uninstall

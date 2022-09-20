@@ -1,8 +1,10 @@
-<Project ToolsVersion="15.0" Sdk="Microsoft.NET.Sdk">
+﻿<Project ToolsVersion="15.0" Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>Template Instantiation Commands for .NET CLI.</Description>
     <TargetFramework>$(SdkTargetFramework)</TargetFramework>
     <OutputType>Exe</OutputType>
+    <EnableStyleCopAnalyzer>true</EnableStyleCopAnalyzer>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>

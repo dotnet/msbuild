@@ -186,7 +186,7 @@ namespace Microsoft.NET.Build.Tests
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
 
             new DotnetNewCommand(Log, "wpf", "-lang", "vb")
-                .WithVirutalHive()
+                .WithVirtualHive()
                 .WithWorkingDirectory(testDirectory)
                 .Execute()
                 .Should()

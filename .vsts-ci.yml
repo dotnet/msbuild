@@ -2,12 +2,12 @@ trigger:
   batch: true
   branches:
     include:
-    - master
     - main
     - release/*
     - internal/release/3.*
     - internal/release/5.*
     - internal/release/6.*
+    - internal/release/7.*
   paths:
     exclude:
     - "*.md"
@@ -21,8 +21,13 @@ variables:
     value: .NETCore
   - name: _DotNetValidationArtifactsCategory
     value: .NETCore
-  - name: PostBuildSign
-    value: true
+  - ${{ if or(startswith(variables['Build.SourceBranch'], 'refs/heads/release/'), startswith(variables['Build.SourceBranch'], 'refs/heads/internal/release/'), eq(variables['Build.Reason'], 'Manual')) }}:
+    - name: PostBuildSign
+      value: false
+  - ${{ else }}:
+    - name: PostBuildSign
+      value: true
+
   - ${{ if eq(variables['System.TeamProject'], 'public') }}:
     - name: _InternalRuntimeDownloadArgs
       value: ''
@@ -31,8 +36,6 @@ variables:
     - name: "skipComponentGovernanceDetection"
       value: "true"
   - ${{ if ne(variables['System.TeamProject'], 'public') }}:
-    - name: _DotNetPublishToBlobFeed
-      value: true
     - name: _OfficialBuildArgs
       value: /p:OfficialBuilder=Microsoft
     - group: DotNetBuilds storage account read tokens
@@ -173,6 +176,7 @@ stages:
     - template: /eng/common/templates/job/publish-build-assets.yml
       parameters:
         publishUsingPipelines: true
+        publishAssetsImmediately: true
         dependsOn:
           - Windows_NT
           - Source_Build_Managed
@@ -188,6 +192,7 @@ stages:
       enableNugetValidation: false
       enableSourceLinkValidation: false
       publishInstallersAndChecksums: true
+      publishAssetsImmediately: true
       SDLValidationParameters:
         enable: false
         params: ' -SourceToolsList @("policheck","credscan")

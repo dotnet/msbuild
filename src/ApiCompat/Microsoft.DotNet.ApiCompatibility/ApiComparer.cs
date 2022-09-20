@@ -50,12 +50,12 @@ namespace Microsoft.DotNet.ApiCompatibility
         public IEnumerable<CompatDifference> GetDifferences(ElementContainer<IAssemblySymbol> left,
             ElementContainer<IAssemblySymbol> right)
         {
-            var mapper = _elementMapperFactory.CreateAssemblyMapper(Settings.ToMapperSettings());
-            mapper.AddElement(left, ElementSide.Left);
-            mapper.AddElement(right, ElementSide.Right);
+            IAssemblyMapper assemblyMapper = _elementMapperFactory.CreateAssemblyMapper(Settings.ToMapperSettings(), rightCount: 1);
+            assemblyMapper.AddElement(left, ElementSide.Left);
+            assemblyMapper.AddElement(right, ElementSide.Right);
 
             IDifferenceVisitor visitor = _differenceVisitorFactory.Create();
-            visitor.Visit(mapper);
+            visitor.Visit(assemblyMapper);
 
             return visitor.CompatDifferences;
         }
@@ -64,12 +64,12 @@ namespace Microsoft.DotNet.ApiCompatibility
         public IEnumerable<CompatDifference> GetDifferences(IEnumerable<ElementContainer<IAssemblySymbol>> left,
             IEnumerable<ElementContainer<IAssemblySymbol>> right)
         {
-            var mapper = _elementMapperFactory.CreateAssemblySetMapper(Settings.ToMapperSettings());
-            mapper.AddElement(left, ElementSide.Left);
-            mapper.AddElement(right, ElementSide.Right);
+            IAssemblySetMapper assemblySetMapper = _elementMapperFactory.CreateAssemblySetMapper(Settings.ToMapperSettings(), rightCount: 1);
+            assemblySetMapper.AddElement(left, ElementSide.Left);
+            assemblySetMapper.AddElement(right, ElementSide.Right);
 
             IDifferenceVisitor visitor = _differenceVisitorFactory.Create();
-            visitor.Visit(mapper);
+            visitor.Visit(assemblySetMapper);
 
             return visitor.CompatDifferences;
         }
@@ -98,36 +98,60 @@ namespace Microsoft.DotNet.ApiCompatibility
             IReadOnlyList<ElementContainer<IAssemblySymbol>> right)
         {
             int rightCount = right.Count;
-            var mapper = _elementMapperFactory.CreateAssemblyMapper(Settings.ToMapperSettings(), rightCount);
-            mapper.AddElement(left, ElementSide.Left);
+            IAssemblyMapper assemblyMapper = _elementMapperFactory.CreateAssemblyMapper(Settings.ToMapperSettings(), rightCount);
+            assemblyMapper.AddElement(left, ElementSide.Left);
             for (int i = 0; i < rightCount; i++)
             {
-                mapper.AddElement(right[i], ElementSide.Right, i);
+                assemblyMapper.AddElement(right[i], ElementSide.Right, i);
             }
 
             IDifferenceVisitor visitor = _differenceVisitorFactory.Create();
-            visitor.Visit(mapper);
+            visitor.Visit(assemblyMapper);
 
-            // Sort the compat differences by the order of the passed in rights.
-            return right.Join(visitor.CompatDifferences, i => i.MetadataInformation, d => d.Right, (i, d) => d).ToArray();
+            return SortCompatDifferencesByInputMetadata(visitor.CompatDifferences.ToLookup(c => c.Right, t => t), right);
         }
 
         /// <inheritdoc />
         public IEnumerable<CompatDifference> GetDifferences(IEnumerable<ElementContainer<IAssemblySymbol>> left,
             IReadOnlyList<IEnumerable<ElementContainer<IAssemblySymbol>>> right)
         {
-            var mapper = _elementMapperFactory.CreateAssemblySetMapper(Settings.ToMapperSettings(), right.Count);
-            mapper.AddElement(left, ElementSide.Left);
+            IAssemblySetMapper assemblySetMapper = _elementMapperFactory.CreateAssemblySetMapper(Settings.ToMapperSettings(), right.Count);
+            assemblySetMapper.AddElement(left, ElementSide.Left);
             for (int rightIndex = 0; rightIndex < right.Count; rightIndex++)
             {
-                mapper.AddElement(right[rightIndex], ElementSide.Right, rightIndex);
+                assemblySetMapper.AddElement(right[rightIndex], ElementSide.Right, rightIndex);
             }
 
             IDifferenceVisitor visitor = _differenceVisitorFactory.Create();
-            visitor.Visit(mapper);
+            visitor.Visit(assemblySetMapper);
 
-            // Sort the compat differences by the order of the passed in left assemblies.
-            return left.Join(visitor.CompatDifferences, i => i.MetadataInformation, d => d.Left, (i, d) => d).ToArray();
+            return SortCompatDifferencesByInputMetadata(visitor.CompatDifferences.ToLookup(c => c.Left, t => t), left);
+        }
+
+        /// <summary>
+        /// Sort the compat differences by the order of the passed in metadata.
+        /// </summary>
+        private static IEnumerable<CompatDifference> SortCompatDifferencesByInputMetadata(ILookup<MetadataInformation, CompatDifference> compatDifferencesLookup,
+            IEnumerable<ElementContainer<IAssemblySymbol>> inputMetadata)
+        {
+            HashSet<MetadataInformation> processedMetadata = new();
+            List<CompatDifference> sortedCompatDifferences = new();
+
+            foreach (ElementContainer<IAssemblySymbol> elementContainer in inputMetadata)
+            {
+                sortedCompatDifferences.AddRange(compatDifferencesLookup[elementContainer.MetadataInformation]);
+                processedMetadata.Add(elementContainer.MetadataInformation);
+            }
+
+            foreach (IGrouping<MetadataInformation, CompatDifference> compatDifferenceGroup in compatDifferencesLookup)
+            {
+                if (processedMetadata.Contains(compatDifferenceGroup.Key))
+                    continue;
+
+                sortedCompatDifferences.AddRange(compatDifferenceGroup);
+            }
+
+            return sortedCompatDifferences;
         }
     }
 }

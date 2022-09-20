@@ -10,14 +10,6 @@ pr: none
 variables:
   - name: teamName
     value: Roslyn-Project-System
-  - name: _DotNetPublishToBlobFeed
-    value: false
-  - name: _DotNetArtifactsCategory
-    value: .NETCore
-  - name: _DotNetValidationArtifactsCategory
-    value: .NETCore
-  - name: _PublishToAzure
-    value: false
   - name: PostBuildSign
     value: true
 

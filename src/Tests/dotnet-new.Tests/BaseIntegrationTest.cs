@@ -79,14 +79,14 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 
         /// <summary>
         /// Creates a temp test directory under test execution folder.
-        /// Format: artifacts\tmp\Debug\dotnet-new.IntegrationTests\<paramref name="caller"/>\<paramref name="customName"/>\date-time-utc-now[optional counter].
+        /// Format: artifacts\tmp\Debug\dotnet-new.IntegrationTests\<paramref name="testName"/>\<paramref name="folderName"/>\date-time-utc-now[optional counter].
         /// </summary>
         /// <remarks>
-        /// Use this method when temp folder should be under location that is aware of repo nuget.config. 
+        /// Use this method when temp folder should be under location that is aware of repo nuget.config.
         /// This is required for example for restore for the latest framework.
         /// Otherwise <see cref="TemplateEngine.TestHelper.TestUtils.CreateTemporaryFolder"/> can also be used.
         /// </remarks>
-        public static string CreateTemporaryFolder([CallerMemberName]string testName = "UnnamedTest", string folderName = "")
+        public static string CreateTemporaryFolder([CallerMemberName] string testName = "UnnamedTest", string folderName = "")
         {
             return Utilities.CreateTemporaryFolder(testName, folderName);
         }

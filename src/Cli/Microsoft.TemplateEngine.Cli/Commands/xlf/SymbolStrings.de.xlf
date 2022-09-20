@@ -42,9 +42,9 @@ Um das NuGet-Paket einer bestimmten Version zu installieren, verwenden Sie &lt;P
         <note />
       </trans-unit>
       <trans-unit id="Command_Instantiate_Description">
-        <source>Instantiates a template with given short name.</source>
-        <target state="translated">Instanziiert eine Vorlage mit dem angegebenen Kurznamen.</target>
-        <note />
+        <source>Instantiates a template with given short name. An alias of 'dotnet new &lt;template name&gt;'.</source>
+        <target state="needs-review-translation">Instanziiert eine Vorlage mit dem angegebenen Kurznamen.</target>
+        <note>do not translate 'dotnet new &lt;template name&gt;'</note>
       </trans-unit>
       <trans-unit id="Command_Legacy_Update_Check_Description">
         <source>Checks the currently installed template packages for updates.</source>
@@ -94,8 +94,8 @@ Wenn der Befehl ohne Argument angegeben wird, werden alle installierten Vorlagen
         <note />
       </trans-unit>
       <trans-unit id="Command_Update_Option_CheckOnly">
-        <source>Only check for updates and display the template packages to be updated without applying update.</source>
-        <target state="translated">Nur auf Updates überprüfen, und die zu aktualisierenden Vorlagenpakete anzeigen, ohne das Update anzuwenden.</target>
+        <source>Only checks for updates and display the template packages to be updated without applying update.</source>
+        <target state="needs-review-translation">Nur auf Updates überprüfen, und die zu aktualisierenden Vorlagenpakete anzeigen, ohne das Update anzuwenden.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
@@ -124,8 +124,8 @@ Wenn der Befehl ohne Argument angegeben wird, werden alle installierten Vorlagen
         <note />
       </trans-unit>
       <trans-unit id="Option_ColumnsAll">
-        <source>Display all columns in the output.</source>
-        <target state="translated">Zeigt alle Spalten in der Ausgabe an.</target>
+        <source>Displays all columns in the output.</source>
+        <target state="needs-review-translation">Zeigt alle Spalten in der Ausgabe an.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_Debug_Attach">
@@ -185,7 +185,7 @@ Wenn der Befehl ohne Argument angegeben wird, werden alle installierten Vorlagen
       </trans-unit>
       <trans-unit id="Option_ProjectPath">
         <source>The project that should be used for context evaluation.</source>
-        <target state="new">The project that should be used for context evaluation.</target>
+        <target state="translated">Das Projekt, das für die Kontextauswertung verwendet werden soll.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_TagFilter">

@@ -23,7 +23,7 @@ namespace Microsoft.NET.Publish.Tests
         {
         }
 
-        [FullMSBuildOnlyTheory]
+        [FullMSBuildOnlyTheory(Skip = "https://github.com/dotnet/sdk/issues/27766")]
         [InlineData(false)]
         [InlineData(true)]
         public void PublishClickOnceWithPublishProfile(bool? publishSingleFile)

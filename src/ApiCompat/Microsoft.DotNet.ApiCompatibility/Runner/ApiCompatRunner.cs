@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
@@ -44,17 +43,20 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
 
             foreach (ApiCompatRunnerWorkItem workItem in _workItems)
             {
-                bool runWithReferences = true;
+                IReadOnlyList<ElementContainer<IAssemblySymbol>> leftContainerList = CreateAssemblySymbols(workItem.Left, workItem.Options, out bool resolvedExternallyProvidedAssemblyReferences);
+                bool runWithReferences = resolvedExternallyProvidedAssemblyReferences;
 
-                IReadOnlyList<ElementContainer<IAssemblySymbol>> leftContainerList = CreateAssemblySymbols(workItem.Lefts, workItem.Options, out bool resolvedExternallyProvidedAssemblyReferences);
-                runWithReferences &= resolvedExternallyProvidedAssemblyReferences;
-
-                IReadOnlyList<ElementContainer<IAssemblySymbol>> rightContainerList = CreateAssemblySymbols(workItem.Rights.ToImmutableArray(), workItem.Options, out resolvedExternallyProvidedAssemblyReferences);
-                runWithReferences &= resolvedExternallyProvidedAssemblyReferences;
+                List<IEnumerable<ElementContainer<IAssemblySymbol>>> rightContainersList = new(workItem.Right.Count);
+                foreach (IReadOnlyList<MetadataInformation> right in workItem.Right)
+                {
+                    IReadOnlyList<ElementContainer<IAssemblySymbol>> rightContainers = CreateAssemblySymbols(right.ToImmutableArray(), workItem.Options, out resolvedExternallyProvidedAssemblyReferences);
+                    rightContainersList.Add(rightContainers);
+                    runWithReferences &= resolvedExternallyProvidedAssemblyReferences;
+                }
 
                 // There must at least be one left and one right element in the container.
                 // If assemblies symbols failed to load and nothing is to compare, skip this work item.
-                if (leftContainerList.Count == 0 || rightContainerList.Count == 0)
+                if (leftContainerList.Count == 0 || rightContainersList.Count == 0)
                     continue;
 
                 // Create and configure the work item specific api comparer
@@ -63,7 +65,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
                     withReferences: runWithReferences));
 
                 // Invoke the api comparer for the work item and operate on the difference result
-                IEnumerable<CompatDifference> differences = apiComparer.GetDifferences(leftContainerList, rightContainerList);
+                IEnumerable<CompatDifference> differences = apiComparer.GetDifferences(leftContainerList, rightContainersList);
                 var differenceGroups = differences.GroupBy((c) => new { c.Left, c.Right });
 
                 foreach (var differenceGroup in differenceGroups)
@@ -106,7 +108,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
             _workItems.Clear();
         }
 
-        private IReadOnlyList<ElementContainer<IAssemblySymbol>> CreateAssemblySymbols(IReadOnlyList<MetadataInformation> metadataInformation, ApiCompatRunnerOptions options, out bool resolvedExternallyProvidedAssemblyReferences)
+        private IReadOnlyList<ElementContainer<IAssemblySymbol>> CreateAssemblySymbols(IReadOnlyList<MetadataInformation> metadataInformation,
+            ApiCompatRunnerOptions options,
+            out bool resolvedExternallyProvidedAssemblyReferences)
         {
             // In order to enable reference support for baseline suppression we need a better way
             // to resolve references for the baseline package. Let's not enable it for now.
@@ -153,11 +157,26 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
         /// <inheritdoc />
         public void EnqueueWorkItem(ApiCompatRunnerWorkItem workItem)
         {
+            // If the work item (left + options) is already part of the queue, add the new right assembly sets to the work item.
             if (_workItems.TryGetValue(workItem, out ApiCompatRunnerWorkItem actualWorkItem))
             {
-                foreach (MetadataInformation right in workItem.Rights)
+                foreach (IReadOnlyList<MetadataInformation> right in workItem.Right)
                 {
-                    actualWorkItem.Rights.Add(right);
+                    bool exists = false;
+                    foreach (IReadOnlyList<MetadataInformation> actualRight in actualWorkItem.Right)
+                    {
+                        // If the new right is already part of the work item, do nothing.
+                        if (actualRight.SequenceEqual(right))
+                        {
+                            exists = true;
+                            break;
+                        }
+                    }
+
+                    if (!exists)
+                    {
+                        actualWorkItem.Right.Add(right);
+                    }
                 }
             }
             else

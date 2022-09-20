@@ -4,40 +4,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Jab;
 using Microsoft.DotNet.ApiCompatibility.Logging;
 using Microsoft.DotNet.ApiCompatibility.Rules;
-using Microsoft.DotNet.ApiCompatibility.Runner;
 using Microsoft.DotNet.PackageValidation;
 using Microsoft.DotNet.PackageValidation.Validators;
 
 namespace Microsoft.DotNet.ApiCompat
 {
-    [ServiceProvider(RootServices = new[] { typeof(IEnumerable<IRule>) })]
-    [Import(typeof(IApiCompatServiceProviderModule))]
-    [Singleton(typeof(CompatibleFrameworkInPackageValidator))]
-    [Singleton(typeof(CompatibleTfmValidator))]
-    [Singleton(typeof(BaselinePackageValidator))]
-    internal partial class ValidatePackageServiceProvider : IApiCompatServiceProviderModule
-    {
-        public Func<ICompatibilityLogger> LogFactory { get; }
-
-        public Func<ISuppressionEngine> SuppressionEngineFactory { get; }
-
-        public Func<IRuleFactory> RuleFactory { get; }
-
-        public ValidatePackageServiceProvider(Func<ISuppressionEngine, ICompatibilityLogger> logFactory,
-            Func<ISuppressionEngine> suppressionEngineFactory,
-            Func<ICompatibilityLogger, IRuleFactory> ruleFactory)
-        {
-            // It's important to use GetService<T> here instead of directly invoking the factory
-            // to avoid two instances being created when retrieving a singleton.
-            LogFactory = () => logFactory(GetService<ISuppressionEngine>());
-            SuppressionEngineFactory = suppressionEngineFactory;
-            RuleFactory = () => ruleFactory(GetService<ICompatibilityLogger>());
-        }
-    }
-
     internal static class ValidatePackage
     {
         public static void Run(Func<ISuppressionEngine, ICompatibilityLogger> logFactory,
@@ -61,7 +34,7 @@ namespace Microsoft.DotNet.ApiCompat
             string? suppressionFileForEngine = generateSuppressionFile && !File.Exists(suppressionFile) ? null : suppressionFile;
 
             // Initialize the service provider
-            ValidatePackageServiceProvider serviceProvider = new(logFactory,
+            ApiCompatServiceProvider serviceProvider = new(logFactory,
                 () => new SuppressionEngine(suppressionFileForEngine, noWarn, generateSuppressionFile),
                 (log) => new RuleFactory(log,
                     enableRuleAttributesMustMatch,
@@ -78,19 +51,22 @@ namespace Microsoft.DotNet.ApiCompat
             Package package = Package.Create(packagePath, packageAssemblyReferences);
 
             // Invoke all validators and pass the specific validation options in. Don't execute work items, just enqueue them.
-            serviceProvider.GetService<CompatibleTfmValidator>().Validate(new PackageValidatorOption(package,
+            CompatibleTfmValidator tfmValidator = new(serviceProvider.CompatibilityLogger, serviceProvider.ApiCompatRunner);
+            tfmValidator.Validate(new PackageValidatorOption(package,
                 enableStrictModeForCompatibleTfms,
                 enqueueApiCompatWorkItems: runApiCompat,
                 executeApiCompatWorkItems: false));
 
-            serviceProvider.GetService<CompatibleFrameworkInPackageValidator>().Validate(new PackageValidatorOption(package,
+            CompatibleFrameworkInPackageValidator compatibleFrameworkInPackageValidator = new(serviceProvider.CompatibilityLogger, serviceProvider.ApiCompatRunner);
+            compatibleFrameworkInPackageValidator.Validate(new PackageValidatorOption(package,
                 enableStrictModeForCompatibleFrameworksInPackage,
                 enqueueApiCompatWorkItems: runApiCompat,
                 executeApiCompatWorkItems: false));
 
             if (!string.IsNullOrEmpty(baselinePackagePath))
             {
-                serviceProvider.GetService<BaselinePackageValidator>().Validate(new PackageValidatorOption(package,
+                BaselinePackageValidator baselineValidator = new(serviceProvider.CompatibilityLogger, serviceProvider.ApiCompatRunner);
+                baselineValidator.Validate(new PackageValidatorOption(package,
                     enableStrictMode: enableStrictModeForBaselineValidation,
                     enqueueApiCompatWorkItems: runApiCompat,
                     executeApiCompatWorkItems: false,
@@ -100,13 +76,13 @@ namespace Microsoft.DotNet.ApiCompat
             if (runApiCompat)
             {
                 // Execute the work items that were enqueued.
-                serviceProvider.GetService<IApiCompatRunner>().ExecuteWorkItems();
+                serviceProvider.ApiCompatRunner.ExecuteWorkItems();
             }
 
             if (generateSuppressionFile)
             {
-                SuppressionFileHelper.GenerateSuppressionFile(serviceProvider.GetService<ISuppressionEngine>(),
-                    serviceProvider.GetService<ICompatibilityLogger>(),
+                SuppressionFileHelper.GenerateSuppressionFile(serviceProvider.SuppressionEngine,
+                    serviceProvider.CompatibilityLogger,
                     suppressionFile);
             }
         }

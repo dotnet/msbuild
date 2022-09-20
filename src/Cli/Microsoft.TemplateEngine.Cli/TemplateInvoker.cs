@@ -1,5 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.Text.RegularExpressions;
 using Microsoft.DotNet.Cli.Utils;
@@ -27,7 +28,7 @@ namespace Microsoft.TemplateEngine.Cli
             Func<string> inputGetter)
         {
             _environmentSettings = environment;
-            _cliTemplateEngineHost = _environmentSettings.Host as ICliTemplateEngineHost ?? throw new ArgumentException($"The hosts other than {typeof(ICliTemplateEngineHost).Name} are not supported.");
+            _cliTemplateEngineHost = _environmentSettings.Host as ICliTemplateEngineHost ?? throw new ArgumentException($"The hosts other than {nameof(ICliTemplateEngineHost)} are not supported.");
             _inputGetter = inputGetter;
 
             _templateCreator = new TemplateCreator(_environmentSettings);
@@ -72,7 +73,7 @@ namespace Microsoft.TemplateEngine.Cli
             finally
             {
                 TelemetryEventEntry.TrackEvent(
-                    TelemetryConstants.CreateEvent, 
+                    TelemetryConstants.CreateEvent,
                     new Dictionary<string, string?>
                     {
                         { TelemetryConstants.Language, templateLanguage },
@@ -274,6 +275,12 @@ namespace Microsoft.TemplateEngine.Cli
                     }
                     Reporter.Error.WriteLine(LocalizableStrings.RerunCommandAndPassForceToCreateAnyway.Bold().Red());
                     return NewCommandStatus.CannotCreateOutputFile;
+                case CreationResultStatus.TemplateIssueDetected:
+                    if (!string.IsNullOrEmpty(instantiateResult.ErrorMessage))
+                    {
+                        Reporter.Error.WriteLine(instantiateResult.ErrorMessage.Bold().Red());
+                    }
+                    return NewCommandStatus.TemplateIssueDetected;
                 default:
                     return NewCommandStatus.Unexpected;
             }

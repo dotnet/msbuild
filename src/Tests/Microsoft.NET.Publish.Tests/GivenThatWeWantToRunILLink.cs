@@ -645,16 +645,31 @@ namespace Microsoft.NET.Publish.Tests
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             // Please keep list below sorted and de-duplicated
-            var expectedOutput = new string[] {
+            var expectedOutput = new List<string> {
                 "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.ComActivator.GetClassFactoryForTypeInternal(ComActivationContextInternal*",
                 "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.ComponentActivator.GetFunctionPointer(IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr",
-                "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssembly(IntPtr, IntPtr",
                 "ILLink : Trim analysis warning IL2026: System.ComponentModel.Design.DesigntimeLicenseContextSerializer.DeserializeUsingBinaryFormatter(DesigntimeLicenseContextSerializer.StreamWrapper, String, RuntimeLicenseContext",
                 "ILLink : Trim analysis warning IL2026: System.Resources.ManifestBasedResourceGroveler.CreateResourceSet(Stream, Assembly",
                 "ILLink : Trim analysis warning IL2026: System.StartupHookProvider.ProcessStartupHooks(",
                 "ILLink : Trim analysis warning IL2063: System.RuntimeType.GetInterface(String, Boolean",
                 "ILLink : Trim analysis warning IL2065: System.Runtime.Serialization.FormatterServices.InternalGetSerializableMembers(Type",
             };
+            switch (targetFramework) {
+            case "net6.0":
+                expectedOutput.AddRange(new string[] {
+                    "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssembly(IntPtr, IntPtr",
+                });
+                break;
+            case "net7.0":
+            case "net8.0":
+                expectedOutput.AddRange(new string[] {
+                    "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssembly(IntPtr, IntPtr",
+                    "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssemblyInContextWhenSupported(IntPtr, IntPtr",
+                });
+                break;
+            default:
+                throw new InvalidOperationException();
+            }
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
@@ -662,7 +677,7 @@ namespace Microsoft.NET.Publish.Tests
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             var result = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true", "/p:TrimMode=copyused", "/p:TrimmerSingleWarn=false");
             result.Should().Pass();
-            ValidateWarningsOnHelloWorldApp(publishCommand, result, expectedOutput, targetFramework, rid);
+            ValidateWarningsOnHelloWorldApp(publishCommand, result, expectedOutput.ToArray(), targetFramework, rid);
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
@@ -675,7 +690,6 @@ namespace Microsoft.NET.Publish.Tests
             // Please keep list below sorted and de-duplicated
             var expectedOutput = new List<string> {
                 "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.ComponentActivator.GetFunctionPointer(IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr",
-                "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssembly(IntPtr, IntPtr",
                 "ILLink : Trim analysis warning IL2026: System.ComponentModel.Design.DesigntimeLicenseContextSerializer.DeserializeUsingBinaryFormatter(DesigntimeLicenseContextSerializer.StreamWrapper, String, RuntimeLicenseContext",
                 "ILLink : Trim analysis warning IL2026: System.ComponentModel.Design.DesigntimeLicenseContextSerializer.SerializeWithBinaryFormatter(Stream, String, DesigntimeLicenseContext",
                 "ILLink : Trim analysis warning IL2026: System.Data.DataSet.System.Xml.Serialization.IXmlSerializable.GetSchema(",
@@ -690,14 +704,19 @@ namespace Microsoft.NET.Publish.Tests
             switch (targetFramework) {
             case "net6.0":
                 expectedOutput.AddRange(new string[] {
+                    "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssembly(IntPtr, IntPtr",
                     "ILLink : Trim analysis warning IL2055: System.Runtime.Serialization.ClassDataContract.UnadaptedClassType.get",
                     "ILLink : Trim analysis warning IL2067: System.Runtime.Serialization.SurrogateDataContract.GetUninitializedObject(Type"
                 });
                 break;
             case "net7.0":
+            case "net8.0":
                 expectedOutput.AddRange(new string[] {
                     "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.ComActivator.GetClassFactoryForTypeInternal(ComActivationContextInternal*",
+                    "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssembly(IntPtr, IntPtr",
+                    "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssemblyInContextWhenSupported(IntPtr, IntPtr",
                     "ILLink : Trim analysis warning IL2026: System.Linq.Queryable: Using member 'System.Linq.EnumerableRewriter.s_seqMethods' which has 'RequiresUnreferencedCodeAttribute'",
+                    "ILLink : Trim analysis warning IL2026: System.Transactions.DtcProxyShim.DtcProxyShimFactory.ConnectToProxyCore(String, Guid, Object, Boolean&, Byte[]&, ResourceManagerShim&",
                     "ILLink : Trim analysis warning IL2045: System.Runtime.InteropServices.Marshal.GenerateProgIdForType(Type",
                     "ILLink : Trim analysis warning IL2045: System.Runtime.InteropServices.Marshal.GenerateProgIdForType(Type",
                     "ILLink : Trim analysis warning IL2045: System.Runtime.InteropServices.ComAwareEventInfo.GetDataForComInvocation(EventInfo, Guid&, Int32&",
@@ -1718,7 +1737,7 @@ namespace Microsoft.NET.Publish.Tests
   </assembly>
 </linker>
 ";
-            
+
             testProject.AddItem("EmbeddedResource", new Dictionary<string, string> {
                 ["Include"] = substitutionsFilename,
                 ["LogicalName"] = substitutionsFilename
@@ -1753,7 +1772,7 @@ namespace Microsoft.NET.Publish.Tests
             // actually an important failure, so don't error out here.
             // If we're actually testing that we build with no warnings, the test will still fail.
             testProject.AdditionalProperties["WarningsNotAsErrors"] = "CS9057;";
-            
+
             testProject.SourceFiles[$"{projectName}.cs"] = @"
 using System;
 using System.Reflection;

@@ -1,5 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using System.CommandLine.Completions;
@@ -66,7 +67,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 
         public void DebugFlagCanBeParsedOnNewLevel(string command, string option)
         {
-             Dictionary<string, Func<GlobalArgs, bool>> optionsMap = new()
+            Dictionary<string, Func<GlobalArgs, bool>> optionsMap = new()
             {
                 { "--debug:attach", args => args.DebugAttach },
                 { "--debug:ephemeral-hive", args => args.DebugVirtualizeSettings },
@@ -164,7 +165,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         }
 
         [Theory]
-        [InlineData ("new --output test console", "test")]
+        [InlineData("new --output test console", "test")]
         [InlineData("new console --output test", "test")]
         [InlineData("new -o test console", "test")]
         [InlineData("new console -o test", "test")]

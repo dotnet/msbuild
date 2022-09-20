@@ -1,5 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using System.CommandLine.Completions;
@@ -101,13 +102,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             SharedOptions.DryRunOption,
             SharedOptions.NoUpdateCheckOption
         };
-   
 
-        protected internal override IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings)
+        protected internal override IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager)
         {
             if (context is not TextCompletionContext textCompletionContext)
             {
-                foreach (CompletionItem completion in base.GetCompletions(context, environmentSettings))
+                foreach (CompletionItem completion in base.GetCompletions(context, environmentSettings, templatePackageManager))
                 {
                     yield return completion;
                 }
@@ -115,9 +115,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
 
             InstantiateCommandArgs instantiateCommandArgs = InstantiateCommandArgs.FromNewCommandArgs(ParseContext(context.ParseResult));
-
-            using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
-            HostSpecificDataLoader? hostSpecificDataLoader = new HostSpecificDataLoader(environmentSettings);
+            HostSpecificDataLoader? hostSpecificDataLoader = new(environmentSettings);
 
             //TODO: consider new API to get templates only from cache (non async)
             IReadOnlyList<ITemplateInfo> templates =
@@ -138,7 +136,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 yield return completion;
             }
-            foreach (CompletionItem completion in base.GetCompletions(context, environmentSettings))
+            foreach (CompletionItem completion in base.GetCompletions(context, environmentSettings, templatePackageManager))
             {
                 yield return completion;
             }
@@ -147,9 +145,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         protected override Task<NewCommandStatus> ExecuteAsync(
             NewCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager,
             InvocationContext context)
         {
-            return InstantiateCommand.ExecuteAsync(args, environmentSettings, context);
+            return InstantiateCommand.ExecuteAsync(args, environmentSettings, templatePackageManager, context);
         }
 
         protected override NewCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);

@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
         /// <summary>
         /// The metadata information of the left assemblies to compare with the rights.
         /// </summary>
-        public readonly IReadOnlyList<MetadataInformation> Lefts;
+        public readonly IReadOnlyList<MetadataInformation> Left;
 
         /// <summary>
         /// The api compat options to configure the comparison checks.
@@ -26,29 +26,46 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
         /// <summary>
         /// The metadata information of the right assemblies that are compared against the lefts.
         /// </summary>
-        public HashSet<MetadataInformation> Rights { get; }
+        public IList<IReadOnlyList<MetadataInformation>> Right { get; }
 
         /// <summary>
-        /// Initializes an api compat work item.
+        /// Creates a workitem with a single left set, options and multiple right sets.
         /// </summary>
-        public ApiCompatRunnerWorkItem(IReadOnlyList<MetadataInformation> lefts,
+        public ApiCompatRunnerWorkItem(IReadOnlyList<MetadataInformation> left,
             ApiCompatRunnerOptions options,
-            IEnumerable<MetadataInformation> rights)
+            List<IReadOnlyList<MetadataInformation>> right)
         {
-            Lefts = lefts;
+            Left = left;
             Options = options;
-            Rights = new HashSet<MetadataInformation>(rights);
+            Right = right;
         }
 
+        /// <summary>
+        /// Creates a workitem with a single left set, options and a single right set.
+        /// </summary>
+        public ApiCompatRunnerWorkItem(IReadOnlyList<MetadataInformation> left,
+            ApiCompatRunnerOptions options,
+            IReadOnlyList<MetadataInformation> right)
+        {
+            Left = left;
+            Options = options;
+            Right = new List<IReadOnlyList<MetadataInformation>>(new IReadOnlyList<MetadataInformation>[] { right });
+        }
+
+        /// <summary>
+        /// Creates a workitem with a single left, options and a single right.
+        /// </summary>
         public ApiCompatRunnerWorkItem(MetadataInformation left,
             ApiCompatRunnerOptions options,
-            params MetadataInformation[] rights)
-            : this(new MetadataInformation[] { left }, options, rights)
+            MetadataInformation right)
+            : this(new MetadataInformation[] { left },
+                  options,
+                  new MetadataInformation[] { right })
         {
         }
 
         /// <inheritdoc />
-        public bool Equals(ApiCompatRunnerWorkItem other) => other.Lefts.SequenceEqual(Lefts) && other.Options.Equals(Options);
+        public bool Equals(ApiCompatRunnerWorkItem other) => other.Left.SequenceEqual(Left) && other.Options.Equals(Options);
 
         /// <inheritdoc />
         public override bool Equals(object? obj) => obj is ApiCompatRunnerWorkItem item && Equals(item);
@@ -59,7 +76,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
             unchecked
             {
                 int hash = 19 + Options.GetHashCode();
-                foreach (MetadataInformation left in Lefts)
+                foreach (MetadataInformation left in Left)
                 {
                     hash = hash * 31 + left.GetHashCode();
                 }
@@ -74,6 +91,6 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
         public static bool operator !=(ApiCompatRunnerWorkItem workItem1, ApiCompatRunnerWorkItem workItem2) => !(workItem1 == workItem2);
 
         /// <inheritdoc />
-        public override string ToString() => $"{Lefts.Select(l => l.AssemblyId).Aggregate((l1, l2) => l1 + ", " + l2)}: {Options}";
+        public override string ToString() => $"{Left.Select(l => l.AssemblyId).Aggregate((l1, l2) => l1 + ", " + l2)}: {Options}";
     }
 }

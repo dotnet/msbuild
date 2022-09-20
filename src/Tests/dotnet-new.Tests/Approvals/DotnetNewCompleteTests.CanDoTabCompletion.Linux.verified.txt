@@ -31,6 +31,7 @@ webapp
 webconfig
 worker
 xunit
+--diagnostics
 --dry-run
 --force
 --help
@@ -38,12 +39,16 @@ xunit
 --no-update-check
 --output
 --project
+--verbosity
 -?
+-d
 -h
 -n
 -o
+-v
 /?
 /h
+create
 install
 list
 search

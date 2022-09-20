@@ -42,9 +42,9 @@ Pour installer le package NuGet d’une certaine version, utilisez &lt;package I
         <note />
       </trans-unit>
       <trans-unit id="Command_Instantiate_Description">
-        <source>Instantiates a template with given short name.</source>
-        <target state="translated">Instancie un modèle avec le nom court donné.</target>
-        <note />
+        <source>Instantiates a template with given short name. An alias of 'dotnet new &lt;template name&gt;'.</source>
+        <target state="needs-review-translation">Instancie un modèle avec le nom court donné.</target>
+        <note>do not translate 'dotnet new &lt;template name&gt;'</note>
       </trans-unit>
       <trans-unit id="Command_Legacy_Update_Check_Description">
         <source>Checks the currently installed template packages for updates.</source>
@@ -94,8 +94,8 @@ Si la commande est spécifiée sans l’argument, elle répertorie tous les pack
         <note />
       </trans-unit>
       <trans-unit id="Command_Update_Option_CheckOnly">
-        <source>Only check for updates and display the template packages to be updated without applying update.</source>
-        <target state="translated">Recherchez uniquement les mises à jour et affichez les packages de modèles à mettre à jour sans appliquer la mise à jour.</target>
+        <source>Only checks for updates and display the template packages to be updated without applying update.</source>
+        <target state="needs-review-translation">Recherchez uniquement les mises à jour et affichez les packages de modèles à mettre à jour sans appliquer la mise à jour.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
@@ -124,8 +124,8 @@ Si la commande est spécifiée sans l’argument, elle répertorie tous les pack
         <note />
       </trans-unit>
       <trans-unit id="Option_ColumnsAll">
-        <source>Display all columns in the output.</source>
-        <target state="translated">Afficher toutes les colonnes dans la sortie</target>
+        <source>Displays all columns in the output.</source>
+        <target state="needs-review-translation">Afficher toutes les colonnes dans la sortie</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_Debug_Attach">
@@ -185,7 +185,7 @@ Si la commande est spécifiée sans l’argument, elle répertorie tous les pack
       </trans-unit>
       <trans-unit id="Option_ProjectPath">
         <source>The project that should be used for context evaluation.</source>
-        <target state="new">The project that should be used for context evaluation.</target>
+        <target state="translated">Projet à utiliser pour l’évaluation du contexte</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_TagFilter">

@@ -141,7 +141,8 @@ To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;ver
     <value>Template specific options to use.</value>
   </data>
   <data name="Command_Instantiate_Description" xml:space="preserve">
-    <value>Instantiates a template with given short name.</value>
+    <value>Instantiates a template with given short name. An alias of 'dotnet new &lt;template name&gt;'.</value>
+    <comment>do not translate 'dotnet new &lt;template name&gt;'</comment>
   </data>
   <data name="Command_Legacy_Update_Check_Description" xml:space="preserve">
     <value>Checks the currently installed template packages for updates.</value>
@@ -172,7 +173,7 @@ If command is specified without the argument, it lists all the template packages
     <value>Checks the currently installed template packages for update, and install the updates.</value>
   </data>
   <data name="Command_Update_Option_CheckOnly" xml:space="preserve">
-    <value>Only check for updates and display the template packages to be updated without applying update.</value>
+    <value>Only checks for updates and display the template packages to be updated without applying update.</value>
   </data>
   <data name="ListCommand_Option_IgnoreConstraints" xml:space="preserve">
     <value>Disables checking if the template meets the constraints to be run.</value>
@@ -190,7 +191,7 @@ If command is specified without the argument, it lists all the template packages
     <value>Specifies the columns to display in the output. </value>
   </data>
   <data name="Option_ColumnsAll" xml:space="preserve">
-    <value>Display all columns in the output.</value>
+    <value>Displays all columns in the output.</value>
   </data>
   <data name="Option_Debug_Attach" xml:space="preserve">
     <value>Allows to pause execution in order to attach to the process for debug purposes.</value>
