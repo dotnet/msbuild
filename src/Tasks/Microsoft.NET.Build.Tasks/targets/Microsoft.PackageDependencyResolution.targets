@@ -310,6 +310,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="PackageFolders" ItemName="AssetsFilePackageFolder" />
       <Output TaskParameter="PackageDependencies" ItemName="PackageDependencies" />
       <Output TaskParameter="PackageDefinitions" ItemName="PackageDefinitions" />
+      <Output TaskParameter="PackageDependenciesBetweenPackages" ItemName="PackageDependencies" />
     </ResolvePackageAssets>
 
     <ItemGroup Condition="'$(CopyDebugSymbolFilesFromPackages)' == 'true'">
