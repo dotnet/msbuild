@@ -151,7 +151,7 @@ namespace Microsoft.DotNet.Cli
                     {
                         lock (projectDataLock)
                         {
-                            configuredProjects.Add(projectData); // we don't care about race conditions here
+                            configuredProjects.Add(projectData);
                             configValues.Add(useReleaseConfiguraton.ToLower());
                         }
                     }
@@ -189,12 +189,16 @@ namespace Microsoft.DotNet.Cli
         private Dictionary<string, string> GetGlobalPropertiesFromUserArgs(IEnumerable<string> userPropertyArgs)
         {
             Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            IEnumerable<(string key, string value)> globalPropEnumerable = MSBuildPropertyParser.ParseProperties(String.Join(";", userPropertyArgs));
 
-            // The parser puts keys into the format --property:Key no matter the user input, so we can expect that pattern and extract the key.
-            foreach (var kvPair in globalPropEnumerable)
+            var forwardingFunction = (CommonOptions.PropertiesOption as ForwardedOption<string[]>).GetForwardingFunction();
+            IEnumerable<string> globalPropEnumerable = forwardingFunction(CommonOptions.PropertiesOption.Parse(String.Join(";", userPropertyArgs)));
+
+            foreach (var propertyString in globalPropEnumerable)
             {
-                globalProperties[kvPair.key.Split(new string[] { "--property:" }, StringSplitOptions.None).Last()] = kvPair.value;
+                // The parser puts keys into the format --property:Key=Value no matter the user input, so we can expect that pattern and extract the key.
+                string keyEqVal = propertyString.Split("--property:").Last();
+                string[] keyValuePair = keyEqVal.Split("=");
+                globalProperties[keyValuePair.First()] = keyValuePair.Last();
             }
             return globalProperties;
         }
