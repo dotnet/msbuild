@@ -86,7 +86,7 @@ namespace Microsoft.Build.Construction
         public string Add(string key, XmlDocument document)
         {
             // Remove string interning in ChangeWave 17.4
-            // Note: When ready to remove the ChangeWaves under 17.4, please remove all related and no more used code (see the PR https://github.com/dotnet/msbuild/pull/7952).
+            // Note: When ready to remove the ChangeWaves under 17.4, please delete this entire class and all references to it. (See the PR https://github.com/dotnet/msbuild/pull/7952).
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
             {
                 return key;
