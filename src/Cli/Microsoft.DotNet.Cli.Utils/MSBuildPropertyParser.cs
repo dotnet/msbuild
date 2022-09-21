@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Microsoft.DotNet.Cli.Utils;
 
-public class MSBuildPropertyParser {
+public static class MSBuildPropertyParser {
     public static IEnumerable<(string key, string value)> ParseProperties(string input) {
         var currentPos = 0;
         StringBuilder currentKey = new StringBuilder();
