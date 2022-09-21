@@ -691,7 +691,7 @@ public static class Program
         public void PublishRelease_does_not_override_Configuration_property_across_formats(string configOpt)
         {
             var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld", "PublishReleaseHelloWorldCsProjConfigPropOverride")
+               .CopyTestAsset("HelloWorld", $"PublishReleaseHelloWorldCsProjConfigPropOverride{configOpt}")
                .WithSource()
                .WithTargetFramework(ToolsetInfo.CurrentTargetFramework)
                .WithProjectChanges(project =>
@@ -760,7 +760,7 @@ public static class Program
             var rid = EnvironmentInfo.GetCompatibleRid(tfm);
 
             var helloWorldAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld", "PublishReleaseHelloWorldCsProjPublishProfile")
+                .CopyTestAsset("HelloWorld", $"PublishReleaseHelloWorldCsProjPublishProfile{config}")
                 .WithSource()
                 .WithTargetFramework(ToolsetInfo.CurrentTargetFramework)
                 .WithProjectChanges(project =>
