@@ -24,12 +24,13 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests.Mappers
             INamespaceMapper containingNamespace = Mock.Of<INamespaceMapper>();
             ITypeMapper containingType = Mock.Of<ITypeMapper>();
 
-            TypeMapper assemblyMapper = new(ruleRunner, mapperSettings, rightSetSize, containingNamespace, containingType);
+            TypeMapper typeMapper = new(ruleRunner, mapperSettings, rightSetSize, containingNamespace, containingType);
 
-            Assert.Equal(mapperSettings, assemblyMapper.Settings);
-            Assert.Equal(rightSetSize, assemblyMapper.Right.Length);
-            Assert.Equal(containingNamespace, assemblyMapper.ContainingNamespace);
-            Assert.Equal(containingType, assemblyMapper.ContainingType);
+            Assert.Null(typeMapper.Left);
+            Assert.Equal(mapperSettings, typeMapper.Settings);
+            Assert.Equal(rightSetSize, typeMapper.Right.Length);
+            Assert.Equal(containingNamespace, typeMapper.ContainingNamespace);
+            Assert.Equal(containingType, typeMapper.ContainingType);
         }
 
         [Fact]

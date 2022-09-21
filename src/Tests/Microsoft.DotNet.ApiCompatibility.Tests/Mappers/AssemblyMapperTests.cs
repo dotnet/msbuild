@@ -25,6 +25,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests.Mappers
 
             AssemblyMapper assemblyMapper = new(ruleRunner, mapperSettings, rightSetSize, assemblySetMapper);
 
+            Assert.Null(assemblyMapper.Left);
             Assert.Equal(mapperSettings, assemblyMapper.Settings);
             Assert.Equal(rightSetSize, assemblyMapper.Right.Length);
             Assert.Equal(assemblySetMapper, assemblyMapper.ContainingAssemblySet);
