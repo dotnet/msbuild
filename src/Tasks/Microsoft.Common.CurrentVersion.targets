@@ -4370,9 +4370,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                             Exclude="@(ReferenceCopyLocalPaths);@(_NETStandardLibraryNETFrameworkLib)" />
     </ItemGroup>
 
+    <ItemGroup Condition="'$(PublishSingleFile)' != 'true'">
+      <_ClickOnceSatelliteAssemblies Include="@(IntermediateSatelliteAssembliesWithTargetPath);@(ReferenceSatellitePaths)" />
+    </ItemGroup>
+
     <!-- Flag primary dependencies-certain warnings emitted during application manifest generation apply only to them. -->
     <ItemGroup>
-      <_SatelliteAssemblies Include="@(IntermediateSatelliteAssembliesWithTargetPath);@(ReferenceSatellitePaths)" />
       <_DeploymentReferencePaths Include="@(ReferenceCopyLocalPaths)"
                                  Condition="('%(Extension)' == '.dll' Or '%(Extension)' == '.exe' Or '%(Extension)' == '.md') and ('%(ReferenceCopyLocalPaths.CopyToPublishDirectory)' != 'false')">
         <IsPrimary>true</IsPrimary>
@@ -4383,7 +4386,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Include managed references in clickonce manifest only if single file publish is false -->
     <ItemGroup Condition="'$(PublishSingleFile)' != 'true'">
       <_ManifestManagedReferences Include="@(_DeploymentReferencePaths);@(ReferenceDependencyPaths);@(_SGenDllsRelatedToCurrentDll);@(SerializationAssembly);@(ReferenceCOMWrappersToCopyLocal)"
-                               Exclude="@(_SatelliteAssemblies);@(_ReferenceScatterPaths);@(_ExcludedAssembliesFromManifestGeneration)" />
+                               Exclude="@(_ClickOnceSatelliteAssemblies);@(_ReferenceScatterPaths);@(_ExcludedAssembliesFromManifestGeneration)" />
     </ItemGroup>
 
     <!-- Include the following files in clickonce manifest only if single file publish is false -->
@@ -4474,7 +4477,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         NativeAssemblies="@(NativeReferenceFile);@(_DeploymentNativePrerequisite)"
         PublishFiles="@(PublishFile)"
         RuntimePackAssets="@(RuntimePackAsset)"
-        SatelliteAssemblies="@(_SatelliteAssemblies)"
+        SatelliteAssemblies="@(_ClickOnceSatelliteAssemblies)"
         SigningManifests="$(SignManifests)"
         TargetCulture="$(TargetCulture)"
         TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
