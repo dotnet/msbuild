@@ -30,7 +30,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static readonly Dictionary<string, string> PlatformAliases = new(StringComparer.OrdinalIgnoreCase)
         {
-            { "UAP", "windows" }
+            { "UAP", "Windows" }
         };
 
         /// <summary>
