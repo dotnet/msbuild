@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="AssemblyCultureDoesNotMatch">
         <source>{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</source>
-        <target state="new">{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</target>
+        <target state="translated">Язык и региональные параметры {0} сборки "{2}" не совпадают с языком и региональными параметрами {1} сборки "{3}".</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyLoadError">
@@ -44,7 +44,7 @@
       </trans-unit>
       <trans-unit id="AssemblyVersionDoesNotMatch">
         <source>{3} assembly version '{1}' should be equal to {2} version '{0}'.</source>
-        <target state="new">{3} assembly version '{1}' should be equal to {2} version '{0}'.</target>
+        <target state="translated">Версия "{1}" сборки {3} должна быть равна {2} версии "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyVersionIsNotCompatible">
@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="CannotAddAttribute">
         <source>Cannot add attribute '{0}' to '{1}'.</source>
-        <target state="new">Cannot add attribute '{0}' to '{1}'.</target>
+        <target state="translated">Не удается добавить атрибут "{0}" к "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotAddMemberToInterface">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="CannotAddSealedToInterfaceMember">
         <source>Cannot add sealed keyword to default interface member '{0}'.</source>
-        <target state="new">Cannot add sealed keyword to default interface member '{0}'.</target>
+        <target state="translated">Не удается добавить запечатанное ключевое слово в элемент интерфейса по умолчанию "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotAddVirtualToMember">
@@ -79,12 +79,12 @@
       </trans-unit>
       <trans-unit id="CannotChangeAttribute">
         <source>Cannot change arguments of attribute '{0}' on '{1}'.</source>
-        <target state="new">Cannot change arguments of attribute '{0}' on '{1}'.</target>
+        <target state="translated">Не удается изменить аргументы атрибута "{0}" в "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotChangeParameterName">
         <source>Parameter name on member '{0}' changed from '{1}' to '{2}'.</source>
-        <target state="new">Parameter name on member '{0}' changed from '{1}' to '{2}'.</target>
+        <target state="translated">Имя параметра на члене "{0}" изменено с "{1}" на "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotExpandVisibility">
@@ -99,7 +99,7 @@
       </trans-unit>
       <trans-unit id="CannotRemoveAttribute">
         <source>Cannot remove attribute '{0}' from '{1}'.</source>
-        <target state="new">Cannot remove attribute '{0}' from '{1}'.</target>
+        <target state="translated">Не удается удалить атрибут "{0}" из "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
@@ -209,7 +209,7 @@
       </trans-unit>
       <trans-unit id="TypeMissingOnSide">
         <source>Type '{0}' exists on {1} but not on {2}</source>
-        <target state="new">Type '{0}' exists on {1} but not on {2}</target>
+        <target state="translated">Тип "{0}" существует в {1}, но не в {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="VisitorRightCountShouldMatchMappersSetSize">

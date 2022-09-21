@@ -466,7 +466,7 @@
       </trans-unit>
       <trans-unit id="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed">
         <source>NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</source>
-        <target state="new">NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</target>
+        <target state="translated">NETSDK1191: 無法推斷屬性 '{0}' 的執行階段識別碼。請明確指定 rid。</target>
         <note>{StrBegin="NETSDK1191: "}</note>
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
@@ -647,7 +647,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PReleaseRequiresEnvVarOnSln">
         <source>NETSDK1190: To use '{0}' in solution projects, you must set the environment variable '{1}' (to true). This will increase the time to complete the operation.</source>
-        <target state="new">NETSDK1190: To use '{0}' in solution projects, you must set the environment variable '{1}' (to true). This will increase the time to complete the operation.</target>
+        <target state="translated">NETSDK1190: 若要在解決方案專案中使用 '{0}'，您必須將環境變數 '{1}' 設為 true。這會增加完成作業的時間。</target>
         <note>{StrBegin="NETSDK1190: "}</note>
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
@@ -692,7 +692,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="Prefer32BitIgnoredForNetCoreApp">
         <source>NETSDK1189: Prefer32Bit is not supported and has no effect for netcoreapp target.</source>
-        <target state="new">NETSDK1189: Prefer32Bit is not supported and has no effect for netcoreapp target.</target>
+        <target state="translated">NETSDK1189: 不支援 Prefer32Bit，且對 netcoreapp 目標沒有影響。</target>
         <note>{StrBegin="NETSDK1189: "}</note>
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">

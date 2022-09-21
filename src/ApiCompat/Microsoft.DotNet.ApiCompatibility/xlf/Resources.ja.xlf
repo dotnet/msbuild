@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="AssemblyCultureDoesNotMatch">
         <source>{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</source>
-        <target state="new">{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</target>
+        <target state="translated">{2} アセンブリ カルチャ '{0}' が {3} アセンブリ カルチャ '{1}' と一致しません。</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyLoadError">
@@ -44,7 +44,7 @@
       </trans-unit>
       <trans-unit id="AssemblyVersionDoesNotMatch">
         <source>{3} assembly version '{1}' should be equal to {2} version '{0}'.</source>
-        <target state="new">{3} assembly version '{1}' should be equal to {2} version '{0}'.</target>
+        <target state="translated">{3} アセンブリバージョン '{1}' は {2} バージョン '{0}' と等しい必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyVersionIsNotCompatible">
@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="CannotAddAttribute">
         <source>Cannot add attribute '{0}' to '{1}'.</source>
-        <target state="new">Cannot add attribute '{0}' to '{1}'.</target>
+        <target state="translated">属性 '{0}' を '{1}' に追加できません。</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotAddMemberToInterface">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="CannotAddSealedToInterfaceMember">
         <source>Cannot add sealed keyword to default interface member '{0}'.</source>
-        <target state="new">Cannot add sealed keyword to default interface member '{0}'.</target>
+        <target state="translated">既定のインターフェイス メンバー '{0}' にシールド キーワードを追加できません。</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotAddVirtualToMember">
@@ -79,12 +79,12 @@
       </trans-unit>
       <trans-unit id="CannotChangeAttribute">
         <source>Cannot change arguments of attribute '{0}' on '{1}'.</source>
-        <target state="new">Cannot change arguments of attribute '{0}' on '{1}'.</target>
+        <target state="translated">'{1}' で属性の引数 '{0}' を変更できません。</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotChangeParameterName">
         <source>Parameter name on member '{0}' changed from '{1}' to '{2}'.</source>
-        <target state="new">Parameter name on member '{0}' changed from '{1}' to '{2}'.</target>
+        <target state="translated">メンバー '{0}' のパラメーター名が '{1}' から '{2}' に変更されました。</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotExpandVisibility">
@@ -99,7 +99,7 @@
       </trans-unit>
       <trans-unit id="CannotRemoveAttribute">
         <source>Cannot remove attribute '{0}' from '{1}'.</source>
-        <target state="new">Cannot remove attribute '{0}' from '{1}'.</target>
+        <target state="translated">属性 '{0}' を '{1}' から削除できません。</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
@@ -209,7 +209,7 @@
       </trans-unit>
       <trans-unit id="TypeMissingOnSide">
         <source>Type '{0}' exists on {1} but not on {2}</source>
-        <target state="new">Type '{0}' exists on {1} but not on {2}</target>
+        <target state="translated">タイプ '{0}' は {1} に存在していますが、{2} には存在しません</target>
         <note />
       </trans-unit>
       <trans-unit id="VisitorRightCountShouldMatchMappersSetSize">

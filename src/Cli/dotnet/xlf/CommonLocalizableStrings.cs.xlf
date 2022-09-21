@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="CustomConfigurationDisablesPublishAndPackReleaseProperties">
         <source>A custom configuration was detected in the project '{0}', so the property '{1}' will not take effect.</source>
-        <target state="new">A custom configuration was detected in the project '{0}', so the property '{1}' will not take effect.</target>
+        <target state="translated">U projektu {0} byla zjištěna vlastní konfigurace, takže vlastnost {1} se neprojeví.</target>
         <note />
       </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
@@ -200,7 +200,7 @@ Pokud se zadá identifikátor modulu runtime, výchozí hodnota je true.</target
       <trans-unit id="SolutionExecutableConfigurationMismatchError">
         <source>Multiple executable projects in the solution contain conflicting '{0}' values. Ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
 {1}.</source>
-        <target state="new">Multiple executable projects in the solution contain conflicting '{0}' values. Ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
+        <target state="translated">Několik spustitelných projektů v řešení obsahuje konfliktní hodnoty {0}. Ujistěte se, že se hodnoty shodují. Zvažte použití souboru Directory.build.props k nastavení všech konfigurací projektu. Konfliktní projekty:
 {1}.</target>
         <note />
       </trans-unit>

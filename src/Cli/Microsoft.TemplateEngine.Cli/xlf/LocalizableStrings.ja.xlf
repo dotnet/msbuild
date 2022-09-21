@@ -310,7 +310,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="Commands_TemplateShortNameCommandConflict_Info">
         <source>To instantiate the template with short name '{0}', run:</source>
-        <target state="new">To instantiate the template with short name '{0}', run:</target>
+        <target state="translated">短い名前の '{0}' を持つテンプレートをインスタンス化するには、次を実行します。</target>
         <note>Followed by command example from new line.</note>
       </trans-unit>
       <trans-unit id="Commands_Validator_WrongArgumentValue">
@@ -415,7 +415,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="Generic_CommandHints_List_Template">
         <source>To list installed templates similar to '{0}', run:</source>
-        <target state="new">To list installed templates similar to '{0}', run:</target>
+        <target state="translated">'{0}' に類似したインストール済みのテンプレートを一覧表示するには、次を実行します:</target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_CommandHints_Search">
@@ -480,12 +480,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplate">
         <source>Failed to get information about template packages for the template with identity '{0}'.</source>
-        <target state="new">Failed to get information about template packages for the template with identity '{0}'.</target>
+        <target state="translated">ID '{0}' を持つテンプレートのテンプレート パッケージに関する情報を取得できませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplateGroup">
         <source>Failed to get information about template packages for template group '{0}'.</source>
-        <target state="new">Failed to get information about template packages for template group '{0}'.</target>
+        <target state="translated">テンプレート グループ '{0}' のテンプレート パッケージに関する情報を取得できませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidCommandOptions">

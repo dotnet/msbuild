@@ -466,7 +466,7 @@
       </trans-unit>
       <trans-unit id="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed">
         <source>NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</source>
-        <target state="new">NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</target>
+        <target state="translated">NETSDK1191: '{0}' 속성의 런타임 식별자를 유추할 수 없습니다. RID를 명시적으로 지정하세요.</target>
         <note>{StrBegin="NETSDK1191: "}</note>
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
@@ -647,7 +647,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PReleaseRequiresEnvVarOnSln">
         <source>NETSDK1190: To use '{0}' in solution projects, you must set the environment variable '{1}' (to true). This will increase the time to complete the operation.</source>
-        <target state="new">NETSDK1190: To use '{0}' in solution projects, you must set the environment variable '{1}' (to true). This will increase the time to complete the operation.</target>
+        <target state="translated">NETSDK1190: 솔루션 프로젝트에서 '{0}'을(를) 사용하려면 환경 변수 '{1}'(true)를 설정해야 합니다. 이렇게 하면 작업을 완료하는 시간이 늘어나게 됩니다.</target>
         <note>{StrBegin="NETSDK1190: "}</note>
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
@@ -692,7 +692,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="Prefer32BitIgnoredForNetCoreApp">
         <source>NETSDK1189: Prefer32Bit is not supported and has no effect for netcoreapp target.</source>
-        <target state="new">NETSDK1189: Prefer32Bit is not supported and has no effect for netcoreapp target.</target>
+        <target state="translated">NETSDK1189: Prefer32Bit는 지원되지 않으며 netcoreapp 대상에는 영향을 주지 않습니다.</target>
         <note>{StrBegin="NETSDK1189: "}</note>
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
