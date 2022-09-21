@@ -109,9 +109,9 @@
       <Uri>https://github.com/microsoft/vstest</Uri>
       <Sha>e3ef271ba4d8ef1cda34bfa544e33c350fce622e</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="7.0.100-1.22452.1">
+    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="7.0.100-1.22471.3">
       <Uri>https://github.com/dotnet/linker</Uri>
-      <Sha>5f9bfd94d9c687207872ae03f751ea19704381c0</Sha>
+      <Sha>219e84c88def8276179f66282b2f7cb5f1d0d126</Sha>
       <SourceBuild RepoName="linker" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.DotNet.ILCompiler" Version="7.0.0-rtm.22471.3">
@@ -119,9 +119,9 @@
       <Sha>473b3120d476594d463020090f0d6b80174eb37b</Sha>
       <SourceBuildTarball RepoName="runtime" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.NET.ILLink.Analyzers" Version="7.0.100-1.22452.1">
+    <Dependency Name="Microsoft.NET.ILLink.Analyzers" Version="7.0.100-1.22471.3">
       <Uri>https://github.com/dotnet/linker</Uri>
-      <Sha>5f9bfd94d9c687207872ae03f751ea19704381c0</Sha>
+      <Sha>219e84c88def8276179f66282b2f7cb5f1d0d126</Sha>
     </Dependency>
     <Dependency Name="System.CodeDom" Version="7.0.0-rtm.22471.3">
       <Uri>https://github.com/dotnet/runtime</Uri>
@@ -242,13 +242,13 @@
       <Sha>9a1c3e1b7f0c8763d4c96e593961a61a72679a7b</Sha>
       <SourceBuild RepoName="xdt" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.CodeAnalysis.NetAnalyzers" Version="7.0.0-preview1.22466.1">
+    <Dependency Name="Microsoft.CodeAnalysis.NetAnalyzers" Version="7.0.0-preview1.22471.2">
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
-      <Sha>10a460bb34f36dfb3be9fe463d343ad71a9a2961</Sha>
+      <Sha>bce5d7e440efbfc33bf28bd9e4357a9446d5f7e2</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn-analyzers" Version="3.3.4-beta1.22466.1">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn-analyzers" Version="3.3.4-beta1.22471.2">
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
-      <Sha>10a460bb34f36dfb3be9fe463d343ad71a9a2961</Sha>
+      <Sha>bce5d7e440efbfc33bf28bd9e4357a9446d5f7e2</Sha>
       <SourceBuild RepoName="roslyn-analyzers" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="System.CommandLine" Version="2.0.0-beta4.22402.1">
