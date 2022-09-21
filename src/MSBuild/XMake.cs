@@ -217,6 +217,8 @@ namespace Microsoft.Build.CommandLine
 #endif
             )
         {
+            DebuggerLaunchCheck();
+
             // Initialize new build telemetry and record start of this build.
             KnownTelemetry.BuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow };
 
@@ -242,8 +244,7 @@ namespace Microsoft.Build.CommandLine
             {
                 Console.CancelKeyPress += Console_CancelKeyPress;
 
-                DebuggerLaunchCheck();
-
+                
                 // Use the client app to execute build in msbuild server. Opt-in feature.
                 exitCode = ((s_initialized && MSBuildClientApp.Execute(
 #if FEATURE_GET_COMMANDLINE
@@ -303,7 +304,8 @@ namespace Microsoft.Build.CommandLine
                     commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode) ||
                     commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Version] ||
                     FileUtilities.IsBinaryLogFilename(projectFile) ||
-                    ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]) == false)
+                    ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]) == false ||
+                    IsInteractiveBuild(commandLineSwitches))
                 {
                     canRunServer = false;
                     if (KnownTelemetry.BuildTelemetry != null)
@@ -323,6 +325,36 @@ namespace Microsoft.Build.CommandLine
             }
 
             return canRunServer;
+        }
+
+        private static bool IsInteractiveBuild(CommandLineSwitches commandLineSwitches)
+        {
+            // In 16.0 we added the /interactive command-line argument so the line below keeps back-compat
+            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Interactive) &&
+                ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Interactive], true, "InvalidInteractiveValue"))
+            {
+                return true;
+            }
+
+            // In 15.9 we added support for the global property "NuGetInteractive" to allow SDK resolvers to be interactive.
+            foreach (string parameter in commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Property])
+            {
+                // split each <prop>=<value> string into 2 pieces, breaking on the first = that is found
+                string[] parameterSections = parameter.Split(s_propertyValueSeparator, 2);
+
+                if (parameterSections.Length == 2 &&
+                    parameterSections[0].Length > 0 &&
+                    string.Equals("NuGetInteractive", parameterSections[0], StringComparison.OrdinalIgnoreCase))
+                {
+                    string nuGetInteractiveValue = parameterSections[1].Trim('"', ' ');
+                    if (!string.Equals("false", nuGetInteractiveValue, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
 #if !FEATURE_GET_COMMANDLINE
@@ -558,6 +590,11 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static void DebuggerLaunchCheck()
         {
+            if (Debugger.IsAttached)
+            {
+                return;
+            }
+
             switch (Environment.GetEnvironmentVariable("MSBUILDDEBUGONSTART"))
             {
 #if FEATURE_DEBUG_LAUNCH
@@ -591,6 +628,8 @@ namespace Microsoft.Build.CommandLine
 #endif
             )
         {
+            DebuggerLaunchCheck();
+
             // Initialize new build telemetry and record start of this build, if not initialized already
             KnownTelemetry.BuildTelemetry ??= new BuildTelemetry { StartAt = DateTime.UtcNow };
 
@@ -600,8 +639,6 @@ namespace Microsoft.Build.CommandLine
             // with our OM and modify and save them. They'll never do this for Microsoft.*.targets, though,
             // and those form the great majority of our unnecessary memory use.
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", "true");
-
-            DebuggerLaunchCheck();
 
 #if FEATURE_GET_COMMANDLINE
             ErrorUtilities.VerifyThrowArgumentLength(commandLine, nameof(commandLine));
@@ -2366,6 +2403,12 @@ namespace Microsoft.Build.CommandLine
                         out enableProfiler
                         );
 
+                    // We're finished with defining individual loggers' verbosity at this point, so we don't need to worry about messing them up.
+                    if (Traits.Instance.DebugEngine)
+                    {
+                        verbosity = LoggerVerbosity.Diagnostic;
+                    }
+
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.DetailedSummary))
                     {
                         detailedSummary = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.DetailedSummary], defaultValue: true, resourceName: "InvalidDetailedSummaryValue");
@@ -3235,7 +3278,7 @@ namespace Microsoft.Build.CommandLine
 
                 // Check to see if there is a possibility we will be logging from an out-of-proc node.
                 // If so (we're multi-proc or the in-proc node is disabled), we register a distributed logger.
-                if (cpuCount == 1 && Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") != "1")
+                if (cpuCount == 1 && !Traits.Instance.InProcNodeDisabled)
                 {
                     // We've decided to use the MP logger even in single proc mode.
                     // Switch it on here, rather than in the logger, so that other hosts that use
@@ -3307,7 +3350,7 @@ namespace Microsoft.Build.CommandLine
 
                 // Check to see if there is a possibility we will be logging from an out-of-proc node.
                 // If so (we're multi-proc or the in-proc node is disabled), we register a distributed logger.
-                if (cpuCount == 1 && Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") != "1")
+                if (cpuCount == 1 && !Traits.Instance.InProcNodeDisabled)
                 {
                     // We've decided to use the MP logger even in single proc mode.
                     // Switch it on here, rather than in the logger, so that other hosts that use

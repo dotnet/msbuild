@@ -6249,7 +6249,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <PropertyGroup>
-    <SatelliteDllsProjectOutputGroupDependsOn>PrepareForBuild;PrepareResourceNames</SatelliteDllsProjectOutputGroupDependsOn>
+    <SatelliteDllsProjectOutputGroupDependsOn>$(SatelliteDllsProjectOutputGroupDependsOn);PrepareForBuild;PrepareResourceNames</SatelliteDllsProjectOutputGroupDependsOn>
   </PropertyGroup>
 
   <Target

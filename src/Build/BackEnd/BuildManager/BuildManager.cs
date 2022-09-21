@@ -467,6 +467,12 @@ namespace Microsoft.Build.Execution
 
             _previousLowPriority = parameters.LowPriority;
 
+            if (Traits.Instance.DebugEngine)
+            {
+                parameters.DetailedSummary = true;
+                parameters.LogTaskInputs = true;
+            }
+
             lock (_syncLock)
             {
                 AttachDebugger();
@@ -1354,23 +1360,6 @@ namespace Microsoft.Build.Execution
                     HandleSubmissionException(submission, ex);
                     throw;
                 }
-            }
-        }
-
-        private void LoadSubmissionProjectIntoConfiguration(BuildSubmission submission, BuildRequestConfiguration config)
-        {
-            if (!config.IsLoaded)
-            {
-                config.LoadProjectIntoConfiguration(
-                    this,
-                    submission.BuildRequestData.Flags,
-                    submission.SubmissionId,
-                    Scheduler.InProcNodeId
-                );
-
-                // If we're taking the time to evaluate, avoid having other nodes to repeat the same evaluation.
-                // Based on the assumption that ProjectInstance serialization is faster than evaluating from scratch.
-                config.Project.TranslateEntireState = true;
             }
         }
 
