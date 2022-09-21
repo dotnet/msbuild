@@ -579,7 +579,7 @@ public static class Program
             var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
 
             publishCommand
-            .Execute("-f net7.0")
+            .Execute("-f", "net7.0")
             .Should()
             .Pass().And.NotHaveStdErr();
         }
