@@ -274,6 +274,43 @@ namespace Microsoft.Build.UnitTests
                 .OverallResult.ShouldBe(BuildResultCode.Success);
         }
 
+        /// <summary>
+        /// Regression test for https://github.com/dotnet/msbuild/issues/7828
+        /// </summary>
+        /// <remarks>
+        /// This test verifies,
+        /// 1. When binary log and verbosity=quiet are both set, the equivalent command line is NOT printed
+        /// 2. When binary log and non-quiet verbosity are set, the equivalent command line is still printed
+        /// </remarks>
+        [Fact]
+        public void NoOutputWhenBinaryLoggerAndQuietVerbosityBothSet()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                var contents = @"
+                    <Project>
+                        <Target Name='Target2'>
+                            <Exec Command='echo a'/>
+                        </Target>
+                    </Project>";
+                BinaryLogger logger = new();
+                logger.Parameters = _logFile;
+                TransientTestFolder testFolder = env.CreateFolder(createFolder: true);
+
+                TransientTestFile projectFile1 = env.CreateFile(testFolder, "testProject01.proj", contents);
+                string consoleOutput1 = RunnerUtilities.ExecMSBuild($"{projectFile1.Path} -bl:{logger.Parameters} -verbosity:q -nologo", out bool success1);
+                success1.ShouldBeTrue();
+                var expected1 = $"MSBuild.exe -nologo -bl:{logger.Parameters} -verbosity:q {projectFile1.Path}";
+                consoleOutput1.ShouldNotContain(expected1);
+
+                TransientTestFile projectFile2 = env.CreateFile(testFolder, "testProject02.proj", contents);
+                string consoleOutput2 = RunnerUtilities.ExecMSBuild($"{projectFile2.Path} -bl:{logger.Parameters} -verbosity:m -nologo", out bool success2);
+                success2.ShouldBeTrue();
+                var expected2 = $"MSBuild.exe -nologo -bl:{logger.Parameters} -verbosity:m {projectFile2.Path}";
+                consoleOutput2.ShouldContain(expected2); ;
+            }
+        }
+
         public void Dispose()
         {
             _env.Dispose();
