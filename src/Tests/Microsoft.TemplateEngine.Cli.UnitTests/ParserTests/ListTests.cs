@@ -220,8 +220,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             ListCommandArgs args = new((BaseListCommand)parseResult.CommandResult.Command, parseResult);
 
             Assert.False(args.DisplayAllColumns);
+            Assert.NotNull(args.ColumnsToDisplay);
             Assert.NotEmpty(args.ColumnsToDisplay);
-            Assert.Equal(expectedColumns.Length, args.ColumnsToDisplay?.Count);
+            Assert.Equal(expectedColumns.Length, args.ColumnsToDisplay.Count);
             foreach (string column in expectedColumns)
             {
                 Assert.Contains(column, args.ColumnsToDisplay);
