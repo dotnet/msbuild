@@ -41,7 +41,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         private void ValidateParentCommandArguments(CommandResult commandResult)
         {
-            var nameArgumentResult = commandResult.Children.FirstOrDefault(symbol => symbol.Symbol == this.NameArgument);
+            var nameArgumentResult = commandResult.Children.FirstOrDefault(symbol => symbol.Symbol == ListCommand.NameArgument);
             if (nameArgumentResult == null)
             {
                 return;
