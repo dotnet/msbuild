@@ -563,13 +563,11 @@ public static class Program
                 .HaveStdOutContaining("NETSDK1190");
         }
 
-        [Theory]
-        [InlineData("-f net7.0")]
-        [InlineData("/p:TargetFramework=net7.0")]
-        public void It_publishes_correctly_with_different_property_formats_despite_PublishRelease_code(string paramsToPublish)
+        [Fact]
+        public void It_publishes_correctly_in_PublishRelease_evaluation_despite_option_forwarded_format()
         {
             var helloWorldAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorld", $"PublishesWithProperyFormats{paramsToPublish}")
+               .CopyTestAsset("HelloWorld", $"PublishesWithProperyFormats")
                .WithSource()
                .WithTargetFramework(ToolsetInfo.CurrentTargetFramework);
 
@@ -581,9 +579,9 @@ public static class Program
             var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
 
             publishCommand
-            .Execute(paramsToPublish.Split(" "))
+            .Execute("-f net7.0")
             .Should()
-            .Pass();
+            .Pass().And.NotHaveStdErr();
         }
 
         [Fact]
@@ -684,8 +682,13 @@ public static class Program
             Assert.False(File.Exists(releaseAssetPath)); // build will produce a debug asset, need to make sure this doesn't exist either.       
         }
 
-        [Fact]
-        public void PublishRelease_does_not_override_Configuration_property()
+        [Theory]
+        [InlineData("-p:Configuration=Debug")]
+        [InlineData("-property:Configuration=Debug")]
+        [InlineData("--property:Configuration=Debug")]
+        [InlineData("/p:Configuration=Debug")]
+        [InlineData("/property:Configuration=Debug")]
+        public void PublishRelease_does_not_override_Configuration_property_across_formats(string configOpt)
         {
             var helloWorldAsset = _testAssetsManager
                .CopyTestAsset("HelloWorld", "PublishReleaseHelloWorldCsProjConfigPropOverride")
@@ -699,16 +702,16 @@ public static class Program
                });
 
             new BuildCommand(helloWorldAsset)
-           .Execute("-p:Configuration=Debug")
+           .Execute(configOpt)
            .Should()
            .Pass();
 
             var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
 
             publishCommand
-            .Execute("-p:Configuration=Debug")
+            .Execute(configOpt)
             .Should()
-            .Pass();
+            .Pass().And.NotHaveStdErr();
 
             var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
             Assert.True(File.Exists(expectedAssetPath));
