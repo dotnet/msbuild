@@ -204,22 +204,22 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>0bb3d6897e3cae58517217b628c08e585d0bede6</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.CodeAnalysis.Razor.Tooling.Internal" Version="7.0.0-preview.5.22412.2">
+    <Dependency Name="Microsoft.CodeAnalysis.Razor.Tooling.Internal" Version="7.0.0-preview.5.22471.1">
       <Uri>https://github.com/dotnet/razor-compiler</Uri>
-      <Sha>a41514681a4db83c7cae7e17debf668d12efc1bb</Sha>
+      <Sha>883416c9d9ec221a9d73e62de093a43f2e2daf90</Sha>
       <SourceBuild RepoName="razor-compiler" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Mvc.Razor.Extensions.Tooling.Internal" Version="7.0.0-preview.5.22412.2">
+    <Dependency Name="Microsoft.AspNetCore.Mvc.Razor.Extensions.Tooling.Internal" Version="7.0.0-preview.5.22471.1">
       <Uri>https://github.com/dotnet/razor-compiler</Uri>
-      <Sha>a41514681a4db83c7cae7e17debf668d12efc1bb</Sha>
+      <Sha>883416c9d9ec221a9d73e62de093a43f2e2daf90</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Razor.SourceGenerator.Tooling.Internal" Version="7.0.0-preview.5.22412.2">
+    <Dependency Name="Microsoft.AspNetCore.Razor.SourceGenerator.Tooling.Internal" Version="7.0.0-preview.5.22471.1">
       <Uri>https://github.com/dotnet/razor-compiler</Uri>
-      <Sha>a41514681a4db83c7cae7e17debf668d12efc1bb</Sha>
+      <Sha>883416c9d9ec221a9d73e62de093a43f2e2daf90</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Razor.SourceGenerators.Transport" Version="7.0.0-preview.5.22412.2">
+    <Dependency Name="Microsoft.NET.Sdk.Razor.SourceGenerators.Transport" Version="7.0.0-preview.5.22471.1">
       <Uri>https://github.com/dotnet/razor-compiler</Uri>
-      <Sha>a41514681a4db83c7cae7e17debf668d12efc1bb</Sha>
+      <Sha>883416c9d9ec221a9d73e62de093a43f2e2daf90</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="7.0.0-rc.2.22464.13">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
@@ -267,30 +267,30 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="7.0.0-beta.22418.4">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="7.0.0-beta.22464.4">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>0c027eede69ba22bafca9a1955f1e00848655ece</Sha>
+      <Sha>720af493900b2f2bdc48e9ee12577983a5c9be36</Sha>
       <SourceBuild RepoName="arcade" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Helix.Sdk" Version="7.0.0-beta.22418.4">
+    <Dependency Name="Microsoft.DotNet.Helix.Sdk" Version="7.0.0-beta.22464.4">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>0c027eede69ba22bafca9a1955f1e00848655ece</Sha>
+      <Sha>720af493900b2f2bdc48e9ee12577983a5c9be36</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.SignTool" Version="7.0.0-beta.22418.4">
+    <Dependency Name="Microsoft.DotNet.SignTool" Version="7.0.0-beta.22464.4">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>0c027eede69ba22bafca9a1955f1e00848655ece</Sha>
+      <Sha>720af493900b2f2bdc48e9ee12577983a5c9be36</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="7.0.0-beta.22418.4">
+    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="7.0.0-beta.22464.4">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>0c027eede69ba22bafca9a1955f1e00848655ece</Sha>
+      <Sha>720af493900b2f2bdc48e9ee12577983a5c9be36</Sha>
     </Dependency>
     <Dependency Name="System.Reflection.MetadataLoadContext" Version="7.0.0-rc.2.22469.6">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>b23dc07bd7363fcd986a17230c2734bc656e71a7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XliffTasks" Version="1.0.0-beta.22415.3" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
+    <Dependency Name="Microsoft.DotNet.XliffTasks" Version="1.0.0-beta.22427.1" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
       <Uri>https://github.com/dotnet/xliff-tasks</Uri>
-      <Sha>47a504cdc72993370f057a11c2a39a7faa3111ad</Sha>
+      <Sha>740189d758fb3bbdc118c5b6171ef1a7351a8c44</Sha>
       <SourceBuild RepoName="xliff-tasks" ManagedOnly="true" />
     </Dependency>
   </ToolsetDependencies>
