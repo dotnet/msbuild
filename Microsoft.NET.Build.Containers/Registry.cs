@@ -1,6 +1,7 @@
 using Microsoft.VisualBasic;
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Compression;
 using System.Net;
 using System.Net.Http;
@@ -10,10 +11,91 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Xml.Linq;
+using Microsoft.Extensions.Caching.Memory;
 
 using Valleysoft.DockerCredsProvider;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.NET.Build.Containers;
+
+#nullable enable
+
+public class AuthHandshakeMessageHandler : DelegatingHandler {
+    private record AuthInfo(Uri Realm, string Service, string Scope);
+    private MemoryCache tokenCache = new MemoryCache(new OptionsWrapper<MemoryCacheOptions>(new MemoryCacheOptions()));
+
+    private static bool TryParseAuthenticationInfo(HttpResponseMessage msg, [NotNullWhen(true)]out AuthInfo? authInfo) {
+        var authenticateHeader = msg.Headers.WwwAuthenticate;
+        if (!authenticateHeader.Any()) {
+            authInfo = null;
+            return false;
+        }
+        var header = authenticateHeader.First();
+        if (header is { Scheme: "Bearer", Parameter: var args} && args is not null){
+            var parts = args.Split(',');
+            if (parts is not { Length: 3 }) {
+                authInfo = null;
+                return false;
+            }
+            var keyValues = parts.Select(part => part.Split('=', 2)).ToDictionary(parts => parts[0], parts => parts[1]);
+            if (keyValues.TryGetValue("realm", out var realm) && keyValues.TryGetValue("service", out var service) && keyValues.TryGetValue("scope", out var scope)) {
+                authInfo = new AuthInfo(new Uri(realm.Trim('\"')), service.Trim('\"'), scope.Trim('\"'));
+                return true;
+            } else {
+                authInfo = null;
+                return false;
+            }
+        } else {
+            authInfo = null;
+            return false;
+        }
+
+    }
+    public AuthHandshakeMessageHandler(HttpMessageHandler innerHandler) : base(innerHandler) { }
+
+    private record TokenResponse(string token, int? expires_in, DateTimeOffset? issued_at);
+    private async Task<string> GetTokenAsync(Uri realm, string service, string scope, CancellationToken cancellationToken) {
+        // fetch creds for the host
+        DockerCredentials privateRepoCreds = await CredsProvider.GetCredentialsAsync(realm.Host);
+        // use those creds when calling the token provider
+        var header = privateRepoCreds.Username == "<token>" 
+                        ? new AuthenticationHeaderValue("Bearer", privateRepoCreds.Password)
+                        : new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{privateRepoCreds.Username}:{privateRepoCreds.Password}")));
+        var builder = new UriBuilder(realm);
+        var queryDict = System.Web.HttpUtility.ParseQueryString("");
+        queryDict["service"] = service;
+        queryDict["scope"] = scope;
+        builder.Query = queryDict.ToString();
+        var message = new HttpRequestMessage(HttpMethod.Get, builder.ToString());
+        message.Headers.Authorization = header;
+        var tokenResponse = await base.SendAsync(message, cancellationToken);
+        tokenResponse.EnsureSuccessStatusCode();
+        TokenResponse token = JsonSerializer.Deserialize<TokenResponse>(tokenResponse.Content.ReadAsStream());
+        // save the retrieved token in the cache
+        var entry = tokenCache.CreateEntry(realm.Host);
+        entry.SetValue(token.token);
+        entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(token.expires_in ?? 3600);
+        return token.token;
+    }
+
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
+        if(tokenCache.Get<string>(request.RequestUri.Host) is {} cachedToken){
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", cachedToken);
+        }
+        var response = await base.SendAsync(request, cancellationToken);
+        if (response is { StatusCode: HttpStatusCode.OK}) {
+            return response;
+        } else if (response is { StatusCode: HttpStatusCode.Unauthorized} && TryParseAuthenticationInfo(response, out var authInfo)) {
+            if (await GetTokenAsync(authInfo.Realm, authInfo.Service, authInfo.Scope, cancellationToken) is {} fetchedToken) {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", fetchedToken);
+                return await base.SendAsync(request, cancellationToken);
+            }
+            return response;
+        } else {
+            return response;
+        }
+    }
+}
 
 public record struct Registry(Uri BaseUri)
 {
@@ -163,8 +245,9 @@ public record struct Registry(Uri BaseUri)
     }
 
     private readonly async Task<HttpClient> GetClient()
-    {
-        HttpClient client = new(new HttpClientHandler() { UseDefaultCredentials = true });
+    {   
+        var clientHandler = new AuthHandshakeMessageHandler(new HttpClientHandler() { UseDefaultCredentials = true });
+        HttpClient client = new(clientHandler);
 
         client.DefaultRequestHeaders.Accept.Clear();
         client.DefaultRequestHeaders.Accept.Add(
@@ -174,20 +257,20 @@ public record struct Registry(Uri BaseUri)
         client.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue(DockerContainerV1));
 
-        try
-        {
-            DockerCredentials privateRepoCreds = await CredsProvider.GetCredentialsAsync(BaseUri.Host);
-            if (privateRepoCreds.Username == "<token>") {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", privateRepoCreds.Password);
-            } else {
-                byte[] byteArray = Encoding.ASCII.GetBytes($"{privateRepoCreds.Username}:{privateRepoCreds.Password}");
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
-            }
-        }
-        catch (CredsNotFoundException)
-        {
-            // TODO: log?
-        }
+        //try
+        //{
+        //    DockerCredentials privateRepoCreds = await CredsProvider.GetCredentialsAsync(BaseUri.Host);
+        //    if (privateRepoCreds.Username == "<token>") {
+        //        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", privateRepoCreds.Password);
+        //    } else {
+        //        byte[] byteArray = Encoding.ASCII.GetBytes($"{privateRepoCreds.Username}:{privateRepoCreds.Password}");
+        //        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+        //    }
+        //}
+        //catch (CredsNotFoundException)
+        //{
+        //    // TODO: log?
+        //}
 
         client.DefaultRequestHeaders.Add("User-Agent", ".NET Container Library");
 
