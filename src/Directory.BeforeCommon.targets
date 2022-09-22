@@ -25,6 +25,7 @@
     <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_COMPILE_IN_TESTS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CONSTRAINED_EXECUTION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CODETASKFACTORY</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_GETCULTURES</DefineConstants>
     <DefineConstants Condition="'$(MonoBuild)' != 'true' and '$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_ENCODING_DEFAULT</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ENVIRONMENT_SYSTEMDIRECTORY</DefineConstants>
@@ -93,7 +94,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_SYMLINK_TARGET</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' or '$(TargetFramework)' == 'net6.0'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' or '$(TargetFramework)' == '$(LatestDotNetCoreForMSBuild)'">
     <DefineConstants>$(DefineConstants);FEATURE_PIPEOPTIONS_CURRENTUSERONLY</DefineConstants>
     <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_NODE_REUSE</DefineConstants>
   </PropertyGroup>
