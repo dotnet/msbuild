@@ -34,12 +34,11 @@ namespace Microsoft.DotNet.Cli
             ParseResult parseResult,
             string defaultedConfigurationProperty,
             IEnumerable<string> slnOrProjectArgs,
-            Option<string> configOption,
-            IEnumerable<string> userPropertyArgs
+            Option<string> configOption
             )
         {
             ProjectInstance project = null;
-            var globalProperties = GetGlobalPropertiesFromUserArgs(userPropertyArgs);
+            var globalProperties = GetGlobalPropertiesFromUserArgs(parseResult);
 
             if (parseResult.HasOption(configOption) || globalProperties.ContainsKey(MSBuildPropertyNames.CONFIGURATION))
                 yield break;
@@ -151,7 +150,7 @@ namespace Microsoft.DotNet.Cli
                     {
                         lock (projectDataLock)
                         {
-                            configuredProjects.Add(projectData); // we don't care about race conditions here
+                            configuredProjects.Add(projectData);
                             configValues.Add(useReleaseConfiguraton.ToLower());
                         }
                     }
@@ -186,15 +185,16 @@ namespace Microsoft.DotNet.Cli
         }
 
         /// <returns>A case-insensitive dictionary of any properties passed from the user and their values.</returns>
-        private Dictionary<string, string> GetGlobalPropertiesFromUserArgs(IEnumerable<string> userPropertyArgs)
+        private Dictionary<string, string> GetGlobalPropertiesFromUserArgs(ParseResult parseResult)
         {
             Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            IEnumerable<(string key, string value)> globalPropEnumerable = MSBuildPropertyParser.ParseProperties(String.Join(";", userPropertyArgs));
 
-            // The parser puts keys into the format --property:Key no matter the user input, so we can expect that pattern and extract the key.
-            foreach (var kvPair in globalPropEnumerable)
+            string[] globalPropEnumerable = parseResult.GetValueForOption(CommonOptions.PropertiesOption);
+
+            foreach (var keyEqVal in globalPropEnumerable)
             {
-                globalProperties[kvPair.key.Split(new string[] { "--property:" }, StringSplitOptions.None).Last()] = kvPair.value;
+                string[] keyValuePair = keyEqVal.Split("=", 2);
+                globalProperties[keyValuePair[0]] = keyValuePair[1];
             }
             return globalProperties;
         }
