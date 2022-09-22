@@ -43,7 +43,7 @@ Um das NuGet-Paket einer bestimmten Version zu installieren, verwenden Sie &lt;P
       </trans-unit>
       <trans-unit id="Command_Instantiate_Description">
         <source>Instantiates a template with given short name. An alias of 'dotnet new &lt;template name&gt;'.</source>
-        <target state="needs-review-translation">Instanziiert eine Vorlage mit dem angegebenen Kurznamen.</target>
+        <target state="translated">Instanziiert eine Vorlage mit dem angegebenen Kurznamen. Ein Alias von "dotnet new &lt;template name&gt;".</target>
         <note>do not translate 'dotnet new &lt;template name&gt;'</note>
       </trans-unit>
       <trans-unit id="Command_Legacy_Update_Check_Description">
@@ -95,7 +95,7 @@ Wenn der Befehl ohne Argument angegeben wird, werden alle installierten Vorlagen
       </trans-unit>
       <trans-unit id="Command_Update_Option_CheckOnly">
         <source>Only checks for updates and display the template packages to be updated without applying update.</source>
-        <target state="needs-review-translation">Nur auf Updates überprüfen, und die zu aktualisierenden Vorlagenpakete anzeigen, ohne das Update anzuwenden.</target>
+        <target state="translated">Sucht nur nach Updates und zeigt die vorlagenbasierten Pakete an, die aktualisiert werden sollen, ohne das Update anzuwenden.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
@@ -125,7 +125,7 @@ Wenn der Befehl ohne Argument angegeben wird, werden alle installierten Vorlagen
       </trans-unit>
       <trans-unit id="Option_ColumnsAll">
         <source>Displays all columns in the output.</source>
-        <target state="needs-review-translation">Zeigt alle Spalten in der Ausgabe an.</target>
+        <target state="translated">Zeigt alle Spalten in der Ausgabe an.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_Debug_Attach">

@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="Diagnostics_OptionDescription">
         <source>Enables diagnostic output.</source>
-        <target state="new">Enables diagnostic output.</target>
+        <target state="translated">启用诊断输出。</target>
         <note />
       </trans-unit>
       <trans-unit id="DisableProjectContextEval_OptionDescription">
@@ -250,7 +250,7 @@
       </trans-unit>
       <trans-unit id="Verbosity_OptionDescription">
         <source>Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</source>
-        <target state="new">Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</target>
+        <target state="translated">设置详细级别。允许的值为 q[uiet]、m[inimal]、n[ormal]、diag[nostic]。</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadInfoProvider_Message_AddWorkloads">

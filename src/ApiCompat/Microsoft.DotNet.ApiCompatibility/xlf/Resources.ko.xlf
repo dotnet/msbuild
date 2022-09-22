@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="AssemblyCultureDoesNotMatch">
         <source>{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</source>
-        <target state="new">{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</target>
+        <target state="translated">{2} 어셈블리 문화권 '{0}'이(가) {3} 어셈블리 문화권 '{1}'과(와) 일치하지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyLoadError">
@@ -44,7 +44,7 @@
       </trans-unit>
       <trans-unit id="AssemblyVersionDoesNotMatch">
         <source>{3} assembly version '{1}' should be equal to {2} version '{0}'.</source>
-        <target state="new">{3} assembly version '{1}' should be equal to {2} version '{0}'.</target>
+        <target state="translated">{3} 어셈블리 버전 '{1}'이(는) {2} 버전 '{0}'과(와) 같아야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyVersionIsNotCompatible">
@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="CannotAddAttribute">
         <source>Cannot add attribute '{0}' to '{1}'.</source>
-        <target state="new">Cannot add attribute '{0}' to '{1}'.</target>
+        <target state="translated">'{1}'에 특성 '{0}'을(를) 추가할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotAddMemberToInterface">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="CannotAddSealedToInterfaceMember">
         <source>Cannot add sealed keyword to default interface member '{0}'.</source>
-        <target state="new">Cannot add sealed keyword to default interface member '{0}'.</target>
+        <target state="translated">기본 인터페이스 멤버 '{0}'에 sealed 키워드를 추가할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotAddVirtualToMember">
@@ -79,12 +79,12 @@
       </trans-unit>
       <trans-unit id="CannotChangeAttribute">
         <source>Cannot change arguments of attribute '{0}' on '{1}'.</source>
-        <target state="new">Cannot change arguments of attribute '{0}' on '{1}'.</target>
+        <target state="translated">'{1}'에서 특성 '{0}'의 인수를 변경할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotChangeParameterName">
         <source>Parameter name on member '{0}' changed from '{1}' to '{2}'.</source>
-        <target state="new">Parameter name on member '{0}' changed from '{1}' to '{2}'.</target>
+        <target state="translated">멤버 '{0}'의 매개 변수 이름이 '{1}'에서 '{2}'(으)로 변경되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotExpandVisibility">
@@ -99,7 +99,7 @@
       </trans-unit>
       <trans-unit id="CannotRemoveAttribute">
         <source>Cannot remove attribute '{0}' from '{1}'.</source>
-        <target state="new">Cannot remove attribute '{0}' from '{1}'.</target>
+        <target state="translated">'{1}'에서 특성 '{0}'을(를) 제거할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveBaseInterface">
@@ -209,7 +209,7 @@
       </trans-unit>
       <trans-unit id="TypeMissingOnSide">
         <source>Type '{0}' exists on {1} but not on {2}</source>
-        <target state="new">Type '{0}' exists on {1} but not on {2}</target>
+        <target state="translated">'{0}' 유형이 {1}에 있지만 {2}에 없음</target>
         <note />
       </trans-unit>
       <trans-unit id="VisitorRightCountShouldMatchMappersSetSize">

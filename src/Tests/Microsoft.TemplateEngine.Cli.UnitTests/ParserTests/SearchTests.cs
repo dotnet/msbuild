@@ -217,9 +217,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 
             SearchCommandArgs args = new((BaseSearchCommand)parseResult.CommandResult.Command, parseResult);
 
+            Assert.NotNull(args.ColumnsToDisplay);
             Assert.False(args.DisplayAllColumns);
-            Assert.NotEmpty(args.ColumnsToDisplay!);
-            Assert.Equal(expectedColumns.Length, args.ColumnsToDisplay?.Count);
+            Assert.NotEmpty(args.ColumnsToDisplay);
+            Assert.Equal(expectedColumns.Length, args.ColumnsToDisplay.Count);
             foreach (string column in expectedColumns)
             {
                 Assert.Contains(column, args.ColumnsToDisplay!);

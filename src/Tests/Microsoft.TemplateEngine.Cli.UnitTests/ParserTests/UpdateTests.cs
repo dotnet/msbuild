@@ -21,8 +21,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             ParseResult parseResult = myCommand.Parse($"new update {optionName} my-custom-source");
             UpdateCommandArgs args = new((UpdateCommand)parseResult.CommandResult.Command, parseResult);
 
-            Assert.Single(args.AdditionalSources!);
-            Assert.Contains("my-custom-source", args.AdditionalSources!);
+            Assert.NotNull(args.AdditionalSources);
+            Assert.Single(args.AdditionalSources);
+            Assert.Contains("my-custom-source", args.AdditionalSources);
         }
 
         [Theory]
@@ -50,9 +51,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             ParseResult parseResult = myCommand.Parse(testCase);
             UpdateCommandArgs args = new((UpdateCommand)parseResult.CommandResult.Command, parseResult);
 
-            Assert.Equal(2, args.AdditionalSources?.Count);
-            Assert.Contains("my-custom-source1", args.AdditionalSources!);
-            Assert.Contains("my-custom-source2", args.AdditionalSources!);
+            Assert.NotNull(args.AdditionalSources);
+            Assert.Equal(2, args.AdditionalSources.Count);
+            Assert.Contains("my-custom-source1", args.AdditionalSources);
+            Assert.Contains("my-custom-source2", args.AdditionalSources);
         }
 
         [Fact]
@@ -120,8 +122,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             ParseResult parseResult = myCommand.Parse(testCase);
             UpdateCommandArgs args = new((BaseUpdateCommand)parseResult.CommandResult.Command, parseResult);
 
-            Assert.Single(args.AdditionalSources!);
-            Assert.Contains("my-custom-source", args.AdditionalSources!);
+            Assert.NotNull(args.AdditionalSources);
+            Assert.Single(args.AdditionalSources);
+            Assert.Contains("my-custom-source", args.AdditionalSources);
         }
 
         [Theory]
@@ -149,9 +152,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             ParseResult parseResult = myCommand.Parse(testCase);
             UpdateCommandArgs args = new((BaseUpdateCommand)parseResult.CommandResult.Command, parseResult);
 
-            Assert.Equal(2, args.AdditionalSources?.Count);
-            Assert.Contains("my-custom-source1", args.AdditionalSources!);
-            Assert.Contains("my-custom-source2", args.AdditionalSources!);
+            Assert.NotNull(args.AdditionalSources);
+            Assert.Equal(2, args.AdditionalSources.Count);
+            Assert.Contains("my-custom-source1", args.AdditionalSources);
+            Assert.Contains("my-custom-source2", args.AdditionalSources);
         }
 
         [Theory]

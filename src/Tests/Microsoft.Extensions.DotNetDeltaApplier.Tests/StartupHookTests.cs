@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.DotNetDeltaApplier
                 (name, value) => environmentVariables[name] = value);
 
             // Assert
-            Assert.Empty(environmentVariables["DOTNET_STARTUP_HOOKS"]!);
+            Assert.True(string.IsNullOrEmpty(environmentVariables["DOTNET_STARTUP_HOOKS"]));
         }
 
         [Fact]
