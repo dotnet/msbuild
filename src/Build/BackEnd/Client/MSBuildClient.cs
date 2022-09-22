@@ -390,7 +390,7 @@ namespace Microsoft.Build.Experimental
 
             return (acceptAnsiColorCodes: acceptAnsiColorCodes, outputIsScreen: outputIsScreen);
         }
-
+        
         private int QueryConsoleBufferWidth()
         {
             int consoleBufferWidth = -1;
@@ -454,22 +454,23 @@ namespace Microsoft.Build.Experimental
         private bool TryLaunchServer()
         {
             string serverLaunchMutexName = $@"Global\msbuild-server-launch-{_handshake.ComputeHash()}";
-            using var serverLaunchMutex = ServerNamedMutex.OpenOrCreateMutex(serverLaunchMutexName, out bool mutexCreatedNew);
-            if (!mutexCreatedNew)
-            {
-                // Some other client process launching a server and setting a build request for it. Fallback to usual msbuild app build.
-                CommunicationsUtilities.Trace("Another process launching the msbuild server, falling back to former behavior.");
-                _exitResult.MSBuildClientExitType = MSBuildClientExitType.ServerBusy;
-                return false;
-            }
-
-            string[] msBuildServerOptions = new string[] {
-                "/nologo",
-                "/nodemode:8"
-            };
-
             try
             {
+                // For unknown root cause, opening mutex can sometimes throw 'Connection timed out' exception. See: https://github.com/dotnet/msbuild/issues/7993
+                using var serverLaunchMutex = ServerNamedMutex.OpenOrCreateMutex(serverLaunchMutexName, out bool mutexCreatedNew);
+                if (!mutexCreatedNew)
+                {
+                    // Some other client process launching a server and setting a build request for it. Fallback to usual msbuild app build.
+                    CommunicationsUtilities.Trace("Another process launching the msbuild server, falling back to former behavior.");
+                    _exitResult.MSBuildClientExitType = MSBuildClientExitType.ServerBusy;
+                    return false;
+                }
+
+                string[] msBuildServerOptions = new string[] {
+                    "/nologo",
+                    "/nodemode:8"
+                };
+
                 NodeLauncher nodeLauncher = new NodeLauncher();
                 CommunicationsUtilities.Trace("Starting Server...");
                 Process msbuildProcess = nodeLauncher.Start(_msbuildLocation, string.Join(" ", msBuildServerOptions));
