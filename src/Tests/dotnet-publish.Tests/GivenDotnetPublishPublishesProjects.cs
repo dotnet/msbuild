@@ -102,6 +102,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         [Theory]
         [InlineData("publish", "-property", "Configuration=Debug")]
         [InlineData("publish", "-p", "Configuration=Debug")]
+        [InlineData("publish", "--property", "Configuration=Debug")]
         public void ItParsesSpacedPropertiesInPublishReleaseEvaluationPhase(string command, string propertyKey, string propertyVal)
         {
             var testInstance = _testAssetsManager.CopyTestAsset("TestAppSimple")

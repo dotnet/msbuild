@@ -193,7 +193,7 @@ namespace Microsoft.DotNet.Cli
 
             foreach (var keyEqVal in globalPropEnumerable)
             {
-                string[] keyValuePair = keyEqVal.Split("=");
+                string[] keyValuePair = keyEqVal.Split("=", 2);
                 globalProperties[keyValuePair[0]] = keyValuePair[1];
             }
             return globalProperties;
