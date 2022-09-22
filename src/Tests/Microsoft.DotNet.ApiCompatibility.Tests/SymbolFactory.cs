@@ -99,13 +99,13 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             return CSharpCompilation.Create(name, options: compilationOptions, references: DefaultReferences);
         }
 
-        private static CSharpParseOptions ParseOptions { get; } = new(preprocessorSymbols:
+        private static CSharpParseOptions ParseOptions { get; } = new CSharpParseOptions(preprocessorSymbols:
 #if NETFRAMEWORK
                 new string[] { "NETFRAMEWORK" }
 #else
                 Array.Empty<string>()
 #endif
-        ); 
+        );
 
         private static IEnumerable<KeyValuePair<string, ReportDiagnostic>> DiagnosticOptions { get; } = new[]
         {
