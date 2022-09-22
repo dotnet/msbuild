@@ -7,6 +7,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.ServiceModel.Configuration;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
@@ -99,13 +100,13 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             return CSharpCompilation.Create(name, options: compilationOptions, references: DefaultReferences);
         }
 
-        private static CSharpParseOptions ParseOptions { get; } = new(preprocessorSymbols:
+        private static CSharpParseOptions ParseOptions { get; } = new CSharpParseOptions(preprocessorSymbols:
 #if NETFRAMEWORK
                 new string[] { "NETFRAMEWORK" }
 #else
                 Array.Empty<string>()
 #endif
-        ); 
+        ).WithFeatures(new[] { new KeyValuePair<string, string>("noRefSafetyRulesAttribute", "") });
 
         private static IEnumerable<KeyValuePair<string, ReportDiagnostic>> DiagnosticOptions { get; } = new[]
         {
