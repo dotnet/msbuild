@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
 #else
                 Array.Empty<string>()
 #endif
-        ).WithFeatures(new[] { new KeyValuePair<string, string>("noRefSafetyRulesAttribute", "") });
+        );
 
         private static IEnumerable<KeyValuePair<string, ReportDiagnostic>> DiagnosticOptions { get; } = new[]
         {
