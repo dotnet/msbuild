@@ -20,10 +20,19 @@ namespace Microsoft.NET.Build.Containers;
 
 #nullable enable
 
+/// <summary>
+/// A delegating handler that performs the Docker auth handshake as described <see href="https://docs.docker.com/registry/spec/auth/token/">in their docs</see> if a request isn't authenticated
+/// </summary>
 public class AuthHandshakeMessageHandler : DelegatingHandler {
     private record AuthInfo(Uri Realm, string Service, string Scope);
     private MemoryCache tokenCache = new MemoryCache(new OptionsWrapper<MemoryCacheOptions>(new MemoryCacheOptions()));
 
+    /// <summary>
+    /// the www-authenticate header must have realm, service, and scope information, so this method parses it into that shape if present
+    /// </summary>
+    /// <param name="msg"></param>
+    /// <param name="authInfo"></param>
+    /// <returns></returns>
     private static bool TryParseAuthenticationInfo(HttpResponseMessage msg, [NotNullWhen(true)]out AuthInfo? authInfo) {
         var authenticateHeader = msg.Headers.WwwAuthenticate;
         if (!authenticateHeader.Any()) {
@@ -51,9 +60,28 @@ public class AuthHandshakeMessageHandler : DelegatingHandler {
         }
 
     }
+
     public AuthHandshakeMessageHandler(HttpMessageHandler innerHandler) : base(innerHandler) { }
 
+    /// <summary>
+    /// the token response from the service can include the token as well as expiration data, but I found that github's responses at least
+    /// didn't include the latter two points of information, so those are marked nullable.
+    /// </summary>
+    /// <param name="token"></param>
+    /// <param name="expires_in"></param>
+    /// <param name="issued_at"></param>
     private record TokenResponse(string token, int? expires_in, DateTimeOffset? issued_at);
+
+    /// <summary>
+    /// Uses the authentication information from a 401 response to perform the authentication dance for a given registry.
+    /// Credentials for the request are retrieved from the credential provider, then used to acquire a token.
+    /// That token is cached for some duration on a per-host basis.
+    /// </summary>
+    /// <param name="realm"></param>
+    /// <param name="service"></param>
+    /// <param name="scope"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     private async Task<string> GetTokenAsync(Uri realm, string service, string scope, CancellationToken cancellationToken) {
         // fetch creds for the host
         DockerCredentials privateRepoCreds = await CredsProvider.GetCredentialsAsync(realm.Host);
@@ -79,6 +107,7 @@ public class AuthHandshakeMessageHandler : DelegatingHandler {
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
+        // attempt to use cached token for the request if available
         if(tokenCache.Get<string>(request.RequestUri.Host) is {} cachedToken){
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", cachedToken);
         }
