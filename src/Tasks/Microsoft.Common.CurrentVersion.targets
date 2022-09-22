@@ -1970,8 +1970,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
              Generally this value will come from the IsRidAgnostic property set by the .NET SDK.  If that's not set, then the fallback logic here will be that the project
              is RID agnostic if it doesn't have RuntimeIdentifier or RuntimeIdentifiers properties set. -->
         <IsRidAgnostic>$(IsRidAgnostic)</IsRidAgnostic>
-        <IsRidAgnostic Condition=" '$(IsRidAgnostic)' == '' and '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
-        <IsRidAgnostic Condition=" '$(IsRidAgnostic)' == ''">false</IsRidAgnostic>
+        <IsRidAgnostic Condition=" '%(IsRidAgnostic)' == '' and '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
+        <IsRidAgnostic Condition=" '%(IsRidAgnostic)' == ''">false</IsRidAgnostic>
 
       </_TargetFrameworkInfo>
     </ItemGroup>
