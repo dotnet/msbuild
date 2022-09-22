@@ -7,7 +7,6 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.ServiceModel.Configuration;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
