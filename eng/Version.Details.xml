@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="7.0.100-rtm.22471.1">
+    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="7.0.100-rtm.22471.6">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>af6a5d1979f7cb4b1144f63903f5b40f3825bc9a</Sha>
+      <Sha>a1a844d50e08db9f6b71fe09ad15ef43a30fc494</Sha>
       <SourceBuild RepoName="templating" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Ref" Version="7.0.0-rtm.22471.3">
@@ -42,21 +42,21 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>473b3120d476594d463020090f0d6b80174eb37b</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="17.4.0-preview-22469-04">
+    <Dependency Name="Microsoft.Build" Version="17.4.0-preview-22472-01">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>cc3db358d34ad4cd1ec0c67e17582d7ca2a15040</Sha>
+      <Sha>f8463b94a623a6446b66feb86c795dc5fd2edb21</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build.Localization" Version="17.4.0-preview-22469-04">
+    <Dependency Name="Microsoft.Build.Localization" Version="17.4.0-preview-22472-01">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>cc3db358d34ad4cd1ec0c67e17582d7ca2a15040</Sha>
+      <Sha>f8463b94a623a6446b66feb86c795dc5fd2edb21</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.FSharp.Compiler" Version="12.0.5-beta.22470.2">
+    <Dependency Name="Microsoft.FSharp.Compiler" Version="12.0.5-beta.22471.6">
       <Uri>https://github.com/dotnet/fsharp</Uri>
-      <Sha>da42031ad1cf0880768dfedac75c782b721cd175</Sha>
+      <Sha>de216eb65d741d01aff5d32a4bdc495ca730290a</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.fsharp" Version="7.0.0-beta.22470.2">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.fsharp" Version="7.0.0-beta.22471.6">
       <Uri>https://github.com/dotnet/fsharp</Uri>
-      <Sha>da42031ad1cf0880768dfedac75c782b721cd175</Sha>
+      <Sha>de216eb65d741d01aff5d32a4bdc495ca730290a</Sha>
       <SourceBuild RepoName="fsharp" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="dotnet-format" Version="7.0.346701">
