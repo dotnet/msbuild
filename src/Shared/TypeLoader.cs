@@ -59,10 +59,10 @@ namespace Microsoft.Build.Shared
             string[] msbuildAssemblies = Directory.GetFiles(msbuildDirectory, "*.dll");
             string[] runtimeAssemblies = Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll");
 
-            List<string> msbuildAssembliesList = new(msbuildAssemblies);
-            msbuildAssembliesList.AddRange(runtimeAssemblies);
+            List<string> runtimeAssembliesList = new(runtimeAssemblies);
+            runtimeAssembliesList.AddRange(msbuildAssemblies);
 
-            return msbuildAssembliesList.ToArray();
+            return runtimeAssembliesList.ToArray();
         }
 
         /// <summary>
@@ -192,10 +192,20 @@ namespace Microsoft.Build.Shared
         private static Assembly LoadAssemblyUsingMetadataLoadContext(AssemblyLoadInfo assemblyLoadInfo)
         {
             string path = assemblyLoadInfo.AssemblyFile;
-            List<string> localPaths = new(Directory.GetFiles(Path.GetDirectoryName(path), "*.dll"));
-            localPaths.AddRange(runtimeAssemblies);
+            string[] localAssemblies = Directory.GetFiles(Path.GetDirectoryName(path), "*.dll");
 
-            _context = new(new PathAssemblyResolver(localPaths));
+            // Deduplicate between MSBuild assemblies and task dependencies. 
+            Dictionary<string, string> assembliesDictionary = new(localAssemblies.Length + runtimeAssemblies.Length);
+            foreach (string localPath in localAssemblies) {
+                assembliesDictionary.Add(Path.GetFileName(localPath), localPath);
+            }
+
+            foreach (string runtimeAssembly in runtimeAssemblies)
+            {
+                assembliesDictionary[Path.GetFileName(runtimeAssembly)] = runtimeAssembly;
+            }
+
+            _context = new(new PathAssemblyResolver(assembliesDictionary.Values));
             return _context.LoadFromAssemblyPath(path);
         }
 

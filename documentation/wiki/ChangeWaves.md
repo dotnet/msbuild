@@ -27,6 +27,7 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Respect deps.json when loading assemblies](https://github.com/dotnet/msbuild/pull/7520)
 - [Consider `Platform` as default during Platform Negotiation](https://github.com/dotnet/msbuild/pull/7511)
 - [Adding accepted SDK name match pattern to SDK manifests](https://github.com/dotnet/msbuild/pull/7597)
+- [Throw warning indicating invalid project types](https://github.com/dotnet/msbuild/pull/7708)
 - [MSBuild server](https://github.com/dotnet/msbuild/pull/7634)
 
 ### 17.0

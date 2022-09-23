@@ -10,6 +10,7 @@ using Microsoft.Build.UnitTests.Shared;
 using Xunit;
 using Xunit.Abstractions;
 using Shouldly;
+using System.Linq;
 
 #nullable disable
 
@@ -20,6 +21,8 @@ namespace Microsoft.Build.UnitTests
         private static readonly string ProjectFileFolder = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "PortableTask");
         private const string ProjectFileName = "portableTaskTest.proj";
         private const string DLLFileName = "PortableTask.dll";
+        private static string PortableTaskFolderPath = Path.GetFullPath(
+                    Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "..", "..", "..", "Samples", "PortableTask"));
 
         private readonly ITestOutputHelper _output;
 
@@ -87,6 +90,28 @@ namespace Microsoft.Build.UnitTests
                 string dllPath = Path.Combine(dir.Path, DLLFileName);
 
                 CheckIfCorrectAssemblyLoaded(output, dllPath);
+            }
+        }
+
+        [Fact]
+        public void LoadTaskDependingOnMSBuild()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+                string currentAssembly = Assembly.GetExecutingAssembly().Location;
+                string utilitiesName = "Microsoft.Build.Utilities.Core.dll";
+                string newAssemblyLocation = Path.Combine(folder.Path, Path.GetFileName(currentAssembly));
+
+                // The "first" directory is "Debug" or "Release"
+                string portableTaskPath = Path.Combine(Directory.GetDirectories(PortableTaskFolderPath).First(), "netstandard2.0", "OldMSBuild");
+                string utilities = Path.Combine(portableTaskPath, utilitiesName);
+                File.Copy(utilities, Path.Combine(folder.Path, utilitiesName));
+                File.Copy(currentAssembly, newAssemblyLocation);
+                TypeLoader typeLoader = new(TaskLoader.IsTaskClass);
+
+                // If we cannot accept MSBuild next to the task assembly we're loading, this will throw.
+                typeLoader.Load("TypeLoader_Tests", AssemblyLoadInfo.Create(null, newAssemblyLocation), useTaskHost: true);
             }
         }
 
