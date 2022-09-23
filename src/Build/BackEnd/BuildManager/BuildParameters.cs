@@ -303,6 +303,7 @@ namespace Microsoft.Build.Execution
             _outputResultsCacheFile = other._outputResultsCacheFile;
             DiscardBuildResults = other.DiscardBuildResults;
             LowPriority = other.LowPriority;
+            Question = other.Question;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
         }
 
@@ -789,6 +790,11 @@ namespace Microsoft.Build.Execution
         /// Gets or sets a value indicating whether the build process should run as low priority.
         /// </summary>
         public bool LowPriority { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value that will error when the build process fails an incremental check.
+        /// </summary>
+        public bool Question { get; set; }
 
         /// <summary>
         /// Gets or sets the project cache description to use for all <see cref="BuildSubmission"/> or <see cref="GraphBuildSubmission"/>

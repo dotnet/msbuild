@@ -1021,6 +1021,7 @@ namespace Microsoft.Build.UnitTests
                                         isolateProjects: false,
                                         graphBuildOptions: null,
                                         lowPriority: false,
+                                        question: false,
                                         inputResultsCaches: null,
                                         outputResultsCache: null,
                                         commandLine: null

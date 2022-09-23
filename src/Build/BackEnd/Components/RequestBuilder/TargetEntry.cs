@@ -465,6 +465,7 @@ namespace Microsoft.Build.BackEnd
                         TargetUpToDateChecker dependencyAnalyzer = new TargetUpToDateChecker(requestEntry.RequestConfiguration.Project, _target, targetLoggingContext.LoggingService, targetLoggingContext.BuildEventContext);
                         DependencyAnalysisResult dependencyResult = dependencyAnalyzer.PerformDependencyAnalysis(bucket, out changedTargetInputs, out upToDateTargetInputs);
                         MSBuildEventSource.Log.TargetUpToDateStop((int)dependencyResult);
+                        bool canBeIncremental = !string.IsNullOrEmpty(_target.Inputs) && !string.IsNullOrEmpty(_target.Outputs) && this._host.BuildParameters.Question;
 
                         switch (dependencyResult)
                         {
@@ -472,6 +473,13 @@ namespace Microsoft.Build.BackEnd
                             case DependencyAnalysisResult.FullBuild:
                             case DependencyAnalysisResult.IncrementalBuild:
                             case DependencyAnalysisResult.SkipUpToDate:
+                                if (dependencyResult != DependencyAnalysisResult.SkipUpToDate && canBeIncremental)
+                                {
+                                    targetSuccess = false;
+                                    aggregateResult = aggregateResult.AggregateResult(new WorkUnitResult(WorkUnitResultCode.Canceled, WorkUnitActionCode.Stop, null));
+                                    break;
+                                }
+
                                 // Create the lookups used to hold the current set of properties and items
                                 lookupForInference = bucket.Lookup;
                                 lookupForExecution = bucket.Lookup.Clone();
