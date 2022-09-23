@@ -980,18 +980,6 @@ namespace Microsoft.Build.Execution
                             _overallBuildSuccess = false;
                         }
 
-                        if (loggingService is LoggingService logService && !BuildEnvironmentState.s_runningTests)
-                        {
-                            if (_overallBuildSuccess)
-                            {
-                                Debug.Assert(logService.HasLoggedErrors() == false, "Build succeeded but logged errors.");
-                            }
-                            else
-                            {
-                                Debug.Assert(logService.HasLoggedErrors() == true, "Build failed but did not log errors.");
-                            }
-                        }
-
                         loggingService.LogBuildFinished(_overallBuildSuccess);
 
                         if (KnownTelemetry.BuildTelemetry != null)
