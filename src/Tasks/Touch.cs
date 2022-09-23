@@ -16,8 +16,10 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// This class defines the touch task.
     /// </summary>
-    public class Touch : TaskExtension
+    public class Touch : TaskExtension, IIncrementalTask
     {
+        private MessageImportance messageImportance;
+
         /// <summary>
         /// Forces a touch even if the file to be touched is read-only.
         /// </summary>
@@ -44,6 +46,20 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [Output]
         public ITaskItem[] TouchedFiles { get; set; }
+
+        /// <summary>
+        /// Importance: high, normal, low (default normal)
+        /// </summary>
+        public string Importance { get; set; }
+
+        /// <summary>
+        /// Question the incremental nature of this task.
+        /// </summary>
+        /// <remarks>When Question is true, skip touching the disk to avoid causing incremental issue.
+        /// Unless the file doesn't exists, in which case, error out.</remarks>
+        public bool Question { get; set; }
+
+        public bool CanBeIncremental => true;
 
         /// <summary>
         /// Implementation of the execute method.
@@ -125,6 +141,24 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         public override bool Execute()
         {
+            if (string.IsNullOrEmpty(Importance))
+            {
+                messageImportance = MessageImportance.Normal;
+            }
+            else
+            {
+                try
+                {
+                    // Parse the raw importance string into a strongly typed enumeration.  
+                    messageImportance = (MessageImportance)Enum.Parse(typeof(MessageImportance), Importance, true /* case-insensitive */);
+                }
+                catch (ArgumentException)
+                {
+                    Log.LogErrorWithCodeFromResources("Message.InvalidImportance", Importance);
+                    return false;
+                }
+            }
+
             return ExecuteImpl
             (
                 File.Exists,
@@ -184,7 +218,13 @@ namespace Microsoft.Build.Tasks
                 // If the file does not exist then we check if we need to create it.
                 if (AlwaysCreate)
                 {
-                    Log.LogMessageFromResources(MessageImportance.Normal, "Touch.CreatingFile", file, "AlwaysCreate");
+                    Log.LogMessageFromResources(messageImportance, "Touch.CreatingFile", file, "AlwaysCreate");
+
+                    if (Question)
+                    {
+                        return false;
+                    }
+
                     if (!CreateFile(file, fileCreate))
                     {
                         return false;
@@ -196,10 +236,14 @@ namespace Microsoft.Build.Tasks
                     return false;
                 }
             }
-            else
+
+            Log.LogMessageFromResources(messageImportance, "Touch.Touching", file);
+
+            if (Question)
             {
-                Log.LogMessageFromResources(MessageImportance.Normal, "Touch.Touching", file);
+                return true;
             }
+
 
             // If the file is read only then we must either issue an error, or, if the user so 
             // specified, make the file temporarily not read only.

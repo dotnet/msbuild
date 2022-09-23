@@ -28,6 +28,23 @@
         <target state="translated">MSBUILD : error MSB1027: non è possibile specificare l'opzione -noAutoResponse nel file di risposta automatica MSBuild.rsp o in file di risposta a cui il file di risposta automatica fa riferimento.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="HelpMessage_41_QuestionSwitch">
+        <source>  -question          (Experimental) Question the build if it is incremental.
+                     MSBuild will stop and error out as soon as it detects
+                     a target or task that isn't incremental.
+                     (Short form: -q)
+    </source>
+        <target state="new">  -question          (Experimental) Question the build if it is incremental.
+                     MSBuild will stop and error out as soon as it detects
+                     a target or task that isn't incremental.
+                     (Short form: -q)
+    </target>
+        <note>
+      LOCALIZATION: "MSBuild" should not be localized.
+      LOCALIZATION: "-question" and "-q" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
         <target state="new">MSBuild version {0} for {1}</target>
@@ -263,8 +280,7 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_40_WarnNotAsErrorSwitch">
-        <source>
-      -warnNotAsError[:code[;code2]]
+        <source>  -warnNotAsError[:code[;code2]]
                      List of warning codes to treats not treat as errors.
                      Use a semicolon or a comma to separate
                      multiple warning codes. Has no effect if the -warnaserror
@@ -273,7 +289,7 @@
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="translated">
+        <target state="needs-review-translation">
       -warnNotAsError[:code[;code2]]
                      Elenco di codici di avviso da non considerare come errori.
                      Usare un punto e virgola o una virgola per separare

@@ -58,7 +58,7 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     // INTERNAL WARNING: DO NOT USE the Log property in this class! Log points to resources in the task assembly itself, and
     // we want to use resources from Utilities. Use LogPrivate (for private Utilities resources) and LogShared (for shared MSBuild resources)
-    public abstract class ToolTask : Task, ICancelableTask
+    public abstract class ToolTask : Task, IIncrementalTask, ICancelableTask
     {
         private static readonly bool s_preserveTempFiles = string.Equals(Environment.GetEnvironmentVariable("MSBUILDPRESERVETOOLTEMPFILES"), "1", StringComparison.Ordinal);
 
@@ -351,7 +351,11 @@ namespace Microsoft.Build.Utilities
         /// Returns true if task execution is not necessary. Executed after ValidateParameters
         /// </summary>
         /// <returns></returns>
-        protected virtual bool SkipTaskExecution() => false;
+        protected virtual bool SkipTaskExecution() { CanBeIncremental = false; return false; }
+
+        public bool CanBeIncremental { get; set; } = false;
+
+        public bool Question { get; set; }
 
         /// <summary>
         /// Returns a string with those switches and other information that can go into a response file.
@@ -1329,6 +1333,10 @@ namespace Microsoft.Build.Utilities
                     // return true to indicate this task completed successfully (without
                     // doing any actual work).
                     return true;
+                }
+                else if (CanBeIncremental && Question)
+                {
+                    return false;
                 }
 
                 string commandLineCommands = GenerateCommandLineCommands();
