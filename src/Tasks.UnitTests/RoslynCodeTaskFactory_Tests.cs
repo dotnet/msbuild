@@ -49,7 +49,7 @@ namespace Microsoft.Build.Tasks.UnitTests
       <Using Namespace=""Dependency"" />
       <Code Type=""Fragment"" Language=""cs"" >
 <![CDATA[
-Log.LogError(Alpha.GetString());
+Log.LogWarning(Alpha.GetString());
 ]]>
       </Code>
     </Task>
@@ -111,7 +111,7 @@ namespace _5106 {
       <Using Namespace=""_5106"" />
       <Code Type=""Fragment"" Language=""cs"" >
 <![CDATA[
-Log.LogError(Class1.ToPrint());
+Log.LogWarning(Class1.ToPrint());
 ]]>
       </Code>
     </Task>
