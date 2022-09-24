@@ -244,7 +244,6 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-
             // If the file is read only then we must either issue an error, or, if the user so 
             // specified, make the file temporarily not read only.
             bool needToRestoreAttributes = false;

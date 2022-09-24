@@ -153,7 +153,7 @@ namespace Microsoft.Build.Tasks
 
         public bool Question { get; set; }
 
-        public bool CanBeIncremental { get => SkipUnchangedFiles; }
+        public bool CanBeIncremental { get; } = true;
 
         #endregion
 

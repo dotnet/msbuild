@@ -14,7 +14,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// A task that creates a directory
     /// </summary>
-    public class MakeDir : TaskExtension
+    public class MakeDir : TaskExtension, IIncrementalTask
     {
         [Required]
         public ITaskItem[] Directories
@@ -30,6 +30,10 @@ namespace Microsoft.Build.Tasks
 
         [Output]
         public ITaskItem[] DirectoriesCreated { get; private set; }
+
+        public bool Question { get; set; }
+
+        public bool CanBeIncremental => true;
 
         private ITaskItem[] _directories;
 
@@ -59,10 +63,17 @@ namespace Microsoft.Build.Tasks
                             // Only log a message if we actually need to create the folder
                             if (!FileUtilities.DirectoryExistsNoThrow(directory.ItemSpec))
                             {
-                                // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                                Log.LogMessageFromResources(MessageImportance.Normal, "MakeDir.Comment", directory.ItemSpec);
+                                if (CanBeIncremental && Question)
+                                {
+                                    Log.LogErrorFromResources("MakeDir.Comment", directory.ItemSpec);
+                                }
+                                else
+                                {
+                                    // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
+                                    Log.LogMessageFromResources(MessageImportance.Normal, "MakeDir.Comment", directory.ItemSpec);
 
-                                Directory.CreateDirectory(FileUtilities.FixFilePath(directory.ItemSpec));
+                                    Directory.CreateDirectory(FileUtilities.FixFilePath(directory.ItemSpec));
+                                }
                             }
 
                             items.Add(directory);

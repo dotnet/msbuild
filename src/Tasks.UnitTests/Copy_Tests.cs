@@ -129,6 +129,159 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Question should not copy any files.
+        /// </summary>
+        [Fact]
+        public void QuestionCopyFile()
+        {
+            string source = FileUtilities.GetTemporaryFile();
+            string destination = FileUtilities.GetTemporaryFile(null, ".tmp", false);
+            string content = "This is a source file.";
+
+            try
+            {
+                using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
+                {
+                    sw.Write(content);
+                }
+
+                ITaskItem sourceItem = new TaskItem(source);
+                ITaskItem destinationItem = new TaskItem(destination);
+                ITaskItem[] sourceFiles = { sourceItem };
+                ITaskItem[] destinationFiles = { destinationItem };
+
+                CopyMonitor m = new CopyMonitor();
+                Copy t = new Copy
+                {
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = new MockEngine(_testOutputHelper),
+                    SourceFiles = sourceFiles,
+                    DestinationFiles = destinationFiles,
+                    UseHardlinksIfPossible = UseHardLinks,
+                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    Question = true
+                };
+
+                Assert.False(t.Execute(m.CopyFile, _parallelismThreadCount));
+
+                // Expect for there to have been no copies.
+                Assert.Equal(0, m.copyCount);
+
+                Assert.False(FileUtilities.FileExistsNoThrow(destination));
+            }
+            finally
+            {
+                File.Delete(source);
+            }
+        }
+
+        /// <summary>
+        /// Question copy should not error if copy did no work.
+        /// </summary>
+        [Fact]
+        public void QuestionCopyFileSameContent()
+        {
+            string source = FileUtilities.GetTemporaryFile();
+            string destination = FileUtilities.GetTemporaryFile();
+            string content = "This is a source file.";
+
+            try
+            {
+                using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
+                {
+                    sw.Write(content);
+                }
+
+                using (StreamWriter sw = FileUtilities.OpenWrite(destination, true))
+                {
+                    sw.Write(content);
+                }
+
+                ITaskItem sourceItem = new TaskItem(source);
+                ITaskItem destinationItem = new TaskItem(destination);
+                ITaskItem[] sourceFiles = { sourceItem };
+                ITaskItem[] destinationFiles = { destinationItem };
+
+                CopyMonitor m = new CopyMonitor();
+                Copy t = new Copy
+                {
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = new MockEngine(_testOutputHelper),
+                    SourceFiles = sourceFiles,
+                    DestinationFiles = destinationFiles,
+                    UseHardlinksIfPossible = UseHardLinks,
+                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    SkipUnchangedFiles = true,
+                    Question = true
+                };
+
+                Assert.True(t.Execute(m.CopyFile, _parallelismThreadCount));
+
+                // Expect for there to have been no copies.
+                Assert.Equal(0, m.copyCount);
+
+                ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
+            }
+            finally
+            {
+                File.Delete(source);
+                File.Delete(destination);
+            }
+        }
+
+        /// <summary>
+        /// Question copy should error if a copy will occur.
+        /// </summary>
+        [Fact]
+        public void QuestionCopyFileNotSameContent()
+        {
+            string source = FileUtilities.GetTemporaryFile();
+            string destination = FileUtilities.GetTemporaryFile();
+            try
+            {
+                using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
+                {
+                    sw.Write("This is a source file.");
+                }
+
+                using (StreamWriter sw = FileUtilities.OpenWrite(destination, true))
+                {
+                    sw.Write("This is a destination file.");
+                }
+
+                ITaskItem sourceItem = new TaskItem(source);
+                ITaskItem destinationItem = new TaskItem(destination);
+                ITaskItem[] sourceFiles = { sourceItem };
+                ITaskItem[] destinationFiles = { destinationItem };
+
+                CopyMonitor m = new CopyMonitor();
+                Copy t = new Copy
+                {
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = new MockEngine(_testOutputHelper),
+                    SourceFiles = sourceFiles,
+                    DestinationFiles = destinationFiles,
+                    UseHardlinksIfPossible = UseHardLinks,
+                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    SkipUnchangedFiles = true,
+                    Question = true
+                };
+
+                Assert.False(t.Execute(m.CopyFile, _parallelismThreadCount));
+
+                // Expect for there to have been no copies.
+                Assert.Equal(0, m.copyCount);
+
+                ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
+            }
+            finally
+            {
+                File.Delete(source);
+                File.Delete(destination);
+            }
+        }
+
+        /// <summary>
         /// Unless ignore readonly attributes is set, we should not copy over readonly files.
         /// </summary>
         [Fact]
