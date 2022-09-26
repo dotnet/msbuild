@@ -10,6 +10,7 @@
     <StrongNameKeyId>Open</StrongNameKeyId>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>apicompat</ToolCommandName>
+    <PackageDescription>Tool to perform api compatibility checks on assemblies and packages.</PackageDescription>
   </PropertyGroup>
 
   <ItemGroup>
