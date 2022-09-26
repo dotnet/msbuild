@@ -12,6 +12,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NuGet.Common;
+using NuGet.Frameworks;
+using NuGet.Packaging;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
 
@@ -27,6 +29,8 @@ namespace Microsoft.NET.Build.Tasks
     /// </summary>
     public sealed class ResolvePackageAssets : TaskBase
     {
+        #region Input Items
+
         /// <summary>
         /// Path to assets.json.
         /// </summary>
@@ -160,6 +164,10 @@ namespace Microsoft.NET.Build.Tasks
         /// </summary>
         public bool DesignTimeBuild { get; set; }
 
+        #endregion
+
+        #region Output Items
+
         /// <summary>
         /// Full paths to assemblies from packages to pass to compiler as analyzers.
         /// </summary>
@@ -230,8 +238,21 @@ namespace Microsoft.NET.Build.Tasks
         [Output]
         public ITaskItem[] ApphostsForShimRuntimeIdentifiers { get; private set; }
 
+        /// <summary>
+        /// All the libraries/packages in the lock file.
+        /// </summary>
+        [Output]
+        public ITaskItem[] PackageDefinitions { get; private set; }
+
         [Output]
         public ITaskItem[] PackageDependencies { get; private set; }
+
+        /// <summary>
+        /// All the dependencies between packages. Each package has metadata 'ParentPackage'
+        /// to refer to the package that depends on it. For top level packages this value is blank.
+        /// </summary>
+        [Output]
+        public ITaskItem[] PackageDependenciesBetweenPackages { get; private set; }
 
         /// <summary>
         /// List of symbol files (.pdb) related to NuGet packages.
@@ -250,6 +271,8 @@ namespace Microsoft.NET.Build.Tasks
         /// </remarks>
         [Output]
         public ITaskItem[] ReferenceDocumentationFiles { get; private set; }
+
+        #endregion
 
         /// <summary>
         /// Messages from the assets file.
@@ -335,7 +358,9 @@ namespace Microsoft.NET.Build.Tasks
                 FrameworkAssemblies = reader.ReadItemGroup();
                 FrameworkReferences = reader.ReadItemGroup();
                 NativeLibraries = reader.ReadItemGroup();
+                PackageDefinitions = reader.ReadItemGroup();
                 PackageDependencies = reader.ReadItemGroup();
+                PackageDependenciesBetweenPackages = reader.ReadItemGroup();
                 PackageFolders = reader.ReadItemGroup();
                 ReferenceDocumentationFiles = reader.ReadItemGroup();
                 ResourceAssemblies = reader.ReadItemGroup();
@@ -654,6 +679,8 @@ namespace Microsoft.NET.Build.Tasks
         {
             private const int InitialStringTableCapacity = 32;
 
+            private HashSet<string> _projectFileDependencies;
+            private Dictionary<string, string> _targetNameToAliasMap;
             private ResolvePackageAssets _task;
             private BinaryWriter _writer;
             private LockFile _lockFile;
@@ -684,7 +711,8 @@ namespace Microsoft.NET.Build.Tasks
                 _task = task;
                 _lockFile = new LockFileCache(task).GetLockFile(task.ProjectAssetsFile);
                 _packageResolver = NuGetPackageResolver.CreateResolver(_lockFile);
-
+                _targetNameToAliasMap = CreateTargetNameToAlisMap();
+                ReadProjectFileDependencies(string.IsNullOrEmpty(_task.TargetFramework) || !_targetNameToAliasMap.ContainsKey(_task.TargetFramework) ? null : _targetNameToAliasMap[_task.TargetFramework]);
 
                 //  If we are doing a design-time build, we do not want to fail the build if we can't find the
                 //  target framework and/or runtime identifier in the assets file.  This is because the design-time
@@ -726,7 +754,25 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     ComputePackageExclusions();
                 }
+
+                void ReadProjectFileDependencies(string frameworkAlias)
+                {
+                    _projectFileDependencies = _lockFile.GetProjectFileDependencySet(frameworkAlias);
+                }
             }
+
+            private Dictionary<string, string> CreateTargetNameToAlisMap() => _lockFile.Targets.ToDictionary(t => t.Name, t =>
+            {
+                var alias = _lockFile.GetLockFileTargetAlias(t);
+                if (string.IsNullOrEmpty(t.RuntimeIdentifier))
+                {
+                    return alias;
+                }
+                else
+                {
+                    return alias + "/" + t.RuntimeIdentifier;
+                }
+            });
 
             public void WriteToCacheFile()
             {
@@ -806,7 +852,9 @@ namespace Microsoft.NET.Build.Tasks
                 WriteItemGroup(WriteFrameworkAssemblies);
                 WriteItemGroup(WriteFrameworkReferences);
                 WriteItemGroup(WriteNativeLibraries);
+                WriteItemGroup(WritePackageDefinitions);
                 WriteItemGroup(WritePackageDependencies);
+                WriteItemGroup(WritePackageDependenciesBetweenPackages);
                 WriteItemGroup(WritePackageFolders);
                 WriteItemGroup(WriteReferenceDocumentationFiles);
                 WriteItemGroup(WriteResourceAssemblies);
@@ -1157,16 +1205,12 @@ namespace Microsoft.NET.Build.Tasks
 
                         foreach (string fileExtension in relatedExtensions.Split(RelatedPropertySeparator))
                         {
-                            if (fileExtension.ToLower() == extension)
+                            if (fileExtension.ToLowerInvariant() == extension)
                             {
                                 string xmlFilePath = Path.ChangeExtension(itemSpec, fileExtension);
                                 if (File.Exists(xmlFilePath))
                                 {
                                     WriteItem(xmlFilePath, library);
-                                }
-                                else
-                                {
-                                    _task.Log.LogWarning(Strings.AssetsFileNotFound, xmlFilePath);
                                 }
                             }
                         }
@@ -1394,6 +1438,72 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
+            private void WritePackageDefinitions()
+            {
+                // Get library and file definitions
+                foreach (var package in _lockFile.Libraries)
+                {
+                    var packageName = package.Name;
+                    var packageVersion = package.Version.ToNormalizedString();
+                    string packageId = $"{packageName}/{packageVersion}";
+
+                    WriteItem(packageId);
+                    WriteMetadata(MetadataKeys.Name, packageName);
+                    WriteMetadata(MetadataKeys.Type, package.Type);
+                    WriteMetadata(MetadataKeys.Version, packageVersion);
+                    WriteMetadata(MetadataKeys.Path, package.Path ?? string.Empty);
+
+                    string resolvedPackagePath = ResolvePackagePath(package);
+                    WriteMetadata(MetadataKeys.ResolvedPath, resolvedPackagePath ?? string.Empty);
+
+                    WriteMetadata(MetadataKeys.DiagnosticLevel, GetPackageDiagnosticLevel(package));
+                }
+
+                string ResolvePackagePath(LockFileLibrary package)
+                {
+                    if (package.IsProject())
+                    {
+                        var relativeMSBuildProjectPath = package.MSBuildProject;
+
+                        if (string.IsNullOrEmpty(relativeMSBuildProjectPath))
+                        {
+                            throw new BuildErrorException(Strings.ProjectAssetsConsumedWithoutMSBuildProjectPath, package.Name, _task.ProjectAssetsFile);
+                        }
+
+                        return GetAbsolutePathFromProjectRelativePath(relativeMSBuildProjectPath);
+                    }
+                    else
+                    {
+                        return _packageResolver.GetPackageDirectory(package.Name, package.Version);
+                    }
+                }
+
+                string GetAbsolutePathFromProjectRelativePath(string path)
+                {
+                    return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(_task.ProjectPath), path));
+                }
+
+                string GetPackageDiagnosticLevel(LockFileLibrary package)
+                {
+                    string target = _task.TargetFramework ?? "";
+
+                    var messages = _lockFile.LogMessages.Where(log => log.LibraryId == package.Name && log.TargetGraphs
+                                    .Select(tg =>
+                                    {
+                                        var parsedTargetGraph = NuGetFramework.Parse(tg);
+                                        var alias = _lockFile.PackageSpec.TargetFrameworks.FirstOrDefault(tf => tf.FrameworkName == parsedTargetGraph)?.TargetAlias;
+                                        return alias ?? tg;
+                                    }).Contains(target));
+
+                    if (!messages.Any())
+                    {
+                        return string.Empty;
+                    }
+
+                    return messages.Max(log => log.Level).ToString();
+                }
+            }
+
             private void WritePackageDependencies()
             {
                 foreach (var library in _runtimeTarget.Libraries)
@@ -1401,6 +1511,71 @@ namespace Microsoft.NET.Build.Tasks
                     if (library.IsPackage())
                     {
                         WriteItem(library.Name);
+                    }
+                }
+            }
+
+            private void WritePackageDependenciesBetweenPackages()
+            {
+                foreach(var target in _lockFile.Targets)
+                {
+                    GetPackageDependencies(target);
+                }
+
+                void GetPackageDependencies(LockFileTarget target)
+                {
+                    var resolvedPackageVersions = target.Libraries
+                    .ToDictionary(pkg => pkg.Name, pkg => pkg.Version.ToNormalizedString(), StringComparer.OrdinalIgnoreCase);
+
+                    string frameworkAlias = _targetNameToAliasMap[target.Name];
+
+                    var transitiveProjectRefs = new HashSet<string>(
+                        target.Libraries
+                            .Where(lib => lib.IsTransitiveProjectReference(_lockFile, ref _projectFileDependencies, frameworkAlias))
+                            .Select(pkg => pkg.Name),
+                        StringComparer.OrdinalIgnoreCase);
+
+                    foreach (var package in target.Libraries)
+                    {
+                        string packageId = $"{package.Name}/{package.Version.ToNormalizedString()}";
+
+                        if (_projectFileDependencies.Contains(package.Name))
+                        {
+                            WriteItem(packageId);
+                            WriteMetadata(MetadataKeys.ParentTarget, frameworkAlias); // Foreign Key
+                            WriteMetadata(MetadataKeys.ParentPackage, string.Empty); // Foreign Key
+                        }
+
+                        // get sub package dependencies
+                        GetDependencies(package, target.Name, resolvedPackageVersions, transitiveProjectRefs);
+                    }
+                }
+
+                void GetDependencies(
+                    LockFileTargetLibrary package,
+                    string targetName,
+                    Dictionary<string, string> resolvedPackageVersions,
+                    HashSet<string> transitiveProjectRefs)
+                {
+                    string packageId = $"{package.Name}/{package.Version.ToNormalizedString()}";
+                    string frameworkAlias = _targetNameToAliasMap[targetName];
+                    foreach (var deps in package.Dependencies)
+                    {
+                        if (!resolvedPackageVersions.TryGetValue(deps.Id, out string version))
+                        {
+                            continue;
+                        }
+
+                        string depsName = $"{deps.Id}/{version}";
+
+                        WriteItem(depsName);
+                        WriteMetadata(MetadataKeys.ParentTarget, frameworkAlias); // Foreign Key
+                        WriteMetadata(MetadataKeys.ParentPackage, packageId); // Foreign Key
+
+                        if (transitiveProjectRefs.Contains(deps.Id))
+                        {
+                            WriteMetadata(MetadataKeys.TransitiveProjectReference, "true");
+                        }
                     }
                 }
             }
