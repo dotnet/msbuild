@@ -79,7 +79,7 @@ jobs:
           env:
             BuildConfig: $(_BuildConfig)
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-            HelixAccessToken: ${{ parameters.HelixAccessToken }}
+            HelixAccessToken: $(_HelixApiToken)
         - powershell: eng\common\build.ps1
                 -configuration $(_BuildConfig)
                 -prepareMachine
@@ -109,7 +109,7 @@ jobs:
             BuildConfig: $(_BuildConfig)
             TestFullMSBuild: 'true'
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-            HelixAccessToken: ${{ parameters.HelixAccessToken }}
+            HelixAccessToken: $(_HelixApiToken)
         - powershell: eng\common\build.ps1
                 -configuration $(_BuildConfig)
                 -prepareMachine
@@ -253,7 +253,7 @@ jobs:
           env:
             BuildConfig: $(_BuildConfig)
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-            HelixAccessToken: ${{ parameters.HelixAccessToken }}
+            HelixAccessToken: $(_HelixApiToken)
         - script: $(Build.SourcesDirectory)/artifacts/bin/redist/$(_BuildConfig)/dotnet/dotnet workload install wasm-tools --skip-manifest-update
           displayName: Install wasm-tools Workload
           continueOnError: false
@@ -380,7 +380,7 @@ jobs:
           env:
             BuildConfig: $(_BuildConfig)
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-            HelixAccessToken: ${{ parameters.HelixAccessToken }}
+            HelixAccessToken: $(_HelixApiToken)
         - powershell: eng\common\build.ps1
                 -configuration $(_BuildConfig)
                 -prepareMachine
