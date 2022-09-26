@@ -5715,7 +5715,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <RemoveDir
         Directories="$(ClickOncePublishDir)"
-        Condition="'$(ClickOncePublishDir)'=='$(OutputPath)app.publish\' and Exists('$(ClickOncePublishDir)')"/>
+        Condition="Exists('$(ClickOncePublishDir)')"/>
 
   </Target>
 
