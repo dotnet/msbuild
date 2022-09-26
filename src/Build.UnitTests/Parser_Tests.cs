@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-
+using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Xunit;
@@ -529,27 +529,62 @@ namespace Microsoft.Build.UnitTests
         }
 
         // see https://github.com/dotnet/msbuild/issues/5436
-        [Fact]
-        public void SupportItemDefinationGroupInWhenOtherwise()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void SupportItemDefinationGroupInWhenOtherwise(bool context)
         {
-            MockLogger ml = ObjectModelHelpers.BuildProjectExpectSuccess(@"
-                    <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
-                        <Choose>
-                            <When Condition=` '$(OutputType)'=='Library' `>
-                                <ItemDefinitionGroup>
-                                </ItemDefinitionGroup>
-                            </When>
-                            <Otherwise>
-                                <ItemDefinitionGroup>
-                                </ItemDefinitionGroup>
-                            </Otherwise>
-                        </Choose>
-                        <Target Name=`Build`>
-                        </Target>
-                    </Project>
-                ");
+            var projectContent = $@"
+                <Project ToolsVersion= `msbuilddefaulttoolsversion` xmlns= `msbuildnamespace`>
+                    <Choose>
+                        <When Condition= `{context}`>
+                            <PropertyGroup>
+                                <Foo>bar</Foo>
+                            </PropertyGroup>
+                            <ItemGroup>
+                                <A Include= `$(Foo)`>
+                                    <n>n1</n>
+                                </A>
+                            </ItemGroup>
+                            <ItemDefinitionGroup>
+                                <A>
+                                    <m>m1</m>
+                                    <n>n2</n>
+                                </A>
+                            </ItemDefinitionGroup>
+                        </When>
+                        <Otherwise>
+                            <PropertyGroup>
+                                <Foo>bar</Foo>
+                            </PropertyGroup>
+                            <ItemGroup>
+                                <A Include= `$(Foo)`>
+                                    <n>n1</n>
+                                </A>
+                            </ItemGroup>
+                            <ItemDefinitionGroup>
+                                <A>
+                                    <m>m1</m>
+                                    <n>n2</n>
+                                </A>
+                            </ItemDefinitionGroup>
+                        </Otherwise>
+                    </Choose>
+                </Project>
+                ".Cleanup();
 
-            Assert.Equal(0, ml.ErrorCount);
+
+            var project = ObjectModelHelpers.CreateInMemoryProject(projectContent);
+
+            var projectItem = project.GetItems("A").FirstOrDefault();
+            Assert.Equal("bar", projectItem.EvaluatedInclude);
+
+            var metadatan = projectItem.GetMetadata("n");
+            Assert.Equal("n1", metadatan.EvaluatedValue);
+            Assert.Equal("n2", metadatan.Predecessor.EvaluatedValue);
+
+            var metadatam = projectItem.GetMetadata("m");
+            Assert.Equal("m1", metadatam.EvaluatedValue);
         }
     }
 }
