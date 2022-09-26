@@ -279,11 +279,11 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <remarks>
         /// This test verifies,
-        /// 1. When binary log and verbosity=quiet are both set, the equivalent command line is NOT printed
-        /// 2. When binary log and non-quiet verbosity are set, the equivalent command line is still printed
+        /// 1. When binary log and verbosity=diagnostic are both set, the equivalent command line is printed.
+        /// 2. When binary log and non-diag verbosity are set, the equivalent command line is NOT printed.
         /// </remarks>
         [Fact]
-        public void NoOutputWhenBinaryLoggerAndQuietVerbosityBothSet()
+        public void SuppressCommandOutputForNonDiagVerbosity()
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
@@ -298,16 +298,19 @@ namespace Microsoft.Build.UnitTests
                 TransientTestFolder testFolder = env.CreateFolder(createFolder: true);
 
                 TransientTestFile projectFile1 = env.CreateFile(testFolder, "testProject01.proj", contents);
-                string consoleOutput1 = RunnerUtilities.ExecMSBuild($"{projectFile1.Path} -bl:{logger.Parameters} -verbosity:q -nologo", out bool success1);
+                string consoleOutput1 = RunnerUtilities.ExecMSBuild($"{projectFile1.Path} -bl:{logger.Parameters} -verbosity:diag -nologo", out bool success1);
                 success1.ShouldBeTrue();
-                var expected1 = $"-nologo -bl:{logger.Parameters} -verbosity:q {projectFile1.Path}";
-                consoleOutput1.ShouldNotContain(expected1);
+                var expected1 = $"-nologo -bl:{logger.Parameters} -verbosity:diag {projectFile1.Path}";
+                consoleOutput1.ShouldContain(expected1);
 
-                TransientTestFile projectFile2 = env.CreateFile(testFolder, "testProject02.proj", contents);
-                string consoleOutput2 = RunnerUtilities.ExecMSBuild($"{projectFile2.Path} -bl:{logger.Parameters} -verbosity:m -nologo", out bool success2);
-                success2.ShouldBeTrue();
-                var expected2 = $"-nologo -bl:{logger.Parameters} -verbosity:m {projectFile2.Path}";
-                consoleOutput2.ShouldContain(expected2); ;
+                foreach (var verbosity in new string[] { "q", "m", "n", "d" })
+                {
+                    TransientTestFile projectFile2 = env.CreateFile(testFolder, $"testProject_{verbosity}.proj", contents);
+                    string consoleOutput2 = RunnerUtilities.ExecMSBuild($"{projectFile2.Path} -bl:{logger.Parameters} -verbosity:{verbosity} -nologo", out bool success2);
+                    success2.ShouldBeTrue();
+                    var expected2 = $"-nologo -bl:{logger.Parameters} -verbosity:{verbosity} {projectFile2.Path}";
+                    consoleOutput2.ShouldNotContain(expected2);
+                }
             }
         }
 

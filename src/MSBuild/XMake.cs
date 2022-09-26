@@ -2433,7 +2433,7 @@ namespace Microsoft.Build.CommandLine
                         Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("PickedUpSwitchesFromAutoResponse", autoResponseFileName));
                     }
 
-                    if (verbosity == LoggerVerbosity.Diagnostic && originalVerbosity != LoggerVerbosity.Quiet)
+                    if (originalVerbosity == LoggerVerbosity.Diagnostic)
                     {
                         string equivalentCommandLine = commandLineSwitches.GetEquivalentCommandLineExceptProjectFile();
                         Console.WriteLine($"{Path.Combine(s_exePath, s_exeName)} {equivalentCommandLine} {projectFile}");
