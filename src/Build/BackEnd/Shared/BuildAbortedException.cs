@@ -29,9 +29,7 @@ namespace Microsoft.Build.Exceptions
         public BuildAbortedException()
             : base(ResourceUtilities.GetResourceString("BuildAborted"))
         {
-            ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "BuildAborted");
-
-            ErrorCode = "MSB4188";
+            ErrorCode = "MSB4188"; // Must match the shared resource "BuildAborted"
         }
 
         /// <summary>
@@ -40,9 +38,7 @@ namespace Microsoft.Build.Exceptions
         public BuildAbortedException(string message)
             : base(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildAbortedWithMessage", message))
         {
-            ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "BuildAbortedWithMessage", message);
-
-            ErrorCode = errorCode;
+            ErrorCode = "MSB4197"; // Must match the shared resource "BuildAbortedWithMessage"
         }
 
         /// <summary>
@@ -51,9 +47,7 @@ namespace Microsoft.Build.Exceptions
         public BuildAbortedException(string message, Exception innerException)
             : base(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildAbortedWithMessage", message), innerException)
         {
-            ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "BuildAbortedWithMessage", message);
-
-            ErrorCode = errorCode;
+            ErrorCode = "MSB4197"; // Must match the shared resource "BuildAbortedWithMessage"
         }
 
         /// <summary>

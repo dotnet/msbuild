@@ -156,12 +156,12 @@ namespace Microsoft.Build.Execution
             // this one.)
             ErrorUtilities.VerifyThrow(result.ConfigurationId == BuildRequest.ConfigurationId, "BuildResult doesn't match BuildRequest configuration");
 
-            if (BuildResult is null || (BuildResult.OverallResult == BuildResultCode.Success && result is not null))
+            if (BuildResult is null)
             {
                 BuildResult = result;
             }
 
-            CheckForCompletion();
+            CheckForCompletion(result);
         }
 
         /// <summary>
@@ -170,7 +170,7 @@ namespace Microsoft.Build.Execution
         internal void CompleteLogging()
         {
             LoggingCompleted = true;
-            CheckForCompletion();
+            CheckForCompletion(BuildResult);
         }
 
         /// <summary>
@@ -188,16 +188,16 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Determines if we are completely done with this submission and can complete it so the user may access results.
         /// </summary>
-        private void CheckForCompletion()
+        private void CheckForCompletion(BuildResult result)
         {
-            if (BuildResult != null && LoggingCompleted)
+            if (result != null && LoggingCompleted)
             {
                 bool hasCompleted = (Interlocked.Exchange(ref _completionInvoked, 1) == 1);
                 if (!hasCompleted)
                 {
                     // Did this submission have warnings elevated to errors? If so, mark it as
                     // failed even though it succeeded (with warnings--but they're errors).
-                    if (((IBuildComponentHost)BuildManager).LoggingService.HasBuildSubmissionLoggedErrors(BuildResult.SubmissionId))
+                    if (((IBuildComponentHost)BuildManager).LoggingService.HasBuildSubmissionLoggedErrors(result.SubmissionId))
                     {
                         BuildResult.SetOverallResult(overallResult: false);
                     }

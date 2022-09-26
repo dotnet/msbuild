@@ -730,8 +730,8 @@ namespace Microsoft.Build.Execution
                     {
                         if (submission.IsStarted)
                         {
-                            submission.CompleteResults(new GraphBuildResult(submission.SubmissionId, new BuildAbortedException()));
                             ((IBuildComponentHost)this).LoggingService.LogError(BuildEventContext.Invalid, new BuildEventFileInfo(ElementLocation.EmptyLocation), "BuildAborted");
+                            submission.CompleteResults(new GraphBuildResult(submission.SubmissionId, new BuildAbortedException()));
                         }
                     }
 
