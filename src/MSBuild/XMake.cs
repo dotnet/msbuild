@@ -1005,36 +1005,41 @@ namespace Microsoft.Build.CommandLine
             // We're already on a threadpool thread anyway.
             WaitCallback callback = delegate
             {
-                s_cancelComplete.Reset();
-
-                // If the build is already complete, just exit.
-                if (s_buildComplete.WaitOne(0))
+                try 
                 {
-                    s_cancelComplete.Set();
-                    return;
+                    s_cancelComplete.Reset();
+
+                    // If the build is already complete, just exit.
+                    if (s_buildComplete.WaitOne(0))
+                    {
+                        s_cancelComplete.Set();
+                        return;
+                    }
+
+                    // If the build has already started (or already finished), we will cancel it
+                    // If the build has not yet started, it will cancel itself, because
+                    // we set alreadyCalled=1
+                    bool hasBuildStarted;
+                    lock (s_buildLock)
+                    {
+                        hasBuildStarted = s_hasBuildStarted;
+                    }
+
+                    if (hasBuildStarted)
+                    {
+                        BuildManager.DefaultBuildManager.CancelAllSubmissions();
+                        s_buildComplete.WaitOne();
+                    }
+
+                    s_cancelComplete.Set(); // This will release our main Execute method so we can finally exit.
                 }
-
-                // If the build has already started (or already finished), we will cancel it
-                // If the build has not yet started, it will cancel itself, because
-                // we set alreadyCalled=1
-                bool hasBuildStarted;
-                lock (s_buildLock)
+                finally
                 {
-                    hasBuildStarted = s_hasBuildStarted;
-                }
-
-                if (hasBuildStarted)
-                {
-                    BuildManager.DefaultBuildManager.CancelAllSubmissions();
-                    s_buildComplete.WaitOne();
-                }
-
-                s_cancelComplete.Set(); // This will release our main Execute method so we can finally exit.
-
-                // Server node shall terminate, if it received CancelKey press and gracefully cancelled all its submissions.
-                if (s_isServerNode)
-                {
-                    Environment.Exit(1); // the process will now be terminated rudely
+                    // Server node shall terminate, if it received CancelKey press and gracefully cancelled all its submissions.
+                    if (s_isServerNode)
+                    {
+                        Environment.Exit(1); // the process will now be terminated rudely
+                    }
                 }
             };
 
