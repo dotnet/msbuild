@@ -506,7 +506,7 @@ internal static class NativeMethods
     {
         int numberOfCpus = Environment.ProcessorCount;
 #if !MONO
-        // .NET Core on Windows returns a core count limited to the current NUMA node
+        // .NET on Windows returns a core count limited to the current NUMA node
         //     https://github.com/dotnet/runtime/issues/29686
         // so always double-check it.
         if (IsWindows)
