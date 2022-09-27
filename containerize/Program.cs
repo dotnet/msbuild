@@ -44,10 +44,7 @@ RootCommand rootCommand = new("Containerize an application without Docker."){
     imageTag,
     workingDir
 };
-rootCommand.SetHandler(async (folder, containerWorkingDir, uri, baseImageName, baseTag, entrypoint, imageName, imageTag) =>
-{
-    await Containerize(folder, containerWorkingDir, uri, baseImageName, baseTag, entrypoint, imageName, imageTag);
-},
+rootCommand.SetHandler(Containerize,
     fileOption,
     workingDir,
     registryUri,
