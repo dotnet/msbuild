@@ -956,9 +956,6 @@ namespace Microsoft.Build.CommandLine
                 s_buildComplete.Set();
                 Console.CancelKeyPress -= cancelHandler;
 
-                // Wait for any pending cancel, so that we get any remaining messages
-                s_cancelComplete.WaitOne();
-
 #if FEATURE_GET_COMMANDLINE
                 MSBuildEventSource.Log.MSBuildExeStop(commandLine);
 #else
@@ -966,6 +963,8 @@ namespace Microsoft.Build.CommandLine
                     MSBuildEventSource.Log.MSBuildExeStop(string.Join(" ", commandLine));
                 }
 #endif
+                // Wait for any pending cancel, so that we get any remaining messages
+                s_cancelComplete.WaitOne();
             }
             /**********************************************************************************************************************
              * WARNING: Do NOT add any more catch blocks above!
@@ -993,8 +992,8 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            s_buildCancellationSource.Cancel();
 
+            s_buildCancellationSource.Cancel();
             Console.WriteLine(ResourceUtilities.GetResourceString("AbortingBuild"));
 
             // The OS takes a lock in
@@ -1031,6 +1030,12 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 s_cancelComplete.Set(); // This will release our main Execute method so we can finally exit.
+
+                // Server node shall terminate, if it received CancelKey press and gracefully cancelled all its submissions.
+                if (s_isServerNode)
+                {
+                    Environment.Exit(1); // the process will now be terminated rudely
+                }
             };
 
             ThreadPoolExtensions.QueueThreadPoolWorkItemWithCulture(callback, CultureInfo.CurrentCulture, CultureInfo.CurrentUICulture);
