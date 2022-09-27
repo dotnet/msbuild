@@ -1038,7 +1038,7 @@ namespace Microsoft.Build.CommandLine
                     // Server node shall terminate after it received CancelKey press.
                     if (s_isServerNode)
                     {
-                        Environment.Exit(0); // the process cab now be terminated as everything has already been gracefully cancelled.
+                        Environment.Exit(0); // the process can now be terminated as everything has already been gracefully cancelled.
                     }
                 }
             };
