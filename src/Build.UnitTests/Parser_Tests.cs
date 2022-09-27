@@ -564,7 +564,7 @@ namespace Microsoft.Build.UnitTests
                             </ItemGroup>
                             <ItemDefinitionGroup>
                                 <A>
-                                    <m>m1</m>
+                                    <m>m2</m>
                                     <n>n2</n>
                                 </A>
                             </ItemDefinitionGroup>
@@ -579,12 +579,21 @@ namespace Microsoft.Build.UnitTests
             var projectItem = project.GetItems("A").FirstOrDefault();
             Assert.Equal("bar", projectItem.EvaluatedInclude);
 
+            var metadatam = projectItem.GetMetadata("m");
+            if (context)
+            {
+                // Go to when 
+                Assert.Equal("m1", metadatam.EvaluatedValue);
+            }
+            else
+            {
+                // Go to Otherwise
+                Assert.Equal("m2", metadatam.EvaluatedValue);
+            }
+
             var metadatan = projectItem.GetMetadata("n");
             Assert.Equal("n1", metadatan.EvaluatedValue);
             Assert.Equal("n2", metadatan.Predecessor.EvaluatedValue);
-
-            var metadatam = projectItem.GetMetadata("m");
-            Assert.Equal("m1", metadatam.EvaluatedValue);
         }
     }
 }
