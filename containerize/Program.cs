@@ -59,30 +59,40 @@ return await rootCommand.InvokeAsync(args);
 
 async Task Containerize(DirectoryInfo folder, string workingDir, string registryName, string baseName, string baseTag, string[] entrypoint, string imageName, string imageTag)
 {
-    Registry registry = new Registry(new Uri($"https://{registryName}"));
-
-    Console.WriteLine($"Reading from {registry.BaseUri}");
-
-    Image x = await registry.GetImageManifest(baseName, baseTag);
-    x.WorkingDirectory = workingDir;
-
-    JsonSerializerOptions options = new()
+    try
     {
-        WriteIndented = true,
-    };
+        Registry registry = new Registry(new Uri($"https://{registryName}"));
 
-    Console.WriteLine($"Copying from {folder.FullName} to {workingDir}");
-    Layer l = Layer.FromDirectory(folder.FullName, workingDir);
+        Console.WriteLine($"Reading from {registry.BaseUri}");
 
-    x.AddLayer(l);
+        Image x = await registry.GetImageManifest(baseName, baseTag);
+        x.WorkingDirectory = workingDir;
 
-    x.SetEntrypoint(entrypoint);
+        JsonSerializerOptions options = new()
+        {
+            WriteIndented = true,
+        };
 
-    // File.WriteAllTextAsync("manifest.json", x.manifest.ToJsonString(options));
-    // File.WriteAllTextAsync("config.json", x.config.ToJsonString(options));
+        Console.WriteLine($"Copying from {folder.FullName} to {workingDir}");
+        Layer l = Layer.FromDirectory(folder.FullName, workingDir);
 
-    //await LocalDocker.Load(x, imageName, imageTag, baseName);
-    await registry.Push(x, imageName, imageTag, baseName);
+        x.AddLayer(l);
 
-    Console.WriteLine($"Loaded image into local Docker daemon. Use 'docker run --rm -it --name {imageName} {registryName}/{imageName}:{imageTag}' to run the application.");
+        x.SetEntrypoint(entrypoint);
+
+        // File.WriteAllTextAsync("manifest.json", x.manifest.ToJsonString(options));
+        // File.WriteAllTextAsync("config.json", x.config.ToJsonString(options));
+
+        //await LocalDocker.Load(x, imageName, imageTag, baseName);
+        await registry.Push(x, imageName, imageTag, baseName);
+
+        Console.WriteLine($"Loaded image into local Docker daemon. Use 'docker run --rm -it --name {imageName} {registryName}/{imageName}:{imageTag}' to run the application.");
+    }
+    catch (Exception ex)
+    {
+        Console.Error.Write("error CONTAINER999: unhandled exception in containerize. Exception: ");
+        Console.Error.WriteLine(ex.ToString());
+
+        throw;
+    }
 }
