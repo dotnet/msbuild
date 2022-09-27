@@ -64,12 +64,12 @@
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
         <source>MSB4271: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
-        <target state="needs-review-translation">MSB4271: 環境變數 MSBuildDisableFeaturesFromVersion 設定的格式無效。正在啟用所有變更波版本。輸入的值: {0}。目前的變更波: {1}。</target>
+        <target state="new">MSB4271: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</target>
         <note>{StrBegin="MSB4271: "}UE: Value should be of the format: xx.yy</note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">
         <source>MSB4272: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
-        <target state="needs-review-translation">MSB4272: 環境變數 MSBuildDisableFeaturesFromVersion 已設定為無法輪替的版本。預設為變更波版本: {0}。輸入的值: {1}。目前的變更波: {2}。</target>
+        <target state="new">MSB4272: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</target>
         <note>{StrBegin="MSB4272: "}</note>
       </trans-unit>
       <trans-unit id="CircularDependency">
@@ -149,8 +149,7 @@
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
         <source>Loading the following project cache plugin: {0}</source>
-        <target state="needs-review-translation">正在載入下列專案快取外掛程式:
-    {0}</target>
+        <target state="new">Loading the following project cache plugin: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
