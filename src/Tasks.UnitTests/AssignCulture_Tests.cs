@@ -273,7 +273,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Single(t.AssignedFiles);
             Assert.Single(t.CultureNeutralAssignedFiles);
-            Assert.Equal(t.AssignedFiles[0].GetMetadata("WithCulture"), "true");
+            Assert.Equal("true", t.AssignedFiles[0].GetMetadata("WithCulture"));
             Assert.Equal(culture, t.AssignedFiles[0].GetMetadata("Culture"));
             Assert.Equal($"MyResource.{culture}.resx", t.AssignedFiles[0].ItemSpec);
             Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
