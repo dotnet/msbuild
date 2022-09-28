@@ -71,7 +71,7 @@ namespace Microsoft.Build.Tasks
                 catch
                 {
                     // Second attempt: try pseudolocales (see above)
-                    return pseudoLocales.Contains(name);
+                    return pseudoLocales.Contains(name, StringComparer.OrdinalIgnoreCase);
                 }
             }
 #endif
