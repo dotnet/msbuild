@@ -34,10 +34,13 @@ public class AuthHandshakeMessageHandler : DelegatingHandler {
     /// <param name="msg"></param>
     /// <param name="authInfo"></param>
     /// <returns></returns>
-    private static bool TryParseAuthenticationInfo(HttpResponseMessage msg, [NotNullWhen(true)]out AuthInfo? authInfo) {
+    private static bool TryParseAuthenticationInfo(HttpResponseMessage msg, [NotNullWhen(true)]out AuthInfo? authInfo)
+    {
+        authInfo = null;
+
         var authenticateHeader = msg.Headers.WwwAuthenticate;
-        if (!authenticateHeader.Any()) {
-            authInfo = null;
+        if (!authenticateHeader.Any()) 
+        {
             return false;
         }
 
@@ -57,15 +60,10 @@ public class AuthHandshakeMessageHandler : DelegatingHandler {
             {
                 authInfo = new AuthInfo(new Uri(realm), service, scope);
                 return true;
-            } else {
-                authInfo = null;
-                return false;
             }
-        } else {
-            authInfo = null;
-            return false;
         }
 
+        return false;
     }
 
     public AuthHandshakeMessageHandler(HttpMessageHandler innerHandler) : base(innerHandler) { }
