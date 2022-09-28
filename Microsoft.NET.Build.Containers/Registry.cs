@@ -69,13 +69,15 @@ public class AuthHandshakeMessageHandler : DelegatingHandler {
     public AuthHandshakeMessageHandler(HttpMessageHandler innerHandler) : base(innerHandler) { }
 
     /// <summary>
-    /// the token response from the service can include the token as well as expiration data, but I found that github's responses at least
-    /// didn't include the latter two points of information, so those are marked nullable.
+    /// Response to a request to get a token using some auth.
     /// </summary>
-    /// <param name="token"></param>
-    /// <param name="expires_in"></param>
-    /// <param name="issued_at"></param>
-    private record TokenResponse(string token, int? expires_in, DateTimeOffset? issued_at);
+    /// <remarks>
+    /// <see href="https://docs.docker.com/registry/spec/auth/token/#token-response-fields"/>
+    /// </remarks>
+    private record TokenResponse(string? token, string? access_token, int? expires_in, DateTimeOffset? issued_at)
+    {
+        public string ResolvedToken => token ?? access_token ?? throw new ArgumentException("Token response had neither token nor access_token.");
+    }
 
     /// <summary>
     /// Uses the authentication information from a 401 response to perform the authentication dance for a given registry.
@@ -101,14 +103,21 @@ public class AuthHandshakeMessageHandler : DelegatingHandler {
         builder.Query = queryDict.ToString();
         var message = new HttpRequestMessage(HttpMethod.Get, builder.ToString());
         message.Headers.Authorization = header;
+
         var tokenResponse = await base.SendAsync(message, cancellationToken);
         tokenResponse.EnsureSuccessStatusCode();
-        TokenResponse token = JsonSerializer.Deserialize<TokenResponse>(tokenResponse.Content.ReadAsStream());
+
+        TokenResponse? token = JsonSerializer.Deserialize<TokenResponse>(tokenResponse.Content.ReadAsStream());
+        if (token is null)
+        {
+            throw new ArgumentException("Could not deserialize token from JSON");
+        }
+
         // save the retrieved token in the cache
         var entry = tokenCache.CreateEntry(realm.Host);
-        entry.SetValue(token.token);
+        entry.SetValue(token.ResolvedToken);
         entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(token.expires_in ?? 3600);
-        return token.token;
+        return token.ResolvedToken;
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
