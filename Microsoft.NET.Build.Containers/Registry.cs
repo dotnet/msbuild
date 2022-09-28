@@ -120,21 +120,35 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler {
         return token.ResolvedToken;
     }
 
-    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        if (request.RequestUri is null)
+        {
+            throw new ArgumentException("No RequestUri specified", nameof(request));
+        }
+
         // attempt to use cached token for the request if available
-        if(TokenCache.Get<string>(request.RequestUri.Host) is {} cachedToken){
+        if (TokenCache.Get<string>(request.RequestUri.Host) is string cachedToken)
+        {
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", cachedToken);
         }
+
         var response = await base.SendAsync(request, cancellationToken);
-        if (response is { StatusCode: HttpStatusCode.OK}) {
+        if (response is { StatusCode: HttpStatusCode.OK })
+        {
             return response;
-        } else if (response is { StatusCode: HttpStatusCode.Unauthorized} && TryParseAuthenticationInfo(response, out var authInfo)) {
-            if (await GetTokenAsync(authInfo.Realm, authInfo.Service, authInfo.Scope, cancellationToken) is {} fetchedToken) {
+        }
+        else if (response is { StatusCode: HttpStatusCode.Unauthorized } && TryParseAuthenticationInfo(response, out AuthInfo? authInfo))
+        {
+            if (await GetTokenAsync(authInfo.Realm, authInfo.Service, authInfo.Scope, cancellationToken) is string fetchedToken)
+            {
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", fetchedToken);
                 return await base.SendAsync(request, cancellationToken);
             }
             return response;
-        } else {
+        }
+        else
+        {
             return response;
         }
     }
