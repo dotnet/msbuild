@@ -1964,14 +1964,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetPlatformMonikers Condition="'$(TargetPlatformMoniker)' == ''">None</TargetPlatformMonikers>
         <AdditionalPropertiesFromProject>$(_AdditionalTargetFrameworkInfoProperties)</AdditionalPropertiesFromProject>
 
-        <!-- Determine whether a project is "RID agnostic" for each TargetFramework.  "RID agnostic" means that global properties such as SelfContained and RuntimeIdentifier should
-             not flow across project references.
-
-             Generally this value will come from the IsRidAgnostic property set by the .NET SDK.  If that's not set, then the fallback logic here will be that the project
-             is RID agnostic if it doesn't have RuntimeIdentifier or RuntimeIdentifiers properties set. -->
+        <!-- Determine whether a project is "RID agnostic" for each TargetFramework.  "RID agnostic" means that global properties such as
+             SelfContained and RuntimeIdentifier should not flow across project references.  The IsRidAgnostic metadata value is consumed in the
+             _GetProjectReferenceTargetFrameworkProperties target, where those properties are added to a project's UndefineProperties if
+             IsRidAgnostic is set.
+        
+             Generally we set the IsRidAgnostic metadata based on the IsRidAgnostic property set by the .NET SDK.  If that's not set, then the
+             fallback logic here will be that the project is RID agnostic if it doesn't have RuntimeIdentifier or RuntimeIdentifiers properties set. -->
         <IsRidAgnostic>$(IsRidAgnostic)</IsRidAgnostic>
-        <IsRidAgnostic Condition=" '$(IsRidAgnostic)' == '' and '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
-        <IsRidAgnostic Condition=" '$(IsRidAgnostic)' == ''">false</IsRidAgnostic>
+        <IsRidAgnostic Condition=" '%(IsRidAgnostic)' == '' and '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
+        <IsRidAgnostic Condition=" '%(IsRidAgnostic)' == ''">false</IsRidAgnostic>
 
       </_TargetFrameworkInfo>
     </ItemGroup>
