@@ -261,7 +261,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "This is a net core codepath")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Pseudoloc is special-cased in .NET relative to Framework.")]
         public void Pseudolocales_CaseInsensitive()
         {
             string culture = "qps-Ploc";
