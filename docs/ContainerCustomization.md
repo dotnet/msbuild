@@ -51,15 +51,20 @@ By default, the value used will be the `AssemblyName` of the project.
 > **Note**
 > Image names can only contain lowercase alphanumeric characters, periods, underscores, and dashes, and must start with a letter or number - any other characters will result in an error being thrown.
 
-## ContainerImageTag
+## ContainerImageTag(s)
 
-This property controls the tag that is generated for the image. Tags are often used to refer to different versions of an application, but they can also refer to different operating system distributions, or even just different baked-in configuration.
+This property controls the tag that is generated for the image. Tags are often used to refer to different versions of an application, but they can also refer to different operating system distributions, or even just different baked-in configuration. This property also can be used to push multiple tags - simply use a semicolon-delimited set of tags in the `ContainerImageTags` property, similar to setting multiple `TargetFrameworks`.
 
 By default, the value used will be the `Version` of the project.
 
 ```xml
 <ContainerImageTag>1.2.3-alpha2</ContainerImageTag>
 ```
+
+```xml
+<ContainerImageTags>1.2.3-alpha2;latest</ContainerImageTags>
+```
+
 
 > **Note**
 > Tags can only contain up to 127 alphanumeric characters, periods, underscores, and dashes. They must start with an alphanumeric character or an underscore. Any other form will result in an error being thrown.
@@ -74,14 +79,47 @@ By default, we use the `/app` directory as the working directory.
 <ContainerWorkingDirectory>/bin</ContainerWorkingDirectory>
 ```
 
+## ContainerPort
+
+This item adds TCP or UDP ports to the list of known ports for the container. This enables container runtimes like Docker to map these ports to the host machine automatically. This is often used as documentation for the container, but can also be used to enable automatic port mapping.
+
+ContainerPort items have two properties:
+* Include
+  * The port number to expose
+* Type
+  * One of `tcp` or `udp` - the default is `tcp`
+
+```xml
+<ItemGroup>
+    <ContainerPort Include="80" Type="tcp" />
+</ItemGroup>
+```
+
+> **Note**
+> This item does nothing for the container by default and should be considered advisory at best.
+
+## ContainerLabel
+
+This item adds a metadata label to the container. Labels have no impact on the container at runtime, but are often used to store version and authoring metadata for use by security scanners and other infrastructure tools.
+
+ContainerLabel items have two properties:
+* Include
+  * The key of the label
+* Value
+  * The value of the label - this may be empty
+
+```xml
+<ItemGroup>
+    <ContainerLabel Include="org.contoso.businessunit" Value="contoso-university" />
+<ItemGroup>
+```
+
 ## Unsupported properties
 
 There are many other properties and items that we want to add support for in subsequent previews:
 
 * Entrypoints
 * Entrypoint Arguments
-* Ports
 * Environment Variables
-* Labels
 
 We expect to add them in future versions, so watch this space!

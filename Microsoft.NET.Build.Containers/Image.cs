@@ -1,11 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace Microsoft.NET.Build.Containers;
-
-record Label(string name, string value);
 
 public class Image
 {
@@ -19,14 +18,17 @@ public class Image
 
     private HashSet<Label> labels;
 
+    internal HashSet<Port> exposedPorts;
+
     public Image(JsonNode manifest, JsonNode config, string name, Registry? registry)
     {
         this.manifest = manifest;
         this.config = config;
         this.OriginatingName = name;
         this.originatingRegistry = registry;
-        // labels are inherited from the parent image, so we need to seed our new image with them.
+        // these next values are inherited from the parent image, so we need to seed our new image with them.
         this.labels = ReadLabelsFromConfig(config);
+        this.exposedPorts = ReadPortsFromConfig(config);
     }
 
     public IEnumerable<Descriptor> LayerDescriptors
@@ -56,7 +58,7 @@ public class Image
     {
         newLayers.Add(l);
         manifest["layers"]!.AsArray().Add(l.Descriptor);
-        config["rootfs"]!["diff_ids"]!.AsArray().Add(l.Descriptor.Digest); // TODO: this should be the descriptor of the UNCOMPRESSED tarball (once we turn on compression)
+        config["rootfs"]!["diff_ids"]!.AsArray().Add(l.Descriptor.UncompressedDigest);
         RecalculateDigest();
     }
 
@@ -65,6 +67,18 @@ public class Image
         config["created"] = DateTime.UtcNow;
 
         manifest["config"]!["digest"] = GetDigest(config);
+    }
+
+    private JsonObject CreatePortMap()
+    {
+        // ports are entries in a key/value map whose keys are "<number>/<type>" and whose values are an empty object.
+        // yes, this is odd.
+        var container = new JsonObject();
+        foreach (var port in exposedPorts)
+        {
+            container.Add($"{port.number}/{port.type}", new JsonObject());
+        }
+        return container;
     }
 
     private static HashSet<Label> ReadLabelsFromConfig(JsonNode inputConfig)
@@ -84,8 +98,32 @@ public class Image
         }
         else
         {
-            // initialize and empty labels map
+            // initialize an empty labels map
             return new HashSet<Label>();
+        }
+    }
+
+    private static HashSet<Port> ReadPortsFromConfig(JsonNode inputConfig)
+    {
+        if (inputConfig is JsonObject config && config["ExposedPorts"] is JsonObject portsJson)
+        {
+            // read label mappings from object
+            var ports = new HashSet<Port>();
+            foreach (var property in portsJson)
+            {
+                if (property.Key is { } propertyName
+                    && property.Value is JsonObject propertyValue
+                    && ContainerHelpers.TryParsePort(propertyName, out var parsedPort, out var _))
+                {
+                    ports.Add(parsedPort);
+                }
+            }
+            return ports;
+        }
+        else
+        {
+            // initialize an empty ports map
+            return new HashSet<Port>();
         }
     }
 
@@ -141,6 +179,13 @@ public class Image
         RecalculateDigest();
     }
 
+    public void ExposePort(int number, PortType type)
+    {
+        exposedPorts.Add(new(number, type));
+        config["config"]!["ExposedPorts"] = CreatePortMap();
+        RecalculateDigest();
+    }
+
     public string GetDigest(JsonNode json)
     {
         string hashString;
@@ -152,8 +197,8 @@ public class Image
 
     public static string GetSha(JsonNode json)
     {
-        using SHA256 mySHA256 = SHA256.Create();
-        byte[] hash = mySHA256.ComputeHash(Encoding.UTF8.GetBytes(json.ToJsonString()));
+        Span<byte> hash = stackalloc byte[SHA256.HashSizeInBytes];
+        SHA256.HashData(Encoding.UTF8.GetBytes(json.ToJsonString()), hash);
 
         return Convert.ToHexString(hash).ToLowerInvariant();
     }

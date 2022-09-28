@@ -1,7 +1,20 @@
 namespace Microsoft.NET.Build.Containers;
 
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
+
+record Label(string name, string value);
+
+// Explicitly lowercase to ease parsing - the incoming values are
+// lowercased by spec
+public enum PortType
+{
+    tcp,
+    udp
+}
+
+public record Port(int number, PortType type);
 
 public static class ContainerHelpers
 {
@@ -12,7 +25,8 @@ public static class ContainerHelpers
     /// <summary>
     /// Matches if the string is not lowercase or numeric, or ., _, or -.
     /// </summary>
-    private static Regex imageNameCharacters = new Regex(@"[^a-z0-9._\-/]");
+    /// <remarks>Technically the period should be allowed as well, but due to inconsistent support between cloud providers we're removing it.</remarks>
+    private static Regex imageNameCharacters = new Regex(@"[^a-z0-9_\-/]");
 
     /// <summary>
     /// Given some "fully qualified" image name (e.g. mcr.microsoft.com/dotnet/runtime), return
@@ -124,7 +138,8 @@ public static class ContainerHelpers
     /// <summary>
     /// Checks if a given container image name adheres to the image name spec. If not, and recoverable, then normalizes invalid characters.
     /// </summary>
-    public static bool NormalizeImageName(string containerImageName, [NotNullWhen(false)] out string? normalizedImageName)
+    public static bool NormalizeImageName(string containerImageName,
+                                         [NotNullWhen(false)] out string? normalizedImageName)
     {
         if (IsValidImageName(containerImageName))
         {
@@ -133,11 +148,81 @@ public static class ContainerHelpers
         }
         else
         {
-            if (!Char.IsLetterOrDigit(containerImageName, 0)) {
+            if (!Char.IsLetterOrDigit(containerImageName, 0))
+            {
                 throw new ArgumentException("The first character of the image name must be a lowercase letter or a digit.");
             }
             var loweredImageName = containerImageName.ToLowerInvariant();
             normalizedImageName = imageNameCharacters.Replace(loweredImageName, "-");
+            return false;
+        }
+    }
+
+    [Flags]
+    public enum ParsePortError
+    {
+        MissingPortNumber,
+        InvalidPortNumber,
+        InvalidPortType,
+        UnknownPortFormat
+    }
+
+    public static bool TryParsePort(string? portNumber, string? portType, [NotNullWhen(true)] out Port? port, [NotNullWhen(false)] out ParsePortError? error)
+    {
+        var portNo = 0;
+        error = null;
+        if (String.IsNullOrEmpty(portNumber))
+        {
+            error = ParsePortError.MissingPortNumber;
+        }
+        else if (!int.TryParse(portNumber, out portNo))
+        {
+            error = ParsePortError.InvalidPortNumber;
+        }
+
+        if (!Enum.TryParse<PortType>(portType, out PortType t))
+        {
+            if (portType is not null)
+            {
+                error = (error ?? ParsePortError.InvalidPortType) | ParsePortError.InvalidPortType;
+            }
+            else
+            {
+                t = PortType.tcp;
+            }
+        }
+
+        if (error is null)
+        {
+            port = new Port(portNo, t);
+            return true;
+        }
+        else
+        {
+            port = null;
+            return false;
+        }
+
+    }
+
+    public static bool TryParsePort(string input, [NotNullWhen(true)] out Port? port, [NotNullWhen(false)] out ParsePortError? error)
+    {
+        var parts = input.Split('/');
+        if (parts.Length == 2)
+        {
+            string portNumber = parts[0];
+            string type = parts[1];
+            return TryParsePort(portNumber, type, out port, out error);
+        }
+        else if (parts.Length == 1)
+        {
+            string portNum = parts[0];
+            return TryParsePort(portNum, null, out port, out error);
+        }
+        else
+        {
+            error = ParsePortError.UnknownPortFormat;
+            port = null;
             return false;
         }
     }

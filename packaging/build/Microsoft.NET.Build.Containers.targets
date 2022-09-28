@@ -1,4 +1,18 @@
 <Project>
+    <Target Name="_ContainerVerifySDKVersion"
+        Condition="'$(WebPublishMethod)' == 'Container' or '$(PublishProfile)' == 'DefaultContainer'"
+        BeforeTargets="AfterPublish">
+        <!-- If the user has opted into container publishing via their own profile (WebPublishMethod = Container) or
+            via the default Profile (PublishProfile = DefaultContainer), make sure they're on a supported SDK version.
+            We do the explicit profile name check here because for preview6 for example the profile didn't exist, so we
+            can't rely only on the WebPublishMethod. -->
+        <PropertyGroup>
+            <!-- Allow preview 7, any RC, or any stable version of 7 -->
+            <_IsAllowedVersion Condition="$(NETCoreSdkVersion.StartsWith('7.0.100-preview.7')) or $(NETCoreSdkVersion.StartsWith('7.0.100-rc')) or ($(NETCoreSdkVersion.StartsWith('7.0.10')) and $(NETCoreSdkVersion.Contains('-')) == false)">true</_IsAllowedVersion>
+        </PropertyGroup>
+        <Error Condition="'$(_IsAllowedVersion)' != 'true'" Code="CONTAINER002" Text="The current .NET SDK ($(NETCoreSdkVersion)) doesn't support containerization. Please use version 7.0.100-preview.7 or higher." />
+    </Target>
+
     <Target Name="ComputeContainerConfig">
         <!-- Reference data about this project -->
         <PropertyGroup>
@@ -21,7 +35,9 @@
             <ContainerRegistry Condition="'$(ContainerRegistry)' == ''">docker://</ContainerRegistry>
             <!-- Note: spaces will be replaced with '-' in ContainerImageName and ContainerImageTag -->
             <ContainerImageName Condition="'$(ContainerImageName)' == ''">$(AssemblyName)</ContainerImageName>
-            <ContainerImageTag Condition="'$(ContainerImageTag)' == ''">$(Version)</ContainerImageTag>
+            <!-- Only default a tag name if no tag names at all are provided -->
+            <ContainerImageTag Condition="'$(ContainerImageTag)' == '' and '$(ContainerImageTags)' == ''">$(Version)</ContainerImageTag>
+            <ContainerImageTag Condition="'$(RunningInVisualStudio)' == 'true' and '$(PublishImageTag)' != ''">$(PublishImageTag)</ContainerImageTag>
             <ContainerWorkingDirectory Condition="'$(ContainerWorkingDirectory)' == ''">/app</ContainerWorkingDirectory>
             <!-- Could be semicolon-delimited -->
         </PropertyGroup>
@@ -48,34 +64,47 @@
         <ParseContainerProperties FullyQualifiedBaseImageName="$(ContainerBaseImage)"
                                   ContainerRegistry="$(ContainerRegistry)"
                                   ContainerImageName="$(ContainerImageName)"
-                                  ContainerImageTag="$(ContainerImageTag)">
+                                  ContainerImageTag="$(ContainerImageTag)"
+                                  ContainerImageTags="$(ContainerImageTags)">
 
             <Output TaskParameter="ParsedContainerRegistry" PropertyName="ContainerBaseRegistry" />
             <Output TaskParameter="ParsedContainerImage" PropertyName="ContainerBaseName" />
             <Output TaskParameter="ParsedContainerTag" PropertyName="ContainerBaseTag" />
             <Output TaskParameter="NewContainerRegistry" PropertyName="ContainerRegistry" />
             <Output TaskParameter="NewContainerImageName" PropertyName="ContainerImageName" />
-            <Output TaskParameter="NewContainerTag" PropertyName="ContainerImageTag" />
+            <Output TaskParameter="NewContainerTags" ItemName="ContainerImageTags" />
         </ParseContainerProperties>
     </Target>
 
     <PropertyGroup>
         <PublishContainerDependsOn>
+            _ContainerVerifySDKVersion;
             ComputeContainerConfig
         </PublishContainerDependsOn>
     </PropertyGroup>
 
     <Target Name="PublishContainer" DependsOnTargets="$(PublishContainerDependsOn)">
-        <CreateNewImage BaseRegistry="$(ContainerBaseRegistry)"
+
+        <PropertyGroup Condition="'$(DOTNET_HOST_PATH)' == ''">
+            <DotNetHostDirectory>$(NetCoreRoot)</DotNetHostDirectory>
+            <DotNetHostFileName>dotnet</DotNetHostFileName>
+            <DotNetHostFileName Condition="'$(OS)' == 'Windows_NT'">dotnet.exe</DotNetHostFileName>
+        </PropertyGroup>
+
+        <CreateNewImage ContainerizeDirectory="$(ContainerizeFolder)"
+                        ToolPath="$(DotNetHostDirectory)"
+                        ToolExe="$(DotNetHostFileName)"
+                        BaseRegistry="$(ContainerBaseRegistry)"
                         BaseImageName="$(ContainerBaseName)"
                         BaseImageTag="$(ContainerBaseTag)"
                         OutputRegistry="$(ContainerRegistry)"
                         ImageName="$(ContainerImageName)"
-                        ImageTag="$(ContainerImageTag)"
+                        ImageTags="@(ContainerImageTags)"
                         PublishDirectory="$(PublishDir)"
                         WorkingDirectory="$(ContainerWorkingDirectory)"
                         Entrypoint="@(ContainerEntrypoint)"
                         EntrypointArgs="@(ContainerEntrypointArgs)"
-						Labels="@(ContainerLabel)"/>
+                        Labels="@(ContainerLabel)"
+                        ExposedPorts="@(ContainerPort)" />
     </Target>
 </Project>

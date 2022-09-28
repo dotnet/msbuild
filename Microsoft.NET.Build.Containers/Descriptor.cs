@@ -30,6 +30,15 @@ public readonly record struct Descriptor
     public string Digest { get; init; }
 
     /// <summary>
+    /// Digest of the uncompressed content, specifying algorithm and value.
+    /// </summary>
+    /// <remarks>
+    /// <see href="https://github.com/opencontainers/image-spec/blob/7b36cea86235157d78528944cb94c3323ee0905c/descriptor.md#digests"/>
+    /// </remarks>
+    [JsonIgnore]
+    public string? UncompressedDigest { get; init; }
+
+    /// <summary>
     /// Size, in bytes, of the raw content.
     /// </summary>
     [JsonPropertyName("size")]

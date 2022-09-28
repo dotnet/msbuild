@@ -1,98 +1,167 @@
 ﻿using System.CommandLine;
 using Microsoft.NET.Build.Containers;
 using System.Text.Json;
+using System.CommandLine.Parsing;
+using System.Text;
 
-var fileOption = new Argument<DirectoryInfo>(
-    name: "folder",
-    description: "The folder to pack.")
+var publishDirectoryArg = new Argument<DirectoryInfo>(
+    name: "PublishDirectory",
+    description: "The directory for the build outputs to be published.")
     .LegalFilePathsOnly().ExistingOnly();
 
-Option<string> registryUri = new(
-    name: "--registry",
-    description: "Location of the registry to push to.",
-    getDefaultValue: () => "localhost:5010");
-
-Option<string> baseImageName = new(
-    name: "--base",
-    description: "Base image name.",
-    getDefaultValue: () => "dotnet/runtime");
-
-Option<string> baseImageTag = new(
-    name: "--baseTag",
-    description: "Base image tag.",
-    getDefaultValue: () => $"{System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription[5]}.0");
-
-Option<string[]> entrypoint = new(
-    name: "--entrypoint",
-    description: "Entrypoint application command.");
-
-Option<string> imageName = new(
-    name: "--name",
-    description: "Name of the new image.");
-
-var imageTag = new Option<string>("--tag", description: "Tag of the new image.", getDefaultValue: () => "latest");
-
-var workingDir = new Option<string>("--working-dir", description: "The working directory of the application", getDefaultValue: () => "/app");
-
-RootCommand rootCommand = new("Containerize an application without Docker."){
-    fileOption,
-    registryUri,
-    baseImageName,
-    baseImageTag,
-    entrypoint,
-    imageName,
-    imageTag,
-    workingDir
-};
-rootCommand.SetHandler(Containerize,
-    fileOption,
-    workingDir,
-    registryUri,
-    baseImageName,
-    baseImageTag, 
-    entrypoint,
-    imageName,
-    imageTag
-    );
-
-return await rootCommand.InvokeAsync(args);
-
-async Task Containerize(DirectoryInfo folder, string workingDir, string registryName, string baseName, string baseTag, string[] entrypoint, string imageName, string imageTag)
+var baseRegistryOpt = new Option<string>(
+    name: "--baseregistry",
+    description: "The registry to use for the base image.")
 {
-    try
+    IsRequired = true
+};
+
+var baseImageNameOpt = new Option<string>(
+    name: "--baseimagename",
+    description: "The base image to pull.")
+{
+    IsRequired = true
+};
+
+var baseImageTagOpt = new Option<string>(
+    name: "--baseimagetag",
+    description: "The base image tag. Ex: 6.0",
+    getDefaultValue: () => "latest");
+
+var outputRegistryOpt = new Option<string>(
+    name: "--outputregistry",
+    description: "The registry to push to.")
+{
+    IsRequired = true
+};
+
+var imageNameOpt = new Option<string>(
+    name: "--imagename",
+    description: "The name of the output image that will be pushed to the registry.")
+{
+    IsRequired = true
+};
+
+var imageTagsOpt = new Option<string[]>(
+    name: "--imagetags",
+    description: "The tags to associate with the new image.")
+{
+    AllowMultipleArgumentsPerToken = true
+};
+
+var workingDirectoryOpt = new Option<string>(
+    name: "--workingdirectory",
+    description: "The working directory of the container.")
+{
+    IsRequired = true
+};
+
+var entrypointOpt = new Option<string[]>(
+    name: "--entrypoint",
+    description: "The entrypoint application of the container.")
+{
+    IsRequired = true,
+    AllowMultipleArgumentsPerToken = true
+};
+
+var entrypointArgsOpt = new Option<string[]>(
+    name: "--entrypointargs",
+    description: "Arguments to pass alongside Entrypoint.")
+{
+    AllowMultipleArgumentsPerToken = true
+};
+
+var labelsOpt = new Option<string[]>(
+    name: "--labels",
+    description: "Labels that the image configuration will include in metadata.",
+    parseArgument: result =>
     {
-        Registry registry = new Registry(new Uri($"https://{registryName}"));
+        var labels = result.Tokens.Select(x => x.Value).ToArray();
+        var badLabels = labels.Where((v) => v.Split('=').Length != 2);
 
-        Console.WriteLine($"Reading from {registry.BaseUri}");
-
-        Image x = await registry.GetImageManifest(baseName, baseTag);
-        x.WorkingDirectory = workingDir;
-
-        JsonSerializerOptions options = new()
+        // Is there a non-zero number of Labels that didn't split into two elements? If so, assume invalid input and error out
+        if (badLabels.Count() != 0)
         {
-            WriteIndented = true,
-        };
+            result.ErrorMessage = "Incorrectly formatted labels: " + badLabels.Aggregate((x, y) => x = x + ";" + y);
 
-        Console.WriteLine($"Copying from {folder.FullName} to {workingDir}");
-        Layer l = Layer.FromDirectory(folder.FullName, workingDir);
+            return new string[] { };
+        }
+        return labels;
+    })
+{
+    AllowMultipleArgumentsPerToken = true
+};
 
-        x.AddLayer(l);
+var portsOpt = new Option<Port[]>(
+    name: "--ports",
+    description: "Ports that the application declares that it will use. Note that this means nothing to container hosts, by default - it's mostly documentation. Ports should be of the form {number}/{type}, where {type} is tcp or udp",
+    parseArgument: result => {
+        var ports = result.Tokens.Select(x => x.Value).ToArray();
+        var goodPorts = new List<Port>();
+        var badPorts = new List<(string, ContainerHelpers.ParsePortError)>();
+        
+        foreach (var port in ports) {
+            var split = port.Split('/');
+            if (split.Length != 2) {
+                badPorts.Add((port, ContainerHelpers.ParsePortError.UnknownPortFormat));
+                continue;
+            }
+            if (ContainerHelpers.TryParsePort(split[0], split[1], out var portInfo, out var portError)) {
+                goodPorts.Add(portInfo);
+            } else {
+                var pe = (ContainerHelpers.ParsePortError)portError!;
+                badPorts.Add((port, pe));
+            }
+        }
 
-        x.SetEntrypoint(entrypoint);
-
-        // File.WriteAllTextAsync("manifest.json", x.manifest.ToJsonString(options));
-        // File.WriteAllTextAsync("config.json", x.config.ToJsonString(options));
-
-        //await LocalDocker.Load(x, imageName, imageTag, baseName);
-        await registry.Push(x, imageName, imageTag, baseName);
-
-        Console.WriteLine($"Loaded image into local Docker daemon. Use 'docker run --rm -it --name {imageName} {registryName}/{imageName}:{imageTag}' to run the application.");
+        if (badPorts.Count() != 0)
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine("Incorrectly formatted ports:");
+            foreach (var (badPort, error) in badPorts){
+                var errors = Enum.GetValues<ContainerHelpers.ParsePortError>().Where(e => error.HasFlag(e));
+                builder.AppendLine($"\t{badPort}:\t({string.Join(", ", errors)})");
+            }
+            result.ErrorMessage = builder.ToString();
+            return new Port[] { };
+        }
+        return goodPorts.ToArray();
     }
-    catch (Exception ex)
-    {
-        Console.Error.Write("error CONTAINER999: unhandled exception in containerize. Exception: ");
-        Console.Error.WriteLine(ex.ToString());
+){
+    AllowMultipleArgumentsPerToken = true
+};
 
-        throw;
-    }
-}
+RootCommand root = new RootCommand("Containerize an application without Docker.")
+{
+    publishDirectoryArg,
+    baseRegistryOpt,
+    baseImageNameOpt,
+    baseImageTagOpt,
+    outputRegistryOpt,
+    imageNameOpt,
+    imageTagsOpt,
+    workingDirectoryOpt,
+    entrypointOpt,
+    entrypointArgsOpt,
+    labelsOpt,
+    portsOpt
+};
+
+root.SetHandler(async (context) =>
+{
+    DirectoryInfo _publishDir = context.ParseResult.GetValueForArgument(publishDirectoryArg);
+    string _baseReg = context.ParseResult.GetValueForOption(baseRegistryOpt) ?? "";
+    string _baseName = context.ParseResult.GetValueForOption(baseImageNameOpt) ?? "";
+    string _baseTag = context.ParseResult.GetValueForOption(baseImageTagOpt) ?? "";
+    string _outputReg = context.ParseResult.GetValueForOption(outputRegistryOpt) ?? "";
+    string _name = context.ParseResult.GetValueForOption(imageNameOpt) ?? "";
+    string[] _tags = context.ParseResult.GetValueForOption(imageTagsOpt) ?? Array.Empty<string>();
+    string _workingDir = context.ParseResult.GetValueForOption(workingDirectoryOpt) ?? "";
+    string[] _entrypoint = context.ParseResult.GetValueForOption(entrypointOpt) ?? Array.Empty<string>();
+    string[] _entrypointArgs = context.ParseResult.GetValueForOption(entrypointArgsOpt) ?? Array.Empty<string>();
+    string[] _labels = context.ParseResult.GetValueForOption(labelsOpt) ?? Array.Empty<string>();
+    Port[] _ports = context.ParseResult.GetValueForOption(portsOpt) ?? Array.Empty<Port>();
+    await ContainerBuilder.Containerize(_publishDir, _workingDir, _baseReg, _baseName, _baseTag, _entrypoint, _entrypointArgs, _name, _tags, _outputReg, _labels, _ports);
+});
+
+return await root.InvokeAsync(args);
