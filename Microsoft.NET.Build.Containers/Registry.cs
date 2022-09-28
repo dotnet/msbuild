@@ -10,6 +10,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -39,16 +40,22 @@ public class AuthHandshakeMessageHandler : DelegatingHandler {
             authInfo = null;
             return false;
         }
-        var header = authenticateHeader.First();
-        if (header is { Scheme: "Bearer", Parameter: var args} && args is not null){
-            var parts = args.Split(',');
-            if (parts is not { Length: 3 }) {
-                authInfo = null;
-                return false;
+
+        AuthenticationHeaderValue header = authenticateHeader.First();
+        if (header is { Scheme: "Bearer", Parameter: string args })
+        {
+            Regex bearerParameterSplitter = new(@"(?<key>\w+)=""(?<value>[^""]*)""(?:,|$)");
+
+            Dictionary<string, string> keyValues = new();
+
+            foreach (Match match in bearerParameterSplitter.Matches(args))
+            {
+                keyValues.Add(match.Groups["key"].Value, match.Groups["value"].Value);
             }
-            var keyValues = parts.Select(part => part.Split('=', 2)).ToDictionary(parts => parts[0], parts => parts[1]);
-            if (keyValues.TryGetValue("realm", out var realm) && keyValues.TryGetValue("service", out var service) && keyValues.TryGetValue("scope", out var scope)) {
-                authInfo = new AuthInfo(new Uri(realm.Trim('\"')), service.Trim('\"'), scope.Trim('\"'));
+
+            if (keyValues.TryGetValue("realm", out string? realm) && keyValues.TryGetValue("service", out string? service) && keyValues.TryGetValue("scope", out string? scope))
+            {
+                authInfo = new AuthInfo(new Uri(realm), service, scope);
                 return true;
             } else {
                 authInfo = null;
