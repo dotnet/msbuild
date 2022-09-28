@@ -152,8 +152,6 @@ namespace Microsoft.Build.Shared
 
                 string file = Path.Combine(directory, $"{fileName}{extension}");
 
-                ErrorUtilities.VerifyThrow(!FileSystems.Default.FileExists(file), "Guid should be unique");
-
                 if (createFile)
                 {
                     File.WriteAllText(file, string.Empty);
