@@ -24,7 +24,7 @@ namespace Microsoft.NET.Build.Containers;
 /// <summary>
 /// A delegating handler that performs the Docker auth handshake as described <see href="https://docs.docker.com/registry/spec/auth/token/">in their docs</see> if a request isn't authenticated
 /// </summary>
-public class AuthHandshakeMessageHandler : DelegatingHandler {
+public partial class AuthHandshakeMessageHandler : DelegatingHandler {
     private record AuthInfo(Uri Realm, string Service, string Scope);
     private MemoryCache tokenCache = new MemoryCache(new OptionsWrapper<MemoryCacheOptions>(new MemoryCacheOptions()));
 
@@ -47,11 +47,10 @@ public class AuthHandshakeMessageHandler : DelegatingHandler {
         AuthenticationHeaderValue header = authenticateHeader.First();
         if (header is { Scheme: "Bearer", Parameter: string args })
         {
-            Regex bearerParameterSplitter = new(@"(?<key>\w+)=""(?<value>[^""]*)""(?:,|$)");
 
             Dictionary<string, string> keyValues = new();
 
-            foreach (Match match in bearerParameterSplitter.Matches(args))
+            foreach (Match match in BearerParameterSplitter().Matches(args))
             {
                 keyValues.Add(match.Groups["key"].Value, match.Groups["value"].Value);
             }
@@ -138,6 +137,9 @@ public class AuthHandshakeMessageHandler : DelegatingHandler {
             return response;
         }
     }
+
+    [GeneratedRegex("(?<key>\\w+)=\"(?<value>[^\"]*)\"(?:,|$)")]
+    private static partial Regex BearerParameterSplitter();
 }
 
 public record struct Registry(Uri BaseUri)
