@@ -69,6 +69,15 @@ public class AuthHandshakeMessageHandler : DelegatingHandler {
     public AuthHandshakeMessageHandler(HttpMessageHandler innerHandler) : base(innerHandler) { }
 
     /// <summary>
+    /// the token response from the service can include the token as well as expiration data, but I found that github's responses at least
+    /// didn't include the latter two points of information, so those are marked nullable.
+    /// </summary>
+    /// <param name="token"></param>
+    /// <param name="expires_in"></param>
+    /// <param name="issued_at"></param>
+    private record TokenResponse(string token, int? expires_in, DateTimeOffset? issued_at);
+
+    /// <summary>
     /// Uses the authentication information from a 401 response to perform the authentication dance for a given registry.
     /// Credentials for the request are retrieved from the credential provider, then used to acquire a token.
     /// That token is cached for some duration on a per-host basis.
@@ -92,40 +101,14 @@ public class AuthHandshakeMessageHandler : DelegatingHandler {
         builder.Query = queryDict.ToString();
         var message = new HttpRequestMessage(HttpMethod.Get, builder.ToString());
         message.Headers.Authorization = header;
-        HttpResponseMessage tokenResponse = await base.SendAsync(message, cancellationToken);
-
-        if (tokenResponse.IsSuccessStatusCode)
-        {
-            Stream utf8Json = await tokenResponse.Content.ReadAsStreamAsync();
-            JsonNode? tokenJson = JsonNode.Parse(utf8Json);
-
-            if (tokenJson is null)
-            {
-                throw new NotImplementedException("Handle error where requesting a token returns content but it's not JSON");
-            }
-
-            // Per https://docs.docker.com/registry/spec/auth/token/#token-response-fields, both `token` and
-            // `access_token` are allowed, but only one is required
-            string? token = tokenJson["token"]?.ToString()             // Azure Container Registry returns this format
-                            ?? tokenJson["access_token"]?.ToString();  // GitHub Container Registry returns this format
-
-            if (token is not null)
-            {
-                // save the retrieved token in the cache
-                ICacheEntry entry = tokenCache.CreateEntry(realm.Host);
-                entry.SetValue(token);
-
-                if (!int.TryParse(tokenJson["expires_in"]?.ToString(), out int requestedExpiry))
-                {
-                    requestedExpiry = 3600;
-                }
-
-                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(requestedExpiry);
-                return token;
-            }
-        }
-
-        return privateRepoCreds.Password;
+        var tokenResponse = await base.SendAsync(message, cancellationToken);
+        tokenResponse.EnsureSuccessStatusCode();
+        TokenResponse token = JsonSerializer.Deserialize<TokenResponse>(tokenResponse.Content.ReadAsStream());
+        // save the retrieved token in the cache
+        var entry = tokenCache.CreateEntry(realm.Host);
+        entry.SetValue(token.token);
+        entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(token.expires_in ?? 3600);
+        return token.token;
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
