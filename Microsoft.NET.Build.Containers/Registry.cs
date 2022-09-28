@@ -26,7 +26,8 @@ namespace Microsoft.NET.Build.Containers;
 /// </summary>
 public partial class AuthHandshakeMessageHandler : DelegatingHandler {
     private record AuthInfo(Uri Realm, string Service, string Scope);
-    private MemoryCache tokenCache = new MemoryCache(new OptionsWrapper<MemoryCacheOptions>(new MemoryCacheOptions()));
+
+    private static MemoryCache TokenCache = new(new OptionsWrapper<MemoryCacheOptions>(new MemoryCacheOptions()));
 
     /// <summary>
     /// the www-authenticate header must have realm, service, and scope information, so this method parses it into that shape if present
@@ -113,7 +114,7 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler {
         }
 
         // save the retrieved token in the cache
-        var entry = tokenCache.CreateEntry(realm.Host);
+        var entry = TokenCache.CreateEntry(realm.Host);
         entry.SetValue(token.ResolvedToken);
         entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(token.expires_in ?? 3600);
         return token.ResolvedToken;
@@ -121,7 +122,7 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler {
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
         // attempt to use cached token for the request if available
-        if(tokenCache.Get<string>(request.RequestUri.Host) is {} cachedToken){
+        if(TokenCache.Get<string>(request.RequestUri.Host) is {} cachedToken){
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", cachedToken);
         }
         var response = await base.SendAsync(request, cancellationToken);
