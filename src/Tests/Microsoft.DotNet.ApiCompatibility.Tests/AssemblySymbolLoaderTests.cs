@@ -210,7 +210,7 @@ namespace MyNamespace
             IEnumerable<ITypeSymbol> types = symbols.FirstOrDefault()
                 .GlobalNamespace
                 .GetNamespaceMembers()
-                .FirstOrDefault()
+                .FirstOrDefault((n) => n.Name == "MyNamespace")
                 .GetTypeMembers();
 
             Assert.Single(types);
@@ -226,7 +226,7 @@ namespace MyNamespace
 
             IEnumerable<ITypeSymbol> types = symbol.GlobalNamespace
                 .GetNamespaceMembers()
-                .FirstOrDefault()
+                .FirstOrDefault((n) => n.Name == "MyNamespace")
                 .GetTypeMembers();
 
             Assert.Single(types);
@@ -332,7 +332,7 @@ namespace MyNamespace
 
             IEnumerable<ITypeSymbol> types = symbol.GlobalNamespace
                 .GetNamespaceMembers()
-                .FirstOrDefault()
+                .FirstOrDefault((n) => n.Name == "MyNamespace")
                 .GetTypeMembers();
 
             Assert.Single(types);
