@@ -993,9 +993,8 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            s_buildCancellationSource.Cancel();
-
             Console.WriteLine(ResourceUtilities.GetResourceString("AbortingBuild"));
+            s_buildCancellationSource.Cancel();
 
             // The OS takes a lock in
             // kernel32.dll!_SetConsoleCtrlHandler, so if a task
@@ -1006,31 +1005,42 @@ namespace Microsoft.Build.CommandLine
             // We're already on a threadpool thread anyway.
             WaitCallback callback = delegate
             {
-                s_cancelComplete.Reset();
-
-                // If the build is already complete, just exit.
-                if (s_buildComplete.WaitOne(0))
+                try 
                 {
-                    s_cancelComplete.Set();
-                    return;
-                }
+                    s_cancelComplete.Reset();
 
-                // If the build has already started (or already finished), we will cancel it
-                // If the build has not yet started, it will cancel itself, because
-                // we set alreadyCalled=1
-                bool hasBuildStarted;
-                lock (s_buildLock)
+                    // If the build is already complete, just exit.
+                    if (s_buildComplete.WaitOne(0))
+                    {
+                        s_cancelComplete.Set();
+                        return;
+                    }
+
+                    // If the build has already started (or already finished), we will cancel it
+                    // If the build has not yet started, it will cancel itself, because
+                    // we set alreadyCalled=1
+                    bool hasBuildStarted;
+                    lock (s_buildLock)
+                    {
+                        hasBuildStarted = s_hasBuildStarted;
+                    }
+
+                    if (hasBuildStarted)
+                    {
+                        BuildManager.DefaultBuildManager.CancelAllSubmissions();
+                        s_buildComplete.WaitOne();
+                    }
+
+                    s_cancelComplete.Set(); // This will release our main Execute method so we can finally exit.
+                }
+                finally
                 {
-                    hasBuildStarted = s_hasBuildStarted;
+                    // Server node shall terminate after it received CancelKey press.
+                    if (s_isServerNode)
+                    {
+                        Environment.Exit(0); // the process can now be terminated as everything has already been gracefully cancelled.
+                    }
                 }
-
-                if (hasBuildStarted)
-                {
-                    BuildManager.DefaultBuildManager.CancelAllSubmissions();
-                    s_buildComplete.WaitOne();
-                }
-
-                s_cancelComplete.Set(); // This will release our main Execute method so we can finally exit.
             };
 
             ThreadPoolExtensions.QueueThreadPoolWorkItemWithCulture(callback, CultureInfo.CurrentCulture, CultureInfo.CurrentUICulture);
