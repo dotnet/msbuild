@@ -62,6 +62,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 return;
             }
 
+            if (!_settings.StrictMode && dt == DifferenceType.Added)
+            {
+                return;
+            }
+
             CompatDifference difference = dt switch
             {
                 DifferenceType.Changed => new CompatDifference(
