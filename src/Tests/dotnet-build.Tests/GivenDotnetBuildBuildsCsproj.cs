@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                      .And.HaveStdOutContaining("Hello World");
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.4.0")]
         public void ItPrintsBuildSummary()
         {
             var testAppName = "MSBuildTestApp";
