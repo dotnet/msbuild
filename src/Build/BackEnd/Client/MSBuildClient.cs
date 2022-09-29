@@ -35,6 +35,11 @@ namespace Microsoft.Build.Experimental
         private readonly Dictionary<string, string> _serverEnvironmentVariables;
 
         /// <summary>
+        /// The console mode we had before the build.
+        /// </summary>
+        private uint? _originalConsoleMode;
+
+        /// <summary>
         /// Full path to current MSBuild.exe if executable is MSBuild.exe,
         /// or to version of MSBuild.dll found to be associated with the current process.
         /// </summary>
@@ -195,8 +200,14 @@ namespace Microsoft.Build.Experimental
             // Send build command.
             // Let's send it outside the packet pump so that we easier and quicker deal with possible issues with connection to server.
             MSBuildEventSource.Log.MSBuildServerBuildStart(descriptiveCommandLine);
+            IntPtr stdOut = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
             if (!TrySendBuildCommand())
             {
+                if (_originalConsoleMode is not null)
+                {
+                    NativeMethodsShared.SetConsoleMode(stdOut, _originalConsoleMode.Value);
+                }
+
                 return _exitResult;
             }
 
@@ -207,6 +218,12 @@ namespace Microsoft.Build.Experimental
 
             MSBuildEventSource.Log.MSBuildServerBuildStop(descriptiveCommandLine, _numConsoleWritePackets, _sizeOfConsoleWritePackets, _exitResult.MSBuildClientExitType.ToString(), _exitResult.MSBuildAppExitTypeString);
             CommunicationsUtilities.Trace("Build finished.");
+
+            if (_originalConsoleMode is not null)
+            {
+                NativeMethodsShared.SetConsoleMode(stdOut, _originalConsoleMode.Value);
+            }
+
             return _exitResult;
         }
 
@@ -353,6 +370,7 @@ namespace Microsoft.Build.Experimental
                     IntPtr stdOut = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
                     if (NativeMethodsShared.GetConsoleMode(stdOut, out uint consoleMode))
                     {
+                        _originalConsoleMode = consoleMode;
                         bool success;
                         if ((consoleMode & NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING) == NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING &&
                             (consoleMode & NativeMethodsShared.DISABLE_NEWLINE_AUTO_RETURN) == NativeMethodsShared.DISABLE_NEWLINE_AUTO_RETURN)
