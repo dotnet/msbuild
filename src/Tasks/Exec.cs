@@ -37,7 +37,6 @@ namespace Microsoft.Build.Tasks
             // If the cmd file contains non-ANSI characters encoding may change.
             _standardOutputEncoding = EncodingUtilities.CurrentSystemOemEncoding;
             _standardErrorEncoding = EncodingUtilities.CurrentSystemOemEncoding;
-            CanBeIncremental = false;
         }
 
         #endregion

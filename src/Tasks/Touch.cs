@@ -57,9 +57,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <remarks>When Question is true, skip touching the disk to avoid causing incremental issue.
         /// Unless the file doesn't exists, in which case, error out.</remarks>
-        public bool Question { get; set; }
+        public void SetQuestion(bool question) { this.question = question; }
 
-        public bool CanBeIncremental => true;
+        private bool question = false;
 
         /// <summary>
         /// Implementation of the execute method.
@@ -220,7 +220,7 @@ namespace Microsoft.Build.Tasks
                 {
                     Log.LogMessageFromResources(messageImportance, "Touch.CreatingFile", file, "AlwaysCreate");
 
-                    if (Question)
+                    if (question)
                     {
                         return false;
                     }
@@ -239,7 +239,7 @@ namespace Microsoft.Build.Tasks
 
             Log.LogMessageFromResources(messageImportance, "Touch.Touching", file);
 
-            if (Question)
+            if (question)
             {
                 return true;
             }

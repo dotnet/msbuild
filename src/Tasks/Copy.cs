@@ -151,9 +151,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool OverwriteReadOnlyFiles { get; set; }
 
-        public bool Question { get; set; }
+        public void SetQuestion(bool question) { this.question = question; }
 
-        public bool CanBeIncremental { get; } = true;
+        private bool question = false;
 
         #endregion
 
@@ -749,7 +749,7 @@ namespace Microsoft.Build.Tasks
                 {
                     MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Name, false);
 
-                    if (CanBeIncremental && Question)
+                    if (question)
                     {
                         success = false;
                     }

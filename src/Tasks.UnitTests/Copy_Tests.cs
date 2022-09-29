@@ -159,8 +159,8 @@ namespace Microsoft.Build.UnitTests
                     DestinationFiles = destinationFiles,
                     UseHardlinksIfPossible = UseHardLinks,
                     UseSymboliclinksIfPossible = UseSymbolicLinks,
-                    Question = true
                 };
+                t.SetQuestion(true);
 
                 Assert.False(t.Execute(m.CopyFile, _parallelismThreadCount));
 
@@ -184,6 +184,7 @@ namespace Microsoft.Build.UnitTests
             string source = FileUtilities.GetTemporaryFile();
             string destination = FileUtilities.GetTemporaryFile();
             string content = "This is a source file.";
+            DateTime testTime = DateTime.Now;
 
             try
             {
@@ -196,6 +197,12 @@ namespace Microsoft.Build.UnitTests
                 {
                     sw.Write(content);
                 }
+
+                FileInfo sourcefi = new FileInfo(source);
+                sourcefi.LastWriteTimeUtc = testTime;
+
+                FileInfo destinationfi = new FileInfo(destination);
+                destinationfi.LastWriteTimeUtc = testTime;
 
                 ITaskItem sourceItem = new TaskItem(source);
                 ITaskItem destinationItem = new TaskItem(destination);
@@ -212,9 +219,8 @@ namespace Microsoft.Build.UnitTests
                     UseHardlinksIfPossible = UseHardLinks,
                     UseSymboliclinksIfPossible = UseSymbolicLinks,
                     SkipUnchangedFiles = true,
-                    Question = true
                 };
-
+                t.SetQuestion(true);
                 Assert.True(t.Execute(m.CopyFile, _parallelismThreadCount));
 
                 // Expect for there to have been no copies.
@@ -264,8 +270,8 @@ namespace Microsoft.Build.UnitTests
                     UseHardlinksIfPossible = UseHardLinks,
                     UseSymboliclinksIfPossible = UseSymbolicLinks,
                     SkipUnchangedFiles = true,
-                    Question = true
                 };
+                t.SetQuestion(true);
 
                 Assert.False(t.Execute(m.CopyFile, _parallelismThreadCount));
 

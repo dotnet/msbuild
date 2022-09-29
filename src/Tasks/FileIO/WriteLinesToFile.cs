@@ -52,7 +52,9 @@ namespace Microsoft.Build.Tasks
         /// Question whether this task is incremental.
         /// </summary>
         /// <remarks>When question is true, then this task would not write to disk.  If CanBeIncremental is true, then error out.</remarks>
-        public bool Question { get; set; }
+        public void SetQuestion(bool question) { this.question = question; }
+
+        private bool question = false;
 
         public bool CanBeIncremental => WriteOnlyWhenDifferent;
 
@@ -69,7 +71,7 @@ namespace Microsoft.Build.Tasks
                 // do not return if Lines is null, because we may
                 // want to delete the file in that case
                 StringBuilder buffer = new StringBuilder();
-                if (Lines != null && (!Question || WriteOnlyWhenDifferent))
+                if (Lines != null && (!question || WriteOnlyWhenDifferent))
                 {
                     foreach (ITaskItem line in Lines)
                     {
@@ -116,7 +118,7 @@ namespace Microsoft.Build.Tasks
                                             MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, true);
                                             return true;
                                         }
-                                        else if (Question)
+                                        else if (question)
                                         {
                                             return false;
                                         }
@@ -130,12 +132,12 @@ namespace Microsoft.Build.Tasks
                             MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, false);
                         }
 
-                        if (!Question)
+                        if (!question)
                             System.IO.File.WriteAllText(File.ItemSpec, contentsAsString, encoding);
                     }
                     else
                     {
-                        if (!Question)
+                        if (!question)
                         {
                             Directory.CreateDirectory(directoryPath);
                             System.IO.File.AppendAllText(File.ItemSpec, buffer.ToString(), encoding);

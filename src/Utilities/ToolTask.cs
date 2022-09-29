@@ -351,11 +351,13 @@ namespace Microsoft.Build.Utilities
         /// Returns true if task execution is not necessary. Executed after ValidateParameters
         /// </summary>
         /// <returns></returns>
-        protected virtual bool SkipTaskExecution() { CanBeIncremental = false; return false; }
+        protected virtual bool SkipTaskExecution() { canBeIncremental = false; return false; }
 
-        public bool CanBeIncremental { get; set; } = false;
+        private bool canBeIncremental { get; set; } = true;
 
-        public bool Question { get; set; }
+        public void SetQuestion(bool question) { this.question = question; }
+
+        private bool question = false;
 
         /// <summary>
         /// Returns a string with those switches and other information that can go into a response file.
@@ -1334,7 +1336,7 @@ namespace Microsoft.Build.Utilities
                     // doing any actual work).
                     return true;
                 }
-                else if (CanBeIncremental && Question)
+                else if (canBeIncremental && question)
                 {
                     return false;
                 }
