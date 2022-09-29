@@ -224,17 +224,9 @@ public record struct Registry(Uri BaseUri)
         string tempTarballPath = ContentStore.GetTempFile();
         using (FileStream fs = File.Create(tempTarballPath))
         {
-            Stream? gzs = null;
+            using Stream responseStream = await response.Content.ReadAsStreamAsync();
 
-            Stream responseStream = await response.Content.ReadAsStreamAsync();
-            if (descriptor.MediaType.EndsWith("gzip"))
-            {
-                gzs = new GZipStream(responseStream, CompressionMode.Decompress);
-            }
-
-            using Stream? gzipStreamToDispose = gzs;
-
-            await (gzs ?? responseStream).CopyToAsync(fs);
+            await responseStream.CopyToAsync(fs);
         }
 
         File.Move(tempTarballPath, localPath, overwrite: true);
@@ -359,17 +351,14 @@ public record struct Registry(Uri BaseUri)
             {
                 // The blob wasn't already available in another namespace, so fall back to explicitly uploading it
 
-                // TODO: don't do this search, which is ridiculous
-                foreach (Layer layer in x.newLayers)
+                if (!x.originatingRegistry.HasValue)
                 {
-                    if (layer.Descriptor.Digest == digest)
-                    {
-                        await Push(layer, name);
-                        break;
+                    throw new NotImplementedException("Need a good error for 'couldn't download a thing because no link to registry'");
                     }
 
-                    throw new NotImplementedException("Need to push a layer but it's not a new one--need to download it from the base registry and upload it");
-                }
+                string localPath = await x.originatingRegistry.Value.DownloadBlob(x.OriginatingName, descriptor);
+
+                await Push(Layer.FromDescriptor(descriptor), name);
             }
         }
 
