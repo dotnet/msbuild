@@ -354,15 +354,14 @@ namespace Microsoft.Build.Experimental
                     if (NativeMethodsShared.GetConsoleMode(stdOut, out uint consoleMode))
                     {
                         bool success;
-                        if ((consoleMode & NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING) == NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING &&
-                            (consoleMode & NativeMethodsShared.DISABLE_NEWLINE_AUTO_RETURN) == NativeMethodsShared.DISABLE_NEWLINE_AUTO_RETURN)
+                        if ((consoleMode & NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING) == NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING)
                         {
                             // Console is already in required state
                             success = true;
                         }
                         else
                         {
-                            consoleMode |= NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING | NativeMethodsShared.DISABLE_NEWLINE_AUTO_RETURN;
+                            consoleMode |= NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING;
                             success = NativeMethodsShared.SetConsoleMode(stdOut, consoleMode);
                         }
 
