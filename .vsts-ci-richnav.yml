@@ -25,7 +25,7 @@ stages:
         richCodeNavigationEnvironment: 'production'
         pool:
             name: NetCore-Public
-            demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre.Open  
+            demands: ImageOverride -equals windows.vs2019.amd64.open   
         timeoutInMinutes: 180
         strategy:
           matrix:
