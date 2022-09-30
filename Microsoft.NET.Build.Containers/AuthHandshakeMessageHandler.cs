@@ -4,10 +4,8 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.Caching.Memory;
 
 using Valleysoft.DockerCredsProvider;
-using Microsoft.Extensions.Options;
 
 namespace Microsoft.NET.Build.Containers;
 
@@ -18,7 +16,10 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
 {
     private record AuthInfo(Uri Realm, string Service, string Scope);
 
-    private static MemoryCache TokenCache = new(new OptionsWrapper<MemoryCacheOptions>(new MemoryCacheOptions()));
+    /// <summary>
+    /// Cache of most-recently-recieved token for each server.
+    /// </summary>
+    private static Dictionary<string, string> TokenCache = new();
 
     /// <summary>
     /// the www-authenticate header must have realm, service, and scope information, so this method parses it into that shape if present
@@ -106,9 +107,7 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
         }
 
         // save the retrieved token in the cache
-        var entry = TokenCache.CreateEntry(realm.Host);
-        entry.SetValue(token.ResolvedToken);
-        entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(token.expires_in ?? 3600);
+        TokenCache[realm.Host] = token.ResolvedToken;
         return token.ResolvedToken;
     }
 
@@ -120,7 +119,7 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
         }
 
         // attempt to use cached token for the request if available
-        if (TokenCache.Get<string>(request.RequestUri.Host) is string cachedToken)
+        if (TokenCache.TryGetValue(request.RequestUri.Host, out string? cachedToken))
         {
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", cachedToken);
         }
