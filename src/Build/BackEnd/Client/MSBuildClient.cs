@@ -201,30 +201,24 @@ namespace Microsoft.Build.Experimental
             // Let's send it outside the packet pump so that we easier and quicker deal with possible issues with connection to server.
             MSBuildEventSource.Log.MSBuildServerBuildStart(descriptiveCommandLine);
             IntPtr stdOut = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
-            if (!TrySendBuildCommand())
+            if (TrySendBuildCommand())
             {
-                if (_originalConsoleMode is not null)
-                {
-                    NativeMethodsShared.SetConsoleMode(stdOut, _originalConsoleMode.Value);
-                }
+                _numConsoleWritePackets = 0;
+                _sizeOfConsoleWritePackets = 0;
 
-                return _exitResult;
+                ReadPacketsLoop(cancellationToken);
+
+                MSBuildEventSource.Log.MSBuildServerBuildStop(descriptiveCommandLine, _numConsoleWritePackets, _sizeOfConsoleWritePackets, _exitResult.MSBuildClientExitType.ToString(), _exitResult.MSBuildAppExitTypeString);
+                CommunicationsUtilities.Trace("Build finished.");
             }
 
-            _numConsoleWritePackets = 0;
-            _sizeOfConsoleWritePackets = 0;
-
-            ReadPacketsLoop(cancellationToken);
-
-            MSBuildEventSource.Log.MSBuildServerBuildStop(descriptiveCommandLine, _numConsoleWritePackets, _sizeOfConsoleWritePackets, _exitResult.MSBuildClientExitType.ToString(), _exitResult.MSBuildAppExitTypeString);
-            CommunicationsUtilities.Trace("Build finished.");
-
-            if (_originalConsoleMode is not null)
+            if (NativeMethodsShared.IsWindows && _originalConsoleMode is not null)
             {
                 NativeMethodsShared.SetConsoleMode(stdOut, _originalConsoleMode.Value);
             }
 
             return _exitResult;
+
         }
 
         /// <summary>
