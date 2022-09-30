@@ -220,13 +220,31 @@ new CompatDifference[] {
     CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.CannotChangeAttribute, "", DifferenceType.Changed, "T:CompatTests.First:[T:CompatTests.FooAttribute]")
 }
             },
-            // Attributes with internal type arguments
+            // Attributes on internal type arguments
             {
                 @"
 namespace CompatTests
 {
   using System;
+  using CompatTestsSecondNamespace;
 
+  [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
+  public class FooAttribute : Attribute {
+    public FooAttribute(Type type) {}
+  }
+
+  [Foo(typeof(Bar))]
+  public class First {}
+}
+
+namespace CompatTestsSecondNamespace {
+  internal class Bar {}
+}
+",
+                @"
+namespace CompatTests
+{
+  using System;
   [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
   public class FooAttribute : Attribute {
     public FooAttribute(Type type) {}
@@ -235,26 +253,13 @@ namespace CompatTests
 
   internal class Bar {}
 
-  [Foo(typeof(Bar), A = typeof(int))]
+  [Foo(typeof(Bar))]
   public class First {}
 }
 ",
-                @"
-namespace CompatTests
-{
-  using System;
-
-  [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
-  public class FooAttribute : Attribute {
-    public FooAttribute(Type type) {}
-    public Type A;
-  }
-
-  [Foo(typeof(int), A = typeof(int))]
-  public class First {}
+new CompatDifference[] {
+    CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.CannotChangeAttribute, "", DifferenceType.Changed, "T:CompatTests.First:[T:CompatTests.FooAttribute]"),
 }
-",
-new CompatDifference[] {}
             }
         };
 
