@@ -363,7 +363,6 @@ namespace Microsoft.Build.Experimental
                     IntPtr stdOut = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
                     if (NativeMethodsShared.GetConsoleMode(stdOut, out uint consoleMode))
                     {
-                        _originalConsoleMode = consoleMode;
                         bool success;
                         if ((consoleMode & NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING) == NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING &&
                             (consoleMode & NativeMethodsShared.DISABLE_NEWLINE_AUTO_RETURN) == NativeMethodsShared.DISABLE_NEWLINE_AUTO_RETURN)
@@ -373,6 +372,7 @@ namespace Microsoft.Build.Experimental
                         }
                         else
                         {
+                            _originalConsoleMode = consoleMode;
                             consoleMode |= NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING | NativeMethodsShared.DISABLE_NEWLINE_AUTO_RETURN;
                             success = NativeMethodsShared.SetConsoleMode(stdOut, consoleMode);
                         }
