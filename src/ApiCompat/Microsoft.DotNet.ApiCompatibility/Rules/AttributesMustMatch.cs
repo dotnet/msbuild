@@ -48,32 +48,6 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             }
         }
 
-        private bool IsInternalArgument(TypedConstant argument) => (argument.Kind == TypedConstantKind.Type
-            && argument.Value is INamedTypeSymbol typ
-            && !typ.IsVisibleOutsideOfAssembly(_settings.IncludeInternalSymbols));
-
-        private bool HasInternalArguments(AttributeData attr)
-        {
-            foreach (TypedConstant argument in attr.ConstructorArguments)
-            {
-                if (IsInternalArgument(argument))
-                {
-                    return true;
-                }
-            }
-
-            foreach (KeyValuePair<string, TypedConstant> kv in attr.NamedArguments)
-            {
-                TypedConstant argument = kv.Value;
-                if (IsInternalArgument(argument))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         private void AddDifference(IList<CompatDifference> differences, DifferenceType dt, MetadataInformation leftMetadata, MetadataInformation rightMetadata, ISymbol containing, string itemRef, AttributeData attr)
         {
             string? docId = attr.AttributeClass?.GetDocumentationCommentId();
@@ -175,9 +149,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                         for (int j = 0; j < rightGroup.Attributes.Count; j++)
                         {
                             AttributeData rightAttribute = rightGroup.Attributes[j];
-                            if (AttributeEquals(leftAttribute, rightAttribute)
-                                || HasInternalArguments(leftAttribute) // If attribute argument is an internal type, ignore.
-                                || HasInternalArguments(rightAttribute))
+                            if (AttributeEquals(leftAttribute, rightAttribute))
                             {
                                 rightGroup.Seen[j] = true;
                                 seen = true;
