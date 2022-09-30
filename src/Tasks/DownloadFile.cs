@@ -18,7 +18,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Represents a task that can download a file.
     /// </summary>
-    public sealed class DownloadFile : TaskExtension, ICancelableTask
+    public sealed class DownloadFile : TaskExtension, ICancelableTask, IIncrementalTask
     {
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
@@ -64,6 +64,10 @@ namespace Microsoft.Build.Tasks
         /// Gets or sets the number of milliseconds to wait before the request times out.
         /// </summary>
         public int Timeout { get; set; } = 100_000;
+
+        public void SetQuestion(bool question) => this.question = question;
+
+        private bool question = false;
 
         /// <summary>
         /// Gets or sets a <see cref="HttpMessageHandler"/> to use.  This is used by unit tests to mock a connection to a remote server.
@@ -181,6 +185,11 @@ namespace Microsoft.Build.Tasks
 
                         DownloadedFile = new TaskItem(destinationFile.FullName);
 
+                        return;
+                    }
+                    else if (question)
+                    {
+                        Log.LogErrorFromResources("DownloadFile.Downloading", SourceUrl, destinationFile.FullName, response.Content.Headers.ContentLength);
                         return;
                     }
 

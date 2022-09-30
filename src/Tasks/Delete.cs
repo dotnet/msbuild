@@ -16,7 +16,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Delete files from disk.
     /// </summary>
-    public class Delete : TaskExtension, ICancelableTask
+    public class Delete : TaskExtension, ICancelableTask, IIncrementalTask
     {
         #region Properties
 
@@ -44,6 +44,14 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] DeletedFiles { get; set; }
 
         #endregion
+
+        /// <summary>
+        /// Set question parameter to verify if this is incremental.
+        /// </summary>
+        /// <remarks></remarks>
+        public void SetQuestion(bool question) => this.question = question;
+
+        private bool question = false;
 
         /// <summary>
         /// Stop and return (in an undefined state) as soon as possible.
@@ -77,10 +85,17 @@ namespace Microsoft.Build.Tasks
                     {
                         if (FileSystems.Default.FileExists(file.ItemSpec))
                         {
-                            // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                            Log.LogMessageFromResources(MessageImportance.Normal, "Delete.DeletingFile", file.ItemSpec);
+                            if (question)
+                            {
+                                Log.LogErrorFromResources("Delete.DeletingFile", file.ItemSpec);
+                            }
+                            else
+                            {
+                                // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
+                                Log.LogMessageFromResources(MessageImportance.Normal, "Delete.DeletingFile", file.ItemSpec);
 
-                            File.Delete(file.ItemSpec);
+                                File.Delete(file.ItemSpec);
+                            }
                         }
                         else
                         {

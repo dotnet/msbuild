@@ -31,7 +31,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] DirectoriesCreated { get; private set; }
 
-        public void SetQuestion(bool question) { this.question = question; }
+        public void SetQuestion(bool question) => this.question = question;
 
         private bool question = false;
 

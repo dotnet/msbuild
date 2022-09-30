@@ -19,7 +19,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Represents a task that can extract a .zip archive.
     /// </summary>
-    public sealed class Unzip : TaskExtension, ICancelableTask
+    public sealed class Unzip : TaskExtension, ICancelableTask, IIncrementalTask
     {
         // We pick a value that is the largest multiple of 4096 that is still smaller than the large object heap threshold (85K).
         // The CopyTo/CopyToAsync buffer is short-lived and is likely to be collected at Gen0, and it offers a significant
@@ -72,6 +72,10 @@ namespace Microsoft.Build.Tasks
         /// Gets or sets an MSBuild glob expression that specifies which files to exclude from being unzipped from the archive.
         /// </summary>
         public string Exclude { get; set; }
+
+        public void SetQuestion(bool question) => this.question = question;
+
+        private bool question = false;
 
         /// <inheritdoc cref="ICancelableTask.Cancel"/>
         public void Cancel()
@@ -186,6 +190,11 @@ namespace Microsoft.Build.Tasks
                 if (ShouldSkipEntry(zipArchiveEntry, destinationPath))
                 {
                     Log.LogMessageFromResources(MessageImportance.Low, "Unzip.DidNotUnzipBecauseOfFileMatch", zipArchiveEntry.FullName, destinationPath.FullName, nameof(SkipUnchangedFiles), "true");
+                    continue;
+                }
+                else if (question)
+                {
+                    Log.LogErrorFromResources("Unzip.FileComment", zipArchiveEntry.FullName, destinationPath.FullName);
                     continue;
                 }
 

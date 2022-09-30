@@ -57,7 +57,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <remarks>When Question is true, skip touching the disk to avoid causing incremental issue.
         /// Unless the file doesn't exists, in which case, error out.</remarks>
-        public void SetQuestion(bool question) { this.question = question; }
+        public void SetQuestion(bool question) => this.question = question;
 
         private bool question = false;
 

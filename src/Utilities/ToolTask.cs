@@ -355,7 +355,7 @@ namespace Microsoft.Build.Utilities
 
         private bool canBeIncremental { get; set; } = true;
 
-        public void SetQuestion(bool question) { this.question = question; }
+        public void SetQuestion(bool question) => this.question = question;
 
         private bool question = false;
 

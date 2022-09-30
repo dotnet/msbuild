@@ -151,7 +151,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool OverwriteReadOnlyFiles { get; set; }
 
-        public void SetQuestion(bool question) { this.question = question; }
+        public void SetQuestion(bool question) => this.question = question;
 
         private bool question = false;
 

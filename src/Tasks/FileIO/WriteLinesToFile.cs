@@ -52,7 +52,7 @@ namespace Microsoft.Build.Tasks
         /// Question whether this task is incremental.
         /// </summary>
         /// <remarks>When question is true, then this task would not write to disk.  If CanBeIncremental is true, then error out.</remarks>
-        public void SetQuestion(bool question) { this.question = question; }
+        public void SetQuestion(bool question) => this.question = question;
 
         private bool question = false;
 
