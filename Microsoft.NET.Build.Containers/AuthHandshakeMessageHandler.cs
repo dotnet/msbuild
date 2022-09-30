@@ -26,12 +26,12 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
     /// <param name="msg"></param>
     /// <param name="authInfo"></param>
     /// <returns></returns>
-    private static bool TryParseAuthenticationInfo(HttpResponseMessage msg, [NotNullWhen(true)]out AuthInfo? authInfo)
+    private static bool TryParseAuthenticationInfo(HttpResponseMessage msg, [NotNullWhen(true)] out AuthInfo? authInfo)
     {
         authInfo = null;
 
         var authenticateHeader = msg.Headers.WwwAuthenticate;
-        if (!authenticateHeader.Any()) 
+        if (!authenticateHeader.Any())
         {
             return false;
         }
@@ -80,11 +80,12 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
     /// <param name="scope"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task<string> GetTokenAsync(Uri realm, string service, string scope, CancellationToken cancellationToken) {
+    private async Task<string> GetTokenAsync(Uri realm, string service, string scope, CancellationToken cancellationToken)
+    {
         // fetch creds for the host
         DockerCredentials privateRepoCreds = await CredsProvider.GetCredentialsAsync(realm.Host);
         // use those creds when calling the token provider
-        var header = privateRepoCreds.Username == "<token>" 
+        var header = privateRepoCreds.Username == "<token>"
                         ? new AuthenticationHeaderValue("Bearer", privateRepoCreds.Password)
                         : new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{privateRepoCreds.Username}:{privateRepoCreds.Password}")));
         var builder = new UriBuilder(realm);
