@@ -196,8 +196,10 @@ public record struct Registry(Uri BaseUri)
                     throw new NotImplementedException("Need a good error for 'couldn't download a thing because no link to registry'");
                     }
 
-                string localPath = await x.originatingRegistry.Value.DownloadBlob(x.OriginatingName, descriptor);
+                // Ensure the blob is available locally
+                await x.originatingRegistry.Value.DownloadBlob(x.OriginatingName, descriptor);
 
+                // Then push it to the destination registry
                 await Push(Layer.FromDescriptor(descriptor), name);
             }
         }
