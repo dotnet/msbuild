@@ -43,6 +43,7 @@
             <Content Include="$(OutDir)containerize.dll" Pack="true" PackagePath="containerize/" />
             <Content Include="$(OutDir)containerize.runtimeconfig.json" Pack="true" PackagePath="containerize/" />
             <Content Include="$(OutDir)System.CommandLine.dll" Pack="true" PackagePath="containerize/" />
+            <Content Include="$(OutDir)Microsoft.Extensions.Caching.Memory.dll" Pack="true" PackagePath="containerize/" />
             <Content Include="$(OutDir)Valleysoft.DockerCredsProvider.dll" Pack="true" PackagePath="containerize/" />
             <Content Include="@(ContainerLibraryOutput)" Pack="true" PackagePath="containerize/" />
 
@@ -50,6 +51,8 @@
             <Content Include="@(ContainerLibraryOutput)" Pack="true" PackagePath="tasks/$(TargetFramework)/" />
             <Content Include="@(ContainerLibraryOutputNet472)" Pack="true" PackagePath="tasks/$(VSCompatTargetFramework)/" />
             <Content Include="../Microsoft.NET.Build.Containers/bin/$(Configuration)/$(TargetFramework)/Microsoft.NET.Build.Containers.deps.json" Pack="true" PackagePath="tasks/$(TargetFramework)" />
+            <Content Include="$(OutDir)Microsoft.Extensions.Caching.Memory.dll" Pack="true" PackagePath="tasks/$(TargetFramework)" />
+            <Content Include="$(OutDir)Valleysoft.DockerCredsProvider.dll" Pack="true" PackagePath="tasks/$(TargetFramework)" />
             <Content Include="../Microsoft.NET.Build.Containers/bin/$(Configuration)/$(VSCompatTargetFramework)/Microsoft.NET.Build.Containers.deps.json" Pack="true" PackagePath="tasks/$(VSCompatTargetFramework)" />
 
             <!-- build folder -->
