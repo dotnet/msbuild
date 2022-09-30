@@ -200,7 +200,6 @@ namespace Microsoft.Build.Experimental
             // Send build command.
             // Let's send it outside the packet pump so that we easier and quicker deal with possible issues with connection to server.
             MSBuildEventSource.Log.MSBuildServerBuildStart(descriptiveCommandLine);
-            IntPtr stdOut = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
             if (TrySendBuildCommand())
             {
                 _numConsoleWritePackets = 0;
@@ -214,11 +213,11 @@ namespace Microsoft.Build.Experimental
 
             if (NativeMethodsShared.IsWindows && _originalConsoleMode is not null)
             {
+                IntPtr stdOut = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
                 NativeMethodsShared.SetConsoleMode(stdOut, _originalConsoleMode.Value);
             }
 
             return _exitResult;
-
         }
 
         /// <summary>
