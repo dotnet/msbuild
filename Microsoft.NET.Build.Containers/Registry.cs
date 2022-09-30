@@ -19,7 +19,7 @@ public record struct Registry(Uri BaseUri)
 
     public async Task<Image> GetImageManifest(string name, string reference)
     {
-        using HttpClient client = await GetClient();
+        using HttpClient client = GetClient();
 
         var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{reference}"));
 
@@ -70,7 +70,7 @@ public record struct Registry(Uri BaseUri)
 
         // No local copy, so download one
 
-        using HttpClient client = await GetClient();
+        using HttpClient client = GetClient();
 
         var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{name}/blobs/{descriptor.Digest}"));
 
@@ -101,7 +101,7 @@ public record struct Registry(Uri BaseUri)
 
     private readonly async Task UploadBlob(string name, string digest, Stream contents)
     {
-        using HttpClient client = await GetClient();
+        using HttpClient client = GetClient();
 
         if (await BlobAlreadyUploaded(name, digest, client))
         {
@@ -151,8 +151,8 @@ public record struct Registry(Uri BaseUri)
         return false;
     }
 
-    private readonly async Task<HttpClient> GetClient()
-    {   
+    private static HttpClient GetClient()
+    {
         var clientHandler = new AuthHandshakeMessageHandler(new HttpClientHandler() { UseDefaultCredentials = true });
         HttpClient client = new(clientHandler);
 
@@ -164,21 +164,6 @@ public record struct Registry(Uri BaseUri)
         client.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue(DockerContainerV1));
 
-        //try
-        //{
-        //    DockerCredentials privateRepoCreds = await CredsProvider.GetCredentialsAsync(BaseUri.Host);
-        //    if (privateRepoCreds.Username == "<token>") {
-        //        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", privateRepoCreds.Password);
-        //    } else {
-        //        byte[] byteArray = Encoding.ASCII.GetBytes($"{privateRepoCreds.Username}:{privateRepoCreds.Password}");
-        //        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
-        //    }
-        //}
-        //catch (CredsNotFoundException)
-        //{
-        //    // TODO: log?
-        //}
-
         client.DefaultRequestHeaders.Add("User-Agent", ".NET Container Library");
 
         return client;
@@ -188,7 +173,7 @@ public record struct Registry(Uri BaseUri)
     {
         tag ??= "latest";
 
-        using HttpClient client = await GetClient();
+        using HttpClient client = GetClient();
 
         foreach (var descriptor in x.LayerDescriptors)
         {
