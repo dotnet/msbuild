@@ -35,6 +35,11 @@ namespace Microsoft.Build.Experimental
         private readonly Dictionary<string, string> _serverEnvironmentVariables;
 
         /// <summary>
+        /// The console mode we had before the build.
+        /// </summary>
+        private uint? _originalConsoleMode;
+
+        /// <summary>
         /// Full path to current MSBuild.exe if executable is MSBuild.exe,
         /// or to version of MSBuild.dll found to be associated with the current process.
         /// </summary>
@@ -195,18 +200,23 @@ namespace Microsoft.Build.Experimental
             // Send build command.
             // Let's send it outside the packet pump so that we easier and quicker deal with possible issues with connection to server.
             MSBuildEventSource.Log.MSBuildServerBuildStart(descriptiveCommandLine);
-            if (!TrySendBuildCommand())
+            if (TrySendBuildCommand())
             {
-                return _exitResult;
+                _numConsoleWritePackets = 0;
+                _sizeOfConsoleWritePackets = 0;
+
+                ReadPacketsLoop(cancellationToken);
+
+                MSBuildEventSource.Log.MSBuildServerBuildStop(descriptiveCommandLine, _numConsoleWritePackets, _sizeOfConsoleWritePackets, _exitResult.MSBuildClientExitType.ToString(), _exitResult.MSBuildAppExitTypeString);
+                CommunicationsUtilities.Trace("Build finished.");
             }
 
-            _numConsoleWritePackets = 0;
-            _sizeOfConsoleWritePackets = 0;
+            if (NativeMethodsShared.IsWindows && _originalConsoleMode is not null)
+            {
+                IntPtr stdOut = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
+                NativeMethodsShared.SetConsoleMode(stdOut, _originalConsoleMode.Value);
+            }
 
-            ReadPacketsLoop(cancellationToken);
-
-            MSBuildEventSource.Log.MSBuildServerBuildStop(descriptiveCommandLine, _numConsoleWritePackets, _sizeOfConsoleWritePackets, _exitResult.MSBuildClientExitType.ToString(), _exitResult.MSBuildAppExitTypeString);
-            CommunicationsUtilities.Trace("Build finished.");
             return _exitResult;
         }
 
@@ -362,6 +372,7 @@ namespace Microsoft.Build.Experimental
                         }
                         else
                         {
+                            _originalConsoleMode = consoleMode;
                             consoleMode |= NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING | NativeMethodsShared.DISABLE_NEWLINE_AUTO_RETURN;
                             success = NativeMethodsShared.SetConsoleMode(stdOut, consoleMode);
                         }
