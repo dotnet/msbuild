@@ -105,7 +105,14 @@ namespace Microsoft.DotNet.Tools.New.PostActionProcessors
             string solutionFolder = GetSolutionFolder(action);
             bool? inRoot = GetInRoot(action);
 
-            Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostAction_AddProjToSln_Running, string.Join(" ", projectFiles), nearestSlnFilesFound[0], solutionFolder));
+            if (inRoot is true)
+            {
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostAction_AddProjToSln_InRoot_Running, string.Join(" ", projectFiles), nearestSlnFilesFound[0]));
+            }
+            else
+            {
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostAction_AddProjToSln_Running, string.Join(" ", projectFiles), nearestSlnFilesFound[0], solutionFolder));
+            }
             return AddProjectsToSolution(nearestSlnFilesFound[0], projectFiles, solutionFolder, inRoot);
         }
 

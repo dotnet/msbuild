@@ -62,6 +62,15 @@
         <target state="translated">Přidání projektu/ů do souboru řešení se nezdařilo.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_InRoot_Running">
+        <source>Adding
+    project(s): {0}
+    in the root of solution file: {1}</source>
+        <target state="new">Adding
+    project(s): {0}
+    in the root of solution file: {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Running">
         <source>Adding
     project(s): {0}

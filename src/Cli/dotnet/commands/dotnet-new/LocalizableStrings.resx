@@ -164,6 +164,11 @@
     to solution file: {1}
     solution folder: {2}</value>
   </data>
+  <data name="PostAction_AddProjToSln_InRoot_Running" xml:space="preserve">
+    <value>Adding
+    project(s): {0}
+    in the root of solution file: {1}</value>
+  </data>
   <data name="PostAction_AddProjToSln_Succeeded" xml:space="preserve">
     <value>Successfully added project(s) to a solution file.</value>
   </data>

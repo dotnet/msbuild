@@ -22,6 +22,9 @@
     <None Include="nupkg_templates\**" CopyToOutputDirectory="Always" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="test_templates\PostActions\AddProjectToSolution\BasicInSolutionRoot\.template.config\template.json" />
+    <None Remove="test_templates\PostActions\AddProjectToSolution\BasicInSolutionRoot\Basic.csproj" />
+    <None Remove="test_templates\PostActions\AddProjectToSolution\BasicInSolutionRoot\Program.cs" />
     <None Remove="test_templates\TemplateWithConditionalParameters\.template.config\template.json" />
     <None Remove="test_templates\TemplateWithConditionalParameters\Test.cs" />
   </ItemGroup>

@@ -222,16 +222,50 @@ namespace Microsoft.DotNet.Cli.New.Tests
             Assert.Equal(slnFileFullPath, callback.Solution);
         }
 
+        [Fact(DisplayName = nameof(AddProjectToSolutionCanPlaceProjectInSolutionRoot))]
+        public void AddProjectToSolutionCanPlaceProjectInSolutionRoot()
+        {
+            var callback = new MockAddProjectToSolutionCallback();
+            var actionProcessor = new DotnetSlnPostActionProcessor(callback.AddProjectToSolution);
+
+            string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
+            string slnFileFullPath = Path.Combine(targetBasePath, "MyApp.sln");
+            string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
+
+            _engineEnvironmentSettings.Host.FileSystem.WriteAllText(slnFileFullPath, "");
+
+            var args = new Dictionary<string, string>() {
+                { "projectFiles", "MyApp.csproj" },
+                { "inRoot", "true" }
+            };
+            var postAction = new MockPostAction { ActionId = DotnetSlnPostActionProcessor.ActionProcessorId, Args = args };
+
+            MockCreationEffects creationEffects = new MockCreationEffects()
+                .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));
+
+            actionProcessor.Process(
+                _engineEnvironmentSettings,
+                postAction,
+                creationEffects,
+                new MockCreationResult(),
+                targetBasePath);
+
+            Assert.True(callback.InRoot);
+        }
+
         private class MockAddProjectToSolutionCallback
         {
             public string? Solution { get; private set; }
 
             public IReadOnlyList<string?>? Projects { get; private set; }
 
+            public bool? InRoot { get; private set; }
+
             public bool AddProjectToSolution(string solution, IReadOnlyList<string?> projects, string? targetFolder, bool? inRoot)
             {
                 Solution = solution;
                 Projects = projects;
+                InRoot = inRoot;
 
                 return true;
             }
