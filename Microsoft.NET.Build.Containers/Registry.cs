@@ -73,7 +73,7 @@ public record struct Registry(Uri BaseUri)
 
         using HttpClient client = GetClient();
 
-        var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{name}/blobs/{descriptor.Digest}"));
+        var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{name}/blobs/{descriptor.Digest}"), HttpCompletionOption.ResponseHeadersRead);
 
         response.EnsureSuccessStatusCode();
 
