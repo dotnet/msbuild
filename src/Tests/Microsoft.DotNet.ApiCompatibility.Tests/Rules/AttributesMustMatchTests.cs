@@ -147,6 +147,46 @@ new CompatDifference[] {
     CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.CannotChangeAttribute, "", DifferenceType.Changed, "T:CompatTests.First:[T:CompatTests.FooAttribute]")
 }
             },
+            // Attribute repeated with additional arguments
+            {
+                @"
+namespace CompatTests
+{
+  using System;
+  
+  [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
+  public class FooAttribute : Attribute {
+    public FooAttribute(String s) {}
+    public bool A;
+    public int B;
+  }
+
+  [Serializable]
+  [Foo(""S"")]
+  public class First {}
+}
+",
+                @"
+namespace CompatTests
+{
+  using System;
+  
+  [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
+  public class FooAttribute : Attribute {
+    public FooAttribute(String s) {}
+    public bool A;
+    public int B;
+  }
+
+  [Serializable]
+  [Foo(""S"")]
+  [Foo(""T"")]
+  public class First {}
+}
+",
+new CompatDifference[] {}
+            },
+
             // Attribute added to type
             {
                 @"
@@ -764,6 +804,47 @@ namespace CompatTests
 ",
 new CompatDifference[] {
     CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.CannotAddAttribute, "", DifferenceType.Added, "T:CompatTests.First:[T:System.SerializableAttribute]")
+}
+            },
+            // Attribute repeated with additional arguments
+            {
+                @"
+namespace CompatTests
+{
+  using System;
+  
+  [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
+  public class FooAttribute : Attribute {
+    public FooAttribute(String s) {}
+    public bool A;
+    public int B;
+  }
+
+  [Serializable]
+  [Foo(""S"")]
+  public class First {}
+}
+",
+                @"
+namespace CompatTests
+{
+  using System;
+  
+  [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
+  public class FooAttribute : Attribute {
+    public FooAttribute(String s) {}
+    public bool A;
+    public int B;
+  }
+
+  [Serializable]
+  [Foo(""S"")]
+  [Foo(""T"")]
+  public class First {}
+}
+",
+new CompatDifference[] {
+    CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.CannotChangeAttribute, "", DifferenceType.Changed, "T:CompatTests.First:[T:CompatTests.FooAttribute]")
 }
             },
             // Attributes on method
