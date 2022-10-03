@@ -6,7 +6,6 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <IsPackable>true</IsPackable>
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
-    <LangVersion>8.0</LangVersion>
     <PackageId>Microsoft.NET.StringTools</PackageId>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
