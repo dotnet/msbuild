@@ -136,7 +136,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="_WarnWhenUsingNET7AndVSPriorTo174"
         BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
-        Condition="$([MSBuild]::VersionLessThan($(VisualStudioVersion), '17.4')) and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '7.0'))">
+        Condition="$([MSBuild]::VersionLessThan($(MSBuildVersion), '17.4.0')) and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '7.0'))">
     <NetSdkWarning ResourceName="Net7NotCompatibleWithDev173"/>
   </Target>
 
