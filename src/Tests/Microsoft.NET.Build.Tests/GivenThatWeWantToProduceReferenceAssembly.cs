@@ -19,18 +19,24 @@ namespace Microsoft.NET.Build.Tests
         {}
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("netcoreapp3.1", false)]
-        [InlineData(ToolsetInfo.CurrentTargetFramework, true)]
-        public void It_produces_ref_assembly_for_appropriate_frameworks(string targetFramework, bool expectedExists)
+        [InlineData("netcoreapp3.1", ".csproj", false)]
+        [InlineData("net6.0", ".fsproj", false)]
+        [InlineData("net5.0", ".csproj", true)]
+        [InlineData("net7.0", ".fsproj", true)]
+#pragma warning disable xUnit1025 // InlineData duplicates
+        [InlineData(ToolsetInfo.CurrentTargetFramework, ".csproj", true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, ".fsproj", true)]
+#pragma warning restore xUnit1025 // InlineData duplicates
+        public void It_produces_ref_assembly_for_appropriate_frameworks(string targetFramework, string extension, bool expectedExists)
         {
             TestProject testProject = new TestProject()
             {
                 Name = "ProduceRefAssembly",
                 IsExe = true,
-                TargetFrameworks = targetFramework
+                TargetFrameworks = targetFramework,
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework, targetExtension:extension);
 
             var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute()
