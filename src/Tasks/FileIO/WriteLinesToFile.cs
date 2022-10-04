@@ -120,7 +120,7 @@ namespace Microsoft.Build.Tasks
                                         }
                                         else if (question)
                                         {
-                                            Log.LogErrorFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
+                                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
                                             return false;
                                         }
                                     }
@@ -136,7 +136,7 @@ namespace Microsoft.Build.Tasks
 
                         if (question)
                         {
-                            Log.LogErrorFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
+                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
                             return false;
                         }
                         else
@@ -148,7 +148,7 @@ namespace Microsoft.Build.Tasks
                     {
                         if (question)
                         {
-                            Log.LogErrorFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
+                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
                             return false;
                         }
                         else
