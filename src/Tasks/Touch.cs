@@ -218,11 +218,14 @@ namespace Microsoft.Build.Tasks
                 // If the file does not exist then we check if we need to create it.
                 if (AlwaysCreate)
                 {
-                    Log.LogMessageFromResources(messageImportance, "Touch.CreatingFile", file, "AlwaysCreate");
-
                     if (question)
                     {
+                        Log.LogErrorFromResources("Touch.CreatingFile", file, "AlwaysCreate");
                         return false;
+                    }
+                    else
+                    {
+                        Log.LogMessageFromResources(messageImportance, "Touch.CreatingFile", file, "AlwaysCreate");
                     }
 
                     if (!CreateFile(file, fileCreate))

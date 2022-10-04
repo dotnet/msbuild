@@ -599,6 +599,11 @@
         <target state="translated">MSB3094: „{2}” odwołuje się do następującej liczby elementów: {0}, a „{3}” odwołuje się do następującej liczby elementów: {1}. Liczba tych elementów musi być taka sama.</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateBindingRedirects.CreatingBindingRedirectionFile">
+        <source>Creating binding redirection file {0}.</source>
+        <target state="new">Creating binding redirection file {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="GenerateBindingRedirects.MissingConfigurationNode">
         <source>MSB3831: The application configuration file must have root configuration element.</source>
         <target state="translated">MSB3831: Plik konfiguracji aplikacji musi mieć główny element konfiguracyjny.</target>
@@ -1043,6 +1048,11 @@
         <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
         <target state="translated">MSB3821: Nie można przetworzyć pliku {0}, ponieważ znajduje się on w strefie Internet lub Witryny z ograniczeniami albo zawiera znacznik strony internetowej. Jeśli chcesz przetwarzać te pliki, usuń znacznik strony internetowej.</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.OutOfDate">
+        <source>Some resources are out of date.</source>
+        <target state="new">Some resources are out of date.</target>
+        <note />
       </trans-unit>
       <trans-unit id="GenerateResource.OutputDoesntExist">
         <source>Output file "{0}" does not exist.</source>

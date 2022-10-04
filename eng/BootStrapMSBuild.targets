@@ -119,35 +119,45 @@
 
     <!-- Copy in props and targets from the machine-installed MSBuildExtensionsPath -->
     <Copy SourceFiles="@(InstalledVersionedExtensions)"
-          DestinationFiles="@(InstalledVersionedExtensions->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(InstalledVersionedExtensions->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(SdkResolverFiles)"
-          DestinationFiles="@(SdkResolverFiles->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(SdkResolverFiles->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
 
     <Copy SourceFiles="@(InstalledMicrosoftExtensions)"
-          DestinationFiles="@(InstalledMicrosoftExtensions->'$(BootstrapDestination)Microsoft\%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(InstalledMicrosoftExtensions->'$(BootstrapDestination)Microsoft\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
 
     <Copy SourceFiles="@(InstalledSdks)"
           DestinationFiles="@(InstalledSdks -> '$(BootstrapDestination)Sdks\%(RecursiveDir)%(Filename)%(Extension)')"
-          Condition="'$(MonoBuild)' != 'true'" />
+          Condition="'$(MonoBuild)' != 'true'"
+          SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(InstalledSdks)"
           DestinationFiles="@(InstalledSdks -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\Sdks\%(RecursiveDir)%(Filename)%(Extension)')"
-          Condition="'$(MonoBuild)' == 'true'" />
+          Condition="'$(MonoBuild)' == 'true'"
+          SkipUnchangedFiles="true" />
 
     <Copy SourceFiles="@(InstalledStaticAnalysisTools)"
-          DestinationFiles="@(InstalledStaticAnalysisTools -> '$(BootstrapDestination)..\Team Tools\Static Analysis Tools\%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(InstalledStaticAnalysisTools -> '$(BootstrapDestination)..\Team Tools\Static Analysis Tools\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
 
     <Copy SourceFiles="@(InstalledNuGetFiles)"
-          DestinationFiles="@(InstalledNuGetFiles->'$(BootstrapDestination)Microsoft\NuGet\%(Filename)%(Extension)')" />
+          DestinationFiles="@(InstalledNuGetFiles->'$(BootstrapDestination)Microsoft\NuGet\%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
 
     <Copy Condition="'$(MonoBuild)' != 'true'"
           SourceFiles="@(_NuGetRuntimeDependencies)"
-          DestinationFolder="$(BootstrapDestination)..\Common7\IDE\CommonExtensions\Microsoft\NuGet\" />
+          DestinationFolder="$(BootstrapDestination)..\Common7\IDE\CommonExtensions\Microsoft\NuGet\"
+          SkipUnchangedFiles="true" />
     <Copy Condition="'$(MonoBuild)' == 'true'"
           SourceFiles="@(_NuGetRuntimeDependencies)"
-          DestinationFolder="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin" />
+          DestinationFolder="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin" 
+          SkipUnchangedFiles="true" />
 
     <Copy SourceFiles="@(NuGetSdkResolverManifest)"
-          DestinationFolder="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.Build.NuGetSdkResolver" />
+          DestinationFolder="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.Build.NuGetSdkResolver" 
+          SkipUnchangedFiles="true" />
 
     <!-- Delete shim projects, because they point where we can't follow. -->
     <!-- It would be better to just not copy these. -->
@@ -155,27 +165,36 @@
 
     <!-- Copy our binaries -->
     <Copy SourceFiles="@(FreshlyBuiltBinaries)"
-          DestinationFiles="@(FreshlyBuiltBinaries -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(FreshlyBuiltBinaries -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(RecursiveDir)%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+
     <Copy SourceFiles="@(RoslynBinaries)"
-          DestinationFiles="@(RoslynBinaries -> '$(BootstrapDestination)15.0\Bin\Roslyn\%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(RoslynBinaries -> '$(BootstrapDestination)15.0\Bin\Roslyn\%(RecursiveDir)%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
 
     <!-- Copy our binaries to the x64 location. -->
-     <Copy SourceFiles="@(FreshlyBuiltBinariesx64)"
-          DestinationFiles="@(FreshlyBuiltBinariesx64 -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\amd64\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(FreshlyBuiltBinariesx64)"
+          DestinationFiles="@(FreshlyBuiltBinariesx64 -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\amd64\%(RecursiveDir)%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
 
     <!-- Copy our binaries to the arm64 location. -->
-     <Copy SourceFiles="@(FreshlyBuiltBinariesArm64)"
-          DestinationFiles="@(FreshlyBuiltBinariesArm64 -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\arm64\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(FreshlyBuiltBinariesArm64)"
+          DestinationFiles="@(FreshlyBuiltBinariesArm64 -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\arm64\%(RecursiveDir)%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
 
     <!-- Copy our freshly-built props and targets, overwriting anything we copied from the machine -->
     <Copy SourceFiles="@(FreshlyBuiltRootProjects)"
-          DestinationFiles="@(FreshlyBuiltRootProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\%(Filename)%(Extension)')" />
+          DestinationFiles="@(FreshlyBuiltRootProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(FreshlyBuiltProjects)"
-          DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(RecursiveDir)%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(FreshlyBuiltProjects)"
-          DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\amd64\%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\amd64\%(RecursiveDir)%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(FreshlyBuiltProjects)"
-          DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\arm64\%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\arm64\%(RecursiveDir)%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
 
   </Target>
 

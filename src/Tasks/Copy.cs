@@ -262,14 +262,31 @@ namespace Microsoft.Build.Tasks
             {
                 if (!FileSystems.Default.DirectoryExists(destinationFolder))
                 {
-                    Log.LogMessage(MessageImportance.Normal, CreatesDirectory, destinationFolder);
-                    Directory.CreateDirectory(destinationFolder);
+                    if (question)
+                    {
+                        Log.LogError(CreatesDirectory, destinationFolder);
+                        return false;
+                    }
+                    else
+                    {
+                        Log.LogMessage(MessageImportance.Normal, CreatesDirectory, destinationFolder);
+                        Directory.CreateDirectory(destinationFolder);
+                    }
                 }
 
                 // It's very common for a lot of files to be copied to the same folder. 
                 // Eg., "c:\foo\a"->"c:\bar\a", "c:\foo\b"->"c:\bar\b" and so forth.
                 // We don't want to check whether this folder exists for every single file we copy. So store which we've checked.
                 _directoriesKnownToExist.TryAdd(destinationFolder, true);
+            }
+
+            string sourceFilePath = FileUtilities.GetFullPathNoThrow(sourceFileState.Name);
+            string destinationFilePath = FileUtilities.GetFullPathNoThrow(destinationFileState.Name);
+
+            if (question)
+            {
+                Log.LogError(FileComment, sourceFilePath, destinationFilePath);
+                return false;
             }
 
             if (OverwriteReadOnlyFiles)
@@ -302,8 +319,6 @@ namespace Microsoft.Build.Tasks
             if (!linkCreated)
             {
                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                string sourceFilePath = FileUtilities.GetFullPathNoThrow(sourceFileState.Name);
-                string destinationFilePath = FileUtilities.GetFullPathNoThrow(destinationFileState.Name);
                 Log.LogMessage(MessageImportance.Normal, FileComment, sourceFilePath, destinationFilePath);
 
                 File.Copy(sourceFileState.Name, destinationFileState.Name, true);
@@ -751,6 +766,7 @@ namespace Microsoft.Build.Tasks
 
                     if (question)
                     {
+                        Log.LogError(FileComment, sourceFileState.Name, destinationFileState.Name);
                         success = false;
                     }
                     else

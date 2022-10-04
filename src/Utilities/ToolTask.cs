@@ -1338,6 +1338,7 @@ namespace Microsoft.Build.Utilities
                 }
                 else if (canBeIncremental && question)
                 {
+                    LogPrivate.LogErrorWithCodeFromResources("ToolTask.NotUpToDate");
                     return false;
                 }
 

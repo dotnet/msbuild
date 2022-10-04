@@ -19,7 +19,7 @@ namespace Microsoft.Build.Tasks
     /// Take suggested redirects (from the ResolveAssemblyReference and GenerateOutOfBandAssemblyTables tasks)
     /// and add them to an intermediate copy of the App.config file.
     /// </summary>
-    public class GenerateBindingRedirects : TaskExtension
+    public class GenerateBindingRedirects : TaskExtension, IIncrementalTask
     {
         // <param name="SuggestedRedirects">RAR suggested binding redirects.</param>
         // <param name="AppConfigFile">The source App.Config file.</param>
@@ -47,6 +47,10 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [Output]
         public ITaskItem OutputAppConfigFile { get; set; }
+
+        public void SetQuestion(bool question) => this.question = question;
+
+        private bool question = false;
 
         /// <summary>
         /// Execute the task.
@@ -115,7 +119,7 @@ namespace Microsoft.Build.Tasks
                         writeOutput = false;
                     }
                 }
-                catch(System.Xml.XmlException)
+                catch (System.Xml.XmlException)
                 {
                     writeOutput = true;
                 }
@@ -132,9 +136,17 @@ namespace Microsoft.Build.Tasks
 
             if (writeOutput)
             {
-                using (var stream = FileUtilities.OpenWrite(OutputAppConfigFile.ItemSpec, false))
+                if (question)
                 {
-                    doc.Save(stream);
+                    Log.LogErrorFromResources("GenerateBindingRedirects.CreatingBindingRedirectionFile", OutputAppConfigFile.ItemSpec);
+                }
+                else
+                {
+                    Log.LogMessageFromResources(MessageImportance.Low, "GenerateBindingRedirects.CreatingBindingRedirectionFile", OutputAppConfigFile.ItemSpec);
+                    using (var stream = FileUtilities.OpenWrite(OutputAppConfigFile.ItemSpec, false))
+                    {
+                        doc.Save(stream);
+                    }
                 }
             }
 

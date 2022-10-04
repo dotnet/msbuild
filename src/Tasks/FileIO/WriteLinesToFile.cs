@@ -120,6 +120,7 @@ namespace Microsoft.Build.Tasks
                                         }
                                         else if (question)
                                         {
+                                            Log.LogErrorFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
                                             return false;
                                         }
                                     }
@@ -132,12 +133,25 @@ namespace Microsoft.Build.Tasks
                             MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, false);
                         }
 
-                        if (!question)
+
+                        if (question)
+                        {
+                            Log.LogErrorFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
+                            return false;
+                        }
+                        else
+                        {
                             System.IO.File.WriteAllText(File.ItemSpec, contentsAsString, encoding);
+                        }
                     }
                     else
                     {
-                        if (!question)
+                        if (question)
+                        {
+                            Log.LogErrorFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
+                            return false;
+                        }
+                        else
                         {
                             Directory.CreateDirectory(directoryPath);
                             System.IO.File.AppendAllText(File.ItemSpec, buffer.ToString(), encoding);

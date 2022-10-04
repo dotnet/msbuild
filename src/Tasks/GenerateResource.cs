@@ -51,10 +51,10 @@ namespace Microsoft.Build.Tasks
     /// to transform resource files.
     /// </summary>
     [RequiredRuntime("v2.0")]
-    public sealed partial class GenerateResource : TaskExtension
+    public sealed partial class GenerateResource : TaskExtension, IIncrementalTask
     {
 
-#region Fields
+        #region Fields
 
         // This cache helps us track the linked resource files listed inside of a resx resource file
         private ResGenDependencies _cache;
@@ -162,9 +162,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private List<ITaskItem> _satelliteInputs;
 
-#endregion  // fields
+        #endregion  // fields
 
-#region Properties
+        #region Properties
 
         /// <summary>
         /// The names of the items to be converted. The extension must be one of the
@@ -534,7 +534,7 @@ namespace Microsoft.Build.Tasks
             set;
         }
 
-#endregion // properties
+        #endregion // properties
 
         /// <summary>
         /// Simple public constructor.
@@ -543,6 +543,10 @@ namespace Microsoft.Build.Tasks
         {
             // do nothing
         }
+
+        public void SetQuestion(bool question) => this.question = question;
+
+        private bool question = false;
 
         /// <summary>
         /// Logs a Resgen.exe command line that indicates what parameters were
@@ -716,6 +720,10 @@ namespace Microsoft.Build.Tasks
                     }
 
                     Log.LogMessageFromResources("GenerateResource.NothingOutOfDate");
+                }
+                else if (question)
+                {
+                    Log.LogErrorFromResources("GenerateResource.OutOfDate");
                 }
                 else
                 {
@@ -1516,7 +1524,7 @@ namespace Microsoft.Build.Tasks
             {
                 resxFileInfo = _cache.GetResXFileInfo(sourceFilePath, UsePreserializedResources);
             }
-            catch (Exception e)  when (!ExceptionHandling.NotExpectedIoOrXmlException(e) || e is MSBuildResXException)
+            catch (Exception e) when (!ExceptionHandling.NotExpectedIoOrXmlException(e) || e is MSBuildResXException)
             {
                 // Return true, so that resource processing will display the error
                 // No point logging a duplicate error here as well
@@ -2186,7 +2194,7 @@ namespace Microsoft.Build.Tasks
         : MarshalByRefObject
 #endif
     {
-#region fields
+        #region fields
         /// <summary>
         /// List of readers used for input.
         /// </summary>
@@ -2351,7 +2359,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool _useSourcePath = false;
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Process all files.
@@ -2715,7 +2723,7 @@ namespace Microsoft.Build.Tasks
                             && GetFormat(inFile) != Format.Assembly
                             // outFileOrDir is a directory when the input file is an assembly
                             && GetFormat(outFileOrDir) != Format.Assembly)
-                            // Never delete an assembly since we don't ever actually write to assemblies.
+                        // Never delete an assembly since we don't ever actually write to assemblies.
                         {
                             RemoveCorruptedFile(outFileOrDir);
                         }
@@ -3947,7 +3955,7 @@ namespace Microsoft.Build.Tasks
                 get { return column; }
             }
         }
-#endregion // Code from ResGen.EXE
+        #endregion // Code from ResGen.EXE
     }
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT
