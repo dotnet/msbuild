@@ -47,7 +47,7 @@
     The 'solutionFolder' and 'inRoot' cannot be used together; use only one of the options.</source>
         <target state="new">Add project reference to solution action is not configured correctly in the template.
     The 'solutionFolder' and 'inRoot' cannot be used together; use only one of the options.</target>
-        <note />
+        <note>do not translate: 'solutionFolder', 'inRoot'</note>
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Error_NoProjectsToAdd">
         <source>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</source>
@@ -76,18 +76,21 @@
         <target state="new">Adding
     project(s): {0}
     in the root of solution file: {1}</target>
-        <note />
+        <note>{0} - list of file paths to projects to add,
+{1} - the path to target solution file</note>
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Running">
         <source>Adding
     project(s): {0}
     to solution file: {1}
     solution folder: {2}</source>
-        <target state="translated">Agregando
+        <target state="needs-review-translation">Agregando
     proyectos: {0}
      al archivo de solución: {1}
      carpeta de la solución: {2}</target>
-        <note />
+        <note>{0} - list of file paths to projects to add,
+{1} - the path to target solution file,
+{2} - the solution folder inside solution to add the projects to.</note>
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Succeeded">
         <source>Successfully added project(s) to a solution file.</source>

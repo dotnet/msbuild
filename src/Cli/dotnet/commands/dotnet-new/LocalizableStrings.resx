@@ -154,6 +154,7 @@
   <data name="PostAction_AddProjToSln_Error_BothInRootAndSolutionFolderSpecified" xml:space="preserve">
     <value>Add project reference to solution action is not configured correctly in the template.
     The 'solutionFolder' and 'inRoot' cannot be used together; use only one of the options.</value>
+    <comment>do not translate: 'solutionFolder', 'inRoot'</comment>
   </data>
   <data name="PostAction_AddProjToSln_Failed" xml:space="preserve">
     <value>Failed to add project(s) to the solution: {0}</value>
@@ -167,11 +168,16 @@
     project(s): {0}
     to solution file: {1}
     solution folder: {2}</value>
+    <comment>{0} - list of file paths to projects to add,
+{1} - the path to target solution file,
+{2} - the solution folder inside solution to add the projects to.</comment>
   </data>
   <data name="PostAction_AddProjToSln_InRoot_Running" xml:space="preserve">
     <value>Adding
     project(s): {0}
     in the root of solution file: {1}</value>
+    <comment>{0} - list of file paths to projects to add,
+{1} - the path to target solution file</comment>
   </data>
   <data name="PostAction_AddProjToSln_Succeeded" xml:space="preserve">
     <value>Successfully added project(s) to a solution file.</value>
