@@ -205,6 +205,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private bool _logInitialPropertiesAndItems;
 
+        private bool _question;
+
         /// <summary>
         /// The settings used to load the project under build
         /// </summary>
@@ -794,7 +796,11 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets or sets a value that will error when the build process fails an incremental check.
         /// </summary>
-        public bool Question { get; set; }
+        public bool Question
+        {
+            get => _question;
+            set => _question = value;
+        } 
 
         /// <summary>
         /// Gets or sets the project cache description to use for all <see cref="BuildSubmission"/> or <see cref="GraphBuildSubmission"/>
@@ -860,6 +866,7 @@ namespace Microsoft.Build.Execution
             translator.TranslateEnum(ref _projectLoadSettings, (int) _projectLoadSettings);
             translator.Translate(ref _interactive);
             translator.Translate(ref _isolateProjects);
+            translator.Translate(ref _question);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.

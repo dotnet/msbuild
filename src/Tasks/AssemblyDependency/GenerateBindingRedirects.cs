@@ -10,6 +10,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Reflection;
 using Microsoft.Build.Shared.FileSystem;
+using System.IO;
 
 #nullable disable
 
@@ -136,18 +137,18 @@ namespace Microsoft.Build.Tasks
 
             if (writeOutput)
             {
-                if (question)
+                Log.LogMessageFromResources(MessageImportance.Low, "GenerateBindingRedirects.CreatingBindingRedirectionFile", OutputAppConfigFile.ItemSpec);
+                using (var stream = FileUtilities.OpenWrite(OutputAppConfigFile.ItemSpec, false))
                 {
-                    Log.LogErrorFromResources("GenerateBindingRedirects.CreatingBindingRedirectionFile", OutputAppConfigFile.ItemSpec);
+                    doc.Save(stream);
                 }
-                else
-                {
-                    Log.LogMessageFromResources(MessageImportance.Low, "GenerateBindingRedirects.CreatingBindingRedirectionFile", OutputAppConfigFile.ItemSpec);
-                    using (var stream = FileUtilities.OpenWrite(OutputAppConfigFile.ItemSpec, false))
-                    {
-                        doc.Save(stream);
-                    }
-                }
+            }
+            else
+            {
+                // instead of writing, touch the output file
+                var now = DateTime.Now;
+                File.SetLastAccessTime(OutputAppConfigFile.ItemSpec, now);
+                File.SetLastWriteTime(OutputAppConfigFile.ItemSpec, now);
             }
 
             return !Log.HasLoggedErrors;

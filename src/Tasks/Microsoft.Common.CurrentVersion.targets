@@ -2462,7 +2462,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ====================================================================================================
   -->
   <Target Name="GenerateBindingRedirects"
-    Condition="'$(AutoGenerateBindingRedirects)' == 'true' and '$(GenerateBindingRedirectsOutputType)' == 'true'"
+    Inputs="$(MSBuildAllProjects);@(AppConfigFile);$(ResolveAssemblyReferencesStateFile);$(SuggestedBindingRedirectsCacheFile)"
+    Outputs="$(_GenerateBindingRedirectsIntermediateAppConfig)"
+    Condition="'$(AutoGenerateBindingRedirects)' == 'true' and '$(GenerateBindingRedirectsOutputType)' == 'true' and '@(AppConfigWithTargetPath)' != '' and '@(SuggestedBindingRedirects)' != ''"
     DependsOnTargets="_GenerateSuggestedBindingRedirectsCache">
 
     <GenerateBindingRedirects
