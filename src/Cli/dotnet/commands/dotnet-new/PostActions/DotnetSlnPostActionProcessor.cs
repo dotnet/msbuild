@@ -105,6 +105,12 @@ namespace Microsoft.DotNet.Tools.New.PostActionProcessors
             string solutionFolder = GetSolutionFolder(action);
             bool? inRoot = GetInRoot(action);
 
+            if (!string.IsNullOrWhiteSpace(solutionFolder) && inRoot is true)
+            {
+                Reporter.Error.WriteLine(LocalizableStrings.PostAction_AddProjToSln_Error_BothInRootAndSolutionFolderSpecified);
+                return false;
+            }
+
             if (inRoot is true)
             {
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostAction_AddProjToSln_InRoot_Running, string.Join(" ", projectFiles), nearestSlnFilesFound[0]));

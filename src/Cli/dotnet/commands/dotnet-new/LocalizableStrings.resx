@@ -151,6 +151,10 @@
   <data name="PostAction_AddProjToSln_Error_NoSolutionFile" xml:space="preserve">
     <value>Unable to determine which solution file to add the reference to.</value>
   </data>
+  <data name="PostAction_AddProjToSln_Error_BothInRootAndSolutionFolderSpecified" xml:space="preserve">
+    <value>Add project reference to solution action is not configured correctly in the template.
+    The 'solutionFolder' and 'inRoot' cannot be used together; use only one of the options.</value>
+  </data>
   <data name="PostAction_AddProjToSln_Failed" xml:space="preserve">
     <value>Failed to add project(s) to the solution: {0}</value>
     <comment>{0} - the reason why operation failed, normally ends with period</comment>
