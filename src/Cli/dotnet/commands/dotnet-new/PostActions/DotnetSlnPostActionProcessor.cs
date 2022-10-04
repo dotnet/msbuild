@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.Tools.New.PostActionProcessors
                 return false;
             }
 
-            string solutionFolder = GetSolutionFolder(action);
+            string? solutionFolder = GetSolutionFolder(action);
             bool? inRoot = GetInRoot(action);
 
             if (!string.IsNullOrWhiteSpace(solutionFolder) && inRoot is true)
@@ -145,13 +145,13 @@ namespace Microsoft.DotNet.Tools.New.PostActionProcessors
             }
         }
 
-        private static string GetSolutionFolder(IPostAction actionConfig)
+        private static string? GetSolutionFolder(IPostAction actionConfig)
         {
             if (actionConfig.Args != null && actionConfig.Args.TryGetValue("solutionFolder", out string? solutionFolder))
             {
                 return solutionFolder;
             }
-            return string.Empty;
+            return null;
         }
 
         private static bool? GetInRoot(IPostAction actionConfig)
