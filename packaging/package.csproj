@@ -30,7 +30,7 @@
                           SetTargetFramework="TargetFramework=$(VSCompatTargetFramework)" 
                           OutputItemType="ContainerLibraryOutputNet472"/>
 
-        <ProjectReference Include="../containerize/containerize.csproj" PrivateAssets="all" ReferenceOutputAssembly="true" />
+        <ProjectReference Include="../containerize/containerize.csproj" PrivateAssets="all" IncludeAssets="runtime" ReferenceOutputAssembly="true" />
         <PackageReference Include="System.CommandLine" PrivateAssets="all" IncludeAssets="runtime"/>
     </ItemGroup>
 
@@ -43,12 +43,14 @@
             <Content Include="$(OutDir)containerize.dll" Pack="true" PackagePath="containerize/" />
             <Content Include="$(OutDir)containerize.runtimeconfig.json" Pack="true" PackagePath="containerize/" />
             <Content Include="$(OutDir)System.CommandLine.dll" Pack="true" PackagePath="containerize/" />
+            <Content Include="$(OutDir)Valleysoft.DockerCredsProvider.dll" Pack="true" PackagePath="containerize/" />
             <Content Include="@(ContainerLibraryOutput)" Pack="true" PackagePath="containerize/" />
 
             <!-- tasks folder -->
             <Content Include="@(ContainerLibraryOutput)" Pack="true" PackagePath="tasks/$(TargetFramework)/" />
             <Content Include="@(ContainerLibraryOutputNet472)" Pack="true" PackagePath="tasks/$(VSCompatTargetFramework)/" />
             <Content Include="../Microsoft.NET.Build.Containers/bin/$(Configuration)/$(TargetFramework)/Microsoft.NET.Build.Containers.deps.json" Pack="true" PackagePath="tasks/$(TargetFramework)" />
+            <Content Include="$(OutDir)Valleysoft.DockerCredsProvider.dll" Pack="true" PackagePath="tasks/$(TargetFramework)" />
             <Content Include="../Microsoft.NET.Build.Containers/bin/$(Configuration)/$(VSCompatTargetFramework)/Microsoft.NET.Build.Containers.deps.json" Pack="true" PackagePath="tasks/$(VSCompatTargetFramework)" />
 
             <!-- build folder -->

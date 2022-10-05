@@ -2,7 +2,7 @@
   "profiles": {
     "containerize": {
       "commandName": "Project",
-      "commandLineArgs": "bin\\Debug\\net7.0\\ --baseregistry https://mcr.microsoft.com --baseimagename dotnet/runtime --outputregistry docker:// --imagename dotnet-test --imagetags 6.0 --workingdirectory app/ --entrypoint dotnet --entrypointargs run --labels foo=bar hello=world --ports 1234/tcp"
+      "commandLineArgs": "S:\\play\\container-demo\\bin\\Debug\\net6.0\\linux-x64\\ --baseregistry https://mcr.microsoft.com --baseimagename dotnet/runtime --outputregistry https://rainercontainer.azurecr.io --imagename donuts --imagetags 6.0 --workingdirectory app/ --entrypoint dotnet --entrypointargs run --labels foo=bar hello=world --ports 1234/tcp"
     }
   }
 }

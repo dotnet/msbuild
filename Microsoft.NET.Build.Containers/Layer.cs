@@ -10,6 +10,15 @@ public record struct Layer
 
     public string BackingFile { get; private set; }
 
+    public static Layer FromDescriptor(Descriptor descriptor)
+    {
+        return new()
+        {
+            BackingFile = ContentStore.PathForDescriptor(descriptor),
+            Descriptor = descriptor
+        };
+    }
+
     public static Layer FromDirectory(string directory, string containerPath)
     {
         var fileList =

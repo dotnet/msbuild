@@ -7,7 +7,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
-using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Xml.Linq;
 
@@ -80,17 +79,9 @@ public record struct Registry(Uri BaseUri)
         string tempTarballPath = ContentStore.GetTempFile();
         using (FileStream fs = File.Create(tempTarballPath))
         {
-            Stream? gzs = null;
+            using Stream responseStream = await response.Content.ReadAsStreamAsync();
 
-            Stream responseStream = await response.Content.ReadAsStreamAsync();
-            if (descriptor.MediaType.EndsWith("gzip"))
-            {
-                gzs = new GZipStream(responseStream, CompressionMode.Decompress);
-            }
-
-            using Stream? gzipStreamToDispose = gzs;
-
-            await (gzs ?? responseStream).CopyToAsync(fs);
+            await responseStream.CopyToAsync(fs);
         }
 
         File.Move(tempTarballPath, localPath, overwrite: true);
@@ -125,7 +116,15 @@ public record struct Registry(Uri BaseUri)
         //Uri uploadUri = new(BaseUri, pushResponse.Headers.GetValues("location").Single() + $"?digest={layer.Descriptor.Digest}");
         Debug.Assert(pushResponse.Headers.Location is not null);
 
-        var x = new UriBuilder(pushResponse.Headers.Location);
+        UriBuilder x;
+        if (pushResponse.Headers.Location.IsAbsoluteUri)
+        {
+            x = new UriBuilder(pushResponse.Headers.Location);
+        }
+        else
+        {
+            x = new UriBuilder(BaseUri + pushResponse.Headers.Location.OriginalString);
+        }
 
         x.Query += $"&digest={Uri.EscapeDataString(digest)}";
 
@@ -154,7 +153,8 @@ public record struct Registry(Uri BaseUri)
 
     private static HttpClient GetClient()
     {
-        HttpClient client = new(new HttpClientHandler() { UseDefaultCredentials = true });
+        var clientHandler = new AuthHandshakeMessageHandler(new HttpClientHandler() { UseDefaultCredentials = true });
+        HttpClient client = new(clientHandler);
 
         client.DefaultRequestHeaders.Accept.Clear();
         client.DefaultRequestHeaders.Accept.Add(
@@ -191,17 +191,16 @@ public record struct Registry(Uri BaseUri)
             {
                 // The blob wasn't already available in another namespace, so fall back to explicitly uploading it
 
-                // TODO: don't do this search, which is ridiculous
-                foreach (Layer layer in x.newLayers)
+                if (!x.originatingRegistry.HasValue)
                 {
-                    if (layer.Descriptor.Digest == digest)
-                    {
-                        await Push(layer, name);
-                        break;
+                    throw new NotImplementedException("Need a good error for 'couldn't download a thing because no link to registry'");
                     }
 
-                    throw new NotImplementedException("Need to push a layer but it's not a new one--need to download it from the base registry and upload it");
-                }
+                // Ensure the blob is available locally
+                await x.originatingRegistry.Value.DownloadBlob(x.OriginatingName, descriptor);
+
+                // Then push it to the destination registry
+                await Push(Layer.FromDescriptor(descriptor), name);
             }
         }
 

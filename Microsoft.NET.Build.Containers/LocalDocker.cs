@@ -55,6 +55,7 @@ public class LocalDocker
             string localPath = await x.originatingRegistry.Value.DownloadBlob(x.OriginatingName, d);
 
             // Stuff that (uncompressed) tarball into the image tar stream
+            // TODO uncompress!!
             string layerTarballPath = $"{d.Digest.Substring("sha256:".Length)}/layer.tar";
             await writer.WriteEntryAsync(localPath, layerTarballPath);
             layerTarballPaths.Add(layerTarballPath);
