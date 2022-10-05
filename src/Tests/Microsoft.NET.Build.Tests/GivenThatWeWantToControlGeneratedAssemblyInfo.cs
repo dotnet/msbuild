@@ -757,7 +757,7 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-        [RequiresMSBuildVersionTheory("17.4")]
+        [Theory]
         [InlineData("netcoreapp3.1", ".NET Core 3.1")]
         [InlineData("netcoreapp2.1", ".NET Core 2.1")]
         [InlineData("netstandard2.1", ".NET Standard 2.1")]
