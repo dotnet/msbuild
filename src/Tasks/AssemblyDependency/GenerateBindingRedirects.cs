@@ -20,7 +20,7 @@ namespace Microsoft.Build.Tasks
     /// Take suggested redirects (from the ResolveAssemblyReference and GenerateOutOfBandAssemblyTables tasks)
     /// and add them to an intermediate copy of the App.config file.
     /// </summary>
-    public class GenerateBindingRedirects : TaskExtension, IIncrementalTask
+    public class GenerateBindingRedirects : TaskExtension
     {
         // <param name="SuggestedRedirects">RAR suggested binding redirects.</param>
         // <param name="AppConfigFile">The source App.Config file.</param>
@@ -48,10 +48,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [Output]
         public ITaskItem OutputAppConfigFile { get; set; }
-
-        public void SetQuestion(bool question) => this.question = question;
-
-        private bool question = false;
 
         /// <summary>
         /// Execute the task.
@@ -109,8 +105,9 @@ namespace Microsoft.Build.Tasks
             runtimeNode.Add(redirectNodes);
 
             var writeOutput = true;
+            var outputExists = FileSystems.Default.FileExists(OutputAppConfigFile.ItemSpec);
 
-            if (FileSystems.Default.FileExists(OutputAppConfigFile.ItemSpec))
+            if (outputExists)
             {
                 try
                 {
@@ -143,7 +140,7 @@ namespace Microsoft.Build.Tasks
                     doc.Save(stream);
                 }
             }
-            else
+            else if (outputExists)
             {
                 // instead of writing, touch the output file
                 var now = DateTime.Now;
