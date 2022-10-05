@@ -24,6 +24,13 @@ namespace Microsoft.Build.Experimental
         /// The build stopped unexpectedly, for example,
         /// because a named pipe between the server and the client was unexpectedly closed.
         /// </summary>
-        Unexpected
+        Unexpected,
+        /// <summary>
+        /// The client is not able to identify the server state.
+        /// </summary>
+        /// <remarks>
+        /// This may happen when mutex that is regulating the server state throws.
+        /// </remarks>
+        UnknownServerState
     }
 }
