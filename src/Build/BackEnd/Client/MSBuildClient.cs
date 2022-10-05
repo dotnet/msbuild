@@ -476,10 +476,12 @@ namespace Microsoft.Build.Experimental
         private bool TryLaunchServer()
         {
             string serverLaunchMutexName = $@"Global\msbuild-server-launch-{_handshake.ComputeHash()}";
+
             try
             {
                 // For unknown root cause, opening mutex can sometimes throw 'Connection timed out' exception. See: https://github.com/dotnet/msbuild/issues/7993
                 using var serverLaunchMutex = ServerNamedMutex.OpenOrCreateMutex(serverLaunchMutexName, out bool mutexCreatedNew);
+
                 if (!mutexCreatedNew)
                 {
                     // Some other client process launching a server and setting a build request for it. Fallback to usual msbuild app build.
@@ -487,12 +489,20 @@ namespace Microsoft.Build.Experimental
                     _exitResult.MSBuildClientExitType = MSBuildClientExitType.ServerBusy;
                     return false;
                 }
+            }
+            catch (IOException ex) when (ex is not PathTooLongException)
+            {
+                CommunicationsUtilities.Trace("Failed to obtain the current build server state: {0}",  ex);
+                _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnknownServerState;
+                return false;
+            }
 
+            try
+            {
                 string[] msBuildServerOptions = new string[] {
                     "/nologo",
                     "/nodemode:8"
                 };
-
                 NodeLauncher nodeLauncher = new NodeLauncher();
                 CommunicationsUtilities.Trace("Starting Server...");
                 Process msbuildProcess = nodeLauncher.Start(_msbuildLocation, string.Join(" ", msBuildServerOptions));
