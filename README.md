@@ -69,7 +69,7 @@ Before you contribute, please read through the contributing and developer guides
    - [Full Framework](documentation/wiki/Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md)
    - [Mono](documentation/wiki/Building-Testing-and-Debugging-on-Mono-MSBuild.md)
 
-* See our [up for grabs issues](https://github.com/Microsoft/msbuild/issues?q=is%3Aopen+is%3Aissue+label%3Aup-for-grabs) for a list of issues we think are great to onboard new developers.
+* See our [help wanted issues](https://github.com/dotnet/msbuild/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22) for a list of issues we think are great to onboard new developers.
    - **Note:** Please leave a comment asking to be assigned the issue if you want to work on it.
 * See our [label documentation](documentation/wiki/Labels.md) for descriptions of labels we use throughout the repo.
 
