@@ -44,6 +44,50 @@ new CompatDifference[] {
     CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.CannotReduceVisibility, string.Empty, DifferenceType.Changed, "T:CompatTests.First")
 }
             },
+            // Reducing visibility of internal type to protected
+            {
+                @"
+namespace CompatTests
+{
+  public class First {
+    internal int F = 0;
+  }
+}
+",
+                @"
+namespace CompatTests
+{
+  public class First {
+    protected int F = 0;
+  }
+}
+",
+new CompatDifference[] {
+    CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.CannotReduceVisibility, string.Empty, DifferenceType.Changed, "F:CompatTests.First.F")
+}
+            },
+            // Reducing visibility of protected type to internal
+            {
+                @"
+namespace CompatTests
+{
+  public class First {
+    protected int F = 0;
+  }
+}
+",
+                @"
+namespace CompatTests
+{
+  public class First {
+    internal int F = 0;
+  }
+}
+",
+new CompatDifference[] {
+    CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.CannotReduceVisibility, string.Empty, DifferenceType.Changed, "F:CompatTests.First.F")
+}
+            },
             // Expand visibility of type
             {
                 @"
@@ -296,6 +340,46 @@ new CompatDifference[] {
             }
         };
 
+        public static TheoryData<string, string, CompatDifference[]> NoInternals => new()
+        {
+            // No diagnostic on expanding visibility of type from internal to public
+            {
+                @"
+namespace CompatTests
+{
+  internal class First {}
+}
+",
+                @"
+namespace CompatTests
+{
+  public class First {}
+}
+",
+new CompatDifference[] {}
+            },
+            // No diagnostic on expanding visibility of member from protected to protected internal
+            {
+                @"
+namespace CompatTests
+{
+  public class First {
+    protected int F;
+  }
+}
+",
+                @"
+namespace CompatTests
+{
+  public class First {
+    protected internal int F;
+  }
+}
+",
+new CompatDifference[] {}
+            },
+        };
+
         [Theory]
         [MemberData(nameof(TestCases))]
         public void EnsureDiagnosticIsReported(string leftSyntax, string rightSyntax, CompatDifference[] expected)
@@ -317,6 +401,21 @@ new CompatDifference[] {
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
             ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(
                 includeInternalSymbols: true,
+                strictMode: true));
+
+            IEnumerable<CompatDifference> actual = differ.GetDifferences(left, right);
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Theory]
+        [MemberData(nameof(NoInternals))]
+        public void EnsureReportedInStrictModeWithoutInternalSymbols(string leftSyntax, string rightSyntax, CompatDifference[] expected)
+        {
+            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
+            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(
+                includeInternalSymbols: false,
                 strictMode: true));
 
             IEnumerable<CompatDifference> actual = differ.GetDifferences(left, right);
