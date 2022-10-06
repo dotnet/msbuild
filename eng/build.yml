@@ -15,13 +15,13 @@ parameters:
   timeoutInMinutes: 180
 
 jobs:
-- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/release/7.0.1xx'), not(contains(parameters.agentOs, 'TemplateEngine'))) }}:
+- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/main'), not(contains(parameters.agentOs, 'TemplateEngine'))) }}:
   - template: /eng/common/templates/job/onelocbuild.yml
     parameters:
       CreatePr: true
       LclSource: lclFilesfromPackage
       LclPackageId: 'LCL-JUNO-PROD-DOTNETSDK'
-      MirrorBranch: release/7.0.1xx
+      MirrorBranch: main
       MirrorRepo: sdk
 
 - ${{ if not(contains(parameters.agentOs, 'TemplateEngine')) }}:

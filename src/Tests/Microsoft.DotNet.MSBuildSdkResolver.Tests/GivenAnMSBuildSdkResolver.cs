@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 new MockContext { ProjectFileDirectory = environment.TestDirectory },
                 new MockFactory());
 
-            result.Success.Should().BeTrue();
+            result.Success.Should().BeTrue($"No error expected. Error encountered: {string.Join(Environment.NewLine, result.Errors ?? new string[]{})}. Mocked Process Path: {environment.ProcessPath}. Mocked Path: {environment.PathEnvironmentVariable}");
             result.Path.Should().Be(expected.FullName);
             result.AdditionalPaths.Should().BeNull();
             result.Version.Should().Be("99.99.98");
@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 new MockContext { ProjectFileDirectory = environment.TestDirectory, SolutionFilePath = solutionFilePath },
                 new MockFactory());
 
-            result.Success.Should().BeTrue();
+            result.Success.Should().BeTrue($"No error expected. Error encountered: {string.Join(Environment.NewLine, result.Errors ?? new string[]{})}. Mocked Process Path: {environment.ProcessPath}. Mocked Path: {environment.PathEnvironmentVariable}");
             result.Path.Should().StartWith(environment.TestDirectory.FullName);
             result.AdditionalPaths.Should().BeNull();
             result.Version.Should().Be(version);
@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 new MockContext { ProjectFilePath = projectFilePath, SolutionFilePath = solutionFilePath },
                 new MockFactory());
 
-            result.Success.Should().BeTrue();
+            result.Success.Should().BeTrue($"No error expected. Error encountered: {string.Join(Environment.NewLine, result.Errors ?? new string[]{})}. Mocked Process Path: {environment.ProcessPath}. Mocked Path: {environment.PathEnvironmentVariable}");
             result.Path.Should().StartWith(environment.TestDirectory.FullName);
             result.AdditionalPaths.Should().BeNull();
             result.Version.Should().Be(version);
@@ -207,7 +207,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 },
                 new MockFactory());
 
-            result.Success.Should().BeTrue();
+            result.Success.Should().BeTrue($"No error expected. Error encountered: {string.Join(Environment.NewLine, result.Errors ?? new string[]{})}. Mocked Process Path: {environment.ProcessPath}. Mocked Path: {environment.PathEnvironmentVariable}");
             result.Path.Should().Be((disallowPreviews ? compatibleRtm : compatiblePreview).FullName);
             result.AdditionalPaths.Should().BeNull();
             result.PropertiesToAdd.Should().BeNull();
@@ -281,7 +281,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 },
                 new MockFactory());
 
-            result.Success.Should().BeTrue();
+            result.Success.Should().BeTrue($"No error expected. Error encountered: {string.Join(Environment.NewLine, result.Errors ?? new string[]{})}. Mocked Process Path: {environment.ProcessPath}. Mocked Path: {environment.PathEnvironmentVariable}");
             result.Path.Should().Be((disallowPreviews ? compatibleRtm : compatiblePreview).FullName);
             result.AdditionalPaths.Should().BeNull();
             result.PropertiesToAdd.Count.Should().Be(2);
@@ -352,7 +352,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 new MockContext { ProjectFileDirectory = environment.TestDirectory },
                 new MockFactory());
 
-            result.Success.Should().BeTrue();
+            result.Success.Should().BeTrue($"No error expected. Error encountered: {string.Join(Environment.NewLine, result.Errors ?? new string[]{})}. Mocked Process Path: {environment.ProcessPath}. Mocked Path: {environment.PathEnvironmentVariable}");
             result.Path.Should().Be(expected.FullName);
             result.AdditionalPaths.Should().BeNull();
             result.Version.Should().Be("99.99.99");
@@ -374,7 +374,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 new MockContext { ProjectFileDirectory = environment.TestDirectory },
                 new MockFactory());
 
-            result.Success.Should().BeTrue();
+            result.Success.Should().BeTrue($"No error expected. Error encountered: {string.Join(Environment.NewLine, result.Errors ?? new string[]{})}. Mocked Process Path: {environment.ProcessPath}. Mocked Path: {environment.PathEnvironmentVariable}");
             result.Path.Should().Be(expected.FullName);
             result.AdditionalPaths.Should().BeNull();
             result.Version.Should().Be("999.99.99");
@@ -401,7 +401,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 new MockContext { ProjectFileDirectory = environment.TestDirectory },
                 new MockFactory());
 
-            result.Success.Should().BeTrue();
+            result.Success.Should().BeTrue($"No error expected. Error encountered: {string.Join(Environment.NewLine, result.Errors ?? new string[]{})}. Mocked Process Path: {environment.ProcessPath}. Mocked Path: {environment.PathEnvironmentVariable}");
             result.Path.Should().Be(expected.FullName);
             result.AdditionalPaths.Should().BeNull();
             result.Version.Should().Be(disallowPreviewsByDefault ? "10.0.0" : "11.0.0-preview1");
@@ -429,7 +429,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 new MockContext { ProjectFileDirectory = environment.TestDirectory },
                 new MockFactory());
 
-            result.Success.Should().BeTrue();
+            result.Success.Should().BeTrue($"No error expected. Error encountered: {string.Join(Environment.NewLine, result.Errors ?? new string[]{})}. Mocked Process Path: {environment.ProcessPath}. Mocked Path: {environment.PathEnvironmentVariable}");
             result.Path.Should().Be(expected.FullName);
             result.AdditionalPaths.Should().BeNull();
             result.Version.Should().Be(disallowPreviews ? "10.0.0" : "11.0.0-preview1");
@@ -503,7 +503,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 new MockContext { ProjectFileDirectory = environment.TestDirectory },
                 new MockFactory());
 
-            result.Success.Should().BeTrue();
+            result.Success.Should().BeTrue($"No error expected. Error encountered: {string.Join(Environment.NewLine, result.Errors ?? new string[]{})}. Mocked Process Path: {environment.ProcessPath}. Mocked Path: {environment.PathEnvironmentVariable}");
             result.Path.Should().Be(preview.FullName);
             result.AdditionalPaths.Should().BeNull();
             result.Version.Should().Be("11.0.0-preview1");
@@ -532,7 +532,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 new MockContext { ProjectFileDirectory = environment.TestDirectory },
                 new MockFactory());
 
-            result.Success.Should().BeTrue();
+            result.Success.Should().BeTrue($"No error expected. Error encountered: {string.Join(Environment.NewLine, result.Errors ?? new string[]{})}. Mocked Process Path: {environment.ProcessPath}. Mocked Path: {environment.PathEnvironmentVariable}");
             result.Path.Should().Be(expected.FullName);
             result.AdditionalPaths.Should().BeNull();
             result.Version.Should().Be(vsSettings.DisallowPrerelease() ? "10.0.0" : "11.0.0-preview1");
@@ -548,7 +548,9 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", sdkVersion);
             environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
 
-            var resolver = new TemplateLocator.TemplateLocator(environment.GetEnvironmentVariable,
+            var resolver = new TemplateLocator.TemplateLocator(
+                environment.GetEnvironmentVariable,
+                () => environment.ProcessPath,
                 new sdkResolver::Microsoft.DotNet.DotNetSdkResolver.VSSettings(environment.VSSettingsFile?.FullName, environment.DisallowPrereleaseByDefault), null, null);
             resolver.TryGetDotnetSdkVersionUsedInVs("15.8", out var version).Should().BeTrue();
 
@@ -567,6 +569,8 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             public string Muxer => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "dotnet.exe" : "dotnet";
 
             public string PathEnvironmentVariable { get; set; }
+
+            public string ProcessPath { get; set; }
 
             public DirectoryInfo TestDirectory { get; }
             public FileInfo VSSettingsFile { get; set; }
@@ -588,6 +592,8 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             public SdkResolver CreateResolver(bool useAmbientSettings = false)
                 => new DotNetMSBuildSdkResolver(
                     GetEnvironmentVariable,
+                    // force current executable location to be the mocked dotnet executable location
+                    () => ProcessPath,
                     useAmbientSettings
                         ? VSSettings.Ambient
                         : new VSSettings(VSSettingsFile?.FullName, DisallowPrereleaseByDefault));
@@ -629,7 +635,8 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                     new DirectoryInfo(Path.Combine(
                         TestDirectory.FullName, GetProgramFilesDirectory(programFiles).FullName, "dotnet"));
 
-                new FileInfo(Path.Combine(muxerDirectory.FullName, Muxer)).Create();
+                ProcessPath = Path.Combine(muxerDirectory.FullName, Muxer);
+                new FileInfo(ProcessPath).Create();
 
                 PathEnvironmentVariable = $"{muxerDirectory}{Path.PathSeparator}{PathEnvironmentVariable}";
             }

@@ -160,7 +160,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <ComputeBlazorBuildAssets
-      Candidates="@(ReferenceCopyLocalPaths);@(WasmNativeAsset)"
+      Candidates="@(ReferenceCopyLocalPaths->Distinct());@(WasmNativeAsset)"
       ProjectAssembly="@(IntermediateAssembly)"
       ProjectDebugSymbols="@(_DebugSymbolsIntermediatePath)"
       SatelliteAssemblies="@(ReferenceSatellitePaths)"

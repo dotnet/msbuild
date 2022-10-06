@@ -38,9 +38,10 @@
       <OverlaySdkFilesFromStage0 Include="$(Stage0IncludedWorkloadManifestsFile)" Condition="Exists('$(Stage0IncludedWorkloadManifestsFile)')"/>
       <!-- Ignore dotnet-watch files from the SDK since we're building a newer version of it in this repo. -->
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/DotnetTools/**/*" RelativeDestination="DotnetTools"
-        Exclude="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/DotnetTools/dotnet-watch/**" />
+        Exclude="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/DotnetTools/dotnet-watch/**;$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/DotnetTools/dotnet-format/**" />
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/AppHostTemplate/**/*" RelativeDestination="AppHostTemplate"/>
-      <ToolsetToOverlay Include="$(OutputPath)/**/*" />
+      <ToolsetToOverlay Include="$(OutputPath)/**/*"
+        Exclude="$(OutputPath)/DotnetTools/dotnet-watch/**" />
     </ItemGroup>
 
     <Copy SourceFiles="@(OverlaySDK)"
@@ -68,17 +69,13 @@
     <Copy SourceFiles="@(ToolsetToOverlay)"
           DestinationFiles="@(ToolsetToOverlay->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
-     <!-- Copy dotnet-watch files -->
     <ItemGroup>
       <DotNetWatchOverlay Include="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\**" />
-      <!-- To reduce the size of the SDK, we use the compiler dependencies that are located in the `Rosyln/bincore` location
+      <!-- To reduce the size of the SDK, we use the compiler dependencies that are located in the `Roslyn/bincore` location
       instead of shipping our own copies in the dotnet-watch tool. These assemblies will be resolved by path in the
       dotnet-watch executable. -->
       <DotNetWatchOverlay Remove="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\Microsoft.CodeAnalysis.CSharp.dll" />
       <DotNetWatchOverlay Remove="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\Microsoft.CodeAnalysis.dll" />
-      <DotNetWatchOverlay Include="$(ArtifactsDir)bin\Microsoft.AspNetCore.Watch.BrowserRefresh\$(Configuration)\netcoreapp3.1\*.dll" TargetDir="middleware" />
-      <DotNetWatchOverlay Include="$(ArtifactsDir)bin\Microsoft.Extensions.DotNetDeltaApplier\$(Configuration)\net7.0\*.dll" TargetDir="hotreload" />
-      <DotNetWatchOverlay Include="$(ArtifactsDir)bin\DotNetWatchTasks\$(Configuration)\netstandard2.0\DotNetWatchTasks.dll" />
     </ItemGroup>
 
     <Copy SourceFiles="@(DotNetWatchOverlay)"

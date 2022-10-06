@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
@@ -28,7 +29,17 @@ namespace Microsoft.DotNet.ApiCompatibility
         public readonly bool WarnOnMissingReferences;
 
         /// <summary>
-        /// Instantiate an object with the desired comparison settings.
+        /// Instantiates default MapperSettings.
+        /// </summary>
+        public MapperSettings()
+        {
+            Filter = new SymbolAccessibilityBasedFilter(false);
+            EqualityComparer = new DefaultSymbolsEqualityComparer();
+            WarnOnMissingReferences = false;
+        }
+
+        /// <summary>
+        /// Instantiates MapperSettings with the desired comparison settings.
         /// </summary>
         /// <param name="ruleRunner">The rule runner.</param>
         /// <param name="filter">The symbol filter.</param>

@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="AssemblyVersionIsNotCompatible">
         <source>{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</source>
-        <target state="translated">{2} la versión del ensamblado '{0}' debe ser igual o mayor que {3} la versión '{1}'.</target>
+        <target state="new">{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotAddAbstractMember">
@@ -85,6 +85,16 @@
       <trans-unit id="CannotChangeParameterName">
         <source>Parameter name on member '{0}' changed from '{1}' to '{2}'.</source>
         <target state="translated">El nombre de parámetro del miembro '{0}' cambió de '{1}' a '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotExpandVisibility">
+        <source>Visibility of '{0}' expanded from '{1}' to '{2}'.</source>
+        <target state="new">Visibility of '{0}' expanded from '{1}' to '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotReduceVisibility">
+        <source>Visibility of '{0}' reduced from '{1}' to '{2}'.</source>
+        <target state="new">Visibility of '{0}' reduced from '{1}' to '{2}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveAttribute">

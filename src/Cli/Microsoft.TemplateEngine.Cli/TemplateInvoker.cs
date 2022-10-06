@@ -275,6 +275,12 @@ namespace Microsoft.TemplateEngine.Cli
                     }
                     Reporter.Error.WriteLine(LocalizableStrings.RerunCommandAndPassForceToCreateAnyway.Bold().Red());
                     return NewCommandStatus.CannotCreateOutputFile;
+                case CreationResultStatus.TemplateIssueDetected:
+                    if (!string.IsNullOrEmpty(instantiateResult.ErrorMessage))
+                    {
+                        Reporter.Error.WriteLine(instantiateResult.ErrorMessage.Bold().Red());
+                    }
+                    return NewCommandStatus.TemplateIssueDetected;
                 default:
                     return NewCommandStatus.Unexpected;
             }
