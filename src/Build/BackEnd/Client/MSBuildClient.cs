@@ -177,7 +177,7 @@ namespace Microsoft.Build.Experimental
                     CommunicationsUtilities.Trace("Server was not running. Starting server now.");
                     if (!TryLaunchServer())
                     {
-                        _exitResult.MSBuildClientExitType = MSBuildClientExitType.LaunchError;
+                        _exitResult.MSBuildClientExitType = (_exitResult.MSBuildClientExitType == MSBuildClientExitType.Success) ? MSBuildClientExitType.LaunchError : _exitResult.MSBuildClientExitType;
                         return _exitResult;
                     }
                 }

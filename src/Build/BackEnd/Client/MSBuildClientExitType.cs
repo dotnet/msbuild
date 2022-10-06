@@ -30,6 +30,7 @@ namespace Microsoft.Build.Experimental
         /// </summary>
         /// <remarks>
         /// This may happen when mutex that is regulating the server state throws.
+        /// See: https://github.com/dotnet/msbuild/issues/7993.
         /// </remarks>
         UnknownServerState
     }
