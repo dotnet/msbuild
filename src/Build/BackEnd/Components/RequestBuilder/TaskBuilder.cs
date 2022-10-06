@@ -1037,7 +1037,7 @@ namespace Microsoft.Build.BackEnd
 
             var projectReferenceItems = _buildRequestEntry.RequestConfiguration.Project.GetItems(ItemTypeNames.ProjectReference);
 
-            var declaredProjects = new HashSet<string>(projectReferenceItems.Count + 1, StringComparer.OrdinalIgnoreCase);
+            var declaredProjects = new HashSet<string>(projectReferenceItems.Count + 1, FileUtilities.PathComparer);
 
             foreach (var projectReferenceItem in projectReferenceItems)
             {
