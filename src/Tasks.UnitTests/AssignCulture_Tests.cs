@@ -259,5 +259,24 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal($"MyResource.{culture}.resx", t.AssignedFiles[0].ItemSpec);
             Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
         }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Pseudoloc is special-cased in .NET relative to Framework.")]
+        public void Pseudolocales_CaseInsensitive()
+        {
+            string culture = "qps-Ploc";
+            AssignCulture t = new AssignCulture();
+            t.BuildEngine = new MockEngine();
+            ITaskItem i = new TaskItem($"MyResource.{culture}.resx");
+            t.Files = new ITaskItem[] { i };
+            t.Execute();
+
+            Assert.Single(t.AssignedFiles);
+            Assert.Single(t.CultureNeutralAssignedFiles);
+            Assert.Equal("true", t.AssignedFiles[0].GetMetadata("WithCulture"));
+            Assert.Equal(culture, t.AssignedFiles[0].GetMetadata("Culture"));
+            Assert.Equal($"MyResource.{culture}.resx", t.AssignedFiles[0].ItemSpec);
+            Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
+        }
     }
 }
