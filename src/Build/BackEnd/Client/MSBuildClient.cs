@@ -202,6 +202,7 @@ namespace Microsoft.Build.Experimental
                 // For unknown root cause, Mutex.TryOpenExisting can sometimes throw 'Connection timed out' exception preventing to obtain the build server state through it (Running or not, Busy or not).
                 // See: https://github.com/dotnet/msbuild/issues/7993
                 CommunicationsUtilities.Trace("Failed to obtain the current build server state: {0}", ex);
+                CommunicationsUtilities.Trace("HResult: {0}.", ex.HResult);
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnknownServerState;
                 return _exitResult;
             }
@@ -493,6 +494,7 @@ namespace Microsoft.Build.Experimental
             catch (IOException ex) when (ex is not PathTooLongException)
             {
                 CommunicationsUtilities.Trace("Failed to obtain the current build server state: {0}",  ex);
+                CommunicationsUtilities.Trace("HResult: {0}.", ex.HResult);
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnknownServerState;
                 return false;
             }
