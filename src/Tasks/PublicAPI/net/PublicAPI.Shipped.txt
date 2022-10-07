@@ -1926,6 +1926,12 @@ Microsoft.Build.Tasks.RoslynCodeTaskFactory.GetTaskParameters() -> Microsoft.Bui
 Microsoft.Build.Tasks.RoslynCodeTaskFactory.Initialize(string taskName, System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.TaskPropertyInfo> parameterGroup, string taskBody, Microsoft.Build.Framework.IBuildEngine taskFactoryLoggingHost) -> bool
 Microsoft.Build.Tasks.RoslynCodeTaskFactory.RoslynCodeTaskFactory() -> void
 Microsoft.Build.Tasks.RoslynCodeTaskFactory.TaskType.get -> System.Type
+Microsoft.Build.Tasks.SetRidAgnosticValueForProjects
+Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.Projects.get -> Microsoft.Build.Framework.ITaskItem[]
+Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.Projects.set -> void
+Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.SetRidAgnosticValueForProjects() -> void
+Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.UpdatedProjects.get -> Microsoft.Build.Framework.ITaskItem[]
+Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.UpdatedProjects.set -> void
 Microsoft.Build.Tasks.SGen
 Microsoft.Build.Tasks.SGen.BuildAssemblyName.get -> string
 Microsoft.Build.Tasks.SGen.BuildAssemblyName.set -> void
@@ -2232,6 +2238,8 @@ Microsoft.Build.Tasks.XslTransformation.OutputPaths.get -> Microsoft.Build.Frame
 Microsoft.Build.Tasks.XslTransformation.OutputPaths.set -> void
 Microsoft.Build.Tasks.XslTransformation.Parameters.get -> string
 Microsoft.Build.Tasks.XslTransformation.Parameters.set -> void
+Microsoft.Build.Tasks.XslTransformation.PreserveWhitespace.get -> bool
+Microsoft.Build.Tasks.XslTransformation.PreserveWhitespace.set -> void
 Microsoft.Build.Tasks.XslTransformation.UseTrustedSettings.get -> bool
 Microsoft.Build.Tasks.XslTransformation.UseTrustedSettings.set -> void
 Microsoft.Build.Tasks.XslTransformation.XmlContent.get -> string
@@ -2356,6 +2364,7 @@ override Microsoft.Build.Tasks.ResolveManifestFiles.Execute() -> bool
 override Microsoft.Build.Tasks.ResolveNativeReference.Execute() -> bool
 override Microsoft.Build.Tasks.ResolveNonMSBuildProjectOutput.Execute() -> bool
 override Microsoft.Build.Tasks.ResolveSDKReference.Execute() -> bool
+override Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.Execute() -> bool
 override Microsoft.Build.Tasks.SGen.GenerateCommandLineCommands() -> string
 override Microsoft.Build.Tasks.SGen.GenerateFullPathToTool() -> string
 override Microsoft.Build.Tasks.SGen.SkipTaskExecution() -> bool
