@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="7.0.100-rtm.22504.5">
+    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="7.0.100-rtm.22507.5">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>0b4eccde51cf6aadf82cfba0b2a5e4aa4200beea</Sha>
+      <Sha>90b4ea928260c3265949f957d9be506289d8462f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Mocks" Version="7.0.100-rtm.22504.5">
+    <Dependency Name="Microsoft.TemplateEngine.Mocks" Version="7.0.100-rtm.22507.5">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>0b4eccde51cf6aadf82cfba0b2a5e4aa4200beea</Sha>
+      <Sha>90b4ea928260c3265949f957d9be506289d8462f</Sha>
       <SourceBuild RepoName="templating" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Ref" Version="7.0.0-rtm.22507.1">
@@ -46,13 +46,13 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>b8a4363ecd194d4e7906648a505701a9d2b7aeae</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="17.4.0-preview-22480-04">
+    <Dependency Name="Microsoft.Build" Version="17.5.0-preview-22506-03">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>e1930c2ee6b16a0c5afbdc53ec51dbdda4664f80</Sha>
+      <Sha>20ce296d6b3f4e63a511321c7e1a2f69a4ee63ef</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build.Localization" Version="17.4.0-preview-22480-04">
+    <Dependency Name="Microsoft.Build.Localization" Version="17.5.0-preview-22506-03">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>e1930c2ee6b16a0c5afbdc53ec51dbdda4664f80</Sha>
+      <Sha>20ce296d6b3f4e63a511321c7e1a2f69a4ee63ef</Sha>
     </Dependency>
     <Dependency Name="Microsoft.FSharp.Compiler" Version="12.0.5-beta.22507.1">
       <Uri>https://github.com/dotnet/fsharp</Uri>
