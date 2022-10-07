@@ -26,6 +26,14 @@ namespace Microsoft.Build.Tasks
         #region fields
 
         /// <summary>
+        /// Platform aliases
+        /// </summary>
+        private static readonly Dictionary<string, string> PlatformAliases = new(StringComparer.OrdinalIgnoreCase)
+        {
+            { "UAP", "Windows" }
+        };
+
+        /// <summary>
         /// Regex for breaking up the sdk reference include into pieces.
         /// Example: XNA, Version=8.0
         /// </summary>
@@ -1251,7 +1259,7 @@ namespace Microsoft.Build.Tasks
                     AddResolutionWarning("ResolveSDKReference.MaxPlatformVersionNotSpecified", projectName, DisplayName, Version, targetPlatformIdentifier, targetPlatformVersionFromItem.ToString(), targetPlatformIdentifier, targetPlatformVersion.ToString());
                 }
 
-                if (!String.IsNullOrEmpty(TargetPlatform) && !String.Equals(targetPlatformIdentifier, TargetPlatform))
+                if (!String.IsNullOrEmpty(TargetPlatform) && !String.Equals(targetPlatformIdentifier, TargetPlatform) && (!PlatformAliases.TryGetValue(TargetPlatform, out string platform) || !String.Equals(targetPlatformIdentifier, platform, StringComparison.OrdinalIgnoreCase)))
                 {
                     AddResolutionErrorOrWarning("ResolveSDKReference.TargetPlatformIdentifierDoesNotMatch", projectName, DisplayName, Version, targetPlatformIdentifier, TargetPlatform);
                 }
