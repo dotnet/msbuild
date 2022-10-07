@@ -76,17 +76,15 @@ namespace Microsoft.Build.Framework
         /// </remarks>
         public FileClassifier()
         {
-            string? programFiles32 = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
-            string? programFiles64 = Environment.GetEnvironmentVariable("ProgramW6432");
-
-            if (!string.IsNullOrEmpty(programFiles32))
+            // Register Microsoft "Reference Assemblies" as immutable
+            string[] programFilesEnvs = new[] { "ProgramFiles(x86)", "ProgramW6432", "ProgramFiles(Arm)" };
+            foreach (string programFilesEnv in programFilesEnvs)
             {
-                RegisterImmutableDirectory(Path.Combine(programFiles32, "Reference Assemblies", "Microsoft"));
-            }
-
-            if (!string.IsNullOrEmpty(programFiles64))
-            {
-                RegisterImmutableDirectory(Path.Combine(programFiles64, "Reference Assemblies", "Microsoft"));
+                string? programFiles = Environment.GetEnvironmentVariable(programFilesEnv);
+                if (!string.IsNullOrEmpty(programFiles))
+                {
+                    RegisterImmutableDirectory(Path.Combine(programFiles, "Reference Assemblies", "Microsoft"));
+                }
             }
 
 #if !RUNTIME_TYPE_NETCORE
