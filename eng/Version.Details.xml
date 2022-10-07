@@ -109,9 +109,9 @@
       <Uri>https://github.com/microsoft/vstest</Uri>
       <Sha>041b610698e793fcf91439ef79fc98bea2a13ceb</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="7.0.100-1.22504.1">
+    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="7.0.100-1.22507.1">
       <Uri>https://github.com/dotnet/linker</Uri>
-      <Sha>5c909850449fa60f0a0df1cfec7d942a560f3607</Sha>
+      <Sha>6000a84c7e0b3678af032c25b7319aefdd057f6c</Sha>
       <SourceBuild RepoName="linker" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.DotNet.ILCompiler" Version="8.0.0-alpha.1.22506.10">
@@ -119,9 +119,9 @@
       <Sha>b38fb072af49cb4336428c57ff28a22cc5d72cc2</Sha>
       <SourceBuildTarball RepoName="runtime" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.NET.ILLink.Analyzers" Version="7.0.100-1.22504.1">
+    <Dependency Name="Microsoft.NET.ILLink.Analyzers" Version="7.0.100-1.22507.1">
       <Uri>https://github.com/dotnet/linker</Uri>
-      <Sha>5c909850449fa60f0a0df1cfec7d942a560f3607</Sha>
+      <Sha>6000a84c7e0b3678af032c25b7319aefdd057f6c</Sha>
     </Dependency>
     <Dependency Name="System.CodeDom" Version="8.0.0-alpha.1.22506.10">
       <Uri>https://github.com/dotnet/runtime</Uri>
