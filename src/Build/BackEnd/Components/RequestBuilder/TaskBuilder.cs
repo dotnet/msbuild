@@ -1037,7 +1037,7 @@ namespace Microsoft.Build.BackEnd
 
             var projectReferenceItems = _buildRequestEntry.RequestConfiguration.Project.GetItems(ItemTypeNames.ProjectReference);
 
-            var declaredProjects = new HashSet<string>(projectReferenceItems.Count);
+            var declaredProjects = new HashSet<string>(projectReferenceItems.Count + 1, FileUtilities.PathComparer);
 
             foreach (var projectReferenceItem in projectReferenceItems)
             {
@@ -1045,7 +1045,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // allow a project to msbuild itself
-            declaredProjects.Add(_taskExecutionHost.ProjectInstance.FullPath);
+            declaredProjects.Add(FileUtilities.NormalizePath(_taskExecutionHost.ProjectInstance.FullPath));
 
             List<string> undeclaredProjects = null;
 
