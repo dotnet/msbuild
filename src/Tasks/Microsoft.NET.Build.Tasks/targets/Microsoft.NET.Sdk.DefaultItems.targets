@@ -134,6 +134,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NetSdkWarning ResourceName="Net6NotCompatibleWithDev16"/>
   </Target>
 
+  <Target Name="_WarnWhenUsingNET7AndVSPriorTo174"
+        BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+        Condition="$([MSBuild]::VersionLessThan($(MSBuildVersion), '17.4.0')) and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '7.0'))">
+    <NetSdkWarning ResourceName="Net7NotCompatibleWithDev173"/>
+  </Target>
+
   <Target Name="_CheckForInvalidWindowsDesktopTargetingConfiguration"
         BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
         Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0')) and ('$(UseWindowsForms)' == 'true' or '$(UseWPF)' == 'true')">
