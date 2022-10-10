@@ -62,6 +62,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 return;
             }
 
+            if (!_settings.StrictMode && dt == DifferenceType.Added)
+            {
+                return;
+            }
+
             CompatDifference difference = dt switch
             {
                 DifferenceType.Changed => new CompatDifference(
@@ -167,10 +172,17 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
                     for (int i = 0; i < rightGroup.Attributes.Count; i++)
                     {
-                        if (!rightGroup.Seen[i])
+                        if (!rightGroup.Seen[i] && _settings.StrictMode)
                         {
                             // Attribute arguments exist on right but not left.
-                            // Issue "changed" diagnostic.
+                            // Left
+                            //   [Foo("a")]
+                            //   void F()
+                            // Right
+                            //   [Foo("a")]
+                            //   [Foo("b")]
+                            //   void F()
+                            // Issue "changed" diagnostic when in strict mode.
                             AddDifference(differences, DifferenceType.Changed, leftMetadata, rightMetadata, containing, itemRef, rightGroup.Attributes[i]);
                         }
                     }

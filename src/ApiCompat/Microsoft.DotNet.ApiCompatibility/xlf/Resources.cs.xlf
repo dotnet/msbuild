@@ -87,6 +87,16 @@
         <target state="translated">Název parametru u člena {0} se změnil z {1} na {2}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotExpandVisibility">
+        <source>Visibility of '{0}' expanded from '{1}' to '{2}'.</source>
+        <target state="new">Visibility of '{0}' expanded from '{1}' to '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotReduceVisibility">
+        <source>Visibility of '{0}' reduced from '{1}' to '{2}'.</source>
+        <target state="new">Visibility of '{0}' reduced from '{1}' to '{2}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotRemoveAttribute">
         <source>Cannot remove attribute '{0}' from '{1}'.</source>
         <target state="translated">Atribut {0} nelze odebrat z {1}.</target>
