@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                         // From emperical observation, it's noted that failing to launch a browser results in either Process.Start returning a null-value
                         // or for the process to have immediately exited.
                         // We can use this to provide a helpful message.
-                        _reporter.Output($"Unable to launch the browser. Navigate to {launchUrl}");
+                        _reporter.Output($"Unable to launch the browser. Navigate to {launchUrl}", emoji: "🌐");
                     }
                 }
                 else if (_watchContext?.BrowserRefreshServer is { } browserRefresh)

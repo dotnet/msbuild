@@ -11,6 +11,5 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Deployment.DotNet.Releases" Version="$(MicrosoftDeploymentDotNetReleasesVersion)" />
-
   </ItemGroup>
 </Project>

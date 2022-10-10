@@ -15,8 +15,9 @@
     <PropertyGroup Condition="'$(RoslynAssembliesPath)' == ''">
       <RoslynAssembliesPath>$(RoslynTargetsPath)</RoslynAssembliesPath>
       <_packageReferenceList>@(PackageReference)</_packageReferenceList>
-      <RoslynAssembliesPath Condition="'$(MSBuildProjectExtension)' == '.csproj' and $(_packageReferenceList.Contains('Microsoft.Net.Compilers.Toolset'))">$([System.IO.Path]::GetDirectoryName($(CSharpCoreTargetsPath)))</RoslynAssembliesPath>
-      <RoslynAssembliesPath Condition="'$(MSBuildProjectExtension)' == '.vbproj' and $(_packageReferenceList.Contains('Microsoft.Net.Compilers.Toolset'))">$([System.IO.Path]::GetDirectoryName($(VisualBasicCoreTargetsPath)))</RoslynAssembliesPath>
+      <!-- CSharpCoreTargetsPath and VisualBasicCoreTargetsPath point to the same location, Microsoft.CodeAnalysis.CSharp and Microsoft.CodeAnalysis.VisualBasic
+      are on the same directory as Microsoft.CodeAnalysis. So there is no need to distinguish between csproj or vbproj. -->
+      <RoslynAssembliesPath Condition="$(_packageReferenceList.Contains('Microsoft.Net.Compilers.Toolset'))">$([System.IO.Path]::GetDirectoryName($(CSharpCoreTargetsPath)))</RoslynAssembliesPath>
       <RoslynAssembliesPath Condition="'$(MSBuildRuntimeType)' == 'Core'">$([System.IO.Path]::Combine('$(RoslynAssembliesPath)', bincore))</RoslynAssembliesPath>
     </PropertyGroup>
 
@@ -31,6 +32,7 @@
     <!-- PackageTargetPath isn't exposed by NuGet: https://github.com/NuGet/Home/issues/6671. -->
     <Microsoft.DotNet.Compatibility.ValidatePackage
       PackageTargetPath="$([MSBuild]::ValueOrDefault('$(PackageTargetPath)', '$([MSBuild]::NormalizePath('$(PackageOutputPath)', '$(PackageId).$(PackageVersion).nupkg'))'))"
+      AssemblyName="$(AssemblyName)"
       RuntimeGraph="$(RuntimeIdentifierGraphPath)"
       NoWarn="$(NoWarn)"
       RunApiCompat="$([MSBuild]::ValueOrDefault('$(RunApiCompat)', 'true'))"

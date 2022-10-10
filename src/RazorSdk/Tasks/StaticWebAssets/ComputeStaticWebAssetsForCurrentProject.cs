@@ -44,7 +44,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                     {
                         if (selected == null)
                         {
-                            Log.LogMessage("No compatible asset found for '{0}'", key);
+                            Log.LogMessage(MessageImportance.Low, "No compatible asset found for '{0}'", key);
                             continue;
                         }
                         else
@@ -60,7 +60,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                     }
                     else
                     {
-                        Log.LogMessage("Skipping asset '{0}' because it is for referenced projects only.", selected.Identity);
+                        Log.LogMessage(MessageImportance.Low, "Skipping asset '{0}' because it is for referenced projects only.", selected.Identity);
                     }
                 }
 

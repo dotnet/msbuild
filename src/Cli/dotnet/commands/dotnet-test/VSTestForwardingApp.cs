@@ -16,7 +16,8 @@ namespace Microsoft.DotNet.Cli
             : base(GetVSTestExePath(), argsToForward)
         {
             (bool hasRootVariable, string rootVariableName, string rootValue) = GetRootVariable();
-            if (!hasRootVariable) {
+            if (!hasRootVariable)
+            {
                 WithEnvironmentVariable(rootVariableName, rootValue);
             }
         }
@@ -41,7 +42,9 @@ namespace Microsoft.DotNet.Cli
             bool hasRootVariable = Environment.GetEnvironmentVariable(rootVariableName) != null;
             string rootValue = hasRootVariable ? null : Path.GetDirectoryName(new Muxer().MuxerPath);
 
-            return (hasRootVariable, rootVariableName, rootValue);
+            // We rename env variable to support --arch switch that relies on DOTNET_ROOT/DOTNET_ROOT(x86)
+            // We provide VSTEST_WINAPPHOST_ only in case of testhost*.exe removing VSTEST_WINAPPHOST_ prefix and passing as env vars.
+            return (hasRootVariable, $"VSTEST_WINAPPHOST_{rootVariableName}", rootValue);
         }
     }
 }

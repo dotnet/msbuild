@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Frameworks;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
@@ -15,13 +16,16 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
     internal class ToolPackageStoreMock : IToolPackageStoreQuery, IToolPackageStore
     {
         private IFileSystem _fileSystem;
+        private readonly Dictionary<PackageId, IEnumerable<NuGetFramework>> _frameworksMap;
 
         public ToolPackageStoreMock(
             DirectoryPath root,
-            IFileSystem fileSystem)
+            IFileSystem fileSystem,
+            Dictionary<PackageId, IEnumerable<NuGetFramework>> frameworksMap = null)
         {
             Root = new DirectoryPath(Path.GetFullPath(root.Value));
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _frameworksMap = frameworksMap ?? new Dictionary<PackageId, IEnumerable<NuGetFramework>>();
         }
 
         public DirectoryPath Root { get; private set; }
@@ -93,11 +97,15 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 
             foreach (var subdirectory in _fileSystem.Directory.EnumerateFileSystemEntries(packageRootDirectory.Value))
             {
+
+                IEnumerable<NuGetFramework> frameworks = null;
+                _frameworksMap.TryGetValue(packageId, out frameworks);
                 yield return new ToolPackageMock(
                     _fileSystem,
                     packageId,
                     NuGetVersion.Parse(Path.GetFileName(subdirectory)),
-                    new DirectoryPath(subdirectory));
+                    new DirectoryPath(subdirectory),
+                    frameworks: frameworks);
             }
         }
 

@@ -13,6 +13,13 @@ namespace Microsoft.AspNetCore.Razor.Tasks
         [Required]
         public ITaskItem[] Content { get; set; }
 
+        [Required]
+        /// <remarks>
+        /// <c>.cshtml.css</c> is only supported for .NET 6 and newer apps. Since this task is used in older apps
+        /// too, this property determines if we should consider .cshtml.css files.
+        /// </remarks>
+        public bool SupportsScopedCshtmlCss { get; set; }
+
         [Output]
         public ITaskItem[] DiscoveredScopedCssInputs { get; set; }
 
@@ -20,12 +27,19 @@ namespace Microsoft.AspNetCore.Razor.Tasks
         {
             var discoveredInputs = new List<ITaskItem>();
 
-            for (var i = 0; i < Content.Length; i++)
+            foreach (var candidate in Content)
             {
-                var candidate = Content[i];
                 var fullPath = candidate.GetMetadata("FullPath");
-                if ((fullPath.EndsWith(".razor.css", StringComparison.OrdinalIgnoreCase) || fullPath.EndsWith(".cshtml.css", StringComparison.OrdinalIgnoreCase)) &&
-                    !string.Equals("false", candidate.GetMetadata("Scoped"), StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(candidate.GetMetadata("Scoped"), "false", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (fullPath.EndsWith(".razor.css", StringComparison.OrdinalIgnoreCase))
+                {
+                    discoveredInputs.Add(candidate);
+                }
+                else if (SupportsScopedCshtmlCss && fullPath.EndsWith(".cshtml.css", StringComparison.OrdinalIgnoreCase))
                 {
                     discoveredInputs.Add(candidate);
                 }
