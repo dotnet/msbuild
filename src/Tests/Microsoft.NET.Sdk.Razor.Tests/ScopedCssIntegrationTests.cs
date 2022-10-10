@@ -409,7 +409,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             }
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
         public void BuildProjectWithReferences_CorrectlyBundlesScopedCssFiles()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
@@ -441,7 +441,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             appBundle.Should().Contain("_content/PackageLibraryDirectDependency/PackageLibraryDirectDependency.bundle.scp.css");
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
         public void ScopedCss_IsBackwardsCompatible_WithPreviousVersions()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
@@ -484,7 +484,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             appBundle.Should().Contain("_content/PackageLibraryDirectDependency/PackageLibraryDirectDependency.bundle.scp.css");
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
         public void ScopedCss_PublishIsBackwardsCompatible_WithPreviousVersions()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";

@@ -166,7 +166,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
         // Project with references
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
         public void BuildProjectWithReferences_GeneratesJsonManifestAndCopiesItToOutputFolder()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
@@ -199,7 +199,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 intermediateOutputPath);
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
         public void BuildProjectWithReferences_WorksWithStaticWebAssetsV1ClassLibraries()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
@@ -253,7 +253,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 intermediateOutputPath);
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
         public void PublishProjectWithReferences_WorksWithStaticWebAssetsV1ClassLibraries()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
@@ -315,7 +315,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         }
 
         // Build no dependencies
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
         public void BuildProjectWithReferences_NoDependencies_GeneratesJsonManifestAndCopiesItToOutputFolder()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
@@ -597,7 +597,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             AssertManifest(publishManifest, LoadPublishManifest());
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
         public void PublishProjectWithReferences_GeneratesPublishJsonManifestAndCopiesPublishAssets()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
@@ -637,7 +637,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 intermediateOutputPath);
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
         public void PublishProjectWithReferences_PublishSingleFile_GeneratesPublishJsonManifestAndCopiesPublishAssets()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
@@ -672,7 +672,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 intermediateOutputPath);
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
         public void PublishProjectWithReferences_NoBuild_GeneratesPublishJsonManifestAndCopiesPublishAssets()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
@@ -738,7 +738,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             intermediateOutputPath);
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
         public void PublishProjectWithReferences_AppendTargetFrameworkToOutputPathFalse_GeneratesPublishJsonManifestAndCopiesPublishAssets()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
