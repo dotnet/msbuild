@@ -1077,7 +1077,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             VerifyBootManifestHashes(testInstance, blazorPublishDirectory);
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/sdk/issues/28429")]
         public void Publish_HostedApp_WithRidSpecifiedInCLI_Works()
         {
             // Arrange
