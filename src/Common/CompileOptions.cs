@@ -3,7 +3,7 @@
 using System.Reflection;
 
 #if MICROSOFT_ENABLE_TELEMETRY
-      [assembly: AssemblyMetadata("OfficialBuilder", "Microsoft")]
+      [assembly: AssemblyMetadata("TelemetryOptOutDefault", Microsoft.DotNet.Cli.CompileOptions.TelemetryOptOutDefaultString)]
 #endif
 
 namespace Microsoft.DotNet.Cli
@@ -15,6 +15,12 @@ namespace Microsoft.DotNet.Cli
         false;
 #else
         true;
+#endif
+        public const string TelemetryOptOutDefaultString =
+#if MICROSOFT_ENABLE_TELEMETRY
+        "False";
+#else
+        "True";
 #endif
     }
 }
