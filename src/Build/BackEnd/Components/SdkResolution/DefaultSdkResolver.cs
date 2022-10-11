@@ -3,7 +3,6 @@
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Collections.Generic;
 using System.IO;
 
 using SdkResolverBase = Microsoft.Build.Framework.SdkResolver;
@@ -32,12 +31,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         public override SdkResultBase Resolve(SdkReference sdk, SdkResolverContextBase context, SdkResultFactoryBase factory)
         {
-            var sdkPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildSDKsPath, sdk.Name, "Sdk");
+            string sdkPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildSDKsPath, sdk.Name, "Sdk");
 
-            // Note: On failure MSBuild will log a generic message, no need to indicate a failure reason here.
             return FileUtilities.DirectoryExistsNoThrow(sdkPath)
                 ? factory.IndicateSuccess(sdkPath, string.Empty)
-                : factory.IndicateFailure(null, new List<string>() { ResourceUtilities.FormatResourceStringStripCodeAndKeyword("DefaultSDKResolverError", sdk.Name, sdkPath) });
+                : factory.IndicateFailure(new string[] { ResourceUtilities.FormatResourceStringStripCodeAndKeyword("DefaultSDKResolverError", sdk.Name, sdkPath) }, null);
         }
     }
 }
