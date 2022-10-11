@@ -14,6 +14,7 @@ Microsoft.Build.Experimental.MSBuildClientExitType.ServerBusy = 1 -> Microsoft.B
 Microsoft.Build.Experimental.MSBuildClientExitType.Success = 0 -> Microsoft.Build.Experimental.MSBuildClientExitType
 Microsoft.Build.Experimental.MSBuildClientExitType.UnableToConnect = 2 -> Microsoft.Build.Experimental.MSBuildClientExitType
 Microsoft.Build.Experimental.MSBuildClientExitType.Unexpected = 4 -> Microsoft.Build.Experimental.MSBuildClientExitType
+Microsoft.Build.Experimental.MSBuildClientExitType.UnknownServerState = 5 -> Microsoft.Build.Experimental.MSBuildClientExitType
 Microsoft.Build.Experimental.OutOfProcServerNode
 Microsoft.Build.Experimental.OutOfProcServerNode.BuildCallback
 Microsoft.Build.Experimental.OutOfProcServerNode.OutOfProcServerNode(Microsoft.Build.Experimental.OutOfProcServerNode.BuildCallback buildFunction) -> void
