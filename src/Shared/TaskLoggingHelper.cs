@@ -923,6 +923,17 @@ namespace Microsoft.Build.Utilities
             // global state.
             ErrorUtilities.VerifyThrowArgumentNull(exception, nameof(exception));
 
+            // For an AggregateException call LogErrorFromException on each inner exception
+            if (exception is AggregateException aggregateException)
+            {
+                foreach (Exception innerException in aggregateException.Flatten().InnerExceptions)
+                {
+                    LogErrorFromException(innerException, showStackTrace, showDetail, file);
+                }
+
+                return;
+            }
+
             string message;
 
             if (!showDetail && (Environment.GetEnvironmentVariable("MSBUILDDIAGNOSTICS") == null)) // This env var is also used in ToolTask
