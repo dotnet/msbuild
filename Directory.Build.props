@@ -52,7 +52,7 @@
         RS0016 & RS0017: Roslyn analyzers seem to be bugged, claiming that API's that exist don't and vise-versa: https://github.com/dotnet/msbuild/issues/7903
     -->
 
-    <NoWarn>$(NoWarn);NU1603;NU5105;1701;1702;SYSLIB0011;SYSLIB0037;SYSLIB0044;RS0016;RS0017;</NoWarn>
+    <NoWarn>$(NoWarn);NU1603;NU5105;1701;1702;SYSLIB0011;SYSLIB0037;SYSLIB0044</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">
