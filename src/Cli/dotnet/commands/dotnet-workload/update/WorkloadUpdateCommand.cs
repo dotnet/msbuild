@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
             _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.VersionOption), version, _dotnetPath, _userProfileDir);
             _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption)) ?
-                Path.GetTempPath() :
+                PathUtilities.CreateTempSubdirectory() :
                 parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption));
             _printRollbackDefinitionOnly = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.PrintRollbackOption);
             _fromRollbackDefinition = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.FromRollbackFileOption);
@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             var configOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.ConfigOption);
             var sourceOption = parseResult.ValueForOption<string[]>(WorkloadUpdateCommandParser.SourceOption);
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
-                new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides:  sourceOption);
+                new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides: sourceOption);
 
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString(), _userProfileDir);
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, _sdkVersion.ToString(), _userProfileDir);
@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir,
                 filePermissionSetter: null, new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, _verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger()),
                 _verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger(), restoreActionConfig: restoreActionConfig);
-            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadResolver, _nugetPackageDownloader, _userProfileDir, _tempDirPath, 
+            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadResolver, _nugetPackageDownloader, _userProfileDir, _tempDirPath,
                 _workloadInstaller.GetWorkloadInstallationRecordRepository(), _packageSourceLocation);
         }
 
@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
 
             var workloadIds = GetUpdatableWorkloads();
             _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews, offlineCache).Wait();
-            
+
             var manifestsToUpdate = string.IsNullOrWhiteSpace(_fromRollbackDefinition) ?
                 _workloadManifestUpdater.CalculateManifestUpdates().Select(m => (m.manifestId, m.existingVersion, m.newVersion)) :
                 _workloadManifestUpdater.CalculateManifestRollbacks(_fromRollbackDefinition);
@@ -203,7 +203,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                             installer.InstallWorkloadPack(packId, sdkFeatureBand, offlineCache);
                         }
                     },
-                    rollback: () => {
+                    rollback: () =>
+                    {
                         try
                         {
                             _reporter.WriteLine(LocalizableStrings.RollingBackInstall);
@@ -263,7 +264,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             {
                 if (!string.IsNullOrWhiteSpace(tempManifestDir) && Directory.Exists(tempManifestDir))
                 {
-                   Directory.Delete(tempManifestDir, true);
+                    Directory.Delete(tempManifestDir, true);
                 }
             }
         }
