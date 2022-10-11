@@ -1,5 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
@@ -20,6 +21,9 @@ namespace Microsoft.TemplateEngine.Cli
     /// </summary>
     internal sealed class TemplateGroup
     {
+        /// <summary>
+        /// Constructor of TemplateGroup.
+        /// </summary>
         /// <param name="templates">the templates of the template group.</param>
         /// <exception cref="ArgumentNullException">when <paramref name="templates"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentException">when <paramref name="templates"/> is empty or don't have same <see cref="ITemplateInfo.GroupIdentity"/> defined.</exception>
@@ -179,7 +183,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// </summary>
         internal IReadOnlyList<CliTemplateInfo> Templates { get; private set; }
 
-        internal static IEnumerable<TemplateGroup> FromTemplateList (IEnumerable<CliTemplateInfo> templates)
+        internal static IEnumerable<TemplateGroup> FromTemplateList(IEnumerable<CliTemplateInfo> templates)
         {
             return templates
               .GroupBy(x => x.GroupIdentity, x => !string.IsNullOrEmpty(x.GroupIdentity), StringComparer.OrdinalIgnoreCase)

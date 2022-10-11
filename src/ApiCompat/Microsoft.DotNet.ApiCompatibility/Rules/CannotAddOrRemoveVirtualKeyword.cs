@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using Microsoft.DotNet.ApiCompatibility.Extensions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
@@ -15,13 +16,15 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     {
         private readonly RuleSettings _settings;
 
+        private static bool IsSealed(ISymbol sym) => sym.IsSealed || (!sym.IsVirtual && !sym.IsAbstract);
+
         public CannotAddOrRemoveVirtualKeyword(RuleSettings settings, IRuleRegistrationContext context)
         {
             _settings = settings;
             context.RegisterOnMemberSymbolAction(RunOnMemberSymbol);
         }
 
-        private void RunOnMemberSymbol(ISymbol? left, ISymbol? right, ITypeSymbol leftContainingType, ITypeSymbol rightContainingType, string leftName, string rightName, IList<CompatDifference> differences)
+        private void RunOnMemberSymbol(ISymbol? left, ISymbol? right, ITypeSymbol leftContainingType, ITypeSymbol rightContainingType, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences)
         {
             // Members must exist
             if (left is null || right is null)
@@ -29,22 +32,42 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 return;
             }
 
-            // TODO: Skip interfaces for now, until the compatibility rules for interface
-            // members are clarified: https://github.com/dotnet/sdk/issues/26169.
             if (leftContainingType.TypeKind == TypeKind.Interface || rightContainingType.TypeKind == TypeKind.Interface)
             {
+                if (!IsSealed(left) && IsSealed(right))
+                {
+                    // Introducing the sealed keyword to an interface method is a breaking change.
+                    differences.Add(new CompatDifference(
+                        leftMetadata,
+                        rightMetadata,
+                        DiagnosticIds.CannotAddSealedToInterfaceMember,
+                        string.Format(Resources.CannotAddSealedToInterfaceMember, right),
+                        DifferenceType.Added,
+                        right));
+                }
+
                 return;
             }
 
             if (left.IsVirtual)
             {
+                // Removing the virtual keyword from a member in a sealed type won't be a breaking change.
+                if (leftContainingType.IsEffectivelySealed(_settings.IncludeInternalSymbols))
+                {
+                    return;
+                }
+
                 // If left is virtual and right is not, then emit a diagnostic
                 // specifying that the virtual modifier cannot be removed.
                 if (!right.IsVirtual)
                 {
                     differences.Add(new CompatDifference(
-                    DiagnosticIds.CannotRemoveVirtualFromMember, string.Format(
-                        Resources.CannotRemoveVirtualFromMember, left), DifferenceType.Removed, right));
+                        leftMetadata,
+                        rightMetadata,
+                        DiagnosticIds.CannotRemoveVirtualFromMember,
+                        string.Format(Resources.CannotRemoveVirtualFromMember, left),
+                        DifferenceType.Removed,
+                        right));
                 }
             }
             // If the left member is not virtual, ensure that we're in strict mode.
@@ -57,8 +80,12 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 if (right.IsVirtual)
                 {
                     differences.Add(new CompatDifference(
-                    DiagnosticIds.CannotAddVirtualToMember, string.Format(
-                        Resources.CannotAddVirtualToMember, right), DifferenceType.Added, right));
+                        leftMetadata,
+                        rightMetadata,
+                        DiagnosticIds.CannotAddVirtualToMember,
+                        string.Format(Resources.CannotAddVirtualToMember, right),
+                        DifferenceType.Added,
+                        right));
                 }
             }
         }

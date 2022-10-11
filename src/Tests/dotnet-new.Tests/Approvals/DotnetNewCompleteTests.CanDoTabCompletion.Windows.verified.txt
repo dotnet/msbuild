@@ -1,6 +1,8 @@
 ﻿angular
 blazorserver
+blazorserver-empty
 blazorwasm
+blazorwasm-empty
 classlib
 console
 editorconfig
@@ -36,6 +38,7 @@ wpfcustomcontrollib
 wpflib
 wpfusercontrollib
 xunit
+--diagnostics
 --dry-run
 --force
 --help
@@ -43,12 +46,16 @@ xunit
 --no-update-check
 --output
 --project
+--verbosity
 -?
+-d
 -h
 -n
 -o
+-v
 /?
 /h
+create
 install
 list
 search

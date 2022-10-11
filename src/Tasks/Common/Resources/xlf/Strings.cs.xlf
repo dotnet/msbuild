@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="AotNoValidRuntimePackageError">
         <source>NETSDK1183: Unable to optimize assemblies for Ahead of time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing. When targeting .NET 7 or higher, make sure to restore packages with the PublishAot property set to true.</source>
-        <target state="new">NETSDK1183: Unable to optimize assemblies for Ahead of time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing. When targeting .NET 7 or higher, make sure to restore packages with the PublishAot property set to true.</target>
+        <target state="translated">NETSDK1183: Sestavení nelze optimalizovat pro kompilaci s předstihem: nebyl nalezen platný balíček modulu runtime. Buď nastavte vlastnost PublishAot na hodnotu false, nebo při publikování použijte podporovaný identifikátor modulu runtime. Při cílení na .NET 7 nebo vyšší nezapomeňte obnovit balíčky s vlastností PublishAot nastavenou na hodnotu true.</target>
         <note>{StrBegin="NETSDK1183: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
@@ -464,6 +464,11 @@
         <target state="translated">Optimalizace velikosti sestavení Tento proces může chvíli trvat.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed">
+        <source>NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</source>
+        <target state="translated">NETSDK1191: Identifikátor modulu runtime pro vlastnost {0} nešlo odvodit. Zadejte RID explicitně.</target>
+        <note>{StrBegin="NETSDK1191: "}</note>
+      </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
         <source>NETSDK1020: Package Root {0} was incorrectly given for Resolved library {1}</source>
         <target state="translated">NETSDK1020: Kořen balíčku {0} byl pro rozpoznanou knihovnu {1} nesprávně zadán.</target>
@@ -575,6 +580,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1182: Cílení na .NET 6.0 nebo vyšší ve Visual Studio 2019 se nepodporuje.</target>
         <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
+      <trans-unit id="Net7NotCompatibleWithDev173">
+        <source>NETSDK1192: Targeting .NET 7.0 or higher in Visual Studio 2022 17.3 is not supported.</source>
+        <target state="new">NETSDK1192: Targeting .NET 7.0 or higher in Visual Studio 2022 17.3 is not supported.</target>
+        <note>{StrBegin="NETSDK1192: "}</note>
+      </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
         <target state="translated">NETSDK1084: Pro zadaný identifikátor RuntimeIdentifier {0} není k dispozici žádný hostitel aplikace.</target>
@@ -640,6 +650,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1162: Generování PDB: Spustitelný soubor R2R {0} se nenašel.</target>
         <note>{StrBegin="NETSDK1162: "}</note>
       </trans-unit>
+      <trans-unit id="PReleaseRequiresEnvVarOnSln">
+        <source>NETSDK1190: To use '{0}' in solution projects, you must set the environment variable '{1}' (to true). This will increase the time to complete the operation.</source>
+        <target state="translated">NETSDK1190: Pokud chcete v projektech řešení použít {0}, musíte nastavit proměnnou prostředí {1} (na true). Tím se prodlouží doba potřebná k dokončení operace.</target>
+        <note>{StrBegin="NETSDK1190: "}</note>
+      </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>
         <target state="translated">NETSDK1053: Zabalit jako nástroj nepodporuje nezávislost.</target>
@@ -679,6 +694,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1174: Placeholder</source>
         <target state="translated">NETSDK1174: Zástupný symbol</target>
         <note>{StrBegin="NETSDK1174: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</note>
+      </trans-unit>
+      <trans-unit id="Prefer32BitIgnoredForNetCoreApp">
+        <source>NETSDK1189: Prefer32Bit is not supported and has no effect for netcoreapp target.</source>
+        <target state="translated">NETSDK1189: Prefer32Bit se nepodporuje a nemá žádný vliv na cíl netcoreapp.</target>
+        <note>{StrBegin="NETSDK1189: "}</note>
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>NETSDK1011: Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>

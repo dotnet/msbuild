@@ -7,6 +7,11 @@
         <target state="translated">잘못된 식, 위치: {0}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Diagnostics_OptionDescription">
+        <source>Enables diagnostic output.</source>
+        <target state="translated">진단 출력을 사용하도록 설정합니다.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisableProjectContextEval_OptionDescription">
         <source>Disables evaluating project context using MSBuild.</source>
         <target state="translated">MSBuild를 사용하여 프로젝트 컨텍스트 평가를 사용하지 않도록 설정합니다.</target>
@@ -242,6 +247,11 @@
         <source>You have other SDK version(s) installed that can be used to run this template. Switch to any of the following SDK(s) on your system to run this template: '{0}'. Details on selecting SDK version to run: https://docs.microsoft.com/dotnet/core/tools/global-json.</source>
         <target state="translated">이 템플릿을 실행하는 데 사용할 수 있는 다른 SDK 버전이 설치되어 있습니다. 이 템플릿을 실행하려면 시스템에서 다음 SDK 중 하나로 전환하세요. '{0}'. 실행할 SDK 버전 선택에 대한 세부 정보: https://docs.microsoft.com/dotnet/core/tools/global-json.</target>
         <note>{0} is the list of installed and supported versions.</note>
+      </trans-unit>
+      <trans-unit id="Verbosity_OptionDescription">
+        <source>Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</source>
+        <target state="translated">세부 정보 표시 수준을 설정합니다. 허용되는 값은 q[uiet], m[inimal], n[ormal] 및 diag[nostic]입니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="WorkloadInfoProvider_Message_AddWorkloads">
         <source>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</source>

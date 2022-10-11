@@ -21,6 +21,13 @@ namespace Microsoft.DotNet.ApiCompatibility
         public const string EnumValuesMustMatch = "CP0011";
         public const string CannotRemoveVirtualFromMember = "CP0012";
         public const string CannotAddVirtualToMember = "CP0013";
+        public const string CannotRemoveAttribute = "CP0014";
+        public const string CannotChangeAttribute = "CP0015";
+        public const string CannotAddAttribute = "CP0016";
+        public const string CannotChangeParameterName = "CP0017";
+        public const string CannotAddSealedToInterfaceMember = "CP0018";
+        public const string CannotReduceVisibility = "CP0019";
+        public const string CannotExpandVisibility = "CP0020";
 
         // Assembly loading ids
         public const string AssemblyNotFound = "CP1001";

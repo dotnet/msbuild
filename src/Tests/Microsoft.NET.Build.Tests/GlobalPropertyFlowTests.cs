@@ -45,7 +45,7 @@ namespace Microsoft.NET.Build.Tests
 
         TestAsset Build(bool passSelfContained, bool passRuntimeIdentifier, [CallerMemberName] string callingMethod = "", string identifier = "")
         {
-            var testAsset = _testAssetsManager.CreateTestProject(_testProject, callingMethod: callingMethod, identifier:identifier);
+            var testAsset = _testAssetsManager.CreateTestProject(_testProject, callingMethod: callingMethod, identifier: identifier);
 
             var arguments = GetDotnetArguments(passSelfContained, passRuntimeIdentifier);
 
@@ -207,7 +207,8 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(_testProject, identifier: identifier);
 
-            new DotnetCommand(Log, "new", "sln")
+            new DotnetNewCommand(Log, "sln")
+                .WithVirtualHive()
                 .WithWorkingDirectory(testAsset.TestRoot)
                 .Execute()
                 .Should()
@@ -227,7 +228,7 @@ namespace Microsoft.NET.Build.Tests
 
             var arguments = GetDotnetArguments(passSelfContained, passRuntimeIdentifier);
 
-            if (passSelfContained || passRuntimeIdentifier)
+            if (passRuntimeIdentifier)
             {
                 new DotnetBuildCommand(Log, arguments.ToArray())
                     .WithWorkingDirectory(testAsset.TestRoot)
@@ -251,7 +252,7 @@ namespace Microsoft.NET.Build.Tests
         {
             targetFramework = targetFramework ?? testProject.TargetFrameworks;
 
-            
+
             if (string.IsNullOrEmpty(expectedRuntimeIdentifier) && (expectSelfContained || expectRuntimeIdentifier))
             {
                 //  RuntimeIdentifier might be inferred, so look at the output path to figure out what the actual value used was
@@ -268,7 +269,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 properties["SelfContained"].ToLowerInvariant().Should().BeOneOf("false", "");
             }
-            
+
             properties["RuntimeIdentifier"].Should().Be(expectedRuntimeIdentifier);
         }
 

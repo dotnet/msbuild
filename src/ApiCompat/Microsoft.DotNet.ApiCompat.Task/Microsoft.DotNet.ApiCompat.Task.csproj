@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net6.0;net472</TargetFrameworks>
+    <TargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">net7.0;net472</TargetFrameworks>
     <IsPackable>true</IsPackable>
     <IsShippingPackage>true</IsShippingPackage>
     <StrongNameKeyId>Open</StrongNameKeyId>
@@ -10,6 +11,7 @@
     <NoWarn>$(NoWarn);NU5128</NoWarn>
     <Nullable>enable</Nullable>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddBuildOutputToPackageCore;_AddBuildOutputToPackageDesktop</TargetsForTfmSpecificContentInPackage>
+    <PackageDescription>MSBuild tasks and targets to perform api compatibility checks on assemblies and packages.</PackageDescription>
   </PropertyGroup>
 
   <!-- SDK's task infrastructure -->
@@ -23,7 +25,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jab" Version="$(JabVersion)" PrivateAssets="all" />
     <!-- ExcludeAssets="Runtime" is being set to avoid adding package references and dependencies of package and project references into the package. -->
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCoreVersion)" ExcludeAssets="Runtime" />
     <ProjectReference Include="..\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" ExcludeAssets="Runtime" />

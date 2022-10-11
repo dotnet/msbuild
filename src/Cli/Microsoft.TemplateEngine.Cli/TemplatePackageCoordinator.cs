@@ -1,10 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
-using System.CommandLine.Parsing;
-using System.ComponentModel.DataAnnotations;
-using System.Runtime.CompilerServices;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Constraints;
@@ -105,10 +103,10 @@ namespace Microsoft.TemplateEngine.Cli
             IEnumerable<(string Id, string Version, string Provider)> unmanagedTemplatePackages = templatePackages
                 .Where(tp => tp is not IManagedTemplatePackage)
                 .Select(tp => new
-                            {
-                                Info = NuGetUtils.GetNuGetPackageInfo(_engineEnvironmentSettings, tp.MountPointUri),
-                                Package = tp
-                            })
+                {
+                    Info = NuGetUtils.GetNuGetPackageInfo(_engineEnvironmentSettings, tp.MountPointUri),
+                    Package = tp
+                })
                 .Where(i => i.Info != default)
                 .Select(i => (i.Info.Id, i.Info.Version, i.Package.Provider.Factory.DisplayName));
 
@@ -392,7 +390,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (invalidTemplatePackages.Any())
             {
-                Reporter reporter = args.Force ? Reporter.Output : Reporter.Error;
+                IReporter reporter = args.Force ? Reporter.Output : Reporter.Error;
 
                 reporter.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Install_Info_OverrideNotice);
                 reporter.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Install_Info_PackageIsAvailable);

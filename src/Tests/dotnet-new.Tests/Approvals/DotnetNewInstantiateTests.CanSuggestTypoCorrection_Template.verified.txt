@@ -1,0 +1,11 @@
+﻿No templates or subcommands found matching: 'cnsle'.
+Did you mean one of the following templates?
+   dotnet new console
+
+To list installed templates similar to 'cnsle', run:
+   dotnet new list cnsle
+To search for the templates on NuGet.org, run:
+   dotnet new search cnsle
+
+
+For details on the exit code, refer to https://aka.ms/templating-exit-codes#103

@@ -4,6 +4,7 @@
     <Description>Template creation for the dotnet CLI</Description>
     <IsPackable>true</IsPackable>
     <IsShippingPackage>false</IsShippingPackage>
+    <EnableStyleCopAnalyzer>true</EnableStyleCopAnalyzer>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>

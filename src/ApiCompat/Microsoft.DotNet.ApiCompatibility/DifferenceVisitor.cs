@@ -1,7 +1,6 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 
@@ -12,28 +11,10 @@ namespace Microsoft.DotNet.ApiCompatibility
     /// </summary>
     public class DifferenceVisitor : IDifferenceVisitor
     {
-        private readonly HashSet<CompatDifference>[] _diagnostics;
+        private readonly HashSet<CompatDifference> _compatDifferences = new();
 
         /// <inheritdoc />
-        public IReadOnlyList<IReadOnlyCollection<CompatDifference>> DiagnosticCollections => _diagnostics;
-
-        /// <summary>
-        /// Instantiates the visitor with the desired settings.
-        /// </summary>
-        /// <param name="rightCount">Represents the number of elements that the mappers contain on the right hand side.</param>
-        public DifferenceVisitor(int rightCount = 1)
-        {
-            if (rightCount < 1)
-            {
-                throw new ArgumentOutOfRangeException(nameof(rightCount));
-            }
-
-            _diagnostics = new HashSet<CompatDifference>[rightCount];
-            for (int i = 0; i < rightCount; i++)
-            {
-                _diagnostics[i] = new HashSet<CompatDifference>();
-            }
-        }
+        public IEnumerable<CompatDifference> CompatDifferences => _compatDifferences;
 
         /// <inheritdoc />
         public void Visit<T>(ElementMapper<T> mapper)
@@ -81,7 +62,10 @@ namespace Microsoft.DotNet.ApiCompatibility
 
             // After visiting the assembly, the assembly mapper will contain any assembly load errors that happened
             // when trying to resolve typeforwarded types. If there were any, we add them to the diagnostic bag next.
-            AddToDiagnosticCollections(assembly.AssemblyLoadErrors);
+            foreach (CompatDifference item in assembly.AssemblyLoadErrors)
+            {
+                _compatDifferences.Add(item);
+            }
         }
 
         /// <inheritdoc />
@@ -120,23 +104,9 @@ namespace Microsoft.DotNet.ApiCompatibility
 
         private void AddDifferences<T>(ElementMapper<T> mapper)
         {
-            IReadOnlyList<IEnumerable<CompatDifference>> differences = mapper.GetDifferences();
-            AddToDiagnosticCollections(differences);
-        }
-
-        private void AddToDiagnosticCollections(IReadOnlyList<IEnumerable<CompatDifference>> diagnosticsToAdd)
-        {
-            if (_diagnostics.Length != diagnosticsToAdd.Count)
+            foreach (CompatDifference item in mapper.GetDifferences())
             {
-                throw new InvalidOperationException(Resources.VisitorRightCountShouldMatchMappersSetSize);
-            }
-
-            for (int i = 0; i < diagnosticsToAdd.Count; i++)
-            {
-                foreach (CompatDifference item in diagnosticsToAdd[i])
-                {
-                    _diagnostics[i].Add(item);
-                }
+                _compatDifferences.Add(item);
             }
         }
     }

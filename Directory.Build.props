@@ -1,6 +1,7 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+  <Import Project="$(RepositoryEngineeringDir)Analyzers.props" />
 
   <PropertyGroup>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -12,10 +13,18 @@
     <IsShippingPackage>false</IsShippingPackage>
     <SdkTargetFramework>net7.0</SdkTargetFramework>
     <ToolsetTargetFramework>$(SdkTargetFramework)</ToolsetTargetFramework>
+    
+    <!-- VS for Mac may run on a lower version of .NET than the SDK is targeting, but needs to load the resolvers.  So the resolvers and dependencies
+         may target a lower version of .NET -->
+    <ResolverTargetFramework>net6.0</ResolverTargetFramework>
+    <!-- Source build does not need to worry about running on VS for Mac -->
+    <ResolverTargetFramework Condition="'$(DotNetBuildFromSource)' == 'true'">$(SdkTargetFramework)</ResolverTargetFramework>
 
     <!-- Disable implict package target fallback, and disable warning for when we explicitly add it (currently needed for
          Microsoft.ApplicationInsights) -->
     <NoWarn>$(NoWarn);NU1701</NoWarn>
+    <!-- do not enable analyzers on source build-->
+    <EnforceCodeStyleInBuild Condition="'$(DotNetBuildFromSource)' != 'true'">true</EnforceCodeStyleInBuild>
     <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
 
     <!-- <ArtifactsShippingSymbolsDir>$(ArtifactsDir)symbols\$(Configuration)\Shipping</ArtifactsShippingSymbolsDir> -->

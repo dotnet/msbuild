@@ -1,11 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#nullable enable
-
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 
 namespace Microsoft.DotNet.ApiCompatibility
@@ -16,19 +15,12 @@ namespace Microsoft.DotNet.ApiCompatibility
     public interface IAssemblySymbolLoader
     {
         /// <summary>
-        /// Adds a set of paths to the search directories to resolve references from.
-        /// This is only used when the setting to resolve assembly references is set to true.
-        /// </summary>
-        /// <param name="paths">Comma separated list of paths to register as search directories.</param>
-        void AddReferenceSearchDirectories(string paths);
-
-        /// <summary>
         /// Adds a set of paths to the search directories to resolve references from. Paths may
         /// be directories or full paths to assembly files.
         /// This is only used when the setting to resolve assembly references is set to true.
         /// </summary>
         /// <param name="paths">The list of paths to register as search directories.</param>
-        void AddReferenceSearchDirectories(IEnumerable<string> paths);
+        void AddReferenceSearchPaths(params string[] paths);
 
         /// <summary>
         /// Indicates if the <see cref="CSharpCompilation"/> used to resolve binaries has any roslyn diagnostics.
@@ -36,28 +28,29 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// </summary>
         /// <param name="diagnostics">List of diagnostics.</param>
         /// <returns>True if there are any diagnostics, false otherwise.</returns>
-        bool HasRoslynDiagnostics(out IEnumerable<Diagnostic> diagnostics);
+        bool HasRoslynDiagnostics(out IReadOnlyList<Diagnostic> diagnostics);
 
         /// <summary>
         /// Indicates if the loader emitted any warnings that might affect the assembly resolution.
         /// </summary>
         /// <param name="warnings">List of warnings.</param>
         /// <returns>True if there are any warnings, false otherwise.</returns>
-        bool HasLoadWarnings(out IEnumerable<AssemblyLoadWarning> warnings);
+        bool HasLoadWarnings(out IReadOnlyList<AssemblyLoadWarning> warnings);
 
         /// <summary>
         /// Loads a list of assemblies and gets its corresponding <see cref="IAssemblySymbol"/> from the specified paths.
         /// </summary>
-        /// <param name="paths">Comma separated list of paths to load binaries from. Can be full paths to binaries or a directory.</param>
+        /// <param name="paths">List of paths to load binaries from. Can be full paths to binaries or directories.</param>
         /// <returns>The list of resolved <see cref="IAssemblySymbol"/>.</returns>
-        IEnumerable<IAssemblySymbol> LoadAssemblies(string paths);
+        IReadOnlyList<IAssemblySymbol?> LoadAssemblies(params string[] paths);
 
         /// <summary>
-        /// Loads a list of assemblies and gets its corresponding <see cref="IAssemblySymbol"/> from the specified paths.
+        /// Loads assemblies from an archive based on the given relative paths.
         /// </summary>
-        /// <param name="paths">List of paths to load binaries from. Can be full paths to binaries or a directory.</param>
-        /// <returns>The list of resolved <see cref="IAssemblySymbol"/>.</returns>
-        IEnumerable<IAssemblySymbol> LoadAssemblies(IEnumerable<string> paths);
+        /// <param name="archivePath">The path to the archive that should be opened.</param>
+        /// <param name="relativePaths">The relative paths that point to assemblies inside the archive.</param>
+        /// <returns>The list of resolved and unresolved <see cref="IAssemblySymbol"/>.</returns>
+        IReadOnlyList<IAssemblySymbol?> LoadAssembliesFromArchive(string archivePath, IReadOnlyList<string> relativePaths);
 
         /// <summary>
         /// Loads an assembly from the provided path.

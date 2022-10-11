@@ -8,14 +8,16 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     public static class SharedOptions
     {
-        internal static Option<bool> ForceOption { get; } = SharedOptionsFactory.CreateForceOption();
-
         public static Option<FileInfo> OutputOption { get; } = new Option<FileInfo>(new string[] { "-o", "--output" })
         {
             Description = SymbolStrings.Option_Output,
             IsRequired = false,
             Arity = new ArgumentArity(1, 1)
         };
+
+        public static Option<FileInfo> ProjectPathOption { get; } = new Option<FileInfo>("--project", SymbolStrings.Option_ProjectPath).ExistingOnly();
+
+        internal static Option<bool> ForceOption { get; } = SharedOptionsFactory.CreateForceOption();
 
         internal static Option<string> NameOption { get; } = new Option<string>(new string[] { "-n", "--name" })
         {
@@ -34,7 +36,5 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Description = SymbolStrings.TemplateCommand_Option_NoUpdateCheck,
             Arity = new ArgumentArity(0, 1)
         };
-
-        public static Option<FileInfo> ProjectPathOption { get; } = new Option<FileInfo>("--project", SymbolStrings.Option_ProjectPath).ExistingOnly();
     }
 }

@@ -1,5 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using Microsoft.TemplateEngine.Cli.Commands;
@@ -20,6 +21,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             ParseResult parseResult = myCommand.Parse($"new install source {optionName} my-custom-source");
             InstallCommandArgs args = new((InstallCommand)parseResult.CommandResult.Command, parseResult);
 
+            Assert.NotNull(args.AdditionalSources);
             Assert.Single(args.AdditionalSources);
             Assert.Contains("my-custom-source", args.AdditionalSources);
             Assert.Single(args.TemplatePackages);
@@ -64,7 +66,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             ParseResult parseResult = myCommand.Parse(testCase);
             InstallCommandArgs args = new((InstallCommand)parseResult.CommandResult.Command, parseResult);
 
-            Assert.Equal(2, args.AdditionalSources?.Count);
+            Assert.NotNull(args.AdditionalSources);
+            Assert.Equal(2, args.AdditionalSources.Count);
             Assert.Contains("my-custom-source1", args.AdditionalSources);
             Assert.Contains("my-custom-source2", args.AdditionalSources);
             Assert.Single(args.TemplatePackages);
@@ -139,6 +142,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             ParseResult parseResult = myCommand.Parse(testCase);
             InstallCommandArgs args = new((LegacyInstallCommand)parseResult.CommandResult.Command, parseResult);
 
+            Assert.NotNull(args.AdditionalSources);
             Assert.Single(args.AdditionalSources);
             Assert.Contains("my-custom-source", args.AdditionalSources);
             Assert.Single(args.TemplatePackages);
@@ -188,7 +192,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             ParseResult parseResult = myCommand.Parse(testCase);
             InstallCommandArgs args = new((LegacyInstallCommand)parseResult.CommandResult.Command, parseResult);
 
-            Assert.Equal(2, args.AdditionalSources?.Count);
+            Assert.NotNull(args.AdditionalSources);
+            Assert.Equal(2, args.AdditionalSources.Count);
             Assert.Contains("my-custom-source1", args.AdditionalSources);
             Assert.Contains("my-custom-source2", args.AdditionalSources);
             Assert.Single(args.TemplatePackages);

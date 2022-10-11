@@ -145,7 +145,7 @@ namespace Microsoft.NET.Publish.Tests
         [Fact]
         public void Inbox_version_is_loaded_if_runtime_file_versions_arent_in_deps()
         {
-            void testProjectChanges(TestProject testProject)
+            static void testProjectChanges(TestProject testProject)
             {
                 testProject.AdditionalProperties["IncludeFileVersionsInDependencyFile"] = "false";
             }
@@ -157,7 +157,7 @@ namespace Microsoft.NET.Publish.Tests
         [Fact]
         public void Local_version_of_assembly_with_higher_version_is_loaded_over_inbox_version()
         {
-            void publishFolderChanges(string publishFolder)
+            static void publishFolderChanges(string publishFolder)
             {
                 var depsJsonPath = Path.Combine(publishFolder, "DepsJsonVersions.deps.json");
                 var depsJson = JObject.Parse(File.ReadAllText(depsJsonPath));

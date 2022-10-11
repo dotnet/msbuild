@@ -1,5 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using System.CommandLine.Parsing;
@@ -219,8 +220,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             ListCommandArgs args = new((BaseListCommand)parseResult.CommandResult.Command, parseResult);
 
             Assert.False(args.DisplayAllColumns);
+            Assert.NotNull(args.ColumnsToDisplay);
             Assert.NotEmpty(args.ColumnsToDisplay);
-            Assert.Equal(expectedColumns.Length, args.ColumnsToDisplay?.Count);
+            Assert.Equal(expectedColumns.Length, args.ColumnsToDisplay.Count);
             foreach (string column in expectedColumns)
             {
                 Assert.Contains(column, args.ColumnsToDisplay);

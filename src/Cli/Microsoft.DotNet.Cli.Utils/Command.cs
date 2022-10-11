@@ -129,14 +129,14 @@ namespace Microsoft.DotNet.Cli.Utils
         public ICommand ForwardStdOut(TextWriter to = null, bool onlyIfVerbose = false, bool ansiPassThrough = true)
         {
             ThrowIfRunning();
-            if (!onlyIfVerbose || CommandContext.IsVerbose())
+            if (!onlyIfVerbose || CommandLoggingContext.IsVerbose)
             {
                 EnsureStdOut();
 
                 if (to == null)
                 {
                     _stdOut.ForwardTo(writeLine: Reporter.Output.WriteLine);
-                    EnvironmentVariable(CommandContext.Variables.AnsiPassThru, ansiPassThrough.ToString());
+                    EnvironmentVariable(CommandLoggingContext.Variables.AnsiPassThru, ansiPassThrough.ToString());
                 }
                 else
                 {
@@ -149,14 +149,14 @@ namespace Microsoft.DotNet.Cli.Utils
         public ICommand ForwardStdErr(TextWriter to = null, bool onlyIfVerbose = false, bool ansiPassThrough = true)
         {
             ThrowIfRunning();
-            if (!onlyIfVerbose || CommandContext.IsVerbose())
+            if (!onlyIfVerbose || CommandLoggingContext.IsVerbose)
             {
                 EnsureStdErr();
 
                 if (to == null)
                 {
                     _stdErr.ForwardTo(writeLine: Reporter.Error.WriteLine);
-                    EnvironmentVariable(CommandContext.Variables.AnsiPassThru, ansiPassThrough.ToString());
+                    EnvironmentVariable(CommandLoggingContext.Variables.AnsiPassThru, ansiPassThrough.ToString());
                 }
                 else
                 {

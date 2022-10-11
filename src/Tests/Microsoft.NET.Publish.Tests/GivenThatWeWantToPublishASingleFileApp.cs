@@ -126,17 +126,6 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Fact]
-        public void It_errors_when_publishing_single_file_app_without_rid()
-        {
-            GetPublishCommand()
-                .Execute(PublishSingleFile)
-                .Should()
-                .Fail()
-                .And
-                .HaveStdOutContaining(Strings.CannotHaveSingleFileWithoutRuntimeIdentifier);
-        }
-
-        [Fact]
         public void It_errors_when_publishing_single_file_without_apphost()
         {
             GetPublishCommand()
@@ -680,12 +669,12 @@ class C
         [InlineData("netcoreapp3.1", true, IncludeDefault)]
         [InlineData("netcoreapp3.1", false, IncludePdb)]
         [InlineData("netcoreapp3.1", true, IncludePdb)]
-        [InlineData("net5.0", false, IncludeDefault)]
-        [InlineData("net5.0", false, IncludeNative)]
-        [InlineData("net5.0", false, IncludeAllContent)]
-        [InlineData("net5.0", true, IncludeDefault)]
-        [InlineData("net5.0", true, IncludeNative)]
-        [InlineData("net5.0", true, IncludeAllContent)]
+        [InlineData("net6.0", false, IncludeDefault)]
+        [InlineData("net6.0", false, IncludeNative)]
+        [InlineData("net6.0", false, IncludeAllContent)]
+        [InlineData("net6.0", true, IncludeDefault)]
+        [InlineData("net6.0", true, IncludeNative)]
+        [InlineData("net6.0", true, IncludeAllContent)]
         [InlineData(ToolsetInfo.CurrentTargetFramework, false, IncludeDefault)]
         [InlineData(ToolsetInfo.CurrentTargetFramework, false, IncludeNative)]
         [InlineData(ToolsetInfo.CurrentTargetFramework, false, IncludeAllContent)]
@@ -881,7 +870,7 @@ class C
                 .And
                 .HaveStdOutContaining("Hello World");
 
-            void VerifyPrepareForBundle(XDocument project)
+            static void VerifyPrepareForBundle(XDocument project)
             {
                 var ns = project.Root.Name.Namespace;
                 var targetName = "CheckPrepareForBundleData";
@@ -931,7 +920,7 @@ class C
                 .Should()
                 .Pass();
 
-            void VerifyPrepareForBundle(XDocument project)
+            static void VerifyPrepareForBundle(XDocument project)
             {
                 var ns = project.Root.Name.Namespace;
                 var targetName = "CheckPrepareForBundleData";

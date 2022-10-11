@@ -8,6 +8,8 @@ using Parser = Microsoft.DotNet.Cli.Parser;
 using System;
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using Microsoft.DotNet.Tools.Publish;
+using System.Linq;
 
 namespace Microsoft.DotNet.Tools.Pack
 {
@@ -35,12 +37,16 @@ namespace Microsoft.DotNet.Tools.Pack
             var msbuildArgs = new List<string>()
             {
                 "-target:pack",
-                "-property:_IsPacking=true"
+                "--property:_IsPacking=true"
             };
 
-            msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PackCommandParser.GetCommand()));
+            IEnumerable<string> slnOrProjectArgs = parseResult.GetValueForArgument(PackCommandParser.SlnOrProjectArgument);
 
-            msbuildArgs.AddRange(parseResult.GetValueForArgument(PackCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
+            msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PackCommandParser.GetCommand()));
+            ReleasePropertyProjectLocator projectLocator = new ReleasePropertyProjectLocator(Environment.GetEnvironmentVariable(EnvironmentVariableNames.ENABLE_PACK_RELEASE_FOR_SOLUTIONS) != null);
+            msbuildArgs.AddRange(projectLocator.GetCustomDefaultConfigurationValueIfSpecified(parseResult, MSBuildPropertyNames.PACK_RELEASE,
+                slnOrProjectArgs, PackCommandParser.ConfigurationOption) ?? Array.Empty<string>());
+            msbuildArgs.AddRange(slnOrProjectArgs ?? Array.Empty<string>());
 
             bool noRestore = parseResult.HasOption(PackCommandParser.NoRestoreOption) || parseResult.HasOption(PackCommandParser.NoBuildOption);
 

@@ -1,5 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using Microsoft.TemplateEngine.Cli.Commands;
 
@@ -82,7 +83,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 new CliTemplateParameter("foo"),
                 new CliTemplateParameter("bar", shortNameOverrides: new[] { "" })
             };
-  
+
             var result = AliasAssignmentCoordinator.AssignAliasesForParameter(paramList, InitiallyTakenAliases).ToDictionary(r => r.Parameter.Name, r => r);
 
             Assert.Contains("--foo", result["foo"].Aliases);
@@ -111,7 +112,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         {
             IReadOnlyList<CliTemplateParameter> paramList = new List<CliTemplateParameter>()
             {
-                new CliTemplateParameter("bar", shortNameOverrides: new [] { "f" }),
+                new CliTemplateParameter("bar", shortNameOverrides: new[] { "f" }),
                 new CliTemplateParameter("f")
             };
 
@@ -131,26 +132,26 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             IReadOnlyList<CliTemplateParameter> paramList = new List<CliTemplateParameter>()
             {
                 new CliTemplateParameter("auth"),
-                new CliTemplateParameter("AAdB2CInstance", longNameOverrides: new [] { "aad-b2c-instance" }, shortNameOverrides: new [] { "" }),
-                new CliTemplateParameter("SignUpSignInPolicyId", longNameOverrides: new [] { "susi-policy-id" }, shortNameOverrides: new [] { "ssp" }),
-                new CliTemplateParameter("ResetPasswordPolicyId", longNameOverrides: new [] { "reset-password-policy-id" }, shortNameOverrides: new [] { "rp" }),
-                new CliTemplateParameter("EditProfilePolicyId", longNameOverrides: new [] { "edit-profile-policy-id" }, shortNameOverrides: new [] { "ep" }),
-                new CliTemplateParameter("AADInstance", longNameOverrides: new [] { "aad-instance" }, shortNameOverrides: new [] { "" } ),
-                new CliTemplateParameter("ClientId", longNameOverrides: new [] { "client-id" }, shortNameOverrides: new [] { "" }),
-                new CliTemplateParameter("Domain", longNameOverrides: new [] { "domain" }, shortNameOverrides: new [] { "" }),
-                new CliTemplateParameter("TenantId", longNameOverrides: new [] { "tenant-id" }, shortNameOverrides: new [] { "" }),
-                new CliTemplateParameter("CallbackPath", longNameOverrides: new [] { "callback-path" }, shortNameOverrides: new [] { "" }),
-                new CliTemplateParameter("OrgReadAccess", longNameOverrides: new [] { "org-read-access" }, shortNameOverrides: new [] { "r" }),
+                new CliTemplateParameter("AAdB2CInstance", longNameOverrides: new[] { "aad-b2c-instance" }, shortNameOverrides: new[] { "" }),
+                new CliTemplateParameter("SignUpSignInPolicyId", longNameOverrides: new[] { "susi-policy-id" }, shortNameOverrides: new[] { "ssp" }),
+                new CliTemplateParameter("ResetPasswordPolicyId", longNameOverrides: new[] { "reset-password-policy-id" }, shortNameOverrides: new[] { "rp" }),
+                new CliTemplateParameter("EditProfilePolicyId", longNameOverrides: new[] { "edit-profile-policy-id" }, shortNameOverrides: new[] { "ep" }),
+                new CliTemplateParameter("AADInstance", longNameOverrides: new[] { "aad-instance" }, shortNameOverrides: new[] { "" } ),
+                new CliTemplateParameter("ClientId", longNameOverrides: new[] { "client-id" }, shortNameOverrides: new[] { "" }),
+                new CliTemplateParameter("Domain", longNameOverrides: new[] { "domain" }, shortNameOverrides: new[] { "" }),
+                new CliTemplateParameter("TenantId", longNameOverrides: new[] { "tenant-id" }, shortNameOverrides: new[] { "" }),
+                new CliTemplateParameter("CallbackPath", longNameOverrides: new[] { "callback-path" }, shortNameOverrides: new[] { "" }),
+                new CliTemplateParameter("OrgReadAccess", longNameOverrides: new[] { "org-read-access" }, shortNameOverrides: new[] { "r" }),
                 new CliTemplateParameter("UserSecretsId"),
                 new CliTemplateParameter("IncludeLaunchSettings"),
                 new CliTemplateParameter("HttpsPort"),
                 new CliTemplateParameter("KestrelPort"),
                 new CliTemplateParameter("IISExpressPort"),
-                new CliTemplateParameter("UseLocalDB", longNameOverrides: new [] { "use-local-db" }),
-                new CliTemplateParameter("TargetFrameworkOverride", longNameOverrides: new [] { "target-framework-override" }, shortNameOverrides: new [] { "" }),
-                new CliTemplateParameter("Framework", longNameOverrides: new [] { "framework" }),
-                new CliTemplateParameter("NoTools", longNameOverrides: new [] { "no-tools" }),
-                new CliTemplateParameter("skipRestore", longNameOverrides: new [] { "no-restore" }, shortNameOverrides: new [] { "" })
+                new CliTemplateParameter("UseLocalDB", longNameOverrides: new[] { "use-local-db" }),
+                new CliTemplateParameter("TargetFrameworkOverride", longNameOverrides: new[] { "target-framework-override" }, shortNameOverrides: new[] { "" }),
+                new CliTemplateParameter("Framework", longNameOverrides: new[] { "framework" }),
+                new CliTemplateParameter("NoTools", longNameOverrides: new[] { "no-tools" }),
+                new CliTemplateParameter("skipRestore", longNameOverrides: new[] { "no-restore" }, shortNameOverrides: new[] { "" })
             };
 
             var result = AliasAssignmentCoordinator.AssignAliasesForParameter(paramList, InitiallyTakenAliases).ToDictionary(r => r.Parameter.Name, r => r);

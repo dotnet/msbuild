@@ -1,5 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.CommandLine;
 using System.CommandLine.Completions;
@@ -29,9 +30,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             _hostBuilder = hostBuilder;
         }
 
-        protected internal virtual IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings)
+        protected internal virtual IEnumerable<CompletionItem> GetCompletions(CompletionContext context, IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager)
         {
+#pragma warning disable SA1100 // Do not prefix calls with base unless local implementation exists
             return base.GetCompletions(context);
+#pragma warning restore SA1100 // Do not prefix calls with base unless local implementation exists
         }
 
         protected IEngineEnvironmentSettings CreateEnvironmentSettings(GlobalArgs args, ParseResult parseResult)
@@ -60,6 +63,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             TArgs args = ParseContext(context.ParseResult);
             using IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args, context.ParseResult);
+            using TemplatePackageManager templatePackageManager = new(environmentSettings);
             CancellationToken cancellationToken = context.GetCancellationToken();
 
             NewCommandStatus returnCode;
@@ -68,8 +72,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 using (Timing.Over(environmentSettings.Host.Logger, "Execute"))
                 {
-                    await HandleGlobalOptionsAsync(args, environmentSettings, cancellationToken).ConfigureAwait(false);
-                    returnCode = await ExecuteAsync(args, environmentSettings, context).ConfigureAwait(false);
+                    await HandleGlobalOptionsAsync(args, environmentSettings, templatePackageManager, cancellationToken).ConfigureAwait(false);
+                    returnCode = await ExecuteAsync(args, environmentSettings, templatePackageManager, context).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -122,42 +126,38 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 return base.GetCompletions(context);
             }
-            GlobalArgs args = new GlobalArgs(this, context.ParseResult);
+            GlobalArgs args = new(this, context.ParseResult);
             using IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args, context.ParseResult);
-            return GetCompletions(context, environmentSettings).ToList();
-        }
-
-        protected abstract Task<NewCommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, InvocationContext context);
-
-        protected abstract TArgs ParseContext(ParseResult parseResult);
-
-        protected virtual Option GetFilterOption(FilterOptionDefinition def)
-        {
-            return def.OptionFactory();
-        }
-
-        protected IReadOnlyDictionary<FilterOptionDefinition, Option> SetupFilterOptions(IReadOnlyList<FilterOptionDefinition> filtersToSetup)
-        {
-            Dictionary<FilterOptionDefinition, Option> options = new Dictionary<FilterOptionDefinition, Option>();
-            foreach (var filterDef in filtersToSetup)
-            {
-                var newOption = GetFilterOption(filterDef);
-                this.AddOption(newOption);
-                options[filterDef] = newOption;
-            }
-            return options;
+            using TemplatePackageManager templatePackageManager = new(environmentSettings);
+            return GetCompletions(context, environmentSettings, templatePackageManager).ToList();
         }
 
         /// <summary>
-        /// Adds the tabular output settings options for the command from <paramref name="command"/>.
+        /// Checks if the template with same short name as used command alias exists, and if so prints the example on how to run the template using dotnet new create.
         /// </summary>
-        protected void SetupTabularOutputOptions(ITabularOutputCommand command)
+        /// <remarks>
+        /// This method uses <see cref="TemplatePackageManager.GetTemplatesAsync(CancellationToken)"/>, however this should not take long as templates normally at least once
+        /// are queried before and results are cached.
+        /// Alternatively we can think of caching template groups early in <see cref="BaseCommand{TArgs}"/> later on.
+        /// </remarks>
+        protected internal static async Task CheckTemplatesWithSubCommandName(
+            TArgs args,
+            TemplatePackageManager templatePackageManager,
+            CancellationToken cancellationToken)
         {
-            this.AddOption(command.ColumnsAllOption);
-            this.AddOption(command.ColumnsOption);
+            IReadOnlyList<ITemplateInfo> availableTemplates = await templatePackageManager.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
+            string usedCommandAlias = args.ParseResult.CommandResult.Token.Value;
+            if (!availableTemplates.Any(t => t.ShortNameList.Any(sn => string.Equals(sn, usedCommandAlias, StringComparison.OrdinalIgnoreCase))))
+            {
+                return;
+            }
+
+            Reporter.Output.WriteLine(LocalizableStrings.Commands_TemplateShortNameCommandConflict_Info, usedCommandAlias);
+            Reporter.Output.WriteCommand(Example.For<InstantiateCommand>(args.ParseResult).WithArgument(InstantiateCommand.ShortNameArgument, usedCommandAlias));
+            Reporter.Output.WriteLine();
         }
 
-        protected void PrintDeprecationMessage<TDepr, TNew>(ParseResult parseResult, Option? additionalOption = null) where TDepr : Command where TNew : Command
+        protected static void PrintDeprecationMessage<TDepr, TNew>(ParseResult parseResult, Option? additionalOption = null) where TDepr : Command where TNew : Command
         {
             var newCommandExample = Example.For<TNew>(parseResult);
             if (additionalOption != null)
@@ -173,14 +173,47 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Reporter.Output.WriteLine(LocalizableStrings.Commands_Warning_DeprecatedCommand_Info.Yellow());
             Reporter.Output.WriteCommand(Example.For<TNew>(parseResult).WithHelpOption().ToString().Yellow());
             Reporter.Output.WriteLine();
-
         }
 
-        private static async Task HandleGlobalOptionsAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken)
+        protected abstract Task<NewCommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager, InvocationContext context);
+
+        protected abstract TArgs ParseContext(ParseResult parseResult);
+
+        protected virtual Option GetFilterOption(FilterOptionDefinition def)
+        {
+            return def.OptionFactory();
+        }
+
+        protected IReadOnlyDictionary<FilterOptionDefinition, Option> SetupFilterOptions(IReadOnlyList<FilterOptionDefinition> filtersToSetup)
+        {
+            Dictionary<FilterOptionDefinition, Option> options = new();
+            foreach (FilterOptionDefinition filterDef in filtersToSetup)
+            {
+                Option newOption = GetFilterOption(filterDef);
+                this.AddOption(newOption);
+                options[filterDef] = newOption;
+            }
+            return options;
+        }
+
+        /// <summary>
+        /// Adds the tabular output settings options for the command from <paramref name="command"/>.
+        /// </summary>
+        protected void SetupTabularOutputOptions(ITabularOutputCommand command)
+        {
+            this.AddOption(command.ColumnsAllOption);
+            this.AddOption(command.ColumnsOption);
+        }
+
+        private static async Task HandleGlobalOptionsAsync(
+            TArgs args,
+            IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager,
+            CancellationToken cancellationToken)
         {
             HandleDebugAttach(args);
             HandleDebugReinit(args, environmentSettings);
-            await HandleDebugRebuildCacheAsync(args, environmentSettings, cancellationToken).ConfigureAwait(false);
+            await HandleDebugRebuildCacheAsync(args, templatePackageManager, cancellationToken).ConfigureAwait(false);
             HandleDebugShowConfig(args, environmentSettings);
         }
 
@@ -204,15 +237,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             environmentSettings.Host.FileSystem.CreateDirectory(environmentSettings.Paths.HostVersionSettingsDir);
         }
 
-        private static async Task HandleDebugRebuildCacheAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, CancellationToken cancellationToken)
+        private static Task HandleDebugRebuildCacheAsync(TArgs args, TemplatePackageManager templatePackageManager, CancellationToken cancellationToken)
         {
             if (!args.DebugRebuildCache)
             {
-                return;
+                return Task.CompletedTask;
             }
-            using TemplatePackageManager templatePackageManager = new TemplatePackageManager(environmentSettings);
-            //need to await, otherwise template package manager is disposed too early - before the task is completed
-            await templatePackageManager.RebuildTemplateCacheAsync(cancellationToken).ConfigureAwait(true);
+            return templatePackageManager.RebuildTemplateCacheAsync(cancellationToken);
         }
 
         private static void HandleDebugShowConfig(TArgs args, IEngineEnvironmentSettings environmentSettings)

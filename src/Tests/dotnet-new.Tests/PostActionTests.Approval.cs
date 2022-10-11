@@ -1,7 +1,9 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using FluentAssertions;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 
@@ -11,8 +13,6 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
     [Collection("Verify Tests")]
     public partial class PostActionTests : BaseIntegrationTest
     {
-        private string testExecDirPatternForVerify = $"{{SolutionDirectory}}artifacts(\\\\|\\/)tmp(\\\\|\\/){Configuration}";
-
         [Fact]
         public Task Restore_Basic_Approval()
         {
@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string workingDirectory = CreateTemporaryFolder();
             InstallTestTemplate("PostActions/RestoreNuGet/Basic", _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, "TestAssets.PostActions.RestoreNuGet.Basic", "-n", "MyProject")
+            CommandResult commandResult = new DotnetNewCommand(_log, "TestAssets.PostActions.RestoreNuGet.Basic", "-n", "MyProject")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string workingDirectory = CreateTemporaryFolder();
             InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string workingDirectory = CreateTemporaryFolder();
             InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, templateName, "-n", "MyProject")
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName, "-n", "MyProject")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string workingDirectory = CreateTemporaryFolder();
             InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, templateName, "-n", "MyProject")
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName, "-n", "MyProject")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -143,7 +143,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            var commandResult = new DotnetNewCommand(_log, templateName, "-n", "MyProject")
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName, "-n", "MyProject")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -173,7 +173,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string workingDirectory = CreateTemporaryFolder();
             InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, templateName)
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -195,7 +195,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string workingDirectory = CreateTemporaryFolder();
             InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, templateName, "-n", "MyProject", "--dry-run")
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName, "-n", "MyProject", "--dry-run")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -219,7 +219,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string workingDirectory = CreateTemporaryFolder();
             InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, templateName)
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -239,7 +239,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string workingDirectory = CreateTemporaryFolder();
             InstallTestTemplate(templateLocation, _log, home, workingDirectory);
 
-            var commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "no")
+            CommandResult commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "no")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();

@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="AotNoValidRuntimePackageError">
         <source>NETSDK1183: Unable to optimize assemblies for Ahead of time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing. When targeting .NET 7 or higher, make sure to restore packages with the PublishAot property set to true.</source>
-        <target state="new">NETSDK1183: Unable to optimize assemblies for Ahead of time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing. When targeting .NET 7 or higher, make sure to restore packages with the PublishAot property set to true.</target>
+        <target state="translated">NETSDK1183: Ahead of Time 컴파일을 위해 어셈블리를 최적화할 수 없습니다. 유효한 런타임 패키지를 찾을 수 없습니다. PublishAot 속성을 false로 설정하거나 게시할 때 지원되는 런타임 식별자를 사용하세요. .NET 7 이상을 대상으로 하는 경우 PublishAot 속성이 true로 설정된 패키지를 복원해야 합니다.</target>
         <note>{StrBegin="NETSDK1183: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
@@ -464,6 +464,11 @@
         <target state="translated">크기에 맞게 어셈블리 최적화. 이 프로세스는 시간이 걸릴 수 있습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed">
+        <source>NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</source>
+        <target state="translated">NETSDK1191: '{0}' 속성의 런타임 식별자를 유추할 수 없습니다. RID를 명시적으로 지정하세요.</target>
+        <note>{StrBegin="NETSDK1191: "}</note>
+      </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
         <source>NETSDK1020: Package Root {0} was incorrectly given for Resolved library {1}</source>
         <target state="translated">NETSDK1020: 패키지 루트 {0}이(가) 확인된 라이브러리 {1}에 대해 잘못 지정되었습니다.</target>
@@ -575,6 +580,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1182: Visual Studio 2019에서 .NET 6.0 이상을 대상으로 하는 것은 지원되지 않습니다.</target>
         <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
+      <trans-unit id="Net7NotCompatibleWithDev173">
+        <source>NETSDK1192: Targeting .NET 7.0 or higher in Visual Studio 2022 17.3 is not supported.</source>
+        <target state="new">NETSDK1192: Targeting .NET 7.0 or higher in Visual Studio 2022 17.3 is not supported.</target>
+        <note>{StrBegin="NETSDK1192: "}</note>
+      </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
         <target state="translated">NETSDK1084: 지정된 RuntimeIdentifier '{0}'에 사용할 수 있는 애플리케이션 호스트가 없습니다.</target>
@@ -640,6 +650,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1162: PDB 생성: R2R 실행 파일 '{0}'을(를) 찾을 수 없습니다.</target>
         <note>{StrBegin="NETSDK1162: "}</note>
       </trans-unit>
+      <trans-unit id="PReleaseRequiresEnvVarOnSln">
+        <source>NETSDK1190: To use '{0}' in solution projects, you must set the environment variable '{1}' (to true). This will increase the time to complete the operation.</source>
+        <target state="translated">NETSDK1190: 솔루션 프로젝트에서 '{0}'을(를) 사용하려면 환경 변수 '{1}'(true)를 설정해야 합니다. 이렇게 하면 작업을 완료하는 시간이 늘어나게 됩니다.</target>
+        <note>{StrBegin="NETSDK1190: "}</note>
+      </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>
         <target state="translated">NETSDK1053: 도구로서 팩은 자체 포함을 지원하지 않습니다.</target>
@@ -679,6 +694,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1174: Placeholder</source>
         <target state="translated">NETSDK1174: 자리 표시자</target>
         <note>{StrBegin="NETSDK1174: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</note>
+      </trans-unit>
+      <trans-unit id="Prefer32BitIgnoredForNetCoreApp">
+        <source>NETSDK1189: Prefer32Bit is not supported and has no effect for netcoreapp target.</source>
+        <target state="translated">NETSDK1189: Prefer32Bit는 지원되지 않으며 netcoreapp 대상에는 영향을 주지 않습니다.</target>
+        <note>{StrBegin="NETSDK1189: "}</note>
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>NETSDK1011: Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>

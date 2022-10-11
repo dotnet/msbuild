@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="AotNoValidRuntimePackageError">
         <source>NETSDK1183: Unable to optimize assemblies for Ahead of time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing. When targeting .NET 7 or higher, make sure to restore packages with the PublishAot property set to true.</source>
-        <target state="new">NETSDK1183: Unable to optimize assemblies for Ahead of time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing. When targeting .NET 7 or higher, make sure to restore packages with the PublishAot property set to true.</target>
+        <target state="translated">NETSDK1183: Derlemeler, AOT derlemesi için iyileştirilemedi: geçerli bir çalışma zamanı paketi bulunamadı. PublishAot özelliğini false olarak ayarlayın veya yayımlarken desteklenen bir çalışma zamanı tanımlayıcısı kullanın. .NET 7 veya üzerini hedeflerken PublishAot özelliği true olarak ayarlanmış paketleri geri yüklediğinizden emin olun.</target>
         <note>{StrBegin="NETSDK1183: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
@@ -464,6 +464,11 @@
         <target state="translated">Derlemelerin boyutu iyileştiriliyor. Bu işlem biraz zaman alabilir.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed">
+        <source>NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</source>
+        <target state="translated">NETSDK1191: '{0}' özelliği için bir çalışma zamanı tanımlayıcısı çıkarılamadı. Açıkça bir çıkış belirtin.</target>
+        <note>{StrBegin="NETSDK1191: "}</note>
+      </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
         <source>NETSDK1020: Package Root {0} was incorrectly given for Resolved library {1}</source>
         <target state="translated">NETSDK1020: {0} Paket Kökü, Çözümlenmiş {1} kitaplığı için yanlışlıkla verildi</target>
@@ -575,6 +580,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1182: Visual Studio 2019'da .NET 6.0 veya daha üst sürümünü hedefleme desteklenmiyor.</target>
         <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
+      <trans-unit id="Net7NotCompatibleWithDev173">
+        <source>NETSDK1192: Targeting .NET 7.0 or higher in Visual Studio 2022 17.3 is not supported.</source>
+        <target state="new">NETSDK1192: Targeting .NET 7.0 or higher in Visual Studio 2022 17.3 is not supported.</target>
+        <note>{StrBegin="NETSDK1192: "}</note>
+      </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
         <target state="translated">NETSDK1084: Belirtilen RuntimeIdentifier '{0}' için kullanılabilecek bir uygulama konağı yok.</target>
@@ -640,6 +650,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1162: PDB üretme: R2R ile çalıştırılabilir '{0}' bulunamadı.</target>
         <note>{StrBegin="NETSDK1162: "}</note>
       </trans-unit>
+      <trans-unit id="PReleaseRequiresEnvVarOnSln">
+        <source>NETSDK1190: To use '{0}' in solution projects, you must set the environment variable '{1}' (to true). This will increase the time to complete the operation.</source>
+        <target state="translated">NETSDK1190: Çözüm projelerinde '{0}' kullanmak için '{1}' ortam değişkenini (true olarak) ayarlamanız gerekir. Bu ayar, işlemin tamamlanma süresini uzatır.</target>
+        <note>{StrBegin="NETSDK1190: "}</note>
+      </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>
         <target state="translated">NETSDK1053: Araç olarak paketleme kendi kendini kapsamayı desteklemiyor.</target>
@@ -679,6 +694,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1174: Placeholder</source>
         <target state="translated">NETSDK1174: Yer tutucu</target>
         <note>{StrBegin="NETSDK1174: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</note>
+      </trans-unit>
+      <trans-unit id="Prefer32BitIgnoredForNetCoreApp">
+        <source>NETSDK1189: Prefer32Bit is not supported and has no effect for netcoreapp target.</source>
+        <target state="translated">NETSDK1189: Prefer32Bit desteklenmez ve netcoreapp hedefi için hiçbir etkisi yoktur.</target>
+        <note>{StrBegin="NETSDK1189: "}</note>
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>NETSDK1011: Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>

@@ -1,24 +1,45 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework Condition="'$(DotNetBuildFromSource)' == 'true'">net7.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <Nullable>enable</Nullable>
     <IsPackable>true</IsPackable>
+    <IsShippingPackage>true</IsShippingPackage>
     <StrongNameKeyId>Open</StrongNameKeyId>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>apicompat</ToolCommandName>
+    <PackageDescription>Tool to perform api compatibility checks on assemblies and packages.</PackageDescription>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jab" Version="$(JabVersion)" PrivateAssets="all" />
     <PackageReference Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
+    <ProjectReference Include="..\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.ApiCompatibility\Microsoft.DotNet.ApiCompatibility.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.DotNet.ApiCompatibility\Microsoft.DotNet.ApiCompatibility.csproj" />
-    <ProjectReference Include="..\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" />
+    <None Include="$(RepoRoot)LICENSE.txt" PackagePath="LICENSE.txt" Pack="true" />
   </ItemGroup>
+
+  <!-- Move code analysis assemblies into a sub directory so that they can be conditionally resolved. -->
+  <Target Name="UpdateMicrosoftCodeAnalysisFilesForBuild"
+          AfterTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Condition="$([System.String]::new('%(Filename)').StartsWith('Microsoft.CodeAnalysis'))"
+                               DestinationSubDirectory="codeanalysis\%(ReferenceCopyLocalPaths.DestinationSubDirectory)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="UpdateMicrosoftCodeAnalysisFilesForPublish"
+          AfterTargets="_ResolveCopyLocalAssetsForPublish"
+          BeforeTargets="_HandlePackageFileConflictsForPublish">
+    <ItemGroup>
+      <_ResolvedCopyLocalPublishAssets Condition="$([System.String]::new('%(Filename)').StartsWith('Microsoft.CodeAnalysis'))"
+                                       DestinationSubDirectory="codeanalysis\%(_ResolvedCopyLocalPublishAssets.DestinationSubDirectory)" />
+    </ItemGroup>
+  </Target>
 
   <Import Project="..\Microsoft.DotNet.ApiCompat.Shared\Microsoft.DotNet.ApiCompat.Shared.projitems" Label="Shared" />
 
