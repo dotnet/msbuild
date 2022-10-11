@@ -702,8 +702,8 @@ The header is followed by the list of parameters and their errors (might be seve
         <note />
       </trans-unit>
       <trans-unit id="RerunCommandAndPassForceToCreateAnyway">
-        <source>To accept changes and proceed with creating, rerun the command and pass '{0}' option:</source>
-        <target state="new">To accept changes and proceed with creating, rerun the command and pass '{0}' option:</target>
+        <source>To create the template anyway, run the command with '{0}' option:</source>
+        <target state="new">To create the template anyway, run the command with '{0}' option:</target>
         <note>{0} - additional option name (--force)</note>
       </trans-unit>
       <trans-unit id="RunHelpForInformationAboutAcceptedParameters">

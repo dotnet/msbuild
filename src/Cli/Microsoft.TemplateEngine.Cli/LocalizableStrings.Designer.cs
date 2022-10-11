@@ -1271,7 +1271,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To accept changes and proceed with creating, rerun the command and pass &apos;{0}&apos; option:.
+        ///   Looks up a localized string similar to To create the template anyway, run the command with &apos;{0}&apos; option:.
         /// </summary>
         internal static string RerunCommandAndPassForceToCreateAnyway {
             get {
