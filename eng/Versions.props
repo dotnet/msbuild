@@ -29,7 +29,8 @@
     <SystemConfigurationConfigurationManagerVersion>6.0.0</SystemConfigurationConfigurationManagerVersion>
     <!-- 
         Modifying the version of System.Memory is very high impact and causes downstream breaks in third-party tooling that uses the MSBuild API.
-        When updating the version of System.Memory, file a breaking change here: https://github.com/dotnet/docs/issues/new?assignees=gewarren&labels=breaking-change%2CPri1%2Cdoc-idea&template=breaking-change.yml&title=%5BBreaking+change%5D%3A+ 
+        When updating the version of System.Memory file a breaking change here: https://github.com/dotnet/docs/issues/new?assignees=gewarren&labels=breaking-change%2CPri1%2Cdoc-idea&template=breaking-change.yml&title=%5BBreaking+change%5D%3A+ 
+        and follow the guidelines written here (internal-link): https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/1796/How-to-add-a-Known-Issue
     -->
     <SystemMemoryVersion>4.5.5</SystemMemoryVersion>
     <SystemNetHttpVersion>4.3.4</SystemNetHttpVersion>
