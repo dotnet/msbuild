@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="AssemblyVersionIsNotCompatible">
         <source>{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</source>
-        <target state="translated">{2} bütünleştirilmiş kodunun '{0}' sürümü {3} sürümüne '{1}' eşit veya bundan yüksek olmalıdır.</target>
+        <target state="new">{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotAddAbstractMember">
@@ -85,6 +85,16 @@
       <trans-unit id="CannotChangeParameterName">
         <source>Parameter name on member '{0}' changed from '{1}' to '{2}'.</source>
         <target state="translated">'{0}' üyesinin parametre adı '{1}' iken '{2}' olarak değiştirildi.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotExpandVisibility">
+        <source>Visibility of '{0}' expanded from '{1}' to '{2}'.</source>
+        <target state="new">Visibility of '{0}' expanded from '{1}' to '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotReduceVisibility">
+        <source>Visibility of '{0}' reduced from '{1}' to '{2}'.</source>
+        <target state="new">Visibility of '{0}' reduced from '{1}' to '{2}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveAttribute">

@@ -13,8 +13,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     /// </summary>
     public class RuleRunner : IRuleRunner
     {
-        private readonly IRuleContext _context;
         private readonly IRuleFactory _ruleFactory;
+        private readonly IRuleContext _context;
 
         public RuleRunner(IRuleFactory ruleFactory, IRuleContext context)
         {
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         {
             List<CompatDifference> differences = new();
 
-            int rightLength = mapper.Right.Length;            
+            int rightLength = mapper.Right.Length;
             for (int rightIndex = 0; rightIndex < rightLength; rightIndex++)
             {
                 if (mapper is AssemblyMapper am)

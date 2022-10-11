@@ -18,40 +18,40 @@ namespace Microsoft.DotNet.ApiCompatibility
         IEnumerable<CompatDifference> CompatDifferences { get; }
 
         /// <summary>
-        /// Visits the tree for the given <see cref="ElementMapper{T}"/>.
+        /// Visits the tree for the given <see cref="IElementMapper{T}"/>.
         /// </summary>
         /// <typeparam name="T">Underlying type for the objects that the mapper holds.</typeparam>
         /// <param name="mapper"><see cref="ElementMapper{T}"/> to visit.</param>
-        void Visit<T>(ElementMapper<T> mapper);
+        void Visit<T>(IElementMapper<T> mapper);
 
         /// <summary>
-        /// Visits the <see cref="AssemblySetMapper"/> and visits each <see cref="AssemblyMapper"/> in the mapper.
+        /// Visits the <see cref="IAssemblySetMapper"/> and visits each <see cref="IAssemblyMapper"/> in the mapper.
         /// </summary>
         /// <param name="mapper">The <see cref="AssemblySetMapper"/> to visit.</param>
-        void Visit(AssemblySetMapper mapper);
+        void Visit(IAssemblySetMapper mapper);
 
         /// <summary>
-        /// Visits an <see cref="AssemblyMapper"/> and adds it's differences to the <see cref="DiagnosticBag{CompatDifference}"/>.
+        /// Visits an <see cref="IAssemblyMapper"/> and adds it's differences to the <see cref="DiagnosticBag{CompatDifference}"/>.
         /// </summary>
         /// <param name="assembly">The mapper to visit.</param>
-        void Visit(AssemblyMapper assembly);
+        void Visit(IAssemblyMapper assembly);
 
         /// <summary>
-        /// Visits the <see cref="NamespaceMapper"/> and visits each <see cref="TypeMapper"/> in the mapper.
+        /// Visits the <see cref="INamespaceMapper"/> and visits each <see cref="ITypeMapper"/> in the mapper.
         /// </summary>
         /// <param name="mapper">The <see cref="NamespaceMapper"/> to visit.</param>
-        void Visit(NamespaceMapper @namespace);
+        void Visit(INamespaceMapper @namespace);
 
         /// <summary>
-        /// Visits an <see cref="TypeMapper"/> and adds it's differences to the <see cref="DiagnosticBag{CompatDifference}"/>.
+        /// Visits an <see cref="ITypeMapper"/> and adds it's differences to the <see cref="DiagnosticBag{CompatDifference}"/>.
         /// </summary>
         /// <param name="type">The mapper to visit.</param>
-        void Visit(TypeMapper type);
+        void Visit(ITypeMapper type);
 
         /// <summary>
-        /// Visits an <see cref="MemberMapper"/> and adds it's differences to the <see cref="DiagnosticBag{CompatDifference}"/>.
+        /// Visits an <see cref="IMemberMapper"/> and adds it's differences to the <see cref="DiagnosticBag{CompatDifference}"/>.
         /// </summary>
         /// <param name="member">The mapper to visit.</param>
-        void Visit(MemberMapper member);
+        void Visit(IMemberMapper member);
     }
 }

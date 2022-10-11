@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Watcher
         private readonly StaticFileHandler _staticFileHandler;
         private readonly IWatchFilter[] _filters;
 
-        public DotNetWatcher(IReporter reporter, IFileSetFactory fileSetFactory, DotNetWatchOptions dotNetWatchOptions)
+        public DotNetWatcher(IReporter reporter, IFileSetFactory fileSetFactory, DotNetWatchOptions dotNetWatchOptions, string muxerPath)
         {
             Ensure.NotNull(reporter, nameof(reporter));
 
@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Watcher
                 new MSBuildEvaluationFilter(fileSetFactory),
                 new NoRestoreFilter(),
                 new LaunchBrowserFilter(dotNetWatchOptions),
-                new BrowserRefreshFilter(dotNetWatchOptions, _reporter),
+                new BrowserRefreshFilter(dotNetWatchOptions, _reporter, muxerPath),
             };
         }
 
