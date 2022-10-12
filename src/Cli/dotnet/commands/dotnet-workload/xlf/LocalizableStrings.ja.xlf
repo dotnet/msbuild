@@ -37,6 +37,11 @@
         <target state="translated">インストール済みワークロードの ID</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadInfoDescription">
+        <source>Display information about installed workloads.</source>
+        <target state="new">Display information about installed workloads.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WorkloadInstallTypeColumn">
         <source>Install Type</source>
         <target state="translated">インストールの種類</target>
