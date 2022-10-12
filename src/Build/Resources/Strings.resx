@@ -1307,7 +1307,7 @@
     <value>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</value>
   </data>
   <data name="FailedToResolveSDK" xml:space="preserve">
-    <value>No SDK resolver succeeded in resolving SDK "{0}". Their error messages are printed below. Only one of the following indicates a real failure:</value>
+    <value>None of the SDK resolvers were able to resolve SDK "{0}". Their error messages are reproduced below in the order they occurred. Only one SDK resolver is expected to be able to resolve "{0}", so only one of the messages below indicates a real failure.</value>
   </data>
   <data name="CouldNotRunNuGetSdkResolver" xml:space="preserve">
     <value>The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</value>
@@ -1977,7 +1977,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     </comment>
   </data>
    <data name="DefaultSDKResolverError" xml:space="preserve">
-    <value>The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</value>
+    <value>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</value>
   </data>
   <data name="SDKResolverReturnedNull" xml:space="preserve">
     <value>SDK resolver "{0}" returned null. SDK resolvers should always return success or failure. This is a bug in the SDK resolver.</value>
