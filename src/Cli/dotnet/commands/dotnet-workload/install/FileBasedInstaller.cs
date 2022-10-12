@@ -19,6 +19,7 @@ using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using System.Text.Json;
 using System.Threading.Tasks;
 
+
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
     internal class FileBasedInstaller : IInstaller
@@ -51,7 +52,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             _userProfileDir = userProfileDir;
             _dotnetDir = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
-            _tempPackagesDir = new DirectoryPath(tempDirPath ?? Path.GetTempPath());
+            _tempPackagesDir = new DirectoryPath(tempDirPath ?? PathUtilities.CreateTempSubdirectory());
             ILogger logger = verbosity.IsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger();
             _restoreActionConfig = restoreActionConfig;
             _nugetPackageDownloader = nugetPackageDownloader ??
@@ -188,7 +189,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                 Directory.Delete(dir, true);
                             }
                         }
-                    });         
+                    });
             }
         }
 
