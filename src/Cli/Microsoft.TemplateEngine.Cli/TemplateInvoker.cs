@@ -273,7 +273,11 @@ namespace Microsoft.TemplateEngine.Cli
                         }
                         Reporter.Error.WriteLine();
                     }
-                    Reporter.Error.WriteLine(LocalizableStrings.RerunCommandAndPassForceToCreateAnyway.Bold().Red());
+                    Reporter.Error.WriteLine(
+                        string.Format(
+                            LocalizableStrings.RerunCommandAndPassForceToCreateAnyway, SharedOptions.ForceOption.Aliases.First()).Bold().Red()
+                        );
+                    Reporter.Error.WriteCommand(Example.FromExistingTokens(templateArgs.ParseResult).WithOption(SharedOptions.ForceOption));
                     return NewCommandStatus.CannotCreateOutputFile;
                 case CreationResultStatus.TemplateIssueDetected:
                     if (!string.IsNullOrEmpty(instantiateResult.ErrorMessage))

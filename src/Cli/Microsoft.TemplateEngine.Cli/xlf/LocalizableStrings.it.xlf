@@ -702,9 +702,9 @@ The header is followed by the list of parameters and their errors (might be seve
         <note />
       </trans-unit>
       <trans-unit id="RerunCommandAndPassForceToCreateAnyway">
-        <source>Rerun the command and pass --force to accept and create.</source>
-        <target state="translated">Eseguire di nuovo il comando e passare--Force per accettare e creare.</target>
-        <note />
+        <source>To create the template anyway, run the command with '{0}' option:</source>
+        <target state="new">To create the template anyway, run the command with '{0}' option:</target>
+        <note>{0} - additional option name (--force)</note>
       </trans-unit>
       <trans-unit id="RunHelpForInformationAboutAcceptedParameters">
         <source>For usage information, run: </source>

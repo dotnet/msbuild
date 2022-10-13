@@ -191,7 +191,8 @@
     <value>Overwrite</value>
   </data>
   <data name="RerunCommandAndPassForceToCreateAnyway" xml:space="preserve">
-    <value>Rerun the command and pass --force to accept and create.</value>
+    <value>To create the template anyway, run the command with '{0}' option:</value>
+    <comment>{0} - additional option name (--force)</comment>
   </data>
   <data name="RunHelpForInformationAboutAcceptedParameters" xml:space="preserve">
     <value>For usage information, run: </value>

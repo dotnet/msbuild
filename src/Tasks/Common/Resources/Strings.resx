@@ -871,4 +871,8 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</value>
       <comment>{StrBegin="NETSDK1191: "}</comment>
   </data>
+  <data name="Net7NotCompatibleWithDev173" xml:space="preserve">
+    <value>NETSDK1192: Targeting .NET 7.0 or higher in Visual Studio 2022 17.3 is not supported.</value>
+    <comment>{StrBegin="NETSDK1192: "}</comment>
+  </data>
 </root>

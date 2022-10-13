@@ -563,8 +563,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
                 var existingWorkload = _workloads[workloadId];
                 var existingPacks = GetPacksInWorkload(existingWorkload.workload, existingWorkload.manifest).Select(p => p.packId).ToHashSet();
-                var updatedWorkload = advertisingManifestResolver._workloads[workloadId].workload;
-                var updatedPacks = advertisingManifestResolver.GetPacksInWorkload(existingWorkload.workload, existingWorkload.manifest).Select(p => p.packId);
+
+                var updatedWorkload = advertisingManifestResolver._workloads[workloadId];
+                var updatedPacks = advertisingManifestResolver.GetPacksInWorkload(updatedWorkload.workload, updatedWorkload.manifest).Select(p => p.packId);
 
                 if (!existingPacks.SetEquals(updatedPacks) || existingPacks.Any(p => PackHasChanged(_packs[p].pack, advertisingManifestResolver._packs[p].pack)))
                 {
