@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="7.0.0-beta.22507.2">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="7.0.0-beta.22511.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>c4f77b4e80e942941e73d70cec045eddbfd7b4eb</Sha>
+      <Sha>f760da39566d1cfa90c89e38d8dfafb3d43f9cae</Sha>
       <SourceBuild RepoName="arcade" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="6.4.0-preview.3.107">
@@ -14,9 +14,9 @@
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>85f9dbfea5955ec9cdad3417dba40034da74fb93</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="7.0.0-beta.22507.2">
+    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="7.0.0-beta.22511.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>c4f77b4e80e942941e73d70cec045eddbfd7b4eb</Sha>
+      <Sha>f760da39566d1cfa90c89e38d8dfafb3d43f9cae</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
