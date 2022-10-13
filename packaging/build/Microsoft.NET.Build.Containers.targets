@@ -22,7 +22,7 @@
 
         <!-- Compute private defaults -->
         <PropertyGroup Condition="$(ContainerBaseImage) == ''">
-            <_ContainerBaseRegistry>https://mcr.microsoft.com</_ContainerBaseRegistry>
+            <_ContainerBaseRegistry>mcr.microsoft.com</_ContainerBaseRegistry>
             <_ContainerBaseImageName Condition="'$(_IsSelfContained)' == 'true'">dotnet/runtime-deps</_ContainerBaseImageName>
             <_ContainerBaseImageName Condition="'$(_ContainerBaseImageName)' == '' and '$(_IsAspNet)' == 'true'">dotnet/aspnet</_ContainerBaseImageName>
             <_ContainerBaseImageName Condition="'$(_ContainerBaseImageName)' == ''">dotnet/runtime</_ContainerBaseImageName>
@@ -39,7 +39,7 @@
         <!-- Container Defaults -->
         <PropertyGroup>
             <ContainerBaseImage Condition="'$(ContainerBaseImage)' == ''">$(_ContainerBaseRegistry)/$(_ContainerBaseImageName):$(_ContainerBaseImageTag)</ContainerBaseImage>
-            <ContainerRegistry Condition="'$(ContainerRegistry)' == ''">docker://</ContainerRegistry>
+            <!-- ContainerRegistry is a thing, and it defaults to empty to signal no registry - i.e. a local daemon image. -->
             <!-- Note: spaces will be replaced with '-' in ContainerImageName and ContainerImageTag -->
             <ContainerImageName Condition="'$(ContainerImageName)' == ''">$(AssemblyName)</ContainerImageName>
             <!-- Only default a tag name if no tag names at all are provided -->

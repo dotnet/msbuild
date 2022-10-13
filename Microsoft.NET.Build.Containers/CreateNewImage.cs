@@ -22,7 +22,7 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
 
     /// <summary>
     /// The base registry to pull from.
-    /// Ex: https://mcr.microsoft.com
+    /// Ex: mcr.microsoft.com
     /// </summary>
     [Required]
     public string BaseRegistry { get; set; }
@@ -94,7 +94,9 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
     /// </summary>
     public ITaskItem[] Labels { get; set; }
 
-    private bool IsDockerPush { get => OutputRegistry == "docker://"; }
+    private bool IsDockerPush { get => String.IsNullOrEmpty(OutputRegistry); }
+
+    private bool IsDockerPull { get => String.IsNullOrEmpty(BaseRegistry); }
 
     public CreateNewImage()
     {
@@ -162,6 +164,15 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
 
     }
 
+    private Image GetBaseImage() {
+        if (IsDockerPull) {
+            throw new ArgumentException("Don't know how to pull images from local daemons at the moment");
+        } else {
+            var reg = new Registry(ContainerHelpers.TryExpandRegistryToUri(BaseRegistry));
+            return reg.GetImageManifest(BaseImageName, BaseImageTag).Result;
+        }
+    }
+
     public override bool Execute()
     {
         if (!Directory.Exists(PublishDirectory))
@@ -170,18 +181,7 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
             return !Log.HasLoggedErrors;
         }
 
-        Registry reg;
-        Image image;
-
-        try
-        {
-            reg = new Registry(new Uri(BaseRegistry, UriKind.RelativeOrAbsolute));
-            image = reg.GetImageManifest(BaseImageName, BaseImageTag).Result;
-        }
-        catch
-        {
-            throw;
-        }
+        var image = GetBaseImage();
 
         if (BuildEngine != null)
         {
@@ -206,11 +206,10 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
             return false;
         }
 
-        var isDockerPush = OutputRegistry.StartsWith("docker://");
-        Registry? outputReg = isDockerPush ? null : new Registry(new Uri(OutputRegistry));
+        Registry? outputReg = IsDockerPush ? null : new Registry(ContainerHelpers.TryExpandRegistryToUri(OutputRegistry));
         foreach (var tag in ImageTags)
         {
-            if (isDockerPush)
+            if (IsDockerPush)
             {
                 try
                 {
