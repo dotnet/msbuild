@@ -273,7 +273,7 @@
   </data>
   <data name="ProjectCapabilityConstraint_Restricted_NotRestored_CTA" xml:space="preserve">
     <value>Run 'dotnet restore {0}' to restore the project.</value>
-    <comment>do not translate 'dotnet restore {0}'</comment>
+    <comment>{Locked="dotnet restore {0}"}</comment>
   </data>
   <data name="ProjectContextSymbolSource_DisplayName" xml:space="preserve">
     <value>Project context</value>
@@ -291,5 +291,6 @@
   </data>
   <data name="WorkloadInfoProvider_Message_AddWorkloads" xml:space="preserve">
     <value>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</value>
+    <comment>{Locked="dotnet workload search"}</comment>
   </data>
 </root>
