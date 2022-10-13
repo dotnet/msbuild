@@ -1,6 +1,8 @@
-﻿{
+{
   "author": "Майкрософт",
   "name": "Конфигурация NuGet",
   "description": "Файл для настройки расположений, в которых NuGet будет искать пакеты",
+  "postActions/chmod/description": "Apply permissions",
+  "postActions/chmod/manualInstructions/default/text": "Run 'chmod 600 nuget.config'",
   "postActions/open-file/description": "Открывает файл nuget.config в редакторе"
 }
