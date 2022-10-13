@@ -34,6 +34,11 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
     /// </summary>
     public string[] ContainerImageTags { get; set; }
 
+    /// <summary>
+    /// Container environment variables to set.
+    /// </summary>
+    public ITaskItem[] ContainerEnvironmentVariables { get; set; }
+
     [Output]
     public string ParsedContainerRegistry { get; private set; }
 
@@ -52,6 +57,9 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
     [Output]
     public string[] NewContainerTags { get; private set; }
 
+    [Output]
+    public ITaskItem[] NewContainerEnvironmentVariables { get; private set; }
+
     public ParseContainerProperties()
     {
         FullyQualifiedBaseImageName = "";
@@ -59,12 +67,14 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
         ContainerImageName = "";
         ContainerImageTag = "";
         ContainerImageTags = Array.Empty<string>();
+        ContainerEnvironmentVariables = Array.Empty<ITaskItem>();
         ParsedContainerRegistry = "";
         ParsedContainerImage = "";
         ParsedContainerTag = "";
         NewContainerRegistry = "";
         NewContainerImageName = "";
         NewContainerTags = Array.Empty<string>();
+        NewContainerEnvironmentVariables = Array.Empty<ITaskItem>();
     }
 
     private static bool TryValidateTags(string[] inputTags, out string[] validTags, out string[] invalidTags)
@@ -133,6 +143,8 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
             return !Log.HasLoggedErrors;
         }
 
+        ValidateEnvironmentVariables();
+
         if (FullyQualifiedBaseImageName.Contains(' ') && BuildEngine != null)
         {
             Log.LogWarning($"{nameof(FullyQualifiedBaseImageName)} had spaces in it, replacing with dashes.");
@@ -185,5 +197,26 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
         }
 
         return !Log.HasLoggedErrors;
+    }
+
+    public void ValidateEnvironmentVariables()
+    {
+        var filteredEnvVars = ContainerEnvironmentVariables.Where((x) => ContainerHelpers.IsValidEnvironmentVariable(x.ItemSpec)).ToArray<ITaskItem>();
+        var badEnvVars = ContainerEnvironmentVariables.Where((x) => !ContainerHelpers.IsValidEnvironmentVariable(x.ItemSpec));
+
+        foreach (var badEnvVar in badEnvVars)
+        {
+            if (BuildEngine != null)
+            {
+                Log.LogWarning($"{nameof(ContainerEnvironmentVariables)}: '{badEnvVar.ItemSpec}' was not a valid Environment Variable. Ignoring.");
+            }
+        }
+
+        NewContainerEnvironmentVariables = new ITaskItem[filteredEnvVars.Length];
+
+        for (int i = 0; i < filteredEnvVars.Length; i++)
+        {
+            NewContainerEnvironmentVariables[i] = filteredEnvVars[i];
+        }
     }
 }

@@ -131,6 +131,27 @@ var portsOpt = new Option<Port[]>(
     AllowMultipleArgumentsPerToken = true
 };
 
+var envVarsOpt = new Option<string[]>(
+    name: "--environmentvariables",
+    description: "Container environment variables to set.",
+    parseArgument: result =>
+    {
+        var envVars = result.Tokens.Select(x => x.Value).ToArray();
+        var badEnvVars = envVars.Where((v) => v.Split('=').Length != 2);
+
+        if (badEnvVars.Count() != 0)
+        {
+            result.ErrorMessage = "Incorrectly formatted environment variables: " + badEnvVars.Aggregate((x, y) => x = x + ";" + y);
+
+            return new string[] { };
+        }
+        return envVars;
+    })
+{
+    AllowMultipleArgumentsPerToken = true
+};
+
+
 RootCommand root = new RootCommand("Containerize an application without Docker.")
 {
     publishDirectoryArg,
@@ -144,7 +165,8 @@ RootCommand root = new RootCommand("Containerize an application without Docker."
     entrypointOpt,
     entrypointArgsOpt,
     labelsOpt,
-    portsOpt
+    portsOpt,
+    envVarsOpt
 };
 
 root.SetHandler(async (context) =>
@@ -161,7 +183,8 @@ root.SetHandler(async (context) =>
     string[] _entrypointArgs = context.ParseResult.GetValueForOption(entrypointArgsOpt) ?? Array.Empty<string>();
     string[] _labels = context.ParseResult.GetValueForOption(labelsOpt) ?? Array.Empty<string>();
     Port[] _ports = context.ParseResult.GetValueForOption(portsOpt) ?? Array.Empty<Port>();
-    await ContainerBuilder.Containerize(_publishDir, _workingDir, _baseReg, _baseName, _baseTag, _entrypoint, _entrypointArgs, _name, _tags, _outputReg, _labels, _ports);
+    string[] _envVars = context.ParseResult.GetValueForOption(envVarsOpt) ?? Array.Empty<string>();
+    await ContainerBuilder.Containerize(_publishDir, _workingDir, _baseReg, _baseName, _baseTag, _entrypoint, _entrypointArgs, _name, _tags, _outputReg, _labels, _ports, _envVars);
 });
 
 return await root.InvokeAsync(args);

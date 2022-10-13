@@ -94,6 +94,11 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
     /// </summary>
     public ITaskItem[] Labels { get; set; }
 
+    /// <summary>
+    /// Container environment variables to set.
+    /// </summary>
+    public ITaskItem[] ContainerEnvironmentVariables { get; set; }
+
     private bool IsDockerPush { get => String.IsNullOrEmpty(OutputRegistry); }
 
     private bool IsDockerPull { get => String.IsNullOrEmpty(BaseRegistry); }
@@ -115,6 +120,7 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
         EntrypointArgs = Array.Empty<ITaskItem>();
         Labels = Array.Empty<ITaskItem>();
         ExposedPorts = Array.Empty<ITaskItem>();
+        ContainerEnvironmentVariables = Array.Empty<ITaskItem>();
     }
 
     private void SetPorts(Image image, ITaskItem[] exposedPorts)
@@ -161,7 +167,14 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
                 }
             }
         }
+    }
 
+    private void SetEnvironmentVariables(Image img, ITaskItem[] envVars)
+    {
+        foreach (ITaskItem envVar in envVars)
+        {
+            img.AddEnvironmentVariable(envVar.ItemSpec, envVar.GetMetadata("Value"));
+        }
     }
 
     private Image GetBaseImage() {
@@ -197,6 +210,8 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
         {
             image.Label(label.ItemSpec, label.GetMetadata("Value"));
         }
+
+        SetEnvironmentVariables(image, ContainerEnvironmentVariables);
 
         SetPorts(image, ExposedPorts);
 

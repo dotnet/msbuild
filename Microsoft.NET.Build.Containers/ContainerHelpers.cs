@@ -20,6 +20,7 @@ public record Port(int number, PortType type);
 
 public static class ContainerHelpers
 {
+    private static Regex envVarRegex = new Regex(@"^[a-zA-Z_]+$");
 
     /// <summary>
     /// DefaultRegistry is the canonical representation of something that lives in the local docker daemon. It's used as the inferred registry for repositories
@@ -71,6 +72,16 @@ public static class ContainerHelpers
     {
         var prefix = alreadyValidatedDomain.StartsWith("localhost") ? "http" : "https";
         return new Uri($"{prefix}://{alreadyValidatedDomain}");
+    }
+
+    /// <summary>
+    /// Ensures a given environment variable is valid.
+    /// </summary>
+    /// <param name="envVar"></param>
+    /// <returns></returns>
+    public static bool IsValidEnvironmentVariable(string envVar)
+    {
+        return envVarRegex.IsMatch(envVar);
     }
 
     /// <summary>

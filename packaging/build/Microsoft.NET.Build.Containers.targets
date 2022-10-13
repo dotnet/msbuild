@@ -64,7 +64,7 @@
         <ItemGroup Label="ASP.NET port forwarding" Condition="'$(_IsAspNet)' == 'true'">
             <ContainerPort Include="80" Type="tcp" Condition="@(ContainerPort->WithMetadataValue('Identity', '80')->AnyHaveMetadataValue('Type', 'tcp')) == ''" />
 
-            <ContainerEnvironmentVariable Include="ASPNETCORE_URLS" Value="http://localhost:5000;https://localhost:5001"
+            <ContainerEnvironmentVariable Include="ASPNETCORE_URLS" Value="http://+:80"
                                                                     Condition="@(ContainerEnvironmentVariable->WithMetadataValue('Identity', 'ASPNETCORE_URLS')) == ''"/>
         </ItemGroup>
 
@@ -72,7 +72,8 @@
                                   ContainerRegistry="$(ContainerRegistry)"
                                   ContainerImageName="$(ContainerImageName)"
                                   ContainerImageTag="$(ContainerImageTag)"
-                                  ContainerImageTags="$(ContainerImageTags)">
+                                  ContainerImageTags="$(ContainerImageTags)"
+                                  ContainerEnvironmentVariables="@(ContainerEnvironmentVariable)">
 
             <Output TaskParameter="ParsedContainerRegistry" PropertyName="ContainerBaseRegistry" />
             <Output TaskParameter="ParsedContainerImage" PropertyName="ContainerBaseName" />
@@ -80,6 +81,7 @@
             <Output TaskParameter="NewContainerRegistry" PropertyName="ContainerRegistry" />
             <Output TaskParameter="NewContainerImageName" PropertyName="ContainerImageName" />
             <Output TaskParameter="NewContainerTags" ItemName="ContainerImageTags" />
+            <Output TaskParameter="NewContainerEnvironmentVariables" ItemName="ContainerEnvironmentVariables" />
         </ParseContainerProperties>
     </Target>
 
@@ -112,6 +114,7 @@
                         Entrypoint="@(ContainerEntrypoint)"
                         EntrypointArgs="@(ContainerEntrypointArgs)"
                         Labels="@(ContainerLabel)"
-                        ExposedPorts="@(ContainerPort)" />
+                        ExposedPorts="@(ContainerPort)"
+                        ContainerEnvironmentVariables="@(ContainerEnvironmentVariables)" />
     </Target>
 </Project>

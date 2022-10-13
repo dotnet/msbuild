@@ -20,6 +20,8 @@ public class Image
 
     internal HashSet<Port> exposedPorts;
 
+    internal Dictionary<string, string> environmentVariables;
+
     public Image(JsonNode manifest, JsonNode config, string name, Registry? registry)
     {
         this.manifest = manifest;
@@ -29,6 +31,7 @@ public class Image
         // these next values are inherited from the parent image, so we need to seed our new image with them.
         this.labels = ReadLabelsFromConfig(config);
         this.exposedPorts = ReadPortsFromConfig(config);
+        this.environmentVariables = ReadEnvVarsFromConfig(config);
     }
 
     public IEnumerable<Descriptor> LayerDescriptors
@@ -81,6 +84,17 @@ public class Image
         return container;
     }
 
+    private JsonArray CreateEnvironmentVarMapping()
+    {
+        // Env is a JSON array where each value is of the format: "VAR=value"
+        var envVarJson = new JsonArray();
+        foreach (var envVar in environmentVariables)
+        {
+            envVarJson.Add<string>($"{envVar.Key}={envVar.Value}");
+        }
+        return envVarJson;
+    }
+
     private static HashSet<Label> ReadLabelsFromConfig(JsonNode inputConfig)
     {
         if (inputConfig is JsonObject config && config["Labels"] is JsonObject labelsJson)
@@ -100,6 +114,31 @@ public class Image
         {
             // initialize an empty labels map
             return new HashSet<Label>();
+        }
+    }
+
+    private static Dictionary<string, string> ReadEnvVarsFromConfig(JsonNode inputConfig)
+    {
+        if (inputConfig is JsonObject config && config["config"]!["Env"] is JsonArray envVarJson)
+        {
+            var envVars = new Dictionary<string, string>();
+            foreach (var entry in envVarJson)
+            {
+                if (entry is null)
+                    continue;
+
+                var val = entry.GetValue<string>().Split('=', 2);
+
+                if (val.Length != 2)
+                    continue;
+
+                envVars.Add(val[0], val[1]);
+            }
+            return envVars;
+        }
+        else
+        {
+            return new Dictionary<string, string>();
         }
     }
 
@@ -176,6 +215,20 @@ public class Image
     {
         labels.Add(new(name, value));
         config["config"]!["Labels"] = CreateLabelMap();
+        RecalculateDigest();
+    }
+
+    public void AddEnvironmentVariable(string envVarName, string value)
+    {
+        if (!environmentVariables.ContainsKey(envVarName))
+        {
+            environmentVariables.Add(envVarName, value);
+        }
+        else
+        {
+            environmentVariables[envVarName] = value;
+        }
+        config["config"]!["Env"] = CreateEnvironmentVarMapping();
         RecalculateDigest();
     }
 

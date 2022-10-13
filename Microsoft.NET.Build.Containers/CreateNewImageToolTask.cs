@@ -86,6 +86,11 @@ public class CreateNewImage : ToolTask
     /// it's mostly documentation.
     /// </summary>
     public ITaskItem[] ExposedPorts { get; set; }
+
+    /// <summary>
+    /// Container environment variables to set.
+    /// </summary>
+    public ITaskItem[] ContainerEnvironmentVariables { get; set; }
  
     // Unused, ToolExe is set via targets and overrides this.
     protected override string ToolName => "dotnet";
@@ -119,6 +124,7 @@ public class CreateNewImage : ToolTask
         EntrypointArgs = Array.Empty<ITaskItem>();
         Labels = Array.Empty<ITaskItem>();
         ExposedPorts = Array.Empty<ITaskItem>();
+        ContainerEnvironmentVariables = Array.Empty<ITaskItem>();
     }
 
     protected override string GenerateFullPathToTool() => Quote(Path.Combine(DotNetPath, ToolExe));
@@ -137,7 +143,8 @@ public class CreateNewImage : ToolTask
                (Labels.Length > 0 ? " --labels " + Labels.Select((i) => i.ItemSpec + "=" + i.GetMetadata("Value")).Aggregate((i, s) => s += i + " ") : "") +
                (ImageTags.Length > 0 ? " --imagetags " + ImageTags.Select((i) => i.ItemSpec).Aggregate((i, s) => s += i + " ") : "") +
                (EntrypointArgs.Length > 0 ? " --entrypointargs " + EntrypointArgs.Select((i) => i.ItemSpec).Aggregate((i, s) => s += i + " ") : "") +
-               (ExposedPorts.Length > 0 ? " --ports " + ExposedPorts.Select((i) => i.ItemSpec + "/" + i.GetMetadata("Type")).Aggregate((i, s) => s += i + " ") : "");
+               (ExposedPorts.Length > 0 ? " --ports " + ExposedPorts.Select((i) => i.ItemSpec + "/" + i.GetMetadata("Type")).Aggregate((i, s) => s += i + " ") : "") +
+               (ContainerEnvironmentVariables.Length > 0 ? " --environmentvariables " + ContainerEnvironmentVariables.Select((i) => i.ItemSpec + "=" + i.GetMetadata("Value")).Aggregate((i, s) => s += i + " ") : "");
     }
 
     private string Quote(string path)
