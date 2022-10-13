@@ -12,6 +12,11 @@
         <target state="translated">Lista os pacotes que foram preteridos. Não pode ser combinado com a opção '--vulnerable' nem com a opção '--outdated'.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdFormatDescription">
+        <source>Specify output format type for list packages command. Requires the "console", "json" option.</source>
+        <target state="new">Specify output format type for list packages command. Requires the "console", "json" option.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK | FRAMEWORK\RID</source>
         <target state="translated">FRAMEWORK | FRAMEWORK\RID</target>

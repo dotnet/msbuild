@@ -12,6 +12,11 @@
         <target state="translated">列出已淘汰的套件。無法與 '--vulnerable' 或 '--outdated' 選項一併使用。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdFormatDescription">
+        <source>Specify output format type for list packages command. Requires the "console", "json" option.</source>
+        <target state="new">Specify output format type for list packages command. Requires the "console", "json" option.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK | FRAMEWORK\RID</source>
         <target state="translated">FRAMEWORK | FRAMEWORK\RID</target>

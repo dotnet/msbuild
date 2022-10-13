@@ -12,6 +12,11 @@
         <target state="translated">Kullanım dışı bırakılan paketleri listeler. '--vulnerable' veya '--outdated' seçenekleriyle birleştirilemez.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdFormatDescription">
+        <source>Specify output format type for list packages command. Requires the "console", "json" option.</source>
+        <target state="new">Specify output format type for list packages command. Requires the "console", "json" option.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK | FRAMEWORK\RID</source>
         <target state="translated">FRAMEWORK | FRAMEWORK\RID</target>

@@ -168,4 +168,7 @@
   <data name="CmdVulnerableDescription" xml:space="preserve">
     <value>Lists packages that have known vulnerabilities. Cannot be combined with '--deprecated' or '--outdated' options.</value>
   </data>
+  <data name="CmdFormatDescription" xml:space="preserve">
+    <value>Specify output format type for list packages command. Requires the "console", "json" option.</value>
+  </data>
 </root>

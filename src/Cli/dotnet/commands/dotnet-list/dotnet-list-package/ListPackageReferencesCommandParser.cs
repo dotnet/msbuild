@@ -61,6 +61,11 @@ namespace Microsoft.DotNet.Cli
                 ArgumentHelpName = CommonLocalizableStrings.LevelArgumentName
             }.ForwardAsSingle(o => $"--verbosity:{o}");
 
+        public static readonly Option FormatOption = new ForwardedOption<string>("--format", LocalizableStrings.CmdFormatDescription)
+        {
+            ArgumentHelpName = LocalizableStrings.CmdConfig
+        }.ForwardAsMany(o => new[] { "--format", o });
+
         private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
@@ -84,6 +89,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(ConfigOption);
             command.AddOption(SourceOption);
             command.AddOption(InteractiveOption);
+            command.AddOption(FormatOption);
 
             command.SetHandler((parseResult) => new ListPackageReferencesCommand(parseResult).Execute());
 

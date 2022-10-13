@@ -12,6 +12,11 @@
         <target state="translated">列出已被弃用的包。不能与 "--vulnerable" 或 "--outdated" 选项结合使用。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdFormatDescription">
+        <source>Specify output format type for list packages command. Requires the "console", "json" option.</source>
+        <target state="new">Specify output format type for list packages command. Requires the "console", "json" option.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK | FRAMEWORK\RID</source>
         <target state="translated">FRAMEWORK | FRAMEWORK\RID</target>
