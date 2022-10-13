@@ -150,4 +150,7 @@
   <data name="NoWorkloadsInstalledInfoWarning" xml:space="preserve">
     <value>There are no installed workloads to display.</value>
   </data>
+  <data name="WorkloadInfoDescription" xml:space="preserve">
+    <value>Display information about installed workloads.</value>
+  </data>
 </root>
