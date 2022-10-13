@@ -65,6 +65,8 @@ namespace Microsoft.Build.Evaluation
 
         internal abstract void DiscardImplicitReferences();
 
+        internal abstract void SetImplicitReferencesToAutoReload();
+
         internal abstract void DiscardAnyWeakReference(ProjectRootElement projectRootElement);
 
         /// <summary>

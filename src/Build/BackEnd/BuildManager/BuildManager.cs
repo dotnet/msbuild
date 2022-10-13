@@ -645,7 +645,7 @@ namespace Microsoft.Build.Execution
                         config.ResultsNodeId = Scheduler.InvalidNodeId;
                     }
 
-                    _buildParameters.ProjectRootElementCache.DiscardImplicitReferences();
+                    _buildParameters.ProjectRootElementCache.SetImplicitReferencesToAutoReload();
                 }
             }
         }

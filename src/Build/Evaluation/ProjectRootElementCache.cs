@@ -228,7 +228,8 @@ namespace Microsoft.Build.Evaluation
                 {
                     _weakCache.TryGetValue(projectFile, out projectRootElement);
 
-                    if (projectRootElement != null)
+
+                    if (projectRootElement != null && projectRootElement.AutoReloadFromDisk)
                     {
                         BoostEntryInStrongCache(projectRootElement);
 
@@ -453,6 +454,38 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Set any implicitly loaded entries in the cache to automatically reload if they have
+        /// changed on disk, and clean up any entries that have been garbage collected.
+        /// </summary>
+        /// <remarks>
+        /// Previously, implicit references were always discarded when a build started (in BuildManager.BeginBuild).
+        /// This resulted in a lot of reloading of shared .props and .targets files when loading projects in a large
+        /// solution (see https://github.com/Microsoft/msbuild/issues/1068).
+        /// So now we don't remove these entries from the cache.  In order to preserve the previous behavior, we
+        /// do need to reload them if they've changed on disk, so we set an AutoReloadFromDisk on each ProjectRootElement
+        /// that was not explicitly loaded.
+        /// </remarks>
+        internal override void SetImplicitReferencesToAutoReload()
+        {
+            lock (_locker)
+            {
+                foreach (string projectPath in _weakCache.Keys)
+                {
+                    ProjectRootElement rootElement;
+
+                    if (_weakCache.TryGetValue(projectPath, out rootElement))
+                    {
+                        if (!rootElement.IsExplicitlyLoaded)
+                        {
+                            rootElement.AutoReloadFromDisk = true;
+                        }
+                    }
+                }
+                _weakCache.Scavenge();
             }
         }
 

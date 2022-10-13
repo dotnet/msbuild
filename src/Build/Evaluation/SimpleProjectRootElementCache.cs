@@ -145,5 +145,10 @@ namespace Microsoft.Build.Evaluation
         {
              throw new NotImplementedException();
         }
+
+        internal override void SetImplicitReferencesToAutoReload()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

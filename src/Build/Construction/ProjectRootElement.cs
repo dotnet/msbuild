@@ -262,6 +262,11 @@ namespace Microsoft.Build.Construction
             ProjectParser.Parse(document, this);
         }
 
+	/// <summary>
+        /// See comments for <see cref="ProjectRootElementCache.SetImplicitReferencesToAutoReload"/> 
+        /// </summary>
+        internal bool AutoReloadFromDisk { get; set; }
+
         /// <summary>
         /// Event raised after this project is renamed
         /// </summary>
