@@ -39,6 +39,8 @@ variables:
     value: .NETCore
   - name: _DotNetValidationArtifactsCategory
     value: .NETCoreValidation
+  - name: Codeql.Enabled
+    value: true
 
 stages:
 - stage: build
