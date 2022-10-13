@@ -104,6 +104,9 @@ stages:
         feedSource: 'https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json'
       displayName: 'Install OptProf Plugin'
 
+    - task: CodeQL3000Init@0
+      displayName: Initialize CodeQL
+
     # Required by MicroBuildBuildVSBootstrapper
     - task: MicroBuildSwixPlugin@4
       inputs:
@@ -133,6 +136,9 @@ stages:
 
     # Required by Microsoft policy
     - template: eng\common\templates\steps\generate-sbom.yml
+
+    - task: CodeQL3000Finalize@0
+      displayName: Finalize CodeQL
 
     # Publish OptProf configuration files
     - task: ms-vscs-artifact.build-tasks.artifactDropTask-1.artifactDropTask@0
