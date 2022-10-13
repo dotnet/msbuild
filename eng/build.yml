@@ -15,13 +15,13 @@ parameters:
   timeoutInMinutes: 180
 
 jobs:
-- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/release/7.0.1xx'), not(contains(parameters.agentOs, 'TemplateEngine'))) }}:
+- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/release/7.0.2xx'), not(contains(parameters.agentOs, 'TemplateEngine'))) }}:
   - template: /eng/common/templates/job/onelocbuild.yml
     parameters:
       CreatePr: true
       LclSource: lclFilesfromPackage
       LclPackageId: 'LCL-JUNO-PROD-DOTNETSDK'
-      MirrorBranch: release/7.0.1xx
+      MirrorBranch: release/7.0.2xx
       MirrorRepo: sdk
 
 - ${{ if not(contains(parameters.agentOs, 'TemplateEngine')) }}:
@@ -67,7 +67,8 @@ jobs:
           env:
             Token: $(dn-bot-dnceng-artifact-feeds-rw)
       - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
-        - script: eng\CIBuild.cmd
+        - powershell: eng\common\build.ps1
+                    $(_CIBuild)
                     -configuration $(_BuildConfig)
                     $(_PublishArgs)
                     $(_SignArgs)
@@ -79,7 +80,7 @@ jobs:
           env:
             BuildConfig: $(_BuildConfig)
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-            HelixAccessToken: $(_HelixApiToken)
+            HelixAccessToken: ${{ parameters.HelixAccessToken }}
         - powershell: eng\common\build.ps1
                 -configuration $(_BuildConfig)
                 -prepareMachine
@@ -98,7 +99,8 @@ jobs:
               RunAoTTests: 'false'
   
       - ${{ if eq(parameters.agentOs, 'Windows_NT_FullFramework') }}:
-        - script: eng\CIBuild.cmd
+        - powershell: eng\common\build.ps1
+                    $(_CIBuild)
                     -configuration $(_BuildConfig)
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)
@@ -109,7 +111,7 @@ jobs:
             BuildConfig: $(_BuildConfig)
             TestFullMSBuild: 'true'
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-            HelixAccessToken: $(_HelixApiToken)
+            HelixAccessToken: ${{ parameters.HelixAccessToken }}
         - powershell: eng\common\build.ps1
                 -configuration $(_BuildConfig)
                 -prepareMachine
@@ -118,7 +120,6 @@ jobs:
                 -test
                 -projects $(Build.SourcesDirectory)\src\Tests\UnitTests.proj
                 /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\TestInHelix.binlog
-                /p:HelixBaseUri="https://helix.int-dot.net/"
                 /p:_CustomHelixTargetQueue=${{ parameters.helixTargetQueue }}
                 $(_InternalRuntimeDownloadArgs)
           displayName: Run Tests in Helix
@@ -129,11 +130,11 @@ jobs:
               HelixAccessToken: $(_HelixApiToken)
   
       - ${{ if eq(parameters.agentOs, 'Windows_NT_TestAsTools') }}:
-        - script: eng\CIBuild.cmd
+        - powershell: eng\common\build.ps1
+                    $(_CIBuild)
                     -configuration $(_BuildConfig)
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)
-                    $(_Test)
                     $(_InternalRuntimeDownloadArgs)
                     /p:RunTestsAsTool=true
           displayName: Build
@@ -141,7 +142,8 @@ jobs:
             BuildConfig: $(_BuildConfig)
   
       - ${{ if notIn(parameters.agentOs, 'Windows_NT', 'Windows_NT_FullFramework', 'Windows_NT_TestAsTools') }}:
-        - script: eng/common/cibuild.sh
+        - script: eng/common/build.sh
+                    $(_CIBuild)
                     --configuration $(_BuildConfig)
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)
@@ -158,7 +160,6 @@ jobs:
                 -test
                 -projects $(Build.SourcesDirectory)/src/Tests/UnitTests.proj
                 /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/TestInHelix.binlog
-                /p:HelixBaseUri="https://helix.int-dot.net/"
                 /p:_CustomHelixTargetQueue=${{ parameters.helixTargetQueue }}
                 $(_InternalRuntimeDownloadArgs)
           displayName: Run Tests in Helix
@@ -243,7 +244,8 @@ jobs:
           env:
             Token: $(dn-bot-dnceng-artifact-feeds-rw)
       - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
-        - script: eng\CIBuild.cmd
+        - powershell: eng\common\build.ps1
+                    $(_CIBuild)
                     -configuration $(_BuildConfig)
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)
@@ -253,7 +255,7 @@ jobs:
           env:
             BuildConfig: $(_BuildConfig)
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-            HelixAccessToken: $(_HelixApiToken)
+            HelixAccessToken: ${{ parameters.HelixAccessToken }}
         - script: $(Build.SourcesDirectory)/artifacts/bin/redist/$(_BuildConfig)/dotnet/dotnet workload install wasm-tools --skip-manifest-update
           displayName: Install wasm-tools Workload
           continueOnError: false
@@ -269,7 +271,7 @@ jobs:
           displayName: Run AoT Tests in Helix
           env:
               SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-              HelixAccessToken: $(_HelixApiToken)
+              HelixAccessToken: ''
               RunAoTTests: 'true'
 
       - ${{ if eq(parameters.agentOs, 'Darwin') }}:
@@ -370,7 +372,8 @@ jobs:
           env:
             Token: $(dn-bot-dnceng-artifact-feeds-rw)
       - ${{ if contains(parameters.agentOs, 'Windows_NT') }}:
-        - script: eng\CIBuild.cmd
+        - powershell: eng\common\build.ps1
+                    $(_CIBuild)
                     -configuration $(_BuildConfig)
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)
@@ -380,7 +383,7 @@ jobs:
           env:
             BuildConfig: $(_BuildConfig)
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-            HelixAccessToken: $(_HelixApiToken)
+            HelixAccessToken: ${{ parameters.HelixAccessToken }}
         - powershell: eng\common\build.ps1
                 -configuration $(_BuildConfig)
                 -prepareMachine

@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="CustomConfigurationDisablesPublishAndPackReleaseProperties">
         <source>A custom configuration was detected in the project '{0}', so the property '{1}' will not take effect.</source>
-        <target state="new">A custom configuration was detected in the project '{0}', so the property '{1}' will not take effect.</target>
+        <target state="translated">'{0}' 프로젝트에서 사용자 지정 구성이 검색되었으므로 '{1}' 속성이 적용되지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
@@ -200,7 +200,7 @@ The default is 'true' if a runtime identifier is specified.</source>
       <trans-unit id="SolutionExecutableConfigurationMismatchError">
         <source>Multiple executable projects in the solution contain conflicting '{0}' values. Ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
 {1}.</source>
-        <target state="new">Multiple executable projects in the solution contain conflicting '{0}' values. Ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
+        <target state="translated">솔루션의 여러 실행 가능한 프로젝트에 충돌하는 '{0}' 값이 포함되어 있습니다. 값이 일치하는지 확인하세요. Directory.build.props 파일을 사용하여 모든 프로젝트 구성을 설정하는 것이 좋습니다. 충돌하는 프로젝트:
 {1}.</target>
         <note />
       </trans-unit>

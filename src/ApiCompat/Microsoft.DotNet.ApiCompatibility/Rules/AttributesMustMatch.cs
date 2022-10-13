@@ -48,32 +48,6 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             }
         }
 
-        private bool IsInternalArgument(TypedConstant argument) => (argument.Kind == TypedConstantKind.Type
-            && argument.Value is INamedTypeSymbol typ
-            && !typ.IsVisibleOutsideOfAssembly(_settings.IncludeInternalSymbols));
-
-        private bool HasInternalArguments(AttributeData attr)
-        {
-            foreach (TypedConstant argument in attr.ConstructorArguments)
-            {
-                if (IsInternalArgument(argument))
-                {
-                    return true;
-                }
-            }
-
-            foreach (KeyValuePair<string, TypedConstant> kv in attr.NamedArguments)
-            {
-                TypedConstant argument = kv.Value;
-                if (IsInternalArgument(argument))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         private void AddDifference(IList<CompatDifference> differences, DifferenceType dt, MetadataInformation leftMetadata, MetadataInformation rightMetadata, ISymbol containing, string itemRef, AttributeData attr)
         {
             string? docId = attr.AttributeClass?.GetDocumentationCommentId();
@@ -84,6 +58,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             }
 
             if (attr.AttributeClass != null && !attr.AttributeClass.IsVisibleOutsideOfAssembly(_settings.IncludeInternalSymbols))
+            {
+                return;
+            }
+
+            if (!_settings.StrictMode && dt == DifferenceType.Added)
             {
                 return;
             }
@@ -175,9 +154,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                         for (int j = 0; j < rightGroup.Attributes.Count; j++)
                         {
                             AttributeData rightAttribute = rightGroup.Attributes[j];
-                            if (AttributeEquals(leftAttribute, rightAttribute)
-                                || HasInternalArguments(leftAttribute) // If attribute argument is an internal type, ignore.
-                                || HasInternalArguments(rightAttribute))
+                            if (AttributeEquals(leftAttribute, rightAttribute))
                             {
                                 rightGroup.Seen[j] = true;
                                 seen = true;
@@ -195,10 +172,17 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
                     for (int i = 0; i < rightGroup.Attributes.Count; i++)
                     {
-                        if (!rightGroup.Seen[i])
+                        if (!rightGroup.Seen[i] && _settings.StrictMode)
                         {
                             // Attribute arguments exist on right but not left.
-                            // Issue "changed" diagnostic.
+                            // Left
+                            //   [Foo("a")]
+                            //   void F()
+                            // Right
+                            //   [Foo("a")]
+                            //   [Foo("b")]
+                            //   void F()
+                            // Issue "changed" diagnostic when in strict mode.
                             AddDifference(differences, DifferenceType.Changed, leftMetadata, rightMetadata, containing, itemRef, rightGroup.Attributes[i]);
                         }
                     }

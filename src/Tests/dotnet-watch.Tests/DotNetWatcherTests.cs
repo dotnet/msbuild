@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await app.StartWatcherAsync();
             const string messagePrefix = "DOTNET_WATCH = ";
-            var message = await app.Process.GetOutputLineStartsWithAsync(messagePrefix, TimeSpan.FromMinutes(2));
+            var message = await app.Process.GetOutputLineStartsWithAsync(messagePrefix);
             var envValue = message.Substring(messagePrefix.Length);
             Assert.Equal("1", envValue);
         }
@@ -55,16 +55,16 @@ namespace Microsoft.DotNet.Watcher.Tools
             var contents = File.ReadAllText(source);
             const string messagePrefix = "DOTNET_WATCH_ITERATION = ";
 
-            var message = await app.Process.GetOutputLineStartsWithAsync(messagePrefix, TimeSpan.FromMinutes(2));
+            var message = await app.Process.GetOutputLineStartsWithAsync(messagePrefix);
             var count = int.Parse(message.Substring(messagePrefix.Length), CultureInfo.InvariantCulture);
             Assert.Equal(1, count);
 
             await app.IsWaitingForFileChange();
 
             File.SetLastWriteTime(source, DateTime.Now);
-            await app.HasRestarted(TimeSpan.FromMinutes(1));
+            await app.HasRestarted();
 
-            message = await app.Process.GetOutputLineStartsWithAsync(messagePrefix, TimeSpan.FromMinutes(2));
+            message = await app.Process.GetOutputLineStartsWithAsync(messagePrefix);
             count = int.Parse(message.Substring(messagePrefix.Length), CultureInfo.InvariantCulture);
             Assert.Equal(2, count);
         }
@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             for (var i = 0; i < 3; i++)
             {
                 File.SetLastWriteTime(source, DateTime.Now);
-                var message = await app.Process.GetOutputLineStartsWithAsync(messagePrefix, TimeSpan.FromMinutes(2));
+                var message = await app.Process.GetOutputLineStartsWithAsync(messagePrefix);
 
                 Assert.Equal(messagePrefix + " --no-restore -- wait", message.Trim());
 
@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             Assert.Contains(app.Process.Output, p => string.Equals(messagePrefix + " -- wait", p.Trim()));
 
             File.SetLastWriteTime(source, DateTime.Now);
-            var message = await app.Process.GetOutputLineStartsWithAsync(messagePrefix, TimeSpan.FromMinutes(2));
+            var message = await app.Process.GetOutputLineStartsWithAsync(messagePrefix);
 
             // csproj changed. Do not expect a --no-restore
             Assert.Equal(messagePrefix + " -- wait", message.Trim());
@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             // regular file changed after csproj changes. Should use --no-restore
             File.SetLastWriteTime(Path.Combine(app.SourceDirectory, "Program.cs"), DateTime.Now);
-            message = await app.Process.GetOutputLineStartsWithAsync(messagePrefix, TimeSpan.FromMinutes(2));
+            message = await app.Process.GetOutputLineStartsWithAsync(messagePrefix);
             Assert.Equal(messagePrefix + " --no-restore -- wait", message.Trim());
         }
 
@@ -143,7 +143,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await app.StartWatcherAsync();
 
-            await app.Process.GetOutputLineAsyncWithConsoleHistoryAsync("Environment: Development", TimeSpan.FromSeconds(10));
+            await app.Process.GetOutputLineAsyncWithConsoleHistoryAsync("Environment: Development");
         }
 
         [Fact(Skip = "https://github.com/dotnet/sdk/issues/24406")]
@@ -166,7 +166,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await app.StartWatcherAsync();
 
-            await app.Process.GetOutputLineAsyncWithConsoleHistoryAsync("Environment: Development", TimeSpan.FromSeconds(10));
+            await app.Process.GetOutputLineAsyncWithConsoleHistoryAsync("Environment: Development");
         }
 
         [CoreMSBuildOnlyFact]
@@ -192,8 +192,8 @@ namespace Microsoft.DotNet.Watcher.Tools
             var standardInput = app.Process.Process.StandardInput;
             var inputString = "This is a test input";
 
-            await standardInput.WriteLineAsync(inputString).WaitAsync(TimeSpan.FromSeconds(10));
-            await app.Process.GetOutputLineAsync($"Echo: {inputString}", TimeSpan.FromSeconds(10));
+            await standardInput.WriteLineAsync(inputString);
+            await app.Process.GetOutputLineAsync($"Echo: {inputString}");
         }
     }
 }

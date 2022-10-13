@@ -43,7 +43,7 @@ To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;ver
       </trans-unit>
       <trans-unit id="Command_Instantiate_Description">
         <source>Instantiates a template with given short name. An alias of 'dotnet new &lt;template name&gt;'.</source>
-        <target state="needs-review-translation">Создает экземпляр шаблона с заданным коротким именем.</target>
+        <target state="translated">Создание экземпляра шаблона с заданным коротким именем. Псевдоним 'dotnet new &lt;template name&gt;'.</target>
         <note>do not translate 'dotnet new &lt;template name&gt;'</note>
       </trans-unit>
       <trans-unit id="Command_Legacy_Update_Check_Description">
@@ -95,7 +95,7 @@ If command is specified without the argument, it lists all the template packages
       </trans-unit>
       <trans-unit id="Command_Update_Option_CheckOnly">
         <source>Only checks for updates and display the template packages to be updated without applying update.</source>
-        <target state="needs-review-translation">Только проверяет наличие обновлений и отображает пакеты шаблонов, подлежащие обновлению. Не применяет обновления.</target>
+        <target state="translated">Только проверяет наличие обновлений и отображает пакеты шаблонов, подлежащие обновлению, без применения обновления.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
@@ -125,7 +125,7 @@ If command is specified without the argument, it lists all the template packages
       </trans-unit>
       <trans-unit id="Option_ColumnsAll">
         <source>Displays all columns in the output.</source>
-        <target state="needs-review-translation">Отображать все столбцы в выходных данных.</target>
+        <target state="translated">Отображает все столбцы в выходных данных.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_Debug_Attach">

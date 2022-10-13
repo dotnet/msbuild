@@ -43,7 +43,7 @@ Para instalar el paquete NuGet de una versión determinada, use &lt;package ID&g
       </trans-unit>
       <trans-unit id="Command_Instantiate_Description">
         <source>Instantiates a template with given short name. An alias of 'dotnet new &lt;template name&gt;'.</source>
-        <target state="needs-review-translation">Crea una instancia de una plantilla con un nombre corto determinado.</target>
+        <target state="translated">Crea una instancia de una plantilla con el nombre corto especificado. Alias de "dotnet new &lt;template name&gt;".</target>
         <note>do not translate 'dotnet new &lt;template name&gt;'</note>
       </trans-unit>
       <trans-unit id="Command_Legacy_Update_Check_Description">
@@ -95,7 +95,7 @@ Si el comando se especifica sin el argumento, muestra todos los paquetes de plan
       </trans-unit>
       <trans-unit id="Command_Update_Option_CheckOnly">
         <source>Only checks for updates and display the template packages to be updated without applying update.</source>
-        <target state="needs-review-translation">Compruebe solo si hay actualizaciones y muestre los paquetes de plantillas que se van a actualizar sin aplicar la actualización.</target>
+        <target state="translated">Comprueba solo si hay actualizaciones y muestra los paquetes de plantillas que se van a actualizar sin aplicar la actualización.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListCommand_Option_IgnoreConstraints">
@@ -125,7 +125,7 @@ Si el comando se especifica sin el argumento, muestra todos los paquetes de plan
       </trans-unit>
       <trans-unit id="Option_ColumnsAll">
         <source>Displays all columns in the output.</source>
-        <target state="needs-review-translation">Muestra todas las columnas de la salida.</target>
+        <target state="translated">Muestra todas las columnas de la salida.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_Debug_Attach">

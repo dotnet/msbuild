@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework Condition="'$(DotNetBuildFromSource)' == 'true'">net7.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <Nullable>enable</Nullable>
     <IsPackable>true</IsPackable>
@@ -9,6 +10,7 @@
     <StrongNameKeyId>Open</StrongNameKeyId>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>apicompat</ToolCommandName>
+    <PackageDescription>Tool to perform api compatibility checks on assemblies and packages.</PackageDescription>
   </PropertyGroup>
 
   <ItemGroup>

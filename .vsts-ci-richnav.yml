@@ -33,7 +33,7 @@ stages:
         richCodeNavigationEnvironment: 'production'
         pool:
             name: NetCore-Svc-Public
-            demands: ImageOverride -equals Build.Windows.10.Amd64.VS2019.Pre.Open  
+            demands: ImageOverride -equals windows.vs2019.amd64.open  
         timeoutInMinutes: 180
         strategy:
           matrix:
@@ -52,7 +52,12 @@ stages:
           - _SignArgs: ''
           - _InternalRuntimeDownloadArgs: ''
         steps:
-        - script: eng\CIBuild.cmd
+        - powershell: eng\common\build.ps1
+                    -restore
+                    -ci
+                    -build
+                    -pack
+                    -sign
                     -configuration $(_BuildConfig)
                     $(_PublishArgs)
                     $(_SignArgs)

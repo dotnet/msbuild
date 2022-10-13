@@ -39,7 +39,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 new CannotRemoveBaseTypeOrInterface(settings, context),
                 new CannotSealType(settings, context),
                 new EnumsMustMatch(settings, context),
-                new MembersMustExist(settings, context)
+                new MembersMustExist(settings, context),
+                new CannotChangeVisibility(settings, context)
             };
 
             if (_enableRuleAttributesMustMatch)
