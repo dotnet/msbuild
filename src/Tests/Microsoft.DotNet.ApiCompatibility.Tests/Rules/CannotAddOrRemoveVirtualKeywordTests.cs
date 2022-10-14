@@ -72,6 +72,13 @@ namespace CompatTests {{
                                     (DifferenceType.Removed, "M:CompatTests.First.remove_F(CompatTests.First.EventHandler)"),
                                     (DifferenceType.Removed, "E:CompatTests.First.F")),
             };
+            // effectively sealed containing type
+            yield return new object[] {
+                CreateType(" class", "private First() {}", " public virtual void F() {}"),
+                CreateType(" class", "private First() {}", " public void F() {}"),
+                false,
+                CreateDifferences(),
+            };
         }
 
         public static IEnumerable<object[]> AddedCases()

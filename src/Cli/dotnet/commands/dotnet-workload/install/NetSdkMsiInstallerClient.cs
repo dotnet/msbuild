@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -116,7 +115,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 Log?.LogMessage("Starting garbage collection.");
                 IEnumerable<SdkFeatureBand> installedFeatureBands = GetInstalledFeatureBands();
                 IEnumerable<WorkloadId> installedWorkloads = RecordRepository.GetInstalledWorkloads(_sdkFeatureBand);
-                Dictionary<(WorkloadPackId id, string version),PackInfo> expectedWorkloadPacks = installedWorkloads
+                Dictionary<(WorkloadPackId id, string version), PackInfo> expectedWorkloadPacks = installedWorkloads
                     .SelectMany(workload => _workloadResolver.GetPacksInWorkload(workload))
                     .Distinct()
                     .Select(pack => _workloadResolver.TryGetPackInfo(pack))
@@ -415,9 +414,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         RollBackMsiInstall(msiToInstall);
                     }
                 });
-                
+
             }
-    
+
         }
 
         void RollBackMsiInstall(WorkloadDownload msiToRollback, DirectoryPath? offlineCache = null)
@@ -492,17 +491,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         public async Task ExtractManifestAsync(string nupkgPath, string targetPath)
         {
             Log?.LogMessage($"ExtractManifestAsync: Extracting '{nupkgPath}' to '{targetPath}'");
-
-            string extractionPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-            if (Directory.Exists(extractionPath))
-            {
-                Directory.Delete(extractionPath, true);
-            }
+            string extractionPath = PathUtilities.CreateTempSubdirectory();
 
             try
             {
-                Directory.CreateDirectory(extractionPath);
-
                 Log?.LogMessage($"ExtractManifestAsync: Temporary extraction path: '{extractionPath}'");
                 await _nugetPackageDownloader.ExtractPackageAsync(nupkgPath, new DirectoryPath(extractionPath));
                 if (Directory.Exists(targetPath))
@@ -959,7 +951,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             if (nugetPackageDownloader == null)
             {
-                DirectoryPath tempPackagesDir = new(string.IsNullOrWhiteSpace(tempDirPath) ? Path.GetTempPath() : tempDirPath);
+                DirectoryPath tempPackagesDir = new(string.IsNullOrWhiteSpace(tempDirPath) ? PathUtilities.CreateTempSubdirectory() : tempDirPath);
 
                 nugetPackageDownloader = new NuGetPackageDownloader(tempPackagesDir,
                     filePermissionSetter: null, new FirstPartyNuGetPackageSigningVerifier(),

@@ -1,6 +1,8 @@
-﻿{
+{
   "author": "Microsoft",
   "name": "Konfigurace NuGet",
   "description": "Soubor pro konfiguraci umístění, ve kterých bude NuGet hledat balíčky",
+  "postActions/chmod/description": "Apply permissions",
+  "postActions/chmod/manualInstructions/default/text": "Run 'chmod 600 nuget.config'",
   "postActions/open-file/description": "Otevře nuget.config v editoru."
 }

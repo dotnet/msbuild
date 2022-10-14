@@ -87,6 +87,16 @@
         <target state="translated">El nombre de parámetro del miembro '{0}' cambió de '{1}' a '{2}'.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotExpandVisibility">
+        <source>Visibility of '{0}' expanded from '{1}' to '{2}'.</source>
+        <target state="new">Visibility of '{0}' expanded from '{1}' to '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotReduceVisibility">
+        <source>Visibility of '{0}' reduced from '{1}' to '{2}'.</source>
+        <target state="new">Visibility of '{0}' reduced from '{1}' to '{2}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotRemoveAttribute">
         <source>Cannot remove attribute '{0}' from '{1}'.</source>
         <target state="translated">No se puede quitar el atributo '{0}' de '{1}'.</target>
