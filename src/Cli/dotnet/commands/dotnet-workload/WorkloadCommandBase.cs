@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.Workloads.Workload
                 ? tempDirPath
                 : !string.IsNullOrWhiteSpace(parseResult.GetValueForOption(WorkloadInstallCommandParser.TempDirOption))
                 ? parseResult.GetValueForOption(WorkloadInstallCommandParser.TempDirOption)
-                : Path.GetTempPath();
+                : PathUtilities.CreateTempSubdirectory();
 
             TempPackagesDirectory = new DirectoryPath(Path.Combine(TempDirectoryPath, "dotnet-sdk-advertising-temp"));
 
