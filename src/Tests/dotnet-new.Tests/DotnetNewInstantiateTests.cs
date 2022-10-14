@@ -398,6 +398,21 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("--framework");
         }
 
+        [Theory]
+        [InlineData("-lang", "F#", "--use-program-main")]
+        [InlineData("--language", "F#", "--use-program-main")]
+        [InlineData("-lang", "C#", "--no-exist")]
+        public void ExampleHasLanguageForSepecifiedLanguageWithInvalidOption(string languageOption, string language, string invalidOption)
+        {
+            CommandResult cmd = new DotnetNewCommand(Log, "console", languageOption, language, invalidOption)
+                .WithVirtualHive()
+                .Execute();
+            cmd.Should().Fail()
+                .And.HaveStdErrContaining($"'{invalidOption}' is not a valid option")
+                .And.HaveStdErrContaining("For more information, run:")
+                .And.HaveStdErrContaining($"dotnet new console --language {language} -h");
+        }
+
         [Fact]
         public void ItCanShowParseError()
         {
