@@ -1,6 +1,8 @@
-﻿{
+{
   "author": "Microsoft",
   "name": "NuGet 구성",
   "description": "NuGet 패키지를 검색할 위치를 구성하는 파일",
+  "postActions/chmod/description": "Apply permissions",
+  "postActions/chmod/manualInstructions/default/text": "Run 'chmod 600 nuget.config'",
   "postActions/open-file/description": "편집기에서 nuget.config를 엽니다"
 }

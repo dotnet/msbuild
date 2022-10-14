@@ -1,6 +1,8 @@
-﻿{
+{
   "author": "Microsoft",
   "name": "Configuración de NuGet",
   "description": "Un archivo para configurar las ubicaciones en las que NuGet buscará paquetes",
+  "postActions/chmod/description": "Apply permissions",
+  "postActions/chmod/manualInstructions/default/text": "Run 'chmod 600 nuget.config'",
   "postActions/open-file/description": "Abre nuget.config en el editor"
 }

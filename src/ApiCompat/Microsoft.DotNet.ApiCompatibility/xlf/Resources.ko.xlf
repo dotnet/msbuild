@@ -87,6 +87,16 @@
         <target state="translated">멤버 '{0}'의 매개 변수 이름이 '{1}'에서 '{2}'(으)로 변경되었습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotExpandVisibility">
+        <source>Visibility of '{0}' expanded from '{1}' to '{2}'.</source>
+        <target state="new">Visibility of '{0}' expanded from '{1}' to '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotReduceVisibility">
+        <source>Visibility of '{0}' reduced from '{1}' to '{2}'.</source>
+        <target state="new">Visibility of '{0}' reduced from '{1}' to '{2}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotRemoveAttribute">
         <source>Cannot remove attribute '{0}' from '{1}'.</source>
         <target state="translated">'{1}'에서 특성 '{0}'을(를) 제거할 수 없습니다.</target>

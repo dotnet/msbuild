@@ -2,11 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.TemplateEngine.TestHelper;
 using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
@@ -191,7 +194,7 @@ Restore succeeded\.",
                 .Should()
                 .ExitWith(0)
                 .And.NotHaveStdErr()
-                .And.HaveStdOut($@"The template ""{expectedTemplateName}"" was created successfully.");
+                .And.HaveStdOutContaining($@"The template ""{expectedTemplateName}"" was created successfully.");
 
             Directory.Delete(workingDir, true);
         }
@@ -271,6 +274,47 @@ Restore succeeded\.",
 
             string globalJsonConent = File.ReadAllText(Path.Combine(workingDir, "global.json"));
             Assert.Equal(expectedContent.Replace("\r\n", "\n"), globalJsonConent.Replace("\r\n", "\n"));
+            Directory.Delete(workingDir, true);
+        }
+
+        [Fact]
+        public void NuGetConfigPermissions()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                //runs only on Unix
+                return;
+            }
+
+            string templateShortName = "nugetconfig";
+            string expectedTemplateName = "NuGet Config";
+            string workingDir = TestUtils.CreateTemporaryFolder();
+
+            new DotnetNewCommand(_log, templateShortName)
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDir)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining($@"The template ""{expectedTemplateName}"" was created successfully.");
+
+            var process = Process.Start(new ProcessStartInfo()
+            {
+                FileName = "/bin/sh",
+                Arguments = "-c \"ls -la\"",
+                WorkingDirectory = workingDir
+            });
+
+            new Command(process)
+                .WorkingDirectory(workingDir)
+                .CaptureStdOut()
+                .CaptureStdErr()
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.HaveStdOutMatching("^-rw-------.*nuget.config$", RegexOptions.Multiline);
+
             Directory.Delete(workingDir, true);
         }
 
