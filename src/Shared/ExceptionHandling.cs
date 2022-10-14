@@ -323,12 +323,9 @@ namespace Microsoft.Build.Shared
 
                     // For some reason we get Watson buckets because GetTempPath gives us a folder here that doesn't exist.
                     // Either because %TMP% is misdefined, or because they deleted the temp folder during the build.
-                    if (!FileSystems.Default.DirectoryExists(DebugDumpPath))
-                    {
-                        // If this throws, no sense catching it, we can't log it now, and we're here
-                        // because we're a child node with no console to log to, so die
-                        Directory.CreateDirectory(DebugDumpPath);
-                    }
+                    // If this throws, no sense catching it, we can't log it now, and we're here
+                    // because we're a child node with no console to log to, so die
+                    Directory.CreateDirectory(DebugDumpPath);
 
                     var pid = Process.GetCurrentProcess().Id;
                     // This naming pattern is assumed in ReadAnyExceptionFromFile

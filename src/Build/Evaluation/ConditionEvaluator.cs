@@ -17,6 +17,7 @@ namespace Microsoft.Build.Evaluation
     using ElementLocation = Microsoft.Build.Construction.ElementLocation;
     using Microsoft.Build.Shared;
     using Microsoft.Build.Shared.FileSystem;
+    using Microsoft.Build.BackEnd.Logging;
 
     internal static class ConditionEvaluator
     {
@@ -181,7 +182,8 @@ namespace Microsoft.Build.Evaluation
             ILoggingService loggingServices,
             BuildEventContext buildEventContext,
             IFileSystem fileSystem,
-            ProjectRootElementCacheBase projectRootElementCache = null)
+            ProjectRootElementCacheBase projectRootElementCache = null,
+            LoggingContext loggingContext = null)
             where P : class, IProperty
             where I : class, IItem
         {
@@ -196,7 +198,8 @@ namespace Microsoft.Build.Evaluation
                 loggingServices,
                 buildEventContext,
                 fileSystem,
-                projectRootElementCache);
+                projectRootElementCache,
+                loggingContext);
         }
 
         /// <summary>
@@ -218,7 +221,8 @@ namespace Microsoft.Build.Evaluation
             ILoggingService loggingServices,
             BuildEventContext buildEventContext,
             IFileSystem fileSystem,
-            ProjectRootElementCacheBase projectRootElementCache = null
+            ProjectRootElementCacheBase projectRootElementCache = null,
+            LoggingContext loggingContext = null
         )
             where P : class, IProperty
             where I : class, IItem
@@ -279,7 +283,7 @@ namespace Microsoft.Build.Evaluation
             {
                 try
                 {
-                    result = parsedExpression.Evaluate(state);
+                    result = parsedExpression.Evaluate(state, loggingContext);
                 }
                 finally
                 {
@@ -353,7 +357,7 @@ namespace Microsoft.Build.Evaluation
             ///     May return null if the expression would expand to non-empty and it broke out early.
             ///     Otherwise, returns the correctly expanded expression.
             /// </summary>
-            string ExpandIntoStringBreakEarly(string expression);
+            string ExpandIntoStringBreakEarly(string expression, LoggingContext loggingContext = null);
 
             /// <summary>
             ///     Expands the specified expression into a list of TaskItem's.
@@ -363,7 +367,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             ///     Expands the specified expression into a string.
             /// </summary>
-            string ExpandIntoString(string expression);
+            string ExpandIntoString(string expression, LoggingContext loggingContext = null);
 
             /// <summary>
             ///     PRE cache
@@ -440,11 +444,11 @@ namespace Microsoft.Build.Evaluation
             /// May return null if the expression would expand to non-empty and it broke out early.
             /// Otherwise, returns the correctly expanded expression.
             /// </summary>
-            public string ExpandIntoStringBreakEarly(string expression)
+            public string ExpandIntoStringBreakEarly(string expression, LoggingContext loggingContext = null)
             {
                 var originalValue = _expander.WarnForUninitializedProperties;
 
-                expression = _expander.ExpandIntoStringAndUnescape(expression, _expanderOptions | ExpanderOptions.BreakOnNotEmpty, ElementLocation);
+                expression = _expander.ExpandIntoStringAndUnescape(expression, _expanderOptions | ExpanderOptions.BreakOnNotEmpty, ElementLocation, loggingContext);
 
                 _expander.WarnForUninitializedProperties = originalValue;
 
@@ -471,12 +475,13 @@ namespace Microsoft.Build.Evaluation
             /// Expands the specified expression into a string.
             /// </summary>
             /// <param name="expression">The expression to expand.</param>
+            /// <param name="loggingContext"></param>
             /// <returns>The expanded string.</returns>
-            public string ExpandIntoString(string expression)
+            public string ExpandIntoString(string expression, LoggingContext loggingContext = null)
             {
                 var originalValue = _expander.WarnForUninitializedProperties;
 
-                expression = _expander.ExpandIntoStringAndUnescape(expression, _expanderOptions, ElementLocation);
+                expression = _expander.ExpandIntoStringAndUnescape(expression, _expanderOptions, ElementLocation, loggingContext);
 
                 _expander.WarnForUninitializedProperties = originalValue;
 

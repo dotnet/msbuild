@@ -3,13 +3,14 @@
     "allowPrerelease": true
   },
   "tools": {
-    "dotnet": "6.0.200",
+    "dotnet": "7.0.100-rc.1.22431.12",
     "vs": {
-      "version": "17.0"
-    }
+      "version": "17.2.1"
+    },
+    "xcopy-msbuild": "17.2.1"
   },
   "msbuild-sdks": {
     "Microsoft.Build.CentralPackageVersions": "2.0.1",
-    "Microsoft.DotNet.Arcade.Sdk": "6.0.0-beta.22261.7"
+    "Microsoft.DotNet.Arcade.Sdk": "6.0.0-beta.22458.2"
   }
 }

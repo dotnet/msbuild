@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading;
 using Microsoft.Build.BackEnd;
@@ -22,10 +23,6 @@ namespace Microsoft.Build.Graph
 {
     internal class GraphBuilder
     {
-        private const string PlatformLookupTableMetadataName = "PlatformLookupTable";
-        private const string PlatformMetadataName = "Platform";
-        private const string PlatformsMetadataName = "Platforms";
-        private const string EnableDynamicPlatformResolutionMetadataName = "EnableDynamicPlatformResolution";
         internal const string SolutionItemReference = "_SolutionReference";
         
         /// <summary>
@@ -51,8 +48,6 @@ namespace Microsoft.Build.Graph
 
         private readonly ProjectGraph.ProjectInstanceFactoryFunc _projectInstanceFactory;
         private IReadOnlyDictionary<string, IReadOnlyCollection<string>> _solutionDependencies;
-
-        private bool PlatformNegotiationEnabled = false;
 
         public GraphBuilder(
             IEnumerable<ProjectGraphEntryPoint> entryPoints,
@@ -505,44 +500,18 @@ namespace Microsoft.Build.Graph
         {
             // TODO: ProjectInstance just converts the dictionary back to a PropertyDictionary, so find a way to directly provide it.
             var globalProperties = configurationMetadata.GlobalProperties.ToDictionary();
-            ProjectGraphNode graphNode;
-            ProjectInstance projectInstance;
-            var negotiatePlatform = PlatformNegotiationEnabled && !configurationMetadata.IsSetPlatformHardCoded;
 
-            projectInstance = _projectInstanceFactory(
-                                configurationMetadata.ProjectFullPath,
-                                negotiatePlatform ? null : globalProperties, // Platform negotiation requires an evaluation with no global properties first
-                                _projectCollection);
-
-            if (ConversionUtilities.ValidBooleanTrue(projectInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)))
-            {
-                PlatformNegotiationEnabled = true;
-            }
+            var projectInstance = _projectInstanceFactory(
+                configurationMetadata.ProjectFullPath,
+                globalProperties,
+                _projectCollection);
 
             if (projectInstance == null)
             {
                 throw new InvalidOperationException(ResourceUtilities.GetResourceString("NullReferenceFromProjectInstanceFactory"));
             }
 
-            if (negotiatePlatform)
-            {
-                var selectedPlatform = PlatformNegotiation.GetNearestPlatform(projectInstance.GetPropertyValue(PlatformMetadataName), projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), configurationMetadata.PreviousPlatformLookupTable, projectInstance.FullPath, configurationMetadata.PreviousPlatform);
-
-                if (selectedPlatform.Equals(String.Empty))
-                {
-                    globalProperties.Remove(PlatformMetadataName);
-                }
-                else
-                {
-                    globalProperties[PlatformMetadataName] = selectedPlatform;
-                }
-                projectInstance = _projectInstanceFactory(
-                                configurationMetadata.ProjectFullPath,
-                                globalProperties,
-                                _projectCollection);           
-            }
-
-            graphNode = new ProjectGraphNode(projectInstance);
+            var graphNode = new ProjectGraphNode(projectInstance);
 
             var referenceInfos = ParseReferences(graphNode);
 
@@ -578,8 +547,9 @@ namespace Microsoft.Build.Graph
         private List<ProjectInterpretation.ReferenceInfo> ParseReferences(ProjectGraphNode parsedProject)
         {
             var referenceInfos = new List<ProjectInterpretation.ReferenceInfo>();
+            
 
-            foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject.ProjectInstance))
+            foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject.ProjectInstance, _projectCollection, _projectInstanceFactory))
             {
                 if (FileUtilities.IsSolutionFilename(referenceInfo.ReferenceConfiguration.ProjectFullPath))
                 {
@@ -638,7 +608,7 @@ namespace Microsoft.Build.Graph
             return propertyDictionary;
         }
 
-        internal class GraphEdges
+        internal sealed class GraphEdges
         {
             private ConcurrentDictionary<(ProjectGraphNode, ProjectGraphNode), ProjectItemInstance> ReferenceItems =
                 new ConcurrentDictionary<(ProjectGraphNode, ProjectGraphNode), ProjectItemInstance>();
@@ -652,9 +622,42 @@ namespace Microsoft.Build.Graph
                     ErrorUtilities.VerifyThrow(ReferenceItems.TryGetValue(key, out ProjectItemInstance referenceItem), "All requested keys should exist");
                     return referenceItem;
                 }
+            }
 
-                // First edge wins, in accordance with vanilla msbuild behaviour when multiple msbuild tasks call into the same logical project
-                set => ReferenceItems.TryAdd(key, value);
+            public void AddOrUpdateEdge((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstance edge)
+            {
+                ReferenceItems.AddOrUpdate(
+                    key,
+                    addValueFactory: static ((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstance referenceItem) => referenceItem,
+                    updateValueFactory: static ((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstance existingItem, ProjectItemInstance newItem) =>
+                    {
+                        string existingTargetsMetadata = existingItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
+                        string newTargetsMetadata = newItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
+
+                        // Bail out if the targets are the same.
+                        if (existingTargetsMetadata.Equals(newTargetsMetadata, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return existingItem;
+                        }
+
+                        existingTargetsMetadata = GetEffectiveTargets(key.reference, existingTargetsMetadata);
+                        newTargetsMetadata = GetEffectiveTargets(key.reference, newTargetsMetadata);
+
+                        ProjectItemInstance mergedItem = existingItem.DeepClone();
+                        mergedItem.SetMetadata(ItemMetadataNames.ProjectReferenceTargetsMetadataName, $"{existingTargetsMetadata};{newTargetsMetadata}");
+                        return mergedItem;
+
+                        static string GetEffectiveTargets(ProjectGraphNode reference, string targetsMetadata)
+                        {
+                            if (string.IsNullOrWhiteSpace(targetsMetadata))
+                            {
+                                return string.Join(";", reference.ProjectInstance.DefaultTargets);
+                            }
+
+                            return targetsMetadata;
+                        }
+                    },
+                    edge);
             }
 
             public void RemoveEdge((ProjectGraphNode node, ProjectGraphNode reference) key)
@@ -663,7 +666,6 @@ namespace Microsoft.Build.Graph
             }
 
             internal bool HasEdge((ProjectGraphNode node, ProjectGraphNode reference) key) => ReferenceItems.ContainsKey(key);
-            internal bool TryGetEdge((ProjectGraphNode node, ProjectGraphNode reference) key, out ProjectItemInstance edge) => ReferenceItems.TryGetValue(key, out edge);
 
             internal IReadOnlyDictionary<(ConfigurationMetadata, ConfigurationMetadata), ProjectItemInstance> TestOnly_AsConfigurationMetadata()
             {

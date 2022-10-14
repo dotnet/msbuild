@@ -162,6 +162,6 @@ By default, there are ten locations RAR will search (four if using the .NET SDK)
 
 ## There was a conflict
 
-A common situation is MSBuild gives a warning about different versions of the same assembly being used by different references. The solution often involves adding a binding redirect to the app.config file. 
+A common situation is MSBuild gives a warning about different versions of the same assembly being used by different references. The solution often involves adding a binding redirect to the app.config file.
 
 A useful way to investigate these conflicts is to search in MSBuild Structured Log Viewer for "There was a conflict". It will show you detailed information about which references needed which versions of the assembly in question.

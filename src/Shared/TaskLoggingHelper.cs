@@ -923,6 +923,17 @@ namespace Microsoft.Build.Utilities
             // global state.
             ErrorUtilities.VerifyThrowArgumentNull(exception, nameof(exception));
 
+            // For an AggregateException call LogErrorFromException on each inner exception
+            if (exception is AggregateException aggregateException)
+            {
+                foreach (Exception innerException in aggregateException.Flatten().InnerExceptions)
+                {
+                    LogErrorFromException(innerException, showStackTrace, showDetail, file);
+                }
+
+                return;
+            }
+
             string message;
 
             if (!showDetail && (Environment.GetEnvironmentVariable("MSBUILDDIAGNOSTICS") == null)) // This env var is also used in ToolTask
@@ -1364,7 +1375,7 @@ namespace Microsoft.Build.Utilities
 
         /// <summary>
         /// Logs an error/warning/message from the given line of text. Errors/warnings are only logged for lines that fit a
-        /// particular (canonical) format -- all other lines are treated as messages.
+        /// <see href="https://docs.microsoft.com/visualstudio/msbuild/msbuild-diagnostic-format-for-tasks">particular (canonical) format</see> -- all other lines are treated as messages.
         /// Thread safe.
         /// </summary>
         /// <param name="lineOfText">The line of text to log from.</param>

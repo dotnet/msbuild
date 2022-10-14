@@ -8,7 +8,7 @@ namespace Microsoft.Build.Shared
 {
     internal static class NamedPipeUtil
     {
-        internal static string GetPipeNameOrPath(int? processId = null)
+        internal static string GetPlatformSpecificPipeName(int? processId = null)
         {
             if (processId is null)
             {
@@ -17,6 +17,11 @@ namespace Microsoft.Build.Shared
 
             string pipeName = $"MSBuild{processId}";
 
+            return GetPlatformSpecificPipeName(pipeName);
+        }
+
+        internal static string GetPlatformSpecificPipeName(string pipeName)
+        {
             if (NativeMethodsShared.IsUnixLike)
             {
                 // If we're on a Unix machine then named pipes are implemented using Unix Domain Sockets.

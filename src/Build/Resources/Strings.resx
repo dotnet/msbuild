@@ -142,6 +142,9 @@
   <data name="WaitingForEndOfBuild" xml:space="preserve">
     <value>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</value>
   </data>
+  <data name="EnvironmentDerivedPropertyRead">
+    <value>Property '{0}' with value '{1}' expanded from the environment.</value>
+  </data>
   <data name="SubmissionAlreadyComplete" xml:space="preserve">
     <value>The operation cannot be completed because the submission has already been executed.</value>
   </data>
@@ -319,11 +322,11 @@
     </comment>
   </data>
   <data name="ChangeWave_InvalidFormat" xml:space="preserve">
-    <value>MSB4271: Environment variable MSBuildDisableFeaturesFromVersion is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</value>
+    <value>MSB4271: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</value>
     <comment>{StrBegin="MSB4271: "}UE: Value should be of the format: xx.yy</comment>
   </data>
   <data name="ChangeWave_OutOfRotation" xml:space="preserve">
-    <value>MSB4272: Environment variable MSBuildDisableFeaturesFromVersion is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</value>
+    <value>MSB4272: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</value>
     <comment>{StrBegin="MSB4272: "}</comment>
   </data>
   <data name="SearchPathsForMSBuildExtensionsPath" xml:space="preserve">
@@ -1877,14 +1880,10 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</value>
   </data>
   <data name="LoadingProjectCachePlugin" xml:space="preserve">
-    <value>Loading the following project cache plugin:
-    {0}</value>
+    <value>Loading the following project cache plugin: {0}</value>
   </data>
   <data name="SolutionPathPropertyMustBeSetOnVSSubmissions" xml:space="preserve">
     <value>"MSB4264: Invalid $(SolutionPath) property: {0}"</value>
-  </data>
-  <data name="OnlyOneCachePluginMustBeSpecified" xml:space="preserve">
-    <value>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</value>
   </data>
   <data name="ProjectCacheInitializationFailed" xml:space="preserve">
     <value>MSB4266: Failed to initialize the project cache.</value>
@@ -1894,9 +1893,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="ProjectCacheShutdownFailed" xml:space="preserve">
     <value>MSB4268: The project cache failed to shut down properly.</value>
-  </data>
-  <data name="NotAllNodesDefineACacheItem" xml:space="preserve">
-    <value>MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</value>
   </data>
   <data name="NoProjectCachePluginFoundInAssembly" xml:space="preserve">
     <value>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</value>
@@ -1909,9 +1905,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="ProxyRequestNotScheduledOnInprocNode" xml:space="preserve">
     <value>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</value>
-  </data>
-  <data name="ProjectCacheBeginBuild" xml:space="preserve">
-    <value>Initializing project cache plugin.</value>
   </data>
   <data name="ProjectCacheEndBuild" xml:space="preserve">
     <value>Shutting down project cache plugin.</value>

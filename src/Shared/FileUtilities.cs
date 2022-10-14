@@ -57,6 +57,8 @@ namespace Microsoft.Build.Shared
 
         internal static readonly StringComparison PathComparison = GetIsFileSystemCaseSensitive() ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
+        internal static readonly StringComparer PathComparer = GetIsFileSystemCaseSensitive() ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
+
         /// <summary>
         /// Determines whether the file system is case sensitive.
         /// Copied from https://github.com/dotnet/runtime/blob/73ba11f3015216b39cb866d9fb7d3d25e93489f2/src/libraries/Common/src/System/IO/PathInternal.CaseSensitivity.cs#L41-L59
@@ -174,6 +176,8 @@ namespace Microsoft.Build.Shared
             try
             {
                 string testFilePath = Path.Combine(directory, $"MSBuild_{Guid.NewGuid().ToString("N")}_testFile.txt");
+                FileInfo file = new(testFilePath);
+                file.Directory.Create(); // If the directory already exists, this method does nothing.
                 File.WriteAllText(testFilePath, $"MSBuild process {Process.GetCurrentProcess().Id} successfully wrote to file.");
                 File.Delete(testFilePath);
                 return true;
