@@ -19,7 +19,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                              and '$(TargetPlatformIdentifier)' == 'Windows'
                              and '$(TargetPlatformVersion)' != ''
                              and $([MSBuild]::VersionGreaterThanOrEquals($(TargetPlatformVersion), '10.0'))
-                             and ('$(Language)' != 'C++' or '$(_EnablePackageReferencesInVCProjects)' == 'true')
+                             and '$(Language)' != 'C++'
                              and '$(IncludeWindowsSDKRefFrameworkReferences)' == ''">
     <IncludeWindowsSDKRefFrameworkReferences>true</IncludeWindowsSDKRefFrameworkReferences>
   </PropertyGroup>
