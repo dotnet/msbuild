@@ -1,4 +1,4 @@
-{
+﻿{
   "author": "Microsoft",
   "name": "Konfigurace NuGet",
   "description": "Soubor pro konfiguraci umístění, ve kterých bude NuGet hledat balíčky",
