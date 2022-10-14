@@ -65,6 +65,21 @@ public static class MSBuildPropertyParser {
             while(TryConsume(out char? c) && c != ';') {
                 currentValue.Append(c);
             }
+            // we're either at the end or 
+            if (AtEnd()) return;
+            // we're just past a semicolon
+            // if semicolon, we need to check if there are any other = in the string (signifying property pairs)
+            if (input.IndexOf('=', currentPos) != -1) {
+                // there are more = in the string, so eject and let a new key/value pair be parsed
+                return;
+            } else {
+                currentValue.Append(';');
+                // there are no more = in the string, so consume the remainder of the string
+                while(TryConsume(out char? c))
+                {
+                    currentValue.Append(c);
+                }
+            }
         }
 
         void ParseValue() {
