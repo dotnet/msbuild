@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 ChangeWaves.ResetStateForTests();
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_4.ToString());
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 ChangeWaves.ResetStateForTests();
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_4.ToString());
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -167,7 +167,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 ChangeWaves.ResetStateForTests();
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_4.ToString());
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -252,7 +252,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 ChangeWaves.ResetStateForTests();
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_4.ToString());
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 ProjectStringCache cache = new ProjectStringCache();
@@ -294,7 +294,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 ChangeWaves.ResetStateForTests();
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_4.ToString());
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 ProjectStringCache cache = new ProjectStringCache();
@@ -341,7 +341,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 ChangeWaves.ResetStateForTests();
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_4.ToString());
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 ProjectStringCache cache = new ProjectStringCache();
@@ -380,7 +380,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 ChangeWaves.ResetStateForTests();
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_4.ToString());
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 ProjectStringCache cache = new ProjectStringCache();
@@ -425,7 +425,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 ChangeWaves.ResetStateForTests();
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_4.ToString());
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 ProjectStringCache cache = new ProjectStringCache();
@@ -465,7 +465,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 ChangeWaves.ResetStateForTests();
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_4.ToString());
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 ProjectStringCache cache = new ProjectStringCache();

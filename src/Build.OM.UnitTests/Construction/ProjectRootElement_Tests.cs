@@ -1855,7 +1855,7 @@ true, true, true)]
         {
             using var env = TestEnvironment.Create();
             ChangeWaves.ResetStateForTests();
-            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_4.ToString());
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
             BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
             var testFiles = env.CreateTestProjectWithFiles("", new[] { "build.proj" });
