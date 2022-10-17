@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using Microsoft.DotNet.ApiCompatibility.Extensions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
@@ -50,6 +51,12 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
             if (left.IsVirtual)
             {
+                // Removing the virtual keyword from a member in a sealed type won't be a breaking change.
+                if (leftContainingType.IsEffectivelySealed(_settings.IncludeInternalSymbols))
+                {
+                    return;
+                }
+
                 // If left is virtual and right is not, then emit a diagnostic
                 // specifying that the virtual modifier cannot be removed.
                 if (!right.IsVirtual)

@@ -24,5 +24,9 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
         void Delete(string path, bool recursive);
 
         void Move(string source, string destination);
+
+
+        /// <Summary>Returns a new directory created under the temp folder. Can be on the mock under test or the real temp file folder.</Summary>
+        string CreateTemporarySubdirectory();
     }
 }
