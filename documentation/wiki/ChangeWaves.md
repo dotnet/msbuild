@@ -23,6 +23,9 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 
 ## Current Rotation of Change Waves
 
+### 17.6
+- [Eliminate project string cache](https://github.com/dotnet/msbuild/pull/7965)
+
 ### 17.4
 - [Respect deps.json when loading assemblies](https://github.com/dotnet/msbuild/pull/7520)
 - [Consider `Platform` as default during Platform Negotiation](https://github.com/dotnet/msbuild/pull/7511)
