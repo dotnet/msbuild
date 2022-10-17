@@ -221,28 +221,19 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Fact]
-        public void It_Publishes_Successfully_With_RID_Requiring_Properties_And_RuntimeIdentifierS_but_no_RuntimeIdentifier()
+        public void PublishSuccessfullyWithRIDRequiringPropertyAndRuntimeIdentifiersNoRuntimeIdentifier()
         {
             var targetFramework = ToolsetInfo.CurrentTargetFramework;
             var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld")
-                .WithSource()
-                .WithProjectChanges(project =>
-                {
-                    var ns = project.Root.Name.Namespace;
-                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                    propertyGroup.Add(new XElement(ns + "RuntimeIdentifiers", runtimeIdentifier));
-                    propertyGroup.Add(new XElement(ns + "PublishReadyToRun", "true"));
-                });
+            var testProject = new TestProject()
+            {
+                IsExe = true,
+                TargetFrameworks = targetFramework
+            };
 
-            var buildCommand = new BuildCommand(testAsset);
-            buildCommand
-                .Execute()
-                .Should()
-                .Pass();
-
-            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
+            testProject.AdditionalProperties["RuntimeIdentifiers"] = runtimeIdentifier;
+            testProject.AdditionalProperties["PublishReadyToRun"] = "true";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var publishCommand = new PublishCommand(testAsset);
             publishCommand
