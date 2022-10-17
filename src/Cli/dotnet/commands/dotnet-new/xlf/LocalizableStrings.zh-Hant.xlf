@@ -84,7 +84,7 @@
     project(s): {0}
     to solution file: {1}
     solution folder: {2}</source>
-        <target state="needs-review-translation">正在新增
+        <target state="translated">正在新增
     專案: {0}
     至解決方案檔案: {1}
     解決方案資料夾: {2}</target>
