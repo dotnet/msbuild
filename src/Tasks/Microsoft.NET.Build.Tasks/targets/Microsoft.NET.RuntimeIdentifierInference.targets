@@ -65,6 +65,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                  (
                  '$(RuntimeIdentifier)' == '' and
                  '$(RuntimeIdentifiers)' == '' and
+                 '$(OutputType)' == 'Exe' and
                    (
                    '$(SelfContained)' == 'true' or
                    '$(PublishReadyToRun)' == 'true' or
