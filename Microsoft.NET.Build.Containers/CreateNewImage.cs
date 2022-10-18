@@ -44,7 +44,6 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
     /// <summary>
     /// The registry to push to.
     /// </summary>
-    [Required]
     public string OutputRegistry { get; set; }
 
     /// <summary>
