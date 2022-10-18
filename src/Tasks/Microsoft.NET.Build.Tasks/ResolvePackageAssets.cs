@@ -657,8 +657,8 @@ namespace Microsoft.NET.Build.Tasks
             private ResolvePackageAssets _task;
             private BinaryWriter _writer;
             private LockFile _lockFile;
-            private NuGetPackageResolver _packageResolver;
             private LockFileTarget _compileTimeTarget;
+            private IPackageResolver _packageResolver;
             private LockFileTarget _runtimeTarget;
             private Dictionary<string, int> _stringTable;
             private List<string> _metadataStrings;
@@ -676,6 +676,15 @@ namespace Microsoft.NET.Build.Tasks
             private const string NetCorePlatformLibrary = "Microsoft.NETCore.App";
 
             private const char RelatedPropertySeparator = ';';
+
+            /// <summary>
+            /// This constructor should only be used for testing - IPackgeResolver carries a lot of
+            /// state so using mocks really help with testing this component.
+            /// </summary>
+            public CacheWriter(ResolvePackageAssets task, IPackageResolver resolver) : this(task)
+            {
+                _packageResolver = resolver;
+            }
 
             public CacheWriter(ResolvePackageAssets task)
             {
@@ -1425,14 +1434,30 @@ namespace Microsoft.NET.Build.Tasks
                             var normalizedLocale = System.Globalization.CultureInfo.GetCultureInfo(locale).Name;
                             if (normalizedLocale != locale)
                             {
-                                _task.Log.LogWarning(Strings.PackageContainsIncorrectlyCasedLocale, package.Name, package.Version.ToNormalizedString(), locale, normalizedLocale);
+                                var tfm = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, null).TargetFramework;
+                                if (tfm.Version.Major >= 7)
+                                {
+                                    _task.Log.LogWarning(Strings.PackageContainsIncorrectlyCasedLocale, package.Name, package.Version.ToNormalizedString(), locale, normalizedLocale);
+                                }
+                                else
+                                {
+                                    _task.Log.LogMessage(Strings.PackageContainsIncorrectlyCasedLocale, package.Name, package.Version.ToNormalizedString(), locale, normalizedLocale);
+                                }
                             }
                             locale = normalizedLocale;
                         }
                         catch (System.Globalization.CultureNotFoundException cnf)
                         {
-                            _task.Log.LogWarning(Strings.PackageContainsUnknownLocale, package.Name, package.Version.ToNormalizedString(), cnf.InvalidCultureName);
-                            // We could potentially strip this unknown locales at this point, but we do not.
+                            var tfm = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, null).TargetFramework;
+                            if (tfm.Version.Major >= 7)
+                            {
+                                _task.Log.LogWarning(Strings.PackageContainsUnknownLocale, package.Name, package.Version.ToNormalizedString(), cnf.InvalidCultureName);
+                            } else
+                            {
+                                _task.Log.LogMessage(Strings.PackageContainsUnknownLocale, package.Name, package.Version.ToNormalizedString(), cnf.InvalidCultureName);
+                            }
+
+                            // We could potentially strip this unknown locale at this point, but we do not.
                             // Locale data can change over time (it's typically an OS database that's kept updated),
                             // and the data on the system running the build may not be the same data as
                             // the system executing the built code. So we should be permissive for this case.

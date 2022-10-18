@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="WorkloadInfoDescription">
         <source>Display information about installed workloads.</source>
-        <target state="new">Display information about installed workloads.</target>
+        <target state="translated">Zeigt Informationen zu installierten Workloads an.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadInstallTypeColumn">

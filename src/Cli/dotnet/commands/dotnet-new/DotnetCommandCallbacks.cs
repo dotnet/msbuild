@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Tools.New
             return RestoreCommand.Run(new string[] { pathToRestore }) == 0;
         }
 
-        internal static bool AddProjectsToSolution(string solutionPath, IReadOnlyList<string> projectsToAdd, string? solutionFolder)
+        internal static bool AddProjectsToSolution(string solutionPath, IReadOnlyList<string> projectsToAdd, string? solutionFolder, bool? inRoot)
         {
             PathUtility.EnsureAllPathsExist(new[] { solutionPath }, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
             PathUtility.EnsureAllPathsExist(projectsToAdd, CommonLocalizableStrings.FileNotFound, allowDirectories: false);
@@ -54,6 +54,11 @@ namespace Microsoft.DotNet.Tools.New
             if (!string.IsNullOrWhiteSpace(solutionFolder))
             {
                 commandArgs = commandArgs.Append(SlnAddParser.SolutionFolderOption.Aliases.First()).Append(solutionFolder);
+            }
+
+            if (inRoot is true)
+            {
+                commandArgs = commandArgs.Append(SlnAddParser.InRootOption.Aliases.First());
             }
             var addProjectToSolutionCommand = new AddProjectToSolutionCommand(SlnCommandParser.GetCommand().Parse(commandArgs.ToArray()));
             return addProjectToSolutionCommand.Execute() == 0;
