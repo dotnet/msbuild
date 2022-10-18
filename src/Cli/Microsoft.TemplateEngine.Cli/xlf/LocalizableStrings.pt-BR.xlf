@@ -703,7 +703,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="RerunCommandAndPassForceToCreateAnyway">
         <source>To create the template anyway, run the command with '{0}' option:</source>
-        <target state="new">To create the template anyway, run the command with '{0}' option:</target>
+        <target state="translated">Para criar o modelo mesmo assim, execute o comando com a opção “{0}”:</target>
         <note>{0} - additional option name (--force)</note>
       </trans-unit>
       <trans-unit id="RunHelpForInformationAboutAcceptedParameters">

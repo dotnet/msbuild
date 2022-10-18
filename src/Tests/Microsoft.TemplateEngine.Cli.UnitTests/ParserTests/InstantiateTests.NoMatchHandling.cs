@@ -131,6 +131,154 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                     new string?[] { "value", "langVersion", "--langVersion", null, "Required argument missing for option: '--langVersion'." }
                 }
             };
+
+            yield return new object[]
+            {
+                "foo --fake",
+                new MockTemplateInfo[]
+                {
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithParameter("langVersion")
+                },
+                new string?[][]
+                {
+                    new string?[] { "name", null, "--fake", null, null }
+                }
+            };
+
+            yield return new object[]
+            {
+                "foo --fake value",
+                new MockTemplateInfo[]
+                {
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithParameter("langVersion")
+                },
+                new string?[][]
+                {
+                    new string?[] { "name", null, "--fake", null, null },
+                    new string?[] { "name", null, "value", null, null }
+                }
+            };
+
+            yield return new object[]
+            {
+                "foo --language F# --include",
+                new MockTemplateInfo[]
+                {
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("language", "C#").WithParameter("include", "bool"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("language", "F#")
+                },
+                new string?[][]
+                {
+                    new string?[] { "name", null, "--include", null, null }
+                }
+            };
+
+            yield return new object[]
+            {
+                "foo --language F# --exclude",
+                new MockTemplateInfo[]
+                {
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("language", "C#").WithParameter("include", "bool"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("language", "F#")
+                },
+                new string?[][]
+                {
+                    new string?[] { "name", null, "--exclude", null, null }
+                }
+            };
+
+            yield return new object[]
+            {
+                "foo --int 6 --float 3.14 --hex 0x1A2F --bool --string stringtype --choice c1 --fake",
+                new MockTemplateInfo[]
+                {
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+                    .WithParameter("int", paramType: "integer")
+                    .WithParameter("float", paramType: "float")
+                    .WithParameter("hex", paramType: "hex")
+                    .WithParameter("bool", paramType: "bool")
+                    .WithParameter("string", paramType: "string")
+                    .WithChoiceParameter("choice", "c1", "c2")
+                },
+                new string?[][]
+                {
+                    new string?[] { "name", null, "--fake", null, null }
+                }
+            };
+
+            yield return new object[]
+            {
+                "foo --int 6 --float 3.14 --hex 0x1A2F --bool --string stringtype --choice c1 --fake value",
+                new MockTemplateInfo[]
+                {
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+                    .WithParameter("int", paramType: "integer")
+                    .WithParameter("float", paramType: "float")
+                    .WithParameter("hex", paramType: "hex")
+                    .WithParameter("bool", paramType: "bool")
+                    .WithParameter("string", paramType: "string")
+                    .WithChoiceParameter("choice", "c1", "c2")
+                },
+                new string?[][]
+                {
+                    new string?[] { "name", null, "--fake", null, null },
+                    new string?[] { "name", null, "value", null, null }
+                }
+            };
+
+            yield return new object[]
+            {
+                "foo --language F# --int 6 --float 3.14 --hex 0x1A2F --bool --string stringtype --choice c1 --include",
+                new MockTemplateInfo[]
+                {
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("language", "C#")
+                    .WithParameter("int", paramType: "integer")
+                    .WithParameter("float", paramType: "float")
+                    .WithParameter("hex", paramType: "hex")
+                    .WithParameter("bool", paramType: "bool")
+                    .WithParameter("string", paramType: "string")
+                    .WithChoiceParameter("choice", "c1", "c2")
+                    .WithParameter("include", "bool"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("language", "F#")
+                    .WithParameter("int", paramType: "integer")
+                    .WithParameter("float", paramType: "float")
+                    .WithParameter("hex", paramType: "hex")
+                    .WithParameter("bool", paramType: "bool")
+                    .WithParameter("string", paramType: "string")
+                    .WithChoiceParameter("choice", "c1", "c2")
+                },
+                new string?[][]
+                {
+                    new string?[] { "name", null, "--include", null, null }
+                }
+            };
+
+            yield return new object[]
+            {
+                "foo --language F# --int 6 --float 3.14 --hex 0x1A2F --bool --string stringtype --choice c1 --exclude",
+                new MockTemplateInfo[]
+                {
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("language", "C#")
+                    .WithParameter("int", paramType: "integer")
+                    .WithParameter("float", paramType: "float")
+                    .WithParameter("hex", paramType: "hex")
+                    .WithParameter("bool", paramType: "bool")
+                    .WithParameter("string", paramType: "string")
+                    .WithChoiceParameter("choice", "c1", "c2")
+                    .WithParameter("include", "bool"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("language", "F#")
+                    .WithParameter("int", paramType: "integer")
+                    .WithParameter("float", paramType: "float")
+                    .WithParameter("hex", paramType: "hex")
+                    .WithParameter("bool", paramType: "bool")
+                    .WithParameter("string", paramType: "string")
+                    .WithChoiceParameter("choice", "c1", "c2")
+                },
+                new string?[][]
+                {
+                    new string?[] { "name", null, "--exclude", null, null }
+                }
+            };
         }
 
         [Theory]
