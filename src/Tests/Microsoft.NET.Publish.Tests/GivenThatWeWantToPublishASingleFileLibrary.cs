@@ -16,12 +16,14 @@ namespace Microsoft.NET.Publish.Tests
         {
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         // Tests regression on https://github.com/dotnet/sdk/pull/28484
         public void ItPublishesSuccessfullyWithRIDAndPublishSingleFileLibrary()
         {
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
             var testAsset = _testAssetsManager
                      .CopyTestAsset("AppWithLibrarySDKStyleThatPublishesSingleFile")
+                     .WithTargetFramework(targetFramework)
                      .WithSource();
 
             var publishCommand = new PublishCommand(testAsset);
