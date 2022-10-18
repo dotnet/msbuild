@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="WorkloadListFooter">
         <source>Use `dotnet workload search` to find additional workloads to install.</source>
-        <target state="translated">Use 'pesquisa de carga de trabalho do dotnet' para encontrar cargas de trabalho adicionais a serem instaladas.</target>
+        <target state="translated">Use `dotnet workload search` para encontrar cargas de trabalho adicionais a serem instaladas.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">

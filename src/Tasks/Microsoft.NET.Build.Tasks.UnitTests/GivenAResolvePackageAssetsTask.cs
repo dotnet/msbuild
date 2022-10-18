@@ -4,7 +4,6 @@
 using FluentAssertions;
 using Microsoft.Build.Framework;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -117,15 +116,11 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             new CacheWriter(task); // Should not error
         }
 
-        [Fact]
-        public void It_warns_on_invalid_culture_codes_of_resources()
-        {
-            string projectAssetsJsonPath = Path.GetTempFileName();
-            var assetsContent = @"
+        private static string AssetsFileWithInvalidLocale(string tfm, string locale) => @"
 {
   `version`: 3,
   `targets`: {
-    `net7.0`: {
+    `{tfm}`: {
       `JavaScriptEngineSwitcher.Core/3.3.0`: {
         `type`: `package`,
         `compile`: {
@@ -136,59 +131,65 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         },
         `resource`: {
           `lib/netstandard2.0/ru-ru/JavaScriptEngineSwitcher.Core.resources.dll`: {
-            `locale`: `what is this even`
+            `locale`: `{locale}`
           }
         }
       }
     }
+  },
+  `project`: {
+    `version`: `1.0.0`,
+    `frameworks`: {
+      `{tfm}`: {
+        `targetAlias`: `{tfm}`
+      }
+    }
   }
-}".Replace("`", "\"");
-            File.WriteAllText(projectAssetsJsonPath, assetsContent);
-            var task = InitializeTask(out _);
-            task.ProjectAssetsFile = projectAssetsJsonPath;
-            task.TargetFramework = "net7.0";
-            var writer = new CacheWriter(task);
-            writer.WriteToCacheFile();
-            var messages = (task.BuildEngine as MockBuildEngine).Warnings;
-            var invalidContextMessages = messages.Where(msg => msg.Code == "NETSDK1188");
-            invalidContextMessages.Should().HaveCount(1);
-        }
-        
-        [Fact]
-        public void It_warns_on_incorrectly_cased_culture_codes_of_resources()
+}".Replace("`", "\"").Replace("{tfm}", tfm).Replace("{locale}", locale);
+
+        [InlineData("net7.0", true)]
+        [InlineData("net6.0", false)]
+        [Theory]
+        public void It_warns_on_invalid_culture_codes_of_resources(string tfm, bool shouldHaveWarnings)
         {
             string projectAssetsJsonPath = Path.GetTempFileName();
-            var assetsContent = @"
-{
-  `version`: 3,
-  `targets`: {
-    `net7.0`: {
-      `JavaScriptEngineSwitcher.Core/3.3.0`: {
-        `type`: `package`,
-        `compile`: {
-          `lib/netstandard2.0/JavaScriptEngineSwitcher.Core.dll`: {}
-        },
-        `runtime`: {
-          `lib/netstandard2.0/JavaScriptEngineSwitcher.Core.dll`: {}
-        },
-        `resource`: {
-          `lib/netstandard2.0/ru-ru/JavaScriptEngineSwitcher.Core.resources.dll`: {
-            `locale`: `ru-ru`
-          }
-        }
-      }
-    }
-  }
-}".Replace("`", "\"");
+            var assetsContent = AssetsFileWithInvalidLocale(tfm, "what is this even");
             File.WriteAllText(projectAssetsJsonPath, assetsContent);
             var task = InitializeTask(out _);
             task.ProjectAssetsFile = projectAssetsJsonPath;
-            task.TargetFramework = "net7.0";
-            var writer = new CacheWriter(task);
-            writer.WriteToCacheFile();
-            var messages = (task.BuildEngine as MockBuildEngine).Warnings;
-            var invalidContextMessages = messages.Where(msg => msg.Code == "NETSDK1187");
-            invalidContextMessages.Should().HaveCount(1);
+            task.TargetFramework = tfm;
+            var writer = new CacheWriter(task, new MockPackageResolver());
+            writer.WriteToMemoryStream();
+            var engine = task.BuildEngine as MockBuildEngine;
+
+            var invalidContextWarnings = engine.Warnings.Where(msg => msg.Code == "NETSDK1188");
+            invalidContextWarnings.Should().HaveCount(shouldHaveWarnings ? 1 : 0);
+
+            var invalidContextMessages = engine.Messages.Where(msg => msg.Code == "NETSDK1188");
+            invalidContextMessages.Should().HaveCount(shouldHaveWarnings ? 0 : 1);
+
+        }
+
+        [InlineData("net7.0", true)]
+        [InlineData("net6.0", false)]
+        [Theory]
+        public void It_warns_on_incorrectly_cased_culture_codes_of_resources(string tfm, bool shouldHaveWarnings)
+        {
+            string projectAssetsJsonPath = Path.GetTempFileName();
+            var assetsContent = AssetsFileWithInvalidLocale(tfm, "ru-ru");
+            File.WriteAllText(projectAssetsJsonPath, assetsContent);
+            var task = InitializeTask(out _);
+            task.ProjectAssetsFile = projectAssetsJsonPath;
+            task.TargetFramework = tfm;
+            var writer = new CacheWriter(task, new MockPackageResolver());
+            writer.WriteToMemoryStream();
+            var engine = task.BuildEngine as MockBuildEngine;
+
+            var invalidContextWarnings = engine.Warnings.Where(msg => msg.Code == "NETSDK1187");
+            invalidContextWarnings.Should().HaveCount(shouldHaveWarnings ? 1 : 0);
+
+            var invalidContextMessages = engine.Messages.Where(msg => msg.Code == "NETSDK1187");
+            invalidContextMessages.Should().HaveCount(shouldHaveWarnings ? 0 : 1);
         }
 
         private ResolvePackageAssets InitializeTask(out IEnumerable<PropertyInfo> inputProperties)
