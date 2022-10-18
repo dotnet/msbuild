@@ -50,13 +50,13 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
       <Sha>bebb59597c8f98828b4cf2ae7724b277b15c47ee</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="17.4.0-preview-22512-01">
+    <Dependency Name="Microsoft.Build" Version="17.4.0">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>0a4ea3c41cfd6c0c0b86bad45311c40632e4937e</Sha>
+      <Sha>18d5aef85920037c9d6ff49b1215a4daf515197f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build.Localization" Version="17.4.0-preview-22512-01">
+    <Dependency Name="Microsoft.Build.Localization" Version="17.4.0-preview-22518-02">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>0a4ea3c41cfd6c0c0b86bad45311c40632e4937e</Sha>
+      <Sha>18d5aef85920037c9d6ff49b1215a4daf515197f</Sha>
     </Dependency>
     <Dependency Name="Microsoft.FSharp.Compiler" Version="12.4.0-beta.22513.2">
       <Uri>https://github.com/dotnet/fsharp</Uri>
@@ -250,13 +250,13 @@
       <Sha>9a1c3e1b7f0c8763d4c96e593961a61a72679a7b</Sha>
       <SourceBuild RepoName="xdt" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.CodeAnalysis.NetAnalyzers" Version="7.0.0-preview1.22514.1">
+    <Dependency Name="Microsoft.CodeAnalysis.NetAnalyzers" Version="7.0.0-preview1.22518.1">
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
-      <Sha>c4f866747faeb37156936b2c4eabba60a5925b3b</Sha>
+      <Sha>eb2d0a41844658e92af3941903b2501cb8fc5cc1</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn-analyzers" Version="3.3.4-beta1.22514.1">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn-analyzers" Version="3.3.4-beta1.22518.1">
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
-      <Sha>c4f866747faeb37156936b2c4eabba60a5925b3b</Sha>
+      <Sha>eb2d0a41844658e92af3941903b2501cb8fc5cc1</Sha>
       <SourceBuild RepoName="roslyn-analyzers" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="System.CommandLine" Version="2.0.0-beta4.22504.1">
