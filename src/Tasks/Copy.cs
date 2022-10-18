@@ -280,11 +280,10 @@ namespace Microsoft.Build.Tasks
                 _directoriesKnownToExist.TryAdd(destinationFolder, true);
             }
 
-            string sourceFilePath = FileUtilities.GetFullPathNoThrow(sourceFileState.Name);
-            string destinationFilePath = FileUtilities.GetFullPathNoThrow(destinationFileState.Name);
-
             if (question)
             {
+                string sourceFilePath = FileUtilities.GetFullPathNoThrow(sourceFileState.Name);
+                string destinationFilePath = FileUtilities.GetFullPathNoThrow(destinationFileState.Name);
                 Log.LogError(FileComment, sourceFilePath, destinationFilePath);
                 return false;
             }
@@ -319,6 +318,8 @@ namespace Microsoft.Build.Tasks
             if (!linkCreated)
             {
                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
+                string sourceFilePath = FileUtilities.GetFullPathNoThrow(sourceFileState.Name);
+                string destinationFilePath = FileUtilities.GetFullPathNoThrow(destinationFileState.Name);
                 Log.LogMessage(MessageImportance.Normal, FileComment, sourceFilePath, destinationFilePath);
 
                 File.Copy(sourceFileState.Name, destinationFileState.Name, true);

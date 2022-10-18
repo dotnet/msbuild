@@ -15,13 +15,13 @@ using Microsoft.Build.Tasks.AssemblyDependency;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// File.GetAttributes delegate.
+    /// File.GetAttributes delegate
     /// </summary>
     /// <param name="path">The path get attributes for.</param>
     internal delegate FileAttributes GetAttributes(string path);
 
     /// <summary>
-    /// File SetAttributes delegate.
+    /// File SetAttributes delegate
     /// </summary>
     /// <param name="path">The path to set attributes for.</param>
     /// <param name="attributes">The actual file attributes.</param>
@@ -46,38 +46,38 @@ namespace Microsoft.Build.Tasks
     internal delegate string[] GetDirectories(string path, string pattern);
 
     /// <summary>
-    /// CopyFile delegate.
+    /// CopyFile delegate
     /// </summary>
-    /// <param name="source">Source file.</param>
-    /// <param name="destination">Destination file.</param>
+    /// <param name="source">Source file</param>
+    /// <param name="destination">Destination file</param>
     internal delegate bool CopyFile(string source, string destination);
 
     /// <summary>
-    /// GetAssemblyName delegate.
+    /// GetAssemblyName delegate
     /// </summary>
-    /// <param name="path">The path to the file.</param>
+    /// <param name="path">The path to the file</param>
     /// <returns>The assembly name.</returns>
     internal delegate AssemblyNameExtension GetAssemblyName(string path);
 
     /// <summary>
     /// GetAssemblyRuntimeVersion delegate to get the clr runtime version of a file.
     /// </summary>
-    /// <param name="path">The path to the file.</param>
-    /// <returns>The clr runtime version for the file.</returns>
+    /// <param name="path">The path to the file</param>
+    /// <returns>The clr runtime version for the file</returns>
     internal delegate string GetAssemblyRuntimeVersion(string path);
 
     /// <summary>
-    /// GetGacEnumerator delegate to get the enumerator which will enumerate over the GAC.
+    /// GetGacEnumerator delegate to get the enumerator which will enumerate over the GAC
     /// </summary>
-    /// <param name="strongName">StrongName to get an enumerator for.</param>
+    /// <param name="strongName">StrongName to get an enumerator for</param>
     /// <returns>The enumerator for the gac</returns>
     internal delegate IEnumerable<AssemblyNameExtension> GetGacEnumerator(string strongName);
 
     /// <summary>
-    /// GetPathFromFusionName delegate to get path to a file based on the fusion name.
+    /// GetPathFromFusionName delegate to get path to a file based on the fusion name
     /// </summary>
-    /// <param name="strongName">StrongName to get a path for.</param>
-    /// <returns>The path to the assembly.</returns>
+    /// <param name="strongName">StrongName to get a path for</param>
+    /// <returns>The path to the assembly</returns>
     internal delegate string GetPathFromFusionName(string strongName);
 
     /// <summary>
@@ -88,7 +88,7 @@ namespace Microsoft.Build.Tasks
     /// <param name="assemblyMetadataCache">Assembly metadata cache.</param>
     /// <param name="dependencies">Receives the list of dependencies.</param>
     /// <param name="scatterFiles">Receives the list of associated scatter files.</param>
-    /// <param name="frameworkNameAttribute">The framework name.</param>
+    /// <param name="frameworkNameAttribute">The framework name</param>
     internal delegate void GetAssemblyMetadata
     (
         string path,
@@ -99,7 +99,7 @@ namespace Microsoft.Build.Tasks
     );
 
     /// <summary>
-    /// Delegate to take in a dll path and read the machine type from the PEHeader.
+    /// Delegate to take in a dll path and read the machine type from the PEHeader
     /// </summary>
     internal delegate UInt16 ReadMachineTypeFromPEHeader(string dllPath);
 
@@ -109,23 +109,23 @@ namespace Microsoft.Build.Tasks
     internal delegate string GetAssemblyPathInGac(AssemblyNameExtension assemblyName, System.Reflection.ProcessorArchitecture targetProcessorArchitecture, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVersion, FileExists fileExists, bool fullFusionName, bool specificVersion);
 
     /// <summary>
-    /// Determines if a assembly is an winmd file.
+    /// Determines if a assembly is an winmd file 
     /// </summary>
     internal delegate bool IsWinMDFile(string fullpath, GetAssemblyRuntimeVersion getAssemblyRuntimeVersion, FileExists fileExists, out string imageRuntimeVersion, out bool isManagedWinmd);
 
     /// <summary>
     /// CreateFileString delegate. Creates a stream on top of a file.
     /// </summary>
-    /// <param name="path">Path to the file.</param>
-    /// <param name="mode">File mode.</param>
-    /// <param name="access">Access type.</param>
-    /// <returns>The Stream.</returns>
+    /// <param name="path">Path to the file</param>
+    /// <param name="mode">File mode</param>
+    /// <param name="access">Access type</param>
+    /// <returns>The Stream</returns>
     internal delegate Stream CreateFileStream(string path, FileMode mode, FileAccess access);
 
     /// <summary>
-    /// Delegate for System.IO.File.GetLastWriteTime.
+    /// Delegate for System.IO.File.GetLastWriteTime
     /// </summary>
-    /// <param name="path">The file name.</param>
+    /// <param name="path">The file name</param>
     /// <returns>The last write time.</returns>
     internal delegate DateTime GetLastWriteTime(string path);
 }

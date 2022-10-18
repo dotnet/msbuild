@@ -150,7 +150,7 @@ namespace Microsoft.Build.Tasks
                 try
                 {
                     // Parse the raw importance string into a strongly typed enumeration.  
-                    messageImportance = (MessageImportance)Enum.Parse(typeof(MessageImportance), Importance, true /* case-insensitive */);
+                    messageImportance = (MessageImportance)Enum.Parse(typeof(MessageImportance), Importance, ignoreCase: true);
                 }
                 catch (ArgumentException)
                 {

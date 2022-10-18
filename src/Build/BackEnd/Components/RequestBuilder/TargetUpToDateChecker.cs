@@ -280,7 +280,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        // For the full build decision the are three possible outcomes
+                        // For the full build decision, there are three possible outcomes
                         _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "BuildTargetCompletely", _targetToAnalyze.Name);
                     }
 
