@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.IO;
 using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
@@ -30,6 +31,12 @@ namespace Microsoft.NET.Publish.Tests
             publishCommand.Execute()
                     .Should()
                     .Pass();
+
+            // It would be better if we could somehow check the library binlog or something for a RID instead.
+            var exeFolder = publishCommand.GetOutputDirectory(targetFramework: targetFramework);
+            // Parent: RID, then TFM, then Debug, then bin, then the test folder
+            var ridlessLibraryDllPath = Path.Combine(exeFolder.Parent.Parent.Parent.Parent.FullName, "lib", "bin", "Debug", targetFramework, "lib.dll");
+            Assert.True(File.Exists(ridlessLibraryDllPath));
         }
 
     }
