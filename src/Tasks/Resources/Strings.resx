@@ -2605,4 +2605,7 @@
   <data name="GenerateResource.OutOfDate" xml:space="preserve">
     <value>Some resources are out of date.</value>
   </data>
+  <data name="ResolveAssemblyReference.WritingCacheFile" xml:space="preserve">
+    <value>Writing assembly cache file "{0}" because it is marked dirty.</value>
+  </data>
 </root>

@@ -2111,6 +2111,11 @@
         <target state="translated">"{0}" yeniden dağıtım liste dosyasının FileList öğesindeki Redist adı null veya boş. Redist adının null veya boş olmadığından emin olun.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
+        <source>Writing assembly cache file "{0}" because it is marked dirty.</source>
+        <target state="new">Writing assembly cache file "{0}" because it is marked dirty.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
         <source>COM Reference '{0}' is the interop assembly for ActiveX control '{1}' but was marked to be linked by the compiler with the /link flag. This COM reference will be treated as a reference and will not be linked.</source>
         <target state="translated">'{0}' COM Başvurusu, '{1}' ActiveX denetiminin birlikte çalışma bütünleştirilmiş kodu, ancak /link bayrağıyla derleyici tarafından bağlanmak üzere işaretlenmiş. Bu COM başvurusu, başvuru olarak değerlendirilecek ve bağlanmayacak.</target>

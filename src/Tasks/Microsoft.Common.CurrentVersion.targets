@@ -1471,6 +1471,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       ResolveNativeReferences;
       ResolveAssemblyReferences;
       GenerateBindingRedirects;
+      GenerateBindingRedirectsUpdateAppConfig;
       ResolveComReferences;
       AfterResolveReferences
     </ResolveReferencesDependsOn>
@@ -2464,18 +2465,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="GenerateBindingRedirects"
     Inputs="$(MSBuildAllProjects);@(AppConfigFile);$(ResolveAssemblyReferencesStateFile);$(SuggestedBindingRedirectsCacheFile)"
     Outputs="$(_GenerateBindingRedirectsIntermediateAppConfig)"
-    Condition="'$(AutoGenerateBindingRedirects)' == 'true' and '$(GenerateBindingRedirectsOutputType)' == 'true' and '@(AppConfigWithTargetPath)' != '' and '@(SuggestedBindingRedirects)' != ''"
+    Condition="'$(AutoGenerateBindingRedirects)' == 'true' and '$(GenerateBindingRedirectsOutputType)' == 'true' and '@(SuggestedBindingRedirects)' != ''"
     DependsOnTargets="_GenerateSuggestedBindingRedirectsCache">
 
     <GenerateBindingRedirects
       AppConfigFile="@(AppConfigWithTargetPath)"
       TargetName="$(TargetFileName).config"
       OutputAppConfigFile="$(_GenerateBindingRedirectsIntermediateAppConfig)"
-      SuggestedRedirects="@(SuggestedBindingRedirects)"
-      >
-      <Output TaskParameter="OutputAppConfigFile" ItemName="FileWrites" />
-    </GenerateBindingRedirects>
+      SuggestedRedirects="@(SuggestedBindingRedirects)" />
 
+    <ItemGroup>
+      <FileWrites Include="$(_GenerateBindingRedirectsIntermediateAppConfig)" />
+    </ItemGroup>
   </Target>
 
   <!--
@@ -2487,20 +2488,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ====================================================================================================
   -->
   <Target Name="GenerateBindingRedirectsUpdateAppConfig"
-    AfterTargets="GenerateBindingRedirects"
-    Condition="'$(AutoGenerateBindingRedirects)' == 'true' and '$(GenerateBindingRedirectsOutputType)' == 'true' and Exists('$(_GenerateBindingRedirectsIntermediateAppConfig)')">
-
-    <PropertyGroup>
-      <AppConfig>$(_GenerateBindingRedirectsIntermediateAppConfig)</AppConfig>
-    </PropertyGroup>
-
-    <ItemGroup>
+    Condition="'$(AutoGenerateBindingRedirects)' == 'true' and '$(GenerateBindingRedirectsOutputType)' == 'true'">
+    
+    <ItemGroup Condition="Exists('$(_GenerateBindingRedirectsIntermediateAppConfig)')">
       <AppConfigWithTargetPath Remove="@(AppConfigWithTargetPath)" />
-      <AppConfigWithTargetPath Include="$(AppConfig)">
+      <AppConfigWithTargetPath Include="$(_GenerateBindingRedirectsIntermediateAppConfig)">
         <TargetPath>$(TargetFileName).config</TargetPath>
       </AppConfigWithTargetPath>
     </ItemGroup>
-
   </Target>
 
   <!--
@@ -5669,7 +5664,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <MakeDir Directories="$(IntermediateOutputPath)"/>
 
     <!-- Write new list of current files back to disk. -->
-    <WriteLinesToFile File="$(IntermediateOutputPath)$(CleanFile)" Lines="@(_CleanUniqueRemainingFileWrites)" Overwrite="true" />
+    <WriteLinesToFile File="$(IntermediateOutputPath)$(CleanFile)" Lines="@(_CleanUniqueRemainingFileWrites)" WriteOnlyWhenDifferent="true" Overwrite="true" />
 
   </Target>
 

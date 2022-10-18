@@ -2111,6 +2111,11 @@
         <target state="translated">В файле списка распространяемых пакетов "{0}" имя распространяемого пакета в элементе FileList имеет пустое значение или значение NULL. Убедитесь, что имя распространяемого пакета (Redist Name) не пусто и не равно NULL.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
+        <source>Writing assembly cache file "{0}" because it is marked dirty.</source>
+        <target state="new">Writing assembly cache file "{0}" because it is marked dirty.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
         <source>COM Reference '{0}' is the interop assembly for ActiveX control '{1}' but was marked to be linked by the compiler with the /link flag. This COM reference will be treated as a reference and will not be linked.</source>
         <target state="translated">COM-ссылка "{0}" является сборкой взаимодействия для элемента ActiveX "{1}", но была помечена на компоновку компилятором флагом /link. Эта COM-ссылка будет считаться ссылкой и не будет скомпонована.</target>

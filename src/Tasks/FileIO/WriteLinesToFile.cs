@@ -133,7 +133,6 @@ namespace Microsoft.Build.Tasks
                             MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, false);
                         }
 
-
                         if (question)
                         {
                             Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);

@@ -2111,6 +2111,11 @@
         <target state="translated">Der Redist-Name im FileList-Element der Redistributable-Listendatei "{0}" ist NULL oder leer. Vergewissern Sie sich, dass der Redist-Name nicht NULL oder leer ist.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
+        <source>Writing assembly cache file "{0}" because it is marked dirty.</source>
+        <target state="new">Writing assembly cache file "{0}" because it is marked dirty.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
         <source>COM Reference '{0}' is the interop assembly for ActiveX control '{1}' but was marked to be linked by the compiler with the /link flag. This COM reference will be treated as a reference and will not be linked.</source>
         <target state="translated">Der COM-Verweis "{0}" ist die Interopassembly für das ActiveX-Steuerelement "{1}". Entsprechend der Markierung ist der Verweis jedoch durch den Compiler mit dem /link-Flag verknüpft. Der COM-Verweis wird als Verweis behandelt und nicht verknüpft.</target>
