@@ -147,7 +147,7 @@ namespace Microsoft.Build.Tasks
                     {
                         if (question)
                         {
-                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
+                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", File.ItemSpec, string.Empty);
                             return false;
                         }
                         else
