@@ -145,7 +145,7 @@ namespace Microsoft.NET.Publish.Tests
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
                 publishCommand
-                    .Execute($"/p:RuntimeIdentifier={rid}", @"/bl:C:\Work\Core\Test\NativeAOT\10_19\laks-pub.binlog")
+                    .Execute($"/p:RuntimeIdentifier={rid}")
                     .Should().Pass();
 
                 var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, configuration: projectConfiguration, runtimeIdentifier: rid).FullName;
