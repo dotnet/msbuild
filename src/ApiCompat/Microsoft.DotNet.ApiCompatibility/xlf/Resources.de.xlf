@@ -89,12 +89,12 @@
       </trans-unit>
       <trans-unit id="CannotExpandVisibility">
         <source>Visibility of '{0}' expanded from '{1}' to '{2}'.</source>
-        <target state="new">Visibility of '{0}' expanded from '{1}' to '{2}'.</target>
+        <target state="translated">Die Sichtbarkeit von "{0}" wurde von "{1}" auf "{2}" erweitert.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotReduceVisibility">
         <source>Visibility of '{0}' reduced from '{1}' to '{2}'.</source>
-        <target state="new">Visibility of '{0}' reduced from '{1}' to '{2}'.</target>
+        <target state="translated">Die Sichtbarkeit von "{0}" wurde von "{1}" auf "{2}" reduziert.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotRemoveAttribute">

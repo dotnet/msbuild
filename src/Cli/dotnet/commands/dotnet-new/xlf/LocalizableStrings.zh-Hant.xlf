@@ -45,8 +45,8 @@
       <trans-unit id="PostAction_AddProjToSln_Error_BothInRootAndSolutionFolderSpecified">
         <source>Add project reference to solution action is not configured correctly in the template.
     The 'solutionFolder' and 'inRoot' cannot be used together; use only one of the options.</source>
-        <target state="new">Add project reference to solution action is not configured correctly in the template.
-    The 'solutionFolder' and 'inRoot' cannot be used together; use only one of the options.</target>
+        <target state="translated">未在範本中正確設定新增至解決方案動作中的專案參考。
+    'solutionFolder' 和 'inRoot' 不能同時使用; 只使用其中一個選項。</target>
         <note>do not translate: 'solutionFolder', 'inRoot'</note>
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Error_NoProjectsToAdd">
@@ -73,9 +73,9 @@
         <source>Adding
     project(s): {0}
     in the root of solution file: {1}</source>
-        <target state="new">Adding
-    project(s): {0}
-    in the root of solution file: {1}</target>
+        <target state="translated">正在新增
+    專案: {0}
+    在解決方案檔案的根中: {1}</target>
         <note>{0} - list of file paths to projects to add,
 {1} - the path to target solution file</note>
       </trans-unit>
@@ -84,7 +84,7 @@
     project(s): {0}
     to solution file: {1}
     solution folder: {2}</source>
-        <target state="needs-review-translation">正在新增
+        <target state="translated">正在新增
     專案: {0}
     至解決方案檔案: {1}
     解決方案資料夾: {2}</target>

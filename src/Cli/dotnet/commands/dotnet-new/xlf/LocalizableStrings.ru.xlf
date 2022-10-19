@@ -45,8 +45,8 @@
       <trans-unit id="PostAction_AddProjToSln_Error_BothInRootAndSolutionFolderSpecified">
         <source>Add project reference to solution action is not configured correctly in the template.
     The 'solutionFolder' and 'inRoot' cannot be used together; use only one of the options.</source>
-        <target state="new">Add project reference to solution action is not configured correctly in the template.
-    The 'solutionFolder' and 'inRoot' cannot be used together; use only one of the options.</target>
+        <target state="translated">Добавление ссылки на проект к действию решения неправильно настроено в шаблоне.
+    Невозможно использовать одновременно "solutionFolder" и "inRoot", используйте только один из этих параметров.</target>
         <note>do not translate: 'solutionFolder', 'inRoot'</note>
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Error_NoProjectsToAdd">
@@ -73,9 +73,9 @@
         <source>Adding
     project(s): {0}
     in the root of solution file: {1}</source>
-        <target state="new">Adding
-    project(s): {0}
-    in the root of solution file: {1}</target>
+        <target state="translated">Добавление
+    проектов: {0}
+    в корне файла решения: {1}</target>
         <note>{0} - list of file paths to projects to add,
 {1} - the path to target solution file</note>
       </trans-unit>
@@ -84,7 +84,7 @@
     project(s): {0}
     to solution file: {1}
     solution folder: {2}</source>
-        <target state="needs-review-translation">Добавление
+        <target state="translated">Добавление
     проекта: {0}
     в файл решения: {1}
     папка решения: {2}</target>

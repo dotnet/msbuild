@@ -84,7 +84,7 @@
     project(s): {0}
     to solution file: {1}
     solution folder: {2}</source>
-        <target state="needs-review-translation">Přidávání
+        <target state="translated">Přidávání
     projektu/ů: {0}
     do souboru řešení: {1}
     složka řešení: {2}</target>

@@ -46,21 +46,21 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>cd2d83798383716204eb580eb5c89ef5b73b8ec2</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="17.5.0-preview-22513-03">
+    <Dependency Name="Microsoft.Build" Version="17.5.0-preview-22519-01">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>b3bd0870cd7a5e3b570cc44bd9fa3624c3dd8312</Sha>
+      <Sha>82a30d30731031f57ad95519836abc2772ab472a</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build.Localization" Version="17.5.0-preview-22513-03">
+    <Dependency Name="Microsoft.Build.Localization" Version="17.5.0-preview-22519-01">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>b3bd0870cd7a5e3b570cc44bd9fa3624c3dd8312</Sha>
+      <Sha>82a30d30731031f57ad95519836abc2772ab472a</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.FSharp.Compiler" Version="12.0.5-beta.22512.1">
+    <Dependency Name="Microsoft.FSharp.Compiler" Version="12.5.0-beta.22519.3">
       <Uri>https://github.com/dotnet/fsharp</Uri>
-      <Sha>664588e64eff5db2a2fcb44b8dbddfb0ce4bbbf1</Sha>
+      <Sha>e707dc8b7a99f0f7c4dd0195709488464b557f77</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.fsharp" Version="7.0.0-beta.22512.1">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.fsharp" Version="7.0.1-beta.22519.3">
       <Uri>https://github.com/dotnet/fsharp</Uri>
-      <Sha>664588e64eff5db2a2fcb44b8dbddfb0ce4bbbf1</Sha>
+      <Sha>e707dc8b7a99f0f7c4dd0195709488464b557f77</Sha>
       <SourceBuild RepoName="fsharp" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="dotnet-format" Version="7.0.351204">
@@ -109,9 +109,9 @@
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>125f673fd1cdb3cc012f62aa3ce764d2460b89eb</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Test.Sdk" Version="17.4.0-release-20220926-01">
+    <Dependency Name="Microsoft.NET.Test.Sdk" Version="17.5.0-preview-20221018-02">
       <Uri>https://github.com/microsoft/vstest</Uri>
-      <Sha>576a7cc1b259976393cf576a6a9c5df967bb2b7d</Sha>
+      <Sha>bda34b1793ef6ddcd186b7088a6413692efb215e</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="7.0.100-1.22471.3">
       <Uri>https://github.com/dotnet/linker</Uri>
