@@ -81,7 +81,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Folder where the cache files are written to
         /// </summary>
-        private string _cacheFilePath = Path.GetTempPath();
+        private string _cacheFilePath = FileUtilities.TempFileDirectory;
 
         #region Properties
 
