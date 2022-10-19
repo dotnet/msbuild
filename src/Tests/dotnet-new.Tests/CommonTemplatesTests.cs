@@ -226,44 +226,6 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         }
 
         [Fact]
-        public void EditorConfigTests_orig()
-        {
-            string workingDir = CreateTemporaryFolder();
-
-            new DotnetNewCommand(_log, "editorconfig")
-                .WithCustomHive(_fixture.HomeDirectory)
-                .WithWorkingDirectory(workingDir)
-                .Execute()
-                .Should()
-                .ExitWith(0)
-                .And.NotHaveStdErr()
-                .And.HaveStdOut($@"The template ""EditorConfig file"" was created successfully.");
-
-            string path = Path.Combine(workingDir, ".editorconfig");
-            string editorConfigContent = File.ReadAllText(path);
-            Assert.Contains("dotnet_naming_rule", editorConfigContent);
-            Assert.Contains("dotnet_style_", editorConfigContent);
-            Assert.Contains("dotnet_naming_symbols", editorConfigContent);
-            File.Delete(path);
-
-            new DotnetNewCommand(_log, "editorconfig", "--empty")
-                .WithCustomHive(_fixture.HomeDirectory)
-                .WithWorkingDirectory(workingDir)
-                .Execute()
-                .Should()
-                .ExitWith(0)
-                .And.NotHaveStdErr()
-                .And.HaveStdOut($@"The template ""EditorConfig file"" was created successfully.");
-
-            editorConfigContent = File.ReadAllText(path);
-            Assert.DoesNotContain("dotnet_naming_rule", editorConfigContent);
-            Assert.DoesNotContain("dotnet_style_", editorConfigContent);
-            Assert.DoesNotContain("dotnet_naming_symbols", editorConfigContent);
-            Assert.Contains("root = true", editorConfigContent);
-            Directory.Delete(workingDir, true);
-        }
-
-        [Fact]
         public async void EditorConfigTests_Empty()
         {
             TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: "editorconfig")
@@ -382,7 +344,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string[] unsupportedLanguageVersions = { "1", "ISO-1" };
             string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
 
+            string?[] nullableSupport = { null, "8.0", "9.0", "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
             string?[] topLevelStatementSupport = { null, "9.0", "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
+            string?[] implicitUsingsSupport = { null, "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
 
             foreach (var template in templatesToTest)
             {
@@ -396,7 +360,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                             false, //dotnet build should fail
                             framework,
                             langVersion,
-                            topLevelStatementSupport.Contains(langVersion)
+                            nullableSupport.Contains(langVersion),
+                            topLevelStatementSupport.Contains(langVersion),
+                            implicitUsingsSupport.Contains(langVersion),
                         };
                     }
                 }
@@ -410,7 +376,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                             true, //dotnet build should pass
                             framework,
                             langVersion,
-                            topLevelStatementSupport.Contains(langVersion)
+                            nullableSupport.Contains(langVersion),
+                            topLevelStatementSupport.Contains(langVersion),
+                            implicitUsingsSupport.Contains(langVersion),
                         };
                     }
                 }
@@ -420,11 +388,13 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Theory]
         //creates all possible combinations for supported templates, language versions and frameworks
         [MemberData(nameof(TopLevelProgramSupport_Data))]
-        public void TopLevelProgramSupport(string name, bool buildPass, string? framework, string? langVersion, bool supportsFeature)
+        public async void TopLevelProgramSupport(string name, bool buildPass, string? framework, string? langVersion, bool supportsNullable, bool supportsTopLevel, bool supportsImplicitUsings)
         {
+            //features: top-level statements; nullables; implicit usings
+
             string workingDir = CreateTemporaryFolder(folderName: $"{name}-{langVersion ?? "null"}-{framework ?? "null"}");
 
-            List<string> args = new() { name, "-o", "MyProject" };
+            List<string> args = new() { "-o", "MyProject" };
             if (!string.IsNullOrWhiteSpace(framework))
             {
                 args.Add("--framework");
@@ -436,13 +406,26 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 args.Add(langVersion);
             }
 
-            new DotnetNewCommand(_log, args.ToArray())
-                .WithCustomHive(_fixture.HomeDirectory)
-                .WithWorkingDirectory(workingDir)
-                .Execute()
-                .Should()
-                .ExitWith(0)
-                .And.NotHaveStdErr();
+            TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: name)
+            {
+                TemplateSpecificArgs = args,
+                ExpectationsDirectory = "Approvals",
+                OutputDirectory = workingDir,
+                SettingsDirectory = _fixture.HomeDirectory,
+                DoNotPrependTemplateToScenarioName = true,
+                DoNotAppendParamsToScenarioName = true,
+                ScenarioDistinguisher = !buildPass ?
+                    "OutOfSupport" :
+                    $"Nullable-{supportsNullable}#TopLevel-{supportsTopLevel}#ImplicitUsings-{supportsImplicitUsings}" + (langVersion == null ? "#NoLang" : null),
+                VerificationExcludePatterns = buildPass ? null : new[] { "*" },
+            }
+            .WithCustomScrubbers(
+                ScrubbersDefinition.Empty
+                    .AddScrubber(sb => sb.Replace($"<LangVersion>{langVersion}</LangVersion>", "<LangVersion>%LANG%</LangVersion>"))
+            );
+
+            VerificationEngine engine = new VerificationEngine(_logger);
+            await engine.Execute(options).ConfigureAwait(false);
 
             CommandResult buildResult = new DotnetBuildCommand(_log, "MyProject")
                 .WithWorkingDirectory(workingDir)
@@ -455,32 +438,6 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             else
             {
                 buildResult.Should().Fail();
-                return;
-            }
-
-            string programFileContent = File.ReadAllText(Path.Combine(workingDir, "MyProject", "Program.cs"));
-            string unexpectedTopLevelContent =
-@"namespace MyProject
-{
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            Console.WriteLine(""Hello, World!"");
-        }
-    }
-}
-";
-            if (supportsFeature)
-            {
-                Assert.Contains("Console.WriteLine(\"Hello, World!\")", programFileContent);
-                Assert.Contains("// See https://aka.ms/new-console-template for more information", programFileContent);
-                Assert.DoesNotContain(unexpectedTopLevelContent, programFileContent);
-            }
-            else
-            {
-                Assert.DoesNotContain("// See https://aka.ms/new-console-template for more information", programFileContent);
-                Assert.Contains(unexpectedTopLevelContent, programFileContent);
             }
         }
 
