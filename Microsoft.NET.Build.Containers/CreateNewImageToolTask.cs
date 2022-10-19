@@ -91,6 +91,12 @@ public class CreateNewImage : ToolTask
     /// Container environment variables to set.
     /// </summary>
     public ITaskItem[] ContainerEnvironmentVariables { get; set; }
+
+    [Output]
+    public string GeneratedContainerManifest { get; set; }
+
+    [Output]
+    public string GeneratedContainerConfiguration { get; set; }
  
     // Unused, ToolExe is set via targets and overrides this.
     protected override string ToolName => "dotnet";
@@ -125,9 +131,12 @@ public class CreateNewImage : ToolTask
         Labels = Array.Empty<ITaskItem>();
         ExposedPorts = Array.Empty<ITaskItem>();
         ContainerEnvironmentVariables = Array.Empty<ITaskItem>();
+        GeneratedContainerConfiguration = "";
+        GeneratedContainerManifest = "";
     }
 
     protected override string GenerateFullPathToTool() => Quote(Path.Combine(DotNetPath, ToolExe));
+
 
     protected override string GenerateCommandLineCommands()
     {

@@ -98,6 +98,12 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
     /// </summary>
     public ITaskItem[] ContainerEnvironmentVariables { get; set; }
 
+    [Output]
+    public string GeneratedContainerManifest { get; set; }
+
+    [Output]
+    public string GeneratedContainerConfiguration { get; set; }
+
     private bool IsDockerPush { get => String.IsNullOrEmpty(OutputRegistry); }
 
     private bool IsDockerPull { get => String.IsNullOrEmpty(BaseRegistry); }
@@ -120,6 +126,8 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
         Labels = Array.Empty<ITaskItem>();
         ExposedPorts = Array.Empty<ITaskItem>();
         ContainerEnvironmentVariables = Array.Empty<ITaskItem>();
+        GeneratedContainerConfiguration = "";
+        GeneratedContainerManifest = "";
     }
 
     private void SetPorts(Image image, ITaskItem[] exposedPorts)
@@ -219,6 +227,10 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
         {
             return false;
         }
+
+        // at this point we're done with modifications and are just pushing the data other places
+        GeneratedContainerManifest = image.manifest.ToJsonString();
+        GeneratedContainerConfiguration = image.config.ToJsonString();
 
         Registry? outputReg = IsDockerPush ? null : new Registry(ContainerHelpers.TryExpandRegistryToUri(OutputRegistry));
         foreach (var tag in ImageTags)
