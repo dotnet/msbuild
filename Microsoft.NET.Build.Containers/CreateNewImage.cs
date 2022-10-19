@@ -193,6 +193,10 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
         }
     }
 
+    private void SafeLog(string message, params object[] formatParams) {
+        if(BuildEngine != null) Log.LogMessage(MessageImportance.High, message, formatParams);
+    }
+
     public override bool Execute()
     {
         if (!Directory.Exists(PublishDirectory))
@@ -203,10 +207,7 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
 
         var image = GetBaseImage();
 
-        if (BuildEngine != null)
-        {
-            Log.LogMessage($"Loading from directory: {PublishDirectory}");
-        }
+        SafeLog("Building image '{0}' with tags {1} on top of base image {2}/{3}:{4}", ImageName, String.Join(",", ImageTags), BaseRegistry, BaseImageName, BaseImageTag);
 
         Layer newLayer = Layer.FromDirectory(PublishDirectory, WorkingDirectory);
         image.AddLayer(newLayer);
@@ -240,10 +241,7 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
                 try
                 {
                     LocalDocker.Load(image, ImageName, tag, BaseImageName).Wait();
-                    if (BuildEngine != null)
-                    {
-                        Log.LogMessage(MessageImportance.High, "Pushed container '{0}:{1}' to Docker daemon", ImageName, tag);
-                    }
+                    SafeLog("Pushed container '{0}:{1}' to Docker daemon", ImageName, tag);
                 }
                 catch (AggregateException ex) when (ex.InnerException is DockerLoadException dle)
                 {
@@ -254,11 +252,8 @@ public class CreateNewImage : Microsoft.Build.Utilities.Task
             {
                 try
                 {
-                    outputReg?.Push(image, ImageName, tag, BaseImageName).Wait();
-                    if (BuildEngine != null)
-                    {
-                        Log.LogMessage(MessageImportance.High, "Pushed container '{0}:{1}' to registry '{2}'", ImageName, tag, OutputRegistry);
-                    }
+                    outputReg?.Push(image, ImageName, tag, BaseImageName, message => SafeLog(message)).Wait();
+                    SafeLog("Pushed container '{0}:{1}' to registry '{2}'", ImageName, tag, OutputRegistry);
                 }
                 catch (Exception e)
                 {

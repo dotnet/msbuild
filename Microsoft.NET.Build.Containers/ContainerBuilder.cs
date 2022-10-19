@@ -72,7 +72,7 @@ public static class ContainerBuilder
             {
                 try
                 {
-                    outputReg?.Push(img, imageName, tag, imageName).Wait();
+                    outputReg?.Push(img, imageName, tag, imageName, (message) => Console.WriteLine($"Containerize: {message}")).Wait();
                     Console.WriteLine($"Containerize: Pushed container '{imageName}:{tag}' to registry '{outputRegistry}'");
                 }
                 catch (Exception e)

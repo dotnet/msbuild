@@ -165,7 +165,7 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
         {
             if (!ContainerHelpers.NormalizeImageName(ContainerImageName, out string? normalizedImageName))
             {
-                Log.LogMessage(MessageImportance.High, $"{nameof(ContainerImageName)}:'{ContainerImageName}' was not a valid container image name, it was normalized to {normalizedImageName}");
+                Log.LogMessage(MessageImportance.High, $"'{ContainerImageName}' was not a valid container image name, it was normalized to {normalizedImageName}");
                 NewContainerImageName = normalizedImageName ?? "";
             }
             else

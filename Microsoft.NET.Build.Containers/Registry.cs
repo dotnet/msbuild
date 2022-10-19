@@ -89,7 +89,7 @@ public record struct Registry(Uri BaseUri)
         return localPath;
     }
 
-    public async Task Push(Layer layer, string name)
+    public async Task Push(Layer layer, string name, Action<string> logProgressMessage)
     {
         string digest = layer.Descriptor.Digest;
 
@@ -169,7 +169,7 @@ public record struct Registry(Uri BaseUri)
         return client;
     }
 
-    public async Task Push(Image x, string name, string? tag, string baseName)
+    public async Task Push(Image x, string name, string? tag, string baseName, Action<string> logProgressMessage)
     {
         tag ??= "latest";
 
@@ -178,9 +178,10 @@ public record struct Registry(Uri BaseUri)
         foreach (var descriptor in x.LayerDescriptors)
         {
             string digest = descriptor.Digest;
-
+            logProgressMessage($"Uploading layer {digest} to registry");
             if (await BlobAlreadyUploaded(name, digest, client))
             {
+                logProgressMessage($"Layer {digest} already existed");
                 continue;
             }
 
@@ -194,32 +195,34 @@ public record struct Registry(Uri BaseUri)
                 if (!x.originatingRegistry.HasValue)
                 {
                     throw new NotImplementedException("Need a good error for 'couldn't download a thing because no link to registry'");
-                    }
+                }
 
                 // Ensure the blob is available locally
                 await x.originatingRegistry.Value.DownloadBlob(x.OriginatingName, descriptor);
-
+                logProgressMessage($"Finished uploading layer {digest} to registry");
                 // Then push it to the destination registry
-                await Push(Layer.FromDescriptor(descriptor), name);
+                await Push(Layer.FromDescriptor(descriptor), name, logProgressMessage);
             }
         }
 
+        logProgressMessage($"Uploading config to registry");
         using (MemoryStream stringStream = new MemoryStream(Encoding.UTF8.GetBytes(x.config.ToJsonString())))
         {
             await UploadBlob(name, x.GetDigest(x.config), stringStream);
+            logProgressMessage($"Uploaded config to registry");
         }
 
+        logProgressMessage($"Uploading manifest to registry");
         HttpContent manifestUploadContent = new StringContent(x.manifest.ToJsonString());
         manifestUploadContent.Headers.ContentType = new MediaTypeHeaderValue(DockerManifestV2);
-
         var putResponse = await client.PutAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{x.GetDigest(x.manifest)}"), manifestUploadContent);
-
         string putresponsestr = await putResponse.Content.ReadAsStringAsync();
-
         putResponse.EnsureSuccessStatusCode();
+        logProgressMessage($"Uploaded manifest to registry");
 
+        logProgressMessage($"Uploading tag to registry");
         var putResponse2 = await client.PutAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{tag}"), manifestUploadContent);
-
         putResponse2.EnsureSuccessStatusCode();
+        logProgressMessage($"Uploaded tag to registry");
     }
 }
