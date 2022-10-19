@@ -204,7 +204,7 @@ namespace Microsoft.NET.Publish.Tests
                 TargetFrameworks = targetFramework
             };
             testProject.AdditionalProperties["SelfContained"] = "true";
-            testProject.AdditionalProperties["UseCurrentRuntime"] = "false";
+            testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "false";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
