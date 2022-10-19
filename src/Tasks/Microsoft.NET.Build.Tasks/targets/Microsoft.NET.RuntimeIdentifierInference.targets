@@ -66,7 +66,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                  '$(RuntimeIdentifier)' == '' and
                  '$(RuntimeIdentifiers)' == '' and
                  '$(_IsExecutable)' == 'true' and '$(IsTestProject)' != 'true' and
-                 '$(IsRidAgnostic)' != 'true') and
+                 '$(IsRidAgnostic)' != 'true' and
                   (
                     '$(SelfContained)' == 'true' or
                     '$(PublishReadyToRun)' == 'true' or
