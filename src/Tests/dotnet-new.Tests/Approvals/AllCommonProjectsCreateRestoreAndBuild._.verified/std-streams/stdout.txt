@@ -1,0 +1,7 @@
+﻿The template "%TEMPLATE_NAME%" was created successfully.
+
+Processing post-creation actions...
+Restoring %PROJECT_NAME%:
+  Determining projects to restore...
+  Restored %PROJECT_NAME% (%DURATION%).
+Restore succeeded.

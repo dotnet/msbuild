@@ -10,15 +10,23 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
+  <!--<PropertyGroup>
+    <RestoreSources>$(RestoreSources);C:/tmp/my-nugets</RestoreSources>
+  </PropertyGroup>-->
+
   <ItemGroup>
     <ProjectReference Include="..\..\Cli\dotnet\dotnet.csproj" />
     <ProjectReference Include="..\..\Cli\dotnet-new3\dotnet-new3.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
     <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
-    <PackageReference Include="Verify.Xunit" Version="17.1.4" />
+    <PackageReference Include="Verify.Xunit" Version="18.0.0-beta.18" />
     <PackageReference Include="Verify.DiffPlex" Version="1.3.0" />
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.TestHelper" Version="$(MicrosoftTemplateEngineTestHelperPackageVersion)" />
+    <!--
+    <PackageReference Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="$(MicrosoftTemplateEngineAuthoringTemplateVerifierVersion)" />
+    -->
+    <PackageReference Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="8.0.100-dev" />
   </ItemGroup>
 
   <ItemGroup>
@@ -65,5 +73,11 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
   <ItemGroup>
     <Content Include="TestTemplates\**\*" Exclude="TestTemplates\**\bin\**;TestTemplates\**\obj\**" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Approvals\**\*" />
+    <Content Include="Approvals\**\*" />
+    <None Include="Approvals\**\*" CopyToOutputDirectory="Never" />
   </ItemGroup>
 </Project>

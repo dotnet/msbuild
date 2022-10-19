@@ -6,9 +6,12 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.Extensions.Logging;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.TemplateEngine.Authoring.TemplateVerifier;
 using Microsoft.TemplateEngine.TestHelper;
 using Xunit.Abstractions;
 
@@ -18,11 +21,13 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
     {
         private readonly SharedHomeDirectory _fixture;
         private readonly ITestOutputHelper _log;
+        private readonly ILogger _logger;
 
         public CommonTemplatesTests(SharedHomeDirectory fixture, ITestOutputHelper log) : base(log)
         {
             _fixture = fixture;
             _log = log;
+            _logger = new XunitLoggerProvider(log).CreateLogger("TestRun");
         }
 
         [Theory]
@@ -47,21 +52,22 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("Class Library", "classlib", "C#", "netstandard2.0")]
         [InlineData("Class Library", "classlib", "VB", "netstandard2.0")]
         [InlineData("Class Library", "classlib", "F#", "netstandard2.0")]
-
-        public void AllCommonProjectsCreateRestoreAndBuild(string expectedTemplateName, string templateShortName, string? language = null, string? framework = null, string? langVersion = null)
+        public async void AllCommonProjectsCreateRestoreAndBuild(string expectedTemplateName, string templateShortName, string? language = null, string? framework = null, string? langVersion = null)
         {
             string workingDir = CreateTemporaryFolder(folderName: $"{templateShortName}-{language?.Replace("#", "Sharp") ?? "null"}-{framework ?? "null"}");
-            string workingDirName = Path.GetFileName(workingDir);
             string extension = language switch
             {
                 "F#" => "fsproj",
                 "VB" => "vbproj",
                 _ => "csproj"
             };
-            string finalProjectName = Regex.Escape(Path.Combine(workingDir, $"{workingDirName}.{extension}"));
+
+            string projectName = "sample-project-name";
+            string projectDir = Path.Combine(workingDir, templateShortName);
+            string finalProjectName = Path.Combine(projectDir, $"{projectName}.{extension}");
             Console.WriteLine($"Expected project location: {finalProjectName}");
 
-            List<string> args = new() { templateShortName };
+            List<string> args = new() { "-n", projectName };
             if (!string.IsNullOrWhiteSpace(language))
             {
                 args.Add("--language");
@@ -78,24 +84,35 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 args.Add(langVersion);
             }
 
-            new DotnetNewCommand(_log, args.ToArray())
-                .WithCustomHive(_fixture.HomeDirectory)
-                .WithWorkingDirectory(workingDir)
-                .Execute()
-                .Should()
-                .ExitWith(0)
-                .And.NotHaveStdErr()
-                .And.HaveStdOutMatching(
-$@"The template ""{expectedTemplateName}"" was created successfully\.
+            TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: templateShortName)
+            {
+                TemplateSpecificArgs = args,
+                ExpectationsDirectory = "Approvals",
+                OutputDirectory = workingDir,
+                VerifyCommandOutput = true,
+                VerificationExcludePatterns = new[] { "*.cs", "*.fs", "*.vb", "*.*proj" },
+                DoNotPrependCallerMethodNameToScenarioName = false,
+                DoNotAppendParamsToScenarioName = true,
+                DoNotPrependTemplateToScenarioName = true,
+            }
+            .WithCustomScrubbers(
+                ScrubbersDefinition.Empty
+                    .AddScrubber(sb =>
+                    {
+                        const string projectPathTag = "%PROJECT_NAME%";
+                        sb.Replace(expectedTemplateName, "%TEMPLATE_NAME%").Replace(finalProjectName, projectPathTag);
+                        string pattern = "(^  Restored " + Regex.Escape(projectPathTag) + " \\()(.*)(\\)\\.)";
+                        string res = sb.ToString();
+                        res = Regex.Replace(res, pattern, "$1%DURATION%$3", RegexOptions.Multiline);
+                        sb.Clear();
+                        sb.Append(res);
+                    }));
 
-Processing post-creation actions\.\.\.
-Restoring {finalProjectName}:
-.*
-Restore succeeded\.",
-                RegexOptions.Singleline);
+            VerificationEngine engine = new VerificationEngine(_logger);
+            await engine.Execute(options).ConfigureAwait(false);
 
             new DotnetRestoreCommand(_log)
-                .WithWorkingDirectory(workingDir)
+                .WithWorkingDirectory(projectDir)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -103,7 +120,7 @@ Restore succeeded\.",
                 .NotHaveStdErr();
 
             new DotnetBuildCommand(_log)
-                .WithWorkingDirectory(workingDir)
+                .WithWorkingDirectory(projectDir)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -147,11 +164,9 @@ Restore succeeded\.",
         [InlineData("Class Library", "classlib", "C#", "netstandard2.0")]
         [InlineData("Class Library", "classlib", "VB", "netstandard2.0")]
         [InlineData("Class Library", "classlib", "F#", "netstandard2.0")]
-        public void AllCommonProjectsCreate_NoRestore(string expectedTemplateName, string templateShortName, string? language = null, string? framework = null)
+        public async void AllCommonProjectsCreate_NoRestore(string expectedTemplateName, string templateShortName, string? language = null, string? framework = null)
         {
-            string workingDir = CreateTemporaryFolder(folderName: $"{templateShortName}-{language?.Replace("#", "Sharp") ?? "null"}-{framework ?? "null"}");
-
-            List<string> args = new() { templateShortName, "--no-restore" };
+            List<string> args = new() { "--no-restore" };
             if (!string.IsNullOrWhiteSpace(language))
             {
                 args.Add("--language");
@@ -163,16 +178,23 @@ Restore succeeded\.",
                 args.Add(framework);
             }
 
-            new DotnetNewCommand(_log, args.ToArray())
-                .WithCustomHive(_fixture.HomeDirectory)
-                .WithWorkingDirectory(workingDir)
-                .Execute()
-                .Should()
-                .ExitWith(0)
-                .And.NotHaveStdErr()
-                .And.HaveStdOut($@"The template ""{expectedTemplateName}"" was created successfully.");
+            TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: templateShortName)
+            {
+                TemplateSpecificArgs = args,
+                ExpectationsDirectory = "Approvals",
+                VerifyCommandOutput = true,
+                VerificationIncludePatterns = new[] { "*.txt" },
+                DoNotAppendParamsToScenarioName = true,
+                SettingsDirectory = _fixture.HomeDirectory,
+                DoNotPrependTemplateToScenarioName = true,
+            }
+            .WithCustomScrubbers(
+                ScrubbersDefinition.Empty
+                    .AddScrubber(sb => sb.Replace(expectedTemplateName, "%TEMPLATE_NAME%"))
+            );
 
-            Directory.Delete(workingDir, true);
+            VerificationEngine engine = new VerificationEngine(_logger);
+            await engine.Execute(options).ConfigureAwait(false);
         }
 
         [Theory]
@@ -183,24 +205,28 @@ Restore succeeded\.",
         [InlineData("Solution File", "solution")]
         [InlineData("Dotnet local tool manifest file", "tool-manifest")]
         [InlineData("Web Config", "webconfig")]
-        public void AllCommonItemsCreate(string expectedTemplateName, string templateShortName)
+        public async void AllCommonItemsCreate(string expectedTemplateName, string templateShortName)
         {
-            string workingDir = CreateTemporaryFolder(folderName: $"{templateShortName}");
+            TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: templateShortName)
+            {
+                ExpectationsDirectory = "Approvals",
+                VerifyCommandOutput = true,
+                VerificationIncludePatterns = new[] { "*.txt" },
+                DoNotAppendParamsToScenarioName = true,
+                SettingsDirectory = _fixture.HomeDirectory,
+                DoNotPrependTemplateToScenarioName = true,
+            }
+            .WithCustomScrubbers(
+                ScrubbersDefinition.Empty
+                    .AddScrubber(sb => sb.Replace(expectedTemplateName, "%TEMPLATE_NAME%"))
+            );
 
-            new DotnetNewCommand(_log, templateShortName)
-                .WithCustomHive(_fixture.HomeDirectory)
-                .WithWorkingDirectory(workingDir)
-                .Execute()
-                .Should()
-                .ExitWith(0)
-                .And.NotHaveStdErr()
-                .And.HaveStdOutContaining($@"The template ""{expectedTemplateName}"" was created successfully.");
-
-            Directory.Delete(workingDir, true);
+            VerificationEngine engine = new VerificationEngine(_logger);
+            await engine.Execute(options).ConfigureAwait(false);
         }
 
         [Fact]
-        public void EditorConfigTests()
+        public void EditorConfigTests_orig()
         {
             string workingDir = CreateTemporaryFolder();
 
@@ -237,44 +263,67 @@ Restore succeeded\.",
             Directory.Delete(workingDir, true);
         }
 
+        [Fact]
+        public async void EditorConfigTests_Empty()
+        {
+            TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: "editorconfig")
+            {
+                TemplateSpecificArgs = new[] { "--empty" },
+                ExpectationsDirectory = "Approvals",
+                SettingsDirectory = _fixture.HomeDirectory,
+                VerifyCommandOutput = true,
+            };
+
+            VerificationEngine engine = new VerificationEngine(_logger);
+            await engine.Execute(options).ConfigureAwait(false);
+        }
+
+        [Fact]
+        public async void EditorConfigTests_Default()
+        {
+            TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: "editorconfig")
+            {
+                ExpectationsDirectory = "Approvals",
+                SettingsDirectory = _fixture.HomeDirectory,
+            }
+            .WithCustomDirectoryVerifier(async (content, contentFetcher) =>
+            {
+                await foreach (var (filePath, scrubbedContent) in contentFetcher.Value)
+                {
+                    filePath.Replace(Path.DirectorySeparatorChar, '/').Should().BeEquivalentTo(@"editorconfig/.editorconfig");
+                    scrubbedContent.Should().Contain("dotnet_naming_rule");
+                    scrubbedContent.Should().Contain("dotnet_style_");
+                    scrubbedContent.Should().Contain("dotnet_naming_symbols");
+                }
+            });
+
+            VerificationEngine engine = new VerificationEngine(_logger);
+            await engine.Execute(options).ConfigureAwait(false);
+        }
+
         [Theory]
         [InlineData(
-@"{
-  ""sdk"": {
-    ""version"": ""5.0.200""
-  }
-}",
             "globaljson",
             "--sdk-version",
             "5.0.200")]
         [InlineData(
-@"{
-  ""sdk"": {
-    ""rollForward"": ""major"",
-    ""version"": ""5.0.200""
-  }
-}",
             "globaljson",
             "--sdk-version",
             "5.0.200",
             "--roll-forward",
             "major")]
-        public void GlobalJsonTests(string expectedContent, params string[] parameters)
+        public async void GlobalJsonTests(params string[] parameters)
         {
-            string workingDir = CreateTemporaryFolder();
+            TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: parameters[0])
+            {
+                TemplateSpecificArgs = parameters[1..],
+                ExpectationsDirectory = "Approvals",
+                SettingsDirectory = _fixture.HomeDirectory,
+                VerifyCommandOutput = true,
+            };
 
-            new DotnetNewCommand(_log, parameters)
-                .WithCustomHive(_fixture.HomeDirectory)
-                .WithWorkingDirectory(workingDir)
-                .Execute()
-                .Should()
-                .ExitWith(0)
-                .And.NotHaveStdErr()
-                .And.HaveStdOut($@"The template ""global.json file"" was created successfully.");
-
-            string globalJsonConent = File.ReadAllText(Path.Combine(workingDir, "global.json"));
-            Assert.Equal(expectedContent.Replace("\r\n", "\n"), globalJsonConent.Replace("\r\n", "\n"));
-            Directory.Delete(workingDir, true);
+            VerificationEngine engine = new VerificationEngine(_logger);
+            await engine.Execute(options).ConfigureAwait(false);
         }
 
         [Fact]

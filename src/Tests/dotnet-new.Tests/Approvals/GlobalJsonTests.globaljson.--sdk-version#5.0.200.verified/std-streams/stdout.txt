@@ -1,0 +1,1 @@
+﻿The template "global.json file" was created successfully.
