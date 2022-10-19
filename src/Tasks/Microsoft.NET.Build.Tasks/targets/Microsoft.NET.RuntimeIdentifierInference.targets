@@ -72,8 +72,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                     '$(PublishReadyToRun)' == 'true' or
                     '$(PublishSingleFile)' == 'true' or
                     '$(PublishAot)' == 'true'
-                  )">
-      true</UseCurrentRuntimeIdentifier>
+                  )">true</UseCurrentRuntimeIdentifier>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(UseCurrentRuntimeIdentifier)' == 'true'">
