@@ -228,7 +228,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
             var callback = new MockAddProjectToSolutionCallback();
             var actionProcessor = new DotnetSlnPostActionProcessor(callback.AddProjectToSolution);
 
-            string targetBasePath = _engineEnvironmentSettings.GetNewVirtualizedPath();
+            string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
             string slnFileFullPath = Path.Combine(targetBasePath, "MyApp.sln");
             string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
 
@@ -260,7 +260,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
             var callback = new MockAddProjectToSolutionCallback();
             var actionProcessor = new DotnetSlnPostActionProcessor(callback.AddProjectToSolution);
 
-            string targetBasePath = _engineEnvironmentSettings.GetNewVirtualizedPath();
+            string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
             string slnFileFullPath = Path.Combine(targetBasePath, "MyApp.sln");
             string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
 
@@ -292,7 +292,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
             var callback = new MockAddProjectToSolutionCallback();
             var actionProcessor = new DotnetSlnPostActionProcessor(callback.AddProjectToSolution);
 
-            string targetBasePath = _engineEnvironmentSettings.GetNewVirtualizedPath();
+            string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
             string slnFileFullPath = Path.Combine(targetBasePath, "MyApp.sln");
             string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
 
