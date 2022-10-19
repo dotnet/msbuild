@@ -35,7 +35,9 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void NativeAot_hw_runs_with_no_warnings_when_PublishAot_is_enabled(string targetFramework)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            // Enable Linux after this issue is fixed
+            // https://github.com/dotnet/runtime/issues/75468
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "HellowWorldNativeAotApp";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -118,7 +120,9 @@ namespace Microsoft.NET.Publish.Tests
         {
             // NativeAOT application publish directory should not contain any <App>.deps.json or <App>.runtimeconfig.json
             // The test writes a key-value pair to the runtimeconfig file and checks that the app can access it
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            // Enable Linux after this issue is fixed
+            // https://github.com/dotnet/runtime/issues/75468
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "NativeAotAppForConfigTestDbg";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -141,7 +145,7 @@ namespace Microsoft.NET.Publish.Tests
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
                 publishCommand
-                    .Execute($"/p:RuntimeIdentifier={rid}")
+                    .Execute($"/p:RuntimeIdentifier={rid}", @"/bl:C:\Work\Core\Test\NativeAOT\10_19\laks-pub.binlog")
                     .Should().Pass();
 
                 var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, configuration: projectConfiguration, runtimeIdentifier: rid).FullName;
@@ -174,7 +178,9 @@ namespace Microsoft.NET.Publish.Tests
         {
             // NativeAOT application publish directory should not contain any <App>.deps.json or <App>.runtimeconfig.json
             // The test writes a key-value pair to the runtimeconfig file and checks that the app can access it
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            // Enable Linux after this issue is fixed
+            // https://github.com/dotnet/runtime/issues/75468
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "NativeAotAppForConfigTestRel";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -230,7 +236,9 @@ namespace Microsoft.NET.Publish.Tests
         {
             // NativeAOT application publish directory should not contain any <App>.deps.json or <App>.runtimeconfig.json
             // But build step should preserve these files
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            // Enable Linux after this issue is fixed
+            // https://github.com/dotnet/runtime/issues/75468
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "NativeAotAppForConfigTest";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -263,7 +271,9 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void NativeAot_hw_runs_with_PackageReference_PublishAot_is_enabled(string targetFramework)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            // Enable Linux after this issue is fixed
+            // https://github.com/dotnet/runtime/issues/75468
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "HellowWorldNativeAotApp";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -314,7 +324,9 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void NativeAot_hw_runs_with_PackageReference_PublishAot_is_empty(string targetFramework)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            // Enable Linux after this issue is fixed
+            // https://github.com/dotnet/runtime/issues/75468
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "HellowWorldNativeAotApp";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -514,7 +526,9 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void Requires_analyzers_produce_warnings_without_PublishAot_being_set(string targetFramework)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            // Enable Linux after this issue is fixed
+            // https://github.com/dotnet/runtime/issues/75468
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "WarningAppWithRequiresAnalyzers";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -544,7 +558,9 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void NativeAot_compiler_runs_when_PublishAot_is_enabled(string targetFramework)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            // Enable Linux after this issue is fixed
+            // https://github.com/dotnet/runtime/issues/75468
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "WarningAppWithPublishAot";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -583,7 +599,9 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void Warnings_are_generated_even_with_analyzers_disabled(string targetFramework)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            // Enable Linux after this issue is fixed
+            // https://github.com/dotnet/runtime/issues/75468
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "WarningAppWithPublishAotAnalyzersDisabled";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -624,7 +642,9 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void NativeAotStaticLib_only_runs_when_switch_is_enabled(string targetFramework)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            // Enable Linux after this issue is fixed
+            // https://github.com/dotnet/runtime/issues/75468
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "AotStaticLibraryPublish";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -655,7 +675,9 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void NativeAotSharedLib_only_runs_when_switch_is_enabled(string targetFramework)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            // Enable Linux after this issue is fixed
+            // https://github.com/dotnet/runtime/issues/75468
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "AotSharedLibraryPublish";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -686,7 +708,9 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_publishes_with_implicit_rid_with_NativeAotApp(string targetFramework)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            // Enable Linux after this issue is fixed
+            // https://github.com/dotnet/runtime/issues/75468
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "ImplicitRidNativeAotApp";
                 var testProject = CreateHelloWorldTestProject(targetFramework, projectName, true);
