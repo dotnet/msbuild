@@ -10,13 +10,13 @@ MSBuild can be successfully built on Windows, OS X 10.13, Ubuntu 14.04, and Ubun
 
 ## The easy way
 
-Install the latest .NET Core SDK from http://dot.net/core. That will ensure all prerequisites for our build are met.
+Install the latest .NET SDK from https://dotnet.microsoft.com/download. That will ensure all prerequisites for our build are met.
 
 ## Manually installing required packages for OSX & Ubuntu
 
-[.NET Core prerequisites](https://github.com/dotnet/core/blob/master/Documentation/prereqs.md).
+[.NET Core prerequisites](https://github.com/dotnet/core/blob/main/Documentation/prereqs.md).
 
-* *OpenSSL*: MSBuild uses the .Net CLI during its build process. The CLI requires a recent OpenSSL library available in `/usr/lib`. This can be downloaded using [brew](http://brew.sh/) on OS X (`brew install openssl`) and apt-get (`apt-get install openssl`) on Ubuntu, or [building from source](https://wiki.openssl.org/index.php/Compilation_and_Installation#Mac). If you use a different package manager and see an error that says `Unable to load DLL 'System.Security.Cryptography.Native'`, `dotnet` may be looking in the wrong place for the library.
+* *OpenSSL*: MSBuild uses the .Net CLI during its build process. The CLI requires a recent OpenSSL library available in `/usr/lib`. This can be downloaded using [brew](https://brew.sh/) on OS X (`brew install openssl`) and apt-get (`apt-get install openssl`) on Ubuntu, or [building from source](https://wiki.openssl.org/index.php/Compilation_and_Installation#Mac). If you use a different package manager and see an error that says `Unable to load DLL 'System.Security.Cryptography.Native'`, `dotnet` may be looking in the wrong place for the library.
 
 ## Build
 
