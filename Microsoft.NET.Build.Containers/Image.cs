@@ -70,6 +70,7 @@ public class Image
         config["created"] = DateTime.UtcNow;
 
         manifest["config"]!["digest"] = GetDigest(config);
+        manifest["config"]!["size"] = Encoding.UTF8.GetBytes(config.ToJsonString()).Length;
     }
 
     private JsonObject CreatePortMap()
