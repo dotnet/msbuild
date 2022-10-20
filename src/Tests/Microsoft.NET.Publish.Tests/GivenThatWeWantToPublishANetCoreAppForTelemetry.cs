@@ -109,11 +109,6 @@ namespace Microsoft.NET.Publish.Tests
             // NativeAOT compilation requires PublishTrimmed and will be set to true if not set by the user
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
             var testProject = CreateTestProject(targetFramework, "AotProject", aot: true);
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
-                testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
-            }
             testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);

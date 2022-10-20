@@ -47,8 +47,6 @@ namespace Microsoft.NET.Publish.Tests
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     testProject.AdditionalProperties["StripSymbols"] = "true";
-                    // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
-                    testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
                 }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -134,8 +132,6 @@ namespace Microsoft.NET.Publish.Tests
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     testProject.AdditionalProperties["StripSymbols"] = "true";
-                    // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
-                    testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
                 }
 
                 var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -192,8 +188,6 @@ namespace Microsoft.NET.Publish.Tests
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     testProject.AdditionalProperties["StripSymbols"] = "true";
-                    // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
-                    testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
                 }
 
                 var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -282,11 +276,9 @@ namespace Microsoft.NET.Publish.Tests
 
                 // Linux symbol files are embedded and require additional steps to be stripped to a separate file
                 // assumes /bin (or /usr/bin) are in the PATH
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
-                    testProject.AdditionalProperties["StripSymbols"] = "true";
-                    // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
-                    testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
+                   testProject.AdditionalProperties["StripSymbols"] = "true";
                 }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -334,11 +326,9 @@ namespace Microsoft.NET.Publish.Tests
 
                 // Linux symbol files are embedded and require additional steps to be stripped to a separate file
                 // assumes /bin (or /usr/bin) are in the PATH
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
                     testProject.AdditionalProperties["StripSymbols"] = "true";
-                    // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
-                    testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
                 }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -359,7 +349,7 @@ namespace Microsoft.NET.Publish.Tests
                     .And.HaveStdOutContaining("Hello World");
             }
         }
-
+        
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void NativeAot_hw_runs_with_cross_target_PublishAot_is_enabled(string targetFramework)
@@ -564,12 +554,6 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["PublishAot"] = "true";
                 testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";
                 testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
-                    testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
-                }
-
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
@@ -613,13 +597,6 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["EnableSingleFileAnalyzer"] = "false";
                 testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";
                 testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
-
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
-                    testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
-                }
-
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
@@ -657,11 +634,6 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
                 testProject.AdditionalProperties["NativeLib"] = "Static";
                 testProject.AdditionalProperties["SelfContained"] = "true";
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
-                    testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
-                }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
@@ -693,12 +665,6 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
                 testProject.AdditionalProperties["NativeLib"] = "Shared";
                 testProject.AdditionalProperties["SelfContained"] = "true";
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
-                    testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
-                }
-
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
@@ -725,13 +691,6 @@ namespace Microsoft.NET.Publish.Tests
                 var projectName = "ImplicitRidNativeAotApp";
                 var testProject = CreateHelloWorldTestProject(targetFramework, projectName, true);
                 testProject.AdditionalProperties["PublishAot"] = "true";
-
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
-                    testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
-                }
-
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
