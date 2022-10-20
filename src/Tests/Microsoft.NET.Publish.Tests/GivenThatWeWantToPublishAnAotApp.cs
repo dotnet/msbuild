@@ -47,8 +47,7 @@ namespace Microsoft.NET.Publish.Tests
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     testProject.AdditionalProperties["StripSymbols"] = "true";
-                    // Enable Linux after this issue is fixed
-                    // https://github.com/dotnet/runtime/issues/75468
+                    // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
                     testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
                 }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -135,8 +134,7 @@ namespace Microsoft.NET.Publish.Tests
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     testProject.AdditionalProperties["StripSymbols"] = "true";
-                    // Enable Linux after this issue is fixed
-                    // https://github.com/dotnet/runtime/issues/75468
+                    // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
                     testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
                 }
 
@@ -194,8 +192,7 @@ namespace Microsoft.NET.Publish.Tests
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     testProject.AdditionalProperties["StripSymbols"] = "true";
-                    // Enable Linux after this issue is fixed
-                    // https://github.com/dotnet/runtime/issues/75468
+                    // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
                     testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
                 }
 
@@ -288,8 +285,7 @@ namespace Microsoft.NET.Publish.Tests
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     testProject.AdditionalProperties["StripSymbols"] = "true";
-                    // Enable Linux after this issue is fixed
-                    // https://github.com/dotnet/runtime/issues/75468
+                    // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
                     testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
                 }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -342,7 +338,6 @@ namespace Microsoft.NET.Publish.Tests
                 {
                     testProject.AdditionalProperties["StripSymbols"] = "true";
                     // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
-                    // https://github.com/dotnet/runtime/issues/75468
                     testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
                 }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -571,8 +566,7 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    // Enable Linux after this issue is fixed
-                    // https://github.com/dotnet/runtime/issues/75468
+                    // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
                     testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
                 }
 
@@ -622,8 +616,7 @@ namespace Microsoft.NET.Publish.Tests
 
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    // Enable Linux after this issue is fixed
-                    // https://github.com/dotnet/runtime/issues/75468
+                    // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
                     testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
                 }
 
@@ -666,8 +659,7 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["SelfContained"] = "true";
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    // Enable Linux after this issue is fixed
-                    // https://github.com/dotnet/runtime/issues/75468
+                    // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
                     testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
                 }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -703,8 +695,7 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["SelfContained"] = "true";
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    // Enable Linux after this issue is fixed
-                    // https://github.com/dotnet/runtime/issues/75468
+                    // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
                     testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
                 }
 
@@ -737,8 +728,7 @@ namespace Microsoft.NET.Publish.Tests
 
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    // Enable Linux after this issue is fixed
-                    // https://github.com/dotnet/runtime/issues/75468
+                    // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
                     testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
                 }
 
