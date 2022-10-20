@@ -341,7 +341,7 @@ namespace Microsoft.NET.Publish.Tests
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     testProject.AdditionalProperties["StripSymbols"] = "true";
-                    // Enable Linux after this issue is fixed
+                    // Workaround for https://github.com/dotnet/runtime/issues/75468. Delete once the issue is fixed.
                     // https://github.com/dotnet/runtime/issues/75468
                     testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
                 }
