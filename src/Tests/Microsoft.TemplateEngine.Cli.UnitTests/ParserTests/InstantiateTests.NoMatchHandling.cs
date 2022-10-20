@@ -134,7 +134,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         }
 
         [Theory]
+#pragma warning disable CA1825 // Avoid zero-length array allocations. https://github.com/dotnet/sdk/issues/28672
         [MemberData(nameof(GetInvalidParametersTestData))]
+#pragma warning restore CA1825 // Avoid zero-length array allocations.
         // invalid params:
         // [0] name / value - Kind
         // [1] canonical
