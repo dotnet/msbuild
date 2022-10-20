@@ -57,14 +57,14 @@ namespace Microsoft.NET.Publish.Tests
             var targetFramework = ToolsetInfo.CurrentTargetFramework;
             string rid = "win-x86";
 
-            List<string> args = new List<string>{"/p:PublishSingleFile=true", $"/p:{rid}"};
+            List<string> args = new List<string>{"/p:PublishSingleFile=true", $"/p:RuntimeIdenitifer={rid}"};
             var testAsset = Publish(args, testIdentifierName: "PublishSingleFileLibrary");
 
             var assetFolder = testAsset.TestRoot;
             var ridlessLibraryDllPath = Path.Combine(assetFolder, "Library", "bin", "Debug", targetFramework, "Library.dll");
             Assert.True(File.Exists(ridlessLibraryDllPath));
 
-            var properties = _testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework, runtimeIdentifier: rid);
+            var properties = _referencedProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework);
             Assert.True(properties["RuntimeIdentifier"] == "");
         }
     }
