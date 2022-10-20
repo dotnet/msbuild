@@ -35,9 +35,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void NativeAot_hw_runs_with_no_warnings_when_PublishAot_is_enabled(string targetFramework)
         {
-            // Enable Linux after this issue is fixed
-            // https://github.com/dotnet/runtime/issues/75468
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "HellowWorldNativeAotApp";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -49,6 +47,9 @@ namespace Microsoft.NET.Publish.Tests
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     testProject.AdditionalProperties["StripSymbols"] = "true";
+                    // Enable Linux after this issue is fixed
+                    // https://github.com/dotnet/runtime/issues/75468
+                    testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
                 }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -120,9 +121,7 @@ namespace Microsoft.NET.Publish.Tests
         {
             // NativeAOT application publish directory should not contain any <App>.deps.json or <App>.runtimeconfig.json
             // The test writes a key-value pair to the runtimeconfig file and checks that the app can access it
-            // Enable Linux after this issue is fixed
-            // https://github.com/dotnet/runtime/issues/75468
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "NativeAotAppForConfigTestDbg";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -136,6 +135,9 @@ namespace Microsoft.NET.Publish.Tests
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     testProject.AdditionalProperties["StripSymbols"] = "true";
+                    // Enable Linux after this issue is fixed
+                    // https://github.com/dotnet/runtime/issues/75468
+                    testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
                 }
 
                 var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -178,9 +180,7 @@ namespace Microsoft.NET.Publish.Tests
         {
             // NativeAOT application publish directory should not contain any <App>.deps.json or <App>.runtimeconfig.json
             // The test writes a key-value pair to the runtimeconfig file and checks that the app can access it
-            // Enable Linux after this issue is fixed
-            // https://github.com/dotnet/runtime/issues/75468
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "NativeAotAppForConfigTestRel";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -194,6 +194,9 @@ namespace Microsoft.NET.Publish.Tests
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     testProject.AdditionalProperties["StripSymbols"] = "true";
+                    // Enable Linux after this issue is fixed
+                    // https://github.com/dotnet/runtime/issues/75468
+                    testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
                 }
 
                 var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -236,9 +239,7 @@ namespace Microsoft.NET.Publish.Tests
         {
             // NativeAOT application publish directory should not contain any <App>.deps.json or <App>.runtimeconfig.json
             // But build step should preserve these files
-            // Enable Linux after this issue is fixed
-            // https://github.com/dotnet/runtime/issues/75468
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "NativeAotAppForConfigTest";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -271,9 +272,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void NativeAot_hw_runs_with_PackageReference_PublishAot_is_enabled(string targetFramework)
         {
-            // Enable Linux after this issue is fixed
-            // https://github.com/dotnet/runtime/issues/75468
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "HellowWorldNativeAotApp";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -286,9 +285,12 @@ namespace Microsoft.NET.Publish.Tests
 
                 // Linux symbol files are embedded and require additional steps to be stripped to a separate file
                 // assumes /bin (or /usr/bin) are in the PATH
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                   testProject.AdditionalProperties["StripSymbols"] = "true";
+                    testProject.AdditionalProperties["StripSymbols"] = "true";
+                    // Enable Linux after this issue is fixed
+                    // https://github.com/dotnet/runtime/issues/75468
+                    testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
                 }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -324,9 +326,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void NativeAot_hw_runs_with_PackageReference_PublishAot_is_empty(string targetFramework)
         {
-            // Enable Linux after this issue is fixed
-            // https://github.com/dotnet/runtime/issues/75468
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "HellowWorldNativeAotApp";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -338,9 +338,12 @@ namespace Microsoft.NET.Publish.Tests
 
                 // Linux symbol files are embedded and require additional steps to be stripped to a separate file
                 // assumes /bin (or /usr/bin) are in the PATH
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     testProject.AdditionalProperties["StripSymbols"] = "true";
+                    // Enable Linux after this issue is fixed
+                    // https://github.com/dotnet/runtime/issues/75468
+                    testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
                 }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -361,7 +364,7 @@ namespace Microsoft.NET.Publish.Tests
                     .And.HaveStdOutContaining("Hello World");
             }
         }
-        
+
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void NativeAot_hw_runs_with_cross_target_PublishAot_is_enabled(string targetFramework)
@@ -526,9 +529,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void Requires_analyzers_produce_warnings_without_PublishAot_being_set(string targetFramework)
         {
-            // Enable Linux after this issue is fixed
-            // https://github.com/dotnet/runtime/issues/75468
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "WarningAppWithRequiresAnalyzers";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -558,9 +559,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void NativeAot_compiler_runs_when_PublishAot_is_enabled(string targetFramework)
         {
-            // Enable Linux after this issue is fixed
-            // https://github.com/dotnet/runtime/issues/75468
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "WarningAppWithPublishAot";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -570,6 +569,13 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["PublishAot"] = "true";
                 testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";
                 testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // Enable Linux after this issue is fixed
+                    // https://github.com/dotnet/runtime/issues/75468
+                    testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
+                }
+
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
@@ -599,9 +605,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void Warnings_are_generated_even_with_analyzers_disabled(string targetFramework)
         {
-            // Enable Linux after this issue is fixed
-            // https://github.com/dotnet/runtime/issues/75468
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "WarningAppWithPublishAotAnalyzersDisabled";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -615,6 +619,14 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["EnableSingleFileAnalyzer"] = "false";
                 testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";
                 testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
+
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // Enable Linux after this issue is fixed
+                    // https://github.com/dotnet/runtime/issues/75468
+                    testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
+                }
+
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
@@ -642,9 +654,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void NativeAotStaticLib_only_runs_when_switch_is_enabled(string targetFramework)
         {
-            // Enable Linux after this issue is fixed
-            // https://github.com/dotnet/runtime/issues/75468
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "AotStaticLibraryPublish";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -654,6 +664,12 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
                 testProject.AdditionalProperties["NativeLib"] = "Static";
                 testProject.AdditionalProperties["SelfContained"] = "true";
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // Enable Linux after this issue is fixed
+                    // https://github.com/dotnet/runtime/issues/75468
+                    testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
+                }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
@@ -675,9 +691,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void NativeAotSharedLib_only_runs_when_switch_is_enabled(string targetFramework)
         {
-            // Enable Linux after this issue is fixed
-            // https://github.com/dotnet/runtime/issues/75468
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "AotSharedLibraryPublish";
                 var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -687,6 +701,13 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
                 testProject.AdditionalProperties["NativeLib"] = "Shared";
                 testProject.AdditionalProperties["SelfContained"] = "true";
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // Enable Linux after this issue is fixed
+                    // https://github.com/dotnet/runtime/issues/75468
+                    testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
+                }
+
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
@@ -708,13 +729,19 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_publishes_with_implicit_rid_with_NativeAotApp(string targetFramework)
         {
-            // Enable Linux after this issue is fixed
-            // https://github.com/dotnet/runtime/issues/75468
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))// || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "ImplicitRidNativeAotApp";
                 var testProject = CreateHelloWorldTestProject(targetFramework, projectName, true);
                 testProject.AdditionalProperties["PublishAot"] = "true";
+
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // Enable Linux after this issue is fixed
+                    // https://github.com/dotnet/runtime/issues/75468
+                    testProject.AdditionalProperties["LinkStandardCPlusPlusLibrary"] = "true";
+                }
+
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
