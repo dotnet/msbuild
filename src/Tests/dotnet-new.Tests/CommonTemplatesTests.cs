@@ -370,7 +370,9 @@ Restore succeeded\.",
 
         [Theory]
         //creates all possible combinations for supported templates, language versions and frameworks
+#pragma warning disable CA1825 // Avoid zero-length array allocations. https://github.com/dotnet/sdk/issues/28672
         [MemberData(nameof(TopLevelProgramSupport_Data))]
+#pragma warning restore CA1825 // Avoid zero-length array allocations.
         public void TopLevelProgramSupport(string name, bool buildPass, string? framework, string? langVersion, bool supportsFeature)
         {
             string workingDir = CreateTemporaryFolder(folderName: $"{name}-{langVersion ?? "null"}-{framework ?? "null"}");
@@ -582,7 +584,9 @@ class Program
 
         [Theory]
         //creates all possible combinations for supported templates, language versions and frameworks
+#pragma warning disable CA1825 // Avoid zero-length array allocations. https://github.com/dotnet/sdk/issues/28672
         [MemberData(nameof(NullableSupport_Data))]
+#pragma warning restore CA1825 // Avoid zero-length array allocations.
         public void NullableSupport(string name, bool buildPass, string? framework, string? langVersion, bool supportsFeature)
         {
             string workingDir = CreateTemporaryFolder(folderName: $"{name}-{langVersion ?? "null"}-{framework ?? "null"}");
@@ -684,7 +688,9 @@ class Program
 
         [Theory]
         //creates all possible combinations for supported templates, language versions and frameworks
+#pragma warning disable CA1825 // Avoid zero-length array allocations. https://github.com/dotnet/sdk/issues/28672
         [MemberData(nameof(ImplicitUsingsSupport_Data))]
+#pragma warning restore CA1825 // Avoid zero-length array allocations.
         public void ImplicitUsingsSupport(string name, bool buildPass, string? framework, string? langVersion, bool supportsFeature)
         {
             string workingDir = CreateTemporaryFolder(folderName: $"{name}-{langVersion ?? "null"}-{framework ?? "null"}");
@@ -771,7 +777,9 @@ class Program
 
         [Theory]
         //creates all possible combinations for supported templates, language versions and frameworks
+#pragma warning disable CA1825 // Avoid zero-length array allocations.https://github.com/dotnet/sdk/issues/28672
         [MemberData(nameof(FileScopedNamespacesSupport_Data))]
+#pragma warning restore CA1825 // Avoid zero-length array allocations.
         public void FileScopedNamespacesSupport(string name, bool pass, string? framework, string? langVersion, bool supportsFeature)
         {
             string workingDir = CreateTemporaryFolder(folderName: $"{name}-{langVersion ?? "null"}-{framework ?? "null"}");
