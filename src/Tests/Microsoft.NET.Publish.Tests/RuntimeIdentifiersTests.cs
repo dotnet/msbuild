@@ -194,6 +194,30 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Fact]
+        public void ImplicitRuntimeIdentifierOptOutCorrecltyOptsOut()
+        {
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
+            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
+            var testProject = new TestProject()
+            {
+                IsExe = true,
+                TargetFrameworks = targetFramework
+            };
+            testProject.AdditionalProperties["SelfContained"] = "true";
+            testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "false";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(testAsset);
+            publishCommand
+                .Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1191");
+        }
+
+        [Fact]
         public void DuplicateRuntimeIdentifiers()
         {
             var testProject = new TestProject()
