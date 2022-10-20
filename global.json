@@ -7,7 +7,7 @@
     "vs": {
       "version": "17.2.1"
     },
-    "xcopy-msbuild": "17.2.1"
+    "xcopy-msbuild": "17.3.1"
   },
   "msbuild-sdks": {
     "Microsoft.Build.CentralPackageVersions": "2.0.1",
