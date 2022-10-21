@@ -217,12 +217,24 @@ public record struct Registry(Uri BaseUri)
         manifestUploadContent.Headers.ContentType = new MediaTypeHeaderValue(DockerManifestV2);
         var putResponse = await client.PutAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{x.GetDigest(x.manifest)}"), manifestUploadContent);
         string putresponsestr = await putResponse.Content.ReadAsStringAsync();
-        putResponse.EnsureSuccessStatusCode();
+
+        if (!putResponse.IsSuccessStatusCode)
+        {
+            string jsonResponse = await putResponse.Content.ReadAsStringAsync();
+            throw new ContainerHttpException("Registry push failed.", putResponse.RequestMessage?.RequestUri?.ToString(), jsonResponse);
+        }
+
         logProgressMessage($"Uploaded manifest to registry");
 
         logProgressMessage($"Uploading tag to registry");
         var putResponse2 = await client.PutAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{tag}"), manifestUploadContent);
-        putResponse2.EnsureSuccessStatusCode();
+
+        if (!putResponse2.IsSuccessStatusCode)
+        {
+            string jsonResponse = await putResponse2.Content.ReadAsStringAsync();
+            throw new ContainerHttpException("Registry push failed.", putResponse2.RequestMessage?.RequestUri?.ToString(), jsonResponse);
+        }
+
         logProgressMessage($"Uploaded tag to registry");
     }
 }

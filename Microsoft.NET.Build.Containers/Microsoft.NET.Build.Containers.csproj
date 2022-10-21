@@ -25,6 +25,7 @@
     <PackageReference Include="Valleysoft.DockerCredsProvider" />
   </ItemGroup>
 
+  <!-- net472 builds manually import files to compile -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
     <Compile Remove="*.*" />
     <Compile Include="ReferenceParser.cs" />
@@ -32,11 +33,14 @@
     <Compile Include="CreateNewImageToolTask.cs" />
     <Compile Include="ContainerHelpers.cs" />
     <Compile Include="net472Definitions.cs" />
+    <Compile Include="VSHostObject.cs" />
   </ItemGroup>
 
+  <!-- core remove files specific to net472 workarounds -->
   <ItemGroup Condition="'$(TargetFramework)' != 'net472'">
     <Compile Remove="CreateNewImageToolTask.cs" />
     <Compile Remove="net472Definitions.cs" />
+    <Compile Remove="VSHostObject.cs" />
   </ItemGroup>
 
   <!-- This target adds all of our PackageReference and ProjectReference's runtime assets to our package output. -->
