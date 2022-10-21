@@ -117,13 +117,15 @@ public record struct Registry(Uri BaseUri)
         Debug.Assert(pushResponse.Headers.Location is not null);
 
         UriBuilder x;
-        if (pushResponse.Headers.Location.IsAbsoluteUri)
+        if (pushResponse.Headers.Location is {IsAbsoluteUri: true })
         {
             x = new UriBuilder(pushResponse.Headers.Location);
         }
         else
         {
-            x = new UriBuilder(BaseUri + pushResponse.Headers.Location.OriginalString);
+            // if we don't trim the BaseUri and relative Uri of slashes, you can get invalid urls.
+            // Uri constructor does this on our behalf.
+            x = new UriBuilder(new Uri(BaseUri, pushResponse.Headers.Location.OriginalString));
         }
 
         x.Query += $"&digest={Uri.EscapeDataString(digest)}";
@@ -199,23 +201,25 @@ public record struct Registry(Uri BaseUri)
 
                 // Ensure the blob is available locally
                 await x.originatingRegistry.Value.DownloadBlob(x.OriginatingName, descriptor);
-                logProgressMessage($"Finished uploading layer {digest} to registry");
                 // Then push it to the destination registry
                 await Push(Layer.FromDescriptor(descriptor), name, logProgressMessage);
+                logProgressMessage($"Finished uploading layer {digest} to registry");
             }
         }
 
-        logProgressMessage($"Uploading config to registry");
         using (MemoryStream stringStream = new MemoryStream(Encoding.UTF8.GetBytes(x.config.ToJsonString())))
         {
-            await UploadBlob(name, x.GetDigest(x.config), stringStream);
+            var configDigest = x.GetDigest(x.config);
+            logProgressMessage($"Uploading config to registry at blob {configDigest}");
+            await UploadBlob(name, configDigest, stringStream);
             logProgressMessage($"Uploaded config to registry");
         }
 
-        logProgressMessage($"Uploading manifest to registry");
+        var manifestDigest = x.GetDigest(x.manifest);
+        logProgressMessage($"Uploading manifest to registry at blob {manifestDigest}");
         HttpContent manifestUploadContent = new StringContent(x.manifest.ToJsonString());
         manifestUploadContent.Headers.ContentType = new MediaTypeHeaderValue(DockerManifestV2);
-        var putResponse = await client.PutAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{x.GetDigest(x.manifest)}"), manifestUploadContent);
+        var putResponse = await client.PutAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{manifestDigest}"), manifestUploadContent);
         string putresponsestr = await putResponse.Content.ReadAsStringAsync();
 
         if (!putResponse.IsSuccessStatusCode)
@@ -226,7 +230,7 @@ public record struct Registry(Uri BaseUri)
 
         logProgressMessage($"Uploaded manifest to registry");
 
-        logProgressMessage($"Uploading tag to registry");
+        logProgressMessage($"Uploading tag {tag} to registry");
         var putResponse2 = await client.PutAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{tag}"), manifestUploadContent);
 
         if (!putResponse2.IsSuccessStatusCode)
