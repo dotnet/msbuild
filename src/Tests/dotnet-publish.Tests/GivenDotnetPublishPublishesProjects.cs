@@ -189,7 +189,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             });
         }
 
-        [RequiresMSBuildVersionTheory("17.5.0.0")] // This needs _IsPublishing to be set in MSBuild to pass.
+        [Theory]
         [InlineData("net7.0", true, false, false)]
         [InlineData("net7.0", false, false, false)]
         [InlineData("net7.0", true, true, false)]
@@ -213,6 +213,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             List<string> args = new List<string>
             {
                 $"/p:RuntimeIdentifier={rid}",
+                $"/p:_IsPublishing=true", // Normally this would be set by the CLI (OR VS Soon TM), but this calls directly into t:/Publish.
                 selfContainedIsGlobal ? $"/p:SelfContained={!publishSelfContained}" : "",
                 publishSelfContainedIsGlobal ? $"/p:PublishSelfContained={publishSelfContained}" : ""
             };

@@ -34,9 +34,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Set default intermediate and output paths -->
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultOutputPaths.targets" Condition="'$(UsingNETSdkDefaults)' == 'true'"/>
 
-  <!-- Allow targets to edit SelfContained.-->
-  <Import Project="Microsoft.NET.ForceCommandLineSelfContainedToBeLocal.targets" Condition=" '$(PublishSelfContained)' != '' "/>
-
+  <!-- Edit SelfContained to match if we are publishing. Won't affect t:/Publish (because of _IsPublishing), and also won't override a global SelfContained.-->
+  <PropertyGroup>
+    <SelfContained Condition=" '$(_IsPublishing)' == 'true' and '$(PublishSelfContained)' == 'false'">false</SelfContained>
+    <SelfContained Condition=" '$(_IsPublishing)' == 'true' and '$(PublishSelfContained)' == 'true'">true</SelfContained>
+  </PropertyGroup>
+  
   <!-- Before any additional SDK targets are imported, import the publish profile.
        This allows the publish profile to set properties like RuntimeIdentifier and them be
        respected by the SDK. -->
