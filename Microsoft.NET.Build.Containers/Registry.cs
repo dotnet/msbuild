@@ -176,19 +176,18 @@ public record struct Registry(Uri BaseUri)
         tag ??= "latest";
 
         using HttpClient client = GetClient();
-
-        foreach (var descriptor in x.LayerDescriptors)
-        {
+        var reg = this;
+        await Task.WhenAll(x.LayerDescriptors.Select(async descriptor => {
             string digest = descriptor.Digest;
             logProgressMessage($"Uploading layer {digest} to registry");
-            if (await BlobAlreadyUploaded(name, digest, client))
+            if (await reg.BlobAlreadyUploaded(name, digest, client))
             {
                 logProgressMessage($"Layer {digest} already existed");
-                continue;
+                return;
             }
 
             // Blob wasn't there; can we tell the server to get it from the base image?
-            HttpResponseMessage pushResponse = await client.PostAsync(new Uri(BaseUri, $"/v2/{name}/blobs/uploads/?mount={digest}&from={baseName}"), content: null);
+            HttpResponseMessage pushResponse = await client.PostAsync(new Uri(reg.BaseUri, $"/v2/{name}/blobs/uploads/?mount={digest}&from={baseName}"), content: null);
 
             if (pushResponse.StatusCode != HttpStatusCode.Created)
             {
@@ -202,10 +201,10 @@ public record struct Registry(Uri BaseUri)
                 // Ensure the blob is available locally
                 await x.originatingRegistry.Value.DownloadBlob(x.OriginatingName, descriptor);
                 // Then push it to the destination registry
-                await Push(Layer.FromDescriptor(descriptor), name, logProgressMessage);
+                await reg.Push(Layer.FromDescriptor(descriptor), name, logProgressMessage);
                 logProgressMessage($"Finished uploading layer {digest} to registry");
             }
-        }
+        }));
 
         using (MemoryStream stringStream = new MemoryStream(Encoding.UTF8.GetBytes(x.config.ToJsonString())))
         {
@@ -220,14 +219,12 @@ public record struct Registry(Uri BaseUri)
         HttpContent manifestUploadContent = new StringContent(x.manifest.ToJsonString());
         manifestUploadContent.Headers.ContentType = new MediaTypeHeaderValue(DockerManifestV2);
         var putResponse = await client.PutAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{manifestDigest}"), manifestUploadContent);
-        string putresponsestr = await putResponse.Content.ReadAsStringAsync();
 
         if (!putResponse.IsSuccessStatusCode)
         {
             string jsonResponse = await putResponse.Content.ReadAsStringAsync();
             throw new ContainerHttpException("Registry push failed.", putResponse.RequestMessage?.RequestUri?.ToString(), jsonResponse);
         }
-
         logProgressMessage($"Uploaded manifest to registry");
 
         logProgressMessage($"Uploading tag {tag} to registry");

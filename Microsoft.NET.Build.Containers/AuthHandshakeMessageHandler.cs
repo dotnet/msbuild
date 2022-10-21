@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
@@ -19,7 +20,7 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
     /// <summary>
     /// Cache of most-recently-recieved token for each server.
     /// </summary>
-    private static Dictionary<string, string> TokenCache = new();
+    private static ConcurrentDictionary<string, string> TokenCache = new();
 
     /// <summary>
     /// the www-authenticate header must have realm, service, and scope information, so this method parses it into that shape if present
@@ -112,8 +113,10 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
             throw new ArgumentException("Could not deserialize token from JSON");
         }
 
-        // save the retrieved token in the cache
-        TokenCache[realm.Host] = token.ResolvedToken;
+        // save the retrieved token in the cache.
+        // if we encounter a previous token (very possible due to concurrent upload)
+        // use the more recent token.
+        TokenCache.AddOrUpdate(realm.Host, token.ResolvedToken, (previous, current) => current);
         return token.ResolvedToken;
     }
 
