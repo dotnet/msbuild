@@ -388,18 +388,19 @@ namespace Microsoft.NET.Build.Tests
                     var ns = project.Root.Name.Namespace;
                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                     propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", runtimeIdentifier));
+                    propertyGroup.Add(new XElement(ns + "SelfContained", "false"));
                     propertyGroup.Add(new XElement(ns + "PublishSelfContained", "true"));
                 });
 
             var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
-                .Execute("-p:SelfContained=false")
+                .Execute()
                 .Should()
                 .Pass();
 
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
-            outputDirectory.Should().NotHaveFile("hostfxr.dll");
+            outputDirectory.Should().NotHaveFile("hostfxr.dll"); // This file will only appear if SelfContained. 
         }
 
         [Theory]

@@ -160,36 +160,6 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         }
 
         [Theory]
-        [InlineData("net7.0")]
-        public void ItPublishesSelfContainedWithPublishSelfContainedProperty(string targetFramework)
-        {
-            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
-            var testAsset = _testAssetsManager
-            .CopyTestAsset("HelloWorld", identifier: targetFramework)
-            .WithSource()
-            .WithTargetFramework(targetFramework)
-            .WithProjectChanges(project =>
-            {
-                var ns = project.Root.Name.Namespace;
-                var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                propertyGroup.Add(new XElement(ns + "PublishSelfContained", "true"));
-            });
-
-            var publishCommand = new PublishCommand(testAsset);
-            var publishResult = publishCommand.Execute($"/p:RuntimeIdentifier={rid}");
-
-            publishResult.Should().Pass();
-
-            var publishDirectory = publishCommand.GetOutputDirectory(
-                targetFramework: targetFramework,
-                runtimeIdentifier: rid);
-            publishDirectory.Should().HaveFiles(new[] {
-                "HelloWorld.dll",
-                "System.dll"
-            });
-        }
-
-        [Theory]
         [InlineData("net7.0", true, false, false)]
         [InlineData("net7.0", false, false, false)]
         [InlineData("net7.0", true, true, false)]
@@ -230,37 +200,6 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 expectedFiles.Append("System.dll"); // System.dll should only exist if self contained 
 
             publishedDirectory.Should().HaveFiles(expectedFiles);
-        }
-
-
-        [RequiresMSBuildVersionTheory("17.5.0.0")] // This needs _IsPublishing to be set in MSBuild to pass.
-        [InlineData("net7.0")]
-        public void PublishSelfContainedPropertyDoesNotOverrideGlobalSelfContainProperty(string targetFramework)
-        {
-            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
-
-            var testAsset = _testAssetsManager
-            .CopyTestAsset("HelloWorld")
-            .WithSource()
-            .WithProjectChanges(project =>
-            {
-                var ns = project.Root.Name.Namespace;
-                var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                propertyGroup.Add(new XElement(ns + "PublishSelfContained", "true"));
-            });
-
-            var publishCommand = new PublishCommand(testAsset);
-            var publishResult = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:SelfContained=false");
-
-            publishResult.Should().Pass();
-
-            var publishDirectory = publishCommand.GetOutputDirectory(
-                targetFramework: targetFramework,
-                runtimeIdentifier: rid);
-            publishDirectory.Should().HaveFiles(new[] {
-                "HelloWorld.dll",
-                "System.dll"  // File that should only exist if self contained 
-            });
         }
 
         [Theory]
