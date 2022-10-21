@@ -208,22 +208,22 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>d50065c4a4fe31a66a1cc2e1a31896d30464da13</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.CodeAnalysis.Razor.Tooling.Internal" Version="7.0.0-preview.5.22412.2">
+    <Dependency Name="Microsoft.CodeAnalysis.Razor.Tooling.Internal" Version="7.0.0-preview.5.22471.1">
       <Uri>https://github.com/dotnet/razor-compiler</Uri>
-      <Sha>a41514681a4db83c7cae7e17debf668d12efc1bb</Sha>
+      <Sha>883416c9d9ec221a9d73e62de093a43f2e2daf90</Sha>
       <SourceBuild RepoName="razor-compiler" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Mvc.Razor.Extensions.Tooling.Internal" Version="7.0.0-preview.5.22412.2">
+    <Dependency Name="Microsoft.AspNetCore.Mvc.Razor.Extensions.Tooling.Internal" Version="7.0.0-preview.5.22471.1">
       <Uri>https://github.com/dotnet/razor-compiler</Uri>
-      <Sha>a41514681a4db83c7cae7e17debf668d12efc1bb</Sha>
+      <Sha>883416c9d9ec221a9d73e62de093a43f2e2daf90</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Razor.SourceGenerator.Tooling.Internal" Version="7.0.0-preview.5.22412.2">
+    <Dependency Name="Microsoft.AspNetCore.Razor.SourceGenerator.Tooling.Internal" Version="7.0.0-preview.5.22471.1">
       <Uri>https://github.com/dotnet/razor-compiler</Uri>
-      <Sha>a41514681a4db83c7cae7e17debf668d12efc1bb</Sha>
+      <Sha>883416c9d9ec221a9d73e62de093a43f2e2daf90</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Razor.SourceGenerators.Transport" Version="7.0.0-preview.5.22412.2">
+    <Dependency Name="Microsoft.NET.Sdk.Razor.SourceGenerators.Transport" Version="7.0.0-preview.5.22471.1">
       <Uri>https://github.com/dotnet/razor-compiler</Uri>
-      <Sha>a41514681a4db83c7cae7e17debf668d12efc1bb</Sha>
+      <Sha>883416c9d9ec221a9d73e62de093a43f2e2daf90</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="7.0.0">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
