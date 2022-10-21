@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -189,8 +190,51 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("17.5.0.0")] // This needs _IsPublishing to be set in MSBuild to pass.
+        [InlineData("net7.0", true, false, false)]
+        [InlineData("net7.0", false, false, false)]
+        [InlineData("net7.0", true, true, false)]
+        [InlineData("net7.0", true, true, true)]
+        public void PublishSelfContainedPropertyDoesOrDoesntOverrideSelfContainProperty(string targetFramework, bool publishSelfContained, bool selfContainedIsGlobal, bool publishSelfContainedIsGlobal)
+        {
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testAsset = _testAssetsManager
+            .CopyTestAsset("HelloWorld")
+            .WithSource()
+            .WithProjectChanges(project =>
+            {
+                var ns = project.Root.Name.Namespace;
+                var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                propertyGroup.Add(new XElement(ns + "SelfContained", (!publishSelfContained).ToString()));
+                propertyGroup.Add(new XElement(ns + "PublishSelfContained", publishSelfContained.ToString()));
+            });
+
+            var publishCommand = new PublishCommand(testAsset);
+            List<string> args = new List<string>
+            {
+                $"/p:RuntimeIdentifier={rid}",
+                selfContainedIsGlobal ? $"/p:SelfContained={!publishSelfContained}" : "",
+                publishSelfContainedIsGlobal ? $"/p:PublishSelfContained={publishSelfContained}" : ""
+            };
+
+            publishCommand
+                .Execute(args.ToArray())
+                .Should()
+                .Pass();
+
+            var publishedDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid);
+            var expectedFiles = new[] { "HelloWorld.dll" };
+
+            if (publishSelfContained && !selfContainedIsGlobal)
+                expectedFiles.Append("System.dll"); // System.dll should only exist if self contained 
+
+            publishedDirectory.Should().HaveFiles(expectedFiles);
+        }
+
+
+        [RequiresMSBuildVersionTheory("17.5.0.0")] // This needs _IsPublishing to be set in MSBuild to pass.
         [InlineData("net7.0")]
-        public void PublishSelfContainedPropertyOverridesSelfContainProperty(string targetFramework)
+        public void PublishSelfContainedPropertyDoesNotOverrideGlobalSelfContainProperty(string targetFramework)
         {
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
@@ -205,7 +249,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             });
 
             var publishCommand = new PublishCommand(testAsset);
-            var publishResult = publishCommand.Execute( $"/p:RuntimeIdentifier={rid}", "/p:SelfContained=false");
+            var publishResult = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:SelfContained=false");
 
             publishResult.Should().Pass();
 
