@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Linq;
 using FluentAssertions;
@@ -15,6 +16,7 @@ using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -93,8 +95,6 @@ namespace Microsoft.NET.Publish.Tests
                 IsSdkProject = true,
                 IsExe = true
             };
-
-            var compatibleRid = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
 
             testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "True";
 
@@ -192,6 +192,70 @@ namespace Microsoft.NET.Publish.Tests
 
                 }
             }
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData("net7.0", "win-x64", "win-x86", false, false)]
+        [InlineData("net7.0", "win-x64", "win-x86", true, false)]
+        [InlineData("net7.0", "win-x64", "win-x86", true, true)]
+        public void PublishRuntimeIdentifierSetsRuntimeIdentifierAndDoesOrDoesntOverrideRID(string tfm, string publishRuntimeIdentifier, string runtimeIdentifier, bool runtimeIdentifierIsGlobal, bool publishRuntimeIdentifierIsGlobal)
+        {
+            var testProject = new TestProject()
+            {
+                IsExe = true,
+                TargetFrameworks = tfm
+            };
+            testProject.AdditionalProperties["RuntimeIdentifier"] = runtimeIdentifier;
+            testProject.AdditionalProperties["PublishRuntimeIdentifier"] = publishRuntimeIdentifier;
+            testProject.RecordProperties("RuntimeIdentifier");
+
+            List<string> args = new List<string>
+            {
+                $"/p:_IsPublishing=true", // Normally this would be set by the CLI (OR VS Soon TM), but this calls directly into t:/Publish.
+                runtimeIdentifierIsGlobal ? $"/p:RuntimeIdentifier={runtimeIdentifier}" : "",
+                publishRuntimeIdentifierIsGlobal ? $"/p:PublishRuntimeIdentifier={publishRuntimeIdentifier}" : ""
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: $"{publishRuntimeIdentifierIsGlobal}-{runtimeIdentifierIsGlobal}");
+            var publishCommand = new PublishCommand(testAsset);
+            publishCommand
+                .Execute(args.ToArray())
+                .Should()
+                .Pass();
+
+            string expectedRid = runtimeIdentifierIsGlobal ? runtimeIdentifier : publishRuntimeIdentifier;
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm, runtimeIdentifier: expectedRid);
+            var finalRid = properties["RuntimeIdentifier"];
+
+            Assert.True(finalRid == expectedRid); // This assert is theoretically worthless as the above code will fail if the RID path is wrong.
+        }
+
+        [WindowsOnlyFact]
+        [InlineData("net7.0", "tizen")] // tizen is an arbitrary nonwindows rid, picked because it will be different from a windows rid.
+        public void PublishRuntimeIdentifierDoesNotOverrideUseCurrentRuntime(string tfm, string publishRid)
+        {
+            var testProject = new TestProject()
+            {
+                IsExe = true,
+                TargetFrameworks = tfm
+            };
+
+            testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "true";
+            testProject.AdditionalProperties["PublishRuntimeIdentifier"] = publishRid;
+            testProject.RecordProperties("RuntimeIdentifier");
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: "UCR_PUBLISH_RID_OVERRIDES");
+            var publishCommand = new PublishCommand(testAsset);
+            publishCommand
+                .Execute($"/p:_IsPublishing=true")
+                .Should()
+                .Pass();
+
+            var currentRid = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm, runtimeIdentifier: currentRid);
+            var finalRid = properties["RuntimeIdentifier"];
+
+            Assert.True(finalRid == currentRid); // This assert is theoretically worthless as the above code will fail if the RID path is wrong.
         }
 
         [Fact]
