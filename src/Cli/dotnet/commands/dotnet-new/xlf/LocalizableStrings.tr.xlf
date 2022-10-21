@@ -84,7 +84,7 @@
     project(s): {0}
     to solution file: {1}
     solution folder: {2}</source>
-        <target state="needs-review-translation">
+        <target state="translated">
     projesi/projeleri: {0}
     şu çözüm dosyasına: {1}
     şu çözüm klasörüne: {2} ekleniyor</target>

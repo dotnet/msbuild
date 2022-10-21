@@ -483,7 +483,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 
         [Theory]
         //creates all possible combinations for supported templates, language versions and frameworks
+#pragma warning disable CA1825 // Avoid zero-length array allocations. https://github.com/dotnet/sdk/issues/28672
         [MemberData(nameof(FeaturesSupport_Data))]
+#pragma warning restore CA1825 // Avoid zero-length array allocations.
         public async void FeaturesSupport(
             string name,
             bool buildPass,
