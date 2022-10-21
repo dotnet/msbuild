@@ -230,7 +230,7 @@ namespace Microsoft.NET.Publish.Tests
             Assert.True(finalRid == expectedRid); // This assert is theoretically worthless as the above code will fail if the RID path is wrong.
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyTheory]
         [InlineData("net7.0", "tizen")] // tizen is an arbitrary nonwindows rid, picked because it will be different from a windows rid.
         public void PublishRuntimeIdentifierDoesNotOverrideUseCurrentRuntime(string tfm, string publishRid)
         {
