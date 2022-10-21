@@ -380,7 +380,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
             var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld", identifier: targetFramework)
+                .CopyTestAsset("HelloWorld", identifier: "ItDoesNotBuildSCDueToPSC")
                 .WithSource()
                 .WithTargetFramework(targetFramework)
                 .WithProjectChanges(project =>

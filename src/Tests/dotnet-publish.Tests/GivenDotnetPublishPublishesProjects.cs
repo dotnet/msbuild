@@ -169,7 +169,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             var testAsset = _testAssetsManager
-            .CopyTestAsset("HelloWorld")
+            .CopyTestAsset("HelloWorld", identifier: $"PSC-OVERRIDES-{publishSelfContained}-{selfContainedIsGlobal}-{publishSelfContainedIsGlobal}")
             .WithSource()
             .WithProjectChanges(project =>
             {
