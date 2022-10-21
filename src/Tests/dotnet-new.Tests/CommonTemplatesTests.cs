@@ -92,8 +92,8 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 VerifyCommandOutput = true,
                 VerificationExcludePatterns = new[] { "*.cs", "*.fs", "*.vb", "*.*proj" },
                 DoNotPrependCallerMethodNameToScenarioName = false,
-                DoNotAppendParamsToScenarioName = true,
-                DoNotPrependTemplateToScenarioName = true,
+                DoNotAppendTemplateArgsToScenarioName = true,
+                DoNotPrependTemplateNameToScenarioName = true,
             }
             .WithCustomScrubbers(
                 ScrubbersDefinition.Empty
@@ -184,9 +184,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 ExpectationsDirectory = "Approvals",
                 VerifyCommandOutput = true,
                 VerificationIncludePatterns = new[] { "*.txt" },
-                DoNotAppendParamsToScenarioName = true,
+                DoNotAppendTemplateArgsToScenarioName = true,
                 SettingsDirectory = _fixture.HomeDirectory,
-                DoNotPrependTemplateToScenarioName = true,
+                DoNotPrependTemplateNameToScenarioName = true,
             }
             .WithCustomScrubbers(
                 ScrubbersDefinition.Empty
@@ -212,9 +212,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 ExpectationsDirectory = "Approvals",
                 VerifyCommandOutput = true,
                 VerificationIncludePatterns = new[] { "*.txt" },
-                DoNotAppendParamsToScenarioName = true,
+                DoNotAppendTemplateArgsToScenarioName = true,
                 SettingsDirectory = _fixture.HomeDirectory,
-                DoNotPrependTemplateToScenarioName = true,
+                DoNotPrependTemplateNameToScenarioName = true,
             }
             .WithCustomScrubbers(
                 ScrubbersDefinition.Empty
@@ -364,9 +364,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 ExpectationsDirectory = "Approvals",
                 OutputDirectory = workingDir,
                 SettingsDirectory = _fixture.HomeDirectory,
-                // DoNotPrependTemplateToScenarioName = true,
-                DoNotAppendParamsToScenarioName = true,
-                ScenarioDistinguisher = langVersion == null ? "#NoLang" : null,
+                // DoNotPrependTemplateNameToScenarioName = true,
+                DoNotAppendTemplateArgsToScenarioName = true,
+                ScenarioName = langVersion == null ? "#NoLang" : null,
             }
             .WithCustomScrubbers(
                 ScrubbersDefinition.Empty
@@ -400,9 +400,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 TemplateSpecificArgs = args,
                 ExpectationsDirectory = "Approvals",
                 SettingsDirectory = _fixture.HomeDirectory,
-                // DoNotPrependTemplateToScenarioName = true,
-                DoNotAppendParamsToScenarioName = true,
-                DoNotPrependTemplateToScenarioName = true,
+                // DoNotPrependTemplateNameToScenarioName = true,
+                DoNotAppendTemplateArgsToScenarioName = true,
+                DoNotPrependTemplateNameToScenarioName = true,
             }
             .WithCustomScrubbers(
                 ScrubbersDefinition.Empty
@@ -519,9 +519,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 ExpectationsDirectory = "Approvals",
                 OutputDirectory = workingDir,
                 SettingsDirectory = _fixture.HomeDirectory,
-                DoNotPrependTemplateToScenarioName = false,
-                DoNotAppendParamsToScenarioName = true,
-                ScenarioDistinguisher = !buildPass ?
+                DoNotPrependTemplateNameToScenarioName = false,
+                DoNotAppendTemplateArgsToScenarioName = true,
+                ScenarioName = !buildPass ?
                     "OutOfSupport" :
                     $"Nullable-{supportsNullable}#TopLevel-{supportsTopLevel}#ImplicitUsings-{supportsImplicitUsings}#FileScopedNs-{supportsFileScopedNs}" + (langVersion == null ? "#NoLang" : null),
                 VerificationExcludePatterns = buildPass ? null : new[] { "*" },
