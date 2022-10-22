@@ -294,6 +294,10 @@ namespace Microsoft.Build.Internal
                         var runtimeInformationType = new Tuple<string, Type>(null, typeof(RuntimeInformation));
                         var osPlatformType = new Tuple<string, Type>(null, typeof(OSPlatform));
 
+                        #if FEATURE_OS_APIS
++                           var operatingSystemType = new Tuple<string, Type>(null, typeof(OperatingSystem));
+                        #endif
+
                         // Make specific static methods available (Assembly qualified type names are *NOT* supported, only null which means mscorlib):
                         availableStaticMethods.TryAdd("System.Environment::ExpandEnvironmentVariables", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::GetEnvironmentVariable", environmentType);
@@ -365,6 +369,10 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("Microsoft.Build.Utilities.ToolLocationHelper", new Tuple<string, Type>("Microsoft.Build.Utilities.ToolLocationHelper, Microsoft.Build.Utilities.Core, Version=" + MSBuildConstants.CurrentAssemblyVersion + ", Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", null));
                         availableStaticMethods.TryAdd("System.Runtime.InteropServices.RuntimeInformation", runtimeInformationType);
                         availableStaticMethods.TryAdd("System.Runtime.InteropServices.OSPlatform", osPlatformType);
+
+                        #if FEATURE_OS_APIS
++                           availableStaticMethods.TryAdd("System.OperatingSystem", operatingSystemType);
+                        #endif
 
                         s_availableStaticMethods = availableStaticMethods;
                     }
