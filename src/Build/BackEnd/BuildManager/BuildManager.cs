@@ -965,10 +965,10 @@ namespace Microsoft.Build.Execution
 
                 if (e is AggregateException ae && ae.InnerExceptions.Count == 1)
                 {
-                    e = ae.InnerExceptions.First();
+                    ExceptionDispatchInfo.Capture(ae.InnerExceptions[0]).Throw();
                 }
 
-                throw e;
+                throw;
             }
             finally
             {
