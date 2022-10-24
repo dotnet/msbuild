@@ -243,6 +243,7 @@ namespace Microsoft.NET.Publish.Tests
             testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "true";
             testProject.AdditionalProperties["PublishRuntimeIdentifier"] = publishRid;
             testProject.RecordProperties("RuntimeIdentifier");
+            testProject.RecordProperties("NETCoreSdkPortableRuntimeIdentifier");
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: "UCR_PUBLISH_RID_OVERRIDES");
             var publishCommand = new PublishCommand(testAsset);
@@ -251,11 +252,16 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var currentRid = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
-            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm, runtimeIdentifier: currentRid);
-            var finalRid = properties["RuntimeIdentifier"];
+            var projectTfmPath = Path.Combine(testAsset.Path, System.Reflection.MethodBase.GetCurrentMethod().Name, "bin", "Debug", tfm);
+            var projectPath = Directory.GetDirectories(projectTfmPath).FirstOrDefault();
+            var testResolvedRid = Path.GetFileName(projectPath);
 
-            Assert.True(finalRid == currentRid); // This assert is theoretically worthless as the above code will fail if the RID path is wrong.
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm, runtimeIdentifier: testResolvedRid);
+            var finalRid = properties["RuntimeIdentifier"];
+            var expectedRid = properties["NETCoreSdkPortableRuntimeIdentifier"];
+
+            Assert.True(expectedRid == testResolvedRid);
+            Assert.True(finalRid == expectedRid); // This assert is theoretically worthless as the above code will fail if the RID path is wrong.
         }
 
         [Fact]
