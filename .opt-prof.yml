@@ -44,7 +44,7 @@ stages:
     - name: branchName
       value: $[replace(variables['resources.pipeline.ComponentBuildUnderTest.sourceBranch'],'refs/heads/','')]
     - name: OptimizationInputsDropName
-      value: Testing/AR-May/OptimizationData/DotNet-msbuild-Trusted/$(branchName)/$(resources.pipeline.ComponentBuildUnderTest.runName)/$(Build.BuildId)/$(System.StageAttempt)
+      value: OptimizationData/DotNet-msbuild-Trusted/$(branchName)/$(resources.pipeline.ComponentBuildUnderTest.runName)/$(Build.BuildId)/$(System.StageAttempt)
     ##### Step Hooks #####
     preTestMachineConfigurationStepList:
     - download: ComponentBuildUnderTest
