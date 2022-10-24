@@ -693,7 +693,7 @@ namespace Microsoft.Build.Internal
 
                         if (String.IsNullOrEmpty(s_debugDumpPath))
                         {
-                            s_debugDumpPath = Path.GetTempPath();
+                            s_debugDumpPath = FileUtilities.TempFileDirectory;
                         }
                         else
                         {

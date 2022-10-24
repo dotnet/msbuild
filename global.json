@@ -3,11 +3,11 @@
     "allowPrerelease": true
   },
   "tools": {
-    "dotnet": "7.0.100-rc.1.22431.12",
+    "dotnet": "7.0.100-rc.2.22477.23",
     "vs": {
-      "version": "17.2.1"
+      "version": "17.3.1"
     },
-    "xcopy-msbuild": "17.2.1"
+    "xcopy-msbuild": "17.3.1"
   },
   "msbuild-sdks": {
     "Microsoft.Build.CentralPackageVersions": "2.0.1",

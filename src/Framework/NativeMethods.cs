@@ -36,7 +36,6 @@ internal static class NativeMethods
     internal const uint RUNTIME_INFO_DONT_SHOW_ERROR_DIALOG = 0x40;
     internal const uint FILE_TYPE_CHAR = 0x0002;
     internal const Int32 STD_OUTPUT_HANDLE = -11;
-    internal const uint DISABLE_NEWLINE_AUTO_RETURN = 0x0008;
     internal const uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
     internal const uint RPC_S_CALLPENDING = 0x80010115;
     internal const uint E_ABORT = (uint)0x80004004;
@@ -506,16 +505,10 @@ internal static class NativeMethods
     {
         int numberOfCpus = Environment.ProcessorCount;
 #if !MONO
-        // .NET Core on Windows returns a core count limited to the current NUMA node
+        // .NET on Windows returns a core count limited to the current NUMA node
         //     https://github.com/dotnet/runtime/issues/29686
         // so always double-check it.
-        if (IsWindows
-#if NETFRAMEWORK
-            // .NET Framework calls Windows APIs that have a core count limit (32/64 depending on process bitness).
-            // So if we get a high core count on full framework, double-check it.
-            && (numberOfCpus >= 32)
-#endif
-            )
+        if (IsWindows)
         {
             var result = GetLogicalCoreCountOnWindows();
             if (result != -1)
@@ -655,6 +648,7 @@ internal static class NativeMethods
     /// <summary>
     /// Gets a flag indicating if we are running under Linux
     /// </summary>
+    [SupportedOSPlatformGuard("linux")]
     internal static bool IsLinux
     {
 #if CLR2COMPATIBILITY
@@ -1470,9 +1464,16 @@ internal static class NativeMethods
         }
     }
 
-#endregion
+    #endregion
 
-#region PInvoke
+    #region PInvoke
+    [SupportedOSPlatform("linux")]
+    [DllImport("libc", SetLastError = true)]
+    internal static extern int chmod(string pathname, int mode);
+
+    [SupportedOSPlatform("linux")]
+    [DllImport("libc", SetLastError = true)]
+    internal static extern int mkdir(string path, int mode);
 
     /// <summary>
     /// Gets the current OEM code page which is used by console apps

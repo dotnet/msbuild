@@ -76,6 +76,7 @@ namespace Microsoft.Build.CommandLine
 
             if (exitResult.MSBuildClientExitType == MSBuildClientExitType.ServerBusy ||
                 exitResult.MSBuildClientExitType == MSBuildClientExitType.UnableToConnect ||
+                exitResult.MSBuildClientExitType == MSBuildClientExitType.UnknownServerState ||
                 exitResult.MSBuildClientExitType == MSBuildClientExitType.LaunchError)
             {
                 if (KnownTelemetry.BuildTelemetry != null)

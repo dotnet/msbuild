@@ -9,4 +9,4 @@ Here's a brief explanation on the labels most often used by the MSBuild team exc
 | `initial-investigation` | A member of the team does a "first pass" investigation. | `needs-triage` is applied and team member and unassigns themselves after the initial investigation is complete. |
 | `stale` | An issue marked with `needs-more-info` is inactive for 7 days. | The issue will be closed after 30 days of inactivity while the `stale` label is applied. |
 | `For consideration` | An issue should get higher prioritization when planning the next set of features. | |
-| `up-for-grabs` | Anyone can take ownership over this issue. | If a contributor wants to take the issue on, they should ask that it be assigned to them BEFORE doing development work.  |
+| `help wanted` | Anyone can take ownership over this issue. | If a contributor wants to take the issue on, they should ask that it be assigned to them BEFORE doing development work.  |

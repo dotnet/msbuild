@@ -409,6 +409,14 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public void BeginBuild(BuildParameters parameters, IEnumerable<DeferredBuildMessage> deferredBuildMessages)
         {
+            // TEMP can be modified from the environment. Most of Traits is lasts for the duration of the process (with a manual reset for tests)
+            // and environment variables we use as properties are stored in a dictionary at the beginning of the build, so they also cannot be
+            // changed during a build. Some of our older stuff uses live environment variable checks. The TEMP directory previously used a live
+            // environment variable check, but it now uses a cached value. Nevertheless, we should support changing it between builds, so reset
+            // it here in case the user is using Visual Studio or the MSBuild server, as those each last for multiple builds without changing
+            // BuildManager.
+            FileUtilities.ClearTempFileDirectory();
+
             // deferredBuildMessages cannot be an optional parameter on a single BeginBuild method because it would break binary compatibility.
             _deferredBuildMessages = deferredBuildMessages;
             BeginBuild(parameters);
@@ -957,10 +965,10 @@ namespace Microsoft.Build.Execution
 
                 if (e is AggregateException ae && ae.InnerExceptions.Count == 1)
                 {
-                    e = ae.InnerExceptions.First();
+                    ExceptionDispatchInfo.Capture(ae.InnerExceptions[0]).Throw();
                 }
 
-                throw e;
+                throw;
             }
             finally
             {
@@ -1846,8 +1854,7 @@ namespace Microsoft.Build.Execution
 
             if (submission.BuildRequestData.GraphBuildOptions.Build)
             {
-                // Kick off project cache initialization frontloading
-                Task.Run(() => _projectCacheService.InitializePluginsForGraph(projectGraph, _executionCancellationTokenSource.Token));
+                _projectCacheService.InitializePluginsForGraph(projectGraph, _executionCancellationTokenSource.Token);
 
                 var targetListTask = projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames);
 

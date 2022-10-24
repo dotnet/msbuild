@@ -274,6 +274,46 @@ namespace Microsoft.Build.UnitTests
                 .OverallResult.ShouldBe(BuildResultCode.Success);
         }
 
+        /// <summary>
+        /// Regression test for https://github.com/dotnet/msbuild/issues/7828
+        /// </summary>
+        /// <remarks>
+        /// This test verifies,
+        /// 1. When binary log and verbosity=diagnostic are both set, the equivalent command line is printed.
+        /// 2. When binary log and non-diag verbosity are set, the equivalent command line is NOT printed.
+        /// </remarks>
+        [Fact]
+        public void SuppressCommandOutputForNonDiagVerbosity()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                var contents = @"
+                    <Project>
+                        <Target Name='Target2'>
+                            <Exec Command='echo a'/>
+                        </Target>
+                    </Project>";
+                BinaryLogger logger = new();
+                logger.Parameters = _logFile;
+                TransientTestFolder testFolder = env.CreateFolder(createFolder: true);
+
+                TransientTestFile projectFile1 = env.CreateFile(testFolder, "testProject01.proj", contents);
+                string consoleOutput1 = RunnerUtilities.ExecMSBuild($"{projectFile1.Path} -bl:{logger.Parameters} -verbosity:diag -nologo", out bool success1);
+                success1.ShouldBeTrue();
+                var expected1 = $"-nologo -bl:{logger.Parameters} -verbosity:diag {projectFile1.Path}";
+                consoleOutput1.ShouldContain(expected1);
+
+                foreach (var verbosity in new string[] { "q", "m", "n", "d" })
+                {
+                    TransientTestFile projectFile2 = env.CreateFile(testFolder, $"testProject_{verbosity}.proj", contents);
+                    string consoleOutput2 = RunnerUtilities.ExecMSBuild($"{projectFile2.Path} -bl:{logger.Parameters} -verbosity:{verbosity} -nologo", out bool success2);
+                    success2.ShouldBeTrue();
+                    var expected2 = $"-nologo -bl:{logger.Parameters} -verbosity:{verbosity} {projectFile2.Path}";
+                    consoleOutput2.ShouldNotContain(expected2);
+                }
+            }
+        }
+
         public void Dispose()
         {
             _env.Dispose();

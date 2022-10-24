@@ -824,8 +824,11 @@ namespace Microsoft.Build.Evaluation
             List<P> list = new(dictionary.Count);
             foreach (P p in dictionary)
             {
-                if (p is EnvironmentDerivedProjectPropertyInstance ||
-                    (p is ProjectProperty pp && pp.IsEnvironmentProperty))
+                // This checks if a property was derived from the environment but is not one of the well-known environment variables we
+                // use to change build behavior.
+                if ((p is EnvironmentDerivedProjectPropertyInstance ||
+                    (p is ProjectProperty pp && pp.IsEnvironmentProperty)) &&
+                    !EnvironmentUtilities.IsWellKnownEnvironmentDerivedProperty(p.Name))
                 {
                     continue;
                 }
@@ -1538,6 +1541,9 @@ namespace Microsoft.Build.Evaluation
                             break;
                         case ProjectChooseElement choose:
                             EvaluateChooseElement(choose);
+                            break;
+                        case ProjectItemDefinitionGroupElement itemDefinition:
+                            _itemDefinitionGroupElements.Add(itemDefinition);
                             break;
                         default:
                             ErrorUtilities.ThrowInternalError("Unexpected child type");

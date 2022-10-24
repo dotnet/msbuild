@@ -6,7 +6,6 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <IsPackable>true</IsPackable>
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
-    <LangVersion>8.0</LangVersion>
     <PackageId>Microsoft.NET.StringTools</PackageId>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
@@ -15,6 +14,13 @@
 
     <AssemblyName>Microsoft.NET.StringTools</AssemblyName>
     <PackageDescription>This package contains the $(AssemblyName) assembly which implements common string-related functionality such as weak interning.</PackageDescription>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <!-- Place the netstandard2.0 ref assembly to /ref instead of /lib to work around a NuGet pack misbehavior. -->
+    <!-- Without this customization both the ref and implementation assembly would go to /lib, creating a conflict. -->
+    <TargetsForTfmSpecificBuildOutput />
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackRefAssembly</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net35'">
@@ -36,4 +42,10 @@
     <Compile Remove="InternableString.Simple.cs" />
     <Compile Remove="WeakStringCache.Locking.cs" />
   </ItemGroup>
+
+  <Target Name="PackRefAssembly">
+      <ItemGroup>
+        <TfmSpecificPackageFile Include="$(TargetRefPath);@(FinalDocFile)" PackagePath="ref/$(TargetFramework)" />
+      </ItemGroup>
+  </Target>
 </Project>

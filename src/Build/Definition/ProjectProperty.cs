@@ -98,7 +98,7 @@ namespace Microsoft.Build.Evaluation
             [DebuggerStepThrough]
             get
             {
-                if (this is EnvironmentDerivedProjectProperty environmentProperty && environmentProperty.loggingContext is { IsValid: true } loggingContext && !environmentProperty._loggedEnvProperty)
+                if (this is EnvironmentDerivedProjectProperty environmentProperty && environmentProperty.loggingContext is { IsValid: true } loggingContext && !environmentProperty._loggedEnvProperty && !Traits.LogAllEnvironmentVariables)
                 {
                     EnvironmentVariableReadEventArgs args = new(Name, EvaluatedValueEscapedInternal);
                     args.BuildEventContext = loggingContext.BuildEventContext;
@@ -596,7 +596,7 @@ namespace Microsoft.Build.Evaluation
             {
                 [DebuggerStepThrough]
                 get
-                { return _project.GlobalProperties.ContainsKey(Name); }
+                { return _project.GlobalPropertiesContains(Name); }
             }
 
             /// <summary>
