@@ -92,6 +92,8 @@ namespace Microsoft.Build.UnitTests
                 Exec exec = PrepareExec("echo Hello World!");
                 exec.Execute().ShouldBeFalse();
 
+                // These reset different things. ChangeWaves.ResetStateForTests only clears caches for things related to
+                // change waves. FileUtilities.ClearTempFileDirectory permits resetting the directory used for temp files.
                 ChangeWaves.ResetStateForTests();
                 FileUtilities.ClearTempFileDirectory();
             }
