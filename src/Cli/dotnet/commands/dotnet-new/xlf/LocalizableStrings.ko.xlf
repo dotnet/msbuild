@@ -274,7 +274,7 @@
       </trans-unit>
       <trans-unit id="WorkloadInfoProvider_Message_AddWorkloads">
         <source>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</source>
-        <target state="new">Run 'dotnet workload search' to search workloads available to be installed on your SDK.</target>
+        <target state="translated">'dotnet workload search'을 실행하여 SDK에 설치할 수 있는 워크로드를 검색합니다.</target>
         <note>{Locked="dotnet workload search"}</note>
       </trans-unit>
     </body>
