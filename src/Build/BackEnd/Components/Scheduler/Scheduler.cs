@@ -1963,13 +1963,15 @@ namespace Microsoft.Build.BackEnd
         {
             emitNonErrorLogs = _ => { };
 
-            var isIsolatedBuild = _componentHost.BuildParameters.IsolateProjects;
+            IsolateProjects isolateProjects = _componentHost.BuildParameters.IsolateProjects;
             var configCache = (IConfigCache) _componentHost.GetComponent(BuildComponentType.ConfigCache);
 
             // do not check root requests as nothing depends on them
-            if (!isIsolatedBuild || request.IsRootRequest || request.SkipStaticGraphIsolationConstraints)
+            if (isolateProjects == IsolateProjects.False || request.IsRootRequest || request.SkipStaticGraphIsolationConstraints)
             {
-                if (isIsolatedBuild && request.SkipStaticGraphIsolationConstraints)
+                // N.B.: isolateProjects == IsolateProjects.Message iff request.SkipStaticGraphIsolationConstraints
+                bool logComment = ((isolateProjects == IsolateProjects.True || isolateProjects == IsolateProjects.Message) && request.SkipStaticGraphIsolationConstraints);
+                if (logComment)
                 {
                     // retrieving the configs is not quite free, so avoid computing them eagerly
                     var configs = GetConfigurations();

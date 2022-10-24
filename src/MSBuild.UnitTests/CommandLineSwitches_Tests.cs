@@ -1018,7 +1018,7 @@ namespace Microsoft.Build.UnitTests
                                         profilerLogger: null,
                                         enableProfiler: false,
                                         interactive: false,
-                                        isolateProjects: false,
+                                        isolateProjects: IsolateProjects.False,
                                         graphBuildOptions: null,
                                         lowPriority: false,
                                         inputResultsCaches: null,

@@ -1034,7 +1034,8 @@ namespace Microsoft.Build.BackEnd
 
         private List<string> GetUndeclaredProjects(MSBuild msbuildTask)
         {
-            if (!_componentHost.BuildParameters.IsolateProjects)
+            IsolateProjects isolateProjects = _componentHost.BuildParameters.IsolateProjects;
+            if (isolateProjects == IsolateProjects.False || isolateProjects == IsolateProjects.Message)
             {
                 return null;
             }
@@ -1066,9 +1067,9 @@ namespace Microsoft.Build.BackEnd
                         undeclaredProjects = new List<string>(projectReferenceItems.Count);
                     }
 
-                    undeclaredProjects.Add(normalizedMSBuildProject);
+                            undeclaredProjects.Add(normalizedMSBuildProject);
+                        }
                 }
-            }
 
             return undeclaredProjects;
         }

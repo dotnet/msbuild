@@ -212,7 +212,7 @@ namespace Microsoft.Build.Execution
 
         private bool _interactive;
 
-        private bool _isolateProjects;
+        private IsolateProjects _isolateProjects;
 
         private string[] _inputResultsCacheFiles;
 
@@ -760,9 +760,9 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether projects should build in isolation.
+        /// Gets or sets a value indicating the isolation mode to use.
         /// </summary>
-        public bool IsolateProjects
+        public IsolateProjects IsolateProjects
         {
             get => _isolateProjects;
             set => _isolateProjects = value;
@@ -770,7 +770,8 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Input cache files that MSBuild will use to read build results from.
-        /// Setting this also turns on isolated builds.
+        /// If the isolation mode is not explicitly already set to <see cref="IsolateProjects.False"/>,
+        /// this sets the isolation mode to <see cref="IsolateProjects.True"/>.
         /// </summary>
         public string[] InputResultsCacheFiles
         {
@@ -780,7 +781,8 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Output cache file where MSBuild will write the contents of its build result caches during EndBuild.
-        /// Setting this also turns on isolated builds.
+        /// If the isolation mode is not explicitly already set to <see cref="IsolateProjects.False"/>,
+        /// this sets the isolation mode to <see cref="IsolateProjects.True"/>.
         /// </summary>
         public string OutputResultsCacheFile
         {
@@ -828,7 +830,7 @@ namespace Microsoft.Build.Execution
 
         internal bool UsesInputCaches() => InputResultsCacheFiles != null;
 
-        internal bool SkippedResultsDoNotCauseCacheMiss() => IsolateProjects;
+        internal bool SkippedResultsDoNotCauseCacheMiss() => IsolateProjects != IsolateProjects.False;
 
         /// <summary>
         /// Implementation of the serialization mechanism.
@@ -861,7 +863,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _logInitialPropertiesAndItems);
             translator.TranslateEnum(ref _projectLoadSettings, (int) _projectLoadSettings);
             translator.Translate(ref _interactive);
-            translator.Translate(ref _isolateProjects);
+            translator.TranslateEnum(ref _isolateProjects, (int)_isolateProjects);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.

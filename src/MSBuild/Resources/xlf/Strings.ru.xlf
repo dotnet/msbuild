@@ -129,7 +129,7 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_35_IsolateProjectsSwitch">
-        <source>  -isolateProjects[:True|False]
+        <source>  -isolateProjects[:True|Message|False]
                      Causes MSBuild to build each project in isolation.
 
                      This is a more restrictive mode of MSBuild as it requires
@@ -138,9 +138,12 @@
                      memory overhead when building a large set of projects.
                      (Short form: -isolate)
 
+                     When set to Message, all isolation violations are
+                     logged as messages.
+
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="translated">  -isolateProjects[:True|False]
+        <target state="translated">  -isolateProjects[:True|Message|False]
                      Сообщает MSBuild, что нужно собирать каждый проект по отдельности.
 
                      Это более строгий режим MSBuild, так как он требует,
@@ -148,6 +151,9 @@
                      во время оценки, но он может улучшить планирование и сократить
                      издержки памяти при сборке больших наборов проектов.
                      (Краткая форма: -isolate)
+
+                     При равенстве Message, все нарушения изоляции
+                     регистрируются как сообщения.
 
                      Это экспериментальный флаг. Может работать не так, как ожидалось.
     </target>
@@ -1023,11 +1029,11 @@
       </trans-unit>
       <trans-unit id="InvalidIsolateProjectsValue">
         <source>MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</source>
-        <target state="translated">MSBUILD : error MSB1056: значение изолирования проектов является недопустимым. {0}</target>
+        <target state="needs-review-translation">MSBUILD : error MSB1056: значение изолирования проектов является недопустимым. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent to Boolean.TrueString, IsolateProjects. Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>

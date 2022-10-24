@@ -130,7 +130,7 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_35_IsolateProjectsSwitch">
-        <source>  -isolateProjects[:True|False]
+        <source>  -isolateProjects[:True|Message|False]
                      Causes MSBuild to build each project in isolation.
 
                      This is a more restrictive mode of MSBuild as it requires
@@ -139,9 +139,12 @@
                      memory overhead when building a large set of projects.
                      (Short form: -isolate)
 
+                     When set to Message, all isolation violations are
+                     logged as messages.
+
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="translated">  -isolateProjects[:True|False]
+        <target state="needs-review-translation">  -isolateProjects[:True|Message|False]
                      Force MSBuild à générer chaque projet de manière isolée.
 
                      Ce mode de MSBuild est plus restrictif car il nécessite
@@ -1024,11 +1027,11 @@
       </trans-unit>
       <trans-unit id="InvalidIsolateProjectsValue">
         <source>MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</source>
-        <target state="translated">MSBUILD : error MSB1056: La valeur d’isolation des projets n'est pas valide. {0}</target>
+        <target state="needs-review-translation">MSBUILD : error MSB1056: La valeur d’isolation des projets n'est pas valide. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent to Boolean.TrueString, IsolateProjects. Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -1752,7 +1755,7 @@ fois plus petit que le journal
         <target state="translated">  -profileEvaluation:&lt;fichier&gt;
          Profile l'évaluation MSBuild et écrit le résultat
          dans le fichier spécifié. Si l'extension du fichier spécifié
-         est '.md', le résultat est généré au format Markdown. 
+         est '.md', le résultat est généré au format Markdown.
          Sinon, un fichier de valeurs séparées par des tabulations est généré.
     </target>
         <note />

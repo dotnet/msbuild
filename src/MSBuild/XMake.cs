@@ -702,7 +702,7 @@ namespace Microsoft.Build.CommandLine
                 ProfilerLogger profilerLogger = null;
                 bool enableProfiler = false;
                 bool interactive = false;
-                bool isolateProjects = false;
+                IsolateProjects isolateProjects = IsolateProjects.False;
                 GraphBuildOptions graphBuildOptions = null;
                 bool lowPriority = false;
                 string[] inputResultsCaches = null;
@@ -1120,7 +1120,7 @@ namespace Microsoft.Build.CommandLine
             ProfilerLogger profilerLogger,
             bool enableProfiler,
             bool interactive,
-            bool isolateProjects,
+            IsolateProjects isolateProjects,
             GraphBuildOptions graphBuildOptions,
             bool lowPriority,
             string[] inputResultsCaches,
@@ -2226,7 +2226,7 @@ namespace Microsoft.Build.CommandLine
             ref ProfilerLogger profilerLogger,
             ref bool enableProfiler,
             ref Dictionary<string, string> restoreProperties,
-            ref bool isolateProjects,
+            ref IsolateProjects isolateProjects,
             ref GraphBuildOptions graphBuild,
             ref string[] inputResultsCaches,
             ref string outputResultsCache,
@@ -2403,7 +2403,7 @@ namespace Microsoft.Build.CommandLine
 
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.IsolateProjects))
                     {
-                        isolateProjects = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IsolateProjects], defaultValue: true, resourceName: "InvalidIsolateProjectsValue");
+                        isolateProjects = ProcessIsolateProjectsSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IsolateProjects]);
                     }
 
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GraphBuild))
@@ -2543,6 +2543,37 @@ namespace Microsoft.Build.CommandLine
 
             int indexOfColon = val.IndexOf(":");
             return indexOfColon < 0 || indexOfColon == val.Length - 1;
+        }
+
+        internal static IsolateProjects ProcessIsolateProjectsSwitch(string[] parameters)
+        {
+
+            // Before /isolate had parameters, it was treated as a boolean switch.
+            // Preserve that in case anyone is using /isolate:{false|true}
+            if (parameters.Length == 1 && bool.TryParse(parameters[0], out bool boolValue))
+            {
+                return boolValue ? IsolateProjects.True : IsolateProjects.False;
+            }
+
+            IsolateProjects isolateProjects = IsolateProjects.True;
+            foreach (string parameter in parameters)
+            {
+                if (string.IsNullOrWhiteSpace(parameter))
+                {
+                    continue;
+                }
+
+                if (parameter.Trim().Equals("Message", StringComparison.OrdinalIgnoreCase))
+                {
+                    isolateProjects = IsolateProjects.Message;
+                }
+                else
+                {
+                    CommandLineSwitchException.Throw("InvalidIsolateProjectsValue", parameter);
+                }
+            }
+
+            return isolateProjects;
         }
 
         internal static GraphBuildOptions ProcessGraphBuildSwitch(string[] parameters)

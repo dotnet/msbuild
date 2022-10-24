@@ -525,9 +525,9 @@ namespace Microsoft.Build.Execution
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
 
-                if (_buildParameters.UsesCachedResults())
+                if (_buildParameters.UsesCachedResults() && parameters.IsolateProjects == IsolateProjects.False)
                 {
-                    _buildParameters.IsolateProjects = true;
+                    _buildParameters.IsolateProjects = IsolateProjects.True;
                 }
 
                 if (_buildParameters.UsesOutputCache() && string.IsNullOrWhiteSpace(_buildParameters.OutputResultsCacheFile))
