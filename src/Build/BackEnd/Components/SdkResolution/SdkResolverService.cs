@@ -14,7 +14,7 @@ using System.Reflection;
 using Microsoft.Build.Eventing;
 using System.Linq;
 using System.Text.RegularExpressions;
-using static Microsoft.Build.Shared.FileMatcher;
+using System.Diagnostics;
 
 #nullable disable
 
@@ -126,12 +126,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     if (failOnUnresolvedSdk)
                     {
-                        loggingContext.LogError(new BuildEventFileInfo(sdkReferenceLocation), "FailedToResolveSDK", sdk.Name);
-                    }
-
-                    foreach (string error in errors)
-                    {
-                        loggingContext.LogErrorFromText(subcategoryResourceName: null, errorCode: null, helpKeyword: null, new BuildEventFileInfo(sdkReferenceLocation), message: error);
+                        loggingContext.LogError(new BuildEventFileInfo(sdkReferenceLocation), "FailedToResolveSDK", sdk.Name, string.Join($"{Environment.NewLine}  ", errors));
                     }
 
                     LogWarnings(loggingContext, sdkReferenceLocation, warnings);
@@ -229,12 +224,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             if (failOnUnresolvedSdk)
             {
-                loggingContext.LogError(new BuildEventFileInfo(sdkReferenceLocation), "FailedToResolveSDK", sdk.Name);
-            }
-
-            foreach (string error in errors)
-            {
-                loggingContext.LogErrorFromText(subcategoryResourceName: null, errorCode: null, helpKeyword: null, file: new BuildEventFileInfo(sdkReferenceLocation), message: error);
+                loggingContext.LogError(new BuildEventFileInfo(sdkReferenceLocation), "FailedToResolveSDK", sdk.Name, string.Join($"{Environment.NewLine}  ", errors));
             }
 
             LogWarnings(loggingContext, sdkReferenceLocation, warnings);

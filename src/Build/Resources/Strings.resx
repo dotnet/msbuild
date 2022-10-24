@@ -1307,7 +1307,8 @@
     <value>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</value>
   </data>
   <data name="FailedToResolveSDK" xml:space="preserve">
-    <value>None of the SDK resolvers were able to resolve SDK "{0}". Their error messages are reproduced below in the order they occurred. Only one SDK resolver is expected to be able to resolve "{0}", so only one of the messages below indicates a real failure.</value>
+    <value>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
+  {1}</value>
   </data>
   <data name="CouldNotRunNuGetSdkResolver" xml:space="preserve">
     <value>The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</value>

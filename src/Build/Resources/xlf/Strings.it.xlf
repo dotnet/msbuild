@@ -128,8 +128,10 @@
         <note />
       </trans-unit>
       <trans-unit id="FailedToResolveSDK">
-        <source>None of the SDK resolvers were able to resolve SDK "{0}". Their error messages are reproduced below in the order they occurred. Only one SDK resolver is expected to be able to resolve "{0}", so only one of the messages below indicates a real failure.</source>
-        <target state="new">None of the SDK resolvers were able to resolve SDK "{0}". Their error messages are reproduced below in the order they occurred. Only one SDK resolver is expected to be able to resolve "{0}", so only one of the messages below indicates a real failure.</target>
+        <source>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
+  {1}</source>
+        <target state="new">Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
+  {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
