@@ -97,6 +97,7 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' or '$(TargetFramework)' == '$(LatestDotNetCoreForMSBuild)'">
     <DefineConstants>$(DefineConstants);FEATURE_PIPEOPTIONS_CURRENTUSERONLY</DefineConstants>
     <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_NODE_REUSE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_OS_APIS</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GenerateReferenceAssemblySource)' != 'true'">
@@ -115,10 +116,6 @@
   <PropertyGroup Condition="'$(MonoBuild)' != 'true' and '$(DotNetBuildFromSource)' != 'true' and $([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETFramework'">
     <DefineConstants>$(DefineConstants);FEATURE_MSIOREDIST</DefineConstants>
     <FeatureMSIORedist>true</FeatureMSIORedist>
-  </PropertyGroup>
-
-   <PropertyGroup Condition="'$(TargetFramework)' == 'net5.0'">
-    <DefineConstants>$(DefineConstants);FEATURE_OS_APIS</DefineConstants>
   </PropertyGroup>
 
 </Project>
