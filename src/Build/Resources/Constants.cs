@@ -295,7 +295,7 @@ namespace Microsoft.Build.Internal
                         var osPlatformType = new Tuple<string, Type>(null, typeof(OSPlatform));
 
                         #if FEATURE_OS_APIS
-+                           var operatingSystemType = new Tuple<string, Type>(null, typeof(OperatingSystem));
+                           var operatingSystemType = new Tuple<string, Type>(null, typeof(OperatingSystem));
                         #endif
 
                         // Make specific static methods available (Assembly qualified type names are *NOT* supported, only null which means mscorlib):
@@ -371,7 +371,7 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.Runtime.InteropServices.OSPlatform", osPlatformType);
 
                         #if FEATURE_OS_APIS
-+                           availableStaticMethods.TryAdd("System.OperatingSystem", operatingSystemType);
+                            availableStaticMethods.TryAdd("System.OperatingSystem", operatingSystemType);
                         #endif
 
                         s_availableStaticMethods = availableStaticMethods;

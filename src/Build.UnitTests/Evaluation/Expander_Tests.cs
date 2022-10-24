@@ -32,6 +32,7 @@ using Xunit;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
+using System.Collections.Concurrent;
 
 #nullable disable
 
@@ -2849,6 +2850,18 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Assert.Equal(expectedExpansion, result);
         }
+
+        [Fact]
+        public void TestFeatureOSAPIs()
+        {
+            var availableStaticMethods = new ConcurrentDictionary<string, Tuple<string, Type>>(StringComparer.OrdinalIgnoreCase);
+
+            var operatingSystemType = new Tuple<string, Type>(null, typeof(OperatingSystem));
+            availableStaticMethods.TryAdd("System.OperatingSystem", operatingSystemType);
+            Assert.Equal(availableStaticMethods.Count, 1);
+            Assert.NotNull(operatingSystemType);
+        }
+
 
         [Theory]
         [InlineData("AString", "x12x456789x11", "$(AString.IndexOf('x', 1))", "3")]
