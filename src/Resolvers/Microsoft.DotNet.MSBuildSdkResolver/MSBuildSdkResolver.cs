@@ -96,7 +96,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
             if (context.IsRunningInVisualStudio)
             {
-                logger.LogMessage("Running in Visual Studio, using static workload resolver");
+                logger.LogMessage($"Running in Visual Studio, using static workload resolver");
                 workloadResolver = _staticWorkloadResolver;
             }
 
@@ -110,7 +110,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 dotnetRoot = EnvironmentProvider.GetDotnetExeDirectory(_getEnvironmentVariable, logger.LogMessage);
                 logger.LogMessage($"\tDotnet root: {dotnetRoot}");
 
-                logger.LogMessage("Resolving .NET Core SDK directory");
+                logger.LogMessage($"Resolving .NET Core SDK directory");
                 string globalJsonStartDir = GetGlobalJsonStartDir(context);
                 logger.LogMessage($"\tglobal.json start directory: {globalJsonStartDir}");
                 var resolverResult = _netCoreSdkResolver.ResolveNETCoreSdkDirectory(globalJsonStartDir, context.MSBuildVersion, context.IsRunningInVisualStudio, dotnetRoot);
@@ -238,10 +238,10 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             return factory.IndicateSuccess(msbuildSdkDir, netcoreSdkVersion, propertiesToAdd, itemsToAdd, warnings);
         }
 
-        private static SdkResult Failure(SdkResultFactory factory, Action<string> log, string format, params object[] args)
+        private static SdkResult Failure(SdkResultFactory factory, Action<FormattableString> log, string format, params object[] args)
         {
             string error = string.Format(format, args);
-            log("Failed to resolve SDK: " + error);
+            log($"Failed to resolve SDK: {error}");
             return factory.IndicateFailure(new[] { error });
         }
 
@@ -321,7 +321,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 }
             }
 
-            public void LogMessage(string message)
+            public void LogMessage(FormattableString message)
             {
                 if (_stream != null)
                 {

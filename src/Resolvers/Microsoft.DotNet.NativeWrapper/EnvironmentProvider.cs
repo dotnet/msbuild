@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.NativeWrapper
             return commandPath;
         }
 
-        public string GetDotnetExeDirectory(Action<string> log = null)
+        public string GetDotnetExeDirectory(Action<FormattableString> log = null)
         {
             string environmentOverride = _getEnvironmentVariable(Constants.DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR);
             if (!string.IsNullOrEmpty(environmentOverride))
@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.NativeWrapper
             return dotnetDirectory;
         }
 
-        public static string GetDotnetExeDirectory(Func<string, string> getEnvironmentVariable = null, Action<string> log = null)
+        public static string GetDotnetExeDirectory(Func<string, string> getEnvironmentVariable = null, Action<FormattableString> log = null)
         {
             if (getEnvironmentVariable == null)
             {
