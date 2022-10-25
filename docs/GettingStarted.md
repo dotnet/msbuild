@@ -25,4 +25,4 @@ For more information, see [Customizing a container](./ContainerCustomization.md)
 > This package only supports Linux containers in this version.
 
 > **Note**
-> This package only supports Web projects (those that use the `Microsoft.NET.Sdk.Web` SDK) in this version.
+> If you are publishing a console application (or any non-Web project) you will need to add the `/t:PublishContainer` option to the command line above. See [dotnet/sdk-container-builds#141](https://github.com/dotnet/sdk-container-builds/issues/141) for more details.

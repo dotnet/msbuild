@@ -1,6 +1,6 @@
 # Customizing your container
 
-You can control many aspects of the generated container through MSBuild properties. In general, if you could use a command in a Dockerfile to set some configuration, you can do the same via MSBuild. 
+You can control many aspects of the generated container through MSBuild properties. In general, if you could use a command in a Dockerfile to set some configuration, you can do the same via MSBuild.
 
 > **Note**
 > The only exception to this is `RUN` commands - due to the way we build containers, those cannot be emulated. If you need this functionality, you will need to use a Dockerfile to build your container images.
@@ -39,10 +39,9 @@ Be default, we push to the local Docker daemon (annotated by `docker://`), but f
 
 ## ContainerImageName
 
-This property controls the name of the image itself, e.g `dotnet/runtime` or `my-awesome-app`. 
+This property controls the name of the image itself, e.g `dotnet/runtime` or `my-awesome-app`.
 
 By default, the value used will be the `AssemblyName` of the project.
-
 
 ```xml
 <ContainerImageName>my-super-awesome-app</ContainerImageName>
@@ -65,7 +64,6 @@ By default, the value used will be the `Version` of the project.
 <ContainerImageTags>1.2.3-alpha2;latest</ContainerImageTags>
 ```
 
-
 > **Note**
 > Tags can only contain up to 127 alphanumeric characters, periods, underscores, and dashes. They must start with an alphanumeric character or an underscore. Any other form will result in an error being thrown.
 
@@ -84,6 +82,7 @@ By default, we use the `/app` directory as the working directory.
 This item adds TCP or UDP ports to the list of known ports for the container. This enables container runtimes like Docker to map these ports to the host machine automatically. This is often used as documentation for the container, but can also be used to enable automatic port mapping.
 
 ContainerPort items have two properties:
+
 * Include
   * The port number to expose
 * Type
@@ -103,10 +102,13 @@ ContainerPort items have two properties:
 This item adds a metadata label to the container. Labels have no impact on the container at runtime, but are often used to store version and authoring metadata for use by security scanners and other infrastructure tools.
 
 ContainerLabel items have two properties:
+
 * Include
   * The key of the label
 * Value
   * The value of the label - this may be empty
+
+See [default container labels](#default-container-labels) for a list of labels that are created by default.
 
 ```xml
 <ItemGroup>
@@ -114,12 +116,78 @@ ContainerLabel items have two properties:
 <ItemGroup>
 ```
 
-## Unsupported properties
+## ContainerEnvironmentVariable
 
-There are many other properties and items that we want to add support for in subsequent previews:
+This item adds a new environment variable to the container. Environment variables will be accessible to the application running in the container immediately, and are often used to change the runtime behavior of the running application.
 
-* Entrypoints
-* Entrypoint Arguments
-* Environment Variables
+ContainerEnvironmentVariable items have two properties:
 
-We expect to add them in future versions, so watch this space!
+* Include
+  * The name of the environment variable
+* Value
+  * The value of the environment variable
+
+```xml
+<ItemGroup>
+  <ContainerEnvironmentVariable Include="LOGGER_VERBOSITY" Value="Trace" />
+</ItemGroup>
+```
+
+## ContainerEntrypoint
+
+This item can be used to customize the entrypoint of the container - the binary that is run by default when the container is started.
+
+By default, for builds that create an executable binary that binary is set as the ContainerEntrypoint. For builds that do not create an executable binary `dotnet path/to/application.dll` is used as the ContainerEntrypoint.
+
+ContainerEntrypoint items have one property:
+
+* Include
+  * The command, option, or argument to use in the entrypoint command
+
+```xml
+<ItemGroup Label="Entrypoint Assignment">
+  <!-- This is how you would start the dotnet ef tool in your container -->
+  <ContainerEntrypoint Include="dotnet" />
+  <ContainerEntrypoint Include="ef" />
+
+  <!-- This shorthand syntax means the same thing - note the semicolon separating the tokens. -->
+  <ContainerEntrypoint Include="dotnet;ef" />
+</ItemGroup>
+```
+
+## ContainerEntrypointArgs
+
+This item controls the default arguments provided to the `ContainerEntrypoint`. This should be used when the ContainerEntrypoint is a program that the user might want to use on its own.
+
+By default, no ContainerEntrypointArgs are created on your behalf.
+
+ContainerEntrypointArg items have one property:
+
+* Include
+  * The option or argument to apply to the ContainerEntrypoint command
+
+```xml
+<ItemGroup>
+  <!-- Assuming the ContainerEntrypoint defined above, this would be the way to update the database by default, but let the user run a different EF command. -->
+  <ContainerEntrypointArgs Include="database" />
+  <ContainerEntrypointArgs Include="update" />
+
+  <!-- This is the shorthand syntax for the same idea -->
+  <ContainerEntrypointArgs Include="database;update" />
+</ItemGroup>
+```
+
+## ASP.NET Core customizations
+
+ASP.NET Core applications have certain defaults that are set to make containers more 'plug and play'.
+
+* A ContainerPort item is set to expose TCP port 80
+* The ASPNETCORE_URLS environment variable is set to `http://+:80` to match that port value.
+
+Both of these will be skipped if a custom value is set.
+
+## Default container labels
+
+Labels are often used to provide consistent metadata on container images. This package provides some default labels to encourage better maintainability of the generated images.
+
+* `org.opencontainers.image.created` is set to the ISO 8601 format of the current UTC DateTime
