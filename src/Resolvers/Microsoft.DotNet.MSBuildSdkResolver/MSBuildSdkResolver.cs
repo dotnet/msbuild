@@ -35,8 +35,6 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
         private static CachingWorkloadResolver _staticWorkloadResolver = new CachingWorkloadResolver();
 
-        private bool _shouldLog = false;
-
         public DotNetMSBuildSdkResolver() 
             : this(Environment.GetEnvironmentVariable, VSSettings.Ambient)
         {
@@ -47,12 +45,6 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         {
             _getEnvironmentVariable = getEnvironmentVariable;
             _netCoreSdkResolver = new NETCoreSdkResolver(getEnvironmentVariable, vsSettings);
-
-            if (_getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_ENABLE_LOG") is String val &&
-                string.Equals(val, "true", StringComparison.OrdinalIgnoreCase))
-            {
-                _shouldLog = true;
-            }
         }
 
         private sealed class CachedState
@@ -74,13 +66,13 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             List<string> warnings = null;
             CachingWorkloadResolver workloadResolver = null;
 
-            using var logger = new ResolverLogger(sdkReference, _shouldLog);
+            var logger = new ResolverLogger();
 
             logger.LogMessage($"Attempting to resolve MSBuild SDK {sdkReference.Name}");
 
             if (context.State is CachedState priorResult)
             {
-                logger.LogMessage($"Using previously cached state");
+                logger.LogString("Using previously cached state");
                 
 
                 dotnetRoot = priorResult.DotnetRoot;
@@ -96,7 +88,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
             if (context.IsRunningInVisualStudio)
             {
-                logger.LogMessage($"Running in Visual Studio, using static workload resolver");
+                logger.LogString("Running in Visual Studio, using static workload resolver");
                 workloadResolver = _staticWorkloadResolver;
             }
 
@@ -110,7 +102,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 dotnetRoot = EnvironmentProvider.GetDotnetExeDirectory(_getEnvironmentVariable, logger.LogMessage);
                 logger.LogMessage($"\tDotnet root: {dotnetRoot}");
 
-                logger.LogMessage($"Resolving .NET Core SDK directory");
+                logger.LogString("Resolving .NET Core SDK directory");
                 string globalJsonStartDir = GetGlobalJsonStartDir(context);
                 logger.LogMessage($"\tglobal.json start directory: {globalJsonStartDir}");
                 var resolverResult = _netCoreSdkResolver.ResolveNETCoreSdkDirectory(globalJsonStartDir, context.MSBuildVersion, context.IsRunningInVisualStudio, dotnetRoot);
@@ -120,7 +112,8 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                     logger.LogMessage($"Failed to resolve .NET SDK.  Global.json path: {resolverResult.GlobalJsonPath}");
                     return Failure(
                         factory,
-                        logger.LogMessage,
+                        logger,
+                        context.Logger,
                         Strings.UnableToLocateNETCoreSdk);
                 }
 
@@ -151,7 +144,8 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 {
                     return Failure(
                         factory,
-                        logger.LogMessage,
+                        logger,
+                        context.Logger,
                         Strings.NETCoreSDKSmallerThanMinimumRequestedVersion,
                         netcoreSdkVersion,
                         sdkReference.MinimumVersion);
@@ -162,7 +156,8 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 {
                     return Failure(
                         factory,
-                        logger.LogMessage,
+                        logger,
+                        context.Logger,
                         Strings.MSBuildSmallerThanMinimumVersion,
                         netcoreSdkVersion,
                         minimumMSBuildVersion,
@@ -174,7 +169,8 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 {
                     return Failure(
                         factory,
-                        logger.LogMessage,
+                        logger,
+                        context.Logger,
                         Strings.NETCoreSDKSmallerThanMinimumVersionRequiredByVisualStudio,
                         netcoreSdkVersion,
                         minimumVSDefinedSDKVersion);
@@ -204,6 +200,8 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                     }
                     propertiesToAdd.Add("SdkResolverHonoredGlobalJson", "false");
                     propertiesToAdd.Add("SdkResolverGlobalJsonPath", resolverResult.GlobalJsonPath);
+
+                    CopyLogMessages(logger, context.Logger);
                 }
             }
 
@@ -230,7 +228,8 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             {
                 return Failure(
                     factory,
-                    logger.LogMessage,
+                    logger,
+                    context.Logger,
                     Strings.MSBuildSDKDirectoryNotFound,
                     msbuildSdkDir);
             }
@@ -238,11 +237,22 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             return factory.IndicateSuccess(msbuildSdkDir, netcoreSdkVersion, propertiesToAdd, itemsToAdd, warnings);
         }
 
-        private static SdkResult Failure(SdkResultFactory factory, Action<FormattableString> log, string format, params object[] args)
+        private static SdkResult Failure(SdkResultFactory factory, ResolverLogger logger, SdkLogger sdkLogger, string format, params object[] args)
         {
             string error = string.Format(format, args);
-            log($"Failed to resolve SDK: {error}");
+            logger.LogMessage($"Failed to resolve SDK: {error}");
+
+            CopyLogMessages(logger, sdkLogger);
+
             return factory.IndicateFailure(new[] { error });
+        }
+
+        private static void CopyLogMessages(ResolverLogger source, SdkLogger destination)
+        {
+            foreach (var message in source.Messages)
+            {
+                destination.LogMessage(message.ToString(), MessageImportance.High);
+            }
         }
 
         /// <summary>
@@ -307,31 +317,23 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         }
 
 
-        class ResolverLogger : IDisposable
+        class ResolverLogger
         {
-            private readonly StreamWriter _stream;
+            public List<object> Messages = new List<object>();
 
-            public ResolverLogger(SdkReference sdkReference, bool enabled)
+            public ResolverLogger()
             {
-                if (enabled)
-                {
-                    var path = Path.Combine(Path.GetTempPath(), $"Microsoft.DotNet.MSBuildSdkResolver_{DateTime.Now:yyyyMMdd_HHmmss}_{sdkReference.Name}_{Guid.NewGuid()}.log");
-                    Directory.CreateDirectory(Path.GetDirectoryName(path));
-                    _stream = File.CreateText(path);
-                }
+
             }
 
             public void LogMessage(FormattableString message)
             {
-                if (_stream != null)
-                {
-                    _stream.WriteLine(message);
-                }
+                Messages.Add(message);
             }
 
-            public void Dispose()
+            public void LogString(string message)
             {
-                _stream?.Dispose();
+                Messages.Add(message);
             }
         }
     }
