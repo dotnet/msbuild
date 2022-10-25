@@ -23,7 +23,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <_IsExecutable Condition="'$(OutputType)' == 'Exe' or '$(OutputType)'=='WinExe'">true</_IsExecutable>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="'$(HasRuntimeOutput)' == ''">
     <HasRuntimeOutput>$(_IsExecutable)</HasRuntimeOutput>
     <_UsingDefaultForHasRuntimeOutput>true</_UsingDefaultForHasRuntimeOutput>
@@ -36,11 +36,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Edit SelfContained to match the value of PublishSelfContained if we are publishing.
        This Won't affect t:/Publish (because of _IsPublishing), and also won't override a global SelfContained property.-->
-  <PropertyGroup>
-    <SelfContained Condition=" '$(_IsPublishing)' == 'true' and '$(PublishSelfContained)' == 'false'">false</SelfContained>
-    <SelfContained Condition=" '$(_IsPublishing)' == 'true' and '$(PublishSelfContained)' == 'true'">true</SelfContained>
+  <PropertyGroup Condition="'$(_CommandLineDefinedSelfContained)' != 'true' and '$(_IsPublishing)' == 'true'">
+    <SelfContained Condition="'$(PublishSelfContained)' == 'true' or '$(PublishSelfContained)' == 'false'">$(PublishSelfContained)</SelfContained>
   </PropertyGroup>
-  
+
   <!-- Before any additional SDK targets are imported, import the publish profile.
        This allows the publish profile to set properties like RuntimeIdentifier and them be
        respected by the SDK. -->

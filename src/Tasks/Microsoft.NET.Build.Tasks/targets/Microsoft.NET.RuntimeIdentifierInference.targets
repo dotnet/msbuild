@@ -71,7 +71,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                     '$(PublishReadyToRun)' == 'true' or
                     '$(PublishSingleFile)' == 'true' or
                     '$(PublishAot)' == 'true' or
-                    ('$(_IsPublishing)' == 'true' and '$(PublishSelfContained)' == 'true')
+                    ('$(_CommandLineDefinedSelfContained)' != 'true' and '$(_IsPublishing)' == 'true' and '$(PublishSelfContained)' == 'true')
                   )">true</UseCurrentRuntimeIdentifier>
   </PropertyGroup>
 
