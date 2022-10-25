@@ -45,8 +45,8 @@
       <trans-unit id="PostAction_AddProjToSln_Error_BothInRootAndSolutionFolderSpecified">
         <source>Add project reference to solution action is not configured correctly in the template.
     The 'solutionFolder' and 'inRoot' cannot be used together; use only one of the options.</source>
-        <target state="new">Add project reference to solution action is not configured correctly in the template.
-    The 'solutionFolder' and 'inRoot' cannot be used together; use only one of the options.</target>
+        <target state="translated">L’ajout d’une référence de projet à l’action de solution n’est pas configuré correctement dans le modèle.
+    'solutionFolder' et 'inRoot' ne peuvent pas être utilisés ensemble ; utilisez une seule des options.</target>
         <note>do not translate: 'solutionFolder', 'inRoot'</note>
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Error_NoProjectsToAdd">
@@ -73,9 +73,9 @@
         <source>Adding
     project(s): {0}
     in the root of solution file: {1}</source>
-        <target state="new">Adding
-    project(s): {0}
-    in the root of solution file: {1}</target>
+        <target state="translated">Ajouter
+    projet(s) : {0}
+    à la racine du fichier solution : {1}</target>
         <note>{0} - list of file paths to projects to add,
 {1} - the path to target solution file</note>
       </trans-unit>
@@ -249,7 +249,7 @@
       </trans-unit>
       <trans-unit id="ProjectCapabilityConstraint_Restricted_NotRestored_CTA">
         <source>Run 'dotnet restore {0}' to restore the project.</source>
-        <target state="needs-review-translation">Exécutez « dotnet restore {0} » pour restaurer le projet.</target>
+        <target state="translated">Exécutez « dotnet restore {0} » pour restaurer le projet.</target>
         <note>{Locked="dotnet restore {0}"}</note>
       </trans-unit>
       <trans-unit id="ProjectContextSymbolSource_DisplayName">
@@ -274,7 +274,7 @@
       </trans-unit>
       <trans-unit id="WorkloadInfoProvider_Message_AddWorkloads">
         <source>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</source>
-        <target state="needs-review-translation">Exécutez 'dotnet workload search' pour rechercher les charges de travail disponibles à installer sur votre SDK.</target>
+        <target state="translated">Exécutez 'dotnet workload search' pour rechercher les charges de travail disponibles à installer sur votre SDK.</target>
         <note>{Locked="dotnet workload search"}</note>
       </trans-unit>
     </body>

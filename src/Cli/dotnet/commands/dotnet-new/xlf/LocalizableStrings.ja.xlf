@@ -45,8 +45,8 @@
       <trans-unit id="PostAction_AddProjToSln_Error_BothInRootAndSolutionFolderSpecified">
         <source>Add project reference to solution action is not configured correctly in the template.
     The 'solutionFolder' and 'inRoot' cannot be used together; use only one of the options.</source>
-        <target state="new">Add project reference to solution action is not configured correctly in the template.
-    The 'solutionFolder' and 'inRoot' cannot be used together; use only one of the options.</target>
+        <target state="translated">テンプレートでソリューションへのプロジェクト参照の追加アクションが正しく構成されていません。
+    'solutionFolder' と 'inRoot' を同時に使用することはできません。いずれか 1 つのオプションのみを使用してください。</target>
         <note>do not translate: 'solutionFolder', 'inRoot'</note>
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Error_NoProjectsToAdd">
@@ -73,9 +73,9 @@
         <source>Adding
     project(s): {0}
     in the root of solution file: {1}</source>
-        <target state="new">Adding
-    project(s): {0}
-    in the root of solution file: {1}</target>
+        <target state="translated">
+ プロジェクトの追加: ソリューション ファイルのルート: {1} に {0}
+</target>
         <note>{0} - list of file paths to projects to add,
 {1} - the path to target solution file</note>
       </trans-unit>
@@ -249,7 +249,7 @@
       </trans-unit>
       <trans-unit id="ProjectCapabilityConstraint_Restricted_NotRestored_CTA">
         <source>Run 'dotnet restore {0}' to restore the project.</source>
-        <target state="needs-review-translation">'dotnet restore {0}' を実行してプロジェクトを復元します。</target>
+        <target state="translated">'dotnet restore {0}' を実行してプロジェクトを復元します。</target>
         <note>{Locked="dotnet restore {0}"}</note>
       </trans-unit>
       <trans-unit id="ProjectContextSymbolSource_DisplayName">
@@ -274,7 +274,7 @@
       </trans-unit>
       <trans-unit id="WorkloadInfoProvider_Message_AddWorkloads">
         <source>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</source>
-        <target state="needs-review-translation">SDK にインストールできるワークロードを検索するには、'dotnet workload search' を実行します。</target>
+        <target state="translated">SDK にインストールできるワークロードを検索するには、'dotnet workload search' を実行します。</target>
         <note>{Locked="dotnet workload search"}</note>
       </trans-unit>
     </body>

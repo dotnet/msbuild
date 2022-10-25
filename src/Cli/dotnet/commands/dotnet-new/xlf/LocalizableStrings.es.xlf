@@ -249,7 +249,7 @@
       </trans-unit>
       <trans-unit id="ProjectCapabilityConstraint_Restricted_NotRestored_CTA">
         <source>Run 'dotnet restore {0}' to restore the project.</source>
-        <target state="needs-review-translation">Ejecute "dotnet restore {0}" para restaurar el proyecto.</target>
+        <target state="translated">Ejecute "dotnet restore {0}" para restaurar el proyecto.</target>
         <note>{Locked="dotnet restore {0}"}</note>
       </trans-unit>
       <trans-unit id="ProjectContextSymbolSource_DisplayName">
@@ -274,7 +274,7 @@
       </trans-unit>
       <trans-unit id="WorkloadInfoProvider_Message_AddWorkloads">
         <source>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</source>
-        <target state="needs-review-translation">Ejecute "dotnet workload search" para buscar las cargas de trabajo disponibles para instalarse en el SDK.</target>
+        <target state="translated">Ejecute "dotnet workload search" para buscar las cargas de trabajo disponibles para instalarse en el SDK.</target>
         <note>{Locked="dotnet workload search"}</note>
       </trans-unit>
     </body>
