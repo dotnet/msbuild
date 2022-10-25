@@ -61,14 +61,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeIdentifier Condition="'$(PlatformTarget)' == 'x86' or '$(PlatformTarget)' == ''">win7-x86</RuntimeIdentifier>
   </PropertyGroup>
 
-  <!-- Check if variable is global, resets the value to it's original state if it was local.-->
+  <!-- Check if SelfContained is global, resets the value to it's original state if it was local.-->
   <PropertyGroup>
     <_OriginalSelfContainedValue>$(SelfContained)</_OriginalSelfContainedValue>
     <SelfContained></SelfContained>
   </PropertyGroup>
 
   <Choose>
-    <!-- Assumes a global variable cannot be an undefined variable; not setting it to 'temp' as that may cause type resolution failures.-->
+    <!-- Assumes a global variable cannot be an undefined variable.-->
     <When Condition="'$(SelfContained)' != '' and $(SelfContained) == $(_OriginalSelfContainedValue)">
       <PropertyGroup>
         <_SelfContainedIsGlobal>true</_SelfContainedIsGlobal>
@@ -82,13 +82,19 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Choose>
 
   <PropertyGroup>
-    <SelfContained>$(OriginalSelfContainedValue)</SelfContained>
+    <SelfContained>$(_OriginalSelfContainedValue)</SelfContained>
     <_OriginalSelfContainedValue></_OriginalSelfContainedValue>
   </PropertyGroup>
 
   <!-- PubishSelfContained may be set but not change self contained if we are not publishing, or self contained was already set globally. This condition tracks whether it will take effect.-->
-  <PropertyGroup Condition=" '$(_CommandLineDefinedSelfContained)' != 'true' and '$(_SelfContainedIsGlobal)' != 'true' and '$(_IsPublishing)' == 'true' and '$(PublishSelfContained)' == 'true'">
+  <PropertyGroup Condition=" '$(_CommandLineDefinedSelfContained)' != 'true' and '$(_SelfContainedIsGlobal)' != 'true' and '$(_IsPublishing)' == 'true' and ('$(PublishSelfContained)' == 'true' or '$(PublishSelfContained)' == 'false')">
     <_PublishSelfContainedIsActive>true</_PublishSelfContainedIsActive>
+  </PropertyGroup>
+
+  <!-- Edit SelfContained to match the value of PublishSelfContained if we are publishing.
+       This Won't affect t:/Publish (because of _IsPublishing), and also won't override a global SelfContained property.-->
+  <PropertyGroup Condition="'$(_PublishSelfContainedIsActive)' == 'true'">
+    <SelfContained>$(PublishSelfContained)</SelfContained>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(UseCurrentRuntimeIdentifier)' == ''">
@@ -101,7 +107,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                     '$(PublishReadyToRun)' == 'true' or
                     '$(PublishSingleFile)' == 'true' or
                     '$(PublishAot)' == 'true' or
-                    '$(_PublishSelfContainedIsActive)' == 'true'
+                    ('$(_PublishSelfContainedIsActive)' == 'true' and '$(PublishSelfContained)' == 'true')
                   )">true</UseCurrentRuntimeIdentifier>
   </PropertyGroup>
 
@@ -200,7 +206,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                  ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
                  FormatArguments="SelfContained"/>
 
-    <NETSdkError Condition="'$(_PublishSelfContainedIsActive)' == 'true' and '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == ''"
+    <NETSdkError Condition="'$(_PublishSelfContainedIsActive)' == 'true' and '$(PublishSelfContained)' == 'true' and '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == ''"
                  ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
                  FormatArguments="PublishSelfContained"/>
 

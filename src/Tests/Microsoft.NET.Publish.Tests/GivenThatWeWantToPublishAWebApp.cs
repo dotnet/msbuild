@@ -201,7 +201,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var command = new PublishCommand(testProjectInstance);
             command
-                .Execute("/p:PublishProfile=test")
+                .Execute("/p:PublishProfile=test", "-bl:C:\\users\\noahgilson\\SELFCP.binlog")
                 .Should()
                 .Pass();
 
