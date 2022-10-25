@@ -42,7 +42,7 @@ Set the environment variable `MSBUILDDEBUGONSTART` to `2`, then attach a debugge
 
 To build projects using the MSBuild binaries from the repository, you first need to do a build (command: `build.cmd /p:CreateBootstrap=true`) which produces a bootstrap directory mimicking a Visual Studio (full framework flavor) or dotnet CLI (.net core flavor) installation.
 
-Now, just point `dotnet ./artifacts/bin/bootstrap/netcoreapp2.1/MSBuild/MSBuild.dll` at a project file.
+Now, just point `dotnet ./artifacts/bin/bootstrap/<TARGET_FRAMEWORK>/MSBuild/MSBuild.dll` at a project file. (Change <TARGET_FRAMEWORK> to current target framework, for example net7.0, net8.0) 
 
 Alternatively, if you want to test the msbuild binaries in a more realistic environment, you can overwrite the dotnet CLI msbuild binaries (found under a path like `~/dotnet/sdk/3.0.100-alpha1-009428/`) with the just-built MSBuild . You might have to kill existing `dotnet` processes before doing this. You can use [`Deploy-MSBuild.ps1 -runtime Core`](../Deploy-MSBuild.md#.NET-(Core)-SDK) to do the copy. Then, (using the previous dotnet example directory) just point `~/dotnet/dotnet build` at a project file.
 
