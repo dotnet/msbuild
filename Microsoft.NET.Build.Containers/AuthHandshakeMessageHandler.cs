@@ -18,12 +18,12 @@ namespace Microsoft.NET.Build.Containers;
 /// </summary>
 public partial class AuthHandshakeMessageHandler : DelegatingHandler
 {
-    private record AuthInfo(Uri Realm, string Service, string Scope);
+    private record AuthInfo(Uri Realm, string Service, string? Scope);
 
     /// <summary>
-    /// Cache of most-recently-recieved token for each server.
+    /// Cache of most-recently-received token for each server.
     /// </summary>
-    private static ConcurrentDictionary<string, string> TokenCache = new();
+    private static ConcurrentDictionary<string, AuthenticationHeaderValue> HostAuthenticationCache = new();
 
     /// <summary>
     /// the www-authenticate header must have realm, service, and scope information, so this method parses it into that shape if present
@@ -31,9 +31,10 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
     /// <param name="msg"></param>
     /// <param name="authInfo"></param>
     /// <returns></returns>
-    private static bool TryParseAuthenticationInfo(HttpResponseMessage msg, [NotNullWhen(true)] out AuthInfo? authInfo)
+    private static bool TryParseAuthenticationInfo(HttpResponseMessage msg, [NotNullWhen(true)] out string? scheme, [NotNullWhen(true)] out AuthInfo? authInfo)
     {
         authInfo = null;
+        scheme = null;
 
         var authenticateHeader = msg.Headers.WwwAuthenticate;
         if (!authenticateHeader.Any())
@@ -42,18 +43,19 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
         }
 
         AuthenticationHeaderValue header = authenticateHeader.First();
-        if (header is { Scheme: "Bearer", Parameter: string args })
+        if (header is { Scheme: "Bearer" or "Basic", Parameter: string bearerArgs })
         {
-
+            scheme = header.Scheme;
             Dictionary<string, string> keyValues = new();
-
-            foreach (Match match in BearerParameterSplitter().Matches(args))
+            foreach (Match match in BearerParameterSplitter().Matches(bearerArgs))
             {
                 keyValues.Add(match.Groups["key"].Value, match.Groups["value"].Value);
             }
 
-            if (keyValues.TryGetValue("realm", out string? realm) && keyValues.TryGetValue("service", out string? service) && keyValues.TryGetValue("scope", out string? scope))
+            if (keyValues.TryGetValue("realm", out string? realm) && keyValues.TryGetValue("service", out string? service))
             {
+                string? scope = null;
+                keyValues.TryGetValue("scope", out scope);
                 authInfo = new AuthInfo(new Uri(realm), service, scope);
                 return true;
             }
@@ -85,14 +87,14 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
     /// <param name="scope"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task<string> GetTokenAsync(Uri realm, string service, string scope, CancellationToken cancellationToken)
+    private async Task<AuthenticationHeaderValue?> GetAuthenticationAsync(string scheme, Uri realm, string service, string? scope, CancellationToken cancellationToken)
     {
         // Allow overrides for auth via environment variables
         string? credU = Environment.GetEnvironmentVariable(ContainerHelpers.HostObjectUser);
         string? credP = Environment.GetEnvironmentVariable(ContainerHelpers.HostObjectPass);
 
         // fetch creds for the host
-        DockerCredentials? privateRepoCreds;
+      DockerCredentials? privateRepoCreds;
 
         if (!string.IsNullOrEmpty(credU) && !string.IsNullOrEmpty(credP))
         {
@@ -109,33 +111,46 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
                 throw new CredentialRetrievalException(realm.Host, e);
             }
         }
-
-        // use those creds when calling the token provider
-        var header = privateRepoCreds.Username == "<token>"
-                        ? new AuthenticationHeaderValue("Bearer", privateRepoCreds.Password)
-                        : new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{privateRepoCreds.Username}:{privateRepoCreds.Password}")));
-        var builder = new UriBuilder(realm);
-        var queryDict = System.Web.HttpUtility.ParseQueryString("");
-        queryDict["service"] = service;
-        queryDict["scope"] = scope;
-        builder.Query = queryDict.ToString();
-        var message = new HttpRequestMessage(HttpMethod.Get, builder.ToString());
-        message.Headers.Authorization = header;
-
-        var tokenResponse = await base.SendAsync(message, cancellationToken);
-        tokenResponse.EnsureSuccessStatusCode();
-
-        TokenResponse? token = JsonSerializer.Deserialize<TokenResponse>(tokenResponse.Content.ReadAsStream());
-        if (token is null)
+        
+        if (scheme is "Basic")
         {
-            throw new ArgumentException("Could not deserialize token from JSON");
+            var basicAuth = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{privateRepoCreds.Username}:{privateRepoCreds.Password}")));
+            return HostAuthenticationCache.AddOrUpdate(realm.Host, basicAuth, (previous, current) => current);
         }
+        else if (scheme is "Bearer")
+        {
+            // use those creds when calling the token provider
+            var header = privateRepoCreds.Username == "<token>"
+                            ? new AuthenticationHeaderValue("Bearer", privateRepoCreds.Password)
+                            : new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{privateRepoCreds.Username}:{privateRepoCreds.Password}")));
+            var builder = new UriBuilder(realm);
+            var queryDict = System.Web.HttpUtility.ParseQueryString("");
+            queryDict["service"] = service;
+            if (scope is string s)
+            {
+                queryDict["scope"] = s;
+            }
+            builder.Query = queryDict.ToString();
+            var message = new HttpRequestMessage(HttpMethod.Get, builder.ToString());
+            message.Headers.Authorization = header;
 
-        // save the retrieved token in the cache.
-        // if we encounter a previous token (very possible due to concurrent upload)
-        // use the more recent token.
-        TokenCache.AddOrUpdate(realm.Host, token.ResolvedToken, (previous, current) => current);
-        return token.ResolvedToken;
+            var tokenResponse = await base.SendAsync(message, cancellationToken);
+            tokenResponse.EnsureSuccessStatusCode();
+
+            TokenResponse? token = JsonSerializer.Deserialize<TokenResponse>(tokenResponse.Content.ReadAsStream());
+            if (token is null)
+            {
+                throw new ArgumentException("Could not deserialize token from JSON");
+            }
+
+            // save the retrieved token in the cache
+            var bearerAuth = new AuthenticationHeaderValue("Bearer", token.ResolvedToken);
+            return HostAuthenticationCache.AddOrUpdate(realm.Host, bearerAuth, (previous, current) => current);
+        }
+        else
+        {
+            return null;
+        }
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -146,9 +161,9 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
         }
 
         // attempt to use cached token for the request if available
-        if (TokenCache.TryGetValue(request.RequestUri.Host, out string? cachedToken))
+        if (HostAuthenticationCache.TryGetValue(request.RequestUri.Host, out AuthenticationHeaderValue? cachedAuthentication))
         {
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", cachedToken);
+            request.Headers.Authorization = cachedAuthentication;
         }
 
         var response = await base.SendAsync(request, cancellationToken);
@@ -156,11 +171,11 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
         {
             return response;
         }
-        else if (response is { StatusCode: HttpStatusCode.Unauthorized } && TryParseAuthenticationInfo(response, out AuthInfo? authInfo))
+        else if (response is { StatusCode: HttpStatusCode.Unauthorized } && TryParseAuthenticationInfo(response, out string? scheme, out AuthInfo? authInfo))
         {
-            if (await GetTokenAsync(authInfo.Realm, authInfo.Service, authInfo.Scope, cancellationToken) is string fetchedToken)
+            if (await GetAuthenticationAsync(scheme, authInfo.Realm, authInfo.Service, authInfo.Scope, cancellationToken) is AuthenticationHeaderValue authentication)
             {
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", fetchedToken);
+                request.Headers.Authorization = authentication;
                 return await base.SendAsync(request, cancellationToken);
             }
             return response;
