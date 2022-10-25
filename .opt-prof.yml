@@ -2,6 +2,13 @@
 
 trigger: none # Prevents this pipeline from triggering on check-ins
 pr: none # don't run this on PR as well, this should only trigger off on MSBuild runs
+schedules:
+  - cron: "0 20 */7 * *"
+    displayName: Weekly OptProf Run
+    branches:
+      include:
+      - main
+    always: true
 
 resources:
   pipelines:
