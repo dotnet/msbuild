@@ -34,6 +34,13 @@
         <PackageReference Include="System.CommandLine" PrivateAssets="all" IncludeAssets="runtime"/>
     </ItemGroup>
 
+    <Target Name="PreparePackageReleaseNotesFromFile" BeforeTargets="GenerateNuspec">
+        <PropertyGroup>
+            <PackageReleaseNotesFile>../docs/ReleaseNotes/v0.2.0.md</PackageReleaseNotesFile>
+            <PackageReleaseNotes>$([System.IO.File]::ReadAllText($(PackageReleaseNotesFile)))</PackageReleaseNotes>
+        </PropertyGroup>
+    </Target>
+
     <Target Name="AddItemsForPackaging" AfterTargets="Build">
         <ItemGroup>
             <!-- root folder -->
