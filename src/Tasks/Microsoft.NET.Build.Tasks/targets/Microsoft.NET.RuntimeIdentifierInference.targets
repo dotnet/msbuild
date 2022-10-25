@@ -61,6 +61,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeIdentifier Condition="'$(PlatformTarget)' == 'x86' or '$(PlatformTarget)' == ''">win7-x86</RuntimeIdentifier>
   </PropertyGroup>
 
+  <!-- PubishSelfContained may be set but not change self contained if we are not publishing, or self contained was already set globally. This condition tracks whether it will take effect.-->
+  <PropertyGroup Condition=" '$(_CommandLineDefinedSelfContained)' != 'true' and '$(_IsPublishing)' == 'true' and ('$(PublishSelfContained)' == 'true' or '$(PublishSelfContained)' == 'false')">
+    <_PublishSelfContainedIsActive>true</_PublishSelfContainedIsActive>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(UseCurrentRuntimeIdentifier)' == ''">
     <UseCurrentRuntimeIdentifier Condition="
                  '$(RuntimeIdentifier)' == '' and
@@ -71,7 +76,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                     '$(PublishReadyToRun)' == 'true' or
                     '$(PublishSingleFile)' == 'true' or
                     '$(PublishAot)' == 'true' or
-                    ('$(_CommandLineDefinedSelfContained)' != 'true' and '$(_IsPublishing)' == 'true' and '$(PublishSelfContained)' == 'true')
+                    '$(_PublishSelfContainedIsActive)' == 'true'
                   )">true</UseCurrentRuntimeIdentifier>
   </PropertyGroup>
 
@@ -170,7 +175,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                  ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
                  FormatArguments="SelfContained"/>
 
-    <NETSdkError Condition="'$(_IsPublishing)' == 'true' and '$(PublishSelfContained)' == 'true' and '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == ''"
+    <NETSdkError Condition="'$(_PublishSelfContainedIsActive)' == 'true' and '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == ''"
                  ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
                  FormatArguments="PublishSelfContained"/>
 
