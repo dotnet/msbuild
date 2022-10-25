@@ -1086,7 +1086,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <AdditionalTargetFrameworkInfoProperty Include="ShouldBeValidatedAsExecutableReference"/>
     <AdditionalTargetFrameworkInfoProperty Include="_SelfContainedWasSpecified"/>
   </ItemGroup>
-  
+
   <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'browser-wasm'">
     <!-- Don't generate a NETSDK1151 error if a non self-contained Exe references a Blazor wasm Exe -->
     <ShouldBeValidatedAsExecutableReference>false</ShouldBeValidatedAsExecutableReference>
@@ -1132,15 +1132,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="ValidateCommandLineProperties"
           AfterTargets="_CheckForInvalidConfigurationAndPlatform" >
-
-    <NETSdkWarning Condition="'$(_SelfContainedWasSpecified)' != 'true' and
-                   '$(_CommandLineDefinedRuntimeIdentifier)' == 'true' and
-                   '$(RuntimeIdentifier)' != '' and
-                   '$(PublishAot)' != 'true' and
-                   '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
-                   $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '6.0'))"
-               ResourceName="SelfContainedOptionShouldBeUsedWithRuntime" />
-
   </Target>
 
   <!--
