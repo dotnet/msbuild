@@ -61,8 +61,33 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeIdentifier Condition="'$(PlatformTarget)' == 'x86' or '$(PlatformTarget)' == ''">win7-x86</RuntimeIdentifier>
   </PropertyGroup>
 
+  <!-- Check if variable is global, resets the value to it's original state if it was local.-->
+  <PropertyGroup>
+    <_OriginalSelfContainedValue>$(SelfContained)</_OriginalSelfContainedValue>
+    <SelfContained></SelfContained>
+  </PropertyGroup>
+
+  <Choose>
+    <!-- Assumes a global variable cannot be an undefined variable; not setting it to 'temp' as that may cause type resolution failures.-->
+    <When Condition="'$(SelfContained)' != '' and $(SelfContained) == $(_OriginalSelfContainedValue)">
+      <PropertyGroup>
+        <_SelfContainedIsGlobal>true</_SelfContainedIsGlobal>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <_SelfContainedIsGlobal>false</_SelfContainedIsGlobal>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <PropertyGroup>
+    <SelfContained>$(OriginalSelfContainedValue)</SelfContained>
+    <_OriginalSelfContainedValue></_OriginalSelfContainedValue>
+  </PropertyGroup>
+
   <!-- PubishSelfContained may be set but not change self contained if we are not publishing, or self contained was already set globally. This condition tracks whether it will take effect.-->
-  <PropertyGroup Condition=" '$(_CommandLineDefinedSelfContained)' != 'true' and '$(_IsPublishing)' == 'true' and ('$(PublishSelfContained)' == 'true' or '$(PublishSelfContained)' == 'false')">
+  <PropertyGroup Condition=" '$(_CommandLineDefinedSelfContained)' != 'true' and '$(_SelfContainedIsGlobal)' != 'true' and '$(_IsPublishing)' == 'true' and '$(PublishSelfContained)' == 'true'">
     <_PublishSelfContainedIsActive>true</_PublishSelfContainedIsActive>
   </PropertyGroup>
 
