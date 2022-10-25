@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolManifest;
+using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.Tools.Tool.List
@@ -33,6 +34,12 @@ namespace Microsoft.DotNet.Tools.Tool.List
         public override int Execute()
         {
             var table = new PrintableTable<(ToolManifestPackage toolManifestPackage, FilePath SourceManifest)>();
+            var packageIdArgument = _parseResult.GetValueForArgument(ToolListCommandParser.PackageIdArgument);
+            PackageId? packageId = null;
+            if (!string.IsNullOrWhiteSpace(packageIdArgument))
+            {
+                packageId = new PackageId(packageIdArgument);
+            }
 
             table.AddColumn(
                 LocalizableStrings.PackageIdColumn,
@@ -47,8 +54,22 @@ namespace Microsoft.DotNet.Tools.Tool.List
                 LocalizableStrings.ManifestFileColumn,
                 p => p.SourceManifest.Value);
 
-            table.PrintRows(_toolManifestInspector.Inspect(), l => _reporter.WriteLine(l));
+            var packageEnumerable = _toolManifestInspector.Inspect().Where(
+                 (t) => PackageIdMatches(t.toolManifestPackage, packageId)
+             );
+            table.PrintRows(packageEnumerable, l => _reporter.WriteLine(l));
+
+            if (packageId.HasValue && !packageEnumerable.Any())
+            {
+                // return 1 if target package was not found
+                return 1;
+            }
             return 0;
+        }
+
+        private bool PackageIdMatches(ToolManifestPackage package, PackageId? packageId)
+        {
+            return !packageId.HasValue || package.PackageId.Equals(packageId);
         }
     }
 }

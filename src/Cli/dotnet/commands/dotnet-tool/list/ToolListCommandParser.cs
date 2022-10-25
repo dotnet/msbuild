@@ -13,6 +13,12 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class ToolListCommandParser
     {
+        public static readonly Argument<string> PackageIdArgument = new Argument<string>(LocalizableStrings.PackageIdArgumentName)
+        {
+            Description = LocalizableStrings.PackageIdArgumentDescription,
+            Arity = ArgumentArity.ZeroOrOne,
+        };
+
         public static readonly Option<bool> GlobalOption = ToolAppliedOption.GlobalOption;
 
         public static readonly Option<bool> LocalOption = ToolAppliedOption.LocalOption;
@@ -30,6 +36,7 @@ namespace Microsoft.DotNet.Cli
         {
             var command = new Command("list", LocalizableStrings.CommandDescription);
 
+            command.AddArgument(PackageIdArgument);
             command.AddOption(GlobalOption.WithHelpDescription(command, LocalizableStrings.GlobalOptionDescription));
             command.AddOption(LocalOption.WithHelpDescription(command, LocalizableStrings.LocalOptionDescription));
             command.AddOption(ToolPathOption.WithHelpDescription(command, LocalizableStrings.ToolPathOptionDescription));
