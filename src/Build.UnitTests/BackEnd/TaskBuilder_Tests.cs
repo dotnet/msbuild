@@ -138,7 +138,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Loggers = new ILogger[] { logger },
                     EnableNodeReuse = false
                 };
-                ;
 
                 BuildRequestData data = new BuildRequestData(project.CreateProjectInstance(), new string[] { "test" }, collection.HostServices);
                 manager.BeginBuild(_parameters);
