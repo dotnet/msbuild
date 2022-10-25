@@ -70,7 +70,6 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 
   <ItemGroup>
     <Compile Remove="Approvals\**\*" />
-    <Content Include="Approvals\**\*" />
     <None Include="Approvals\**\*" CopyToOutputDirectory="Never" />
   </ItemGroup>
 </Project>
