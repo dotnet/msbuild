@@ -61,6 +61,7 @@
     <Loggers />
   </LoggerRunSettings>
   <VisualStudioConfiguration>
+    <!-- MSBuild-OptProf specific VS configuration element -->
     <InstallationUnderTest>
       <Components All="false">
         <Include ID="Microsoft.VisualStudio.Component.VC.CLI.Support" />

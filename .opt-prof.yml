@@ -6,10 +6,9 @@ pr: none # don't run this on PR as well, this should only trigger off on MSBuild
 resources:
   pipelines:
   - pipeline: ComponentBuildUnderTest
-    source: MSBuild\MSBuild
+    source: MSBuild\MSBuild # The name of the pipeline that produces the artifact
     trigger:
       branches:
-        - main
         - vs*
   - pipeline: DartLab
     project: DevDiv
@@ -38,12 +37,12 @@ stages:
     name: OptProfProfilingWorkflow
     displayName: OptProf Profiling Workflow
     optOptimizationInputsDropName: $(OptimizationInputsDropName)
-    testLabPoolName: VS-Platform
+    testLabPoolName: VS-Platform # The test lab pool to run your tests in
     testMachineImageName: Windows-10-Enterprise-20H2
     variables:
-    - name: branchName
+    - name: branchName # The branch in the VS repo the bootstrapper was based on
       value: $[replace(variables['resources.pipeline.ComponentBuildUnderTest.sourceBranch'],'refs/heads/','')]
-    - name: OptimizationInputsDropName
+    - name: OptimizationInputsDropName # The naming convention of the OptimizationInputsDrop
       value: OptimizationData/DotNet-msbuild-Trusted/$(branchName)/$(resources.pipeline.ComponentBuildUnderTest.runName)/$(Build.BuildId)/$(System.StageAttempt)
     ##### Step Hooks #####
     preTestMachineConfigurationStepList:
