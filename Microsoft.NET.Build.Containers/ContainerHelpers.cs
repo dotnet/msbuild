@@ -20,6 +20,10 @@ public record Port(int number, PortType type);
 
 public static class ContainerHelpers
 {
+    public const string HostObjectUser = "SDK_CONTAINER_REGISTRY_UNAME";
+    
+    public const string HostObjectPass = "SDK_CONTAINER_REGISTRY_PWORD";
+
     private static Regex envVarRegex = new Regex(@"^[a-zA-Z_]+$");
 
     /// <summary>

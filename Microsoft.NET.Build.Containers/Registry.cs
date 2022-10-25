@@ -216,14 +216,14 @@ public record struct Registry(Uri BaseUri)
 
         var manifestDigest = x.GetDigest(x.manifest);
         logProgressMessage($"Uploading manifest to registry at blob {manifestDigest}");
-        HttpContent manifestUploadContent = new StringContent(x.manifest.ToJsonString());
+        string jsonString = x.manifest.ToJsonString();
+        HttpContent manifestUploadContent = new StringContent(jsonString);
         manifestUploadContent.Headers.ContentType = new MediaTypeHeaderValue(DockerManifestV2);
         var putResponse = await client.PutAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{manifestDigest}"), manifestUploadContent);
 
         if (!putResponse.IsSuccessStatusCode)
         {
-            string jsonResponse = await putResponse.Content.ReadAsStringAsync();
-            throw new ContainerHttpException("Registry push failed.", putResponse.RequestMessage?.RequestUri?.ToString(), jsonResponse);
+            throw new ContainerHttpException("Registry push failed.", putResponse.RequestMessage?.RequestUri?.ToString(), jsonString);
         }
         logProgressMessage($"Uploaded manifest to registry");
 
@@ -232,8 +232,7 @@ public record struct Registry(Uri BaseUri)
 
         if (!putResponse2.IsSuccessStatusCode)
         {
-            string jsonResponse = await putResponse2.Content.ReadAsStringAsync();
-            throw new ContainerHttpException("Registry push failed.", putResponse2.RequestMessage?.RequestUri?.ToString(), jsonResponse);
+            throw new ContainerHttpException("Registry push failed.", putResponse2.RequestMessage?.RequestUri?.ToString(), jsonString);
         }
 
         logProgressMessage($"Uploaded tag to registry");

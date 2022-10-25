@@ -139,28 +139,7 @@ public class CreateNewImage : ToolTask
         GeneratedContainerManifest = "";
     }
 
-    private void HostObjectMagic()
-    {
-        VSHostObject hostObj = new VSHostObject(HostObject as System.Collections.Generic.IEnumerable<ITaskItem>);
-        if (hostObj.ExtractCredentials(out string user, out string pass))
-        {
-            Log.LogWarning($"Host Object Retrieved.\nUser: {user}\nPass: {pass}");
-            extractionInfo = (true, user, pass);
-        }
-        else
-        {
-            Log.LogWarning("Host object failed to extract");
-        }
-            
-    }
-
     protected override string GenerateFullPathToTool() => Quote(Path.Combine(DotNetPath, ToolExe));
-
-    public override bool Execute()
-    {
-        HostObjectMagic();
-        return base.Execute();
-    }
 
     /// <summary>
     /// Workaround to avoid storing user/pass into the EnvironmentVariables property, which gets logged by the task.
@@ -176,12 +155,22 @@ public class CreateNewImage : ToolTask
         string responseFileSwitch
     )
     {
+        VSHostObject hostObj = new VSHostObject(HostObject as System.Collections.Generic.IEnumerable<ITaskItem>);
+        if (hostObj.ExtractCredentials(out string user, out string pass))
+        {
+            extractionInfo = (true, user, pass);
+        }
+        else
+        {
+            Log.LogMessage(MessageImportance.Low, "No host object detected.");
+        }
+
         ProcessStartInfo startInfo = base.GetProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch)!;
 
         if (extractionInfo.success)
         {
-            startInfo.Environment["SDK_CONTAINER_REGISTRY_UNAME"] = extractionInfo.user;
-            startInfo.Environment["SDK_CONTAINER_REGISTRY_PWORD"] = extractionInfo.pass;
+            startInfo.Environment[ContainerHelpers.HostObjectUser] = extractionInfo.user;
+            startInfo.Environment[ContainerHelpers.HostObjectPass] = extractionInfo.pass;
         }
 
         return startInfo;

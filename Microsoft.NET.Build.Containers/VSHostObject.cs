@@ -2,8 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Framework;
 
-#nullable disable
-
 namespace Microsoft.NET.Build.Containers.Tasks;
 
 internal class VSHostObject
@@ -11,9 +9,9 @@ internal class VSHostObject
     private const string CredentialItemSpecName = "MsDeployCredential";
     private const string UserMetaDataName = "UserName";
     private const string PasswordMetaDataName = "Password";
-    IEnumerable<ITaskItem> _hostObject;
+    IEnumerable<ITaskItem>? _hostObject;
 
-    public VSHostObject(IEnumerable<ITaskItem> hostObject)
+    public VSHostObject(IEnumerable<ITaskItem>? hostObject)
     {
         _hostObject = hostObject;
     }
