@@ -145,7 +145,10 @@ namespace Microsoft.DotNet.Cli
                 builtIns.Add((typeof(ITemplateConstraintFactory), new ProjectCapabilityConstraintFactory()));
                 builtIns.Add((typeof(MSBuildEvaluator), new MSBuildEvaluator(outputDirectory: outputPath?.FullName, projectPath: projectPath?.FullName)));
             }
-            builtIns.Add((typeof(IWorkloadsInfoProvider), new WorkloadsInfoProvider(new WorkloadInfoHelper())));
+
+            builtIns.Add((typeof(IWorkloadsInfoProvider), new WorkloadsInfoProvider(
+                    new Lazy<IWorkloadsRepositoryEnumerator>(() => new WorkloadInfoHelper())))
+            );
             builtIns.Add((typeof(ISdkInfoProvider), new SdkInfoProvider()));
 
             string? preferredLangEnvVar = Environment.GetEnvironmentVariable(PrefferedLangEnvVarName);
