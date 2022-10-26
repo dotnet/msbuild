@@ -912,10 +912,7 @@ namespace Microsoft.Build.Execution
                 // but the top level exception handler there should catch everything and have forwarded it to the
                 // OnThreadException method in this class already.
                 _workQueue.Complete();
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
-                {
-                    _workQueue.Completion.Wait();
-                }
+                _workQueue.Completion.Wait();
 
                 Task projectCacheDispose = _projectCacheService.DisposeAsync().AsTask();
 
@@ -2745,14 +2742,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void OnLoggingThreadException(Exception e)
         {
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
-            {
-                _workQueue.Post(() => OnThreadException(e));
-            }
-            else
-            {
-                OnThreadException(e);
-            }
+            _workQueue.Post(() => OnThreadException(e));
         }
 
         /// <summary>
@@ -2760,32 +2750,29 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void OnProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
-            {
-                _workQueue.Post(() => OnProjectFinishedBody(e));
-            }
-            else
-            {
-                OnProjectFinishedBody(e);
+                _workQueue.Post(() =>
+                {
+                    lock (_syncLock)
+                    {
+                        if (_projectStartedEvents.TryGetValue(e.BuildEventContext.SubmissionId, out var originalArgs))
+                        {
+                            if (originalArgs.BuildEventContext.Equals(e.BuildEventContext))
+                            {
+                                _projectStartedEvents.Remove(e.BuildEventContext.SubmissionId);
+                                if (_buildSubmissions.TryGetValue(e.BuildEventContext.SubmissionId, out var submission))
+                                {
+                                    submission.CompleteLogging();
+                                    CheckSubmissionCompletenessAndRemove(submission);
+                                }
+                            }
+                        }
+                    }
+                });
             }
 
             void OnProjectFinishedBody(ProjectFinishedEventArgs e)
             {
-                lock (_syncLock)
-                {
-                    if (_projectStartedEvents.TryGetValue(e.BuildEventContext.SubmissionId, out var originalArgs))
-                    {
-                        if (originalArgs.BuildEventContext.Equals(e.BuildEventContext))
-                        {
-                            _projectStartedEvents.Remove(e.BuildEventContext.SubmissionId);
-                            if (_buildSubmissions.TryGetValue(e.BuildEventContext.SubmissionId, out var submission))
-                            {
-                                submission.CompleteLogging();
-                                CheckSubmissionCompletenessAndRemove(submission);
-                            }
-                        }
-                    }
-                }
+                
             }
         }
 
@@ -2794,16 +2781,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void OnProjectStarted(object sender, ProjectStartedEventArgs e)
         {
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
-            {
-                _workQueue.Post(() => OnProjectStartedBody(e));
-            }
-            else
-            {
-                OnProjectStartedBody(e);
-            }
-
-            void OnProjectStartedBody(ProjectStartedEventArgs e)
+            _workQueue.Post(() =>
             {
                 lock (_syncLock)
                 {
@@ -2812,7 +2790,7 @@ namespace Microsoft.Build.Execution
                         _projectStartedEvents[e.BuildEventContext.SubmissionId] = e;
                     }
                 }
-            }
+            });
         }
 
         /// <summary>

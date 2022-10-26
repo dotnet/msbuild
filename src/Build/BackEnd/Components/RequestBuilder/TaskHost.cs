@@ -123,9 +123,7 @@ namespace Microsoft.Build.BackEnd
             _continueOnError = false;
             _activeProxy = true;
             _callbackMonitor = new object();
-            _disableInprocNode = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
-                ? Traits.Instance.InProcNodeDisabled || host.BuildParameters.DisableInProcNode
-                : Traits.Instance.InProcNodeDisabled;
+            _disableInprocNode = Traits.Instance.InProcNodeDisabled || host.BuildParameters.DisableInProcNode;
             EngineServices = new EngineServicesImpl(this);
         }
 
