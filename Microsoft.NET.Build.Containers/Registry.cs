@@ -113,9 +113,6 @@ public record struct Registry(Uri BaseUri)
 
         Debug.Assert(pushResponse.StatusCode == HttpStatusCode.Accepted);
 
-        //Uri uploadUri = new(BaseUri, pushResponse.Headers.GetValues("location").Single() + $"?digest={layer.Descriptor.Digest}");
-        Debug.Assert(pushResponse.Headers.Location is not null);
-
         UriBuilder x;
         if (pushResponse.Headers.Location is {IsAbsoluteUri: true })
         {
@@ -125,7 +122,7 @@ public record struct Registry(Uri BaseUri)
         {
             // if we don't trim the BaseUri and relative Uri of slashes, you can get invalid urls.
             // Uri constructor does this on our behalf.
-            x = new UriBuilder(new Uri(BaseUri, pushResponse.Headers.Location.OriginalString));
+            x = new UriBuilder(new Uri(BaseUri, pushResponse.Headers.Location?.OriginalString ?? ""));
         }
 
         x.Query += $"&digest={Uri.EscapeDataString(digest)}";
