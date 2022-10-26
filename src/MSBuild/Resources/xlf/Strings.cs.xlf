@@ -651,10 +651,11 @@
         <source>  -inputResultsCaches:&lt;cacheFile&gt;...
                      Semicolon separated list of input cache files that MSBuild
                      will read build results from.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -irc)
+                     If the isolation mode is not explicitly already set to
+                     IsolateProjects.False, this sets the isolation mode to
+                     IsolateProjects.True. (-isolate). (short form: -irc)
    </source>
-        <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
+        <target state="needs-review-translation">  -inputResultsCaches:&lt;cacheFile&gt;...
                      Seznam středníkem oddělených vstupních souborů mezipaměti, ze kterých
                      MSBuild přečte výsledky sestavení.
                      Nastavení tohoto atributu zároveň zapne izolované buildy (-isolate).
@@ -669,10 +670,11 @@
         <source>  -outputResultsCache:[cacheFile]
                      Output cache file where MSBuild will write the contents of
                      its build result caches at the end of the build.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -orc)
+                     If the isolation mode is not explicitly already set to
+                     IsolateProjects.False, this sets the isolation mode to
+                     IsolateProjects.True. (-isolate). (short form: -orc)
    </source>
-        <target state="translated">  -outputResultsCache:[souborMezipaměti]...
+        <target state="needs-review-translation">  -outputResultsCache:[souborMezipaměti]...
                      Výstupní soubor mezipaměti, do něhož bude MSBuild
                      zapisovat obsah svých mezipamětí výsledků sestavení.
                      Nastavením této možnosti zapnete také izolované buildy (-isolate).
@@ -1039,7 +1041,7 @@
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent to Boolean.TrueString, IsolateProjects. Boolean.FalseString.
+      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent to Boolean.TrueString, IsolateProjects.Message.toString(), or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>

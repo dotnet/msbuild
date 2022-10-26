@@ -648,10 +648,11 @@
         <source>  -inputResultsCaches:&lt;cacheFile&gt;...
                      Semicolon separated list of input cache files that MSBuild
                      will read build results from.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -irc)
+                     If the isolation mode is not explicitly already set to
+                     IsolateProjects.False, this sets the isolation mode to
+                     IsolateProjects.True. (-isolate). (short form: -irc)
    </source>
-        <target state="translated">  -inputResultsCaches:&lt;快取檔案&gt;...
+        <target state="needs-review-translation">  -inputResultsCaches:&lt;快取檔案&gt;...
                      以分號分隔的輸入快取檔案
                       (MSBuild 將會從此檔案讀取建置結果) 清單。
                      設定此項目也會開啟隔離式建置 (-isolate)。
@@ -666,10 +667,11 @@
         <source>  -outputResultsCache:[cacheFile]
                      Output cache file where MSBuild will write the contents of
                      its build result caches at the end of the build.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -orc)
+                     If the isolation mode is not explicitly already set to
+                     IsolateProjects.False, this sets the isolation mode to
+                     IsolateProjects.True. (-isolate). (short form: -orc)
    </source>
-        <target state="translated">  -outputResultsCache:[cacheFile]
+        <target state="needs-review-translation">  -outputResultsCache:[cacheFile]
                      MSBuild 要在組建結束時寫入
                      其組建結果快取內容的目標輸出快取檔案。
                      設定此項也會開啟隔離組建 (-isolate)。
@@ -1031,7 +1033,7 @@
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent to Boolean.TrueString, IsolateProjects. Boolean.FalseString.
+      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent to Boolean.TrueString, IsolateProjects.Message.toString(), or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>

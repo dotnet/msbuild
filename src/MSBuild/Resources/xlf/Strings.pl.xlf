@@ -658,10 +658,11 @@
         <source>  -inputResultsCaches:&lt;cacheFile&gt;...
                      Semicolon separated list of input cache files that MSBuild
                      will read build results from.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -irc)
+                     If the isolation mode is not explicitly already set to
+                     IsolateProjects.False, this sets the isolation mode to
+                     IsolateProjects.True. (-isolate). (short form: -irc)
    </source>
-        <target state="translated">  -inputResultsCaches:&lt;plik pamięci podręcznej&gt;...
+        <target state="needs-review-translation">  -inputResultsCaches:&lt;plik pamięci podręcznej&gt;...
                      Rozdzielana średnikami lista wejściowych plików pamięci podręcznej, z których program MSBuild
                      będzie odczytywać wyniki kompilacji.
                      Ustawienie tej opcji włącza też kompilacje izolowane (-isolate).
@@ -676,10 +677,11 @@
         <source>  -outputResultsCache:[cacheFile]
                      Output cache file where MSBuild will write the contents of
                      its build result caches at the end of the build.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -orc)
+                     If the isolation mode is not explicitly already set to
+                     IsolateProjects.False, this sets the isolation mode to
+                     IsolateProjects.True. (-isolate). (short form: -orc)
    </source>
-        <target state="translated">  -outputResultsCache:[plik pamięci podręcznej]
+        <target state="needs-review-translation">  -outputResultsCache:[plik pamięci podręcznej]
                      Plik pamięci podręcznej, w którym program MSBuild zapisze zawartość
                      swoich pamięci podręcznych wyników kompilacji po zakończeniu kompilacji.
                      Ustawienie tej opcji włącza też kompilacje izolowane (-isolate).
@@ -1043,7 +1045,7 @@
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent to Boolean.TrueString, IsolateProjects. Boolean.FalseString.
+      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent to Boolean.TrueString, IsolateProjects.Message.toString(), or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
