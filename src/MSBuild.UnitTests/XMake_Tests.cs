@@ -924,6 +924,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio for .net")]
         public void VSToolsPathExists()
         {
             string project = @"
