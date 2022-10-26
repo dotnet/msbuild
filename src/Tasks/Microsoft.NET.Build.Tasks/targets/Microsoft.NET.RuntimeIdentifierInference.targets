@@ -61,39 +61,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeIdentifier Condition="'$(PlatformTarget)' == 'x86' or '$(PlatformTarget)' == ''">win7-x86</RuntimeIdentifier>
   </PropertyGroup>
 
-  <!-- Check if SelfContained is global, resets the value to it's original state if it was local.-->
-  <PropertyGroup>
-    <_OriginalSelfContainedValue>$(SelfContained)</_OriginalSelfContainedValue>
-    <SelfContained></SelfContained>
-  </PropertyGroup>
-
-  <Choose>
-    <!-- Assumes a global variable cannot be an undefined variable.-->
-    <When Condition="'$(SelfContained)' != '' and $(SelfContained) == $(_OriginalSelfContainedValue)">
-      <PropertyGroup>
-        <_SelfContainedIsGlobal>true</_SelfContainedIsGlobal>
-      </PropertyGroup>
-    </When>
-    <Otherwise>
-      <PropertyGroup>
-        <_SelfContainedIsGlobal>false</_SelfContainedIsGlobal>
-      </PropertyGroup>
-    </Otherwise>
-  </Choose>
-
-  <PropertyGroup>
-    <SelfContained>$(_OriginalSelfContainedValue)</SelfContained>
-    <_OriginalSelfContainedValue></_OriginalSelfContainedValue>
-  </PropertyGroup>
-
-  <!-- PubishSelfContained may be set but not change self contained if we are not publishing, or self contained was already set globally. This condition tracks whether it will take effect.-->
-  <PropertyGroup Condition=" '$(_CommandLineDefinedSelfContained)' != 'true' and '$(_SelfContainedIsGlobal)' != 'true' and '$(_IsPublishing)' == 'true' and ('$(PublishSelfContained)' == 'true' or '$(PublishSelfContained)' == 'false')">
-    <_PublishSelfContainedIsActive>true</_PublishSelfContainedIsActive>
-  </PropertyGroup>
-
   <!-- Edit SelfContained to match the value of PublishSelfContained if we are publishing.
        This Won't affect t:/Publish (because of _IsPublishing), and also won't override a global SelfContained property.-->
-  <PropertyGroup Condition="'$(_PublishSelfContainedIsActive)' == 'true'">
+  <PropertyGroup Condition="'$(_IsPublishing)' == 'true' and ('$(PublishSelfContained)' == 'true' or '$(PublishSelfContained)' == 'false')">
     <SelfContained>$(PublishSelfContained)</SelfContained>
   </PropertyGroup>
 
@@ -106,8 +76,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                     '$(SelfContained)' == 'true' or
                     '$(PublishReadyToRun)' == 'true' or
                     '$(PublishSingleFile)' == 'true' or
-                    '$(PublishAot)' == 'true' or
-                    ('$(_PublishSelfContainedIsActive)' == 'true' and '$(PublishSelfContained)' == 'true')
+                    '$(PublishAot)' == 'true'
                   )">true</UseCurrentRuntimeIdentifier>
   </PropertyGroup>
 
