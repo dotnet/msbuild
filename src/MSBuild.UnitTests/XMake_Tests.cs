@@ -923,6 +923,24 @@ namespace Microsoft.Build.UnitTests
             output.ShouldContain(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, Case.Insensitive);
         }
 
+        [Fact]
+        public void VSToolsPathExists()
+        {
+            string project = @"
+<Project>
+  <Target Name=""Test"">
+    <Error Condition=""'$(VSToolsPath)' == ''"" Text=""VSToolsPath should have a predefined value."" />
+  </Target>
+</Project>";
+
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFile file = env.CreateFile(".proj", project);
+                RunnerUtilities.ExecMSBuild(file.Path, out bool success);
+                success.ShouldBeTrue();
+            }
+        }
+
         /// <summary>
         /// Any msbuild.rsp in the directory of the specified project/solution should be read, and should
         /// take priority over any other response files.
