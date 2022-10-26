@@ -179,6 +179,23 @@ namespace Microsoft.DotNet.Cli.Build.Tests
         }
 
         [Fact]
+        public void It_warns_on_rid_without_self_contained_options()
+        {
+            var testInstance = _testAssetsManager.CopyTestAsset("HelloWorld")
+                .WithSource()
+                .WithTargetFrameworkOrFrameworks("net6.0", false)
+                .Restore(Log);
+
+            new DotnetBuildCommand(Log)
+               .WithWorkingDirectory(testInstance.Path)
+               .Execute("-r", "win-x64")
+               .Should()
+               .Pass()
+               .And
+               .HaveStdOutContaining("NETSDK1179");
+        }
+
+        [Fact]
         public void It_does_not_warn_on_rid_with_self_contained_set_in_project()
         {
             var testProject = new TestProject()
