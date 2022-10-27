@@ -186,12 +186,12 @@ public class CreateNewImage : ToolTask
                " --outputregistry " + OutputRegistry +
                " --imagename " + ImageName +
                " --workingdirectory " + WorkingDirectory +
-               (Entrypoint.Length > 0 ? " --entrypoint " + Entrypoint.Select((i) => i.ItemSpec).Aggregate((i, s) => s += i + " ") : "") +
-               (Labels.Length > 0 ? " --labels " + Labels.Select((i) => i.ItemSpec + "=" + i.GetMetadata("Value")).Aggregate((i, s) => s += i + " ") : "") +
-               (ImageTags.Length > 0 ? " --imagetags " + ImageTags.Select((i) => i.ItemSpec).Aggregate((i, s) => s += i + " ") : "") +
-               (EntrypointArgs.Length > 0 ? " --entrypointargs " + EntrypointArgs.Select((i) => i.ItemSpec).Aggregate((i, s) => s += i + " ") : "") +
-               (ExposedPorts.Length > 0 ? " --ports " + ExposedPorts.Select((i) => i.ItemSpec + "/" + i.GetMetadata("Type")).Aggregate((i, s) => s += i + " ") : "") +
-               (ContainerEnvironmentVariables.Length > 0 ? " --environmentvariables " + ContainerEnvironmentVariables.Select((i) => i.ItemSpec + "=" + i.GetMetadata("Value")).Aggregate((i, s) => s += i + " ") : "");
+               (Entrypoint.Length > 0 ? " --entrypoint " + String.Join(" ", Entrypoint.Select((i) => i.ItemSpec)) : "") +
+               (Labels.Length > 0 ? " --labels " + String.Join(" ", Labels.Select((i) => i.ItemSpec + "=" + Quote(i.GetMetadata("Value")))) : "") +
+               (ImageTags.Length > 0 ? " --imagetags " + String.Join(" ", ImageTags.Select((i) => Quote(i.ItemSpec))) : "") +
+               (EntrypointArgs.Length > 0 ? " --entrypointargs " + String.Join(" ", EntrypointArgs.Select((i) => i.ItemSpec)) : "") +
+               (ExposedPorts.Length > 0 ? " --ports " + String.Join(" ", ExposedPorts.Select((i) => i.ItemSpec + "/" + i.GetMetadata("Type"))) : "") +
+               (ContainerEnvironmentVariables.Length > 0 ? " --environmentvariables " + String.Join(" ", ContainerEnvironmentVariables.Select((i) => i.ItemSpec + "=" + Quote(i.GetMetadata("Value")))) : "");
     }
 
     private string Quote(string path)
