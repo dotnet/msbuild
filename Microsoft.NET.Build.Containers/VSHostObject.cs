@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Framework;
@@ -16,7 +17,7 @@ internal class VSHostObject
         _hostObject = hostObject;
     }
 
-    public bool ExtractCredentials(out string username, out string password)
+    public bool ExtractCredentials(out string username, out string password, Action<string> logMethod)
     {
         bool retVal = false;
         username = password = string.Empty;
@@ -30,6 +31,10 @@ internal class VSHostObject
                 if (!string.IsNullOrEmpty(username))
                 {
                     password = credentialItem.GetMetadata(PasswordMetaDataName);
+                }
+                else
+                {
+                    logMethod("HostObject credentials not detected. Falling back to Docker credential retrieval.");
                 }
             }
         }
