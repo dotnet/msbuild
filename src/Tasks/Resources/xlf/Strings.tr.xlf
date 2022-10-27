@@ -1612,6 +1612,13 @@
         <target state="translated">AssemblyFoldersEx konumu: "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.NoBecauseBadImage">
+        <source>This reference is not "CopyLocal" because it is a bad image. It may be a native assembly, or it may not be an assembly at all.</source>
+        <target state="new">This reference is not "CopyLocal" because it is a bad image. It may be a native assembly, or it may not be an assembly at all.</target>
+        <note>
+      LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name. "CopyLocalDependenciesWhenParentReferenceInGac" is a property name.
+    </note>
+      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.SearchedAssemblyFoldersEx">
         <source>Considered AssemblyFoldersEx locations.</source>
         <target state="translated">AssemblyFoldersEx konumları dikkate alındı.</target>

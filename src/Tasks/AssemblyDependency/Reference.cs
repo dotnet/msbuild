@@ -969,6 +969,11 @@ namespace Microsoft.Build.Tasks
             ReferenceTable referenceTable
         )
         {
+            if (IsBadImage)
+            {
+                CopyLocal = CopyLocalState.NoBecauseBadImage;
+            }
+
             // If this item was unresolvable, then copy-local is false.
             if (IsUnresolvable)
             {
