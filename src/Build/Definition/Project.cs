@@ -2784,16 +2784,16 @@ namespace Microsoft.Build.Evaluation
 
                 return projectItemElements
                     .AsParallel()
-                    .Select((item, index) => ComputeProvenanceResult(itemToMatch, item, index))
+                    .Select((item, index) => (Result: ComputeProvenanceResult(itemToMatch, item), Index: index))
+                    .Where(pair => pair.Result != null)
                     .AsSequential()
                     .OrderBy(pair => pair.Index)
                     .Select(pair => pair.Result)
-                    .Where(r => r != null)
                     .ToList();
             }
 
             // TODO: cache result?
-            private (ProvenanceResult Result, int Index) ComputeProvenanceResult(string itemToMatch, ProjectItemElement itemElement, int index)
+            private ProvenanceResult ComputeProvenanceResult(string itemToMatch, ProjectItemElement itemElement)
             {
                 ProvenanceResult SingleItemSpecProvenance(string itemSpec, IElementLocation elementLocation, Operation operation)
                 {
@@ -2808,11 +2808,9 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 ProvenanceResult result = SingleItemSpecProvenance(itemElement.Include, itemElement.IncludeLocation, Operation.Include);
-                result = result == null ?
+                return result == null ?
                     SingleItemSpecProvenance(itemElement.Update, itemElement.UpdateLocation, Operation.Update) ?? SingleItemSpecProvenance(itemElement.Remove, itemElement.RemoveLocation, Operation.Remove) :
                     SingleItemSpecProvenance(itemElement.Exclude, itemElement.ExcludeLocation, Operation.Exclude) ?? result;
-
-                return (result, index);
             }
 
             /// <summary>
