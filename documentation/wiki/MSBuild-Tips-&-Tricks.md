@@ -14,7 +14,7 @@ See the [MSBuild Command-Line Reference](https://docs.microsoft.com/visualstudio
 
 # Environment Variables
 
- * `MSBUILDDEBUGENGINE=1` & `MSBUILDDEBUGPATH=<DIRECTORY>`
+ * `MSBuildDebugEngine=1` & `MSBUILDDEBUGPATH=<DIRECTORY>`
   * Set this to cause any MSBuild invocation launched within this environment to emit binary logs and additional debugging information to `<DIRECTORY>`. Useful when debugging build or evaluation issues when you can't directly influence the MSBuild invocation, such as in Visual Studio.
  * `MSBUILDTARGETOUTPUTLOGGING=1`
    * Set this to enable [printing all target outputs to the log](https://blogs.msdn.microsoft.com/msbuild/2010/03/31/displaying-target-output-items-using-the-console-logger).
@@ -36,7 +36,7 @@ See the [MSBuild Command-Line Reference](https://docs.microsoft.com/visualstudio
    * Launch debugger on build start.
    * Setting the value of 2 allows for manually attaching a debugger to a process ID.
  * `MSBUILDDEBUGSCHEDULER=1` & `MSBUILDDEBUGPATH=<DIRECTORY>`
-   * Dumps scheduler state at specified directory (implied by `MSBUILDDEBUGENGINE`)
+   * Dumps scheduler state at specified directory (`MSBUILDDEBUGSCHEDULER` is implied by `MSBuildDebugEngine`).
 
 # TreatAsLocalProperty
 If MSBuild.exe is passed properties on the command line, such as `/p:Platform=AnyCPU` then this value overrides whatever assignments you have to that property inside property groups. For instance, `<Platform>x86</Platform>` will be ignored. To make sure your local assignment to properties overrides whatever they pass on the command line, add the following at the top of your MSBuild project file:
