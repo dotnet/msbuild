@@ -2,7 +2,7 @@
   "profiles": {
     "containerize": {
       "commandName": "Project",
-      "commandLineArgs": "S:\\play\\container-demo\\bin\\Debug\\net6.0\\linux-x64\\ --baseregistry https://mcr.microsoft.com --baseimagename dotnet/runtime --outputregistry https://rainercontainer.azurecr.io --imagename donuts --imagetags 6.0 --workingdirectory app/ --entrypoint dotnet --entrypointargs run --labels foo=bar hello=world --ports 1234/tcp"
+      "commandLineArgs": "\"S:\\play\\container-package-test\\obj\\Release\\net7.0\\PubTmp\\Out\" --baseregistry mcr.microsoft.com --baseimagename dotnet/aspnet --baseimagetag 7.0 --outputregistry rainercontainer.azurecr.io --imagename container-package-test --workingdirectory /app --entrypoint /app/container-package-test.exe --labels org.opencontainers.image.created=2022-10-27T14:17:19.9046559Z --imagetags latest --ports 80/tcp --environmentvariables ASPNETCORE_URLS=http://+:80 \r\n"
     }
   }
 }

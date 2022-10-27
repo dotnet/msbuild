@@ -21,11 +21,6 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
     private record AuthInfo(Uri Realm, string Service, string? Scope);
 
     /// <summary>
-    /// Cache of most-recently-received token for each server.
-    /// </summary>
-    private static ConcurrentDictionary<string, AuthenticationHeaderValue> HostAuthenticationCache = new();
-
-    /// <summary>
     /// the www-authenticate header must have realm, service, and scope information, so this method parses it into that shape if present
     /// </summary>
     /// <param name="msg"></param>
@@ -115,7 +110,7 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
         if (scheme is "Basic")
         {
             var basicAuth = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{privateRepoCreds.Username}:{privateRepoCreds.Password}")));
-            return HostAuthenticationCache.AddOrUpdate(realm.Host, basicAuth, (previous, current) => current);
+            return basicAuth;
         }
         else if (scheme is "Bearer")
         {
@@ -145,7 +140,7 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
 
             // save the retrieved token in the cache
             var bearerAuth = new AuthenticationHeaderValue("Bearer", token.ResolvedToken);
-            return HostAuthenticationCache.AddOrUpdate(realm.Host, bearerAuth, (previous, current) => current);
+            return bearerAuth;
         }
         else
         {
@@ -160,11 +155,7 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
             throw new ArgumentException("No RequestUri specified", nameof(request));
         }
 
-        // attempt to use cached token for the request if available
-        if (HostAuthenticationCache.TryGetValue(request.RequestUri.Host, out AuthenticationHeaderValue? cachedAuthentication))
-        {
-            request.Headers.Authorization = cachedAuthentication;
-        }
+        // TODO: attempt to use cached token for the request if available
 
         var response = await base.SendAsync(request, cancellationToken);
         if (response is { StatusCode: HttpStatusCode.OK })

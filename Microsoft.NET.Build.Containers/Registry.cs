@@ -109,9 +109,14 @@ public record struct Registry(Uri BaseUri)
             return;
         }
 
-        HttpResponseMessage pushResponse = await client.PostAsync(new Uri(BaseUri, $"/v2/{name}/blobs/uploads/"), content: null);
+        Uri pushUri = new Uri(BaseUri, $"/v2/{name}/blobs/uploads/");
+        HttpResponseMessage pushResponse = await client.PostAsync(pushUri, content: null);
 
-        Debug.Assert(pushResponse.StatusCode == HttpStatusCode.Accepted);
+        if (pushResponse.StatusCode != HttpStatusCode.Accepted)
+        {
+            string errorMessage = $"Failed to upload blob to {pushUri}; recieved {pushResponse.StatusCode} with detail {await pushResponse.Content.ReadAsStringAsync()}";
+            throw new ApplicationException(errorMessage);
+        }
 
         UriBuilder x;
         if (pushResponse.Headers.Location is {IsAbsoluteUri: true })
