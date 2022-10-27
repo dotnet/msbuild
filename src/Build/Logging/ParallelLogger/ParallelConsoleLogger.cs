@@ -1750,7 +1750,6 @@ namespace Microsoft.Build.BackEnd.Logging
         private bool _forceNoAlign;
         private bool _showEventId;
         // According to the documentation for ENABLE_PROCESSED_OUTPUT tab width for the console is 8 characters
-        private const string consoleTab = "        ";
         #endregion
 
         #region Per-build Members

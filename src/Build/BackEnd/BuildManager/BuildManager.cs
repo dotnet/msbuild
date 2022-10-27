@@ -2750,30 +2750,24 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void OnProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
-                _workQueue.Post(() =>
+            _workQueue.Post(() =>
+            {
+                lock (_syncLock)
                 {
-                    lock (_syncLock)
+                    if (_projectStartedEvents.TryGetValue(e.BuildEventContext.SubmissionId, out var originalArgs))
                     {
-                        if (_projectStartedEvents.TryGetValue(e.BuildEventContext.SubmissionId, out var originalArgs))
+                        if (originalArgs.BuildEventContext.Equals(e.BuildEventContext))
                         {
-                            if (originalArgs.BuildEventContext.Equals(e.BuildEventContext))
+                            _projectStartedEvents.Remove(e.BuildEventContext.SubmissionId);
+                            if (_buildSubmissions.TryGetValue(e.BuildEventContext.SubmissionId, out var submission))
                             {
-                                _projectStartedEvents.Remove(e.BuildEventContext.SubmissionId);
-                                if (_buildSubmissions.TryGetValue(e.BuildEventContext.SubmissionId, out var submission))
-                                {
-                                    submission.CompleteLogging();
-                                    CheckSubmissionCompletenessAndRemove(submission);
-                                }
+                                submission.CompleteLogging();
+                                CheckSubmissionCompletenessAndRemove(submission);
                             }
                         }
                     }
-                });
-            }
-
-            void OnProjectFinishedBody(ProjectFinishedEventArgs e)
-            {
-                
-            }
+                }
+            });
         }
 
         /// <summary>
