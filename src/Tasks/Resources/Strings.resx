@@ -1618,7 +1618,7 @@
   <data name="ResolveAssemblyReference.NoBecauseBadImage">
     <value>This reference is not "CopyLocal" because it is a bad image. It may be a native assembly, or it may not be an assembly at all.</value>
     <comment>
-      LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name. "CopyLocalDependenciesWhenParentReferenceInGac" is a property name.
+      LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
     </comment>
   </data>
   <data name="ResolveAssemblyReference.NotCopyLocalBecauseEmbedded">
