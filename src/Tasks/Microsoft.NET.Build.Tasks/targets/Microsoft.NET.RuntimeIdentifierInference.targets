@@ -192,6 +192,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                 FormatArguments="PublishAot"/>
 
     <!-- End of implicit RID resolver checks.-->
+
+    <NETSdkError Condition="'$(PublishSelfContained)' != 'true' and '$(PublishSelfContained)' != 'false' and '$(PublishSelfContained)' != ''"
+                ResourceName="PublishSelfContainedMustBeBool"
+                FormatArguments="$(PublishSelfContained)"/>
+
     <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(UseAppHost)' != 'true' and '$(_RuntimeIdentifierUsesAppHost)' == 'true'"
                  ResourceName="CannotUseSelfContainedWithoutAppHost" />
 

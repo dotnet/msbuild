@@ -202,6 +202,21 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             publishedDirectory.Should().HaveFiles(expectedFiles);
         }
 
+        [Fact]
+        public void ItFailsWith1193IfPublishSelfContainedHasInvalidValue()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld", identifier: "NET1193Failure")
+                .WithSource();
+
+            var publishCommand = new PublishCommand(testAsset);
+            publishCommand
+                .Execute("-p:PublishSelfContained=Invalid")
+                .Should()
+                .Fail()
+                .And.HaveStdOutContaining("NETSDK1193");
+        }
+
         [Theory]
         [InlineData("--sc=false")]
         [InlineData("--self-contained=false")]
