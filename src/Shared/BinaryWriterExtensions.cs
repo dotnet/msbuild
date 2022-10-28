@@ -11,7 +11,7 @@ namespace Microsoft.Build.Shared
     internal static class BinaryWriterExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteOptionalString(this BinaryWriter writer, string value)
+        public static void WriteOptionalString(this BinaryWriter writer, string? value)
         {
             if (value == null)
             {
@@ -47,7 +47,7 @@ namespace Microsoft.Build.Shared
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteOptionalBuildEventContext(this BinaryWriter writer, BuildEventContext context)
+        public static void WriteOptionalBuildEventContext(this BinaryWriter writer, BuildEventContext? context)
         {
             if (context == null)
             {

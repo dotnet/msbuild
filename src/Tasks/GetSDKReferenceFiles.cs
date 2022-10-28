@@ -17,12 +17,16 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
     /// Resolves an SDKReference to a full path on disk
     /// </summary>
+#pragma warning disable RS0022 // Constructor make noninheritable base class inheritable: Longstanding API design that we shouldn't change now
     public class GetSDKReferenceFiles : TaskExtension
+#pragma warning restore RS0022 // Constructor make noninheritable base class inheritable
     {
         /// <summary>
         /// Set of resolvedSDK references which we will use to find the reference assemblies.
@@ -77,7 +81,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Folder where the cache files are written to
         /// </summary>
-        private string _cacheFilePath = Path.GetTempPath();
+        private string _cacheFilePath = FileUtilities.TempFileDirectory;
 
         #region Properties
 
@@ -223,6 +227,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override bool Execute()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(GetSDKReferenceFiles));
+                return false;
+            }
             return Execute(AssemblyNameExtension.GetAssemblyNameEx, AssemblyInformation.GetRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: false);
         }
 
@@ -271,7 +280,7 @@ namespace Microsoft.Build.Tasks
 
                 GenerateOutputItems();
 
-                if (_exceptions.Count > 0 && LogCacheFileExceptions)
+                if (_exceptions.Any() && LogCacheFileExceptions)
                 {
                     foreach (string exceptionMessage in _exceptions)
                     {
@@ -279,13 +288,8 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("GetSDKReferenceFiles.CouldNotGetSDKReferenceFiles", e.Message);
             }
 
@@ -1087,7 +1091,11 @@ namespace Microsoft.Build.Tasks
                 string currentAssembly = String.Empty;
                 try
                 {
+#if NETCOREAPP
+                    currentAssembly = Assembly.GetExecutingAssembly().Location;
+#else
                     currentAssembly = Assembly.GetExecutingAssembly().CodeBase;
+#endif
                     var codeBase = new Uri(currentAssembly);
                     DateTime currentCodeLastWriteTime = File.GetLastWriteTimeUtc(codeBase.LocalPath);
                     if (FileSystems.Default.FileExists(referencesCacheFile) && currentCodeLastWriteTime < referencesCacheFileLastWriteTimeUtc)
@@ -1095,13 +1103,8 @@ namespace Microsoft.Build.Tasks
                         return true;
                     }
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                 {
-                    if (ExceptionHandling.IsCriticalException(ex))
-                    {
-                        throw;
-                    }
-
                     // Queue up for later logging, does not matter if the cache got written
                     _exceptionMessages.Enqueue(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("GetSDKReferenceFiles.ProblemGeneratingHash", currentAssembly, ex.Message));
 
@@ -1134,13 +1137,8 @@ namespace Microsoft.Build.Tasks
                         }
                     }
                 }
-                catch (Exception e)
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    if (ExceptionHandling.IsCriticalException(e))
-                    {
-                        throw;
-                    }
-
                     // Queue up for later logging, does not matter if the cache got written
                     _exceptionMessages.Enqueue(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("GetSDKReferenceFiles.ProblemGettingAssemblyMetadata", referencePath, e.Message));
                 }

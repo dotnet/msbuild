@@ -11,6 +11,9 @@ using Microsoft.Build.Shared;
 using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
+using System.Linq;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -106,7 +109,14 @@ namespace Microsoft.Build.BackEnd.Logging
                 WriteLinePrettyFromResource("BuildStartedWithTime", e.Timestamp);
             }
 
-            WriteEnvironment(e.BuildEnvironment);
+            if (Traits.LogAllEnvironmentVariables)
+            {
+                WriteEnvironment(e.BuildEnvironment);
+            }
+            else
+            {
+                WriteEnvironment(e.BuildEnvironment?.Where(kvp => EnvironmentUtilities.IsWellKnownEnvironmentDerivedProperty(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
+            }
         }
 
         /// <summary>
@@ -509,17 +519,14 @@ namespace Microsoft.Build.BackEnd.Logging
                     setColor(ConsoleColor.DarkGray);
                 }
 
-                string nonNullMessage;
+                string nonNullMessage = e is EnvironmentVariableReadEventArgs environmentDerivedProperty ?
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EnvironmentDerivedPropertyRead", environmentDerivedProperty.EnvironmentVariableName, e.Message)
+                    : e.Message ?? String.Empty;
 
                 // Include file information if present.
                 if (e.File != null)
                 {
                     nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile);
-                }
-                else
-                {
-                    // null messages are ok -- treat as blank line
-                    nonNullMessage = e.Message ?? String.Empty;
                 }
 
                 WriteLinePretty(nonNullMessage);
@@ -591,7 +598,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             this.VerifyStack(!contextStack.IsEmpty(), "Bad project stack");
 
-            //Pop the current project
+            // Pop the current project
             Frame outerMost = contextStack.Pop();
 
             this.VerifyStack(!outerMost.displayed, "Bad project stack on {0}", outerMost.ID);
@@ -725,9 +732,9 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 ShowDeferredMessages();
 
-                //push now, so that the stack is in a good state
-                //for WriteProjectStarted() and WriteLinePretty()
-                //because we use the stack to control indenting
+                // push now, so that the stack is in a good state
+                // for WriteProjectStarted() and WriteLinePretty()
+                // because we use the stack to control indenting
                 contextStack.Push(f);
 
                 switch (f.type)
@@ -820,7 +827,7 @@ namespace Microsoft.Build.BackEnd.Logging
         internal struct Frame
         {
             /// <summary>
-            /// Creates a new instance of frame with all fields specified.
+            /// Initializes a new instance of the <see cref="Frame"/> struct with all fields specified.
             /// </summary>
             /// <param name="t">the type of the this frame</param>
             /// <param name="d">display state. true indicates this frame has been displayed to the user</param>
@@ -905,14 +912,14 @@ namespace Microsoft.Build.BackEnd.Logging
             /// The frames member is contained by FrameStack and does
             /// all the heavy lifting for FrameStack.
             /// </summary>
-            private System.Collections.Stack _frames;
+            private readonly Stack<Frame> _frames;
 
             /// <summary>
-            /// Create a new, empty, FrameStack.
+            /// Initializes a new instance of the <see cref="FrameStack"/> class.
             /// </summary>
             internal FrameStack()
             {
-                _frames = new System.Collections.Stack();
+                _frames = new Stack<Frame>();
             }
 
             /// <summary>
@@ -921,7 +928,7 @@ namespace Microsoft.Build.BackEnd.Logging
             /// <exception cref="InvalidOperationException">Thrown when stack is empty.</exception>
             internal Frame Pop()
             {
-                return (Frame)(_frames.Pop());
+                return _frames.Pop();
             }
 
             /// <summary>
@@ -929,7 +936,7 @@ namespace Microsoft.Build.BackEnd.Logging
             /// </summary>
             internal Frame Peek()
             {
-                return (Frame)(_frames.Peek());
+                return _frames.Peek();
             }
 
             /// <summary>

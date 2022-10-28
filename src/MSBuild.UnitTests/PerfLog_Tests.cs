@@ -1,35 +1,19 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Threading;
 
-using Microsoft.Build.CommandLine;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Xunit;
 using Xunit.Abstractions;
 using Shouldly;
-using System.IO.Compression;
-using System.Reflection;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
     public class PerfLogTests
     {
-#if USE_MSBUILD_DLL_EXTN
-        private const string MSBuildExeName = "MSBuild.dll";
-#else
-        private const string MSBuildExeName = "MSBuild.exe";
-#endif
-
         private readonly ITestOutputHelper _output;
 
         public PerfLogTests(ITestOutputHelper output)

@@ -22,6 +22,8 @@ using System.Security.Principal;
 using System.Threading.Tasks;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -69,6 +71,13 @@ namespace Microsoft.Build.BackEnd
         /// Set when the asynchronous packet pump should terminate
         /// </summary>
         private AutoResetEvent _terminatePacketPump;
+
+        /// <summary>
+        /// True if this side is gracefully disconnecting.
+        /// In such case we have sent last packet to client side and we expect
+        /// client will soon broke pipe connection - unless server do it first.
+        /// </summary>
+        private bool _isClientDisconnecting;
 
         /// <summary>
         /// The thread which runs the asynchronous packet pump
@@ -176,6 +185,14 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        /// <summary>
+        /// Called when we are about to send last packet to finalize graceful disconnection with client.
+        /// </summary>
+        public void ClientWillDisconnect()
+        {
+            _isClientDisconnecting = true;
+        }
+
 #endregion
 
 #region Construction
@@ -183,7 +200,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Instantiates an endpoint to act as a client
         /// </summary>
-        internal void InternalConstruct()
+        internal void InternalConstruct(string pipeName = null)
         {
             _status = LinkStatus.Inactive;
             _asyncDataMonitor = new object();
@@ -192,7 +209,7 @@ namespace Microsoft.Build.BackEnd
             _packetStream = new MemoryStream();
             _binaryWriter = new BinaryWriter(_packetStream);
 
-            string pipeName = NamedPipeUtil.GetPipeNameOrPath();
+            pipeName ??= NamedPipeUtil.GetPlatformSpecificPipeName();
 
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
             if (!NativeMethodsShared.IsMono)
@@ -215,7 +232,11 @@ namespace Microsoft.Build.BackEnd
                     PipeDirection.InOut,
                     1, // Only allow one connection at a time.
                     PipeTransmissionMode.Byte,
-                    PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+                    PipeOptions.Asynchronous | PipeOptions.WriteThrough
+#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+                    | PipeOptions.CurrentUserOnly
+#endif
+                    ,
                     PipeBufferSize, // Default input buffer
                     PipeBufferSize,  // Default output buffer
                     security,
@@ -231,7 +252,11 @@ namespace Microsoft.Build.BackEnd
                     PipeDirection.InOut,
                     1, // Only allow one connection at a time.
                     PipeTransmissionMode.Byte,
-                    PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+                    PipeOptions.Asynchronous | PipeOptions.WriteThrough
+#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+                    | PipeOptions.CurrentUserOnly
+#endif
+                    ,
                     PipeBufferSize, // Default input buffer
                     PipeBufferSize  // Default output buffer
                 );
@@ -309,6 +334,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_asyncDataMonitor)
             {
+                _isClientDisconnecting = false;
                 _packetPump = new Thread(PacketPumpProc);
                 _packetPump.IsBackground = true;
                 _packetPump.Name = "OutOfProc Endpoint Packet Pump";
@@ -447,13 +473,8 @@ namespace Microsoft.Build.BackEnd
 
                     ChangeLinkStatus(LinkStatus.Active);
                 }
-                catch (Exception e)
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    if (ExceptionHandling.IsCriticalException(e))
-                    {
-                        throw;
-                    }
-
                     CommunicationsUtilities.Trace("Client connection failed.  Exiting comm thread. {0}", e);
                     if (localPipeServer.IsConnected)
                     {
@@ -550,14 +571,25 @@ namespace Microsoft.Build.BackEnd
                                 // Incomplete read.  Abort.
                                 if (bytesRead == 0)
                                 {
-                                    CommunicationsUtilities.Trace("Parent disconnected abruptly");
+                                    if (_isClientDisconnecting)
+                                    {
+                                        CommunicationsUtilities.Trace("Parent disconnected gracefully.");
+                                        // Do not change link status to failed as this could make node think connection has failed
+                                        // and recycle node, while this is perfectly expected and handled race condition
+                                        // (both client and node is about to close pipe and client can be faster).
+                                    }
+                                    else
+                                    {
+                                        CommunicationsUtilities.Trace("Parent disconnected abruptly.");
+                                        ChangeLinkStatus(LinkStatus.Failed);
+                                    }
                                 }
                                 else
                                 {
                                     CommunicationsUtilities.Trace("Incomplete header read from server.  {0} of {1} bytes read", bytesRead, headerByte.Length);
+                                    ChangeLinkStatus(LinkStatus.Failed);
                                 }
 
-                                ChangeLinkStatus(LinkStatus.Failed);
                                 exitLoop = true;
                                 break;
                             }

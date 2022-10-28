@@ -7,6 +7,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
 #if FEATURE_XAMLTASKFACTORY
@@ -111,7 +113,8 @@ namespace Microsoft.Build.Tasks
 
             CodeCompileUnit dom = generator.GenerateCode();
 
-            string pathToMSBuildBinaries = ToolLocationHelper.GetPathToBuildTools(ToolLocationHelper.CurrentToolsVersion);
+            // MSBuildToolsDirectoryRoot is the canonical location for MSBuild dll's.
+            string pathToMSBuildBinaries = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
 
             // create the code generator options    
             // Since we are running msbuild 12.0 these had better load.

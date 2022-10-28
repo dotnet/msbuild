@@ -11,6 +11,8 @@ using Expander = Microsoft.Build.Evaluation.Expander<Microsoft.Build.Evaluation.
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <summary>
@@ -46,7 +48,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Valid attributes on usingtask element
         /// </summary>
-        private static readonly HashSet<string> ValidAttributesOnUsingTask = new HashSet<string> { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.taskName, XMakeAttributes.assemblyFile, XMakeAttributes.assemblyName, XMakeAttributes.taskFactory, XMakeAttributes.architecture, XMakeAttributes.runtime, XMakeAttributes.requiredPlatform, XMakeAttributes.requiredRuntime };
+        private static readonly HashSet<string> ValidAttributesOnUsingTask = new HashSet<string> { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.taskName, XMakeAttributes.assemblyFile, XMakeAttributes.assemblyName, XMakeAttributes.taskFactory, XMakeAttributes.architecture, XMakeAttributes.runtime, XMakeAttributes.requiredPlatform, XMakeAttributes.requiredRuntime, XMakeAttributes.overrideUsingTask };
 
         /// <summary>
         /// Valid attributes on target element
@@ -179,7 +181,7 @@ namespace Microsoft.Build.Construction
                         break;
 
                     case XMakeElements.itemDefinitionGroup:
-                        _project.AppendParentedChildNoChecks(ParseProjectItemDefinitionGroupElement(childElement));
+                        _project.AppendParentedChildNoChecks(ParseProjectItemDefinitionGroupElement(childElement, _project));
                         break;
 
                     case XMakeElements.choose:
@@ -282,7 +284,7 @@ namespace Microsoft.Build.Construction
                 exclusiveItemOperation = XMakeAttributes.update;
             }
 
-            //  At most one of the include, remove, or update attributes may be specified
+            // At most one of the include, remove, or update attributes may be specified
             if (exclusiveAttributeCount > 1)
             {
                 XmlAttributeWithLocation errorAttribute = remove.Length > 0 ? (XmlAttributeWithLocation)element.Attributes[XMakeAttributes.remove] : (XmlAttributeWithLocation)element.Attributes[XMakeAttributes.update];
@@ -357,7 +359,7 @@ namespace Microsoft.Build.Construction
                 return;
             }
 
-            //  Case insensitive comparison so that mis-capitalizing an attribute like Include or Exclude results in an easy to understand
+            // Case insensitive comparison so that mis-capitalizing an attribute like Include or Exclude results in an easy to understand
             //  error instead of unexpected behavior
             if (KnownAttributesOnItemIgnoreCase.Contains(name))
             {
@@ -366,7 +368,7 @@ namespace Microsoft.Build.Construction
                 return;
             }
 
-            //  Reserve attributes starting with underscores in case we need to add more built-in attributes later
+            // Reserve attributes starting with underscores in case we need to add more built-in attributes later
             if (name[0] == '_')
             {
                 isReservedAttributeName = false;
@@ -707,11 +709,11 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Parse a ProjectItemDefinitionGroupElement
         /// </summary>
-        private ProjectItemDefinitionGroupElement ParseProjectItemDefinitionGroupElement(XmlElementWithLocation element)
+        private ProjectItemDefinitionGroupElement ParseProjectItemDefinitionGroupElement(XmlElementWithLocation element, ProjectElementContainer parent)
         {
             ProjectXmlUtilities.VerifyThrowProjectAttributes(element, ValidAttributesOnlyConditionAndLabel);
 
-            ProjectItemDefinitionGroupElement itemDefinitionGroup = new ProjectItemDefinitionGroupElement(element, _project, _project);
+            ProjectItemDefinitionGroupElement itemDefinitionGroup = new ProjectItemDefinitionGroupElement(element, parent, _project);
 
             foreach (XmlElementWithLocation childElement in ProjectXmlUtilities.GetVerifyThrowProjectChildElements(element))
             {
@@ -861,6 +863,10 @@ namespace Microsoft.Build.Construction
 
                     case XMakeElements.choose:
                         child = ParseProjectChooseElement(childElement, parent, nestingDepth);
+                        break;
+
+                    case XMakeElements.itemDefinitionGroup:
+                        child = ParseProjectItemDefinitionGroupElement(childElement, parent);
                         break;
 
                     default:

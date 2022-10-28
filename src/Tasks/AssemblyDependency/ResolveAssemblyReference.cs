@@ -21,6 +21,8 @@ using Microsoft.Build.Utilities;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -320,7 +322,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string[] TargetFrameworkSubsets
         {
-            get { return _targetFrameworkSubsets; }
+            get
+            {
+                return _targetFrameworkSubsets;
+            }
+
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "TargetFrameworkSubsets");
@@ -448,7 +454,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem[] InstalledAssemblySubsetTables
         {
-            get { return _installedAssemblySubsetTables; }
+            get
+            {
+                return _installedAssemblySubsetTables;
+            }
+
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "InstalledAssemblySubsetTables");
@@ -475,7 +485,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem[] FullFrameworkAssemblyTables
         {
-            get { return _fullFrameworkAssemblyTables; }
+            get
+            {
+                return _fullFrameworkAssemblyTables;
+            }
+
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "FullFrameworkAssemblyTables");
@@ -1047,7 +1061,7 @@ namespace Microsoft.Build.Tasks
             {
                 /*
                 PERF NOTE: The Silent flag turns off logging completely from the task side. This means
-                we avoid the String.Formats that would normally occur even if the verbosity was set to 
+                we avoid the String.Formats that would normally occur even if the verbosity was set to
                 quiet at the engine level.
                 */
                 if (!Silent)
@@ -1105,7 +1119,7 @@ namespace Microsoft.Build.Tasks
                             string details = string.Empty;
                             if (logWarning)
                             {
-                                // This warning is logged regardless of AutoUnify since it means a conflict existed where the reference	
+                                // This warning is logged regardless of AutoUnify since it means a conflict existed where the reference
                                 // chosen was not the conflict victor in a version comparison. In other words, the victor was older.
                                 Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.FoundConflicts", assemblyName.Name, output);
                             }
@@ -1150,15 +1164,15 @@ namespace Microsoft.Build.Tasks
                             {
                                 foreach (AssemblyNameExtension conflictVictim in conflictVictims)
                                 {
-                                    // Make note we only output a conflict suggestion if the reference has at 
-                                    // least one conflict victim - that way we don't suggest redirects to 
+                                    // Make note we only output a conflict suggestion if the reference has at
+                                    // least one conflict victim - that way we don't suggest redirects to
                                     // assemblies that don't exist at runtime. For example, this avoids us suggesting
                                     // a redirect from Foo 1.0.0.0 -> 2.0.0.0 in the following:
                                     //
                                     //      Project -> Foo, 1.0.0.0
                                     //      Project -> Bar -> Foo, 2.0.0.0
                                     //
-                                    // Above, Foo, 1.0.0.0 wins out and is copied to the output directory because 
+                                    // Above, Foo, 1.0.0.0 wins out and is copied to the output directory because
                                     // it is a primary reference.
                                     foundAtLeastOneValidBindingRedirect = true;
 
@@ -1235,9 +1249,8 @@ namespace Microsoft.Build.Tasks
                     // Log general resolution exceptions.
                     foreach (Exception error in generalResolutionExceptions)
                     {
-                        if (error is InvalidReferenceAssemblyNameException)
+                        if (error is InvalidReferenceAssemblyNameException e)
                         {
-                            InvalidReferenceAssemblyNameException e = (InvalidReferenceAssemblyNameException)error;
                             Log.LogWarningWithCodeFromResources("General.MalformedAssemblyName", e.SourceItemSpec);
                         }
                         else
@@ -1255,9 +1268,9 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (Resolver r in dependencyTable.Resolvers)
                 {
-                    if (r is AssemblyFoldersExResolver)
+                    if (r is AssemblyFoldersExResolver assemblyFoldersExResolver)
                     {
-                        AssemblyFoldersEx assemblyFoldersEx = ((AssemblyFoldersExResolver)r).AssemblyFoldersExLocations;
+                        AssemblyFoldersEx assemblyFoldersEx = assemblyFoldersExResolver.AssemblyFoldersExLocations;
 
                         if (assemblyFoldersEx != null && _showAssemblyFoldersExLocations.TryGetValue(r.SearchPath, out messageImportance))
                         {
@@ -2214,7 +2227,7 @@ namespace Microsoft.Build.Tasks
                             if (targetingProfile)
                             {
                                 // When targeting a profile we want the redist list to be the full framework redist list, since this is what should be used
-                                // when unifying assemblies ect. 
+                                // when unifying assemblies ect.
                                 AssemblyTableInfo[] fullRedistAssemblyTableInfo = null;
                                 RedistList fullFrameworkRedistList = null;
 
@@ -2390,7 +2403,7 @@ namespace Microsoft.Build.Tasks
                             dependencyTable.RemoveReferencesMarkedForExclusion(true /* Remove the reference and do not warn*/, subsetOrProfileName);
                         }
 
-                        // Based on the closure, get a table of ideal remappings needed to 
+                        // Based on the closure, get a table of ideal remappings needed to
                         // produce zero conflicts.
                         dependencyTable.ResolveConflicts
                         (
@@ -2451,8 +2464,8 @@ namespace Microsoft.Build.Tasks
                     // If we're not finding dependencies, then don't suggest redirects (they're only about dependencies).
                     if (FindDependencies)
                     {
-                        // Build the table of suggested redirects. If we're auto-unifying, we want to output all the 
-                        // assemblies that we auto-unified so that GenerateBindingRedirects can consume them, 
+                        // Build the table of suggested redirects. If we're auto-unifying, we want to output all the
+                        // assemblies that we auto-unified so that GenerateBindingRedirects can consume them,
                         // not just the required ones for build to succeed
                         List<DependentAssembly> remappings = AutoUnify ? autoUnifiedRemappedAssemblies : idealAssemblyRemappings;
                         List<AssemblyNameReference> remappedReferences = AutoUnify ? autoUnifiedRemappedAssemblyReferences : idealAssemblyRemappingsIdentities;
@@ -2546,7 +2559,7 @@ namespace Microsoft.Build.Tasks
                                 {
                                     // Its pretty hard to get here, you need an assembly that contains a valid reference
                                     // to a dependent assembly that, in turn, throws a FileLoadException during GetAssemblyName.
-                                    // Still it happened once, with an older version of the CLR. 
+                                    // Still it happened once, with an older version of the CLR.
 
                                     // ...falling through and relying on the targetAssemblyName==null behavior below...
                                 }
@@ -2623,7 +2636,7 @@ namespace Microsoft.Build.Tasks
             {
                 try
                 {
-                    // in case of P2P that have not build the reference can be resolved but file does not exist on disk. 
+                    // in case of P2P that have not build the reference can be resolved but file does not exist on disk.
                     if (fileExists(resolvedReference.FullPath))
                     {
                         FrameworkNameVersioning frameworkName;
@@ -2631,12 +2644,8 @@ namespace Microsoft.Build.Tasks
                         getAssemblyMetadata(resolvedReference.FullPath, assemblyMetadataCache, out result, out scatterFiles, out frameworkName);
                     }
                 }
-                catch (Exception e)
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    if (ExceptionHandling.IsCriticalException(e))
-                    {
-                        throw;
-                    }
                 }
             }
 
@@ -2901,7 +2910,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            // No subset names were passed in to search for in the targetframework directories and no installed subset tables were provided, we have nothing to use to 
+            // No subset names were passed in to search for in the targetframework directories and no installed subset tables were provided, we have nothing to use to
             // generate the exclusion list with, so do not continue.
             if (_targetFrameworkSubsets.Length == 0 && _installedAssemblySubsetTables.Length == 0)
             {

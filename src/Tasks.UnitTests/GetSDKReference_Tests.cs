@@ -15,6 +15,8 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 {
     public class FakeSdkStructure : IDisposable
@@ -178,6 +180,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
     /// <summary>
     /// Test the expansion of sdk reference assemblies.
     /// </summary>
+    [PlatformSpecific(TestPlatforms.Windows)]
     public class GetSDKReferenceFilesTestFixture : IDisposable, IClassFixture<FakeSdkStructure>
     {
         private readonly ITestOutputHelper _output;

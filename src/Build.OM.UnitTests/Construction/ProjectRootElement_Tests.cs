@@ -21,6 +21,9 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 using Shouldly;
 using Xunit;
+using Microsoft.Build.Framework;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -214,7 +217,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void ConstructOverSameFileReturnsSameEvenWithOneBeingRelativePath3()
         {
-            string content = "<Project ToolsVersion=\"4.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\r\n</Project>";
+            string content = "<Project ToolsVersion=\"4.0\">\r\n</Project>";
 
             ProjectRootElement projectXml1 = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
 
@@ -231,7 +234,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void ConstructOverSameFileReturnsSameEvenWithOneBeingRelativePath4()
         {
-            string content = "<Project ToolsVersion=\"4.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\r\n</Project>";
+            string content = "<Project ToolsVersion=\"4.0\">\r\n</Project>";
 
             ProjectRootElement projectXml1 = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
 
@@ -290,7 +293,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <XXX xmlns='http://schemas.microsoft.com/developer/msbuild/2003'/>
+                    <XXX />
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
@@ -306,7 +309,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <XXX/>
                     </Project>
                 ";
@@ -392,7 +395,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <ItemGroup>
                            <XXX YYY='ZZZ'/>
                         </ItemGroup>
@@ -413,7 +416,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <ItemGroup>
                            <XXX YYY='ZZZ'/>
                         </ItemGroup>
@@ -453,10 +456,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Trait("Category", "netcore-linux-failing")]
         public void ValidXmlXmlTextReaderNotCache()
         {
-            string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                    </Project>
-                ";
+            string content = @"<Project />";
 
             string path = null;
 
@@ -491,15 +491,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void ValidXmlXmlReaderCache()
         {
-            string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                    </Project>
-                ";
+            string content = @"<Project />";
 
-            string content2 = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' DefaultTargets='t'>
-                    </Project>
-                ";
+            string content2 = @"<Project DefaultTargets='t' />";
 
             string path = null;
 
@@ -949,7 +943,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Build a project file that can't be accessed
         /// </summary>
         [Fact]
-        [PlatformSpecific (TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         // FileSecurity class is not supported on Unix
         public void ProjectCanNotBeOpened()
         {
@@ -1024,7 +1018,7 @@ Project(""{";
         /// Open lots of projects concurrently to try to trigger problems
         /// </summary>
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]  //This test is platform specific for Windows
+        [PlatformSpecific(TestPlatforms.Windows)]  // This test is platform specific for Windows
         public void ConcurrentProjectOpenAndCloseThroughProject()
         {
             int iterations = 500;
@@ -1718,7 +1712,7 @@ true, true, true)]
             AssertProjectFileAfterReload(
                 true,
                 false,
-                (initial, reload, actualFile) => { Assert.Equal(reload, actualFile);});
+                (initial, reload, actualFile) => { Assert.Equal(reload, actualFile); });
         }
 
         [Fact]
@@ -1860,6 +1854,10 @@ true, true, true)]
         public void ReloadDoesNotLeakCachedXmlDocuments()
         {
             using var env = TestEnvironment.Create();
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
             var testFiles = env.CreateTestProjectWithFiles("", new[] { "build.proj" });
             var projectFile = testFiles.CreatedFiles.First();
 

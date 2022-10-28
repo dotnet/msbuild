@@ -15,6 +15,8 @@ using System.Reflection.PortableExecutable;
 using System.Reflection.Metadata;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -187,59 +189,22 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         internal static AssemblyNameExtension GetAssemblyNameEx(string path)
         {
-            AssemblyName assemblyName = null;
-#if !FEATURE_ASSEMBLYLOADCONTEXT
             try
             {
-                assemblyName = AssemblyName.GetAssemblyName(path);
+                return new AssemblyNameExtension(AssemblyName.GetAssemblyName(path));
             }
             catch (FileLoadException)
             {
                 // Its pretty hard to get here, you need an assembly that contains a valid reference
                 // to a dependent assembly that, in turn, throws a FileLoadException during GetAssemblyName.
                 // Still it happened once, with an older version of the CLR. 
-
-                // ...falling through and relying on the assemblyName == null behavior below...
             }
             catch (FileNotFoundException)
             {
                 // Its pretty hard to get here, also since we do a file existence check right before calling this method so it can only happen if the file got deleted between that check and this call.
             }
-#else
-            using (var stream = File.OpenRead(path))
-            using (var peFile = new PEReader(stream))
-            {
-                bool hasMetadata = false;
-                try
-                {
-                    // This can throw if the stream is too small, which means
-                    // the assembly doesn't have metadata.
-                    hasMetadata = peFile.HasMetadata;
-                }
-                finally
-                {
-                    // If the file does not contain PE metadata, throw BadImageFormatException to preserve
-                    // behavior from AssemblyName.GetAssemblyName(). RAR will deal with this correctly.
-                    if (!hasMetadata)
-                    {
-                        throw new BadImageFormatException(string.Format(CultureInfo.CurrentCulture,
-                            AssemblyResources.GetString("ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata"),
-                            path));
-                    }
-                }
 
-                var metadataReader = peFile.GetMetadataReader();
-                var entry = metadataReader.GetAssemblyDefinition();
-
-                assemblyName = new AssemblyName();
-                assemblyName.Name = metadataReader.GetString(entry.Name);
-                assemblyName.Version = entry.Version;
-                assemblyName.CultureName = metadataReader.GetString(entry.Culture);
-                assemblyName.SetPublicKey(metadataReader.GetBlobBytes(entry.PublicKey));
-                assemblyName.Flags = (AssemblyNameFlags)(int)entry.Flags;
-            }
-#endif
-            return assemblyName == null ? null : new AssemblyNameExtension(assemblyName);
+            return null;
         }
 
         /// <summary>
@@ -820,11 +785,15 @@ namespace Microsoft.Build.Shared
             // Some assemblies (real case was interop assembly) may have null PKTs.
             if (aPKT == null)
             {
+#pragma warning disable CA1825 // Avoid zero-length array allocations
                 aPKT = new byte[0];
+#pragma warning restore CA1825 // Avoid zero-length array allocations
             }
             if (bPKT == null)
             {
+#pragma warning disable CA1825 // Avoid zero-length array allocations
                 bPKT = new byte[0];
+#pragma warning restore CA1825 // Avoid zero-length array allocations
             }
 
             if (aPKT.Length != bPKT.Length)

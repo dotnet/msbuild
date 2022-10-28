@@ -5,6 +5,8 @@ using System.IO;
 using System.Text;
 using Microsoft.Build.Shared.LanguageParser;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

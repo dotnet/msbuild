@@ -12,6 +12,8 @@ using Xunit;
 
 
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.Evaluation
 {
     /// <summary>
@@ -80,7 +82,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// Tests that a strong reference is held to a single item
         /// </summary>
         [Fact]
-        //  This test fails on .NET Core and Mono: https://github.com/dotnet/msbuild/issues/282
+        // This test fails on .NET Core and Mono: https://github.com/dotnet/msbuild/issues/282
         [Trait("Category", "non-mono-tests")]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/msbuild/issues/282")]
         public void AddEntryStrongReference()

@@ -3,11 +3,14 @@
 
 using System;
 using System.IO;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -280,6 +283,30 @@ namespace Microsoft.Build.UnitTests
                 engine.AssertLogContains(stackTrace);
                 engine.AssertLogContains("InvalidOperationException");
             }
+        }
+
+        /// <summary>
+        /// Verify that <see cref="TaskLoggingHelper.LogErrorFromException(Exception, bool, bool, string)" /> logs inner exceptions from an <see cref="AggregateException" />.
+        /// </summary>
+        [Fact]
+        public void TestLogFromExceptionWithAggregateException()
+        {
+            AggregateException aggregateException = new AggregateException(
+                new InvalidOperationException("The operation was invalid"),
+                new IOException("An I/O error occurred"));
+
+            MockEngine engine = new MockEngine();
+            MockTask task = new MockTask
+            {
+                BuildEngine = engine
+            };
+
+            task.Log.LogErrorFromException(aggregateException);
+
+            engine.Errors.ShouldBe(2);
+
+            engine.AssertLogContains("The operation was invalid");
+            engine.AssertLogContains("An I/O error occurred");
         }
     }
 }

@@ -8,6 +8,8 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Logging
 {
     /// <summary>
@@ -127,7 +129,7 @@ namespace Microsoft.Build.UnitTests.Logging
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/msbuild/issues/282")]
         public void TestShutDown()
         {
-            SendDataDelegate transportDelegate = PacketProcessor;
+            SendDataDelegate transportDelegate = new(PacketProcessor);
             var weakTransportDelegateReference = new WeakReference(transportDelegate);
             var transportSink = new BuildEventArgTransportSink(transportDelegate);
 

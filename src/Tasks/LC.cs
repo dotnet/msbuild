@@ -7,6 +7,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -99,7 +101,7 @@ namespace Microsoft.Build.Tasks
         /// </remarks>
         public override bool Execute()
         {
-            Log.LogErrorFromResources("TaskRequiresFrameworkFailure", nameof(LC));
+            Log.LogErrorWithCodeFromResources("TaskRequiresFrameworkFailure", nameof(LC));
             return false;
         }
 #endif

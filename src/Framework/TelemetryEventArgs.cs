@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>

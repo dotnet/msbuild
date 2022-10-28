@@ -19,6 +19,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /*
@@ -73,7 +75,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// directory we should write the wrapper to
         /// </summary>
-        protected override string OutputDirectory => (HasTemporaryWrapper) ? Path.GetTempPath() : base.OutputDirectory;
+        protected override string OutputDirectory => (HasTemporaryWrapper) ? FileUtilities.TempFileDirectory : base.OutputDirectory;
 
         private readonly bool _noClassMembers;
         private readonly string _targetProcessorArchitecture;

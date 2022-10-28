@@ -12,6 +12,8 @@ using System.Linq;
 using Path = Microsoft.IO.Path;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.FileSystem
 {
     internal class DirectoryCacheFileSystemWrapper : IFileSystem
@@ -85,8 +87,12 @@ namespace Microsoft.Build.FileSystem
             {
                 return FileMatcher.IsAllFilesWildcard(searchPattern) || FileMatcher.IsMatch(fileName, searchPattern);
             };
-            FindTransform<string> transform = (ref ReadOnlySpan<char> fileName) => Path.Join(path.AsSpan(), fileName);
 
+#if !FEATURE_MSIOREDIST && NETFRAMEWORK
+            FindTransform<string> transform = (ref ReadOnlySpan<char> fileName) => Path.Combine(path, fileName.ToString());
+#else
+            FindTransform<string> transform = (ref ReadOnlySpan<char> fileName) => Path.Join(path.AsSpan(), fileName);
+#endif
             IEnumerable<string> directories = includeDirectories
                 ? _directoryCache.EnumerateDirectories(path, searchPattern, predicate, transform)
                 : Enumerable.Empty<string>();
@@ -97,9 +103,9 @@ namespace Microsoft.Build.FileSystem
             return Enumerable.Concat(directories, files);
         }
 
-        #endregion
+#endregion
 
-        #region IFileSystem pass-through implementation
+#region IFileSystem pass-through implementation
 
         public FileAttributes GetAttributes(string path) => _fileSystem.GetAttributes(path);
 
@@ -113,6 +119,6 @@ namespace Microsoft.Build.FileSystem
 
         public byte[] ReadFileAllBytes(string path) => _fileSystem.ReadFileAllBytes(path);
 
-        #endregion
+#endregion
     }
 }

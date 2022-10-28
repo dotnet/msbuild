@@ -13,6 +13,8 @@ using System.Security.Permissions;
 using System.Xml;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     /// <summary>
@@ -193,7 +195,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private static XmlElement GetRequestedPrivilegeElement(XmlElement inputRequestedPrivilegeElement, XmlDocument document)
         {
-            //  <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+            // <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
             //      <!--
             //          UAC Manifest Options
             //          If you want to change the Windows User Account Control level replace the 
@@ -551,7 +553,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             var outputDocument = new XmlDocument();
             XmlElement inputPermissionSetElement = GetInputPermissionSetElement();
 
-            //NOTE: XmlDocument.ImportNode munges "xmlns:asmv2" to "xmlns:d1p1" for some reason, use XmlUtil.CloneElementToDocument instead
+            // NOTE: XmlDocument.ImportNode munges "xmlns:asmv2" to "xmlns:d1p1" for some reason, use XmlUtil.CloneElementToDocument instead
             XmlElement outputPermissionSetElement = XmlUtil.CloneElementToDocument(inputPermissionSetElement, outputDocument, XmlNamespaces.asmv2);
             outputDocument.AppendChild(outputPermissionSetElement);
 

@@ -6,6 +6,8 @@ using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class XmakeAttributesTest
@@ -130,7 +132,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestArchitectureValuesMatch()
         {
-            string currentArchitecture = EnvironmentUtilities.Is64BitProcess ? XMakeAttributes.MSBuildArchitectureValues.x64 : XMakeAttributes.MSBuildArchitectureValues.x86;
+            string currentArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
             string notCurrentArchitecture = EnvironmentUtilities.Is64BitProcess ? XMakeAttributes.MSBuildArchitectureValues.x86 : XMakeAttributes.MSBuildArchitectureValues.x64;
 
             Assert.True(XMakeAttributes.ArchitectureValuesMatch(XMakeAttributes.MSBuildArchitectureValues.any, XMakeAttributes.MSBuildArchitectureValues.currentArchitecture));
@@ -145,7 +147,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestMergeArchitectureValues()
         {
-            string currentArchitecture = EnvironmentUtilities.Is64BitProcess ? XMakeAttributes.MSBuildArchitectureValues.x64 : XMakeAttributes.MSBuildArchitectureValues.x86;
+            string currentArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
             string notCurrentArchitecture = EnvironmentUtilities.Is64BitProcess ? XMakeAttributes.MSBuildArchitectureValues.x86 : XMakeAttributes.MSBuildArchitectureValues.x64;
 
             string mergedArchitecture;

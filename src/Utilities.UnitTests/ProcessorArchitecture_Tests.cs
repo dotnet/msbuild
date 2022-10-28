@@ -7,6 +7,8 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class ProcessorArchitectureTests
@@ -19,6 +21,7 @@ namespace Microsoft.Build.UnitTests
                 NativeMethodsShared.ProcessorArchitectures.X64 => ProcessorArchitecture.AMD64,
                 NativeMethodsShared.ProcessorArchitectures.IA64 => ProcessorArchitecture.IA64,
                 NativeMethodsShared.ProcessorArchitectures.ARM => ProcessorArchitecture.ARM,
+                NativeMethodsShared.ProcessorArchitectures.ARM64 => ProcessorArchitecture.ARM64,
                 // unknown architecture? return null
                 _ => null,
             };
@@ -33,6 +36,7 @@ namespace Microsoft.Build.UnitTests
             ProcessorArchitecture.AMD64.ShouldBe("AMD64"); // "AMD64 ProcessorArchitecture isn't correct"
             ProcessorArchitecture.MSIL.ShouldBe("MSIL"); // "MSIL ProcessorArchitecture isn't correct"
             ProcessorArchitecture.ARM.ShouldBe("ARM"); // "ARM ProcessorArchitecture isn't correct"
+            ProcessorArchitecture.ARM64.ShouldBe("ARM64"); // "ARM ProcessorArchitecture isn't correct"
         }
 
         [Fact]
@@ -53,7 +57,15 @@ namespace Microsoft.Build.UnitTests
                     procArchitecture.ShouldBe(ProcessorArchitecture.ARM);
 
                     procArchitecture = ToolLocationHelper.ConvertDotNetFrameworkArchitectureToProcessorArchitecture(Utilities.DotNetFrameworkArchitecture.Bitness64);
-                    procArchitecture.ShouldBeNull(); // "We should not have any Bitness64 Processor architecture returned in arm"
+                    procArchitecture.ShouldBeNull();
+                    break;
+
+                case ProcessorArchitecture.ARM64:
+                    procArchitecture = ToolLocationHelper.ConvertDotNetFrameworkArchitectureToProcessorArchitecture(Utilities.DotNetFrameworkArchitecture.Bitness64);
+                    procArchitecture.ShouldBe(ProcessorArchitecture.ARM64);
+
+                    procArchitecture = ToolLocationHelper.ConvertDotNetFrameworkArchitectureToProcessorArchitecture(Utilities.DotNetFrameworkArchitecture.Bitness32);
+                    procArchitecture.ShouldBe(ProcessorArchitecture.ARM);
                     break;
 
                 case ProcessorArchitecture.X86:
@@ -62,7 +74,7 @@ namespace Microsoft.Build.UnitTests
 
                     procArchitecture = ToolLocationHelper.ConvertDotNetFrameworkArchitectureToProcessorArchitecture(Utilities.DotNetFrameworkArchitecture.Bitness64);
 
-                    //We should also allow NULL if the machine is true x86 only.
+                    // We should also allow NULL if the machine is true x86 only.
                     bool isValidResult = procArchitecture?.Equals(ProcessorArchitecture.AMD64) != false || procArchitecture.Equals(ProcessorArchitecture.IA64);
 
                     isValidResult.ShouldBeTrue();

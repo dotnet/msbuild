@@ -3,8 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Utilities
 {
@@ -44,7 +47,7 @@ namespace Microsoft.Build.Utilities
     ///     The event source will be cleaned up.  This may be interesting because the unregister will come from a thread other than what is doing the logging.
     ///     This may create a Synchronization issue, if unregister is called while events are being logged.
     /// </summary>
-    //     
+    // 
     // UNDONE: If we can use ErrorUtilities, replace all InvalidOperation and Argument exceptions with the appropriate calls.
     // 
     public class MuxLogger : INodeLogger
@@ -644,6 +647,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -690,6 +694,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -734,6 +739,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -773,6 +779,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -817,6 +824,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -855,7 +863,10 @@ namespace Microsoft.Build.Utilities
                         _firstProjectStartedEventContext = buildEvent.BuildEventContext;
 
                         // We've never seen a project started event, so raise the build started event and save this project started event.
-                        BuildStartedEventArgs startedEvent = new BuildStartedEventArgs(_buildStartedEvent.Message, _buildStartedEvent.HelpKeyword, _buildStartedEvent.BuildEnvironment);
+                        BuildStartedEventArgs startedEvent =
+                            new BuildStartedEventArgs(_buildStartedEvent.Message,
+                            _buildStartedEvent.HelpKeyword,
+                            Traits.LogAllEnvironmentVariables ? _buildStartedEvent.BuildEnvironment : _buildStartedEvent.BuildEnvironment?.Where(kvp => EnvironmentUtilities.IsWellKnownEnvironmentDerivedProperty(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
                         RaiseBuildStartedEvent(sender, startedEvent);
                     }
 
@@ -871,6 +882,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -912,6 +924,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -953,6 +966,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -994,6 +1008,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -1035,6 +1050,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -1076,6 +1092,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -1117,6 +1134,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -1163,6 +1181,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -1224,6 +1243,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -1269,6 +1289,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)

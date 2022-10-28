@@ -17,6 +17,8 @@ using Xunit.Abstractions;
 using static Microsoft.Build.Graph.UnitTests.GraphTestingUtilities;
 using static Microsoft.Build.UnitTests.Helpers;
 
+#nullable disable
+
 namespace Microsoft.Build.Graph.UnitTests
 {
     public class GraphLoadedFromSolutionTests : IDisposable
@@ -76,12 +78,10 @@ namespace Microsoft.Build.Graph.UnitTests
                 defaultTargets: null,
                 extraContent: referenceToSolution);
 
-            var exception = Should.Throw<InvalidOperationException>(
-                () =>
-                {
-                    new ProjectGraph(root.Path);
-                });
+            var aggException = Should.Throw<AggregateException>(() => new ProjectGraph(root.Path));
+            aggException.InnerExceptions.ShouldHaveSingleItem();
 
+            var exception = aggException.InnerExceptions[0].ShouldBeOfType<InvalidOperationException>();
             exception.Message.ShouldContain("MSB4263:");
         }
 
@@ -260,7 +260,7 @@ namespace Microsoft.Build.Graph.UnitTests
             {
                 yield return new object[]
                 {
-                    new Dictionary<int, int[]> //graph nodes and ProjectReference edges
+                    new Dictionary<int, int[]> // graph nodes and ProjectReference edges
                     {
                         {1, null},
                         {2, null}

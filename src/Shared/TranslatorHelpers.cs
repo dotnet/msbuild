@@ -8,6 +8,8 @@ using System.Globalization;
 using System.Reflection;
 using AssemblyHashAlgorithm = System.Configuration.Assemblies.AssemblyHashAlgorithm;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

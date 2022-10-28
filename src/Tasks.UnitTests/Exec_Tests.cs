@@ -16,6 +16,8 @@ using Xunit.Abstractions;
 using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
@@ -64,31 +66,6 @@ namespace Microsoft.Build.UnitTests
                 // Now run the Exec task on a simple command.
                 Exec exec = PrepareExec("echo Hello World!");
                 exec.Execute().ShouldBeTrue();
-            }
-        }
-
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
-        public void EscapeSpecifiedCharactersInPathToGeneratedBatchFile_DisabledUnderChangeWave16_10()
-        {
-            using (var testEnvironment = TestEnvironment.Create())
-            {
-                ChangeWaves.ResetStateForTests();
-                testEnvironment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave16_10.ToString());
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-
-                var newTempPath = testEnvironment.CreateNewTempPathWithSubfolder("hello()w]o(rld)").TempPath;
-
-                string tempPath = Path.GetTempPath();
-                Assert.StartsWith(newTempPath, tempPath);
-
-                // Now run the Exec task on a simple command.
-                Exec exec = PrepareExec("echo Hello World!");
-                exec.Execute().ShouldBeFalse();
-
-                ChangeWaves.ResetStateForTests();
             }
         }
 
@@ -523,7 +500,7 @@ namespace Microsoft.Build.UnitTests
 
                 MethodInfo generateCommandLineCommandsMethod = execType.GetMethod("GenerateCommandLineCommands", BindingFlags.Instance | BindingFlags.NonPublic);
 
-                string commandLine = generateCommandLineCommandsMethod.Invoke(exec, new object[0]) as string;
+                string commandLine = generateCommandLineCommandsMethod.Invoke(exec, Array.Empty<object>()) as string;
 
                 if (autoRunShouldBeDisabled)
                 {
@@ -867,31 +844,31 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ConsoleToMSBuild()
         {
-            //Exec with no output
+            // Exec with no output
             Exec exec = PrepareExec("set foo=blah");
-            //Test Set and Get of ConsoleToMSBuild
+            // Test Set and Get of ConsoleToMSBuild
             exec.ConsoleToMSBuild = true;
             Assert.True(exec.ConsoleToMSBuild);
 
             bool result = exec.Execute();
             Assert.True(result);
 
-            //Nothing to run, so the list should be empty
+            // Nothing to run, so the list should be empty
             Assert.Empty(exec.ConsoleOutput);
 
 
-            //first echo prints "Hello stderr" to stderr, second echo prints to stdout
+            // first echo prints "Hello stderr" to stderr, second echo prints to stdout
             string testString = "echo Hello stderr 1>&2\necho Hello stdout";
             exec = PrepareExec(testString);
 
-            //Test Set and Get of ConsoleToMSBuild
+            // Test Set and Get of ConsoleToMSBuild
             exec.ConsoleToMSBuild = true;
             Assert.True(exec.ConsoleToMSBuild);
 
             result = exec.Execute();
             Assert.True(result);
 
-            //Both two lines should had gone to stdout
+            // Both two lines should had gone to stdout
             Assert.Equal(2, exec.ConsoleOutput.Length);
         }
 
@@ -1015,64 +992,6 @@ echo line 3"" />
                 }
             }
         }
-
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
-        public void EndToEndMultilineExec_EscapeSpecialCharacters_DisabledUnderChangeWave16_10()
-        {
-            using (var env = TestEnvironment.Create(_output))
-            {
-                ChangeWaves.ResetStateForTests();
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave16_10.ToString());
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-
-                var testProject = env.CreateTestProjectWithFiles(@"<Project>
-<Target Name=""ExecCommand"">
-  <Exec Command=""echo Hello, World!"" />
-   </Target>
-</Project>");
-
-                // Ensure path has subfolders
-                var newTempPath = env.CreateNewTempPathWithSubfolder("hello()wo(rld)").TempPath;
-                string tempPath = Path.GetTempPath();
-                Assert.StartsWith(newTempPath, tempPath);
-
-                using (var buildManager = new BuildManager())
-                {
-                    MockLogger logger = new MockLogger(_output, profileEvaluation: false, printEventsToStdout: false);
-
-                    var parameters = new BuildParameters()
-                    {
-                        Loggers = new[] { logger },
-                    };
-
-                    var collection = new ProjectCollection(
-                        new Dictionary<string, string>(),
-                        new[] { logger },
-                        remoteLoggers: null,
-                        ToolsetDefinitionLocations.Default,
-                        maxNodeCount: 1,
-                        onlyLogCriticalEvents: false,
-                        loadProjectsReadOnly: true);
-
-                    var project = collection.LoadProject(testProject.ProjectFile).CreateProjectInstance();
-
-                    var request = new BuildRequestData(
-                        project,
-                        targetsToBuild: new[] { "ExecCommand" },
-                        hostServices: null);
-
-                    var result = buildManager.Build(parameters, request);
-
-                    logger.AssertLogContains("Hello, World!");
-
-                    result.OverallResult.ShouldBe(BuildResultCode.Failure);
-                }
-                ChangeWaves.ResetStateForTests();
-            }
-        }
     }
 
     internal class ExecWrapper : Exec
@@ -1094,6 +1013,3 @@ echo line 3"" />
         }
     }
 }
-
-
-

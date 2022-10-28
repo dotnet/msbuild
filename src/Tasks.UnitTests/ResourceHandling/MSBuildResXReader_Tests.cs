@@ -11,6 +11,8 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
 {
     public class MSBuildResXReader_Tests
@@ -33,6 +35,45 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
   </data>"));
 
             AssertSingleStringResource(resxWithSingleString, "StringResource", "StringValue");
+        }
+
+        [Fact]
+        public void ParsesSingleStringWithoutPreserveAsString()
+        {
+            var resxWithSingleString = MSBuildResXReader.GetResourcesFromString(
+                ResXHelper.SurroundWithBoilerplate(
+                    @"<data name=""StringResource"">
+    <value> StringValue </value>
+    <comment>Comment</comment>
+  </data>"));
+
+            AssertSingleStringResource(resxWithSingleString, "StringResource", " StringValue ");
+        }
+
+        [Fact]
+        public void ParsesSingleWhitespaceStringAsString()
+        {
+            var resxWithSingleString = MSBuildResXReader.GetResourcesFromString(
+                ResXHelper.SurroundWithBoilerplate(
+                    @"<data name=""StringResource"" xml:space=""preserve"">
+    <value> </value>
+    <comment>Comment</comment>
+  </data>"));
+
+            AssertSingleStringResource(resxWithSingleString, "StringResource", " ");
+        }
+
+        [Fact]
+        public void ParsesSingleWhitespaceStringWithNoPreserveAsEmptyString()
+        {
+            var resxWithSingleString = MSBuildResXReader.GetResourcesFromString(
+                ResXHelper.SurroundWithBoilerplate(
+                    @"<data name=""StringResource"">
+    <value> </value>
+    <comment>Comment</comment>
+  </data>"));
+
+            AssertSingleStringResource(resxWithSingleString, "StringResource", "");
         }
 
         [Fact]

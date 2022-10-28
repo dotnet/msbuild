@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Logging
 {
     /// <summary>
@@ -75,13 +77,12 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private void InitializeForwardingTable()
         {
-            _forwardingTable = new Dictionary<string, int>(17, StringComparer.OrdinalIgnoreCase);
+            _forwardingTable = new Dictionary<string, int>(16, StringComparer.OrdinalIgnoreCase);
             _forwardingTable[BuildStartedEventDescription] = 0;
             _forwardingTable[BuildFinishedEventDescription] = 0;
             _forwardingTable[ProjectStartedEventDescription] = 0;
             _forwardingTable[ProjectFinishedEventDescription] = 0;
-            _forwardingTable[ProjectEvaluationStartedEventDescription] = 0;
-            _forwardingTable[ProjectEvaluationFinishedEventDescription] = 0;
+            _forwardingTable[ProjectEvaluationEventDescription] = 0;
             _forwardingTable[TargetStartedEventDescription] = 0;
             _forwardingTable[TargetFinishedEventDescription] = 0;
             _forwardingTable[TaskStartedEventDescription] = 0;
@@ -112,11 +113,20 @@ namespace Microsoft.Build.Logging
                     }
                 }
                 // Setting events to forward on the commandline will override the verbosity and other switches such as
-                // showPerfSummand and ShowSummary
+                // showPerfSummary and ShowSummary
                 if (_forwardingSetFromParameters)
                 {
                     _showPerfSummary = false;
                     _showSummary = true;
+                }
+
+                if (_forwardProjectContext)
+                {
+                    // We can't know whether the project items needed to find ForwardProjectContextDescription
+                    // will be set on ProjectStarted or ProjectEvaluationFinished because we don't know
+                    // all of the other loggers that will be attached. So turn both on.
+                    _forwardingTable[ProjectStartedEventDescription] = 1;
+                    _forwardingTable[ProjectEvaluationEventDescription] = 1;
                 }
             }
         }
@@ -134,6 +144,12 @@ namespace Microsoft.Build.Logging
                 _forwardingSetFromParameters = true;
                 _forwardingTable[parameterName] = 1;
             }
+            else if (String.Equals(parameterName, ProjectEvaluationStartedEventDescription, StringComparison.OrdinalIgnoreCase) ||
+                String.Equals(parameterName, ProjectEvaluationFinishedEventDescription, StringComparison.OrdinalIgnoreCase))
+            {
+                _forwardingSetFromParameters = true;
+                _forwardingTable[ProjectEvaluationEventDescription] = 1;
+            }
 
             // If any of the following parameters are set, we will make sure we forward the events
             // necessary for the central logger to emit the requested information
@@ -148,6 +164,10 @@ namespace Microsoft.Build.Logging
             else if (String.Equals(parameterName, ShowCommandLineDescription, StringComparison.OrdinalIgnoreCase))
             {
                 _showCommandLine = true;
+            }
+            else if (string.Equals(parameterName, ForwardProjectContextDescription, StringComparison.OrdinalIgnoreCase))
+            {
+                _forwardProjectContext = true;
             }
         }
 
@@ -228,8 +248,7 @@ namespace Microsoft.Build.Logging
             if (IsVerbosityAtLeast(LoggerVerbosity.Diagnostic))
             {
                 _forwardingTable[CustomEventDescription] = 1;
-                _forwardingTable[ProjectEvaluationStartedEventDescription] = 1;
-                _forwardingTable[ProjectEvaluationFinishedEventDescription] = 1;
+                _forwardingTable[ProjectEvaluationEventDescription] = 1;
             }
 
             if (_showSummary)
@@ -248,8 +267,7 @@ namespace Microsoft.Build.Logging
                 _forwardingTable[TargetFinishedEventDescription] = 1;
                 _forwardingTable[ProjectStartedEventDescription] = 1;
                 _forwardingTable[ProjectFinishedEventDescription] = 1;
-                _forwardingTable[ProjectEvaluationStartedEventDescription] = 1;
-                _forwardingTable[ProjectEvaluationFinishedEventDescription] = 1;
+                _forwardingTable[ProjectEvaluationEventDescription] = 1;
             }
 
             if (_showCommandLine)
@@ -472,12 +490,7 @@ namespace Microsoft.Build.Logging
 
         private void BuildStatusHandler(object sender, BuildStatusEventArgs e)
         {
-            if (_forwardingTable[ProjectEvaluationStartedEventDescription] == 1 && e is ProjectEvaluationStartedEventArgs)
-            {
-                ForwardToCentralLogger(e);
-            }
-
-            if (_forwardingTable[ProjectEvaluationFinishedEventDescription] == 1 && e is ProjectEvaluationFinishedEventArgs)
+            if (_forwardingTable[ProjectEvaluationEventDescription] == 1 && (e is ProjectEvaluationStartedEventArgs || e is ProjectEvaluationFinishedEventArgs))
             {
                 ForwardToCentralLogger(e);
             }
@@ -527,6 +540,7 @@ namespace Microsoft.Build.Logging
         private const string BuildFinishedEventDescription = "BUILDFINISHEDEVENT";
         private const string ProjectStartedEventDescription = "PROJECTSTARTEDEVENT";
         private const string ProjectFinishedEventDescription = "PROJECTFINISHEDEVENT";
+        private const string ProjectEvaluationEventDescription = "PROJECTEVALUATIONEVENT";
         private const string ProjectEvaluationStartedEventDescription = "PROJECTEVALUATIONSTARTEDEVENT";
         private const string ProjectEvaluationFinishedEventDescription = "PROJECTEVALUATIONFINISHEDEVENT";
         private const string TargetStartedEventDescription = "TARGETSTARTEDEVENT";
@@ -543,6 +557,7 @@ namespace Microsoft.Build.Logging
         private const string PerformanceSummaryDescription = "PERFORMANCESUMMARY";
         private const string NoSummaryDescription = "NOSUMMARY";
         private const string ShowCommandLineDescription = "SHOWCOMMANDLINE";
+        private const string ForwardProjectContextDescription = "FORWARDPROJECTCONTEXTEVENTS";
 
         #region Per-build Members
 
@@ -563,6 +578,12 @@ namespace Microsoft.Build.Logging
         /// if this is false the events to forward are based on verbosity else verbosity settings will be ignored
         /// </summary>
         private bool _forwardingSetFromParameters;
+
+        /// <summary>
+        /// Indicates if the events to forward should include project context events, if not
+        /// overridden by individual-event forwarding in <see cref="_forwardingSetFromParameters"/>.
+        /// </summary>
+        private bool _forwardProjectContext = false;
 
         /// <summary>
         /// Console logger should show error and warning summary at the end of build?

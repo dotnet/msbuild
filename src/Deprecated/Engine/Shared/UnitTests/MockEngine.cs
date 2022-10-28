@@ -321,7 +321,7 @@ namespace Microsoft.Build.UnitTests
             // If we do not contain this string than pass it to
             // MockLogger. Since MockLogger is also registered as
             // a logger it may have this string.
-            if(!upperLog.Contains
+            if (!upperLog.Contains
                 (
                     contains.ToUpperInvariant()
                 )

@@ -8,6 +8,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
 #if FEATURE_CODETASKFACTORY
@@ -160,7 +162,7 @@ namespace Microsoft.Build.Tasks
         public Type TaskType { get; private set; }
 
         /// <summary>
-        /// Get the type information for all task parameters
+        /// Get the type information for all task parameters.
         /// </summary>
         public TaskPropertyInfo[] GetTaskParameters()
         {
@@ -170,7 +172,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Initialze the task factory
+        /// Initializes the task factory.
         /// </summary>
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> taskParameters, string taskElementContents, IBuildEngine taskFactoryLoggingHost)
         {
@@ -306,7 +308,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Create a taskfactory instance which contains the data that needs to be refreshed between task invocations
+        /// Create a taskfactory instance which contains the data that needs to be refreshed between task invocations.
         /// </summary>
         public ITask CreateTask(IBuildEngine loggingHost)
         {
@@ -809,19 +811,13 @@ namespace Microsoft.Build.Tasks
                 var fullSpec = new FullTaskSpecification(finalReferencedAssemblies, fullCode);
                 if (!s_compiledTaskCache.TryGetValue(fullSpec, out Assembly existingAssembly))
                 {
-                    // Invokes compilation. 
-
-                    // Note: CompileAssemblyFromSource uses Path.GetTempPath() directory, but will not create it. In some cases 
-                    // this will throw inside CompileAssemblyFromSource. To work around this, ensure the temp directory exists. 
-                    // See: https://github.com/dotnet/msbuild/issues/328
-                    Directory.CreateDirectory(Path.GetTempPath());
-
+                    // Invokes compilation.
                     CompilerResults compilerResults = provider.CompileAssemblyFromSource(compilerParameters, fullCode);
 
                     string outputPath = null;
                     if (compilerResults.Errors.Count > 0 || Environment.GetEnvironmentVariable("MSBUILDLOGCODETASKFACTORYOUTPUT") != null)
                     {
-                        string tempDirectory = Path.GetTempPath();
+                        string tempDirectory = FileUtilities.TempFileDirectory;
                         string fileName = Guid.NewGuid().ToString() + ".txt";
                         outputPath = Path.Combine(tempDirectory, fileName);
                         File.WriteAllText(outputPath, fullCode);

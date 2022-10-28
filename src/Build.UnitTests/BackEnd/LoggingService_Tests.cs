@@ -19,6 +19,8 @@ using System.Linq;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Logging
 {
     /// <summary>
@@ -797,6 +799,18 @@ namespace Microsoft.Build.UnitTests.Logging
             MockLogger logger = GetLoggedEventsWithWarningsAsErrorsOrMessages(BuildWarningEventForTreatAsErrorOrMessageTests, (LoggerMode)loggerMode, nodeId, warningsAsErrors);
 
             logger.Errors.ShouldHaveSingleItem();
+        }
+
+        [Fact]
+        public void VerifyWarningsPromotedToErrorsAreCounted()
+        {
+            ILoggingService ls = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+            ls.WarningsAsErrors = new HashSet<string>();
+            ls.WarningsAsErrors.Add("FOR123");
+            BuildWarningEventArgs warningArgs = new("abc", "FOR123", "", 0, 0, 0, 0, "warning message", "keyword", "sender");
+            warningArgs.BuildEventContext = new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidProjectContextId, 5, 6);
+            ls.LogBuildEvent(warningArgs);
+            ls.HasBuildSubmissionLoggedErrors(1).ShouldBeTrue();
         }
 
         /// <summary>

@@ -15,9 +15,13 @@ using SDKReference = Microsoft.Build.Tasks.ResolveSDKReference.SDKReference;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Xunit;
+using Shouldly;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 {
+    [PlatformSpecific(TestPlatforms.Windows)]
     public class ResolveSDKReferenceTestFixture
     {
         private Microsoft.Build.UnitTests.MockEngine.GetStringDelegate _resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
@@ -50,7 +54,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         [Fact]
         public void ParseItemSpecBadNames()
         {
-            //These should all be bad the format must be   <SDKName>, Version=<SDKVersion>.
+            // These should all be bad the format must be   <SDKName>, Version=<SDKVersion>.
             TestBadSDKReferenceIncludes(new TaskItem(""));
             TestBadSDKReferenceIncludes(new TaskItem("Cat, Version=8"));
             TestBadSDKReferenceIncludes(new TaskItem("Cat 8.0"));
@@ -378,7 +382,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             reference5.DependsOnSDK = "reference1, Version=1.0";
             references.Add(reference5);
 
-            ResolveSDKReference.VerifySDKDependsOn(log, references); //, new Version(8, 1), "Windows", null);
+            ResolveSDKReference.VerifySDKDependsOn(log, references); // , new Version(8, 1), "Windows", null);
             Assert.Equal(0, engine.Warnings);
             Assert.Equal(0, engine.Errors);
             Assert.Equal(0, engine.Log.Length);
@@ -405,7 +409,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             reference4.DependsOnSDK = "NotThere, Version=1.0";
             references.Add(reference4);
 
-            ResolveSDKReference.VerifySDKDependsOn(log, references);//, new Version(8, 1), "Windows", null);
+            ResolveSDKReference.VerifySDKDependsOn(log, references); // , new Version(8, 1), "Windows", null);
             Assert.Equal(4, engine.Warnings);
             Assert.Equal(0, engine.Errors);
 
@@ -1197,7 +1201,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             ITaskItem item = new TaskItem("GoodTestSDK, Version=2.0");
             ITaskItem item2 = new TaskItem("GoodTestSDK, Version=2.0");
             t.SDKReferences = new ITaskItem[] { item, item2 };
-            t.References = new TaskItem[0];
+            t.References = Array.Empty<TaskItem>();
             ITaskItem installedSDK = new TaskItem(_sdkPath);
             installedSDK.SetMetadata("SDKName", "GoodTestSDK, Version=2.0");
             t.InstalledSDKs = new ITaskItem[] { installedSDK };
@@ -1305,7 +1309,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             ITaskItem item = new TaskItem("GoodTestSDK, Version=2.0");
             t.SDKReferences = new ITaskItem[] { item };
             t.References = null;
-            t.InstalledSDKs = new ITaskItem[0];
+            t.InstalledSDKs = Array.Empty<ITaskItem>();
 
             t.BuildEngine = engine;
             bool succeeded = t.Execute();
@@ -1328,7 +1332,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             ResolveSDKReference t = new ResolveSDKReference();
             ITaskItem item = new TaskItem("GoodTestSDK, Version=2.0");
             t.SDKReferences = new ITaskItem[] { item };
-            t.References = new TaskItem[0];
+            t.References = Array.Empty<TaskItem>();
 
             ITaskItem installedSDK1 = new TaskItem(_sdkPath);
             installedSDK1.SetMetadata("SDKName", "GoodTestSDK, Version=2.0");
@@ -1471,7 +1475,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             ResolveSDKReference t = new ResolveSDKReference();
             ITaskItem item = new TaskItem("GoodTestSDK, Version=2.0");
-            t.SDKReferences = new ITaskItem[0];
+            t.SDKReferences = Array.Empty<ITaskItem>();
             ITaskItem installedSDK = new TaskItem(_sdkPath);
             installedSDK.SetMetadata("SDKName", "GoodTestSDK, Version=2.0");
             t.InstalledSDKs = new ITaskItem[] { installedSDK };
@@ -3699,6 +3703,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
     /// <summary>
     /// Test the output groups which will be used to generate the recipe fileGatherSDKOutputGroups
     /// </summary>
+    [PlatformSpecific(TestPlatforms.Windows)]
     public class GatherSDKOutputGroupsTestFixture
     {
         [Fact]
@@ -4196,6 +4201,29 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
                 }
             }
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void VerifyPlatformAliasesWork()
+        {
+            // This verifies that UAP is an alias for windows, so verifying the target platforms align. Other parts of the reference don't matter here.
+            SDKReference reference = new(new TaskItem("sdkReference", new Dictionary<string, string>() { { SDKManifest.Attributes.TargetPlatform, "UAP" } }), "sdkName", "1.0.2");
+            reference.Resolve(
+                new Dictionary<string, ITaskItem>() { { "sdkName, Version=1.0.2", new TaskItem(Path.GetTempFileName(), new Dictionary<string, string>() { { "PlatformVersion", "1.0.2" } }) } },
+                "Release",
+                "x64",
+                new HashSet<string>() { "sdkName" },
+                treatErrorsAsWarnings: false,
+                prefer32Bit: false,
+                "windows",
+                new Version("1.0.2"),
+                "projectName",
+                enableMaxPlatformVersionEmptyWarning: true);
+
+            reference.ResolutionErrors.ShouldBeEmpty();
+            reference.ResolutionWarnings.ShouldBeEmpty();
+            reference.TargetPlatform.ShouldBe("UAP");
         }
 
         [Fact]

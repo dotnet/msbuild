@@ -23,9 +23,12 @@ variables:
   - name: SourceBranch
     value: $(IbcSourceBranchName)
   # If we're not on a vs* branch, use main as our optprof collection branch
+  # NOTE: the code is temporarily fixed. For the branches that should use opt-prof from the main branch we should use the latest working Opt-Prof 20220901.6-001 collected from main 20220901.6.
   - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
+    - name: OptProfDrop
+      value: 'OptimizationData/DotNet-msbuild-Trusted/main/20220901.6/1387996/1'
     - name: SourceBranch
-      value: main
+      value: ''
   # if OptProfDropName is set as a parameter, set OptProfDrop to the parameter and unset SourceBranch
   - ${{ if ne(parameters.OptProfDropName, 'default') }}:
     - name: OptProfDrop
@@ -36,6 +39,8 @@ variables:
     value: .NETCore
   - name: _DotNetValidationArtifactsCategory
     value: .NETCoreValidation
+  - name: Codeql.Enabled
+    value: true
 
 stages:
 - stage: build
@@ -100,7 +105,7 @@ stages:
       displayName: 'Install OptProf Plugin'
 
     # Required by MicroBuildBuildVSBootstrapper
-    - task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
+    - task: MicroBuildSwixPlugin@4
       inputs:
         dropName: $(VisualStudio.DropName)
 
@@ -122,8 +127,12 @@ stages:
                 /p:TeamName=MSBuild
                 /p:DotNetPublishUsingPipelines=true
                 /p:VisualStudioIbcDrop=$(OptProfDrop)
+                /p:GenerateSbom=true
       displayName: Build
       condition: succeeded()
+
+    # Required by Microsoft policy
+    - template: eng\common\templates\steps\generate-sbom.yml
 
     # Publish OptProf configuration files
     - task: ms-vscs-artifact.build-tasks.artifactDropTask-1.artifactDropTask@0
@@ -138,12 +147,13 @@ stages:
 
     # Build VS bootstrapper
     # Generates $(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
-    - task: ms-vseng.MicroBuildTasks.0e9d0d4d-71ec-4e4e-ae40-db9896f1ae74.MicroBuildBuildVSBootstrapper@2
+    - task: MicroBuildBuildVSBootstrapper@2
       inputs:
         vsMajorVersion: $(VisualStudio.MajorVersion)
         channelName: $(VisualStudio.ChannelName)
         manifests: $(VisualStudio.SetupManifestList)
         outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+        bootstrapperCoreVersion:
       displayName: 'OptProf - Build VS bootstrapper'
       condition: succeeded()
 
@@ -243,7 +253,7 @@ stages:
     parameters:
       platform:
         name: 'Managed'
-        container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7-3e800f1-20190501005343'
+        container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7'
 
   - template: /eng/common/templates/job/publish-build-assets.yml
     parameters:
@@ -253,7 +263,7 @@ stages:
         - Windows_NT
         - Source_Build_Managed
       pool:
-        vmImage: vs2017-win2016
+        vmImage: windows-latest
 
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: eng\common\templates\post-build\post-build.yml

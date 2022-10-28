@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 
 using Microsoft.Build.Collections;
@@ -21,6 +22,8 @@ using Shouldly;
 using Xunit;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
@@ -1886,7 +1889,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-                Assert.Equal(6, project.AllEvaluatedItems.Count());
+                Assert.Equal(6, project.AllEvaluatedItems.Count);
                 Assert.Equal("i1", project.AllEvaluatedItems.ElementAt(0).EvaluatedInclude);
                 Assert.Equal(String.Empty, project.AllEvaluatedItems.ElementAt(0).GetMetadataValue("m"));
                 Assert.Equal("j1", project.AllEvaluatedItems.ElementAt(1).EvaluatedInclude);
@@ -1902,12 +1905,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 project.AddItem("i", "i7");
                 project.RemoveItem(project.AllEvaluatedItems.ElementAt(1));
 
-                Assert.Equal(6, project.AllEvaluatedItems.Count());
+                Assert.Equal(6, project.AllEvaluatedItems.Count);
 
                 project.MarkDirty();
                 project.ReevaluateIfNecessary();
 
-                Assert.Equal(7, project.AllEvaluatedItems.Count());
+                Assert.Equal(7, project.AllEvaluatedItems.Count);
             }
             finally
             {
@@ -2002,15 +2005,15 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-            int initial = project.AllEvaluatedProperties.Count();
+            int initial = project.AllEvaluatedProperties.Count;
 
             project.SetProperty("p", "1");
 
-            Assert.Equal(initial, project.AllEvaluatedProperties.Count());
+            Assert.Equal(initial, project.AllEvaluatedProperties.Count);
 
             project.ReevaluateIfNecessary();
 
-            Assert.Equal(initial + 1, project.AllEvaluatedProperties.Count());
+            Assert.Equal(initial + 1, project.AllEvaluatedProperties.Count);
         }
 
         /// <summary>
@@ -2038,13 +2041,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-            Assert.Equal(4, project.AllEvaluatedItemDefinitionMetadata.Count());
+            Assert.Equal(4, project.AllEvaluatedItemDefinitionMetadata.Count);
 
             Assert.Equal("2", project.AllEvaluatedItemDefinitionMetadata.ElementAt(1).EvaluatedValue);
             Assert.Equal("1;2", project.AllEvaluatedItemDefinitionMetadata.ElementAt(3).EvaluatedValue);
 
             // Verify lists are cleared on reevaluation
-            Assert.Equal(4, project.AllEvaluatedItemDefinitionMetadata.Count());
+            Assert.Equal(4, project.AllEvaluatedItemDefinitionMetadata.Count);
         }
 
         /// <summary>
@@ -4241,7 +4244,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// If DTD processing is disabled, the server should not receive any connection request.
         /// </summary>
         [Fact]
-        public void VerifyDTDProcessingIsDisabled2()
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7623")]
+        public async void VerifyDTDProcessingIsDisabled2()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-8""?>
                                 <!DOCTYPE Project [
@@ -4256,9 +4260,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                     </Target>
                                 </Project>");
 
-            string projectDirectory = Path.Combine(Path.GetTempPath(), "VerifyDTDProcessingIsDisabled");
+            string projectDirectory = Path.Combine(Path.GetTempPath(), "VerifyDTDProcessingIsDisabled2");
 
-            Thread t = new Thread(HttpServerThread);
+            Thread t = new(HttpServerThread);
             t.IsBackground = true;
             t.Start();
 
@@ -4266,7 +4270,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 if (Directory.Exists(projectDirectory))
                 {
-                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
+                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, recursive: true);
                 }
 
                 Directory.CreateDirectory(projectDirectory);
@@ -4275,18 +4279,20 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 File.WriteAllText(projectFilename, projectContents);
 
-                Project project = new Project(projectFilename);
+                Project project = new(projectFilename);
 
-                MockLogger logger = new MockLogger();
+                MockLogger logger = new();
                 project.Build(logger);
             }
             finally
             {
-                Thread.Sleep(500);
+                await Task.Delay(500);
+                t.IsAlive.ShouldBeTrue();
+                t.Abort();
+                await Task.Delay(500);
 
                 // Expect server to be alive and hung up unless a request originating from DTD processing was sent
                 _httpListenerThreadException.ShouldBeNull();
-                t.IsAlive.ShouldBeTrue();
             }
         }
 #endif
@@ -4516,7 +4522,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void VerifyPropertyTrackingLoggingDefault()
         {
-            // Having nothing defined should default to nothing being logged.
+            // Having just environment variables defined should default to nothing being logged except one environment variable read.
             this.VerifyPropertyTrackingLoggingScenario(
                 null,
                 logger =>
@@ -4529,7 +4535,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldBeEmpty();
+                        .ShouldHaveSingleItem()
+                        .EnvironmentVariableName
+                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents
@@ -4558,7 +4566,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldBeEmpty();
+                        .ShouldHaveSingleItem()
+                        .EnvironmentVariableName
+                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents
@@ -4587,7 +4597,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldBeEmpty();
+                        .ShouldHaveSingleItem()
+                        .EnvironmentVariableName
+                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents
@@ -4616,7 +4628,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldBeEmpty();
+                        .ShouldHaveSingleItem()
+                        .EnvironmentVariableName
+                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents
@@ -4700,7 +4714,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<EnvironmentVariableReadEventArgs>()
-                        .ShouldBeEmpty();
+                        .ShouldHaveSingleItem()
+                        .EnvironmentVariableName
+                        .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents

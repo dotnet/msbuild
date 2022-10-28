@@ -14,8 +14,9 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
-using Microsoft.Build.Utilities;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -126,7 +127,7 @@ namespace Microsoft.Build.BackEnd
 
             if (String.IsNullOrEmpty(_debugDumpPath))
             {
-                _debugDumpPath = Path.GetTempPath();
+                _debugDumpPath = FileUtilities.TempFileDirectory;
             }
 
             _status = BuildRequestEngineStatus.Uninitialized;

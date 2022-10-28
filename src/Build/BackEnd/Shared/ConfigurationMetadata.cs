@@ -9,6 +9,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -34,8 +36,8 @@ namespace Microsoft.Build.BackEnd
         public ConfigurationMetadata(Project project)
         {
             ErrorUtilities.VerifyThrowArgumentNull(project, nameof(project));
-            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(project.GlobalProperties.Count);
-            foreach (KeyValuePair<string, string> entry in project.GlobalProperties)
+            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(project.GlobalPropertiesCount);
+            foreach (KeyValuePair<string, string> entry in project.GlobalPropertiesEnumerable)
             {
                 _globalProperties[entry.Key] = ProjectPropertyInstance.Create(entry.Key, entry.Value);
             }
@@ -162,10 +164,9 @@ namespace Microsoft.Build.BackEnd
             {
                 return true;
             }
-
             return ProjectFullPath.Equals(other.ProjectFullPath, StringComparison.OrdinalIgnoreCase) &&
-                   ToolsVersion.Equals(other.ToolsVersion, StringComparison.OrdinalIgnoreCase) &&
-                   GlobalProperties.Equals(other.GlobalProperties);
+                ToolsVersion.Equals(other.ToolsVersion, StringComparison.OrdinalIgnoreCase) &&
+                GlobalProperties.Equals(other.GlobalProperties);
         }
 
         private string DebugString()

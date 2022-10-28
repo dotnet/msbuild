@@ -8,6 +8,8 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Shared;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class Move_Tests
@@ -139,7 +141,7 @@ namespace Microsoft.Build.UnitTests
                 using (StreamReader sr = FileUtilities.OpenRead(destinationFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                Assert.Equal("This is a destination temp file.", destinationFileContents); //                     "Expected the destination file to still contain the contents of destination file."
+                Assert.Equal("This is a destination temp file.", destinationFileContents); // "Expected the destination file to still contain the contents of destination file."
             }
             finally
             {
@@ -218,7 +220,7 @@ namespace Microsoft.Build.UnitTests
                 using (StreamReader sr = FileUtilities.OpenRead(destinationFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                Assert.Equal("This is a destination temp file.", destinationFileContents); //                     "Expected the destination file to be unchanged."
+                Assert.Equal("This is a destination temp file.", destinationFileContents); // "Expected the destination file to be unchanged."
 
                 Assert.True(((new FileInfo(destinationFile)).Attributes & FileAttributes.ReadOnly) != 0); // should still be r/o
             }
@@ -264,7 +266,7 @@ namespace Microsoft.Build.UnitTests
                 using (StreamReader sr = FileUtilities.OpenRead(destinationFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                Assert.Equal("This is a source temp file.", destinationFileContents); //                     "Expected the destination file to contain the contents of source file."
+                Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
             }
             finally
             {
@@ -314,7 +316,7 @@ namespace Microsoft.Build.UnitTests
                 using (StreamReader sr = FileUtilities.OpenRead(destinationFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                Assert.Equal("This is a source temp file.", destinationFileContents); //                     "Expected the destination file to contain the contents of source file."
+                Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
 
                 Assert.True(((new FileInfo(destinationFile)).Attributes & FileAttributes.ReadOnly) == 0); // readonly bit should not be set
             }
@@ -362,7 +364,7 @@ namespace Microsoft.Build.UnitTests
                 using (StreamReader sr = FileUtilities.OpenRead(destinationFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                Assert.Equal("This is a source temp file.", destinationFileContents); //                     "Expected the destination file to contain the contents of source file."
+                Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
 
                 Assert.True(((new FileInfo(destinationFile)).Attributes & FileAttributes.ReadOnly) == 0); // should have cleared r/o bit
             }
@@ -671,7 +673,7 @@ namespace Microsoft.Build.UnitTests
                 using (StreamReader sr = FileUtilities.OpenRead(destFile))
                     destinationFileContents = sr.ReadToEnd();
 
-                Assert.Equal("This is a source temp file.", destinationFileContents); //                     "Expected the destination file to contain the contents of source file."
+                Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
 
                 Assert.Single(t.DestinationFiles);
                 Assert.Single(t.MovedFiles);

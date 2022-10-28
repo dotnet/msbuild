@@ -3,12 +3,15 @@
 
 using System;
 
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 using BaseConsoleLogger = Microsoft.Build.BackEnd.Logging.BaseConsoleLogger;
 using SerialConsoleLogger = Microsoft.Build.BackEnd.Logging.SerialConsoleLogger;
 using ParallelConsoleLogger = Microsoft.Build.BackEnd.Logging.ParallelConsoleLogger;
+
+#nullable disable
 
 namespace Microsoft.Build.Logging
 {
@@ -107,6 +110,7 @@ namespace Microsoft.Build.Logging
             bool useMPLogger = false;
             bool disableConsoleColor = false;
             bool forceConsoleColor = false;
+            bool preferConsoleColor = false;
             if (!string.IsNullOrEmpty(_parameters))
             {
                 string[] parameterComponents = _parameters.Split(BaseConsoleLogger.parameterDelimiters);
@@ -130,10 +134,15 @@ namespace Microsoft.Build.Logging
                     {
                         forceConsoleColor = true;
                     }
+                    if (string.Equals(param, "PREFERCONSOLECOLOR", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Use ansi color codes if current target console do support it
+                        preferConsoleColor = ConsoleConfiguration.AcceptAnsiColorCodes;
+                    }
                 }
             }
 
-            if (forceConsoleColor)
+            if (forceConsoleColor || (!disableConsoleColor && preferConsoleColor))
             {
                 _colorSet = BaseConsoleLogger.SetColorAnsi;
                 _colorReset = BaseConsoleLogger.ResetColorAnsi;

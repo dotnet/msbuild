@@ -9,6 +9,8 @@ using Microsoft.Build.Utilities;
 using Microsoft.Build.Tasks;
 
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     [TestFixture]

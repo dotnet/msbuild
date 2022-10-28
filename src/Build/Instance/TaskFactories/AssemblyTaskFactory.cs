@@ -3,8 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+#if FEATURE_APPDOMAIN
 using System.Threading.Tasks;
+#endif
 
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -13,6 +16,8 @@ using Microsoft.Build.Shared;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -145,14 +150,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public TaskPropertyInfo[] GetTaskParameters()
         {
-            PropertyInfo[] infos = _loadedType.Type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
-            var propertyInfos = new TaskPropertyInfo[infos.Length];
-            for (int i = 0; i < infos.Length; i++)
-            {
-                propertyInfos[i] = new ReflectableTaskPropertyInfo(infos[i]);
-            }
-
-            return propertyInfos;
+            return _loadedType.Properties;
         }
 
         /// <summary>
@@ -275,7 +273,7 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
                 _taskName = taskName;
-                _loadedType = _typeLoader.Load(taskName, loadInfo);
+                _loadedType = _typeLoader.Load(taskName, loadInfo, _taskHostFactoryExplicitlyRequested);
                 ProjectErrorUtilities.VerifyThrowInvalidProject(_loadedType != null, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, String.Empty);
             }
             catch (TargetInvocationException e)
@@ -302,13 +300,8 @@ namespace Microsoft.Build.BackEnd
                 // taskName may be null
                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, e.Message);
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (!ExceptionHandling.NotExpectedReflectionException(e))
             {
-                if (ExceptionHandling.NotExpectedReflectionException(e))
-                {
-                    throw;
-                }
-
                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, e.Message);
             }
 
@@ -440,13 +433,8 @@ namespace Microsoft.Build.BackEnd
                 // taskName may be null
                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _loadedType.Assembly.AssemblyLocation, e.Message);
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (!ExceptionHandling.NotExpectedReflectionException(e))
             {
-                if (ExceptionHandling.NotExpectedReflectionException(e))
-                {
-                    throw;
-                }
-
                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _loadedType.Assembly.AssemblyLocation, e.Message);
             }
 
@@ -572,10 +560,8 @@ namespace Microsoft.Build.BackEnd
             {
                 mergedParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-                string taskRuntime;
-                taskIdentityParameters.TryGetValue(XMakeAttributes.runtime, out taskRuntime);
-                string usingTaskRuntime;
-                factoryIdentityParameters.TryGetValue(XMakeAttributes.runtime, out usingTaskRuntime);
+                taskIdentityParameters.TryGetValue(XMakeAttributes.runtime, out string taskRuntime);
+                factoryIdentityParameters.TryGetValue(XMakeAttributes.runtime, out string usingTaskRuntime);
 
                 if (!XMakeAttributes.TryMergeRuntimeValues(taskRuntime, usingTaskRuntime, out mergedRuntime))
                 {
@@ -586,10 +572,8 @@ namespace Microsoft.Build.BackEnd
                     mergedParameters.Add(XMakeAttributes.runtime, mergedRuntime);
                 }
 
-                string taskArchitecture;
-                taskIdentityParameters.TryGetValue(XMakeAttributes.architecture, out taskArchitecture);
-                string usingTaskArchitecture;
-                factoryIdentityParameters.TryGetValue(XMakeAttributes.architecture, out usingTaskArchitecture);
+                taskIdentityParameters.TryGetValue(XMakeAttributes.architecture, out string taskArchitecture);
+                factoryIdentityParameters.TryGetValue(XMakeAttributes.architecture, out string usingTaskArchitecture);
 
                 if (!XMakeAttributes.TryMergeArchitectureValues(taskArchitecture, usingTaskArchitecture, out mergedArchitecture))
                 {

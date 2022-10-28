@@ -23,20 +23,21 @@ using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectItemFactory = Microsoft.Build.Evaluation.ProjectItem.ProjectItemFactory;
 using System.Globalization;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.ObjectModelRemoting;
-using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>.ItemExpressionFragment;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 using Microsoft.Build.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
-    using Utilities = Internal.Utilities;
+    using Utilities = Microsoft.Build.Internal.Utilities;
 
     /// <summary>
     /// Represents an evaluated project with design time semantics.
@@ -470,17 +471,14 @@ namespace Microsoft.Build.Evaluation
             {
                 defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
             {
                 // If possible, clear out the XML we just loaded into the XML cache:
                 // if we had loaded the XML from disk into the cache within this constructor,
                 // and then are are bailing out because there is a typo in the XML such that
                 // evaluation failed, we don't want to leave the bad XML in the cache;
                 // the user wouldn't be able to fix the XML file and try again.
-                if (!ExceptionHandling.IsCriticalException(ex))
-                {
-                    projectCollection.TryUnloadProject(Xml);
-                }
+                projectCollection.TryUnloadProject(Xml);
 
                 throw;
             }
@@ -601,6 +599,21 @@ namespace Microsoft.Build.Evaluation
         /// <see cref="SetGlobalProperty">SetGlobalProperty</see> and <see cref="RemoveGlobalProperty">RemoveGlobalProperty</see>.
         /// </remarks>
         public IDictionary<string, string> GlobalProperties => implementation.GlobalProperties;
+
+        /// <summary>
+        /// Indicates whether the global properties dictionary contains the specified key.
+        /// </summary>
+        internal bool GlobalPropertiesContains(string key) => implementation.GlobalPropertiesContains(key);
+
+        /// <summary>
+        /// Indicates how many elements are in the global properties dictionary.
+        /// </summary>
+        internal int GlobalPropertiesCount => implementation.GlobalPropertiesCount();
+
+        /// <summary>
+        /// Enumerates the values in the global properties dictionary.
+        /// </summary>
+        internal IEnumerable<KeyValuePair<string, string>> GlobalPropertiesEnumerable => implementation.GlobalPropertiesEnumerable();
 
         /// <summary>
         /// Item types in this project.
@@ -855,38 +868,48 @@ namespace Microsoft.Build.Evaluation
         /// <example>
         ///
         /// <code>
-        ///<P>*.txt</P>
+        /// <![CDATA[
+        /// <P>*.txt</P>
         ///
-        ///<Bar Include="bar"/> (both outside and inside project cone)
-        ///<Zar Include="C:\**\*.foo"/> (both outside and inside project cone)
-        ///<Foo Include="*.a;*.b" Exclude="3.a"/>
-        ///<Foo Remove="2.a" />
-        ///<Foo Include="**\*.b" Exclude="1.b;**\obj\*.b;**\bar\*.b"/>
-        ///<Foo Include="$(P)"/>
-        ///<Foo Include="*.a;@(Bar);3.a"/> (If Bar has globs, they will have been included when querying Bar ProjectItems for globs)
-        ///<Foo Include="*.cs" Exclude="@(Bar)"/>
-        ///</code>
+        /// <Bar Include="bar"/> (both outside and inside project cone)
+        /// <Zar Include="C:\**\*.foo"/> (both outside and inside project cone)
+        /// <Foo Include="*.a;*.b" Exclude="3.a"/>
+        /// <Foo Remove="2.a" />
+        /// <Foo Include="**\*.b" Exclude="1.b;**\obj\*.b;**\bar\*.b"/>
+        /// <Foo Include="$(P)"/>
+        /// <Foo Include="*.a;@(Bar);3.a"/> (If Bar has globs, they will have been included when querying Bar ProjectItems for globs)
+        /// <Foo Include="*.cs" Exclude="@(Bar)"/>
+        /// ]]>
+        /// </code>
         ///
-        ///Example result:
-        ///[
-        ///GlobResult(glob: "C:\**\*.foo", exclude: []),
-        ///GlobResult(glob: ["*.a", "*.b"], exclude=["3.a"], remove=["2.a"]),
-        ///GlobResult(glob: "**\*.b", exclude=["1.b, **\obj\*.b", **\bar\*.b"]),
-        ///GlobResult(glob: "*.txt", exclude=[]),
-        ///GlobResult(glob: "*.a", exclude=[]),
-        ///GlobResult(glob: "*.cs", exclude=["bar"])
-        ///].
+        /// Example result:
+        /// <code>
+        /// <![CDATA[
+        /// [
+        /// GlobResult(glob: "C:\**\*.foo", exclude: []),
+        /// GlobResult(glob: ["*.a", "*.b"], exclude=["3.a"], remove=["2.a"]),
+        /// GlobResult(glob: "**\*.b", exclude=["1.b, **\obj\*.b", **\bar\*.b"]),
+        /// GlobResult(glob: "*.txt", exclude=[]),
+        /// GlobResult(glob: "*.a", exclude=[]),
+        /// GlobResult(glob: "*.cs", exclude=["bar"])
+        /// ].
+        /// ]]>
+        /// </code>
         /// </example>
         /// <remarks>
+        /// <para>
         /// <see cref="GlobResult.MsBuildGlob"/> is a <see cref="IMSBuildGlob"/> that combines all globs in the include element and ignores
         /// all the fragments in the exclude attribute and all the fragments in all Remove elements that apply to the include element.
+        /// </para>
         ///
         /// Users can construct a composite glob that incorporates all the globs in the Project:
         /// <code>
+        /// <![CDATA[
         /// var uberGlob = new CompositeGlob(project.GetAllGlobs().Select(r => r.MSBuildGlob).ToArray());
         /// uberGlob.IsMatch("foo.cs");
+        /// ]]>
         /// </code>
-        ///
+        /// 
         /// </remarks>
         /// <returns>
         /// List of <see cref="GlobResult"/>.
@@ -2080,6 +2103,37 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
+            /// See <see cref="ProjectLink.GlobalPropertiesContains(string)"/>.
+            /// </summary>
+            /// <param name="key">The key to check for its value.</param>
+            /// <returns>Whether the key is in the global properties dictionary.</returns>
+            public override bool GlobalPropertiesContains(string key)
+            {
+                return _data.GlobalPropertiesDictionary.Contains(key);
+            }
+
+            /// <summary>
+            /// See <see cref="ProjectLink.GlobalPropertiesCount()"/>.
+            /// </summary>
+            /// <returns>The number of properties in the global properties dictionary</returns>
+            public override int GlobalPropertiesCount()
+            {
+                return _data.GlobalPropertiesDictionary.Count;
+            }
+
+            /// <summary>
+            /// See <see cref="ProjectLink.GlobalPropertiesEnumerable()"/>.
+            /// </summary>
+            /// <returns>An IEnumerable of the keys and values of the global properties dictionary</returns>
+            public override IEnumerable<KeyValuePair<string, string>> GlobalPropertiesEnumerable()
+            {
+                foreach (ProjectPropertyInstance property in _data.GlobalPropertiesDictionary)
+                {
+                    yield return new KeyValuePair<string, string>(property.Name, ((IProperty)property).EvaluatedValueEscaped);
+                }
+            }
+
+            /// <summary>
             /// Read only dictionary of the global properties used in the evaluation
             /// of this project.
             /// </summary>
@@ -2916,7 +2970,7 @@ namespace Microsoft.Build.Evaluation
                     string originalValue = (existing == null) ? String.Empty : ((IProperty)existing).EvaluatedValueEscaped;
 
                     _data.GlobalPropertiesDictionary.Set(ProjectPropertyInstance.Create(name, escapedValue));
-                    _data.Properties.Set(ProjectProperty.Create(Owner, name, escapedValue, true /* is global */, false /* may not be reserved name */));
+                    _data.Properties.Set(ProjectProperty.Create(Owner, name, escapedValue, isGlobalProperty: true, mayBeReserved: false, loggingContext: null));
 
                     ProjectCollection.AfterUpdateLoadedProjectGlobalProperties(Owner);
                     MarkDirty();
@@ -3280,6 +3334,10 @@ namespace Microsoft.Build.Evaluation
                 if (!IsBuildEnabled)
                 {
                     LoggingService.LogError(s_buildEventContext, new BuildEventFileInfo(FullPath), "SecurityProjectBuildDisabled");
+                    if (LoggingService is LoggingService defaultLoggingService)
+                    {
+                        defaultLoggingService.WaitForLoggingToProcessEvents();
+                    }
                     return false;
                 }
 
@@ -3470,7 +3528,15 @@ namespace Microsoft.Build.Evaluation
 
                 var itemFactory = new ProjectItemFactory(Owner, renamedItemElement);
 
-                List<ProjectItem> items = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(DirectoryPath, renamedItemElement, itemFactory, renamedItemElement.Include, _data.Expander);
+                List<ProjectItem> items = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(
+                    DirectoryPath,
+                    renamedItemElement,
+                    itemFactory,
+                    renamedItemElement.Include,
+                    _data.Expander,
+                    LoggingService,
+                    FullPath,
+                    s_buildEventContext);
 
                 if (items.Count != 1)
                 {
@@ -3530,7 +3596,15 @@ namespace Microsoft.Build.Evaluation
             {
                 var itemFactory = new ProjectItemFactory(Owner, itemElement);
 
-                List<ProjectItem> items = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(DirectoryPath, itemElement, itemFactory, unevaluatedInclude, _data.Expander);
+                List<ProjectItem> items = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(
+                    DirectoryPath,
+                    itemElement,
+                    itemFactory,
+                    unevaluatedInclude,
+                    _data.Expander,
+                    LoggingService,
+                    FullPath,
+                    s_buildEventContext);
 
                 foreach (ProjectItem item in items)
                 {
@@ -4366,9 +4440,9 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Sets a property which is not derived from Xml.
             /// </summary>
-            public ProjectProperty SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false)
+            public ProjectProperty SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false, BackEnd.Logging.LoggingContext loggingContext = null)
             {
-                ProjectProperty property = ProjectProperty.Create(Project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved);
+                ProjectProperty property = ProjectProperty.Create(Project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, loggingContext);
                 Properties.Set(property);
 
                 AddToAllEvaluatedPropertiesList(property);

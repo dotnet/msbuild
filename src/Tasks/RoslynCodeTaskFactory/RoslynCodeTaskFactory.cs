@@ -18,6 +18,8 @@ using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     public sealed class RoslynCodeTaskFactory : ITaskFactory
@@ -101,6 +103,11 @@ namespace Microsoft.Build.Tasks
         private TaskLoggingHelper _log;
 
         /// <summary>
+        /// Stores functions that were added to the current app domain. Should be removed once we're finished.
+        /// </summary>
+        private ResolveEventHandler handlerAddedToAppDomain = null;
+
+        /// <summary>
         /// Stores the parameters parsed in the &lt;UsingTask /&gt;.
         /// </summary>
         private TaskPropertyInfo[] _parameters;
@@ -114,13 +121,17 @@ namespace Microsoft.Build.Tasks
         public string FactoryName => "Roslyn Code Task Factory";
 
         /// <summary>
-        /// Gets the <see cref="T:System.Type" /> of the compiled task.
+        /// Gets the <see cref="Type"/> of the compiled task.
         /// </summary>
         public Type TaskType { get; private set; }
 
         /// <inheritdoc cref="ITaskFactory.CleanupTask(ITask)"/>
         public void CleanupTask(ITask task)
         {
+            if (handlerAddedToAppDomain is not null)
+            {
+                AppDomain.CurrentDomain.AssemblyResolve -= handlerAddedToAppDomain;
+            }
         }
 
         /// <inheritdoc cref="ITaskFactory.CreateTask(IBuildEngine)"/>
@@ -256,27 +267,29 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-        ///  <summary>
-        ///  Parses and validates the body of the &lt;UsingTask /&gt;.
-        ///  </summary>
-        ///  <param name="log">A <see cref="TaskLoggingHelper"/> used to log events during parsing.</param>
-        ///  <param name="taskName">The name of the task.</param>
-        ///  <param name="taskBody">The raw inner XML string of the &lt;UsingTask />&gt; to parse and validate.</param>
+        /// <summary>
+        /// Parses and validates the body of the &lt;UsingTask /&gt;.
+        /// </summary>
+        /// <param name="log">A <see cref="TaskLoggingHelper"/> used to log events during parsing.</param>
+        /// <param name="taskName">The name of the task.</param>
+        /// <param name="taskBody">The raw inner XML string of the &lt;UsingTask />&gt; to parse and validate.</param>
         /// <param name="parameters">An <see cref="ICollection{TaskPropertyInfo}"/> containing parameters for the task.</param>
         /// <param name="taskInfo">A <see cref="RoslynCodeTaskFactoryTaskInfo"/> object that receives the details of the parsed task.</param>
-        /// <returns><code>true</code> if the task body was successfully parsed, otherwise <code>false</code>.</returns>
-        ///  <remarks>
-        ///  The <paramref name="taskBody"/> will look like this:
-        ///  <![CDATA[
+        /// <returns><c>true</c> if the task body was successfully parsed, otherwise <c>false</c>.</returns>
+        /// <remarks>
+        /// The <paramref name="taskBody"/> will look like this:
+        /// <code>
+        /// <![CDATA[
         ///
-        ///    <Using Namespace="Namespace" />
-        ///    <Reference Include="AssemblyName|AssemblyPath" />
-        ///    <Code Type="Fragment|Method|Class" Language="cs|vb" Source="Path">
-        ///      // Source code
-        ///    </Code>
+        /// <Using Namespace="Namespace" />
+        /// <Reference Include="AssemblyName|AssemblyPath" />
+        /// <Code Type="Fragment|Method|Class" Language="cs|vb" Source="Path">
+        ///   // Source code
+        /// </Code>
         ///
-        ///  ]]>
-        ///  </remarks>
+        /// ]]>
+        /// </code>
+        /// </remarks>
         internal static bool TryLoadTaskBody(TaskLoggingHelper log, string taskName, string taskBody, ICollection<TaskPropertyInfo> parameters, out RoslynCodeTaskFactoryTaskInfo taskInfo)
         {
             taskInfo = new RoslynCodeTaskFactoryTaskInfo
@@ -429,7 +442,8 @@ namespace Microsoft.Build.Tasks
                 taskInfo.CodeType = RoslynCodeTaskFactoryCodeType.Class;
                 taskInfo.SourceCode = File.ReadAllText(sourceAttribute.Value.Trim());
             }
-            else if (typeAttribute != null)
+
+            if (typeAttribute != null)
             {
                 if (String.IsNullOrWhiteSpace(typeAttribute.Value))
                 {
@@ -511,7 +525,7 @@ namespace Microsoft.Build.Tasks
         /// Perhaps in the future this could be more powerful by using NuGet to resolve assemblies but we think
         /// that is too complicated for a simple in-line task.  If users have more complex requirements, they
         /// can compile their own task library.</remarks>
-        internal static bool TryResolveAssemblyReferences(TaskLoggingHelper log, RoslynCodeTaskFactoryTaskInfo taskInfo, out ITaskItem[] items)
+        internal bool TryResolveAssemblyReferences(TaskLoggingHelper log, RoslynCodeTaskFactoryTaskInfo taskInfo, out ITaskItem[] items)
         {
             // Store the list of resolved assemblies because a user can specify a short name or a full path
             ISet<string> resolvedAssemblyReferences = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -528,6 +542,8 @@ namespace Microsoft.Build.Tasks
                 references = references.Union(DefaultReferences[taskInfo.CodeLanguage]);
             }
 
+            List<string> directoriesToAddToAppDomain = new();
+
             // Loop through the user specified references as well as the default references
             foreach (string reference in references)
             {
@@ -535,7 +551,9 @@ namespace Microsoft.Build.Tasks
                 if (FileSystems.Default.FileExists(reference))
                 {
                     // The path could be relative like ..\Assembly.dll so we need to get the full path
-                    resolvedAssemblyReferences.Add(Path.GetFullPath(reference));
+                    string fullPath = Path.GetFullPath(reference);
+                    directoriesToAddToAppDomain.Add(Path.GetDirectoryName(fullPath));
+                    resolvedAssemblyReferences.Add(fullPath);
                     continue;
                 }
 
@@ -568,7 +586,34 @@ namespace Microsoft.Build.Tasks
             // Transform the list of resolved assemblies to TaskItems if they were all resolved
             items = hasInvalidReference ? null : resolvedAssemblyReferences.Select(i => (ITaskItem)new TaskItem(i)).ToArray();
 
+            handlerAddedToAppDomain = (_, eventArgs) => TryLoadAssembly(directoriesToAddToAppDomain, new AssemblyName(eventArgs.Name));
+            AppDomain.CurrentDomain.AssemblyResolve += handlerAddedToAppDomain;
+
             return !hasInvalidReference;
+
+            static Assembly TryLoadAssembly(List<string> directories, AssemblyName name)
+            {
+                foreach (string directory in directories)
+                {
+                    string path;
+                    if (!string.IsNullOrEmpty(name.CultureName))
+                    {
+                        path = Path.Combine(directory, name.CultureName, name.Name + ".dll");
+                        if (File.Exists(path))
+                        {
+                            return Assembly.LoadFrom(path);
+                        }
+                    }
+
+                    path = Path.Combine(directory, name.Name + ".dll");
+                    if (File.Exists(path))
+                    {
+                        return Assembly.LoadFrom(path);
+                    }
+                }
+
+                return null;
+            }
         }
 
         private static CodeMemberProperty CreateProperty(CodeTypeDeclaration codeTypeDeclaration, string name, Type type, object defaultValue = null)
@@ -632,8 +677,8 @@ namespace Microsoft.Build.Tasks
 
             // The source code cannot actually be compiled "in memory" so instead the source code is written to disk in
             // the temp folder as well as the assembly.  After compilation, the source code and assembly are deleted.
-            string sourceCodePath = Path.GetTempFileName();
-            string assemblyPath = Path.Combine(Path.GetTempPath(), $"{Path.GetRandomFileName()}.dll");
+            string sourceCodePath = FileUtilities.GetTemporaryFileName(".tmp");
+            string assemblyPath = FileUtilities.GetTemporaryFileName(".dll");
 
             // Delete the code file unless compilation failed or the environment variable MSBUILDLOGCODETASKFACTORYOUTPUT
             // is set (which allows for debugging problems)
@@ -703,6 +748,12 @@ namespace Microsoft.Build.Tasks
 
                         return false;
                     }
+
+                    if (!deleteSourceCodeFile)
+                    {
+                        // Log the location of the code file because MSBUILDLOGCODETASKFACTORYOUTPUT was set.
+                        _log.LogMessageFromResources(MessageImportance.Low, "CodeTaskFactory.FindSourceFileAt", sourceCodePath);
+                    }
                 }
 
                 // Return the assembly which is loaded into memory
@@ -734,7 +785,7 @@ namespace Microsoft.Build.Tasks
 
         private static string[] GetMonoLibDirs()
         {
-            if(NativeMethodsShared.IsMono)
+            if (NativeMethodsShared.IsMono)
             {
                 string monoLibDir = Path.GetDirectoryName(typeof(object).Assembly.Location);
                 string monoLibFacadesDir = Path.Combine(monoLibDir, "Facades");

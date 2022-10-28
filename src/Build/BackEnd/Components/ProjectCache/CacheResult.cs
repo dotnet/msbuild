@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -128,13 +127,8 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         private static ProjectItemInstance.TaskItem CreateTaskItem(ITaskItem2 taskItemInterface)
         {
-            var taskItem = new ProjectItemInstance.TaskItem(taskItemInterface.EvaluatedIncludeEscaped, null);
-
-            foreach (string metadataName in taskItemInterface.MetadataNames)
-            {
-                taskItem.SetMetadata(metadataName, taskItemInterface.GetMetadataValueEscaped(metadataName));
-            }
-
+            var taskItem = new ProjectItemInstance.TaskItem(taskItemInterface.EvaluatedIncludeEscaped, definingFileEscaped: null);
+            taskItemInterface.CopyMetadataTo(taskItem);
             return taskItem;
         }
     }

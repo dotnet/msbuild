@@ -5,6 +5,8 @@ using System;
 using System.Runtime.Versioning;
 using Microsoft.Build.BackEnd;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     internal static class TaskTranslatorHelpers

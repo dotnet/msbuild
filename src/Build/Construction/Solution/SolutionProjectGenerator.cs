@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+#if FEATURE_ASPNET_COMPILER
 using System.Collections;
+#endif
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
@@ -24,11 +26,14 @@ using IProperty = Microsoft.Build.Evaluation.IProperty;
 using Constants = Microsoft.Build.Internal.Constants;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 
+#if FEATURE_ASPNET_COMPILER
 using FrameworkName = System.Runtime.Versioning.FrameworkName;
+#endif
 using Microsoft.Build.Execution;
-using Microsoft.Build.Utilities;
 
 using Microsoft.NET.StringTools;
+
+#nullable disable
 
 namespace Microsoft.Build.Construction
 {
@@ -63,6 +68,11 @@ namespace Microsoft.Build.Construction
         /// The set of properties which identify the configuration and platform to build a project with
         /// </summary>
         private const string SolutionConfigurationAndPlatformProperties = "Configuration=$(Configuration); Platform=$(Platform)";
+
+        /// <summary>
+        /// The Special Target name which when <see cref="_batchProjectTargets"/> is enabled, all P2P references will just execute this target.
+        /// </summary>
+        internal const string SolutionProjectReferenceAllTargets = "SlnProjectResolveProjectReference";
 
         /// <summary>
         /// A known list of target names to create.  This is for backwards compatibility.
@@ -152,6 +162,11 @@ namespace Microsoft.Build.Construction
         private readonly int _submissionId;
 
         /// <summary>
+        /// Create a solution metaproj with one MSBuild task with all project references.
+        /// </summary>
+        private readonly bool _batchProjectTargets;
+
+        /// <summary>
         /// Constructor.
         /// </summary>
         private SolutionProjectGenerator(
@@ -171,6 +186,7 @@ namespace Microsoft.Build.Construction
             _loggingService = loggingService;
             _sdkResolverService = sdkResolverService ?? SdkResolverService.Instance;
             _submissionId = submissionId;
+            _batchProjectTargets = Traits.Instance.SolutionBatchTargets;
 
             if (targetNames != null)
             {
@@ -753,6 +769,24 @@ namespace Microsoft.Build.Construction
             // Now evaluate all of the projects in the solution and handle them appropriately.
             EvaluateAndAddProjects(projectsInOrder, projectInstances, traversalInstance, _selectedSolutionConfiguration);
 
+            if (_batchProjectTargets)
+            {
+                var targetElement = traversalInstance.AddTarget(
+                    SolutionProjectReferenceAllTargets,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    null,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    false);
+
+                // Add global project reference
+                AddProjectBuildTask(traversalInstance, null, targetElement, string.Join(";", _targetNames), "@(ProjectReference)", string.Empty, string.Empty);
+            }
+
             // Special environment variable to allow people to see the in-memory MSBuild project generated
             // to represent the SLN.
             foreach (ProjectInstance instance in projectInstances)
@@ -809,7 +843,7 @@ namespace Microsoft.Build.Construction
             // Add any other targets specified by the user that were not already added
             foreach (string targetName in _targetNames.Where(i => !traversalInstance.Targets.ContainsKey(i)))
             {
-                AddTraversalReferencesTarget(traversalInstance, targetName, null);
+                AddTraversalReferencesTarget(traversalInstance, targetName, null, _batchProjectTargets);
             }
         }
 
@@ -822,10 +856,10 @@ namespace Microsoft.Build.Construction
             AddInitialTargets(traversalInstance, projectsInOrder);
 
             // Add the targets to traverse the metaprojects.
-            AddTraversalReferencesTarget(traversalInstance, null, "CollectedBuildOutput");
-            AddTraversalReferencesTarget(traversalInstance, "Clean", null);
-            AddTraversalReferencesTarget(traversalInstance, "Rebuild", "CollectedBuildOutput");
-            AddTraversalReferencesTarget(traversalInstance, "Publish", null);
+            AddTraversalReferencesTarget(traversalInstance, null, "CollectedBuildOutput", _batchProjectTargets);
+            AddTraversalReferencesTarget(traversalInstance, "Clean", null, _batchProjectTargets);
+            AddTraversalReferencesTarget(traversalInstance, "Rebuild", "CollectedBuildOutput", _batchProjectTargets);
+            AddTraversalReferencesTarget(traversalInstance, "Publish", null, _batchProjectTargets);
         }
 
         /// <summary>
@@ -979,6 +1013,7 @@ namespace Microsoft.Build.Construction
                 traversalProject,
                 _globalProperties,
                 explicitToolsVersionSpecified ? wrapperProjectToolsVersion : null,
+                _loggingService,
                 _solutionFile.VisualStudioVersion,
                 new ProjectCollection(),
                 _sdkResolverService,
@@ -1348,9 +1383,17 @@ namespace Microsoft.Build.Construction
             task.SetParameter("BuildInParallel", "True");
 
             task.SetParameter("ToolsVersion", GetToolsVersionAttributeForDirectMSBuildTask());
-            task.SetParameter("Properties", GetPropertiesAttributeForDirectMSBuildTask(projectConfiguration));
 
-            if (outputItem != null)
+            if (projectConfiguration != null)
+            {
+                task.SetParameter("Properties", GetPropertiesAttributeForDirectMSBuildTask(projectConfiguration));
+            }
+            else
+            {
+                task.SetParameter("Properties", SolutionProperties);
+            }
+
+            if (!string.IsNullOrEmpty(outputItem))
             {
                 task.AddOutputItem("TargetOutputs", outputItem, String.Empty);
             }
@@ -1372,7 +1415,6 @@ namespace Microsoft.Build.Construction
             task.SetParameter("BuildInParallel", "True");
             task.SetParameter("ToolsVersion", "Current");
             task.SetParameter("Properties", SolutionProperties);
-            task.SetParameter("SkipNonexistentProjects", "%(ProjectReference.SkipNonexistentProjects)");
 
             if (outputItem != null)
             {
@@ -1777,7 +1819,7 @@ namespace Microsoft.Build.Construction
                     {
                         condition.Append(" or (");
                         condition.Append(GetConditionStringForConfiguration(solutionConfiguration));
-                        condition.Append(")");
+                        condition.Append(')');
                     }
                 }
                 else if (String.Equals(solutionConfiguration.ConfigurationName, "Release", StringComparison.OrdinalIgnoreCase) ||
@@ -1788,7 +1830,7 @@ namespace Microsoft.Build.Construction
                     // so these should be available in the solution project
                     condition.Append(" or (");
                     condition.Append(GetConditionStringForConfiguration(solutionConfiguration));
-                    condition.Append(")");
+                    condition.Append(')');
                 }
             }
 
@@ -1974,10 +2016,10 @@ namespace Microsoft.Build.Construction
             }
         }
 
-        ///<summary>
+        /// <summary>
         /// Creates the target used to build all of the references in the traversal project.
-        ///</summary>
-        private static void AddTraversalReferencesTarget(ProjectInstance traversalProject, string targetName, string outputItem)
+        /// </summary>
+        private static void AddTraversalReferencesTarget(ProjectInstance traversalProject, string targetName, string outputItem, bool batchBuildTargets)
         {
             string outputItemAsItem = null;
             if (!String.IsNullOrEmpty(outputItem))
@@ -1988,8 +2030,13 @@ namespace Microsoft.Build.Construction
             string correctedTargetName = targetName ?? "Build";
 
             traversalProject.RemoveTarget(correctedTargetName);
-            ProjectTargetInstance target = traversalProject.AddTarget(correctedTargetName, string.Empty, string.Empty, outputItemAsItem, null, string.Empty, string.Empty, string.Empty, string.Empty, false /* legacy target returns behaviour */);
-            AddReferencesBuildTask(target, targetName, outputItem);
+            string dependOnTargets = batchBuildTargets ? SolutionProjectReferenceAllTargets : string.Empty;
+            ProjectTargetInstance target = traversalProject.AddTarget(correctedTargetName, string.Empty, string.Empty, outputItemAsItem, null, string.Empty, dependOnTargets, string.Empty, string.Empty, false /* legacy target returns behaviour */);
+
+            if (!batchBuildTargets)
+            {
+                AddReferencesBuildTask(target, targetName, outputItem);
+            }
         }
 
         /// <summary>
@@ -2014,10 +2061,6 @@ namespace Microsoft.Build.Construction
 
             task.SetParameter("BuildInParallel", "True");
             task.SetParameter("Properties", SolutionProperties);
-
-            // We only want to build "nonexistent" projects if we're building metaprojects, since they don't exist on disk.  Otherwise, 
-            // we still want to error when the referenced project doesn't exist.  
-            task.SetParameter("SkipNonexistentProjects", "%(ProjectReference.SkipNonexistentProjects)");
 
             if (outputItem != null)
             {
@@ -2191,14 +2234,8 @@ namespace Microsoft.Build.Construction
                             AddDependencyByGuid(project, referencedWebProjectGuid);
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e)) // We don't want any problems scanning the project file to result in aborting the build.
                     {
-                        // We don't want any problems scanning the project file to result in aborting the build.
-                        if (ExceptionHandling.IsCriticalException(e))
-                        {
-                            throw;
-                        }
-
                         _loggingService.LogWarning
                             (
                             _projectBuildEventContext,

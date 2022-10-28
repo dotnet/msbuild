@@ -1,8 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
 using System.Diagnostics;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -16,15 +19,15 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Evaluate as boolean
         /// </summary>
-        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
+        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
         {
-            if (!LeftChild.TryBoolEvaluate(state, out bool leftBool))
+            if (!LeftChild.TryBoolEvaluate(state, out bool leftBool, loggingContext))
             {
                 ProjectErrorUtilities.ThrowInvalidProject(
                     state.ElementLocation,
                     "ExpressionDoesNotEvaluateToBoolean",
                     LeftChild.GetUnexpandedValue(state),
-                    LeftChild.GetExpandedValue(state),
+                    LeftChild.GetExpandedValue(state, loggingContext),
                     state.Condition);
             }
 
@@ -35,7 +38,7 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                if (!RightChild.TryBoolEvaluate(state, out bool rightBool))
+                if (!RightChild.TryBoolEvaluate(state, out bool rightBool, loggingContext))
                 {
                     ProjectErrorUtilities.ThrowInvalidProject(
                         state.ElementLocation,

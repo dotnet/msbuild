@@ -3,7 +3,9 @@
 
 using System;
 using System.Text;
-using System.Collections;
+using System.Collections.Generic;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -17,7 +19,7 @@ namespace Microsoft.Build.Tasks
         private int _openConditionalDirectives;
 
         // A stack of namespaces so that nested namespaces can be supported.
-        private readonly Stack _namespaceStack = new Stack();
+        private readonly Stack<string> _namespaceStack = new Stack<string>();
 
         internal ParseState()
         {
@@ -88,7 +90,7 @@ namespace Microsoft.Build.Tasks
                 return null;
             }
 
-            return (string)_namespaceStack.Pop();
+            return _namespaceStack.Pop();
         }
 
         /// <summary>

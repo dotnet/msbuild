@@ -6,6 +6,8 @@ using System.Globalization;
 using System.Text;
 using Error = Microsoft.Build.Shared.ErrorUtilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -92,7 +94,7 @@ namespace Microsoft.Build.Shared
         /// Returns true if the string represents a valid MSBuild boolean true value,
         /// such as "on", "!false", "yes"
         /// </summary>
-        private static bool ValidBooleanTrue(string parameterValue)
+        internal static bool ValidBooleanTrue(string parameterValue)
         {
             return String.Equals(parameterValue, "true", StringComparison.OrdinalIgnoreCase) ||
                    String.Equals(parameterValue, "on", StringComparison.OrdinalIgnoreCase) ||
@@ -106,7 +108,7 @@ namespace Microsoft.Build.Shared
         /// Returns true if the string represents a valid MSBuild boolean false value,
         /// such as "!on" "off" "no" "!true"
         /// </summary>
-        private static bool ValidBooleanFalse(string parameterValue)
+        internal static bool ValidBooleanFalse(string parameterValue)
         {
             return String.Equals(parameterValue, "false", StringComparison.OrdinalIgnoreCase) ||
                    String.Equals(parameterValue, "off", StringComparison.OrdinalIgnoreCase) ||

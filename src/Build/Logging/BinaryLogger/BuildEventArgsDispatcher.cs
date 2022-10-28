@@ -1,5 +1,7 @@
 ﻿using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Logging
 {
     /// <summary>
@@ -85,57 +87,57 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public void Dispatch(BuildEventArgs buildEvent)
         {
-            if (buildEvent is BuildMessageEventArgs)
+            if (buildEvent is BuildMessageEventArgs buildMessageEventArgs)
             {
-                MessageRaised?.Invoke(null, (BuildMessageEventArgs)buildEvent);
+                MessageRaised?.Invoke(null, buildMessageEventArgs);
             }
-            else if (buildEvent is TaskStartedEventArgs)
+            else if (buildEvent is TaskStartedEventArgs taskStartedEventArgs)
             {
-                TaskStarted?.Invoke(null, (TaskStartedEventArgs)buildEvent);
+                TaskStarted?.Invoke(null, taskStartedEventArgs);
             }
-            else if (buildEvent is TaskFinishedEventArgs)
+            else if (buildEvent is TaskFinishedEventArgs taskFinishedEventArgs)
             {
-                TaskFinished?.Invoke(null, (TaskFinishedEventArgs)buildEvent);
+                TaskFinished?.Invoke(null, taskFinishedEventArgs);
             }
-            else if (buildEvent is TargetStartedEventArgs)
+            else if (buildEvent is TargetStartedEventArgs targetStartedEventArgs)
             {
-                TargetStarted?.Invoke(null, (TargetStartedEventArgs)buildEvent);
+                TargetStarted?.Invoke(null, targetStartedEventArgs);
             }
-            else if (buildEvent is TargetFinishedEventArgs)
+            else if (buildEvent is TargetFinishedEventArgs targetFinishedEventArgs)
             {
-                TargetFinished?.Invoke(null, (TargetFinishedEventArgs)buildEvent);
+                TargetFinished?.Invoke(null, targetFinishedEventArgs);
             }
-            else if (buildEvent is ProjectStartedEventArgs)
+            else if (buildEvent is ProjectStartedEventArgs projectStartedEventArgs)
             {
-                ProjectStarted?.Invoke(null, (ProjectStartedEventArgs)buildEvent);
+                ProjectStarted?.Invoke(null, projectStartedEventArgs);
             }
-            else if (buildEvent is ProjectFinishedEventArgs)
+            else if (buildEvent is ProjectFinishedEventArgs projectFinishedEventArgs)
             {
-                ProjectFinished?.Invoke(null, (ProjectFinishedEventArgs)buildEvent);
+                ProjectFinished?.Invoke(null, projectFinishedEventArgs);
             }
-            else if (buildEvent is BuildStartedEventArgs)
+            else if (buildEvent is BuildStartedEventArgs buildStartedEventArgs)
             {
-                BuildStarted?.Invoke(null, (BuildStartedEventArgs)buildEvent);
+                BuildStarted?.Invoke(null, buildStartedEventArgs);
             }
-            else if (buildEvent is BuildFinishedEventArgs)
+            else if (buildEvent is BuildFinishedEventArgs buildFinishedEventArgs)
             {
-                BuildFinished?.Invoke(null, (BuildFinishedEventArgs)buildEvent);
+                BuildFinished?.Invoke(null, buildFinishedEventArgs);
             }
-            else if (buildEvent is CustomBuildEventArgs)
+            else if (buildEvent is CustomBuildEventArgs customBuildEventArgs)
             {
-                CustomEventRaised?.Invoke(null, (CustomBuildEventArgs)buildEvent);
+                CustomEventRaised?.Invoke(null, customBuildEventArgs);
             }
-            else if (buildEvent is BuildStatusEventArgs)
+            else if (buildEvent is BuildStatusEventArgs buildStatusEventArgs)
             {
-                StatusEventRaised?.Invoke(null, (BuildStatusEventArgs)buildEvent);
+                StatusEventRaised?.Invoke(null, buildStatusEventArgs);
             }
-            else if (buildEvent is BuildWarningEventArgs)
+            else if (buildEvent is BuildWarningEventArgs buildWarningEventArgs)
             {
-                WarningRaised?.Invoke(null, (BuildWarningEventArgs)buildEvent);
+                WarningRaised?.Invoke(null, buildWarningEventArgs);
             }
-            else if (buildEvent is BuildErrorEventArgs)
+            else if (buildEvent is BuildErrorEventArgs buildErrorEventArgs)
             {
-                ErrorRaised?.Invoke(null, (BuildErrorEventArgs)buildEvent);
+                ErrorRaised?.Invoke(null, buildErrorEventArgs);
             }
 
             AnyEventRaised?.Invoke(null, buildEvent);

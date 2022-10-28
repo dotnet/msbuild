@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading;
 using Microsoft.Build.BackEnd;
@@ -16,11 +17,13 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Graph
 {
     internal class GraphBuilder
     {
-        internal static readonly string SolutionItemReference = "_SolutionReference";
+        internal const string SolutionItemReference = "_SolutionReference";
         
         /// <summary>
         /// The thread calling BuildGraph() will act as an implicit worker
@@ -124,7 +127,7 @@ namespace Microsoft.Build.Graph
 
         private void AddEdgesFromProjectReferenceItems(Dictionary<ConfigurationMetadata, ParsedProject> allParsedProjects, GraphEdges edges)
         {
-            var transitiveReferenceCache = new Dictionary<ProjectGraphNode, HashSet<ProjectGraphNode>>(allParsedProjects.Count);
+            Dictionary<ProjectGraphNode, HashSet<ProjectGraphNode>> transitiveReferenceCache = new(allParsedProjects.Count);
 
             foreach (var parsedProject in allParsedProjects)
             {
@@ -162,28 +165,30 @@ namespace Microsoft.Build.Graph
 
             HashSet<ProjectGraphNode> GetTransitiveProjectReferencesExcludingSelf(ParsedProject parsedProject)
             {
-                if (transitiveReferenceCache.TryGetValue(parsedProject.GraphNode, out HashSet<ProjectGraphNode> cachedTransitiveReferences))
+                if (transitiveReferenceCache.TryGetValue(parsedProject.GraphNode, out HashSet<ProjectGraphNode> transitiveReferences))
                 {
-                    return cachedTransitiveReferences;
-                }
-                else
-                {
-                    var transitiveReferences = new HashSet<ProjectGraphNode>();
-
-                    foreach (var referenceInfo in parsedProject.ReferenceInfos)
-                    {
-                        transitiveReferences.Add(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode);
-
-                        foreach (var transitiveReference in GetTransitiveProjectReferencesExcludingSelf(allParsedProjects[referenceInfo.ReferenceConfiguration]))
-                        {
-                            transitiveReferences.Add(transitiveReference);
-                        }
-                    }
-
-                    transitiveReferenceCache.Add(parsedProject.GraphNode, transitiveReferences);
-
                     return transitiveReferences;
                 }
+
+                transitiveReferences = new();
+
+                // Add the results to the cache early, even though it'll be incomplete until the loop below finishes. This helps handle cycles by not allowing them to recurse infinitely.
+                // Note that this makes transitive references incomplete in the case of a cycle, but direct dependencies are always added so a cycle will still be detected and an exception will still be thrown.
+                transitiveReferenceCache[parsedProject.GraphNode] = transitiveReferences;
+
+                foreach (ProjectInterpretation.ReferenceInfo referenceInfo in parsedProject.ReferenceInfos)
+                {
+                    ParsedProject reference = allParsedProjects[referenceInfo.ReferenceConfiguration];
+                    transitiveReferences.Add(reference.GraphNode);
+
+                    // Perf note: avoiding UnionWith to avoid boxing the HashSet enumerator.
+                    foreach (ProjectGraphNode transitiveReference in GetTransitiveProjectReferencesExcludingSelf(reference))
+                    {
+                        transitiveReferences.Add(transitiveReference);
+                    }
+                }
+
+                return transitiveReferences;
             }
         }
 
@@ -257,7 +262,7 @@ namespace Microsoft.Build.Graph
                 valueComparer: StringComparer.OrdinalIgnoreCase,
                 items: solutionEntryPoint.GlobalProperties ?? ImmutableDictionary<string, string>.Empty);
 
-            var solution = SolutionFile.Parse(FileUtilities.NormalizePath(solutionEntryPoint.ProjectFile));
+            var solution = SolutionFile.Parse(solutionEntryPoint.ProjectFile);
 
             if (solution.SolutionParserWarnings.Count != 0 || solution.SolutionParserErrorCodes.Count != 0)
             {
@@ -302,7 +307,7 @@ namespace Microsoft.Build.Graph
 
             IReadOnlyCollection<ProjectInSolution> GetBuildableProjects(SolutionFile solutionFile)
             {
-                return solutionFile.ProjectsInOrder.Where(p => p.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat).ToImmutableArray();
+                return solutionFile.ProjectsInOrder.Where(p => p.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat && solutionFile.ProjectShouldBuild(p.RelativePath)).ToImmutableArray();
             }
 
             SolutionConfigurationInSolution SelectSolutionConfiguration(SolutionFile solutionFile, ImmutableDictionary<string, string> globalProperties)
@@ -384,7 +389,7 @@ namespace Microsoft.Build.Graph
 
                     AddGraphBuildGlobalVariable(globalPropertyDictionary);
 
-                    var configurationMetadata = new ConfigurationMetadata(FileUtilities.NormalizePath(entryPoint.ProjectFile), globalPropertyDictionary);
+                    var configurationMetadata = new ConfigurationMetadata(entryPoint.ProjectFile, globalPropertyDictionary);
                     entryPointConfigurationMetadata.Add(configurationMetadata);
                 }
 
@@ -542,8 +547,9 @@ namespace Microsoft.Build.Graph
         private List<ProjectInterpretation.ReferenceInfo> ParseReferences(ProjectGraphNode parsedProject)
         {
             var referenceInfos = new List<ProjectInterpretation.ReferenceInfo>();
+            
 
-            foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject.ProjectInstance))
+            foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject.ProjectInstance, _projectCollection, _projectInstanceFactory))
             {
                 if (FileUtilities.IsSolutionFilename(referenceInfo.ReferenceConfiguration.ProjectFullPath))
                 {
@@ -602,7 +608,7 @@ namespace Microsoft.Build.Graph
             return propertyDictionary;
         }
 
-        internal class GraphEdges
+        internal sealed class GraphEdges
         {
             private ConcurrentDictionary<(ProjectGraphNode, ProjectGraphNode), ProjectItemInstance> ReferenceItems =
                 new ConcurrentDictionary<(ProjectGraphNode, ProjectGraphNode), ProjectItemInstance>();
@@ -616,9 +622,42 @@ namespace Microsoft.Build.Graph
                     ErrorUtilities.VerifyThrow(ReferenceItems.TryGetValue(key, out ProjectItemInstance referenceItem), "All requested keys should exist");
                     return referenceItem;
                 }
+            }
 
-                // First edge wins, in accordance with vanilla msbuild behaviour when multiple msbuild tasks call into the same logical project
-                set => ReferenceItems.TryAdd(key, value);
+            public void AddOrUpdateEdge((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstance edge)
+            {
+                ReferenceItems.AddOrUpdate(
+                    key,
+                    addValueFactory: static ((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstance referenceItem) => referenceItem,
+                    updateValueFactory: static ((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstance existingItem, ProjectItemInstance newItem) =>
+                    {
+                        string existingTargetsMetadata = existingItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
+                        string newTargetsMetadata = newItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
+
+                        // Bail out if the targets are the same.
+                        if (existingTargetsMetadata.Equals(newTargetsMetadata, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return existingItem;
+                        }
+
+                        existingTargetsMetadata = GetEffectiveTargets(key.reference, existingTargetsMetadata);
+                        newTargetsMetadata = GetEffectiveTargets(key.reference, newTargetsMetadata);
+
+                        ProjectItemInstance mergedItem = existingItem.DeepClone();
+                        mergedItem.SetMetadata(ItemMetadataNames.ProjectReferenceTargetsMetadataName, $"{existingTargetsMetadata};{newTargetsMetadata}");
+                        return mergedItem;
+
+                        static string GetEffectiveTargets(ProjectGraphNode reference, string targetsMetadata)
+                        {
+                            if (string.IsNullOrWhiteSpace(targetsMetadata))
+                            {
+                                return string.Join(";", reference.ProjectInstance.DefaultTargets);
+                            }
+
+                            return targetsMetadata;
+                        }
+                    },
+                    edge);
             }
 
             public void RemoveEdge((ProjectGraphNode node, ProjectGraphNode reference) key)
@@ -627,7 +666,6 @@ namespace Microsoft.Build.Graph
             }
 
             internal bool HasEdge((ProjectGraphNode node, ProjectGraphNode reference) key) => ReferenceItems.ContainsKey(key);
-            internal bool TryGetEdge((ProjectGraphNode node, ProjectGraphNode reference) key, out ProjectItemInstance edge) => ReferenceItems.TryGetValue(key, out edge);
 
             internal IReadOnlyDictionary<(ConfigurationMetadata, ConfigurationMetadata), ProjectItemInstance> TestOnly_AsConfigurationMetadata()
             {

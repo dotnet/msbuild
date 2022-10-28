@@ -9,6 +9,8 @@ using Microsoft.Runtime.Hosting;
 using Microsoft.Build.Shared;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
 {
     sealed public class AxTlbBaseTask_Tests
@@ -65,13 +67,13 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
                 Assert.Equal(badParameterValue, t.KeyContainer); // "New KeyContainer value should be set"
                 CommandLine.ValidateHasParameter(t, @"/keycontainer:" + badParameterValue, false /* no response file */);
                 Utilities.ExecuteTaskAndVerifyLogContainsErrorFromResource(t, "AxTlbBaseTask.StrongNameUtils.NoKeyPairInContainer", t.KeyContainer);
-                //ensure the key does not exist in the CSP
+                // ensure the key does not exist in the CSP
                 StrongNameHelpers.StrongNameKeyDelete(goodParameterValue);
 
                 IntPtr publicKeyBlob = IntPtr.Zero;
                 int publicKeyBlobSize = 0;
 
-                //add key to CSP
+                // add key to CSP
                 if (StrongNameHelpers.StrongNameKeyGen(goodParameterValue, 1 /* leave key registered */, out publicKeyBlob, out publicKeyBlobSize) && publicKeyBlob != IntPtr.Zero)
                 {
                     StrongNameHelpers.StrongNameFreeBuffer(publicKeyBlob);
@@ -88,7 +90,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             }
             finally
             {
-                //remove key from CSP
+                // remove key from CSP
                 StrongNameHelpers.StrongNameKeyDelete(goodParameterValue);
 
                 // get rid of the generated temp file

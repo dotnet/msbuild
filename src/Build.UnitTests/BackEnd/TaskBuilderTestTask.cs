@@ -8,12 +8,14 @@ using System.Linq;
 using Microsoft.Build.Framework;
 using System.Reflection;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
     /// A task used for testing the TaskExecutionHost, which reports what the TaskExecutionHost does to it.
     /// </summary>
-    internal class TaskBuilderTestTask : IGeneratedTask
+    public class TaskBuilderTestTask : IGeneratedTask
     {
         /// <summary>
         /// The task host.
@@ -82,7 +84,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set
             {
                 _boolOutput = value;
-                _testTaskHost.ParameterSet("BoolParam", value);
+                _testTaskHost?.ParameterSet("BoolParam", value);
             }
         }
 
@@ -94,7 +96,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set
             {
                 _boolArrayOutput = value;
-                _testTaskHost.ParameterSet("BoolArrayParam", value);
+                _testTaskHost?.ParameterSet("BoolArrayParam", value);
             }
         }
 
@@ -106,7 +108,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set
             {
                 _intOutput = value;
-                _testTaskHost.ParameterSet("IntParam", value);
+                _testTaskHost?.ParameterSet("IntParam", value);
             }
         }
 
@@ -118,7 +120,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set
             {
                 _intArrayOutput = value;
-                _testTaskHost.ParameterSet("IntArrayParam", value);
+                _testTaskHost?.ParameterSet("IntArrayParam", value);
             }
         }
 
@@ -130,7 +132,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set
             {
                 _stringOutput = value;
-                _testTaskHost.ParameterSet("StringParam", value);
+                _testTaskHost?.ParameterSet("StringParam", value);
             }
         }
 
@@ -142,7 +144,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set
             {
                 _stringArrayOutput = value;
-                _testTaskHost.ParameterSet("StringArrayParam", value);
+                _testTaskHost?.ParameterSet("StringArrayParam", value);
             }
         }
 
@@ -154,7 +156,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set
             {
                 _itemOutput = value;
-                _testTaskHost.ParameterSet("ItemParam", value);
+                _testTaskHost?.ParameterSet("ItemParam", value);
             }
         }
 
@@ -166,7 +168,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set
             {
                 _itemArrayOutput = value;
-                _testTaskHost.ParameterSet("ItemArrayParam", value);
+                _testTaskHost?.ParameterSet("ItemArrayParam", value);
             }
         }
 
@@ -179,7 +181,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set
             {
                 _executeReturnValue = value;
-                _testTaskHost.ParameterSet("ExecuteReturnParam", value);
+                _testTaskHost?.ParameterSet("ExecuteReturnParam", value);
             }
         }
 
@@ -191,7 +193,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             get
             {
-                _testTaskHost.OutputRead("BoolOutput", _boolOutput);
+                _testTaskHost?.OutputRead("BoolOutput", _boolOutput);
                 return _boolOutput;
             }
         }
@@ -204,7 +206,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             get
             {
-                _testTaskHost.OutputRead("BoolArrayOutput", _boolArrayOutput);
+                _testTaskHost?.OutputRead("BoolArrayOutput", _boolArrayOutput);
                 return _boolArrayOutput;
             }
         }
@@ -217,7 +219,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             get
             {
-                _testTaskHost.OutputRead("IntOutput", _intOutput);
+                _testTaskHost?.OutputRead("IntOutput", _intOutput);
                 return _intOutput;
             }
         }
@@ -230,7 +232,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             get
             {
-                _testTaskHost.OutputRead("IntArrayOutput", _intArrayOutput);
+                _testTaskHost?.OutputRead("IntArrayOutput", _intArrayOutput);
                 return _intArrayOutput;
             }
         }
@@ -243,7 +245,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             get
             {
-                _testTaskHost.OutputRead("StringOutput", _stringOutput);
+                _testTaskHost?.OutputRead("StringOutput", _stringOutput);
                 return _stringOutput;
             }
         }
@@ -256,7 +258,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             get
             {
-                _testTaskHost.OutputRead("EmptyStringOutput", null);
+                _testTaskHost?.OutputRead("EmptyStringOutput", null);
                 return String.Empty;
             }
         }
@@ -269,8 +271,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             get
             {
-                _testTaskHost.OutputRead("EmptyStringArrayOutput", null);
-                return new string[0];
+                _testTaskHost?.OutputRead("EmptyStringArrayOutput", null);
+                return Array.Empty<string>();
             }
         }
 
@@ -282,7 +284,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             get
             {
-                _testTaskHost.OutputRead("NullStringOutput", null);
+                _testTaskHost?.OutputRead("NullStringOutput", null);
                 return null;
             }
         }
@@ -295,7 +297,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             get
             {
-                _testTaskHost.OutputRead("NullITaskItemOutput", null);
+                _testTaskHost?.OutputRead("NullITaskItemOutput", null);
                 return null;
             }
         }
@@ -308,7 +310,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             get
             {
-                _testTaskHost.OutputRead("NullStringArrayOutput", null);
+                _testTaskHost?.OutputRead("NullStringArrayOutput", null);
                 return null;
             }
         }
@@ -321,7 +323,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             get
             {
-                _testTaskHost.OutputRead("NullITaskItemArrayOutput", null);
+                _testTaskHost?.OutputRead("NullITaskItemArrayOutput", null);
                 return null;
             }
         }
@@ -334,7 +336,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             get
             {
-                _testTaskHost.OutputRead("StringArrayOutput", _stringArrayOutput);
+                _testTaskHost?.OutputRead("StringArrayOutput", _stringArrayOutput);
                 return _stringArrayOutput;
             }
         }
@@ -347,7 +349,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             get
             {
-                _testTaskHost.OutputRead("ItemOutput", _itemOutput);
+                _testTaskHost?.OutputRead("ItemOutput", _itemOutput);
                 return _itemOutput;
             }
         }
@@ -360,7 +362,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             get
             {
-                _testTaskHost.OutputRead("ItemArrayOutput", _itemArrayOutput);
+                _testTaskHost?.OutputRead("ItemArrayOutput", _itemArrayOutput);
                 return _itemArrayOutput;
             }
         }
@@ -373,52 +375,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             get
             {
-                _testTaskHost.OutputRead("ItemArrayNullOutput", _itemArrayOutput);
+                _testTaskHost?.OutputRead("ItemArrayNullOutput", _itemArrayOutput);
                 return null;
             }
         }
 
-        /// <summary>
-        /// An object output
-        /// </summary>
         [Output]
-        public object ObjectOutput
-        {
-            get
-            {
-                object output = new object();
-                _testTaskHost.OutputRead("ObjectOutput", output);
-                return output;
-            }
-        }
-
-        /// <summary>
-        /// An object array output
-        /// </summary>
-        [Output]
-        public object[] ObjectArrayOutput
-        {
-            get
-            {
-                object[] output = new object[] { new object(), new object() };
-                _testTaskHost.OutputRead("ObjectArrayOutput", output);
-                return output;
-            }
-        }
-
-        /// <summary>
-        /// An arraylist output
-        /// </summary>
-        [Output]
-        public ArrayList ArrayListOutput
-        {
-            get
-            {
-                ArrayList output = new ArrayList();
-                _testTaskHost.OutputRead("ArrayListOutput", output);
-                return output;
-            }
-        }
+        public TargetBuiltReason EnumOutput => TargetBuiltReason.BeforeTargets;
 
         #region ITask Members
 
@@ -550,8 +513,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     propertyInfos[i] = new TaskPropertyInfo(
                         infos[i].Name,
                         infos[i].PropertyType,
-                        infos[i].GetCustomAttributes(typeof(OutputAttribute), false).Count() > 0,
-                        infos[i].GetCustomAttributes(typeof(RequiredAttribute), false).Count() > 0);
+                        infos[i].GetCustomAttributes(typeof(OutputAttribute), false).Length > 0,
+                        infos[i].GetCustomAttributes(typeof(RequiredAttribute), false).Length > 0);
                 }
 
                 return propertyInfos;

@@ -14,6 +14,8 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Runtime.Hosting;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -22,7 +24,9 @@ namespace Microsoft.Build.Tasks
     public class ResolveKeySource : TaskExtension
     {
         private const string pfxFileExtension = ".pfx";
+#if !RUNTIME_TYPE_NETCORE
         private const string pfxFileContainerPrefix = "VS_KEY_";
+#endif
         
         #region Properties
 

@@ -6,6 +6,8 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class Delete_Tests
@@ -34,6 +36,3 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
-
-
-

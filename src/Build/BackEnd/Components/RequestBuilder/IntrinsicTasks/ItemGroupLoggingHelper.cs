@@ -5,12 +5,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+#if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
+#endif
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -41,7 +44,9 @@ namespace Microsoft.Build.BackEnd
         /// to materialize the Message as that's a declaration assembly. We inject the logic
         /// here.
         /// </summary>
+#pragma warning disable CA1810 // Initialize reference type static fields inline
         static ItemGroupLoggingHelper()
+#pragma warning restore CA1810 // Initialize reference type static fields inline
         {
             BuildEventArgs.ResourceStringFormatter = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword;
             TaskParameterEventArgs.MessageGetter = GetTaskParameterText;

@@ -4,6 +4,8 @@
 using Microsoft.Build.Tasks;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     sealed public class VisualBasicParserUtilititesTests
@@ -117,6 +119,3 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
-
-
-

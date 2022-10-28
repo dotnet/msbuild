@@ -20,6 +20,8 @@ using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -43,6 +45,10 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string cacheDirectory = null;
 
+#if CLR2COMPATIBILITY
+        internal static string TempFileDirectory => Path.GetTempPath();
+#endif
+
         /// <summary>
         /// FOR UNIT TESTS ONLY
         /// Clear out the static variable used for the cache directory so that tests that
@@ -54,6 +60,8 @@ namespace Microsoft.Build.Shared
         }
 
         internal static readonly StringComparison PathComparison = GetIsFileSystemCaseSensitive() ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+
+        internal static readonly StringComparer PathComparer = GetIsFileSystemCaseSensitive() ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
 
         /// <summary>
         /// Determines whether the file system is case sensitive.
@@ -120,7 +128,7 @@ namespace Microsoft.Build.Shared
         {
             if (cacheDirectory == null)
             {
-                cacheDirectory = Path.Combine(Path.GetTempPath(), String.Format(CultureInfo.CurrentUICulture, "MSBuild{0}-{1}", Process.GetCurrentProcess().Id, AppDomain.CurrentDomain.Id));
+                cacheDirectory = Path.Combine(TempFileDirectory, String.Format(CultureInfo.CurrentUICulture, "MSBuild{0}-{1}", Process.GetCurrentProcess().Id, AppDomain.CurrentDomain.Id));
             }
 
             return cacheDirectory;
@@ -161,6 +169,32 @@ namespace Microsoft.Build.Shared
             }
 
             return builder.ToString().GetHashCode();
+        }
+
+        /// <summary>
+        /// Returns whether MSBuild can write to the given directory. Throws for PathTooLongExceptions
+        /// but not other exceptions.
+        /// </summary>
+        internal static bool CanWriteToDirectory(string directory)
+        {
+            try
+            {
+                string testFilePath = Path.Combine(directory, $"MSBuild_{Guid.NewGuid().ToString("N")}_testFile.txt");
+                FileInfo file = new(testFilePath);
+                file.Directory.Create(); // If the directory already exists, this method does nothing.
+                File.WriteAllText(testFilePath, $"MSBuild process {Process.GetCurrentProcess().Id} successfully wrote to file.");
+                File.Delete(testFilePath);
+                return true;
+            }
+            catch (PathTooLongException)
+            {
+                ErrorUtilities.ThrowArgument("DebugPathTooLong", directory);
+                return false; // Should never reach here.
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -242,6 +276,58 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Ensures the path is enclosed within single quotes.
+        /// </summary>
+        /// <param name="path">The path to check.</param>
+        /// <returns>The path enclosed by quotes.</returns>
+        internal static string EnsureSingleQuotes(string path)
+        {
+            return EnsureQuotes(path);
+        }
+
+        /// <summary>
+        /// Ensures the path is enclosed within double quotes.
+        /// </summary>
+        /// <param name="path">The path to check.</param>
+        /// <returns>The path enclosed by quotes.</returns>
+        internal static string EnsureDoubleQuotes(string path)
+        {
+            return EnsureQuotes(path, isSingleQuote: false);
+        }
+
+        /// <summary>
+        /// Ensures the path is enclosed within quotes.
+        /// </summary>
+        /// <param name="path">The path to check.</param>
+        /// <param name="isSingleQuote">Indicates if single or double quotes should be used</param>
+        /// <returns>The path enclosed by quotes.</returns>
+        internal static string EnsureQuotes(string path, bool isSingleQuote = true)
+        {
+            path = FixFilePath(path);
+
+            const char singleQuote = '\'';
+            const char doubleQuote = '\"';
+            var targetQuote = isSingleQuote ? singleQuote : doubleQuote;
+            var convertQuote = isSingleQuote ? doubleQuote : singleQuote;
+
+            if (!string.IsNullOrEmpty(path))
+            {
+                // Special case: convert the quotes.
+                if (path.Length > 1 && path[0] == convertQuote && path[path.Length - 1] == convertQuote)
+                {
+                    path = $"{targetQuote}{path.Substring(1, path.Length - 2)}{targetQuote}";
+                }
+                // Enclose the path in a set of the 'target' quote unless the string is already quoted with the 'target' quotes.
+                else if (path.Length == 1 || path[0] != targetQuote || path[path.Length - 1] != targetQuote)
+                {
+                    path = $"{targetQuote}{path}{targetQuote}";
+                }
+            }
+
+            return path;
+        }
+
+        /// <summary>
         /// Indicates if the given file-spec ends with a slash.
         /// </summary>
         /// <param name="fileSpec">The file spec.</param>
@@ -268,6 +354,11 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string TrimAndStripAnyQuotes(string path)
         {
+            if (path is null)
+            {
+                return path;
+            }
+
             // Trim returns the same string if trimming isn't needed
             path = path.Trim();
             path = path.Trim(new char[] { '"' });
@@ -285,7 +376,7 @@ namespace Microsoft.Build.Shared
             if (fullPath != null)
             {
                 int i = fullPath.Length;
-                while (i > 0 && fullPath[--i] != Path.DirectorySeparatorChar && fullPath[i] != Path.AltDirectorySeparatorChar) ;
+                while (i > 0 && fullPath[--i] != Path.DirectorySeparatorChar && fullPath[i] != Path.AltDirectorySeparatorChar);
                 return FixFilePath(fullPath.Substring(0, i));
             }
             return null;
@@ -447,7 +538,7 @@ namespace Microsoft.Build.Shared
 
         internal static string FixFilePath(string path)
         {
-            return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/');//.Replace("//", "/");
+            return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/'); // .Replace("//", "/");
         }
 
 #if !CLR2COMPATIBILITY
@@ -822,7 +913,7 @@ namespace Microsoft.Build.Shared
         /// </remarks>
         internal static void DeleteWithoutTrailingBackslash(string path, bool recursive = false)
         {
-            //  Some tests (such as FileMatcher and Evaluation tests) were failing with an UnauthorizedAccessException or directory not empty.
+            // Some tests (such as FileMatcher and Evaluation tests) were failing with an UnauthorizedAccessException or directory not empty.
             //  This retry logic works around that issue.
             const int NUM_TRIES = 3;
             for (int i = 0; i < NUM_TRIES; i++)
@@ -831,17 +922,17 @@ namespace Microsoft.Build.Shared
                 {
                     Directory.Delete(EnsureNoTrailingSlash(path), recursive);
 
-                    //  If we got here, the directory was successfully deleted
+                    // If we got here, the directory was successfully deleted
                     return;
                 }
                 catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
                 {
                     if (i == NUM_TRIES - 1)
                     {
-                        //var files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
-                        //string fileString = string.Join(Environment.NewLine, files);
-                        //string message = $"Unable to delete directory '{path}'.  Contents:" + Environment.NewLine + fileString;
-                        //throw new IOException(message, ex);
+                        // var files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
+                        // string fileString = string.Join(Environment.NewLine, files);
+                        // string message = $"Unable to delete directory '{path}'.  Contents:" + Environment.NewLine + fileString;
+                        // throw new IOException(message, ex);
                         throw;
                     }
                 }
@@ -1085,27 +1176,6 @@ namespace Microsoft.Build.Shared
             }
 
             return StringBuilderCache.GetStringAndRelease(sb);
-        }
-
-        /// <summary>
-        /// Helper function to create an Uri object from path.
-        /// </summary>
-        /// <param name="path">path string</param>
-        /// <returns>uri object</returns>
-        private static Uri CreateUriFromPath(string path)
-        {
-            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
-
-            Uri pathUri;
-
-            // Try absolute first, then fall back on relative, otherwise it
-            // makes some absolute UNC paths like (\\foo\bar) relative ...
-            if (!Uri.TryCreate(path, UriKind.Absolute, out pathUri))
-            {
-                pathUri = new Uri(path, UriKind.Relative);
-            }
-
-            return pathUri;
         }
 
         /// <summary>

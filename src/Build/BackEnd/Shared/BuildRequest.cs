@@ -9,6 +9,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.ProjectCache;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -95,7 +97,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public BuildRequest()
         {
-
         }
 
         private BuildRequest(

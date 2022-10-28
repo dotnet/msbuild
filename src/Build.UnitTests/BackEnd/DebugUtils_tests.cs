@@ -8,6 +8,8 @@ using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class DebugUtils_Tests
@@ -22,7 +24,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 ExceptionHandling.DumpExceptionToFile(new Exception("hello world"));
-                exceptionFiles = Directory.GetFiles(Path.GetTempPath(), "MSBuild_*failure.txt");
+                exceptionFiles = Directory.GetFiles(FileUtilities.TempFileDirectory, "MSBuild_*failure.txt");
             }
             finally
             {

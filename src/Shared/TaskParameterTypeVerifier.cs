@@ -3,8 +3,10 @@
 
 using System;
 using Microsoft.Build.Framework;
-using System.Reflection;
 using Microsoft.Build.Shared;
+using System.Reflection;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -16,11 +18,8 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Is the parameter type a valid scalar input value
         /// </summary>
-        internal static bool IsValidScalarInputParameter(Type parameterType)
-        {
-            bool result = (parameterType.GetTypeInfo().IsValueType || parameterType == typeof(string) || parameterType == typeof(ITaskItem));
-            return result;
-        }
+        internal static bool IsValidScalarInputParameter(Type parameterType) =>
+            parameterType.GetTypeInfo().IsValueType || parameterType == typeof(string) || parameterType == typeof(ITaskItem);
 
         /// <summary>
         /// Is the passed in parameterType a valid vector input parameter

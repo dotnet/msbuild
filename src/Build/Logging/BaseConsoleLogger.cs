@@ -18,6 +18,8 @@ using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd.Logging
 {
     #region Delegates
@@ -26,37 +28,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
     internal abstract class BaseConsoleLogger : INodeLogger
     {
-        /// <summary>
-        /// When set, we'll try reading background color.
-        /// </summary>
-        private static bool _supportReadingBackgroundColor = true;
-
         #region Properties
-
-        /// <summary>
-        /// Some platforms do not allow getting current background color. There
-        /// is not way to check, but not-supported exception is thrown. Assume
-        /// black, but don't crash.
-        /// </summary>
-        internal static ConsoleColor BackgroundColor
-        {
-            get
-            {
-                if (_supportReadingBackgroundColor)
-                {
-                    try
-                    {
-                        return Console.BackgroundColor;
-                    }
-                    catch (PlatformNotSupportedException)
-                    {
-                        _supportReadingBackgroundColor = false;
-                    }
-                }
-
-                return ConsoleColor.Black;
-            }
-        }
 
         /// <summary>
         /// Gets or sets the level of detail to show in the event log.
@@ -121,6 +93,10 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <remarks>Uses CurrentCulture for display purposes</remarks>
         internal class DictionaryEntryKeyComparer : IComparer<DictionaryEntry>
         {
+            public static DictionaryEntryKeyComparer Instance { get; } = new();
+
+            private DictionaryEntryKeyComparer() { }
+
             public int Compare(DictionaryEntry a, DictionaryEntry b)
             {
                 return string.Compare((string) a.Key, (string) b.Key, StringComparison.CurrentCultureIgnoreCase);
@@ -312,16 +288,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (NativeMethodsShared.IsWindows)
             {
-                // Get the std out handle
-                IntPtr stdHandle = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
-
-                if (stdHandle != NativeMethods.InvalidHandle)
-                {
-                    uint fileType = NativeMethodsShared.GetFileType(stdHandle);
-
-                    // The std out is a char type(LPT or Console)
-                    runningWithCharacterFileType = (fileType == NativeMethodsShared.FILE_TYPE_CHAR);
-                }
+                runningWithCharacterFileType = ConsoleConfiguration.OutputIsScreen;
             }
         }
 
@@ -365,7 +332,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             try
             {
-                Console.ForegroundColor = TransformColor(c, BackgroundColor);
+                Console.ForegroundColor = TransformColor(c, ConsoleConfiguration.BackgroundColor);
             }
             catch (IOException)
             {
@@ -439,7 +406,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="background">current background</param>
         internal static ConsoleColor TransformColor(ConsoleColor foreground, ConsoleColor background)
         {
-            ConsoleColor result = foreground; //typically do nothing ...
+            ConsoleColor result = foreground; // typically do nothing ...
 
             if (foreground == background)
             {
@@ -478,7 +445,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             try
             {
-                ConsoleColor c = BackgroundColor;
+                ConsoleColor c = ConsoleConfiguration.BackgroundColor;
             }
             catch (IOException)
             {
@@ -557,9 +524,9 @@ namespace Microsoft.Build.BackEnd.Logging
             // Gather a sorted list of all the properties.
             var list = new List<DictionaryEntry>(properties.FastCountOrZero());
 
-            Internal.Utilities.EnumerateProperties(properties, kvp => list.Add(new DictionaryEntry(kvp.Key, kvp.Value)));
+            Internal.Utilities.EnumerateProperties(properties, list, static (list, kvp) => list.Add(new DictionaryEntry(kvp.Key, kvp.Value)));
 
-            list.Sort(new DictionaryEntryKeyComparer());
+            list.Sort(DictionaryEntryKeyComparer.Instance);
             return list;
         }
 
@@ -825,7 +792,11 @@ namespace Microsoft.Build.BackEnd.Logging
             /// </summary>
             internal bool InScope
             {
-                get { return inScope; }
+                get
+                {
+                    return inScope;
+                }
+
                 set
                 {
                     if (!reenteredScope)
@@ -934,7 +905,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         public virtual void Shutdown()
         {
-            // do nothing
+            Traits.LogAllEnvironmentVariables = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES")) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4);
         }
 
         internal abstract void ResetConsoleLoggerState();
@@ -1044,6 +1015,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     return true;
                 case "SHOWENVIRONMENT":
                     showEnvironment = true;
+                    Traits.LogAllEnvironmentVariables = true;
                     return true;
                 case "SHOWPROJECTFILE":
                     if (parameterValue == null)

@@ -17,6 +17,8 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>
@@ -32,7 +34,6 @@ namespace Microsoft.Build.Execution
         ITaskItem2,
         IMetadataTable,
         ITranslatable,
-        IDeepCloneable<ProjectItemInstance>,
         IMetadataContainer
     {
         /// <summary>
@@ -576,19 +577,6 @@ namespace Microsoft.Build.Execution
         {
             translator.Translate(ref _itemType);
             translator.Translate(ref _taskItem, TaskItem.FactoryForDeserialization);
-        }
-
-        #endregion
-
-        #region IDeepCloneable<T>
-
-        /// <summary>
-        /// Deep clone the item.
-        /// Any metadata inherited from item definitions are also copied.
-        /// </summary>
-        ProjectItemInstance IDeepCloneable<ProjectItemInstance>.DeepClone()
-        {
-            return DeepClone();
         }
 
         #endregion

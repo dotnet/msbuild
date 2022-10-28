@@ -4,8 +4,8 @@ Param(
   [string] $destination,
   [ValidateSet('Debug','Release')]
   [string] $configuration = "Debug",
-  [ValidateSet('Core','Desktop')]
-  [string] $runtime = "Desktop"
+  [ValidateSet('Core','Desktop', 'Detect', 'Full')]
+  [string] $runtime = "Detect"
 )
 
 Set-StrictMode -Version "Latest"
@@ -50,10 +50,26 @@ $BackupFolder = New-Item (Join-Path $destination -ChildPath "Backup-$(Get-Date -
 Write-Verbose "Copying $configuration MSBuild to $destination"
 Write-Host "Existing MSBuild assemblies backed up to $BackupFolder"
 
+if ($runtime -eq "Detect") {
+    if ($destination -like "*dotnet*sdk*") {
+        $runtime = "Core"
+        Write-Host "Detected path that looks like an sdk. Writing .NET Core assemblies."
+    }
+    else {
+        $runtime = "Desktop"
+        Write-Host "Detected path that does not look like an sdk. Writing .NET Framework assemblies."
+    }
+}
+else {
+    if ($runtime -eq "Full") {
+        $runtime = "Desktop"
+    }
+}
+
 if ($runtime -eq "Desktop") {
     $targetFramework = "net472"
 } else {
-    $targetFramework = "net6.0"
+    $targetFramework = "net7.0"
 }
 
 $bootstrapBinDirectory = "artifacts\bin\MSBuild.Bootstrap\$configuration\$targetFramework"
@@ -105,6 +121,7 @@ if ($runtime -eq "Desktop") {
         FileToCopy "$bootstrapBinDirectory\System.Collections.Immutable.dll"
         FileToCopy "$bootstrapBinDirectory\System.Memory.dll"
         FileToCopy "$bootstrapBinDirectory\System.Numerics.Vectors.dll"
+        FileToCopy "$bootstrapBinDirectory\System.Reflection.MetadataLoadContext.dll"
         FileToCopy "$bootstrapBinDirectory\System.Resources.Extensions.dll"
         FileToCopy "$bootstrapBinDirectory\System.Runtime.CompilerServices.Unsafe.dll"
         FileToCopy "$bootstrapBinDirectory\System.Text.Encodings.Web.dll"

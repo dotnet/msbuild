@@ -17,6 +17,8 @@ using Microsoft.Build.Shared;
 using Toolset = Microsoft.Build.Evaluation.Toolset;
 using XmlElementWithLocation = Microsoft.Build.Construction.XmlElementWithLocation;
 
+#nullable disable
+
 namespace Microsoft.Build.Internal
 {
     /// <summary>
@@ -616,7 +618,7 @@ namespace Microsoft.Build.Internal
             return enumerator.ToEnumerable().ToArray();
         }
 
-        public static void EnumerateProperties(IEnumerable properties, Action<KeyValuePair<string, string>> callback)
+        public static void EnumerateProperties<TArg>(IEnumerable properties, TArg arg, Action<TArg, KeyValuePair<string, string>> callback)
         {
             if (properties == null)
             {
@@ -627,14 +629,14 @@ namespace Microsoft.Build.Internal
             {
                 propertyInstanceDictionary.Enumerate((key, value) =>
                 {
-                    callback(new KeyValuePair<string, string>(key, value));
+                    callback(arg, new KeyValuePair<string, string>(key, value));
                 });
             }
             else if (properties is PropertyDictionary<ProjectProperty> propertyDictionary)
             {
                 propertyDictionary.Enumerate((key, value) =>
                 {
-                    callback(new KeyValuePair<string, string>(key, value));
+                    callback(arg, new KeyValuePair<string, string>(key, value));
                 });
             }
             else
@@ -643,15 +645,15 @@ namespace Microsoft.Build.Internal
                 {
                     if (item is IProperty property && !string.IsNullOrEmpty(property.Name))
                     {
-                        callback(new KeyValuePair<string, string>(property.Name, property.EvaluatedValue ?? string.Empty));
+                        callback(arg, new KeyValuePair<string, string>(property.Name, property.EvaluatedValue ?? string.Empty));
                     }
                     else if (item is DictionaryEntry dictionaryEntry && dictionaryEntry.Key is string key && !string.IsNullOrEmpty(key))
                     {
-                        callback(new KeyValuePair<string, string>(key, dictionaryEntry.Value as string ?? string.Empty));
+                        callback(arg, new KeyValuePair<string, string>(key, dictionaryEntry.Value as string ?? string.Empty));
                     }
                     else if (item is KeyValuePair<string, string> kvp)
                     {
-                        callback(kvp);
+                        callback(arg, kvp);
                     }
                     else
                     {

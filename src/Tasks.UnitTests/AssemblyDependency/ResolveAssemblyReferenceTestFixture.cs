@@ -15,6 +15,9 @@ using Xunit;
 using Xunit.Abstractions;
 
 using NativeMethods = Microsoft.Build.Tasks.NativeMethods;
+using System.Runtime.Versioning;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -501,11 +504,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // ==[Related File Extensions Testing]================================================================================================
 
             // ==[Unification Testing]============================================================================================================
-            //@"C:\MyComponents\v0.5\UnifyMe.dll",                                 // For unification testing, a version that doesn't exist.
+            // @"C:\MyComponents\v0.5\UnifyMe.dll",                                 // For unification testing, a version that doesn't exist.
             s_unifyMeDll_V10Path,
             s_unifyMeDll_V20Path,
             s_unifyMeDll_V30Path,
-            //@"C:\MyComponents\v4.0\UnifyMe.dll",
+            // @"C:\MyComponents\v4.0\UnifyMe.dll",
             Path.Combine(s_myApp_V05Path, "DependsOnUnified.dll"),
             Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"),
             Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"),
@@ -518,8 +521,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // ==[Test assemblies reference higher versions than the current target framework=====================================================
             Path.Combine(s_myComponentsMiscPath, "DependsOnOnlyv4Assemblies.dll"),  // Only depends on 4.0.0 assemblies
-            Path.Combine(s_myComponentsMiscPath, "ReferenceVersion9.dll"), //Is in redist list and is a 9.0 assembly
-            Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"), //Depends on 9.0 assemblies
+            Path.Combine(s_myComponentsMiscPath, "ReferenceVersion9.dll"), // Is in redist list and is a 9.0 assembly
+            Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"), // Depends on 9.0 assemblies
             Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"), // Depends on 9.0 assemblies
             Path.Combine(s_myComponents10Path, "DependsOn9.dll"), // Depends on 9.0 assemblies
             Path.Combine(s_myComponents20Path, "DependsOn9.dll"), // Depends on 9.0 assemblies
@@ -914,7 +917,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            return new string[0];
+            return Array.Empty<string>();
         }
 
         /// <summary>
@@ -1386,7 +1389,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("DependsOn9, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
             }
 
-            //A second assembly which depends on version 9 framework assemblies.
+            // A second assembly which depends on version 9 framework assemblies.
             if (String.Equals(path, Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("DependsOn9Also, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
@@ -1985,7 +1988,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (String.Equals(path, @"c:\Regress313086\mscorlib.dll", StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[] { };
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, Path.Combine(s_myVersion20Path, "System.dll"), StringComparison.OrdinalIgnoreCase))
@@ -2088,16 +2091,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 || String.Equals(path, Path.Combine(s_myVersionPocket20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase)
             )
             {
-                return new AssemblyNameExtension[]
-                {
-                };
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, @"MyRelativeAssembly.dll", StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[]
-                {
-                };
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, Path.Combine(s_myAppRootPath, "DependsOnSimpleA.dll"), StringComparison.OrdinalIgnoreCase))
@@ -2206,9 +2205,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (String.Equals(path, s_myLibraries_V1_E_EDllPath, StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[]
-                {
-                };
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, Path.Combine(s_myApp_V05Path, "DependsOnWeaklyNamedUnified.dll"), StringComparison.OrdinalIgnoreCase))
@@ -2294,7 +2291,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            //A second assembly which depends on version 9 framework assemblies.
+            // A second assembly which depends on version 9 framework assemblies.
             if (String.Equals(path, Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
@@ -2354,7 +2351,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (String.Equals(path, Path.Combine(s_myComponents2RootPath, "W.dll"), StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[] { };
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "X.dll"), StringComparison.OrdinalIgnoreCase))
@@ -2367,7 +2364,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "Z.dll"), StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[] { };
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "Y.dll"), StringComparison.OrdinalIgnoreCase))
@@ -2380,7 +2377,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "Microsoft.Build.dll"), StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[] { };
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "DependsOnMSBuild12.dll"), StringComparison.OrdinalIgnoreCase))
@@ -2439,7 +2436,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             if (String.Equals(path, @"C:\DirectoryContainsdllAndWinmd\c.winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
-                return new AssemblyNameExtension[0];
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, @"C:\DirectoryContainstwoWinmd\a.winmd", StringComparison.OrdinalIgnoreCase))
@@ -2453,12 +2450,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (String.Equals(path, @"C:\DirectoryContainstwoWinmd\c.winmd", StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[0];
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (path.StartsWith(@"C:\FakeSDK\", StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[0];
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, s_portableDllPath, StringComparison.OrdinalIgnoreCase))
@@ -2495,10 +2492,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
         }
 
-#pragma warning disable CA1416
         /// <summary>
         /// Registry access delegate. Given a hive and a view, return the registry base key.
         /// </summary>
+        [SupportedOSPlatform("windows")]
         private static RegistryKey GetBaseKey(RegistryHive hive, RegistryView view)
         {
             if (hive == RegistryHive.CurrentUser)
@@ -2520,55 +2517,56 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <param name="baseKey">The base registry key.</param>
         /// <param name="subKey">The subkey</param>
         /// <returns>An enumeration of strings.</returns>
+        [SupportedOSPlatform("windows")]
         private static IEnumerable<string> GetRegistrySubKeyNames(RegistryKey baseKey, string subKey)
         {
             if (baseKey == Registry.CurrentUser)
             {
                 if (String.Equals(subKey, @"Software\Regress714052", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\X86", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\MSIL", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\Mix", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\Mix\Mix", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\None", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\X86\X86", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\MSIL\MSIL", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\None\None", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Microsoft\.NetFramework", StringComparison.OrdinalIgnoreCase))
@@ -2609,7 +2607,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\ZControlB", StringComparison.OrdinalIgnoreCase)
                 )
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if
@@ -2666,12 +2664,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\AssemblyFoldersEx\A", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\AssemblyFoldersEx\B", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\X86", StringComparison.OrdinalIgnoreCase))
                 {
@@ -2695,21 +2693,21 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\Mix\Mix", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\X86\X86", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\MSIL\MSIL", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\None\None", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Microsoft\.NetFramework", StringComparison.OrdinalIgnoreCase))
@@ -2724,12 +2722,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if (String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.FancyControl.1.0", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyHKLMControl.1.0", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Microsoft\.NETCompactFramework", StringComparison.OrdinalIgnoreCase))
@@ -2744,12 +2742,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if (String.Equals(subKey, @"Software\Microsoft\.NETCompactFramework\v2.0.3600\PocketPC\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Microsoft\.NETCompactFramework\v2.0.3600\PocketPC\AssemblyFoldersEx\AFETestDeviceControl", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Microsoft\Microsoft SDKs\Windows", StringComparison.OrdinalIgnoreCase))
@@ -2769,6 +2767,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <param name="baseKey">The base registry key.</param>
         /// <param name="subKey">The subkey</param>
         /// <returns>A string containing the default value.</returns>
+        [SupportedOSPlatform("windows")]
         private static string GetRegistrySubKeyDefaultValue(RegistryKey baseKey, string subKey)
         {
             if (baseKey == Registry.CurrentUser)
@@ -2904,7 +2903,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.True(false, $"New GetRegistrySubKeyDefaultValue parameters encountered, need to add unittesting support for subKey={subKey}");
             return null;
         }
-#pragma warning restore CA1416
 
         /// <summary>
         /// Delegate for System.IO.File.GetLastWriteTime
@@ -3027,7 +3025,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 	                );
 
                     // A few checks. These should always be true or it may be a perf issue for project load.
-                    ITaskItem[] loadModeResolvedFiles = new TaskItem[0];
+                    ITaskItem[] loadModeResolvedFiles = Array.Empty<TaskItem>();
                     if (t.ResolvedFiles != null)
                     {
                         loadModeResolvedFiles = (ITaskItem[])t.ResolvedFiles.Clone();
@@ -3101,7 +3099,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                         // OriginalItemSpec attribute on resolved items is to support VS in figuring out which
                         // project file reference caused a particular resolved file.
                         string originalItemSpec = t.ResolvedFiles[i].GetMetadata("OriginalItemSpec");
-                        Assert.True(ContainsItem(t.Assemblies, originalItemSpec) || ContainsItem(t.AssemblyFiles, originalItemSpec)); //                         "Expected to find OriginalItemSpec in Assemblies or AssemblyFiles task parameters"
+                        Assert.True(ContainsItem(t.Assemblies, originalItemSpec) || ContainsItem(t.AssemblyFiles, originalItemSpec)); // "Expected to find OriginalItemSpec in Assemblies or AssemblyFiles task parameters"
                     }
                 }
             }
