@@ -2105,6 +2105,12 @@ namespace Microsoft.Build.Execution
                                 finishedNodes.Add(finishedNode);
                                 buildingNodes.Remove(finishedBuildSubmission);
 
+                                // Propagate errors to referencing projects so that we don't continue build dependent projects
+                                if (finishedBuildSubmission.BuildResult.OverallResult == BuildResultCode.Failure)
+                                {
+                                    PropagateFailureToDependentNodesToBuild(finishedNode, blockedNodes, finishedNodes);
+                                }
+
                                 resultsPerNode.Add(finishedNode, finishedBuildSubmission.BuildResult);
                             }
 
@@ -2115,6 +2121,18 @@ namespace Microsoft.Build.Execution
             }
 
             return resultsPerNode;
+        }
+
+        private static void PropagateFailureToDependentNodesToBuild(ProjectGraphNode failedNode, HashSet<ProjectGraphNode> blockedNodes,
+            HashSet<ProjectGraphNode> finishedNodes)
+        {
+            blockedNodes.Remove(failedNode);
+            finishedNodes.Add(failedNode);
+            // Propagate the failure to dependent nodes to avoid building them later as part of the graph.
+            foreach (var failedNodeReferencingProject in failedNode.ReferencingProjects)
+            {
+                PropagateFailureToDependentNodesToBuild(failedNodeReferencingProject, blockedNodes, finishedNodes);
+            }
         }
 
         /// <summary>

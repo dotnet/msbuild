@@ -1,5 +1,10 @@
 Microsoft.Build.Evaluation.ProjectCollection.ProjectCollection(System.Collections.Generic.IDictionary<string, string> globalProperties, System.Collections.Generic.IEnumerable<Microsoft.Build.Framework.ILogger> loggers, System.Collections.Generic.IEnumerable<Microsoft.Build.Logging.ForwardingLoggerRecord> remoteLoggers, Microsoft.Build.Evaluation.ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache) -> void
 Microsoft.Build.Experimental.MSBuildClient
+Microsoft.Build.Execution.BuildManager.LoadCachedResults(string[] cacheFiles) -> System.Collections.Generic.Dictionary<Microsoft.Build.Execution.BuildRequestData, Microsoft.Build.Execution.BuildResult>
+Microsoft.Build.Execution.BuildRequestData.InputResultsCacheFiles.get -> string[]
+Microsoft.Build.Execution.BuildRequestData.InputResultsCacheFiles.set -> void
+Microsoft.Build.Execution.BuildRequestData.OutputResultsCacheFile.get -> string
+Microsoft.Build.Execution.BuildRequestData.OutputResultsCacheFile.set -> void
 Microsoft.Build.Experimental.MSBuildClient.Execute(System.Threading.CancellationToken cancellationToken) -> Microsoft.Build.Experimental.MSBuildClientExitResult
 Microsoft.Build.Experimental.MSBuildClient.MSBuildClient(string commandLine, string msbuildLocation) -> void
 Microsoft.Build.Experimental.MSBuildClientExitResult
@@ -15,6 +20,13 @@ Microsoft.Build.Experimental.MSBuildClientExitType.Success = 0 -> Microsoft.Buil
 Microsoft.Build.Experimental.MSBuildClientExitType.UnableToConnect = 2 -> Microsoft.Build.Experimental.MSBuildClientExitType
 Microsoft.Build.Experimental.MSBuildClientExitType.Unexpected = 4 -> Microsoft.Build.Experimental.MSBuildClientExitType
 Microsoft.Build.Experimental.OutOfProcServerNode
+Microsoft.Build.Graph.GraphBuildCacheFilePathDelegate
+Microsoft.Build.Graph.GraphBuildRequestData.GraphBuildCacheFilePath.get -> Microsoft.Build.Graph.GraphBuildCacheFilePathDelegate
+Microsoft.Build.Graph.GraphBuildRequestData.GraphBuildRequestData(Microsoft.Build.Graph.ProjectGraph projectGraph, System.Collections.Generic.ICollection<string> targetsToBuild, Microsoft.Build.Execution.HostServices hostServices, Microsoft.Build.Execution.BuildRequestDataFlags flags, System.Collections.Generic.ICollection<Microsoft.Build.Graph.ProjectGraphNode> startingNodes, Microsoft.Build.Graph.ProjectGraphNodeDirection direction = Microsoft.Build.Graph.ProjectGraphNodeDirection.Current, Microsoft.Build.Graph.GraphBuildCacheFilePathDelegate graphBuildCacheFilePathDelegate = null) -> void
+Microsoft.Build.Graph.GraphBuildRequestData.IsolateProjects.get -> bool
+Microsoft.Build.Graph.GraphBuildRequestData.ProjectGraphNodeDirection.get -> Microsoft.Build.Graph.ProjectGraphNodeDirection
+Microsoft.Build.Graph.GraphBuildRequestData.StartingGraphNodes.get -> System.Collections.Generic.ICollection<Microsoft.Build.Graph.ProjectGraphNode>
+Microsoft.Build.Graph.ProjectGraphNodeDirection
 Microsoft.Build.Experimental.OutOfProcServerNode.BuildCallback
 Microsoft.Build.Experimental.OutOfProcServerNode.OutOfProcServerNode(Microsoft.Build.Experimental.OutOfProcServerNode.BuildCallback buildFunction) -> void
 Microsoft.Build.Experimental.OutOfProcServerNode.Run(out System.Exception shutdownException) -> Microsoft.Build.Execution.NodeEngineShutdownReason
@@ -22,3 +34,9 @@ static Microsoft.Build.Experimental.MSBuildClient.ShutdownServer(System.Threadin
 virtual Microsoft.Build.ObjectModelRemoting.ProjectLink.GlobalPropertiesContains(string key) -> bool
 virtual Microsoft.Build.ObjectModelRemoting.ProjectLink.GlobalPropertiesCount() -> int
 virtual Microsoft.Build.ObjectModelRemoting.ProjectLink.GlobalPropertiesEnumerable() -> System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>>
+Microsoft.Build.Graph.ProjectGraphNodeDirection.Current = 0 -> Microsoft.Build.Graph.ProjectGraphNodeDirection
+Microsoft.Build.Graph.ProjectGraphNodeDirection.Down = 1 -> Microsoft.Build.Graph.ProjectGraphNodeDirection
+Microsoft.Build.Graph.ProjectGraphNodeDirection.Up = 2 -> Microsoft.Build.Graph.ProjectGraphNodeDirection
+Microsoft.Build.Graph.ProjectGraphVisitor
+Microsoft.Build.Graph.ProjectGraphVisitor.FindAll(Microsoft.Build.Graph.ProjectGraphNode graphNode, Microsoft.Build.Graph.ProjectGraphNodeDirection direction) -> System.Collections.Generic.IEnumerable<Microsoft.Build.Graph.ProjectGraphNode>
+Microsoft.Build.Graph.ProjectGraphVisitor.ProjectGraphVisitor() -> void
