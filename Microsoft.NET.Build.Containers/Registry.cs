@@ -19,7 +19,7 @@ public record struct Registry(Uri BaseUri)
 
     public async Task<Image> GetImageManifest(string name, string reference)
     {
-        using HttpClient client = GetClient();
+        HttpClient client = GetClient();
 
         var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{reference}"));
 
@@ -70,7 +70,7 @@ public record struct Registry(Uri BaseUri)
 
         // No local copy, so download one
 
-        using HttpClient client = GetClient();
+        HttpClient client = GetClient();
 
         var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{name}/blobs/{descriptor.Digest}"), HttpCompletionOption.ResponseHeadersRead);
 
@@ -101,7 +101,7 @@ public record struct Registry(Uri BaseUri)
 
     private readonly async Task UploadBlob(string name, string digest, Stream contents)
     {
-        using HttpClient client = GetClient();
+        HttpClient client = GetClient();
 
         if (await BlobAlreadyUploaded(name, digest, client))
         {
@@ -155,7 +155,14 @@ public record struct Registry(Uri BaseUri)
         return false;
     }
 
+    private static HttpClient _client = CreateClient();
+
     private static HttpClient GetClient()
+    {
+        return _client;
+    }
+
+    private static HttpClient CreateClient()
     {
         var clientHandler = new AuthHandshakeMessageHandler(new HttpClientHandler() { UseDefaultCredentials = true });
         HttpClient client = new(clientHandler);
@@ -177,7 +184,7 @@ public record struct Registry(Uri BaseUri)
     {
         tag ??= "latest";
 
-        using HttpClient client = GetClient();
+        HttpClient client = GetClient();
         var reg = this;
         await Task.WhenAll(x.LayerDescriptors.Select(async descriptor => {
             string digest = descriptor.Digest;
