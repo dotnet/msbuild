@@ -636,18 +636,24 @@ namespace Microsoft.Build.Graph
                 var targetsToPropagate = ProjectInterpretation.TargetsToPropagate.FromProjectAndEntryTargets(node.ProjectInstance, requestedTargets);
 
                 // Queue the project references for visitation, if the edge hasn't already been traversed.
-                foreach (var referenceNode in node.ProjectReferences)
+                foreach (ProjectGraphNode referenceNode in node.ProjectReferences)
                 {
-                    var applicableTargets = targetsToPropagate.GetApplicableTargetsForReference(referenceNode.ProjectInstance);
+                    ProjectInstance projectInstance = referenceNode.ProjectInstance;
+                    ImmutableList<string> applicableTargets = targetsToPropagate.GetApplicableTargetsForReference(projectInstance);
 
                     if (applicableTargets.IsEmpty)
                     {
                         continue;
                     }
 
-                    var expandedTargets = ExpandDefaultTargets(
+                    if (ProjectInterpretation.IsOuterBuildWithGeneratePackageOnBuildPropertySetToTrue(projectInstance))
+                        {
+                        applicableTargets = applicableTargets.Add("Build");
+                    }
+
+                    ImmutableList<string> expandedTargets = ExpandDefaultTargets(
                         applicableTargets,
-                        referenceNode.ProjectInstance.DefaultTargets,
+                        projectInstance.DefaultTargets,
                         Edges[(node, referenceNode)]);
 
                     var projectReferenceEdge = new ProjectGraphBuildRequest(

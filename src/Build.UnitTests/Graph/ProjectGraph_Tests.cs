@@ -1299,6 +1299,23 @@ $@"
             }
         }
 
+        [Fact]
+        public void EnsureReferencedMultitargetingNodeWithGeneratePackageOnBuildPropTargetListContainsBuild()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProjectFile(env, 1, projectReferences: new[] { 2 }, extraContent: @$"
+<ItemGroup>
+    <ProjectReferenceTargets Include='Build' Targets='Build' />
+    <ProjectReferenceTargets Include='Build' Targets='OuterBuild' OuterBuild='true' />
+</ItemGroup>");
+                CreateProjectFile(env, 2, extraContent: MultitargetingSpecificationPropertyGroupWithGeneratePackageOnBuild);
+                var graph = new ProjectGraph(entryProject.Path);
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(null);
+                targetLists[key: GetOuterBuild(graph, 2)].ShouldBe(expected: new[] { "OuterBuild", "Build" });
+            }
+        }
+
         public static IEnumerable<object[]> Graphs
         {
             get

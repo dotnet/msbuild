@@ -151,8 +151,8 @@ namespace Microsoft.Build.Graph
 
         internal static ProjectType GetProjectType(ProjectInstance project)
         {
-            var isOuterBuild = String.IsNullOrWhiteSpace(GetInnerBuildPropertyValue(project)) && !String.IsNullOrWhiteSpace(GetInnerBuildPropertyValues(project));
-            var isInnerBuild = !String.IsNullOrWhiteSpace(GetInnerBuildPropertyValue(project));
+            bool isOuterBuild = IsOuterBuild(project);
+            bool isInnerBuild = IsInnerBuild(project);
 
             ErrorUtilities.VerifyThrow(!(isOuterBuild && isInnerBuild), $"A project cannot be an outer and inner build at the same time: ${project.FullPath}");
 
@@ -161,6 +161,46 @@ namespace Microsoft.Build.Graph
                 : isInnerBuild
                     ? ProjectType.InnerBuild
                     : ProjectType.NonMultitargeting;
+        }
+
+        /// <summary>
+        /// Returns <c>true</c> iff the <paramref name="project"/> is an
+        /// outer build.
+        /// </summary>
+        /// <param name="project">The project to determine if it's an outer
+        /// build.</param>
+        /// <returns><c>true</c> iff the <paramref name="project"/> is an outer
+        /// build.</returns>
+        private static bool IsOuterBuild(ProjectInstance project)
+        {
+            return string.IsNullOrWhiteSpace(GetInnerBuildPropertyValue(project)) && !string.IsNullOrWhiteSpace(GetInnerBuildPropertyValues(project));
+        }
+
+        /// <summary>
+        /// Returns <c>true</c> iff the <paramref name="project"/> is an
+        /// inner build.
+        /// </summary>
+        /// <param name="project">The project to determine if it's an inner
+        /// build.</param>
+        /// <returns><c>true</c> iff the <paramref name="project"/> is an inner
+        /// build.</returns>
+        private static bool IsInnerBuild(ProjectInstance project)
+        {
+            return !string.IsNullOrWhiteSpace(GetInnerBuildPropertyValue(project));
+        }
+
+        /// <summary>
+        /// Return <c>true</c> iff the <paramref name="project"/> is an outer
+        /// build with the <c>GeneratePackageOnBuild</c> property set to <c>true</c>.
+        /// </summary>
+        /// <param name="project">The project to determine where it contains
+        /// a <c>GeneratePackageOnBuild</c> property that's set to <c>true</c>.</param>
+        /// <returns><c>true</c> iff the <paramref name="project"/> is an
+        /// outer build with the <c>GeneratePackageOnBuild</c>
+        /// property set to <c>true</c>.</returns>
+        public static bool IsOuterBuildWithGeneratePackageOnBuildPropertySetToTrue(ProjectInstance project)
+        {
+            return IsOuterBuild(project) && MSBuildStringIsTrue(project.GetPropertyValue("GeneratePackageOnBuild"));
         }
 
         /// <summary>

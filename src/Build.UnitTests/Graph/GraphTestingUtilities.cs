@@ -26,6 +26,14 @@ namespace Microsoft.Build.Graph.UnitTests
                                                                         <InnerBuildPropertyValues>{InnerBuildPropertiesName}</InnerBuildPropertyValues>
                                                                         <{InnerBuildPropertiesName}>a;b</{InnerBuildPropertiesName}>
                                                                      </PropertyGroup>";
+
+        public const string MultitargetingSpecificationPropertyGroupWithGeneratePackageOnBuild = $@"<PropertyGroup>
+                                                                                                  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+                                                                                                  <InnerBuildProperty>{InnerBuildPropertyName}</InnerBuildProperty>
+                                                                                                  <InnerBuildPropertyValues>{InnerBuildPropertiesName}</InnerBuildPropertyValues>
+                                                                                                  <{InnerBuildPropertiesName}>a;b</{InnerBuildPropertiesName}>
+                                                                                               </PropertyGroup>";
+
         public const string HardCodedInnerBuildWithMultitargetingSpecification = $@"<PropertyGroup>
                                                                         <InnerBuildProperty>{InnerBuildPropertyName}</InnerBuildProperty>
                                                                         <InnerBuildPropertyValues>{InnerBuildPropertiesName}</InnerBuildPropertyValues>
