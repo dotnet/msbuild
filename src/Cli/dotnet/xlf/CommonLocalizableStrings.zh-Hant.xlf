@@ -32,6 +32,11 @@
         <target state="translated">允許安裝發行前版本套件。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CorruptSolutionProjectFolderStructure">
+        <source>The solution file '{0}' is missing EndProject tags or has invalid child-parent project mappings. Thus, the project with GUID '{1}' failed to load. Try saving your sln in VS to repair it."</source>
+        <target state="new">The solution file '{0}' is missing EndProject tags or has invalid child-parent project mappings. Thus, the project with GUID '{1}' failed to load. Try saving your sln in VS to repair it."</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">在 `{0}` 中找不到任何專案。</target>

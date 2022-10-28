@@ -32,6 +32,11 @@
         <target state="translated">Consente l'installazione di pacchetti non definitivi.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CorruptSolutionProjectFolderStructure">
+        <source>The solution file '{0}' is missing EndProject tags or has invalid child-parent project mappings. Thus, the project with GUID '{1}' failed to load. Try saving your sln in VS to repair it."</source>
+        <target state="new">The solution file '{0}' is missing EndProject tags or has invalid child-parent project mappings. Thus, the project with GUID '{1}' failed to load. Try saving your sln in VS to repair it."</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">Non è stato trovato alcun progetto in `{0}`.</target>

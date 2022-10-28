@@ -712,4 +712,7 @@ The default is 'true' if a runtime identifier is specified.</value>
   <data name="CustomConfigurationDisablesPublishAndPackReleaseProperties" xml:space="preserve">
     <value>A custom configuration was detected in the project '{0}', so the property '{1}' will not take effect.</value>
   </data>
+  <data name="CorruptSolutionProjectFolderStructure" xml:space="preserve">
+    <value>The solution file '{0}' is missing EndProject tags or has invalid child-parent project mappings. Thus, the project with GUID '{1}' failed to load. Try saving your sln in VS to repair it."</value>
+  </data>
 </root>
