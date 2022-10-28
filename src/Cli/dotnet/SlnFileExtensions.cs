@@ -190,7 +190,7 @@ namespace Microsoft.DotNet.Tools.Common
             Dictionary<string, string> projectPlatforms,
             string defaultProjectPlatform)
         {
-            var pair = solutionConfigKey.Split(new char[] {'|'}, 2);
+            var pair = solutionConfigKey.Split(new char[] { '|' }, 2);
             if (pair.Length != 2)
             {
                 return null;
@@ -276,7 +276,8 @@ namespace Microsoft.DotNet.Tools.Common
                     }
                     catch (System.InvalidOperationException)
                     {
-                        throw new Exception(String.Format(CommonLocalizableStrings.CorruptSolutionProjectFolderStructure, slnFile.FullPath, id));
+                        Reporter.Error.WriteLine(String.Format(CommonLocalizableStrings.CorruptSolutionProjectFolderStructure, slnFile.FullPath, id).Red());
+                        Environment.Exit(1);
                     }
                 }
 
