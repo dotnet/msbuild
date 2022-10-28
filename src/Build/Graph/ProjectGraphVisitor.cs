@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
 
@@ -13,7 +12,7 @@ namespace Microsoft.Build.Graph;
 public class ProjectGraphVisitor
 {
     private readonly HashSet<ProjectGraphNode> _cache;
-    private ProjectGraphNode _startingNode;
+    private ProjectGraphNode? _startingNode;
     private ProjectGraphNodeDirection _direction;
 
     /// <summary>
