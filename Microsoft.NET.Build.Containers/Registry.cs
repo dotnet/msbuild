@@ -164,7 +164,7 @@ public record struct Registry(Uri BaseUri)
 
     private static HttpClient CreateClient()
     {
-        var clientHandler = new AuthHandshakeMessageHandler(new HttpClientHandler() { UseDefaultCredentials = true });
+        var clientHandler = new AuthHandshakeMessageHandler(new SocketsHttpHandler() { PooledConnectionLifetime = TimeSpan.FromMilliseconds(10 /* total guess */) });
         HttpClient client = new(clientHandler);
 
         client.DefaultRequestHeaders.Accept.Clear();
