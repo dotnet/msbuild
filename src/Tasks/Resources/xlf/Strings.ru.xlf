@@ -1613,8 +1613,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoBecauseBadImage">
-        <source>This reference is not "CopyLocal" because it is a bad image. It may be a native assembly, or it may not be an assembly at all.</source>
-        <target state="new">This reference is not "CopyLocal" because it is a bad image. It may be a native assembly, or it may not be an assembly at all.</target>
+        <source>This reference is not "CopyLocal" because it is a bad image. It may be a native binary, or it may not be an assembly at all.</source>
+        <target state="new">This reference is not "CopyLocal" because it is a bad image. It may be a native binary, or it may not be an assembly at all.</target>
         <note>
       LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
     </note>
