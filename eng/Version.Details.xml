@@ -54,13 +54,13 @@
       <Uri>https://github.com/dotnet/msbuild</Uri>
       <Sha>3777dcaf7edb3e86a070037ba53e742dd1872873</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.FSharp.Compiler" Version="12.5.0-beta.22528.3">
+    <Dependency Name="Microsoft.FSharp.Compiler" Version="12.5.0-beta.22529.1">
       <Uri>https://github.com/dotnet/fsharp</Uri>
-      <Sha>79ff8fe968f7f66a25665772449e73f2c21c9efe</Sha>
+      <Sha>ccc97d83ecb8c0ad88585e8cdfaa4bd882b6f9cd</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.fsharp" Version="7.0.1-beta.22528.3">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.fsharp" Version="7.0.1-beta.22529.1">
       <Uri>https://github.com/dotnet/fsharp</Uri>
-      <Sha>79ff8fe968f7f66a25665772449e73f2c21c9efe</Sha>
+      <Sha>ccc97d83ecb8c0ad88585e8cdfaa4bd882b6f9cd</Sha>
       <SourceBuild RepoName="fsharp" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="dotnet-format" Version="7.0.352106">
