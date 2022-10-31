@@ -35,8 +35,12 @@ namespace Microsoft.Build.Shared
                 }
 
                 string buildProjectReferenceAs = string.Empty;
-
-                if (projectReferencePlatforms.Contains(currentProjectPlatform))
+                if (!string.IsNullOrEmpty(referencedProjectPlatform) && referencedProjectPlatform.Equals(currentProjectPlatform, StringComparison.OrdinalIgnoreCase))
+                {
+                    buildProjectReferenceAs = currentProjectPlatform;
+                }
+                // Prefer matching platforms
+                else if (projectReferencePlatforms.Contains(currentProjectPlatform))
                 {
                     buildProjectReferenceAs = currentProjectPlatform;
                     log?.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.SamePlatform");
