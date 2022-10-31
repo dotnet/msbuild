@@ -226,5 +226,30 @@ namespace Microsoft.Build.Tasks.UnitTests
             task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe(string.Empty);
             task.Log.HasLoggedErrors.ShouldBeFalse();
         }
+        
+        // When `Platform` is retrieved in "GetTargetFrameworks" and that platform matches what the task has decided the project should be built as
+        // through negotiation. build that project _without_ a global property for Platform.
+        [Fact]
+        public void ChosenPlatformMatchesDefault()
+        {
+            TaskItem projectReference = new TaskItem("foo.bar");
+            projectReference.SetMetadata("Platforms", "AnyCPU");
+            projectReference.SetMetadata("Platform", "AnyCPU");
+
+            GetCompatiblePlatform task = new GetCompatiblePlatform()
+            {
+                BuildEngine = new MockEngine(_output),
+                CurrentProjectPlatform = "x86",
+                PlatformLookupTable = "", // invalid format
+                AnnotatedProjects = new TaskItem[] { projectReference },
+            };
+
+            task.Execute().ShouldBeTrue();
+
+            // A ProjectReference PlatformLookupTable should take priority, but is thrown away when
+            // it has an invalid format. The current project's PLT should be the next priority.
+            task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe(string.Empty);
+            task.Log.HasLoggedErrors.ShouldBeFalse();
+        }
     }
 }
