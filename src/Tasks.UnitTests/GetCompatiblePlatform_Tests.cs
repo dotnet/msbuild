@@ -233,7 +233,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         public void ChosenPlatformMatchesDefault()
         {
             TaskItem projectReference = new TaskItem("foo.bar");
-            projectReference.SetMetadata("Platforms", "AnyCPU");
+            projectReference.SetMetadata("Platforms", "AnyCPU;x64");
             projectReference.SetMetadata("Platform", "AnyCPU");
 
             GetCompatiblePlatform task = new GetCompatiblePlatform()
