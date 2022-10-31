@@ -876,7 +876,7 @@ You may need to build the project on another operating system or architecture, o
     <comment>{StrBegin="NETSDK1192: "}</comment>
   </data>
   <data name="PublishSelfContainedMustBeBool" xml:space="preserve">
-    <value>NETSDK1193: PublishSelfContained must be either true or false. The value given was '{0}'.</value>
+    <value>NETSDK1193: If PublishSelfContained is set, it must be either true or false. The value given was '{0}'.</value>
     <comment>{StrBegin="NETSDK1193: "}</comment>
   </data>
 </root>
