@@ -246,8 +246,6 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             task.Execute().ShouldBeTrue();
 
-            // A ProjectReference PlatformLookupTable should take priority, but is thrown away when
-            // it has an invalid format. The current project's PLT should be the next priority.
             task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe(string.Empty);
             task.Log.HasLoggedErrors.ShouldBeFalse();
         }
