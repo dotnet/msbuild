@@ -23,7 +23,7 @@ namespace Microsoft.Build.Shared
                     log?.LogWarningWithCodeFromResources("GetCompatiblePlatform.NoPlatformsListed", projectPath);
                     return string.Empty;
                 }
- 
+
                 // Pull platformLookupTable metadata from the referenced project. This allows custom
                 // mappings on a per-ProjectReference basis.
                 Dictionary<string, string>? projectReferenceLookupTable = ExtractLookupTable(projectReferenceLookupTableMetadata, log);
