@@ -35,6 +35,8 @@ namespace Microsoft.Build.Shared
                 }
 
                 string buildProjectReferenceAs = string.Empty;
+                // If the referenced project has a defined `Platform` that's compatible, it will build that way by default.
+                // Don't set `buildProjectReferenceAs` and the `_GetProjectReferencePlatformProperties` target will handle the rest.
                 if (!string.IsNullOrEmpty(referencedProjectPlatform) && referencedProjectPlatform.Equals(currentProjectPlatform, StringComparison.OrdinalIgnoreCase))
                 {
                     log?.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform", projectPath, referencedProjectPlatform);
