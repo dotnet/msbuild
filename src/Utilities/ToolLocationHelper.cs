@@ -116,7 +116,7 @@ namespace Microsoft.Build.Utilities
         /// breaking change. Use 'Latest' if possible, but note the
         /// compatibility implications.
         /// </summary>
-        VersionLatest = Version481,
+        VersionLatest = Version48,
 
         /// <summary>
         /// Sentinel value for the latest version that this version of MSBuild is aware of. Similar
@@ -2053,12 +2053,12 @@ namespace Microsoft.Build.Utilities
                 case TargetDotNetFrameworkVersion.Version472:
                     return FrameworkLocationHelper.dotNetFrameworkVersion472;
 
-                case TargetDotNetFrameworkVersion.Version48:
-                    return FrameworkLocationHelper.dotNetFrameworkVersion48;
-
                 case TargetDotNetFrameworkVersion.Version481:
-                case TargetDotNetFrameworkVersion.Latest: // Latest is a special value to indicate the highest version we know about.
                     return FrameworkLocationHelper.dotNetFrameworkVersion481;
+
+                case TargetDotNetFrameworkVersion.Version48:
+                case TargetDotNetFrameworkVersion.Latest: // Latest is a special value to indicate the highest version we know about.
+                    return FrameworkLocationHelper.dotNetFrameworkVersion48;
 
                 default:
                     ErrorUtilities.ThrowArgument("ToolLocationHelper.UnsupportedFrameworkVersion", version);
