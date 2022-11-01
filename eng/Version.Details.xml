@@ -58,18 +58,18 @@
       <Uri>https://github.com/dotnet/msbuild</Uri>
       <Sha>18d5aef85920037c9d6ff49b1215a4daf515197f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.FSharp.Compiler" Version="12.4.0-beta.22513.10">
+    <Dependency Name="Microsoft.FSharp.Compiler" Version="12.4.0-beta.22528.2">
       <Uri>https://github.com/dotnet/fsharp</Uri>
-      <Sha>c370ee09c2eebcc750a59e9c10e52792679f896e</Sha>
+      <Sha>27c5d892b67da443eb5d24b94718f251f0a1001b</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.fsharp" Version="7.0.0-beta.22513.10">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.fsharp" Version="7.0.0-beta.22528.2">
       <Uri>https://github.com/dotnet/fsharp</Uri>
-      <Sha>c370ee09c2eebcc750a59e9c10e52792679f896e</Sha>
+      <Sha>27c5d892b67da443eb5d24b94718f251f0a1001b</Sha>
       <SourceBuild RepoName="fsharp" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="dotnet-format" Version="7.0.352001">
+    <Dependency Name="dotnet-format" Version="7.0.352902">
       <Uri>https://github.com/dotnet/format</Uri>
-      <Sha>6a22157622e5da71ba0c43d23269352210bdb277</Sha>
+      <Sha>f7beff0efdb20b8f22516d310279204a3fa9ef50</Sha>
       <SourceBuildTarball RepoName="format" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.4.0-4.22520.11">
@@ -250,13 +250,13 @@
       <Sha>9a1c3e1b7f0c8763d4c96e593961a61a72679a7b</Sha>
       <SourceBuild RepoName="xdt" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.CodeAnalysis.NetAnalyzers" Version="7.0.0-preview1.22518.1">
+    <Dependency Name="Microsoft.CodeAnalysis.NetAnalyzers" Version="7.0.0-preview1.22551.1">
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
-      <Sha>eb2d0a41844658e92af3941903b2501cb8fc5cc1</Sha>
+      <Sha>55d7cdcf368ea12dc092f8e5e9bba7c3b7728bd8</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn-analyzers" Version="3.3.4-beta1.22518.1">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn-analyzers" Version="3.3.4-beta1.22551.1">
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
-      <Sha>eb2d0a41844658e92af3941903b2501cb8fc5cc1</Sha>
+      <Sha>55d7cdcf368ea12dc092f8e5e9bba7c3b7728bd8</Sha>
       <SourceBuild RepoName="roslyn-analyzers" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="System.CommandLine" Version="2.0.0-beta4.22504.1">
