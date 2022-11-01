@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 #nullable disable
 
@@ -28,9 +29,10 @@ namespace Microsoft.Build.Shared.FileSystem
     /// Windows-specific implementation of file system operations using Windows native invocations.
     /// TODO For potential extra perf gains, provide native implementations for all IFileSystem methods and stop inheriting from ManagedFileSystem
     /// </summary>
+    [SupportedOSPlatform("windows")]
     internal class WindowsFileSystem : ManagedFileSystem
     {
-        private static readonly WindowsFileSystem Instance = new WindowsFileSystem();
+        private static readonly WindowsFileSystem Instance = new();
 
         public new static WindowsFileSystem Singleton() => WindowsFileSystem.Instance;
 

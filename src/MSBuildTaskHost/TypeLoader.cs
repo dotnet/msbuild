@@ -6,6 +6,7 @@ using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Threading;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -126,11 +127,13 @@ namespace Microsoft.Build.Shared
         /// Loads the specified type if it exists in the given assembly. If the type name is fully qualified, then a match (if
         /// any) is unambiguous; otherwise, if there are multiple types with the same name in different namespaces, the first type
         /// found will be returned.
+        /// The unusued bool is to match the signature of the Shared copy of TypeLoader.
         /// </summary>
         internal LoadedType Load
         (
             string typeName,
-            AssemblyLoadInfo assembly
+            AssemblyLoadInfo assembly,
+            bool _
         )
         {
             return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly);
@@ -284,7 +287,7 @@ namespace Microsoft.Build.Shared
                     return null;
                 });
 
-                return type != null ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly) : null;
+                return type != null ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly ?? type.Assembly, typeof(ITaskItem)) : null;
             }
 
             /// <summary>

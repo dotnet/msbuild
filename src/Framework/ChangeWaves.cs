@@ -27,7 +27,8 @@ namespace Microsoft.Build.Framework
         internal static readonly Version Wave17_0 = new Version(17, 0);
         internal static readonly Version Wave17_2 = new Version(17, 2);
         internal static readonly Version Wave17_4 = new Version(17, 4);
-        internal static readonly Version[] AllWaves = { Wave17_0, Wave17_2, Wave17_4 };
+        internal static readonly Version Wave17_6 = new Version(17, 6);
+        internal static readonly Version[] AllWaves = { Wave17_0, Wave17_2, Wave17_4, Wave17_6 };
 
         /// <summary>
         /// Special value indicating that all features behind all Change Waves should be enabled.
@@ -107,7 +108,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Read from environment variable `MSBuildDisableFeaturesFromVersion`, correct it if required, cache it and its ConversionState.
+        /// Read from environment variable `MSBUILDDISABLEFEATURESFROMVERSION`, correct it if required, cache it and its ConversionState.
         /// </summary>
         internal static void ApplyChangeWave()
         {
@@ -119,7 +120,7 @@ namespace Microsoft.Build.Framework
 
             string msbuildDisableFeaturesFromVersion = Environment.GetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION");
 
-            // Most common case, `MSBuildDisableFeaturesFromVersion` unset
+            // Most common case, `MSBUILDDISABLEFEATURESFROMVERSION` unset
             if (string.IsNullOrEmpty(msbuildDisableFeaturesFromVersion))
             {
                 ConversionState = ChangeWaveConversionState.Valid;

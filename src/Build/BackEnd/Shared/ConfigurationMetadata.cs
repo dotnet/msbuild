@@ -36,8 +36,8 @@ namespace Microsoft.Build.BackEnd
         public ConfigurationMetadata(Project project)
         {
             ErrorUtilities.VerifyThrowArgumentNull(project, nameof(project));
-            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(project.GlobalProperties.Count);
-            foreach (KeyValuePair<string, string> entry in project.GlobalProperties)
+            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(project.GlobalPropertiesCount);
+            foreach (KeyValuePair<string, string> entry in project.GlobalPropertiesEnumerable)
             {
                 _globalProperties[entry.Key] = ProjectPropertyInstance.Create(entry.Key, entry.Value);
             }
@@ -57,12 +57,6 @@ namespace Microsoft.Build.BackEnd
             _projectFullPath = projectFullPath;
             _toolsVersion = MSBuildConstants.CurrentToolsVersion;
             _globalProperties = globalProperties;
-        }
-        public ConfigurationMetadata(string projectFullPath, PropertyDictionary<ProjectPropertyInstance> globalProperties, string previousPlatform, string previousPlatformLookupTable, bool isSetPlatformHardCoded) : this(projectFullPath, globalProperties)
-        {
-            PreviousPlatform = previousPlatform;
-            PreviousPlatformLookupTable = previousPlatformLookupTable;
-            IsSetPlatformHardCoded = isSetPlatformHardCoded;
         }
 
         public ConfigurationMetadata(ITranslator translator)
@@ -86,11 +80,6 @@ namespace Microsoft.Build.BackEnd
         /// or a Project tag, or the default.
         /// </summary>
         public string ToolsVersion => _toolsVersion;
-
-        public string PreviousPlatform { get; } = "";
-
-        public string PreviousPlatformLookupTable { get; } = "";
-        public bool IsSetPlatformHardCoded { get; } = false;
 
         private PropertyDictionary<ProjectPropertyInstance> _globalProperties;
 
@@ -175,12 +164,9 @@ namespace Microsoft.Build.BackEnd
             {
                 return true;
             }
-
             return ProjectFullPath.Equals(other.ProjectFullPath, StringComparison.OrdinalIgnoreCase) &&
-                   ToolsVersion.Equals(other.ToolsVersion, StringComparison.OrdinalIgnoreCase) &&
-                   GlobalProperties.Equals(other.GlobalProperties) &&
-                   PreviousPlatform.Equals(other.PreviousPlatform, StringComparison.OrdinalIgnoreCase) &&
-                   PreviousPlatformLookupTable.Equals(other.PreviousPlatformLookupTable, StringComparison.OrdinalIgnoreCase);
+                ToolsVersion.Equals(other.ToolsVersion, StringComparison.OrdinalIgnoreCase) &&
+                GlobalProperties.Equals(other.GlobalProperties);
         }
 
         private string DebugString()

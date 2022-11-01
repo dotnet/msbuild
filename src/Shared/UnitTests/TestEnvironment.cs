@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -259,17 +260,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Create a temp file name under a specific temporary folder. The file is expected to exist when the test completes.
-        /// </summary>
-        /// <param name="transientTestFolder">Temp folder</param>
-        /// <param name="extension">Extension of the file (defaults to '.tmp')</param>
-        /// <returns></returns>
-        public TransientTestFile ExpectFile(TransientTestFolder transientTestFolder, string extension = ".tmp")
-        {
-            return WithTransientTestState(new TransientTestFile(transientTestFolder.Path, extension, createFile: false, expectedAsOutput: true));
-        }
-
-        /// <summary>
         ///     Creates a test variant used to add a unique temporary folder during a test. Will be deleted when the test
         ///     completes.
         /// </summary>
@@ -326,6 +316,15 @@ namespace Microsoft.Build.UnitTests
         public TransientTestState SetCurrentDirectory(string newWorkingDirectory)
         {
             return WithTransientTestState(new TransientWorkingDirectory(newWorkingDirectory));
+        }
+
+        /// <summary>
+        /// Register process ID to be finished/killed after tests ends.
+        /// </summary>
+        public TransientTestProcess WithTransientProcess(int processId)
+        {
+            TransientTestProcess transientTestProcess = new(processId);
+            return WithTransientTestState(transientTestProcess);
         }
 
         #endregion
@@ -560,6 +559,31 @@ namespace Microsoft.Build.UnitTests
         }
     }
 
+    public class TransientTestProcess : TransientTestState
+    {
+        private readonly int _processId;
+
+        public TransientTestProcess(int processId)
+        {
+            _processId = processId;
+        }
+
+        public override void Revert()
+        {
+            if (_processId > -1)
+            {
+                try
+                {
+                    Process.GetProcessById(_processId).KillTree(1000);
+                }
+                catch
+                {
+                    // ignore if process is already dead
+                }
+            }
+        }
+    }
+
 
     public class TransientTestFile : TransientTestState
     {
@@ -570,14 +594,14 @@ namespace Microsoft.Build.UnitTests
         {
             _createFile = createFile;
             _expectedAsOutput = expectedAsOutput;
-            Path = FileUtilities.GetTemporaryFile(null, extension, createFile);
+            Path = FileUtilities.GetTemporaryFile(null, null, extension, createFile);
         }
 
         public TransientTestFile(string rootPath, string extension, bool createFile, bool expectedAsOutput)
         {
             _createFile = createFile;
             _expectedAsOutput = expectedAsOutput;
-            Path = FileUtilities.GetTemporaryFile(rootPath, extension, createFile);
+            Path = FileUtilities.GetTemporaryFile(rootPath, null, extension, createFile);
         }
 
         public TransientTestFile(string rootPath, string fileName, string contents = null)

@@ -13,7 +13,7 @@ https://github.com/dotnet/msbuild/blob/a936b97e30679dcea4d99c362efa6f732c9d3587/
 This is where the RAR task is invoked in the targets file.
 
 The source code for RAR is at:
-https://github.com/dotnet/msbuild/blob/master/src/Tasks/AssemblyDependency/ResolveAssemblyReference.cs
+https://github.com/dotnet/msbuild/blob/main/src/Tasks/AssemblyDependency/ResolveAssemblyReference.cs
 
 ## Inputs
 RAR is very detailed about logging its inputs:
@@ -162,6 +162,6 @@ By default, there are ten locations RAR will search (four if using the .NET SDK)
 
 ## There was a conflict
 
-A common situation is MSBuild gives a warning about different versions of the same assembly being used by different references. The solution often involves adding a binding redirect to the app.config file. 
+A common situation is MSBuild gives a warning about different versions of the same assembly being used by different references. The solution often involves adding a binding redirect to the app.config file.
 
 A useful way to investigate these conflicts is to search in MSBuild Structured Log Viewer for "There was a conflict". It will show you detailed information about which references needed which versions of the assembly in question.

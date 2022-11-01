@@ -12,6 +12,7 @@ using Microsoft.Build.Utilities;
 using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
+using System.Linq;
 
 #nullable disable
 
@@ -88,7 +89,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     // Get the size of the console buffer so messages can be formatted to the console width
                     try
                     {
-                        _bufferWidth = Console.BufferWidth;
+                        _bufferWidth = ConsoleConfiguration.BufferWidth;
                         _alignMessages = true;
                     }
                     catch (Exception)
@@ -231,7 +232,14 @@ namespace Microsoft.Build.BackEnd.Logging
                 WriteLinePrettyFromResource("BuildStartedWithTime", e.Timestamp);
             }
 
-            WriteEnvironment(e.BuildEnvironment);
+            if (Traits.LogAllEnvironmentVariables)
+            {
+                WriteEnvironment(e.BuildEnvironment);
+            }
+            else
+            {
+                WriteEnvironment(e.BuildEnvironment?.Where(kvp => EnvironmentUtilities.IsWellKnownEnvironmentDerivedProperty(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
+            }
         }
 
         /// <summary>
@@ -1204,16 +1212,21 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private void PrintMessage(BuildMessageEventArgs e, bool lightenText)
         {
-            string nonNullMessage;
+            string nonNullMessage = null;
+
+            if (e is EnvironmentVariableReadEventArgs environmentPropertyReadEventArgs)
+            {
+                nonNullMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EnvironmentDerivedPropertyRead", environmentPropertyReadEventArgs.EnvironmentVariableName, e.Message);
+            }
 
             // Include file information if present.
             if (e.File != null)
             {
-                nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile, FindLogOutputProperties(e));
+                nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile, FindLogOutputProperties(e), nonNullMessage);
             }
             else
             {
-                nonNullMessage = e.Message ?? string.Empty;
+                nonNullMessage ??= e.Message ?? string.Empty;
             }
 
             int prefixAdjustment = 0;
@@ -1705,12 +1718,9 @@ namespace Microsoft.Build.BackEnd.Logging
                     entryPoint.MessageIndentLevel = 7;
                 }
 
-                if (_startedEvent == null)
-                {
-                    _startedEvent = comparer == null
-                        ? new Dictionary<BuildEventContext, object>()
-                        : new Dictionary<BuildEventContext, object>(comparer);
-                }
+                _startedEvent ??= comparer == null
+                    ? new Dictionary<BuildEventContext, object>()
+                    : new Dictionary<BuildEventContext, object>(comparer);
 
                 if (!_startedEvent.ContainsKey(buildEventContext))
                 {

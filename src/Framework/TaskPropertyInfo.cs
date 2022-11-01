@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Reflection;
 
 #nullable disable
 
@@ -26,6 +27,9 @@ namespace Microsoft.Build.Framework
             PropertyType = typeOfParameter;
             Output = output;
             Required = required;
+            Type elementType = typeOfParameter.IsArray ? typeOfParameter.GetElementType() : typeOfParameter;
+            IsValueTypeOutputParameter = elementType.GetTypeInfo().IsValueType || elementType.FullName.Equals("System.String");
+            IsAssignableToITask = typeof(ITaskItem).IsAssignableFrom(elementType);
         }
 
         /// <summary>
@@ -62,5 +66,8 @@ namespace Microsoft.Build.Framework
         /// Whether the Log and LogItemMetadata properties have been assigned already.
         /// </summary>
         internal bool Initialized = false;
+
+        internal bool IsValueTypeOutputParameter { get; private set; }
+        internal bool IsAssignableToITask { get; set; }
     }
 }

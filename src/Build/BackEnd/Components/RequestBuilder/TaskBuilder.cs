@@ -381,7 +381,8 @@ namespace Microsoft.Build.BackEnd
                 _targetChildInstance.ConditionLocation,
                 _targetLoggingContext.LoggingService,
                 _targetLoggingContext.BuildEventContext,
-                FileSystems.Default);
+                FileSystems.Default,
+                loggingContext: _targetLoggingContext);
 
             if (!condition)
             {
@@ -623,7 +624,7 @@ namespace Microsoft.Build.BackEnd
                     if (!_targetLoggingContext.LoggingService.OnlyLogCriticalEvents)
                     {
                         // Expand the expression for the Log.  Since we know the condition evaluated to false, leave unexpandable properties in the condition so as not to cause an error
-                        string expanded = bucket.Expander.ExpandIntoStringAndUnescape(_targetChildInstance.Condition, ExpanderOptions.ExpandAll | ExpanderOptions.LeavePropertiesUnexpandedOnError | ExpanderOptions.Truncate, _targetChildInstance.ConditionLocation);
+                        string expanded = bucket.Expander.ExpandIntoStringAndUnescape(_targetChildInstance.Condition, ExpanderOptions.ExpandAll | ExpanderOptions.LeavePropertiesUnexpandedOnError | ExpanderOptions.Truncate, _targetChildInstance.ConditionLocation, loggingContext: _targetLoggingContext);
 
                         // Whilst we are within the processing of the task, we haven't actually started executing it, so
                         // our skip task message needs to be in the context of the target. However any errors should be reported
@@ -1036,7 +1037,7 @@ namespace Microsoft.Build.BackEnd
 
             var projectReferenceItems = _buildRequestEntry.RequestConfiguration.Project.GetItems(ItemTypeNames.ProjectReference);
 
-            var declaredProjects = new HashSet<string>(projectReferenceItems.Count);
+            var declaredProjects = new HashSet<string>(projectReferenceItems.Count + 1, FileUtilities.PathComparer);
 
             foreach (var projectReferenceItem in projectReferenceItems)
             {
@@ -1044,7 +1045,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // allow a project to msbuild itself
-            declaredProjects.Add(_taskExecutionHost.ProjectInstance.FullPath);
+            declaredProjects.Add(FileUtilities.NormalizePath(_taskExecutionHost.ProjectInstance.FullPath));
 
             List<string> undeclaredProjects = null;
 

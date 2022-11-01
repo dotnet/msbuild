@@ -442,7 +442,8 @@ namespace Microsoft.Build.Tasks
                 taskInfo.CodeType = RoslynCodeTaskFactoryCodeType.Class;
                 taskInfo.SourceCode = File.ReadAllText(sourceAttribute.Value.Trim());
             }
-            else if (typeAttribute != null)
+
+            if (typeAttribute != null)
             {
                 if (String.IsNullOrWhiteSpace(typeAttribute.Value))
                 {
@@ -676,8 +677,8 @@ namespace Microsoft.Build.Tasks
 
             // The source code cannot actually be compiled "in memory" so instead the source code is written to disk in
             // the temp folder as well as the assembly.  After compilation, the source code and assembly are deleted.
-            string sourceCodePath = Path.GetTempFileName();
-            string assemblyPath = Path.Combine(Path.GetTempPath(), $"{Path.GetRandomFileName()}.dll");
+            string sourceCodePath = FileUtilities.GetTemporaryFileName(".tmp");
+            string assemblyPath = FileUtilities.GetTemporaryFileName(".dll");
 
             // Delete the code file unless compilation failed or the environment variable MSBUILDLOGCODETASKFACTORYOUTPUT
             // is set (which allows for debugging problems)
@@ -746,6 +747,12 @@ namespace Microsoft.Build.Tasks
                         _log.LogErrorWithCodeFromResources("CodeTaskFactory.FindSourceFileAt", sourceCodePath);
 
                         return false;
+                    }
+
+                    if (!deleteSourceCodeFile)
+                    {
+                        // Log the location of the code file because MSBUILDLOGCODETASKFACTORYOUTPUT was set.
+                        _log.LogMessageFromResources(MessageImportance.Low, "CodeTaskFactory.FindSourceFileAt", sourceCodePath);
                     }
                 }
 
