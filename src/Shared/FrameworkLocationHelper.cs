@@ -1391,10 +1391,14 @@ namespace Microsoft.Build.Shared
                                     Directory.GetDirectories,
                                     architecture);
 
-                // .net was improperly uninstalled: msbuild.exe isn't there
+                // Assume if either MSBuild.exe or Microsoft.Build.dll are shipped, there is a valid install.
+                // Note: net481 did not ship an MSBuild.exe, so checking its dll's is the fallback for a valid install.
+                // Context: https://github.com/dotnet/msbuild/pull/7689
                 if (this._hasMsBuild &&
                     generatedPathToDotNetFramework != null &&
-                    !FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, NativeMethodsShared.IsWindows ? "MSBuild.exe" : "mcs.exe")))
+                    (!FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, NativeMethodsShared.IsWindows ? "MSBuild.exe" : "mcs.exe")) &&
+                     !FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, "Microsoft.Build.dll")))
+                    )
                 {
                     return null;
                 }
