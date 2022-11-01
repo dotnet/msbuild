@@ -94,9 +94,13 @@ namespace Microsoft.DotNet.Cli
                 ArgumentHelpName = CommonLocalizableStrings.VersionSuffixArgumentName
             }.ForwardAsSingle(o => $"-property:VersionSuffix={o}");
 
-        public static Argument<T> DefaultToCurrentDirectory<T>(this Argument<T> arg)
+        public static Lazy<string> NormalizedCurrentDirectory = new Lazy<string>(() => PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()));
+
+        public static Argument<string> DefaultToCurrentDirectory(this Argument<string> arg)
         {
-            arg.SetDefaultValue(PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()));
+            // we set this lazily so that we don't pay the overhead of determining the
+            // CWD multiple times, one for each Argument that uses this.
+            arg.SetDefaultValueFactory(() => NormalizedCurrentDirectory.Value);
             return arg;
         }
 
