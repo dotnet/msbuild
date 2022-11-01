@@ -467,6 +467,14 @@ namespace {safeThisName}
             return GetPropertyValues(finalOutputPath);
         }
 
+        /// <summary>
+        /// Returns a dictionary of property name to value mappings.
+        /// </summary>
+        /// <param name="finalOutputPath">
+        /// The final output path after executing a dotnet command where propertyvalues.txt will be generated.
+        /// If the output path does not need to be hardcoded, use the overload requesting testRoot instead.
+        /// </param>
+        /// <returns></returns>
         public Dictionary<string, string> GetPropertyValues(string finalOutputPath)
         {
             var propertyValues = new Dictionary<string, string>();

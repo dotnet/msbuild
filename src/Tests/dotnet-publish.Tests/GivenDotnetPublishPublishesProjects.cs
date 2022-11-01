@@ -161,9 +161,9 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         }
 
         [Theory]
-        [InlineData(true, false, false)]
-        [InlineData(false, false, false)]
-        [InlineData(true, true, false)]
+        [InlineData(true, false, false)] // PublishSC sets SC to true even if SC is false in the project file
+        [InlineData(false, false, false)] // PublishSC sets SC to false even if SC is true in the project file 
+        [InlineData(true, true, false)] // PublishSC does not take effect if SC is global
         public void PublishSelfContainedPropertyDoesOrDoesntOverrideSelfContained(bool publishSelfContained, bool selfContainedIsGlobal, bool publishSelfContainedIsGlobal)
         {
             bool selfContained = !publishSelfContained;
@@ -199,12 +199,14 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Pass();
 
             var publishedDirectory = testAsset.TestRoot;
-            //var publishedDirectory = publishCommand.GetOutputDirectoryWithAutomaticRid(targetFramework: targetFramework, directoryShouldHaveRuntimeIdentifier: resultShouldBeSelfContained);
-            var properties = testProject.GetPropertyValues(publishedDirectory);
+            publishedDirectory = Path.Combine(publishedDirectory, "MainProject", "obj", "Debug", targetFramework);
+            if (resultShouldBeSelfContained)
+                publishedDirectory = Directory.GetDirectories(publishedDirectory).FirstOrDefault(); // get the rid in the directory
+            var properties = testProject.GetPropertyValues(publishedDirectory.ToString());
 
             if (resultShouldBeSelfContained)
             {
-                Assert.True(properties["SelfContained"] == "true");
+                Assert.True(bool.Parse(properties["SelfContained"]) == true);
             }
         }
 
