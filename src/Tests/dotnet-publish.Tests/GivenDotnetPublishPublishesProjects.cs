@@ -13,6 +13,7 @@ using Microsoft.DotNet.Tools;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
 using Xunit.Abstractions;
 using LocalizableStrings = Microsoft.DotNet.Tools.Publish.LocalizableStrings;
@@ -160,46 +161,51 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         }
 
         [Theory]
-        [InlineData("net7.0", true, false, false)]
-        [InlineData("net7.0", false, false, false)]
-        [InlineData("net7.0", true, true, false)]
-        [InlineData("net7.0", true, true, true)]
-        public void PublishSelfContainedPropertyDoesOrDoesntOverrideSelfContainProperty(string targetFramework, bool publishSelfContained, bool selfContainedIsGlobal, bool publishSelfContainedIsGlobal)
+        [InlineData(true, false, false)]
+        [InlineData(false, false, false)]
+        [InlineData(true, true, false)]
+        public void PublishSelfContainedPropertyDoesOrDoesntOverrideSelfContained(bool publishSelfContained, bool selfContainedIsGlobal, bool publishSelfContainedIsGlobal)
         {
-            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+            bool selfContained = !publishSelfContained;
+            bool resultShouldBeSelfContained = publishSelfContained && !selfContainedIsGlobal;
 
-            var testAsset = _testAssetsManager
-            .CopyTestAsset("HelloWorld", identifier: $"PSC-OVERRIDES-{publishSelfContained}-{selfContainedIsGlobal}-{publishSelfContainedIsGlobal}")
-            .WithSource()
-            .WithProjectChanges(project =>
+            string targetFramework = ToolsetInfo.CurrentTargetFramework;
+            var testProject = new TestProject("MainProject")
             {
-                var ns = project.Root.Name.Namespace;
-                var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                propertyGroup.Add(new XElement(ns + "SelfContained", (!publishSelfContained).ToString()));
-                propertyGroup.Add(new XElement(ns + "PublishSelfContained", publishSelfContained.ToString()));
-            });
+                TargetFrameworks = targetFramework,
+                IsExe = true
+            };
 
-            var publishCommand = new PublishCommand(testAsset);
+            testProject.RecordProperties("SelfContained");
+            if (!publishSelfContainedIsGlobal)
+                testProject.AdditionalProperties["PublishSelfContained"] = publishSelfContained.ToString();
+            if (!selfContainedIsGlobal)
+                testProject.AdditionalProperties["SelfContained"] = selfContained.ToString();
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: $"PSC-OVERRIDES-{publishSelfContained}-{selfContainedIsGlobal}-{publishSelfContainedIsGlobal}");
+            var publishCommand = new DotnetCommand(Log);
             List<string> args = new List<string>
             {
-                $"/p:RuntimeIdentifier={rid}",
-                $"/p:_IsPublishing=true", // Normally this would be set by the CLI (OR VS Soon TM), but this calls directly into t:/Publish.
-                selfContainedIsGlobal ? $"/p:SelfContained={!publishSelfContained}" : "",
-                publishSelfContainedIsGlobal ? $"/p:PublishSelfContained={publishSelfContained}" : ""
+                "publish",
+                selfContainedIsGlobal ? $"/p:SelfContained={selfContained}" : "",
+                publishSelfContainedIsGlobal ? $"/p:PublishSelfContained={publishSelfContained}" : "",
+                "-bl:C:\\users\\noahgilson\\PSCWHYRID.binlog"
             };
 
             publishCommand
+                .WithWorkingDirectory(Path.Combine(testAsset.Path, "MainProject"))
                 .Execute(args.ToArray())
                 .Should()
                 .Pass();
 
-            var publishedDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid);
-            var expectedFiles = new[] { "HelloWorld.dll" };
+            var publishedDirectory = testAsset.TestRoot;
+            //var publishedDirectory = publishCommand.GetOutputDirectoryWithAutomaticRid(targetFramework: targetFramework, directoryShouldHaveRuntimeIdentifier: resultShouldBeSelfContained);
+            var properties = testProject.GetPropertyValues(publishedDirectory);
 
-            if (publishSelfContained && !selfContainedIsGlobal)
-                expectedFiles.Append("System.dll"); // System.dll should only exist if self contained 
-
-            publishedDirectory.Should().HaveFiles(expectedFiles);
+            if (resultShouldBeSelfContained)
+            {
+                Assert.True(properties["SelfContained"] == "true");
+            }
         }
 
         [Fact]

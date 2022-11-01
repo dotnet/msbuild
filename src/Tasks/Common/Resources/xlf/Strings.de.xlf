@@ -721,8 +721,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1122: "}</note>
       </trans-unit>
       <trans-unit id="PublishSelfContainedMustBeBool">
-        <source>NETSDK1193: PublishSelfContained must be either true or false. The value given was '{0}'.</source>
-        <target state="new">NETSDK1193: PublishSelfContained must be either true or false. The value given was '{0}'.</target>
+        <source>NETSDK1193: If PublishSelfContained is set, it must be either true or false. The value given was '{0}'.</source>
+        <target state="new">NETSDK1193: If PublishSelfContained is set, it must be either true or false. The value given was '{0}'.</target>
         <note>{StrBegin="NETSDK1193: "}</note>
       </trans-unit>
       <trans-unit id="PublishSingleFileRequiresVersion30">

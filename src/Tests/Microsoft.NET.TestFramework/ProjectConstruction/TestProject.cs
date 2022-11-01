@@ -51,7 +51,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
         public List<TestPackageReference> PackageReferences { get; } = new List<TestPackageReference>();
 
         public List<TestPackageReference> DotNetCliToolReferences { get; } = new List<TestPackageReference>();
-        
+
         public List<CopyFilesTarget> CopyFilesTargets { get; } = new List<CopyFilesTarget>();
 
         public Dictionary<string, string> SourceFiles { get; } = new Dictionary<string, string>();
@@ -60,7 +60,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public Dictionary<string, string> AdditionalProperties { get; } = new Dictionary<string, string>();
 
-        public List<KeyValuePair<string, Dictionary<string, string>>> AdditionalItems { get; } = new ();
+        public List<KeyValuePair<string, Dictionary<string, string>>> AdditionalItems { get; } = new();
 
         public List<Action<XDocument>> ProjectChanges { get; } = new List<Action<XDocument>>();
 
@@ -299,7 +299,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                         new XAttribute("Include", frameworkReference)));
                 }
             }
-            
+
             if (this.CopyFilesTargets.Any())
             {
                 foreach (var copyFilesTarget in CopyFilesTargets)
@@ -443,7 +443,7 @@ namespace {safeThisName}
 
         public void AddItem(string itemName, string attributeName, string attributeValue)
         {
-            AddItem(itemName, new Dictionary<string, string>() { { attributeName, attributeValue } } );
+            AddItem(itemName, new Dictionary<string, string>() { { attributeName, attributeValue } });
         }
 
         public void AddItem(string itemName, Dictionary<string, string> attributes)
@@ -458,15 +458,20 @@ namespace {safeThisName}
 
         public Dictionary<string, string> GetPropertyValues(string testRoot, string configuration = "Debug", string targetFramework = null, string runtimeIdentifier = null)
         {
-            var propertyValues = new Dictionary<string, string>();
-
-            string intermediateOutputPath = Path.Combine(testRoot, Name, "obj", configuration, targetFramework ?? TargetFrameworks);
+            string finalOutputPath = Path.Combine(testRoot, Name, "obj", configuration, targetFramework ?? TargetFrameworks);
             if (!string.IsNullOrEmpty(runtimeIdentifier))
             {
-                intermediateOutputPath = Path.Combine(intermediateOutputPath, runtimeIdentifier);
+                finalOutputPath = Path.Combine(finalOutputPath, runtimeIdentifier);
             }
 
-            foreach (var line in File.ReadAllLines(Path.Combine(intermediateOutputPath, "PropertyValues.txt")))
+            return GetPropertyValues(finalOutputPath);
+        }
+
+        public Dictionary<string, string> GetPropertyValues(string finalOutputPath)
+        {
+            var propertyValues = new Dictionary<string, string>();
+
+            foreach (var line in File.ReadAllLines(Path.Combine(finalOutputPath, "PropertyValues.txt")))
             {
                 int colonIndex = line.IndexOf(':');
                 if (colonIndex > 0)
