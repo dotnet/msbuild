@@ -1278,15 +1278,15 @@ $@"
         }
 
         [Fact]
-        public void ReferencedMultitargetingEntryPointNodeTargetListContainsBuildTarget()
+        public void ReferencedMultitargetingEntryPointNodeTargetListContainsDefaultTarget()
         {
             using (var env = TestEnvironment.Create())
             {
-                TransientTestFile entryProject1 = CreateProjectFile(env, 1, projectReferences: new[] { 2 });
-                TransientTestFile entryProject2 = CreateProjectFile(env, 2, extraContent: MultitargetingSpecificationPropertyGroup);
+                TransientTestFile entryProject1 = CreateProjectFile(env, 1, projectReferences: new[] { 2 }, defaultTargets: "A", extraContent: ProjectReferenceTargetsWithMultitargeting);
+                TransientTestFile entryProject2 = CreateProjectFile(env, 2, defaultTargets: "A", extraContent: OuterBuildSpecificationWithProjectReferenceTargets);
                 var graph = new ProjectGraph(new HashSet<string> { entryProject1.Path, entryProject2.Path });
                 IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(null);
-                targetLists[key: GetOuterBuild(graph, 2)].ShouldBe(expected: new[] { "Build" });
+                targetLists[key: GetOuterBuild(graph, 2)].ShouldBe(expected: OuterBuildTargets.Prepend("A"));
             }
         }
 
