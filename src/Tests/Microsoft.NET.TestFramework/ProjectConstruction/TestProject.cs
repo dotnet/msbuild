@@ -420,7 +420,7 @@ namespace {safeThisName}
 {propertiesElements}
     </ItemGroup>
     <WriteLinesToFile
-      File=`$(IntermediateOutputPath)\PropertyValues.txt`
+      File=`{targetFolder}\PropertyValues.txt`
       Lines=`@(LinesToWrite)`
       Overwrite=`true`
       Encoding=`Unicode`
@@ -456,17 +456,11 @@ namespace {safeThisName}
             PropertiesToRecord.AddRange(propertyNames);
         }
 
-        public Dictionary<string, string> GetPropertyValues(string testRoot, string configuration = "Debug", string targetFramework = null, string runtimeIdentifier = null)
+        public Dictionary<string, string> GetPropertyValues(string testRoot, [CallerMemberNameAttribute] string testFolderName = "")
         {
             var propertyValues = new Dictionary<string, string>();
 
-            string intermediateOutputPath = Path.Combine(testRoot, Name, "obj", configuration, targetFramework ?? TargetFrameworks);
-            if (!string.IsNullOrEmpty(runtimeIdentifier))
-            {
-                intermediateOutputPath = Path.Combine(intermediateOutputPath, runtimeIdentifier);
-            }
-
-            foreach (var line in File.ReadAllLines(Path.Combine(intermediateOutputPath, "PropertyValues.txt")))
+            foreach (var line in File.ReadAllLines(Path.Combine(testRoot, testFolderName, "PropertyValues.txt")))
             {
                 int colonIndex = line.IndexOf(':');
                 if (colonIndex > 0)
