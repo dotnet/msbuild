@@ -164,7 +164,11 @@ namespace Microsoft.Build.Tasks
                     continue;
                 }
 
-                FileInfo destinationPath = new FileInfo(Path.Combine(destinationDirectory.FullName, zipArchiveEntry.FullName));
+                string fullDestinationPath = Path.GetFullPath(Path.Combine(destinationDirectory.FullName, zipArchiveEntry.FullName));
+                string fullDestinationDirectoryPath = Path.GetFullPath(destinationDirectory.FullName + Path.DirectorySeparatorChar);
+                ErrorUtilities.VerifyThrowInvalidOperation(fullDestinationPath.StartsWith(fullDestinationDirectoryPath, FileUtilities.PathComparison), "Unzip.ZipSlipExploit", fullDestinationPath);
+
+                FileInfo destinationPath = new(fullDestinationPath);
 
                 // Zip archives can have directory entries listed explicitly.
                 // If this entry is a directory we should create it and move to the next entry.
