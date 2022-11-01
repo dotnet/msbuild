@@ -61,10 +61,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeIdentifier Condition="'$(PlatformTarget)' == 'x86' or '$(PlatformTarget)' == ''">win7-x86</RuntimeIdentifier>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(_IsPublishing)' == 'true' and '$(PublishRuntimeIdentifier)' != ''">
-    <RuntimeIdentifier>$(PublishRuntimeIdentifier)</RuntimeIdentifier>
-  </PropertyGroup>
-
   <PropertyGroup Condition="'$(UseCurrentRuntimeIdentifier)' == ''">
     <UseCurrentRuntimeIdentifier Condition="
                  '$(RuntimeIdentifier)' == '' and
@@ -82,6 +78,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeIdentifier>$(NETCoreSdkPortableRuntimeIdentifier)</RuntimeIdentifier>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(_IsPublishing)' == 'true' and '$(PublishRuntimeIdentifier)' != ''">
+    <RuntimeIdentifier>$(PublishRuntimeIdentifier)</RuntimeIdentifier>
+  </PropertyGroup>
+  
   <PropertyGroup Condition="'$(PlatformTarget)' == ''">
     <_UsingDefaultPlatformTarget>true</_UsingDefaultPlatformTarget>
   </PropertyGroup>
