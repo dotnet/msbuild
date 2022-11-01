@@ -189,7 +189,6 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 "publish",
                 selfContainedIsGlobal ? $"/p:SelfContained={selfContained}" : "",
                 publishSelfContainedIsGlobal ? $"/p:PublishSelfContained={publishSelfContained}" : "",
-                "-bl:C:\\users\\noahgilson\\PSCWHYRID.binlog"
             };
 
             publishCommand
