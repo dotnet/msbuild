@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Linq;
@@ -217,21 +218,21 @@ namespace Microsoft.NET.Publish.Tests
 
             List<string> args = new List<string>
             {
-                "publish",
                 runtimeIdentifierIsGlobal ? $"/p:RuntimeIdentifier={runtimeIdentifier}" : "",
                 publishRuntimeIdentifierIsGlobal ? $"/p:PublishRuntimeIdentifier={publishRuntimeIdentifier}" : ""
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: $"{publishRuntimeIdentifierIsGlobal}-{runtimeIdentifierIsGlobal}");
+            string identifier = $"PublishRuntimeIdentifierOverrides-{publishRuntimeIdentifierIsGlobal}-{runtimeIdentifierIsGlobal}";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: identifier);
             var publishCommand = new DotnetPublishCommand(Log);
             publishCommand
-                .WithWorkingDirectory(testAsset.Path)
+                .WithWorkingDirectory(Path.Combine(testAsset.TestRoot, MethodBase.GetCurrentMethod().Name))
                 .Execute(args.ToArray())
                 .Should()
                 .Pass();
 
             string expectedRid = runtimeIdentifierIsGlobal ? runtimeIdentifier : publishRuntimeIdentifier;
-            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm, runtimeIdentifier: expectedRid);
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot);
             var finalRid = properties["RuntimeIdentifier"];
 
             Assert.True(finalRid == expectedRid); // This assert is theoretically worthless as the above code will fail if the RID path is wrong.
@@ -260,16 +261,12 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var projectTfmPath = Path.Combine(testAsset.Path, System.Reflection.MethodBase.GetCurrentMethod().Name, "bin", "Debug", tfm);
-            var projectPath = Directory.GetDirectories(projectTfmPath).FirstOrDefault();
-            var testResolvedRid = Path.GetFileName(projectPath);
-
-            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm, runtimeIdentifier: testResolvedRid);
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot);
             var finalRid = properties["RuntimeIdentifier"];
             var ucrRid = properties["NETCoreSdkPortableRuntimeIdentifier"];
 
-            Assert.True(publishRid == testResolvedRid);
             Assert.True(finalRid == publishRid); // This assert is theoretically worthless as the above code will fail if the RID path is wrong.
+            Assert.True(ucrRid != finalRid);
         }
 
         [Fact]
