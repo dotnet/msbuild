@@ -235,7 +235,7 @@ namespace Microsoft.NET.Publish.Tests
             var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm);
             var finalRid = properties["RuntimeIdentifier"];
 
-            Assert.True(finalRid == expectedRid); // This assert is theoretically worthless as the above code will fail if the RID path is wrong.
+            Assert.True(finalRid == expectedRid);
         }
 
         [WindowsOnlyFact]
@@ -266,7 +266,7 @@ namespace Microsoft.NET.Publish.Tests
             var finalRid = properties["RuntimeIdentifier"];
             var ucrRid = properties["NETCoreSdkPortableRuntimeIdentifier"];
 
-            Assert.True(finalRid == publishRid); // This assert is theoretically worthless as the above code will fail if the RID path is wrong.
+            Assert.True(finalRid == publishRid);
             Assert.True(ucrRid != finalRid);
         }
 
