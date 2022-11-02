@@ -21,6 +21,15 @@ namespace Microsoft.NET.Publish.Tests
 
         public GivenThatWeWantToPublishASingleFileLibrary(ITestOutputHelper log) : base(log)
         {
+        }
+
+        [WindowsOnlyFact]
+        // Tests regression on https://github.com/dotnet/sdk/pull/28484
+        public void ItPublishesSuccessfullyWithRIDAndPublishSingleFileLibrary()
+        {
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
+            string rid = "win-x86";
+
             _referencedProject = new TestProject("Library")
             {
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
@@ -34,35 +43,18 @@ namespace Microsoft.NET.Publish.Tests
             };
             _testProject.ReferencedProjects.Add(_referencedProject);
 
+            _referencedProject.AdditionalProperties["AppendRuntimeIdentifierToOutputPath"] = "false";
             _testProject.RecordProperties("RuntimeIdentifier");
             _referencedProject.RecordProperties("RuntimeIdentifier");
-        }
 
-        TestAsset Publish(List<string> args, [CallerMemberName] string callingMethod = "", string testIdentifierName = "")
-        {
-            var testAsset = _testAssetsManager.CreateTestProject(_testProject, callingMethod: callingMethod, identifier: testIdentifierName);
+            List<string> args = new List<string> { "/p:PublishSingleFile=true", $"/p:RuntimeIdenitifer={rid}" };
+
+            var testAsset = _testAssetsManager.CreateTestProject(_testProject, identifier: "PublishSingleFileLibrary");
 
             new PublishCommand(testAsset)
                 .Execute(args.ToArray())
                 .Should()
                 .Pass();
-
-            return testAsset;
-        }
-
-        [WindowsOnlyFact]
-        // Tests regression on https://github.com/dotnet/sdk/pull/28484
-        public void ItPublishesSuccessfullyWithRIDAndPublishSingleFileLibrary()
-        {
-            var targetFramework = ToolsetInfo.CurrentTargetFramework;
-            string rid = "win-x86";
-
-            List<string> args = new List<string>{"/p:PublishSingleFile=true", $"/p:RuntimeIdenitifer={rid}"};
-            var testAsset = Publish(args, testIdentifierName: "PublishSingleFileLibrary");
-
-            var assetFolder = testAsset.TestRoot;
-            var ridlessLibraryDllPath = Path.Combine(assetFolder, "Library", "bin", "Debug", targetFramework, "Library.dll");
-            Assert.True(File.Exists(ridlessLibraryDllPath));
 
             var properties = _referencedProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework);
             Assert.True(properties["RuntimeIdentifier"] == "");
