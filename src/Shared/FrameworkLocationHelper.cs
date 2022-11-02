@@ -220,7 +220,7 @@ namespace Microsoft.Build.Shared
             CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion48, visualStudioVersion150),
 
             // v4.8.1
-            CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion481, visualStudioVersion150),
+            CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion481, visualStudioVersion170),
         };
 
         /// <summary>
@@ -293,7 +293,6 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion471,
                 dotNetFrameworkVersion472,
                 dotNetFrameworkVersion48,
-                dotNetFrameworkVersion481,
             }),
 
             // VS16
@@ -313,7 +312,6 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion471,
                 dotNetFrameworkVersion472,
                 dotNetFrameworkVersion48,
-                dotNetFrameworkVersion481,
             }),
 
             // VS17
