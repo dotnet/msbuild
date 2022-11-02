@@ -196,9 +196,9 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [WindowsOnlyTheory]
-        [InlineData(false, false)]
-        [InlineData(true, false)]
-        [InlineData(true, true)]
+        [InlineData(false, false)] // publish rid overrides rid in project file if publishing
+        [InlineData(true, false)] // publish rid doesnt override global rid
+        [InlineData(true, true)] // publish rid doesnt override global rid, even if global
         public void PublishRuntimeIdentifierSetsRuntimeIdentifierAndDoesOrDoesntOverrideRID(bool runtimeIdentifierIsGlobal, bool publishRuntimeIdentifierIsGlobal)
         {
             string tfm = ToolsetInfo.CurrentTargetFramework;
@@ -255,9 +255,10 @@ namespace Microsoft.NET.Publish.Tests
             testProject.RecordProperties("NETCoreSdkPortableRuntimeIdentifier");
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
-            var publishCommand = new PublishCommand(testAsset);
+            var publishCommand = new DotnetPublishCommand(Log);
             publishCommand
-                .Execute($"/p:_IsPublishing=true")
+                .WithWorkingDirectory(Path.Combine(testAsset.TestRoot, MethodBase.GetCurrentMethod().Name))
+                .Execute()
                 .Should()
                 .Pass();
 
