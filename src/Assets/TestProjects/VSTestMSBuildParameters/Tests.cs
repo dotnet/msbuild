@@ -15,7 +15,7 @@ namespace TestNamespace
         public void TestMSBuildParameters()
         {
             var assemblyInfoVersion = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
-            Assert.AreEqual(assemblyInfoVersion, "1.2.3");
+            Assert.AreEqual("1.2.3", assemblyInfoVersion);
         }
     }
 }

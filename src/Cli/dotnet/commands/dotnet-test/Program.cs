@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Tools.Test
 
 
             var parsedArgs =
-                    result.OptionValuesToBeForwarded(TestCommandParser.GetCommand()) // all msbuild-recognized tokens
+                result.OptionValuesToBeForwarded(TestCommandParser.GetCommand()) // all msbuild-recognized tokens
                     .Concat(result.UnmatchedTokens); // all tokens that the test-parser doesn't explicitly track
 
             VSTestTrace.SafeWriteTrace(() => $"MSBuild args from forwarded options: {String.Join(", ", parsedArgs)}" );
