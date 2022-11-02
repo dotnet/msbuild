@@ -156,6 +156,8 @@ namespace Microsoft.Build.Tasks
         /// <param name="destinationDirectory">The <see cref="DirectoryInfo"/> to extract files to.</param>
         private void Extract(ZipArchive sourceArchive, DirectoryInfo destinationDirectory)
         {
+            string fullDestinationDirectoryPath = Path.GetFullPath(destinationDirectory.FullName + Path.DirectorySeparatorChar);
+
             foreach (ZipArchiveEntry zipArchiveEntry in sourceArchive.Entries.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
             {
                 if (ShouldSkipEntry(zipArchiveEntry))
@@ -165,7 +167,6 @@ namespace Microsoft.Build.Tasks
                 }
 
                 string fullDestinationPath = Path.GetFullPath(Path.Combine(destinationDirectory.FullName, zipArchiveEntry.FullName));
-                string fullDestinationDirectoryPath = Path.GetFullPath(destinationDirectory.FullName + Path.DirectorySeparatorChar);
                 ErrorUtilities.VerifyThrowInvalidOperation(fullDestinationPath.StartsWith(fullDestinationDirectoryPath, FileUtilities.PathComparison), "Unzip.ZipSlipExploit", fullDestinationPath);
 
                 FileInfo destinationPath = new(fullDestinationPath);
