@@ -16,6 +16,17 @@ internal static class AuthHeaderCache
 
     public static bool TryGet(Uri uri, [NotNullWhen(true)] out AuthenticationHeaderValue? header)
     {
+        header = null;
+
+        // observed quirk in Azure Container Registry: if you present a token to blobs/uploads and it's wrong,
+        // it won't give back a www-authenticate header for the reauth mechanism to work. So never return
+        // a cache for that URI pattern
+        string[] segments = uri.Segments;
+        if (segments is [.., "blobs/", "uploads/"])
+        {
+            return false;
+        }
+
         return HostAuthenticationCache.TryGetValue(GetCacheKey(uri), out header);
     }
 
