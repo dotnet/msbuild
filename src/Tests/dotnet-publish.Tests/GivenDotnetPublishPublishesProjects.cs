@@ -197,11 +197,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should()
                 .Pass();
 
-            var publishedDirectory = testAsset.TestRoot;
-            publishedDirectory = Path.Combine(publishedDirectory, "MainProject", "obj", "Debug", targetFramework);
-            if (resultShouldBeSelfContained)
-                publishedDirectory = Directory.GetDirectories(publishedDirectory).FirstOrDefault(); // get the rid in the directory
-            var properties = testProject.GetPropertyValues(publishedDirectory.ToString());
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework);
 
             if (resultShouldBeSelfContained)
             {

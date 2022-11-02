@@ -175,10 +175,6 @@ Copyright (c) .NET Foundation. All rights reserved.
                  ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
                  FormatArguments="SelfContained"/>
 
-    <NETSdkError Condition="'$(_PublishSelfContainedIsActive)' == 'true' and '$(PublishSelfContained)' == 'true' and '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == ''"
-                 ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
-                 FormatArguments="PublishSelfContained"/>
-
     <NETSdkError Condition="'$(PublishReadyToRun)' == 'true' and '$(RuntimeIdentifier)' == ''"
                  ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
                  FormatArguments="PublishReadyToRun"/>
