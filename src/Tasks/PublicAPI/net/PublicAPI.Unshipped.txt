@@ -1,9 +1,0 @@
-Microsoft.Build.Tasks.SetRidAgnosticValueForProjects
-Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.Projects.get -> Microsoft.Build.Framework.ITaskItem[]
-Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.Projects.set -> void
-Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.SetRidAgnosticValueForProjects() -> void
-Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.UpdatedProjects.get -> Microsoft.Build.Framework.ITaskItem[]
-Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.UpdatedProjects.set -> void
-override Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.Execute() -> bool
-Microsoft.Build.Tasks.XslTransformation.PreserveWhitespace.get -> bool
-Microsoft.Build.Tasks.XslTransformation.PreserveWhitespace.set -> void
