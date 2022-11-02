@@ -12,6 +12,9 @@
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <SemanticVersioningV1>true</SemanticVersioningV1>
 
+    <EnablePackageValidation>true</EnablePackageValidation>
+    <PackageValidationBaselineVersion>17.3.2</PackageValidationBaselineVersion>
+
     <AssemblyName>Microsoft.NET.StringTools</AssemblyName>
     <PackageDescription>This package contains the $(AssemblyName) assembly which implements common string-related functionality such as weak interning.</PackageDescription>
   </PropertyGroup>
