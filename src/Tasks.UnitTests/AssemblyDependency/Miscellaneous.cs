@@ -14,6 +14,7 @@ using Xunit;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using Xunit.Abstractions;
 using Shouldly;
+using Microsoft.Build.UnitTests.Shared;
 
 #nullable disable
 
@@ -92,6 +93,25 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         public Miscellaneous(ITestOutputHelper output) : base(output)
         {
+        }
+
+        [Fact]
+        public void test()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFolder folder = env.CreateFolder(createFolder: true);
+            TransientTestFile pdb = env.CreateFile(folder, "x.pdb", @"not_assembly_text");
+            ResolveAssemblyReference t = new()
+            {
+                SearchPaths = new string[] { folder.Path },
+                BuildEngine = new MockEngine(),
+                AllowedRelatedFileExtensions = new string[] { ".pdb" },
+                Assemblies = new ITaskItem[] { new TaskItem("x.dll"), new TaskItem("x.pdb") },
+                AssemblyFiles = new ITaskItem[] { new TaskItem("x.dll") }
+            };
+
+            bool success = Execute(t);
+            success.ShouldBeTrue();
         }
 
         /// <summary>
