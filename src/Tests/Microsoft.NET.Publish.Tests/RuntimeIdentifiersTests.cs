@@ -232,7 +232,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Pass();
 
             string expectedRid = runtimeIdentifierIsGlobal ? runtimeIdentifier : publishRuntimeIdentifier;
-            var properties = testProject.GetPropertyValues(testAsset.TestRoot);
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm);
             var finalRid = properties["RuntimeIdentifier"];
 
             Assert.True(finalRid == expectedRid); // This assert is theoretically worthless as the above code will fail if the RID path is wrong.
@@ -261,7 +261,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var properties = testProject.GetPropertyValues(testAsset.TestRoot);
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm);
             var finalRid = properties["RuntimeIdentifier"];
             var ucrRid = properties["NETCoreSdkPortableRuntimeIdentifier"];
 
