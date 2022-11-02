@@ -1,0 +1,31 @@
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Microsoft.NET.Build.Containers;
+
+internal static class AuthHeaderCache
+{
+
+    private static ConcurrentDictionary<string, AuthenticationHeaderValue> HostAuthenticationCache = new();
+
+    public static bool TryGet(Uri uri, [NotNullWhen(true)] out AuthenticationHeaderValue? header)
+    {
+        return HostAuthenticationCache.TryGetValue(GetCacheKey(uri), out header);
+    }
+
+    public static AuthenticationHeaderValue AddOrUpdate(Uri uri, AuthenticationHeaderValue header)
+    {
+        return HostAuthenticationCache.AddOrUpdate(GetCacheKey(uri), header, (_, _) => header);
+    }
+
+    private static string GetCacheKey(Uri uri)
+    {
+        return uri.Host + uri.AbsolutePath;
+    }
+}
