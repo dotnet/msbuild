@@ -148,6 +148,7 @@
     <Compile Include="BackEnd\BuildManager\BuildParameters.cs" />
     <Compile Include="BackEnd\BuildManager\CacheSerialization.cs" />
     <Compile Include="BackEnd\BuildManager\CacheAggregator.cs" />
+    <Compile Include="BackEnd\BuildManager\IsolateProjects.cs" />
     <Compile Include="BackEnd\Client\MSBuildClientPacketPump.cs" />
     <Compile Include="BackEnd\Client\MSBuildClientExitType.cs" />
     <Compile Include="BackEnd\Client\MSBuildClientExitResult.cs" />

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Resources;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Shared;
