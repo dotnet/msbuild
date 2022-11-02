@@ -226,7 +226,7 @@ namespace Microsoft.NET.Publish.Tests
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: identifier);
             var publishCommand = new DotnetPublishCommand(Log);
             publishCommand
-                .WithWorkingDirectory(Path.Combine(testAsset.TestRoot, MethodBase.GetCurrentMethod().Name))
+                .WithWorkingDirectory(Path.Combine(testAsset.TestRoot, testProject.Name))
                 .Execute(args.ToArray())
                 .Should()
                 .Pass();
