@@ -21,7 +21,8 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
         }
 
         /// <summary>
-        /// A custom nametag for the project that's appended to a root test folder. By default, it is the unhashed name of the function that instantiated the TestProject object.
+        /// A name for the test project that's used to isolate it from a test's root folder by appending it to the root test path.
+        /// By default, it is the unhashed name of the function that instantiated the TestProject object.
         /// </summary>
         public string Name { get; set; }
 
@@ -29,6 +30,9 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public bool IsExe { get; set; }
 
+        /// <summary>
+        /// The project is a WPF or Windows Form App Executable.
+        /// </summary>
         public bool IsWinExe { get; set; }
 
         public string ProjectSdk { get; set; }
@@ -61,6 +65,9 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public Dictionary<string, string> EmbeddedResources { get; } = new Dictionary<string, string>();
 
+        /// <summary>
+        /// Use this dictionary to set a property key to a desired value before evaluation.
+        /// </summary>
         public Dictionary<string, string> AdditionalProperties { get; } = new Dictionary<string, string>();
 
         public List<KeyValuePair<string, Dictionary<string, string>>> AdditionalItems { get; } = new();
@@ -459,6 +466,10 @@ namespace {safeThisName}
             PropertiesToRecord.AddRange(propertyNames);
         }
 
+        /// <returns>
+        /// A dictionary of property keys to property value strings, case sensitive.
+        /// Only properties added to the PropertiesToRecord member will be observed.<see cref="PropertiesToRecord"/>
+        /// </returns>
         public Dictionary<string, string> GetPropertyValues(string testRoot, string configuration = "Debug", string targetFramework = null)
         {
             var propertyValues = new Dictionary<string, string>();

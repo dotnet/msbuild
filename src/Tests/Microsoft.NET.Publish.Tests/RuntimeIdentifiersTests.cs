@@ -195,7 +195,7 @@ namespace Microsoft.NET.Publish.Tests
             }
         }
 
-        [WindowsOnlyTheory]
+        [Theory]
         [InlineData(false, false)] // publish rid overrides rid in project file if publishing
         [InlineData(true, false)] // publish rid doesnt override global rid
         [InlineData(true, true)] // publish rid doesnt override global rid, even if global

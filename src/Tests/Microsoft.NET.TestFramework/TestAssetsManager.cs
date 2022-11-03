@@ -53,14 +53,16 @@ namespace Microsoft.NET.TestFramework
         }
 
         /// <summary>
-        /// 
+        /// Writes an in-memory test project onto the disk.
         /// </summary>
-        /// <param name="testProject">The testProject used to create a teatAsset with.</param>
-        /// <param name="callingMethod">Defaults to the name of the caller function (presumably the test). Used to prevent file collisions on tests which share the same test project.</param>
-        /// <param name="identifier">An ID for the project that should be unique for every test, including each theory child test.
+        /// <param name="testProject">The testProject used to create a testAsset with.</param>
+        /// <param name="callingMethod">Defaults to the name of the caller function (presumably the test).
+        /// Used to prevent file collisions on tests which share the same test project.</param>
+        /// <param name="identifier">Use this for theories.
+        /// The Identifier is an ID for the project that should be unique for every test, including each theory child test.
         /// This is distinct from the test project name and is used to prevent file collisions between theory tests that use the same test project.</param>
         /// <param name="targetExtension">The extension type of the desired test project, e.g. .csproj, or .fsproj.</param>
-        /// <returns></returns>
+        /// <returns>A new TestAsset directory for the TestProject.</returns>
         public TestAsset CreateTestProject(
             TestProject testProject,
             [CallerMemberName] string callingMethod = "",
