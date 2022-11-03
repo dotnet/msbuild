@@ -23,12 +23,12 @@ namespace Microsoft.NET.Publish.Tests
         {
         }
 
-        [WindowsOnlyFact]
+        [Fact]
         // Tests regression on https://github.com/dotnet/sdk/pull/28484
         public void ItPublishesSuccessfullyWithRIDAndPublishSingleFileLibrary()
         {
             var targetFramework = ToolsetInfo.CurrentTargetFramework;
-            string rid = "win-x86";
+            string rid = EnvironmentInfo.GetCompatibleRid();
 
             _referencedProject = new TestProject("Library")
             {
