@@ -14,8 +14,8 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 namespace Microsoft.NET.TestFramework
 {
     /// <summary>
-    /// A directory wrapper around the <see cref="TestProject"/> class.
-    /// It manages the on-disk files of the TestProject and provides additional functionality to edit projects.
+    /// A directory wrapper around the <see cref="TestProject"/> class, or any other TestAsset type.
+    /// It manages the on-disk files of the test asset and provides additional functionality to edit projects.
     /// </summary>
     public class TestAsset : TestDirectory
     {
