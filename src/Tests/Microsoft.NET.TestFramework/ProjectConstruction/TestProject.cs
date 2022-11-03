@@ -468,7 +468,7 @@ namespace {safeThisName}
 
         /// <returns>
         /// A dictionary of property keys to property value strings, case sensitive.
-        /// Only properties added to the PropertiesToRecord member will be observed.<see cref="PropertiesToRecord"/>
+        /// Only properties added to the <see cref="PropertiesToRecord"/> member will be observed.
         /// </returns>
         public Dictionary<string, string> GetPropertyValues(string testRoot, string configuration = "Debug", string targetFramework = null)
         {
