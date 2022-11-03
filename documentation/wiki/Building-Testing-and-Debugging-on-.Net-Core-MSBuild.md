@@ -40,7 +40,7 @@ Set the environment variable `MSBUILDDEBUGONSTART` to `2`, then attach a debugge
 
 ### Using the repository binaries to perform builds
 
-To build projects using the MSBuild binaries from the repository, you first need to do a build (command: `build.cmd /p:CreateBootstrap=true`) which produces a bootstrap directory mimicking a Visual Studio (full framework flavor) or dotnet CLI (.net core flavor) installation.
+To build projects using the MSBuild binaries from the repository, you first need to do a build (command: `build.cmd`) which produces a bootstrap directory mimicking a Visual Studio (full framework flavor) or dotnet CLI (.net core flavor) installation.
 
 Now, just point `dotnet ./artifacts/bin/bootstrap/<TARGET_FRAMEWORK>/MSBuild/MSBuild.dll` at a project file. (Change <TARGET_FRAMEWORK> to current target framework, for example net7.0, net8.0) 
 

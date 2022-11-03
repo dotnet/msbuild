@@ -42,14 +42,13 @@ To get started on **Visual Studio 2022**:
   - .NET desktop development
   - .NET Core cross-platform development
 2. Ensure [long path support](https://learn.microsoft.com/windows/win32/fileio/maximum-file-path-limitation?tabs=registry#enable-long-paths-in-windows-10-version-1607-and-later) is enabled at the Windows level.
-3. Open a `Developer Command Prompt for VS 2022` prompt.
-4. Clone the source code: `git clone https://github.com/dotnet/msbuild`
+3. [Install The Latest .NET SDK](https://dotnet.microsoft.com/en-us/download/dotnet)
+  - This will ensure you have the correct ASP.NET runtime packs.
+4. Open a `Developer Command Prompt for VS 2022` prompt.
+5. Clone the source code: `git clone https://github.com/dotnet/msbuild`
   - You may have to [download Git](https://git-scm.com/downloads) first.
-5. Run `.\build.cmd` from the root of the repo to build the code. This also restores packages needed to open the projects in Visual Studio.
-6. Open `MSBuild.sln` or `MSBuild.Dev.slnf` in Visual Studio 2022.
-
-Note: To create a usable MSBuild with your changes, run `.\build.cmd /p:CreateBootstrap=true`.
-To build release, add `-c Release`: `.\build.cmd -c Release /p:CreateBootstrap=true`.
+6. Run `.\build.cmd` from the root of the repo to build the code. This also restores packages needed to open the projects in Visual Studio.
+7. Open `MSBuild.sln` or `MSBuild.Dev.slnf` in Visual Studio 2022.
 
 This newly-built MSBuild will be located at `artifacts\bin\bootstrap\net472\MSBuild\Current\Bin\MSBuild.exe`. It may not work for all scenarios, including C++ builds.
 
