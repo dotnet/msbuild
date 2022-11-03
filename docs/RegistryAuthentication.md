@@ -31,8 +31,6 @@ All of the above mechanisms are supported by this package. When we push or pull 
 The following registries have been explicitly tested:
 
 * Azure Container Registry*
-* AWS Elastic Container Registry
-* GitHub Package Registry
 * GitLab Container Registry
 * Google Cloud Artifact Registry
 * Quay.io
@@ -40,6 +38,11 @@ The following registries have been explicitly tested:
 ## Known-unsupported registries
 
 * Docker Hub
+  * needs changes to the code to differentiate between pushing to a local daemon and the remote hub
+* AWS Elastic Container Registry
+  * blob upload is canceled by ECR, unknown reason
+* GitHub Package Registry
+  * blob upload is canceled by the registry, unknown reason
 
 ## Notes for specific registries
 
