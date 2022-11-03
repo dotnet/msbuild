@@ -17,6 +17,8 @@ public record struct Registry(Uri BaseUri)
     private const string DockerManifestV2 = "application/vnd.docker.distribution.manifest.v2+json";
     private const string DockerContainerV1 = "application/vnd.docker.container.image.v1+json";
 
+    private string RegistryName { get; } = BaseUri.Host;
+
     public async Task<Image> GetImageManifest(string name, string reference)
     {
         using HttpClient client = GetClient();
@@ -181,7 +183,7 @@ public record struct Registry(Uri BaseUri)
         var reg = this;
         await Task.WhenAll(x.LayerDescriptors.Select(async descriptor => {
             string digest = descriptor.Digest;
-            logProgressMessage($"Uploading layer {digest} to registry");
+            logProgressMessage($"Uploading layer {digest} to {reg.RegistryName}");
             if (await reg.BlobAlreadyUploaded(name, digest, client))
             {
                 logProgressMessage($"Layer {digest} already existed");
@@ -204,7 +206,7 @@ public record struct Registry(Uri BaseUri)
                 await x.originatingRegistry.Value.DownloadBlob(x.OriginatingName, descriptor);
                 // Then push it to the destination registry
                 await reg.Push(Layer.FromDescriptor(descriptor), name, logProgressMessage);
-                logProgressMessage($"Finished uploading layer {digest} to registry");
+                logProgressMessage($"Finished uploading layer {digest} to {reg.RegistryName}");
             }
         }));
 
@@ -217,7 +219,7 @@ public record struct Registry(Uri BaseUri)
         }
 
         var manifestDigest = x.GetDigest(x.manifest);
-        logProgressMessage($"Uploading manifest to registry at blob {manifestDigest}");
+        logProgressMessage($"Uploading manifest to {RegistryName} as blob {manifestDigest}");
         string jsonString = x.manifest.ToJsonString();
         HttpContent manifestUploadContent = new StringContent(jsonString);
         manifestUploadContent.Headers.ContentType = new MediaTypeHeaderValue(DockerManifestV2);
@@ -227,9 +229,9 @@ public record struct Registry(Uri BaseUri)
         {
             throw new ContainerHttpException("Registry push failed.", putResponse.RequestMessage?.RequestUri?.ToString(), jsonString);
         }
-        logProgressMessage($"Uploaded manifest to registry");
+        logProgressMessage($"Uploaded manifest to {RegistryName}");
 
-        logProgressMessage($"Uploading tag {tag} to registry");
+        logProgressMessage($"Uploading tag {tag} to {RegistryName}");
         var putResponse2 = await client.PutAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{tag}"), manifestUploadContent);
 
         if (!putResponse2.IsSuccessStatusCode)
@@ -237,6 +239,6 @@ public record struct Registry(Uri BaseUri)
             throw new ContainerHttpException("Registry push failed.", putResponse2.RequestMessage?.RequestUri?.ToString(), jsonString);
         }
 
-        logProgressMessage($"Uploaded tag to registry");
+        logProgressMessage($"Uploaded tag {tag} to {RegistryName}");
     }
 }
