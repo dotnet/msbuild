@@ -165,6 +165,7 @@ stages:
                   -task VisualStudio.BuildIbcTrainingSettings
                   /p:VisualStudioDropName=$(VisualStudio.DropName)
                   /p:BootstrapperInfoPath=$(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
+                  /p:VisualStudioIbcTrainingSettingsPath=$(Build.SourcesDirectory)\eng\config\OptProf.runsettings
       displayName: 'OptProf - Build IBC training settings'
       condition: succeeded()
 
