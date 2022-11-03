@@ -269,16 +269,10 @@ namespace Microsoft.DotNet.Tools.Common
                 while (nestedProjects.ContainsKey(id))
                 {
                     id = nestedProjects[id];
-                    try
-                    {
-                        var parentSlnProject = solutionFolderProjects.Where(p => p.Id == id).Single();
-                        path = Path.Combine(parentSlnProject.FilePath, path);
-                    }
-                    catch (System.InvalidOperationException)
-                    {
-                        Reporter.Error.WriteLine(String.Format(CommonLocalizableStrings.CorruptSolutionProjectFolderStructure, slnFile.FullPath, id).Red());
-                        Environment.Exit(1);
-                    }
+                    var parentSlnProject = solutionFolderProjects.Where(p => p.Id == id).SingleOrDefault();
+                    if(parentSlnProject == null) // see: https://github.com/dotnet/sdk/pull/28811
+                        throw new GracefulException(CommonLocalizableStrings.CorruptSolutionProjectFolderStructure, slnFile.FullPath, id);
+                    path = Path.Combine(parentSlnProject.FilePath, path);
                 }
 
                 solutionFolderPaths[path] = slnProject.Id;

@@ -33,8 +33,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CorruptSolutionProjectFolderStructure">
-        <source>The solution file '{0}' is missing EndProject tags or has invalid child-parent project mappings. Thus, the project with GUID '{1}' failed to load. Try saving your sln in VS to repair it."</source>
-        <target state="new">The solution file '{0}' is missing EndProject tags or has invalid child-parent project mappings. Thus, the project with GUID '{1}' failed to load. Try saving your sln in VS to repair it."</target>
+        <source>The solution file '{0}' is missing EndProject tags or has invalid child-parent project folder mappings around project GUID: '{1}'. Manually repair the solution or try to open and save it in Visual Studio."</source>
+        <target state="new">The solution file '{0}' is missing EndProject tags or has invalid child-parent project folder mappings around project GUID: '{1}'. Manually repair the solution or try to open and save it in Visual Studio."</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
