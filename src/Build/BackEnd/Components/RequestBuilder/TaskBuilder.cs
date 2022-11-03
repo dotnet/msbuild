@@ -963,12 +963,13 @@ namespace Microsoft.Build.BackEnd
                     && (be is TaskHost th ? th.BuildRequestsSucceeded : false)
                     && !(_cancellationToken.CanBeCanceled && _cancellationToken.IsCancellationRequested)) // and it wasn't cancelled
                 {
-                    // If is allowed to fail without error
+                    // Then decide how to log MSB4181
                     if (be is IBuildEngine7 be7 && be7.AllowFailureWithoutError)
                     {
+                        // If it's allowed to fail without error, log as a message
                         taskLoggingContext.LogComment(MessageImportance.Normal, "TaskReturnedFalseButDidNotLogError", _taskNode.Name);
                     }
-                    // Then decide how to log MSB4181
+
                     else if (_continueOnError == ContinueOnError.WarnAndContinue)
                     {
                         taskLoggingContext.LogWarning(null,
