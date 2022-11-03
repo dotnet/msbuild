@@ -262,14 +262,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static Configuration ReadApplicationConfiguration()
         {
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
-            {
-                return s_configurationCache.Value;
-            }
-            else
-            {
-                return ReadOpenMappedExeConfiguration();
-            }
+            return s_configurationCache.Value;
         }
 
         private static Configuration ReadOpenMappedExeConfiguration()
