@@ -961,11 +961,15 @@ namespace Microsoft.Build.BackEnd
                     && !taskResult // and it returned false
                     && !taskLoggingContext.HasLoggedErrors // and it didn't log any errors
                     && (be is TaskHost th ? th.BuildRequestsSucceeded : false)
-                    && (be is IBuildEngine7 be7 ? !be7.AllowFailureWithoutError : true) // and it's not allowed to fail unless it logs an error
                     && !(_cancellationToken.CanBeCanceled && _cancellationToken.IsCancellationRequested)) // and it wasn't cancelled
                 {
+                    // If is allowed to fail without error
+                    if (be is IBuildEngine7 be7 && be7.AllowFailureWithoutError)
+                    {
+                        taskLoggingContext.LogComment(MessageImportance.Normal, "TaskReturnedFalseButDidNotLogError", _taskNode.Name);
+                    }
                     // Then decide how to log MSB4181
-                    if (_continueOnError == ContinueOnError.WarnAndContinue)
+                    else if (_continueOnError == ContinueOnError.WarnAndContinue)
                     {
                         taskLoggingContext.LogWarning(null,
                             new BuildEventFileInfo(_targetChildInstance.Location),
