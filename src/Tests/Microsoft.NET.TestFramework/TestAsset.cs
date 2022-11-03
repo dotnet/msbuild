@@ -21,6 +21,9 @@ namespace Microsoft.NET.TestFramework
 
         public string TestRoot => Path;
 
+        /// <summary>
+        /// The hashed test name (so file paths do not become too long) of a particular test. This will be the root of the test folder. 
+        /// </summary>
         public readonly string Name;
 
         public ITestOutputHelper Log { get; }

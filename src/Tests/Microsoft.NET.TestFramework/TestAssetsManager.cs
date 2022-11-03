@@ -52,6 +52,15 @@ namespace Microsoft.NET.TestFramework
             return testAsset;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="testProject">The testProject used to create a teatAsset with.</param>
+        /// <param name="callingMethod">Defaults to the name of the caller function (presumably the test). Used to prevent file collisions on tests which share the same test project.</param>
+        /// <param name="identifier">An ID for the project that should be unique for every test, including each theory child test.
+        /// This is distinct from the test project name and is used to prevent file collisions between theory tests that use the same test project.</param>
+        /// <param name="targetExtension">The extension type of the desired test project, e.g. .csproj, or .fsproj.</param>
+        /// <returns></returns>
         public TestAsset CreateTestProject(
             TestProject testProject,
             [CallerMemberName] string callingMethod = "",

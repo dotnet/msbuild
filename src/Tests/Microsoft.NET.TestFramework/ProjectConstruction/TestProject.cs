@@ -20,6 +20,9 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
             }
         }
 
+        /// <summary>
+        /// A custom nametag for the project that's appended to a root test folder. By default, it is the unhashed name of the function that instantiated the TestProject object.
+        /// </summary>
         public string Name { get; set; }
 
         public bool IsSdkProject { get; set; } = true;
