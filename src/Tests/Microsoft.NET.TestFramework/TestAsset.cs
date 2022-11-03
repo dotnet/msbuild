@@ -28,6 +28,7 @@ namespace Microsoft.NET.TestFramework
         /// <summary>
         /// The hashed test name (so file paths do not become too long) of the TestAsset owning test.
         /// Contains the leaf folder name of any particular test's root folder.
+        /// The hashing occurs in <see cref="TestAssetsManager"/>.
         /// </summary>
         public readonly string Name;
 
