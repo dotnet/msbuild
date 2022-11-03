@@ -25,16 +25,14 @@ namespace Microsoft.NET.Publish.Tests
         // Tests regression on https://github.com/dotnet/sdk/pull/28484
         public void ItPublishesSuccessfullyWithRIDAndPublishSingleFileLibrary()
         {
-            TestProject testProject;
-            TestProject referencedProject;
             var targetFramework = ToolsetInfo.CurrentTargetFramework;
-            referencedProject = new TestProject("Library")
+            TestProject referencedProject = new TestProject("Library")
             {
                 TargetFrameworks = targetFramework,
                 IsExe = false
             };
 
-            testProject = new TestProject("MainProject")
+            TestProject testProject = new TestProject("MainProject")
             {
                 TargetFrameworks = targetFramework,
                 IsExe = true
