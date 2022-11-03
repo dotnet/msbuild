@@ -16,48 +16,47 @@ namespace Microsoft.NET.Publish.Tests
 {
     public class GivenThatWeWantToPublishASingleFileLibrary : SdkTest
     {
-        TestProject _testProject;
-        TestProject _referencedProject;
-
         public GivenThatWeWantToPublishASingleFileLibrary(ITestOutputHelper log) : base(log)
         {
+
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         // Tests regression on https://github.com/dotnet/sdk/pull/28484
         public void ItPublishesSuccessfullyWithRIDAndPublishSingleFileLibrary()
         {
+            TestProject _testProject;
+            TestProject _referencedProject;
             var targetFramework = ToolsetInfo.CurrentTargetFramework;
-            string rid = EnvironmentInfo.GetCompatibleRid();
-
             _referencedProject = new TestProject("Library")
             {
-                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                TargetFrameworks = targetFramework,
                 IsExe = false
             };
 
             _testProject = new TestProject("MainProject")
             {
-                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                TargetFrameworks = targetFramework,
                 IsExe = true
             };
             _testProject.ReferencedProjects.Add(_referencedProject);
-
             _referencedProject.AdditionalProperties["AppendRuntimeIdentifierToOutputPath"] = "false";
             _testProject.RecordProperties("RuntimeIdentifier");
             _referencedProject.RecordProperties("RuntimeIdentifier");
 
-            List<string> args = new List<string> { "/p:PublishSingleFile=true", $"/p:RuntimeIdenitifer={rid}" };
+            string rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+            List<string> args = new List<string>{"/p:PublishSingleFile=true", $"/p:RuntimeIdentifier={rid}", "-bl:C:\\users\\noahgilson\\why_doesnt_this_fail.binlog" };
 
-            var testAsset = _testAssetsManager.CreateTestProject(_testProject, identifier: "PublishSingleFileLibrary");
-
+            var testAsset = _testAssetsManager.CreateTestProject(_testProject);
             new PublishCommand(testAsset)
                 .Execute(args.ToArray())
                 .Should()
                 .Pass();
 
-            var properties = _referencedProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework);
-            Assert.True(properties["RuntimeIdentifier"] == "");
+            var referencedProjProperties = _referencedProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework);
+            var mainProjProperties = _testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework);
+            Assert.True(mainProjProperties["RuntimeIdentifier"] == rid);
+            Assert.True(referencedProjProperties["RuntimeIdentifier"] == "");
         }
     }
 
