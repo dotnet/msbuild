@@ -271,7 +271,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Fact]
-        public void ImplicitRuntimeIdentifierOptOutCorrecltyOptsOut()
+        public void ImplicitRuntimeIdentifierOptOutCorrectlyOptsOut()
         {
             var targetFramework = ToolsetInfo.CurrentTargetFramework;
             var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
