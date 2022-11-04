@@ -69,11 +69,14 @@ namespace Microsoft.NET.Build.Tasks
                     return false;
                 }
 
-                string outputName = Path.GetFileName(referencePath.ItemSpec);
-                string projectName = Path.GetFileNameWithoutExtension(outputName);
+                string projectName = referencePath.GetMetadata(MetadataKeys.MSBuildSourceProjectFile);
                 if (string.IsNullOrEmpty(projectName))
                 {
-                    return true;
+                    projectName = Path.GetFileNameWithoutExtension(referencePath.ItemSpec);
+                    if (string.IsNullOrEmpty(projectName))
+                    {
+                        return true;
+                    }
                 }
 
                 return lockFileLookup.GetProject(projectName) != null;
