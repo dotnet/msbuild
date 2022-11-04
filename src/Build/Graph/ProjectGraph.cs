@@ -588,9 +588,8 @@ namespace Microsoft.Build.Graph
         ///     This method uses the ProjectReferenceTargets items to determine the targets to run per node. The results can then
         ///     be used to start building each project individually, assuming a given project is built after its references.
         /// </remarks>
-        /// <param name="entryProjectTargets">
-        ///     The target list for the <see cref="GraphRoots" />. May be null or empty, in which case the entry projects' default
-        ///     targets will be used.
+        /// <param name="entryProjectTargets">The target list for the entry project. May be null or empty, in which case the entry
+        /// projects' default targets will be used.
         /// </param>
         /// <returns>
         ///     A dictionary containing the target list for each node. If a node's target list is empty, then no targets were
@@ -606,8 +605,7 @@ namespace Microsoft.Build.Graph
             var encounteredEdges = new HashSet<ProjectGraphBuildRequest>();
             var edgesToVisit = new Queue<ProjectGraphBuildRequest>();
 
-            // Initial state for the graph roots
-            foreach (var entryPointNode in GraphRoots)
+            foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
             {
                 var entryTargets = entryProjectTargets == null || entryProjectTargets.Count == 0
                     ? ImmutableList.CreateRange(entryPointNode.ProjectInstance.DefaultTargets)

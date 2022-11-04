@@ -84,6 +84,28 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe("AnyCPU");
         }
+        
+        [Fact]
+        public void ResolvesViaAnyCPUDefaultWithDefaultPlatformEnabled()
+        {
+            // No valid mapping via the lookup table, should default to AnyCPU when the current project
+            // and ProjectReference platforms don't match.
+            TaskItem projectReference = new TaskItem("foo.bar");
+            projectReference.SetMetadata("Platforms", "x64;AnyCPU");
+            projectReference.SetMetadata("Platform", "AnyCPU");
+
+            GetCompatiblePlatform task = new GetCompatiblePlatform()
+            {
+                BuildEngine = new MockEngine(_output),
+                CurrentProjectPlatform = "x86",
+                PlatformLookupTable = "AnyCPU=x64", 
+                AnnotatedProjects = new TaskItem[] { projectReference }
+            };
+
+            task.Execute().ShouldBeTrue();
+
+            task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe(string.Empty);
+        }
 
         [Fact]
         public void ResolvesViaSamePlatform()
@@ -219,6 +241,29 @@ namespace Microsoft.Build.Tasks.UnitTests
                 BuildEngine = new MockEngine(_output),
                 CurrentProjectPlatform = currentPlatform,
                 AnnotatedProjects = new TaskItem[] { projectReference }
+            };
+
+            task.Execute().ShouldBeTrue();
+
+            task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe(string.Empty);
+            task.Log.HasLoggedErrors.ShouldBeFalse();
+        }
+        
+        // When `Platform` is retrieved in "GetTargetFrameworks" and that platform matches what the task has decided the project should be built as
+        // through negotiation. build that project _without_ a global property for Platform.
+        [Fact]
+        public void ChosenPlatformMatchesDefault()
+        {
+            TaskItem projectReference = new TaskItem("foo.bar");
+            projectReference.SetMetadata("Platforms", "AnyCPU;x64");
+            projectReference.SetMetadata("Platform", "AnyCPU");
+
+            GetCompatiblePlatform task = new GetCompatiblePlatform()
+            {
+                BuildEngine = new MockEngine(_output),
+                CurrentProjectPlatform = "x86",
+                PlatformLookupTable = "", // invalid format
+                AnnotatedProjects = new TaskItem[] { projectReference },
             };
 
             task.Execute().ShouldBeTrue();

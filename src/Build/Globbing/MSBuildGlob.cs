@@ -212,16 +212,10 @@ namespace Microsoft.Build.Globbing
                         RegexOptions regexOptions = FileMatcher.DefaultRegexOptions;
                         // compile the regex since it's expected to be used multiple times
                         // For the kind of regexes used here, compilation on .NET Framework tends to be expensive and not worth the small
-                        // run-time boost so it's enabled only on .NET Core by default.
+                        // run-time boost so it's enabled only on .NET Core.
 #if RUNTIME_TYPE_NETCORE
-                        bool compileRegex = true;
-#else
-                        bool compileRegex = !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0);
+                        regexOptions |= RegexOptions.Compiled;
 #endif
-                        if (compileRegex)
-                        {
-                            regexOptions |= RegexOptions.Compiled;
-                        }
                         Regex newRegex = new Regex(matchFileExpression, regexOptions);
                         lock (s_regexCache)
                         {
