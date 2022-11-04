@@ -49,11 +49,11 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                         var match = matcher.Match(candidateMatchPath);
                         if (!match.HasMatches)
                         {
-                            Log.LogMessage("Rejected asset '{0}' for pattern '{1}'", candidateMatchPath, Pattern);
+                            Log.LogMessage(MessageImportance.Low, "Rejected asset '{0}' for pattern '{1}'", candidateMatchPath, Pattern);
                             continue;
                         }
 
-                        Log.LogMessage("Accepted asset '{0}' for pattern '{1}' with relative path '{2}'", candidateMatchPath, Pattern, match.Files.Single().Stem);
+                        Log.LogMessage(MessageImportance.Low, "Accepted asset '{0}' for pattern '{1}' with relative path '{2}'", candidateMatchPath, Pattern, match.Files.Single().Stem);
 
                         candidateRelativePath = StaticWebAsset.Normalize(match.Files.Single().Stem);
                     }
@@ -102,6 +102,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             if (property != null)
             {
                 Log.LogMessage(
+                    MessageImportance.Low,
                     "{0} '{1}' found for candidate '{2}' and will be used for matching.",
                     property,
                     computedPath,

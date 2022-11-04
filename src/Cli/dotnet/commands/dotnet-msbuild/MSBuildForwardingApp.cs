@@ -57,6 +57,8 @@ namespace Microsoft.DotNet.Tools.MSBuild
             }
         }
 
+        public IEnumerable<string> MSBuildArguments { get { return _forwardingAppWithoutLogging.GetAllArguments(); } }
+
         public void EnvironmentVariable(string name, string value)
         {
             _forwardingAppWithoutLogging.EnvironmentVariable(name, value);

@@ -55,9 +55,8 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     if (suggestedWorkloads is not null)
                     {
-                        var suggestedInstallCommand = "dotnet workload install " + string.Join(" ", suggestedWorkloads.Select(w => w.Id));
                         var errorMessage = string.Format(CultureInfo.CurrentCulture,
-                            Strings.WorkloadNotInstalled, string.Join(" ", suggestedWorkloads.Select(w => w.Id)), suggestedInstallCommand);
+                            Strings.WorkloadNotInstalled, string.Join(" ", suggestedWorkloads.Select(w => w.Id)));
                         Log.LogError(errorMessage);
                     }
                     else

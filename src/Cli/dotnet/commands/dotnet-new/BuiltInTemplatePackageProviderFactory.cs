@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Tools.New
     {
         public static readonly Guid FactoryId = new Guid("{4B11226E-4594-43A4-B843-EB97447B6455}");
 
-        public string DisplayName => "BuiltIn SDK packages";
+        public string DisplayName => ".NET SDK";
 
         public Guid Id { get => FactoryId; }
 

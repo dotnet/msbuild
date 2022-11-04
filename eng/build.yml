@@ -15,13 +15,13 @@ parameters:
   timeoutInMinutes: 180
 
 jobs:
-- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/release/6.0.2xx')) }}:
+- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/release/6.0.4xx')) }}:
   - template: /eng/common/templates/job/onelocbuild.yml
     parameters:
       CreatePr: true
       LclSource: lclFilesfromPackage
       LclPackageId: 'LCL-JUNO-PROD-DOTNETSDK'
-      MirrorBranch: release/6.0.2xx
+      MirrorBranch: release/6.0.4xx
       MirrorRepo: sdk
 - template: /eng/common/templates/job/job.yml
   parameters:
@@ -137,24 +137,14 @@ jobs:
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
-      - script: eng/runTestsCannotRunOnHelix.sh
-                  --configuration $(_BuildConfig)
-                  --ci
-                  $(_OfficialBuildIdArgs)
-        displayName: Run Tests Cannot Run On Helix
-        env:
-          BuildConfig: $(_BuildConfig)
-      - script: eng/common/build.sh
-              --configuration $(_BuildConfig)
-              --prepareMachine
-              --ci
-              --restore
-              --test
-              --projects $(Build.SourcesDirectory)/src/Tests/UnitTests.proj
-              /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/TestInHelix.binlog
-              /p:_CustomHelixTargetQueue=${{ parameters.helixTargetQueue }}
-              $(_InternalRuntimeDownloadArgs)
-        displayName: Run Tests in Helix
+      - powershell: eng/runHelixAndNonHelixInParallelNonWindows.ps1
+                -configuration $(_BuildConfig)
+                -buildSourcesDirectory $(Build.SourcesDirectory)
+                -customHelixTargetQueue ${{ parameters.helixTargetQueue }}
+                -officialBuildIdArgs "$(_OfficialBuildIdArgs)"
+                $(_Test)
+                -additionalMSBuildParameters "$(_InternalRuntimeDownloadArgs)"
+        displayName: Run Tests in Helix and non Helix in parallel
         condition: succeededOrFailed()
         env:
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)

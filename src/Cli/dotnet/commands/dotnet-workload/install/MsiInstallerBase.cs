@@ -10,6 +10,7 @@ using System.Linq;
 using System.Runtime.Versioning;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.Win32;
 using Microsoft.Win32.Msi;
 using NuGet.Versioning;
@@ -81,11 +82,6 @@ namespace Microsoft.DotNet.Installer.Windows
         protected readonly IReporter Reporter;
 
         /// <summary>
-        /// Gets the set of currently installed workload pack records by querying the registry.
-        /// </summary>
-        protected IReadOnlyDictionary<string, List<WorkloadPackRecord>> WorkloadPackRecords => GetWorkloadPackRecords();
-
-        /// <summary>
         /// A service controller representing the Windows Update agent (wuaserv).
         /// </summary>
         protected readonly WindowsUpdateAgent UpdateAgent;
@@ -102,10 +98,10 @@ namespace Microsoft.DotNet.Installer.Windows
         /// <param name="logger"></param>
         /// <param name="reporter"></param>
         public MsiInstallerBase(InstallElevationContextBase elevationContext, ISetupLogger logger,
-            IReporter reporter = null) : base(elevationContext, logger)
+            bool verifySignatures, IReporter reporter = null) : base(elevationContext, logger, verifySignatures)
         {
-            Cache = new MsiPackageCache(elevationContext, logger);
-            RecordRepository = new RegistryWorkloadInstallationRecordRepository(elevationContext, logger);
+            Cache = new MsiPackageCache(elevationContext, logger, verifySignatures);
+            RecordRepository = new RegistryWorkloadInstallationRecordRepository(elevationContext, logger, VerifySignatures);
             UpdateAgent = new WindowsUpdateAgent(logger);
             Reporter = reporter;
         }
@@ -114,21 +110,24 @@ namespace Microsoft.DotNet.Installer.Windows
         /// Detect installed workload pack records. Only the default registry hive is searched. Finding a workload pack
         /// record does not necessarily guarantee that the MSI is installed.
         /// </summary>
-        private IReadOnlyDictionary<string, List<WorkloadPackRecord>> GetWorkloadPackRecords()
+        protected List<WorkloadPackRecord> GetWorkloadPackRecords()
         {
             Log?.LogMessage($"Detecting installed workload packs for {HostArchitecture}.");
-            Dictionary<string, List<WorkloadPackRecord>> workloadPackRecords = new Dictionary<string, List<WorkloadPackRecord>>();
+            List<WorkloadPackRecord> workloadPackRecords = new();
             using RegistryKey installedPacksKey = Registry.LocalMachine.OpenSubKey(@$"SOFTWARE\Microsoft\dotnet\InstalledPacks\{HostArchitecture}");
+
+            void SetRecordMsiProperties(WorkloadPackRecord record, RegistryKey key)
+            {
+                record.ProviderKeyName = (string)key.GetValue("DependencyProviderKey");
+                record.ProductCode = (string)key.GetValue("ProductCode");
+                record.ProductVersion = new Version((string)key.GetValue("ProductVersion"));
+                record.UpgradeCode = (string)key.GetValue("UpgradeCode");
+            }
 
             if (installedPacksKey != null)
             {
                 foreach (string packId in installedPacksKey.GetSubKeyNames())
                 {
-                    if (!workloadPackRecords.ContainsKey(packId))
-                    {
-                        workloadPackRecords[packId] = new List<WorkloadPackRecord>();
-                    }
-
                     using RegistryKey packKey = installedPacksKey.OpenSubKey(packId);
 
                     foreach (string packVersion in packKey.GetSubKeyNames())
@@ -137,22 +136,59 @@ namespace Microsoft.DotNet.Installer.Windows
 
                         WorkloadPackRecord record = new WorkloadPackRecord
                         {
-                            ProviderKeyName = (string)packVersionKey.GetValue("DependencyProviderKey"),
-                            PackId = new NET.Sdk.WorkloadManifestReader.WorkloadPackId(packId),
-                            PackVersion = new NuGetVersion(packVersion),
-                            ProductCode = (string)packVersionKey.GetValue("ProductCode"),
-                            ProductVersion = new Version((string)packVersionKey.GetValue("ProductVersion")),
-                            UpgradeCode = (string)packVersionKey.GetValue("UpgradeCode"),
+                            MsiId = packId,
+                            MsiNuGetVersion = packVersion,
                         };
 
-                        Log?.LogMessage($"Found workload pack record, Id: {record.PackId}, version: {record.PackVersion}, ProductCode: {record.ProductCode}, provider key: {record.ProviderKeyName}");
+                        SetRecordMsiProperties(record, packVersionKey);
 
-                        workloadPackRecords[packId].Add(record);
+                        record.InstalledPacks.Add((new WorkloadPackId(packId), new NuGetVersion(packVersion)));
+
+                        Log?.LogMessage($"Found workload pack record, Id: {packId}, version: {packVersion}, ProductCode: {record.ProductCode}, provider key: {record.ProviderKeyName}");
+
+                        workloadPackRecords.Add(record);
                     }
                 }
             }
 
-            return new ReadOnlyDictionary<string, List<WorkloadPackRecord>>(workloadPackRecords);
+            //  Workload pack group installation records are in a similar format as the pack installation records.  They use the "InstalledPackGroups" key,
+            //  and under the key for each pack group/version are keys for the workload pack IDs and versions that are in the pack gorup.
+            using RegistryKey installedPackGroupsKey = Registry.LocalMachine.OpenSubKey(@$"SOFTWARE\Microsoft\dotnet\InstalledPackGroups\{HostArchitecture}");
+            if (installedPackGroupsKey != null)
+            {
+                foreach (string packGroupId in installedPackGroupsKey.GetSubKeyNames())
+                {
+                    using RegistryKey packGroupKey = installedPackGroupsKey.OpenSubKey(packGroupId);
+                    foreach (string packGroupVersion in packGroupKey.GetSubKeyNames())
+                    {
+                        using RegistryKey packGroupVersionKey = packGroupKey.OpenSubKey(packGroupVersion);
+
+                        WorkloadPackRecord record = new WorkloadPackRecord
+                        {
+                            MsiId = packGroupId,
+                            MsiNuGetVersion = packGroupVersion
+                        };
+
+                        SetRecordMsiProperties(record, packGroupVersionKey);
+
+                        Log?.LogMessage($"Found workload pack group record, Id: {packGroupId}, version: {packGroupVersion}, ProductCode: {record.ProductCode}, provider key: {record.ProviderKeyName}");
+
+                        foreach (string packId in packGroupVersionKey.GetSubKeyNames())
+                        {
+                            using RegistryKey packIdKey = packGroupVersionKey.OpenSubKey(packId);
+                            foreach (string packVersion in packIdKey.GetSubKeyNames())
+                            {
+                                record.InstalledPacks.Add((new WorkloadPackId(packId), new NuGetVersion(packVersion)));
+                                Log?.LogMessage($"Found workload pack in group, Id: {packId}, version: {packVersion}");
+                            }
+                        }
+
+                        workloadPackRecords.Add(record);
+                    }
+                }
+            }
+
+            return workloadPackRecords;
         }
 
         /// <summary>
@@ -364,7 +400,7 @@ namespace Microsoft.DotNet.Installer.Windows
         protected string GetMsiLogName(WorkloadPackRecord record, InstallAction action)
         {
             return Path.Combine(Path.GetDirectoryName(Log.LogPath),
-                Path.GetFileNameWithoutExtension(Log.LogPath) + $"_{record.PackId}-{record.PackVersion}_{action}.log");
+                Path.GetFileNameWithoutExtension(Log.LogPath) + $"_{record.MsiId}-{record.MsiNuGetVersion}_{action}.log");
         }
 
         /// <summary>

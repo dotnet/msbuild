@@ -7,9 +7,11 @@ using Xunit;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.NET.TestFramework;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
+    [Collection(TestConstants.UsesStaticTelemetryState)]
     public class GivenDotnetCleanInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
         const string ExpectedPrefix = "-maxcpucount -verbosity:m -verbosity:normal -target:Clean";

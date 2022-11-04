@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                     WorkingDirectory = context.ProcessSpec.WorkingDirectory,
                 };
 
-                _reporter.Output("Building...");
+                _reporter.Output("Building...", emoji: "🔧");
                 var exitCode = await _processRunner.RunAsync(processSpec, cancellationToken);
                 context.FileSet = await _fileSetFactory.CreateAsync(cancellationToken);
                 if (exitCode == 0)
@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
                 // If the build fails, we'll retry until we have a successful build.
                 using var fileSetWatcher = new FileSetWatcher(context.FileSet, _reporter);
-                await fileSetWatcher.GetChangedFileAsync(cancellationToken, () => _reporter.Warn("Waiting for a file to change before restarting dotnet..."));
+                await fileSetWatcher.GetChangedFileAsync(cancellationToken, () => _reporter.Warn("Waiting for a file to change before restarting dotnet...", emoji: "⏳"));
             }
         }
     }

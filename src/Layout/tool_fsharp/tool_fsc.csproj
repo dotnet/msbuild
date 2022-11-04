@@ -3,8 +3,9 @@
     <TargetFramework>$(SdkTargetFramework)</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
   </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.FSharp.Compiler" Version="$(MicrosoftFSharpCompilerPackageVersion)" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.FSharp.Compiler" Version="$(MicrosoftFSharpCompilerPackageVersion)" ExcludeAssets="contentFiles" GeneratePathProperty="true" />
     <PackageReference Include="Microsoft.Build.Framework" Version="$(FSharpBuildVersion)" />
     <PackageReference Include="Microsoft.Build.Tasks.Core" Version="$(FSharpBuildVersion)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(FSharpBuildVersion)" />
@@ -12,13 +13,29 @@
 
    <Target Name="_ResolvePublishNuGetPackagePdbsAndXml"
         AfterTargets="_ResolveCopyLocalAssetsForPublish">
+    <PropertyGroup>
+        <FSharpCorePath Condition="'$(DotNetFinalVersionKind)'!='release'">Shipping</FSharpCorePath>
+        <FSharpCorePath Condition="'$(DotNetFinalVersionKind)'=='release'">Release</FSharpCorePath>
+    </PropertyGroup>
     <ItemGroup>
         <ResolvedFileToPublish
-          Include="$(PkgMicrosoft_FSharp_Compiler)/lib/net5.0/FSharp.Core.xml"
+          Include="$(PkgMicrosoft_FSharp_Compiler)/lib/net6.0/FSharp.Core.xml"
           CopyToPublishDirectory="PreserveNewest"
           DestinationSubPath="FSharp.Core.xml"
           RelativePath="FSharp.Core.xml"
           TargetPath="FSharpCore.xml" />
+        <FilesToCopyFromFSharpCompilerPackage Include="$(PkgMicrosoft_FSharp_Compiler)/contentFiles/$(FSharpCorePath)/FSharp.Core.*.nupkg" SubDir="library-packs\"/>
+        <FilesToCopyFromFSharpCompilerPackage Include="$(PkgMicrosoft_FSharp_Compiler)/contentFiles/$(FSharpCorePath)/Microsoft.FSharp.Core.NetSdk.props" SubDir="" />
+        <FilesToCopyFromFSharpCompilerPackage Include="$(PkgMicrosoft_FSharp_Compiler)/contentFiles/any/any/*" Exclude="$(PkgMicrosoft_FSharp_Compiler)/contentFiles/any/any/Microsoft.FSharp.Core.NetSdk.props" SubDir="" />
     </ItemGroup>
+    <ItemGroup>
+        <ResolvedFileToPublish
+          Include="@(FilesToCopyFromFSharpCompilerPackage)"
+          CopyToPublishDirectory="PreserveNewest"
+          DestinationSubPath="%(FilesToCopyFromFSharpCompilerPackage.SubDir)%(Filename)%(Extension)"
+          RelativePath="%(FilesToCopyFromFSharpCompilerPackage.SubDir)%(Filename)%(Extension)"
+          TargetPath="%(FilesToCopyFromFSharpCompilerPackage.SubDir)%(Filename)%(Extension)" />
+    </ItemGroup>
+
   </Target>
 </Project>

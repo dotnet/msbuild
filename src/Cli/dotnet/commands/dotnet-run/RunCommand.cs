@@ -180,7 +180,8 @@ namespace Microsoft.DotNet.Tools.Run
             var buildResult =
                 new RestoringCommand(
                     restoreArgs.Prepend(Project),
-                    NoRestore
+                    NoRestore,
+                    advertiseWorkloadUpdates: false
                 ).Execute();
 
             if (buildResult != 0)
@@ -328,7 +329,7 @@ namespace Microsoft.DotNet.Tools.Run
         private static bool TryGetTargetArchitecture(string runtimeIdentifier, out Architecture? targetArchitecture)
         {
             targetArchitecture = null;
-            int separator = runtimeIdentifier.LastIndexOf("-");
+            int separator = runtimeIdentifier.LastIndexOf("-", StringComparison.InvariantCulture);
             if (separator < 0)
             {
                 return false;

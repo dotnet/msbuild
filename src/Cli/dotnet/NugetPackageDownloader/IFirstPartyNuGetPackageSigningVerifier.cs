@@ -8,11 +8,5 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
     public interface IFirstPartyNuGetPackageSigningVerifier
     {
         bool Verify(FilePath nupkgToVerify, out string commandOutput);
-
-        /// <summary>
-        /// Will only check if a file has signature without validating it.
-        /// dotnet executable being not signed is used as a proxy for previews or source build
-        /// </summary>
-        bool IsExecutableIsFirstPartySignedWithoutValidation(FilePath executable);
     }
 }

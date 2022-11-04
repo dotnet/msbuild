@@ -83,14 +83,14 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             }
         }
 
-        public IEnumerable<(string manifestId, string? informationalPath, Func<Stream> openManifestStream, Func<Stream?> openLocalizationStream)> GetManifests()
+        public IEnumerable<ReadableWorkloadManifest> GetManifests()
         {
             foreach (var workloadManifestDirectory in GetManifestDirectories())
             {
                 var workloadManifestPath = Path.Combine(workloadManifestDirectory, "WorkloadManifest.json");
                 var id = Path.GetFileName(workloadManifestDirectory);
 
-                yield return (
+                yield return new(
                     id,
                     workloadManifestPath,
                     () => File.OpenRead(workloadManifestPath),
@@ -158,16 +158,22 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         private string FallbackForMissingManifest(string manifestId)
         {
-            var candidateFeatureBands = Directory.GetDirectories(Path.Combine(_sdkRootPath, "sdk-manifests"))
+            var sdkManifestPath = Path.Combine(_sdkRootPath, "sdk-manifests");
+            if (!Directory.Exists(sdkManifestPath))
+            {
+                return string.Empty;
+            }
+
+            var candidateFeatureBands = Directory.GetDirectories(sdkManifestPath)
                 .Select(dir => Path.GetFileName(dir))
                 .Where(featureBand => Version.TryParse(featureBand, out _))
                 .Select(featureBand => Version.Parse(featureBand))
                 .Where(featureBand => featureBand < Version.Parse(_sdkVersionBand));
             var matchingManifestFatureBands = candidateFeatureBands
-                .Where(featureBand => Directory.Exists(Path.Combine(_sdkRootPath, "sdk-manifests", featureBand.ToString(), manifestId)));
+                .Where(featureBand => Directory.Exists(Path.Combine(sdkManifestPath, featureBand.ToString(), manifestId)));
             if (matchingManifestFatureBands.Any())
             {
-                return Path.Combine(_sdkRootPath, "sdk-manifests", matchingManifestFatureBands.Max()!.ToString(), manifestId);
+                return Path.Combine(sdkManifestPath, matchingManifestFatureBands.Max()!.ToString(), manifestId);
             }
             else
             {
