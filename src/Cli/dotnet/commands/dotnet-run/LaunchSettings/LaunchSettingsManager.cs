@@ -52,9 +52,30 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                     }
                     else
                     {
-                        if (!profilesObject.TryGetProperty(profileName, out profileObject) || profileObject.ValueKind != JsonValueKind.Object)
+                        if (!profilesObject.TryGetProperty(profileName, out profileObject))
                         {
-                            return new LaunchSettingsApplyResult(false, LocalizableStrings.LaunchProfileIsNotAJsonObject);
+                            IEnumerable<JsonProperty> caseInsensitiveProfileMatches = profilesObject
+                                .EnumerateObject()
+                                .Where(p => string.Compare(p.Name, profileName, StringComparison.OrdinalIgnoreCase) == 0); // p.Name should never fail, as profileObject enumerables are only created from a JsonObject.
+
+                            if (caseInsensitiveProfileMatches.Count() > 1)
+                            {
+                                return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.DuplicateCaseInsensitiveLaunchProfileNames,
+                                    String.Join(",", caseInsensitiveProfileMatches.ToArray())));
+                            }
+                            else if (!caseInsensitiveProfileMatches.Any())
+                            {
+                                return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.LaunchProfileDoesNotExist, profileName));
+                            }
+                            else
+                            {
+                                profileObject = profilesObject.GetProperty(caseInsensitiveProfileMatches.First().Name);
+                            }
+
+                            if (profileObject.ValueKind != JsonValueKind.Object)
+                            {
+                                return new LaunchSettingsApplyResult(false, LocalizableStrings.LaunchProfileIsNotAJsonObject);
+                            }
                         }
                     }
 

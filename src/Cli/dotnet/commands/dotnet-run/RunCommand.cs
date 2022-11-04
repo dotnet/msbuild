@@ -171,7 +171,7 @@ namespace Microsoft.DotNet.Tools.Run
             }
             else if (!string.IsNullOrEmpty(LaunchProfile))
             {
-                Reporter.Error.WriteLine(LocalizableStrings.RunCommandExceptionCouldNotLocateALaunchSettingsFile.Bold().Red());
+                throw new GracefulException(LocalizableStrings.RunCommandExceptionCouldNotLocateALaunchSettingsFile, launchSettingsPath);
             }
 
             return true;
