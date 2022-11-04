@@ -720,6 +720,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1122: ReadyToRun 컴파일은 .NET Core 3.0 이상에서만 지원되므로 건너뜁니다.</target>
         <note>{StrBegin="NETSDK1122: "}</note>
       </trans-unit>
+      <trans-unit id="PublishSelfContainedMustBeBool">
+        <source>NETSDK1193: If PublishSelfContained is set, it must be either true or false. The value given was '{0}'.</source>
+        <target state="new">NETSDK1193: If PublishSelfContained is set, it must be either true or false. The value given was '{0}'.</target>
+        <note>{StrBegin="NETSDK1193: "}</note>
+      </trans-unit>
       <trans-unit id="PublishSingleFileRequiresVersion30">
         <source>NETSDK1123: Publishing an application to a single-file requires .NET Core 3.0 or higher.</source>
         <target state="translated">NETSDK1123: 애플리케이션을 단일 파일에 게시하려면 .NET Core 3.0 이상이 필요합니다.</target>

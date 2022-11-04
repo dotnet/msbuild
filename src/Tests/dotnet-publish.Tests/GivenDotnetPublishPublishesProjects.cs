@@ -2,14 +2,18 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
 using Xunit.Abstractions;
 using LocalizableStrings = Microsoft.DotNet.Tools.Publish.LocalizableStrings;
@@ -135,6 +139,85 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Execute()
                 .Should().Pass()
                      .And.HaveStdOutContaining("Hello World");
+        }
+
+        [Fact]
+        public void ItPublishesSelfContainedWithPublishSelfContainedTrue()
+        {
+            var testAppName = "MSBuildTestApp";
+            var rid = EnvironmentInfo.GetCompatibleRid();
+            var outputDirectory = PublishApp(testAppName, rid, "-p:PublishSelfContained=true");
+
+            var outputProgram = Path.Combine(outputDirectory.FullName, $"{testAppName}{Constants.ExeSuffix}");
+
+            outputDirectory.Should().HaveFiles(new[] {
+                "System.dll", // File that should only exist if self contained 
+            });
+
+            new RunExeCommand(Log, outputProgram)
+                .Execute()
+                .Should().Pass()
+                     .And.HaveStdOutContaining("Hello World");
+        }
+
+        [Theory]
+        [InlineData(true, false, false)] // PublishSC sets SC to true even if SC is false in the project file
+        [InlineData(false, false, false)] // PublishSC sets SC to false even if SC is true in the project file 
+        [InlineData(true, true, false)] // PublishSC does not take effect if SC is global
+        public void PublishSelfContainedPropertyDoesOrDoesntOverrideSelfContained(bool publishSelfContained, bool selfContainedIsGlobal, bool publishSelfContainedIsGlobal)
+        {
+            bool selfContained = !publishSelfContained;
+            bool resultShouldBeSelfContained = publishSelfContained && !selfContainedIsGlobal;
+
+            string targetFramework = ToolsetInfo.CurrentTargetFramework;
+            var testProject = new TestProject("MainProject")
+            {
+                TargetFrameworks = targetFramework,
+                IsExe = true
+            };
+
+            testProject.RecordProperties("SelfContained");
+            if (!publishSelfContainedIsGlobal)
+                testProject.AdditionalProperties["PublishSelfContained"] = publishSelfContained.ToString();
+            if (!selfContainedIsGlobal)
+                testProject.AdditionalProperties["SelfContained"] = selfContained.ToString();
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: $"PSC-OVERRIDES-{publishSelfContained}-{selfContainedIsGlobal}-{publishSelfContainedIsGlobal}");
+            var publishCommand = new DotnetCommand(Log);
+            List<string> args = new List<string>
+            {
+                "publish",
+                selfContainedIsGlobal ? $"/p:SelfContained={selfContained}" : "",
+                publishSelfContainedIsGlobal ? $"/p:PublishSelfContained={publishSelfContained}" : "",
+            };
+
+            publishCommand
+                .WithWorkingDirectory(Path.Combine(testAsset.Path, "MainProject"))
+                .Execute(args.ToArray())
+                .Should()
+                .Pass();
+
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework);
+
+            if (resultShouldBeSelfContained)
+            {
+                Assert.True(bool.Parse(properties["SelfContained"]) == true);
+            }
+        }
+
+        [Fact]
+        public void ItFailsWith1193IfPublishSelfContainedHasInvalidValue()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld", identifier: "NET1193Failure")
+                .WithSource();
+
+            var publishCommand = new PublishCommand(testAsset);
+            publishCommand
+                .Execute("-p:PublishSelfContained=Invalid")
+                .Should()
+                .Fail()
+                .And.HaveStdOutContaining("NETSDK1193");
         }
 
         [Theory]
