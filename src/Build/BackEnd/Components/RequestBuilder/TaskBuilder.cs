@@ -969,7 +969,6 @@ namespace Microsoft.Build.BackEnd
                         // If it's allowed to fail without error, log as a message
                         taskLoggingContext.LogComment(MessageImportance.Normal, "TaskReturnedFalseButDidNotLogError", _taskNode.Name);
                     }
-
                     else if (_continueOnError == ContinueOnError.WarnAndContinue)
                     {
                         taskLoggingContext.LogWarning(null,
