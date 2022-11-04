@@ -686,9 +686,7 @@ namespace Microsoft.Build.Internal
 #if CLR2COMPATIBILITY
                         Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
 #else
-                        ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
-                            ? DebugUtils.DebugPath
-                            : Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+                        DebugUtils.DebugPath;
 #endif
 
                         if (String.IsNullOrEmpty(s_debugDumpPath))

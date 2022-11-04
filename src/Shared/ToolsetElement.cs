@@ -31,32 +31,25 @@ namespace Microsoft.Build.Evaluation
 
         internal static ToolsetConfigurationSection ReadToolsetConfigurationSection(Configuration configuration)
         {
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
+            if (configuration == null)
             {
-                if (configuration == null)
-                {
-                    return null;
-                }
-
-                lock (s_syncLock)
-                {
-                    // Cache 1st requested configuration section. In unit tests, different Configuration is provided for particular test cases.
-                    // During runtime, however, only MSBuild exe configuration file is provided to read toolset configuration from,
-                    //   and modifying MSBuild exe configuration during lifetime of msbuild nodes is neither expected nor supported.
-                    if (s_toolsetConfigurationSectionCache == null)
-                    {
-                        s_toolsetConfigurationSectionCache = GetToolsetConfigurationSection(configuration);
-                        s_configurationOfCachedSection = configuration;
-                    }
-
-                    return s_configurationOfCachedSection == configuration ?
-                        s_toolsetConfigurationSectionCache :
-                        GetToolsetConfigurationSection(configuration);
-                }
+                return null;
             }
-            else
+
+            lock (s_syncLock)
             {
-                return GetToolsetConfigurationSection(configuration);
+                // Cache 1st requested configuration section. In unit tests, different Configuration is provided for particular test cases.
+                // During runtime, however, only MSBuild exe configuration file is provided to read toolset configuration from,
+                //   and modifying MSBuild exe configuration during lifetime of msbuild nodes is neither expected nor supported.
+                if (s_toolsetConfigurationSectionCache == null)
+                {
+                    s_toolsetConfigurationSectionCache = GetToolsetConfigurationSection(configuration);
+                    s_configurationOfCachedSection = configuration;
+                }
+
+                return s_configurationOfCachedSection == configuration ?
+                    s_toolsetConfigurationSectionCache :
+                    GetToolsetConfigurationSection(configuration);
             }
         }
 
