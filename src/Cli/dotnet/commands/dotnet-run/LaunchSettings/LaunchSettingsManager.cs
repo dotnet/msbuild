@@ -60,8 +60,8 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 
                             if (caseInsensitiveProfileMatches.Count() > 1)
                             {
-                                return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.DuplicateCaseInsensitiveLaunchProfileNames,
-                                    String.Join(",", caseInsensitiveProfileMatches.ToArray())));
+                                throw new GracefulException(LocalizableStrings.DuplicateCaseInsensitiveLaunchProfileNames,
+                                    String.Join(",", caseInsensitiveProfileMatches.ToArray()));
                             }
                             else if (!caseInsensitiveProfileMatches.Any())
                             {
