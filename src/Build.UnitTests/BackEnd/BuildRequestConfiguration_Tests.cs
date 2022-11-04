@@ -424,7 +424,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         [Trait("Category", "mono-osx-failing")]
-        public void TestCache2()
+        public void WorksCorrectlyWithCurlyBraces()
         {
             string projectBody = ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
