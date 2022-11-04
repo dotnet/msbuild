@@ -2590,6 +2590,11 @@
         <target state="translated">Die Datei "{0}" wird in "{1}" entzippt.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Unzip.ZipSlipExploit">
+        <source>Entry is outside the target directory: "{0}"</source>
+        <target state="new">Entry is outside the target directory: "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
         <source>MSB3401: "{1}" is an invalid value for the "{0}" parameter.  The valid values are: {2}</source>
         <target state="translated">MSB3401: "{1}" ist ein ungültiger Wert für den Parameter "{0}". Gültige Werte sind: {2}</target>
