@@ -629,6 +629,42 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         }
 
         [Fact]
+        public void AddProjectToSolution_BasicInSolutionRoot()
+        {
+            string templateLocation = "PostActions/AddProjectToSolution/BasicInSolutionRoot";
+            string expectedTemplateName = "TestAssets.PostActions.AddProjectToSolution.BasicInSolutionRoot";
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            string outputDirectory = CreateTemporaryFolder("output");
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+
+            //creating solution file to add to
+            new DotnetNewCommand(_log, "sln", "-n", "MySolution", "-o", outputDirectory)
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr();
+
+            new DotnetNewCommand(_log, expectedTemplateName, "-n", "MyProject", "-o", outputDirectory)
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining($"The template \"{expectedTemplateName}\" was created successfully.")
+                .And.HaveStdOutContaining("Successfully added")
+                .And.HaveStdOutContaining("in the root of solution file")
+                .And.NotHaveStdOutContaining("Manual instructions: Add the generated files to solution manually.")
+                .And.HaveStdOutContaining(Path.Combine(outputDirectory, "MySolution.sln"))
+                .And.HaveStdOutContaining(Path.Combine(outputDirectory, "MyProject.csproj"));
+
+            Assert.Contains("MyProject.csproj", File.ReadAllText(Path.Combine(outputDirectory, "MySolution.sln")));
+        }
+
+        [Fact]
         public void AddProjectToSolution_WithOutputAbsolutePath()
         {
             string templateLocation = "PostActions/AddProjectToSolution/Basic";

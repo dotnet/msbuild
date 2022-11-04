@@ -37,6 +37,11 @@
         <target state="translated">Идентификатор установленной рабочей нагрузки</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadInfoDescription">
+        <source>Display information about installed workloads.</source>
+        <target state="translated">Отображение сведений об установленных рабочих нагрузках.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WorkloadInstallTypeColumn">
         <source>Install Type</source>
         <target state="translated">Тип установки</target>

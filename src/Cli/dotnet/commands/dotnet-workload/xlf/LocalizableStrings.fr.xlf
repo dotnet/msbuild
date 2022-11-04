@@ -37,6 +37,11 @@
         <target state="translated">ID de la charge de travail installée</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadInfoDescription">
+        <source>Display information about installed workloads.</source>
+        <target state="translated">Affichez des informations sur les charges de travail installées.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WorkloadInstallTypeColumn">
         <source>Install Type</source>
         <target state="translated">Type d'installation</target>

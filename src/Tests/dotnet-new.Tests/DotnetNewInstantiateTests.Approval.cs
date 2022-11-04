@@ -436,6 +436,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             return Verify(commandResult.StdErr)
                 .AddScrubber(output =>
                 {
+                    output = output.Replace(_fixture.HomeDirectory, "%HOME%");
                     //unify directory separators
                     output = output.Replace("\\", "/");
                     //order of files may vary, replace filename with placeholders

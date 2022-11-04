@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
         [Fact(DisplayName = nameof(AddProjectToSolutionPostActionFindSolutionFileAtOutputPath))]
         public void AddProjectToSolutionPostActionFindSolutionFileAtOutputPath()
         {
-            string targetBasePath = FileSystemHelpers.GetNewVirtualizedPath(_engineEnvironmentSettings);
+            string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
             string solutionFileFullPath = Path.Combine(targetBasePath, "MySln.sln");
             _engineEnvironmentSettings.Host.FileSystem.WriteAllText(solutionFileFullPath, string.Empty);
 
@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
         [Fact(DisplayName = nameof(AddProjectToSolutionPostActionFindsOneProjectToAdd))]
         public void AddProjectToSolutionPostActionFindsOneProjectToAdd()
         {
-            string outputBasePath = FileSystemHelpers.GetNewVirtualizedPath(_engineEnvironmentSettings);
+            string outputBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
             IPostAction postAction = new MockPostAction()
             {
                 ActionId = DotnetSlnPostActionProcessor.ActionProcessorId,
@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
         [Fact(DisplayName = nameof(AddProjectToSolutionPostActionFindsMultipleProjectsToAdd))]
         public void AddProjectToSolutionPostActionFindsMultipleProjectsToAdd()
         {
-            string outputBasePath = FileSystemHelpers.GetNewVirtualizedPath(_engineEnvironmentSettings);
+            string outputBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
             IPostAction postAction = new MockPostAction()
             {
                 ActionId = DotnetSlnPostActionProcessor.ActionProcessorId,
@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
         [Fact(DisplayName = nameof(AddProjectToSolutionPostActionFindsMultipleProjectsToAddWithOutputBasePath))]
         public void AddProjectToSolutionPostActionFindsMultipleProjectsToAddWithOutputBasePath()
         {
-            string outputBasePath = FileSystemHelpers.GetNewVirtualizedPath(_engineEnvironmentSettings);
+            string outputBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
 
             IPostAction postAction = new MockPostAction()
             {
@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
         [Fact(DisplayName = nameof(AddProjectToSolutionPostActionWithoutPrimaryOutputIndexesWithOutputBasePath))]
         public void AddProjectToSolutionPostActionWithoutPrimaryOutputIndexesWithOutputBasePath()
         {
-            string outputBasePath = FileSystemHelpers.GetNewVirtualizedPath(_engineEnvironmentSettings);
+            string outputBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
 
             IPostAction postAction = new MockPostAction()
             {
@@ -170,7 +170,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
             var callback = new MockAddProjectToSolutionCallback();
             var actionProcessor = new DotnetSlnPostActionProcessor(callback.AddProjectToSolution);
 
-            string targetBasePath = _engineEnvironmentSettings.GetNewVirtualizedPath();
+            string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
             string slnFileFullPath = Path.Combine(targetBasePath, "MyApp.sln");
             string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
 
@@ -199,7 +199,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
             var callback = new MockAddProjectToSolutionCallback();
             var actionProcessor = new DotnetSlnPostActionProcessor(callback.AddProjectToSolution);
 
-            string targetBasePath = _engineEnvironmentSettings.GetNewVirtualizedPath();
+            string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
             string slnFileFullPath = Path.Combine(targetBasePath, "MyApp.sln");
             string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
 
@@ -222,16 +222,118 @@ namespace Microsoft.DotNet.Cli.New.Tests
             Assert.Equal(slnFileFullPath, callback.Solution);
         }
 
+        [Fact(DisplayName = nameof(AddProjectToSolutionCanPlaceProjectInSolutionRoot))]
+        public void AddProjectToSolutionCanPlaceProjectInSolutionRoot()
+        {
+            var callback = new MockAddProjectToSolutionCallback();
+            var actionProcessor = new DotnetSlnPostActionProcessor(callback.AddProjectToSolution);
+
+            string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
+            string slnFileFullPath = Path.Combine(targetBasePath, "MyApp.sln");
+            string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
+
+            _engineEnvironmentSettings.Host.FileSystem.WriteAllText(slnFileFullPath, "");
+
+            var args = new Dictionary<string, string>() {
+                { "projectFiles", "MyApp.csproj" },
+                { "inRoot", "true" }
+            };
+            var postAction = new MockPostAction { ActionId = DotnetSlnPostActionProcessor.ActionProcessorId, Args = args };
+
+            MockCreationEffects creationEffects = new MockCreationEffects()
+                .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));
+
+            actionProcessor.Process(
+                _engineEnvironmentSettings,
+                postAction,
+                creationEffects,
+                new MockCreationResult(),
+                targetBasePath);
+
+            Assert.True(callback.InRoot);
+            Assert.Null(callback.TargetFolder);
+        }
+
+        [Fact]
+        public void AddProjectToSolutionCanPlaceProjectInSolutionFolder()
+        {
+            var callback = new MockAddProjectToSolutionCallback();
+            var actionProcessor = new DotnetSlnPostActionProcessor(callback.AddProjectToSolution);
+
+            string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
+            string slnFileFullPath = Path.Combine(targetBasePath, "MyApp.sln");
+            string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
+
+            _engineEnvironmentSettings.Host.FileSystem.WriteAllText(slnFileFullPath, "");
+
+            var args = new Dictionary<string, string>() {
+                { "projectFiles", "MyApp.csproj" },
+                { "solutionFolder", "src" }
+            };
+            var postAction = new MockPostAction { ActionId = DotnetSlnPostActionProcessor.ActionProcessorId, Args = args };
+
+            MockCreationEffects creationEffects = new MockCreationEffects()
+                .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));
+
+            actionProcessor.Process(
+                _engineEnvironmentSettings,
+                postAction,
+                creationEffects,
+                new MockCreationResult(),
+                targetBasePath);
+
+            Assert.Null(callback.InRoot);
+            Assert.Equal("src", callback.TargetFolder);
+        }
+
+        [Fact]
+        public void AddProjectToSolutionFailsWhenSolutionFolderAndInRootSpecified()
+        {
+            var callback = new MockAddProjectToSolutionCallback();
+            var actionProcessor = new DotnetSlnPostActionProcessor(callback.AddProjectToSolution);
+
+            string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
+            string slnFileFullPath = Path.Combine(targetBasePath, "MyApp.sln");
+            string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
+
+            _engineEnvironmentSettings.Host.FileSystem.WriteAllText(slnFileFullPath, "");
+
+            var args = new Dictionary<string, string>() {
+                { "projectFiles", "MyApp.csproj" },
+                { "inRoot", "true" },
+                { "solutionFolder", "src" }
+            };
+            var postAction = new MockPostAction { ActionId = DotnetSlnPostActionProcessor.ActionProcessorId, Args = args };
+
+            MockCreationEffects creationEffects = new MockCreationEffects()
+                .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));
+
+            bool result = actionProcessor.Process(
+                _engineEnvironmentSettings,
+                postAction,
+                creationEffects,
+                new MockCreationResult(),
+                targetBasePath);
+
+            Assert.False(result);
+        }
+
         private class MockAddProjectToSolutionCallback
         {
             public string? Solution { get; private set; }
 
             public IReadOnlyList<string?>? Projects { get; private set; }
 
-            public bool AddProjectToSolution(string solution, IReadOnlyList<string?> projects, string? targetFolder)
+            public string? TargetFolder { get; private set; }
+
+            public bool? InRoot { get; private set; }
+
+            public bool AddProjectToSolution(string solution, IReadOnlyList<string?> projects, string? targetFolder, bool? inRoot)
             {
                 Solution = solution;
                 Projects = projects;
+                InRoot = inRoot;
+                TargetFolder = targetFolder;
 
                 return true;
             }
