@@ -260,7 +260,7 @@ namespace Microsoft.NET.Build.Tests
                 expectedRuntimeIdentifier = Path.GetFileName(Directory.GetDirectories(dir).Single());
             }
 
-            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework, runtimeIdentifier: expectedRuntimeIdentifier);
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework);
             if (expectSelfContained)
             {
                 properties["SelfContained"].ToLowerInvariant().Should().Be("true");
