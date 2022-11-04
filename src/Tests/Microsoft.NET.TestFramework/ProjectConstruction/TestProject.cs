@@ -66,7 +66,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
         public Dictionary<string, string> EmbeddedResources { get; } = new Dictionary<string, string>();
 
         /// <summary>
-        /// Use this dictionary to set a property (the key) to a value for the created project. value before evaluation.
+        /// Use this dictionary to set a property (the key) to a value for the created project.
         /// </summary>
         public Dictionary<string, string> AdditionalProperties { get; } = new Dictionary<string, string>();
 
