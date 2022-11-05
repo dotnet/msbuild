@@ -4,4 +4,12 @@
     <DiagnosticId>PKV006</DiagnosticId>
     <Target>.NETFramework,Version=v3.5</Target>
   </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>.NETFramework,Version=v3.5</Target>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0004</DiagnosticId>
+    <Target>.NETFramework,Version=v3.5</Target>
+  </Suppression>
 </Suppressions>
