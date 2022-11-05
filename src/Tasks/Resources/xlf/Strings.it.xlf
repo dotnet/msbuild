@@ -2590,6 +2590,11 @@
         <target state="translated">Decompressione del file "{0}" in "{1}".</target>
         <note />
       </trans-unit>
+      <trans-unit id="Unzip.ZipSlipExploit">
+        <source>Entry is outside the target directory: "{0}"</source>
+        <target state="new">Entry is outside the target directory: "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
         <source>MSB3401: "{1}" is an invalid value for the "{0}" parameter.  The valid values are: {2}</source>
         <target state="translated">MSB3401: "{1}" è un valore non valido per il parametro "{0}". I valori validi sono: {2}</target>
