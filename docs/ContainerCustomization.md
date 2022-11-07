@@ -113,7 +113,7 @@ See [default container labels](#default-container-labels) for a list of labels t
 ```xml
 <ItemGroup>
     <ContainerLabel Include="org.contoso.businessunit" Value="contoso-university" />
-<ItemGroup>
+</ItemGroup>
 ```
 
 ## ContainerEnvironmentVariable
