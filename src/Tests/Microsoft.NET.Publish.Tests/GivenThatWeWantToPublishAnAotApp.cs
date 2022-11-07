@@ -27,6 +27,8 @@ namespace Microsoft.NET.Publish.Tests
     {
         private readonly string RuntimeIdentifier = $"/p:RuntimeIdentifier={RuntimeInformation.RuntimeIdentifier}";
 
+        private readonly string ExplicitPackageVersion = "7.0.0-rc.2.22456.11";
+
         public GivenThatWeWantToPublishAnAotApp(ITestOutputHelper log) : base(log)
         {
         }
@@ -272,7 +274,7 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["PublishAot"] = "true";
 
                 // This will add a reference to a package that will also be automatically imported by the SDK
-                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", "7.0.0-rc.2.22456.11"));
+                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", ExplicitPackageVersion));
 
                 // Linux symbol files are embedded and require additional steps to be stripped to a separate file
                 // assumes /bin (or /usr/bin) are in the PATH
@@ -282,7 +284,7 @@ namespace Microsoft.NET.Publish.Tests
                 }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand= new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
                 publishCommand
                     .Execute($"/p:RuntimeIdentifier={rid}")
                     .Should().Pass()
@@ -307,6 +309,8 @@ namespace Microsoft.NET.Publish.Tests
                 var command = new RunExeCommand(Log, publishedExe)
                     .Execute().Should().Pass()
                     .And.HaveStdOutContaining("Hello World");
+
+                CheckIlcVersions(Path.Combine(testAsset.TestRoot, testProject.Name), targetFramework, ExplicitPackageVersion);
             }
         }
 
@@ -322,7 +326,7 @@ namespace Microsoft.NET.Publish.Tests
                 var testProject = CreateHelloWorldTestProject(targetFramework, projectName, true);
 
                 // This will add a reference to a package that will also be automatically imported by the SDK
-                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", "7.0.0-rc.2.22456.11"));
+                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", ExplicitPackageVersion));
 
                 // Linux symbol files are embedded and require additional steps to be stripped to a separate file
                 // assumes /bin (or /usr/bin) are in the PATH
@@ -373,7 +377,6 @@ namespace Microsoft.NET.Publish.Tests
                 var publishedExe = Path.Combine(publishDirectory, $"{testProject.Name}{Constants.ExeSuffix}");
                 File.Exists(publishedDll).Should().BeFalse();
                 File.Exists(publishedExe).Should().BeTrue();
-
             }
         }
 
@@ -391,8 +394,8 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["PublishAot"] = "true";
 
                 // This will add a reference to a package that will also be automatically imported by the SDK
-                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", "7.0.0-rc.2.22456.11"));
-                testProject.PackageReferences.Add(new TestPackageReference("runtime.win-x64.Microsoft.DotNet.ILCompiler", "7.0.0-rc.2.22456.11"));
+                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", ExplicitPackageVersion));
+                testProject.PackageReferences.Add(new TestPackageReference("runtime.win-x64.Microsoft.DotNet.ILCompiler", ExplicitPackageVersion));
 
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -409,6 +412,8 @@ namespace Microsoft.NET.Publish.Tests
                 var publishedExe = Path.Combine(publishDirectory, $"{testProject.Name}{Constants.ExeSuffix}");
                 File.Exists(publishedDll).Should().BeFalse();
                 File.Exists(publishedExe).Should().BeTrue();
+
+                CheckIlcVersions(Path.Combine(testAsset.TestRoot, testProject.Name), targetFramework, ExplicitPackageVersion);
             }
         }
 
@@ -424,8 +429,8 @@ namespace Microsoft.NET.Publish.Tests
                 var testProject = CreateHelloWorldTestProject(targetFramework, projectName, true);
 
                 // This will add a reference to a package that will also be automatically imported by the SDK
-                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", "7.0.0-rc.2.22456.11"));
-                testProject.PackageReferences.Add(new TestPackageReference("runtime.win-x64.Microsoft.DotNet.ILCompiler", "7.0.0-rc.2.22456.11"));
+                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", ExplicitPackageVersion));
+                testProject.PackageReferences.Add(new TestPackageReference("runtime.win-x64.Microsoft.DotNet.ILCompiler", ExplicitPackageVersion));
 
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -438,7 +443,6 @@ namespace Microsoft.NET.Publish.Tests
                 var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
                 var publishedDll = Path.Combine(publishDirectory, $"{projectName}.dll");
                 File.Exists(publishedDll).Should().BeTrue();
-
             }
         }
 
@@ -476,7 +480,7 @@ namespace Microsoft.NET.Publish.Tests
                 var testProject = CreateHelloWorldTestProject("net6.0", projectName, true);
                 testProject.AdditionalProperties["PublishAot"] = "true";
 
-                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", "7.0.0-rc.2.22456.11"));
+                testProject.PackageReferences.Add(new TestPackageReference("Microsoft.DotNet.ILCompiler", ExplicitPackageVersion));
 
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -698,6 +702,30 @@ namespace Microsoft.NET.Publish.Tests
                     .Execute()
                     .Should().Pass();
             }
+        }
+
+        private void CheckIlcVersions(string projectPath, string targetFramework, string expectedVersion)
+        {
+            // Compiler version matches expected version
+            var ilcToolsPathCommand = new GetValuesCommand(Log, projectPath, targetFramework, "IlcToolsPath")
+            {
+                DependsOnTargets = "WriteIlcRspFileForCompilation"
+            };
+            ilcToolsPathCommand.Execute().Should().Pass();
+            var ilcToolsPath = ilcToolsPathCommand.GetValues()[0];
+            var ilcVersion = Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(ilcToolsPath)));
+            ilcVersion.Should().Be(ExplicitPackageVersion);
+
+            // Compilation references (corelib) match expected version
+            var ilcReferenceCommand = new GetValuesCommand(Log, projectPath, targetFramework, "IlcReference", GetValuesCommand.ValueType.Item)
+            {
+                DependsOnTargets = "WriteIlcRspFileForCompilation"
+            };
+            ilcReferenceCommand.Execute().Should().Pass();
+            var ilcReference = ilcReferenceCommand.GetValues();
+            var corelibReference = ilcReference.Where(r => Path.GetFileName(r).Equals("System.Private.CoreLib.dll")).Single();
+            var ilcReferenceVersion = Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(corelibReference)));
+            ilcReferenceVersion.Should().Be(ExplicitPackageVersion);
         }
 
         private TestProject CreateHelloWorldTestProject(string targetFramework, string projectName, bool isExecutable)

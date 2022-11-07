@@ -563,7 +563,6 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string home = CreateTemporaryFolder(folderName: "Home");
             string invalidTemplatePath = GetTestTemplateLocation("Invalid/MissingMandatoryConfig");
             new DotnetNewCommand(_log, "-i", invalidTemplatePath)
-                .WithDebug()
                 .WithCustomHive(home)
                 .WithWorkingDirectory(CreateTemporaryFolder())
                 .Execute()
@@ -571,7 +570,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .ExitWith(0)
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining($"Error: Failed to load template from {invalidTemplatePath}")
-                .And.HaveStdOutContaining($"The template root is outside the specified install source location.")
+                .And.HaveStdOutContaining($"Details: The template root is outside the specified install source location.")
                 .And.HaveStdOutContaining($"No templates were found in the package {invalidTemplatePath}.");
         }
 
