@@ -118,7 +118,7 @@ public class ParseContainerProperties : Microsoft.Build.Utilities.Task
                 Log.LogError(null, "CONTAINER003", "Container.InvalidTag", null, 0, 0, 0, 0, $"Invalid {nameof(ContainerImageTag)} provided: {{0}}. Image tags must be alphanumeric, underscore, hyphen, or period.", ContainerImageTag);
             }
         }
-        else if (ContainerImageTags.Length != 0 && !TryValidateTags(ContainerImageTags, out var valids, out var invalids))
+        else if (ContainerImageTags.Length != 0 && TryValidateTags(ContainerImageTags, out var valids, out var invalids))
         {
             validTags = valids;
             if (invalids.Any())
