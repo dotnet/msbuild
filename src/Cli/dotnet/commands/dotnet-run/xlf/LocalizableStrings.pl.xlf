@@ -115,8 +115,8 @@ Bieżący element {1}: „{2}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotLocateALaunchSettingsFile">
-        <source>The specified launch profile '{0}' could not be located. Is it of the form ./Properties/launchSettings.json?</source>
-        <target state="new">The specified launch profile '{0}' could not be located. Is it of the form ./Properties/launchSettings.json?</target>
+        <source>The specified launch profile '{0}' could not be located.</source>
+        <target state="new">The specified launch profile '{0}' could not be located.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotApplyLaunchSettings">

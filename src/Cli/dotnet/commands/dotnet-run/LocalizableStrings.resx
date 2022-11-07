@@ -173,7 +173,7 @@ The current {1} is '{2}'.</value>
     <value>Arguments passed to the application that is being run.</value>
   </data>
   <data name="RunCommandExceptionCouldNotLocateALaunchSettingsFile" xml:space="preserve">
-    <value>The specified launch profile '{0}' could not be located. Is it of the form ./Properties/launchSettings.json?</value>
+    <value>The specified launch profile '{0}' could not be located.</value>
   </data>
   <data name="RunCommandExceptionCouldNotApplyLaunchSettings" xml:space="preserve">
     <value>The launch profile "{0}" could not be applied.
