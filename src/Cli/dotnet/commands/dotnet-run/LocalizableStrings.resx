@@ -186,7 +186,7 @@ The current {1} is '{2}'.</value>
     <value>Using launch settings from {0}...</value>
   </data>
   <data name="LaunchProfileIsNotAJsonObject" xml:space="preserve">
-    <value>A profile with the specified name is not a valid JSON object.</value>
+    <value>A profile with the specified name isn't a valid JSON object.</value>
   </data>
   <data name="LaunchProfileHandlerCannotBeLocated" xml:space="preserve">
     <value>The launch profile type '{0}' is not supported.</value>
@@ -227,7 +227,7 @@ The current {1} is '{2}'.</value>
     <value>Only one project can be specified at a time using the `-p` option.</value>
   </data>
   <data name="DuplicateCaseInsensitiveLaunchProfileNames" xml:space="preserve">
-    <value>There are several launch profiles with case-sensitive names, which is not permitted:
+    <value>There are several launch profiles with case-sensitive names, which isn't permitted:
 {0}
 Make the profile names distinct.</value>
   </data>
