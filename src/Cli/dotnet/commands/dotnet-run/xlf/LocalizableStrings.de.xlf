@@ -33,8 +33,12 @@
         <note />
       </trans-unit>
       <trans-unit id="DuplicateCaseInsensitiveLaunchProfileNames">
-        <source>There are several launch profiles with case-sensitive names, which is not permitted: '{0}'. Make the profile names distinct.</source>
-        <target state="new">There are several launch profiles with case-sensitive names, which is not permitted: '{0}'. Make the profile names distinct.</target>
+        <source>There are several launch profiles with case-sensitive names, which is not permitted:
+{0}
+Make the profile names distinct.</source>
+        <target state="new">There are several launch profiles with case-sensitive names, which is not permitted:
+{0}
+Make the profile names distinct.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileDoesNotExist">

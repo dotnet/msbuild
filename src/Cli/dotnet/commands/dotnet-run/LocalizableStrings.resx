@@ -227,7 +227,9 @@ The current {1} is '{2}'.</value>
     <value>Only one project can be specified at a time using the `-p` option.</value>
   </data>
   <data name="DuplicateCaseInsensitiveLaunchProfileNames" xml:space="preserve">
-    <value>There are several launch profiles with case-sensitive names, which is not permitted: '{0}'. Make the profile names distinct.</value>
+    <value>There are several launch profiles with case-sensitive names, which is not permitted:
+{0}
+Make the profile names distinct.</value>
   </data>
   <data name="LaunchProfileDoesNotExist" xml:space="preserve">
     <value>A launch profile with the name '{0}' doesn't exist.</value>

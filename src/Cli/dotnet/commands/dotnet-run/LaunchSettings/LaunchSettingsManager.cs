@@ -50,32 +50,29 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                             .EnumerateObject()
                             .FirstOrDefault(IsDefaultProfileType).Value;
                     }
-                    else
+                    else // Find a profile match for the given profileName
                     {
-                        if (!profilesObject.TryGetProperty(profileName, out profileObject))
+                        IEnumerable<JsonProperty> caseInsensitiveProfileMatches = profilesObject
+                            .EnumerateObject() // p.Name shouldn't fail, as profileObject enumerables here are only created from an existing JsonObject
+                            .Where(p => string.Compare(p.Name, profileName, StringComparison.OrdinalIgnoreCase) == 0);
+
+                        if (caseInsensitiveProfileMatches.Count() > 1)
                         {
-                            IEnumerable<JsonProperty> caseInsensitiveProfileMatches = profilesObject
-                                .EnumerateObject()
-                                .Where(p => string.Compare(p.Name, profileName, StringComparison.OrdinalIgnoreCase) == 0); // p.Name should never fail, as profileObject enumerables are only created from a JsonObject.
+                            throw new GracefulException(LocalizableStrings.DuplicateCaseInsensitiveLaunchProfileNames,
+                                String.Join(",\n", caseInsensitiveProfileMatches.Select(p => $"\t{p.Name}").ToArray()));
+                        }
+                        else if (!caseInsensitiveProfileMatches.Any())
+                        {
+                            return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.LaunchProfileDoesNotExist, profileName));
+                        }
+                        else
+                        {
+                            profileObject = profilesObject.GetProperty(caseInsensitiveProfileMatches.First().Name);
+                        }
 
-                            if (caseInsensitiveProfileMatches.Count() > 1)
-                            {
-                                throw new GracefulException(LocalizableStrings.DuplicateCaseInsensitiveLaunchProfileNames,
-                                    String.Join(",", caseInsensitiveProfileMatches.ToArray()));
-                            }
-                            else if (!caseInsensitiveProfileMatches.Any())
-                            {
-                                return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.LaunchProfileDoesNotExist, profileName));
-                            }
-                            else
-                            {
-                                profileObject = profilesObject.GetProperty(caseInsensitiveProfileMatches.First().Name);
-                            }
-
-                            if (profileObject.ValueKind != JsonValueKind.Object)
-                            {
-                                return new LaunchSettingsApplyResult(false, LocalizableStrings.LaunchProfileIsNotAJsonObject);
-                            }
+                        if (profileObject.ValueKind != JsonValueKind.Object)
+                        {
+                            return new LaunchSettingsApplyResult(false, LocalizableStrings.LaunchProfileIsNotAJsonObject);
                         }
                     }
 

@@ -48,18 +48,18 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         {
             var testAppName = "AppWithDuplicateLaunchProfiles";
             var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+                .WithSource();
 
             var runResult = new DotnetCommand(Log, "run")
                 .WithWorkingDirectory(testInstance.Path)
                 .Execute("--launch-profile", "first");
 
-            string[] expectedErrorWords = LocalizableStrings.DuplicateCaseInsensitiveLaunchProfileNames.Replace("\'{0}\'", "").Split(" ");
+            string expectedError = String.Format(LocalizableStrings.DuplicateCaseInsensitiveLaunchProfileNames, "\tfirst,\r\n\tFIRST");
             runResult
                 .Should()
-                .Fail();
-
-            expectedErrorWords.ForEach(word => runResult.Should().HaveStdErrContaining(word));
+                .Fail()
+                .And
+                .HaveStdErrContaining(expectedError);
         }
 
         [Fact]
