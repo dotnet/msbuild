@@ -875,4 +875,8 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1192: Targeting .NET 7.0 or higher in Visual Studio 2022 17.3 is not supported.</value>
     <comment>{StrBegin="NETSDK1192: "}</comment>
   </data>
+  <data name="PublishSelfContainedMustBeBool" xml:space="preserve">
+    <value>NETSDK1193: If PublishSelfContained is set, it must be either true or false. The value given was '{0}'.</value>
+    <comment>{StrBegin="NETSDK1193: "}</comment>
+  </data>
 </root>

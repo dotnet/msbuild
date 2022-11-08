@@ -61,6 +61,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeIdentifier Condition="'$(PlatformTarget)' == 'x86' or '$(PlatformTarget)' == ''">win7-x86</RuntimeIdentifier>
   </PropertyGroup>
 
+  <!-- Edit SelfContained to match the value of PublishSelfContained if we are publishing.
+       This Won't affect t:/Publish (because of _IsPublishing), and also won't override a global SelfContained property.-->
+  <PropertyGroup Condition="'$(_IsPublishing)' == 'true' and ('$(PublishSelfContained)' == 'true' or '$(PublishSelfContained)' == 'false')">
+    <SelfContained>$(PublishSelfContained)</SelfContained>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(UseCurrentRuntimeIdentifier)' == ''">
     <UseCurrentRuntimeIdentifier Condition="
                  '$(RuntimeIdentifier)' == '' and
@@ -78,6 +84,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeIdentifier>$(NETCoreSdkPortableRuntimeIdentifier)</RuntimeIdentifier>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(_IsPublishing)' == 'true' and '$(PublishRuntimeIdentifier)' != ''">
+    <RuntimeIdentifier>$(PublishRuntimeIdentifier)</RuntimeIdentifier>
+  </PropertyGroup>
+  
   <PropertyGroup Condition="'$(PlatformTarget)' == ''">
     <_UsingDefaultPlatformTarget>true</_UsingDefaultPlatformTarget>
   </PropertyGroup>
@@ -182,6 +192,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                 FormatArguments="PublishAot"/>
 
     <!-- End of implicit RID resolver checks.-->
+
+    <NETSdkError Condition="'$(PublishSelfContained)' != 'true' and '$(PublishSelfContained)' != 'false' and '$(PublishSelfContained)' != ''"
+                ResourceName="PublishSelfContainedMustBeBool"
+                FormatArguments="$(PublishSelfContained)"/>
+
     <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(UseAppHost)' != 'true' and '$(_RuntimeIdentifierUsesAppHost)' == 'true'"
                  ResourceName="CannotUseSelfContainedWithoutAppHost" />
 
