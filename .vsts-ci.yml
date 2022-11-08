@@ -40,6 +40,8 @@ variables:
       value: true
     - name: _OfficialBuildArgs
       value: /p:OfficialBuilder=Microsoft
+    - name: Codeql.Enabled
+      value: true
     - group: DotNetBuilds storage account read tokens
     - name: _InternalRuntimeDownloadArgs
       value: /p:DotNetRuntimeSourceFeed=https://dotnetbuilds.blob.core.windows.net/internal 
