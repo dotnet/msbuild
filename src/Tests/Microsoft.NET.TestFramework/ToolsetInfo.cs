@@ -154,29 +154,29 @@ namespace Microsoft.NET.TestFramework
             }
         }
 
-        public void AddTestEnvironmentVariables(SdkCommandSpec command)
+        public void AddTestEnvironmentVariables(IDictionary<string, string> environment)
         {
             if (ShouldUseFullFrameworkMSBuild)
             {
                 string sdksPath = Path.Combine(DotNetRoot, "sdk", SdkVersion, "Sdks");
 
                 //  Use stage 2 MSBuild SDK resolver
-                command.Environment["MSBUILDADDITIONALSDKRESOLVERSFOLDER"] = SdkResolverPath;
+                environment["MSBUILDADDITIONALSDKRESOLVERSFOLDER"] = SdkResolverPath;
 
                 //  Avoid using stage 0 dotnet install dir
-                command.Environment["DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR"] = "";
+                environment["DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR"] = "";
 
                 //  Put stage 2 on the Path (this is how the MSBuild SDK resolver finds dotnet)
-                command.Environment["Path"] = DotNetRoot + ";" + Environment.GetEnvironmentVariable("Path");
+                environment["Path"] = DotNetRoot + ";" + Environment.GetEnvironmentVariable("Path");
 
                 if (!string.IsNullOrEmpty(MicrosoftNETBuildExtensionsPathOverride))
                 {
                     var microsoftNETBuildExtensionsPath = GetMicrosoftNETBuildExtensionsPath();
-                    command.Environment["MicrosoftNETBuildExtensionsTargets"] = Path.Combine(microsoftNETBuildExtensionsPath, "Microsoft.NET.Build.Extensions.targets");
+                    environment["MicrosoftNETBuildExtensionsTargets"] = Path.Combine(microsoftNETBuildExtensionsPath, "Microsoft.NET.Build.Extensions.targets");
 
                     if (UsingFullMSBuildWithoutExtensionsTargets())
                     {
-                        command.Environment["CustomAfterMicrosoftCommonTargets"] = Path.Combine(sdksPath, "Microsoft.NET.Build.Extensions",
+                        environment["CustomAfterMicrosoftCommonTargets"] = Path.Combine(sdksPath, "Microsoft.NET.Build.Extensions",
                             "msbuildExtensions-ver", "Microsoft.Common.targets", "ImportAfter", "Microsoft.NET.Build.Extensions.targets");
                     }
                 }
@@ -185,21 +185,21 @@ namespace Microsoft.NET.TestFramework
 
             if (Environment.Is64BitProcess)
             {
-                command.Environment.Add("DOTNET_ROOT", DotNetRoot);
+                environment.Add("DOTNET_ROOT", DotNetRoot);
             }
             else
             {
-                command.Environment.Add("DOTNET_ROOT(x86)", DotNetRoot);
+                environment.Add("DOTNET_ROOT(x86)", DotNetRoot);
             }
 
             if (!string.IsNullOrEmpty(CliHomePath))
             {
-                command.Environment.Add("DOTNET_CLI_HOME", CliHomePath);
+                environment.Add("DOTNET_CLI_HOME", CliHomePath);
             }
 
             //  We set this environment variable for in-process tests, but we don't want it to flow to out of process tests
             //  (especially if we're trying to run on full Framework MSBuild)
-            command.Environment[DotNet.Cli.Utils.Constants.MSBUILD_EXE_PATH] = "";
+            environment[DotNet.Cli.Utils.Constants.MSBUILD_EXE_PATH] = "";
 
         }
 
@@ -236,7 +236,7 @@ namespace Microsoft.NET.TestFramework
                 ret.Arguments = newArgs;
             }
 
-            TestContext.Current.AddTestEnvironmentVariables(ret);
+            TestContext.Current.AddTestEnvironmentVariables(ret.Environment);
 
             return ret;
         }

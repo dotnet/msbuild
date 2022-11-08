@@ -517,6 +517,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 args.Add(langVersion);
             }
 
+            Dictionary<string, string> environmentUnderTest = new();
+            TestContext.Current.AddTestEnvironmentVariables(environmentUnderTest);
+
             TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: name)
             {
                 TemplateSpecificArgs = args,
@@ -529,7 +532,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                     "OutOfSupport" :
                     $"Nullable-{supportsNullable}#TopLevel-{supportsTopLevel}#ImplicitUsings-{supportsImplicitUsings}#FileScopedNs-{supportsFileScopedNs}" + (langVersion == null ? "#NoLang" : null),
                 VerificationExcludePatterns = buildPass ? null : new[] { "*" },
+                DotnetExecutablePath = TestContext.Current.ToolsetUnderTest.DotNetHostPath,
             }
+            .WithCustomEnvironment(environmentUnderTest)
             .WithCustomScrubbers(
                 ScrubbersDefinition.Empty
                     //Todo: add extension here (once fixed in templating)
