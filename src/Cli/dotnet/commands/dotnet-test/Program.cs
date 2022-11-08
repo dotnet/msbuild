@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
@@ -32,6 +33,15 @@ namespace Microsoft.DotNet.Tools.Test
             // from the VSTest side.
             string testSessionCorrelationId = $"{Environment.ProcessId}_{Guid.NewGuid()}";
 
+            if (!Debugger.IsAttached)
+            {
+                Debugger.Launch();
+            }
+            else
+            {
+                Debugger.Break();
+            }
+
             string[] args = parseResult.GetArguments();
 
             if (VSTestTrace.TraceEnabled)
@@ -56,10 +66,10 @@ namespace Microsoft.DotNet.Tools.Test
                 return ForwardToVSTestConsole(parseResult, args, settings, testSessionCorrelationId);
             }
 
-            return ForwardToMsbuild(parseResult, settings, testSessionCorrelationId);
+            return ForwardToMsbuild(parseResult, args, settings, testSessionCorrelationId);
         }
 
-        private static int ForwardToMsbuild(ParseResult parseResult, string[] settings, string testSessionCorrelationId)
+        private static int ForwardToMsbuild(ParseResult parseResult, string[] args, string[] settings, string testSessionCorrelationId)
         {
             // Workaround for https://github.com/Microsoft/vstest/issues/1503
             const string NodeWindowEnvironmentName = "MSBUILDENSURESTDOUTFORTASKPROCESSES";
@@ -67,7 +77,7 @@ namespace Microsoft.DotNet.Tools.Test
             try
             {
                 Environment.SetEnvironmentVariable(NodeWindowEnvironmentName, "1");
-                int exitCode = FromParseResult(parseResult, settings, testSessionCorrelationId).Execute();
+                int exitCode = FromParseResult(parseResult, args, settings, testSessionCorrelationId).Execute();
 
                 // We run post processing also if execution is failed for possible partial successful result to post process.
                 exitCode |= RunArtifactPostProcessingIfNeeded(testSessionCorrelationId, parseResult, FeatureFlag.Instance);
@@ -107,7 +117,7 @@ namespace Microsoft.DotNet.Tools.Test
             return exitCode;
         }
 
-        private static TestCommand FromParseResult(ParseResult result, string[] settings, string testSessionCorrelationId, string msbuildPath = null)
+        private static TestCommand FromParseResult(ParseResult result, string[] args, string[] settings, string testSessionCorrelationId, string msbuildPath = null)
         {
             result.ShowHelpOrErrorIfAppropriate();
 
@@ -118,10 +128,9 @@ namespace Microsoft.DotNet.Tools.Test
                 "-nologo"
             };
 
-
             var parsedArgs =
                 result.OptionValuesToBeForwarded(TestCommandParser.GetCommand()) // all msbuild-recognized tokens
-                    .Concat(result.UnmatchedTokens); // all tokens that the test-parser doesn't explicitly track
+                    .Concat(args); // all tokens that the test-parser doesn't explicitly track (minus the settings tokens)
 
             VSTestTrace.SafeWriteTrace(() => $"MSBuild args from forwarded options: {String.Join(", ", parsedArgs)}" );
             msbuildArgs.AddRange(parsedArgs);
@@ -130,7 +139,10 @@ namespace Microsoft.DotNet.Tools.Test
             {
                 //workaround for correct -- logic
                 var commandArgument = result.GetValueForArgument(TestCommandParser.SlnOrProjectArgument);
-                if(!string.IsNullOrWhiteSpace(commandArgument) && !settings.Contains(commandArgument))
+                // TODO: @baronfel, @Evangelink
+                // If the project or solution is not specified we would expect null here but we actually
+                // get some of the parameter (last one before --) instead. 
+                if (!string.IsNullOrWhiteSpace(commandArgument) && !settings.Contains(commandArgument))
                 {
                     msbuildArgs.Add(commandArgument);
                 }
