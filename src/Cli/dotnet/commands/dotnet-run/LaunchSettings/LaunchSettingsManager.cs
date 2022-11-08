@@ -54,7 +54,8 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                     {
                         IEnumerable<JsonProperty> caseInsensitiveProfileMatches = profilesObject
                             .EnumerateObject() // p.Name shouldn't fail, as profileObject enumerables here are only created from an existing JsonObject
-                            .Where(p => string.Compare(p.Name, profileName, StringComparison.OrdinalIgnoreCase) == 0);
+                            .Where(p => string.Equals(p.Name, profileName, StringComparison.OrdinalIgnoreCase))
+                            .ToList();
 
                         if (caseInsensitiveProfileMatches.Count() > 1)
                         {
