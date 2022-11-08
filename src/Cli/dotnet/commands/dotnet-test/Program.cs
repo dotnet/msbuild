@@ -33,15 +33,6 @@ namespace Microsoft.DotNet.Tools.Test
             // from the VSTest side.
             string testSessionCorrelationId = $"{Environment.ProcessId}_{Guid.NewGuid()}";
 
-            if (!Debugger.IsAttached)
-            {
-                Debugger.Launch();
-            }
-            else
-            {
-                Debugger.Break();
-            }
-
             string[] args = parseResult.GetArguments();
 
             if (VSTestTrace.TraceEnabled)
