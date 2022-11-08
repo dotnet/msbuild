@@ -13,6 +13,7 @@ using Microsoft.DotNet.ApiCompatibility.Runner;
 using Microsoft.DotNet.ApiCompatibility.Tests;
 using Microsoft.DotNet.PackageValidation;
 using Microsoft.DotNet.PackageValidation.Validators;
+using Microsoft.DotNet.ApiSymbolExtensions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;

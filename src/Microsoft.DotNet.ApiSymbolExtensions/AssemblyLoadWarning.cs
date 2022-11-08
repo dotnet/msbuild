@@ -3,9 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 
-namespace Microsoft.DotNet.ApiCompatibility
+namespace Microsoft.DotNet.ApiSymbolExtensions
 {
     /// <summary>
     /// Class that represents a warning that occurred while trying to load a specific assembly.

@@ -117,11 +117,6 @@
         <target state="translated">Das virtuelle Schlüsselwort kann nicht aus dem Member „{0}“ entfernt werden.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CouldNotResolveReference">
-        <source>Could not resolve reference '{0}' in any of the provided search directories.</source>
-        <target state="translated">Der Verweis "{0}" konnte in keinem der angegebenen Suchverzeichnisse aufgelöst werden.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ElementShouldNotBeNullAtIndex">
         <source>Element should not be null. Found null at index: {0}.</source>
         <target state="translated">Das Element darf nicht NULL sein. NULL gefunden bei Index: {0}.</target>
@@ -135,11 +130,6 @@
       <trans-unit id="EnumValuesMustMatch">
         <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
         <target state="translated">Wert des Felds „{1}2 in der Enumeration „{0}2 wurde von „{2}“ in „{3}“ geändert.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FileDoesNotExist">
-        <source>File '{0}' does not exist.</source>
-        <target state="translated">Die Datei '{0}' ist nicht vorhanden.</target>
         <note />
       </trans-unit>
       <trans-unit id="IndexShouldBeWithinSetSizeRange">
@@ -162,16 +152,6 @@
         <target state="translated">Das Element „{0}“ ist auf {2} vorhanden, aber nicht auf {1}.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProvidedPathToLoadBinariesFromNotFound">
-        <source>Could not find the provided path '{0}' to load binaries from.</source>
-        <target state="translated">Der angegebene Pfad "{0}" zum Laden von Binärdateien wurde nicht gefunden.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProvidedStreamDoesNotHaveMetadata">
-        <source>Provided stream for assembly '{0}' doesn't have any metadata to read. from.</source>
-        <target state="translated">Der angegebene Datenstrom für die Assembly "{0}" enthält keine Metadaten, aus denen gelesen werden kann.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="RightNamesAtLeastOne">
         <source>Should at least contain one right name.</source>
         <target state="translated">Sollte mindestens einen richtigen Namen enthalten.</target>
@@ -180,21 +160,6 @@
       <trans-unit id="ShouldBeGreaterThanZero">
         <source>Value should be greater than 0.</source>
         <target state="translated">Der Wert muss größer als 0 sein.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ShouldNotBeNullAndContainAtLeastOneElement">
-        <source>Should not be null and contain at least one element.</source>
-        <target state="translated">Darf nicht NULL sein und muss mindestens ein Element enthalten.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ShouldProvideValidAssemblyName">
-        <source>Should provide a valid assembly name.</source>
-        <target state="translated">Geben Sie einen gültigen Assemblynamen an.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="StreamPositionGreaterThanLength">
-        <source>Stream position is greater than it's length, so there are no contents available to read.</source>
-        <target state="translated">Die Datenstromposition ist größer als die Länge, daher sind keine Inhalte zum Lesen verfügbar.</target>
         <note />
       </trans-unit>
       <trans-unit id="TypeIsActuallySealed">

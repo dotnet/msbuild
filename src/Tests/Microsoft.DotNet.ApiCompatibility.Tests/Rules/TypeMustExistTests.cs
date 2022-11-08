@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Tests;
+using Microsoft.DotNet.ApiSymbolExtensions.Tests;
 using Xunit;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
@@ -332,7 +333,7 @@ namespace CompatTests
 "};
             ElementContainer<IAssemblySymbol> left = new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax),
                 new MetadataInformation(string.Empty, "ref"));
-            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
+            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactoryExtensions.GetElementContainersFromSyntaxes(rightSyntaxes);
             ApiComparer differ = new(s_ruleFactory);
 
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
@@ -407,7 +408,7 @@ namespace CompatTests
 "};
             ElementContainer<IAssemblySymbol> left = new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax),
                 new MetadataInformation(string.Empty, "ref"));
-            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
+            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactoryExtensions.GetElementContainersFromSyntaxes(rightSyntaxes);
             ApiComparer differ = new(s_ruleFactory);
 
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
@@ -446,7 +447,7 @@ namespace CompatTests
             ElementContainer<IAssemblySymbol> left = new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax),
                 new MetadataInformation(string.Empty, "ref"));
             string[] rightSyntaxes = new[] { leftSyntax, leftSyntax, leftSyntax, leftSyntax };
-            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
+            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactoryExtensions.GetElementContainersFromSyntaxes(rightSyntaxes);
             ApiComparer differ = new(s_ruleFactory);
 
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
@@ -470,7 +471,7 @@ namespace CompatTests
             ElementContainer<IAssemblySymbol> left = new(SymbolFactory.GetAssemblyFromSyntax(forwardedTypeSyntax),
                 new MetadataInformation(string.Empty, "ref"));
             string[] rightSyntaxes = new[] { rightSyntax, rightSyntax, rightSyntax, rightSyntax, rightSyntax };
-            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes, references);
+            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactoryExtensions.GetElementContainersFromSyntaxes(rightSyntaxes, references);
             ApiComparer differ = new(s_ruleFactory);
 
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
@@ -494,7 +495,7 @@ namespace CompatTests
                 new MetadataInformation(string.Empty, "ref"));
             string[] rightSyntaxes = new[] { rightWithForward, "namespace CompatTests { internal class Foo { } }", rightWithForward };
             IEnumerable<string> references = new[] { forwardedTypeSyntax };
-            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes, references);
+            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactoryExtensions.GetElementContainersFromSyntaxes(rightSyntaxes, references);
             ApiComparer differ = new(s_ruleFactory);
 
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);

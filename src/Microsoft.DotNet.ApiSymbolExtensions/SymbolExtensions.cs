@@ -1,17 +1,17 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using Microsoft.CodeAnalysis;
 
-namespace Microsoft.DotNet.ApiCompatibility.Extensions
+namespace Microsoft.DotNet.ApiSymbolExtensions
 {
-    internal static class SymbolExtensions
+    public static class SymbolExtensions
     {
-        private static SymbolDisplayFormat Format { get; } = GetSymbolDisplayFormat();
+        public static SymbolDisplayFormat Format { get; } = GetSymbolDisplayFormat();
 
-        private static SymbolDisplayFormat GetSymbolDisplayFormat()
+        public static SymbolDisplayFormat GetSymbolDisplayFormat()
         {
             // This is the default format for symbol.ToDisplayString;
             SymbolDisplayFormat format = SymbolDisplayFormat.CSharpErrorMessageFormat;
@@ -29,12 +29,12 @@ namespace Microsoft.DotNet.ApiCompatibility.Extensions
             return format.WithParameterOptions(format.ParameterOptions & ~SymbolDisplayParameterOptions.IncludeParamsRefOut);
         }
 
-        internal static string ToComparisonDisplayString(this ISymbol symbol) =>
+        public static string ToComparisonDisplayString(this ISymbol symbol) =>
             symbol.ToDisplayString(Format)
                   .Replace("System.IntPtr", "nint") // Treat IntPtr and nint as the same
                   .Replace("System.UIntPtr", "nuint"); // Treat UIntPtr and nuint as the same
 
-        internal static IEnumerable<ITypeSymbol> GetAllBaseTypes(this ITypeSymbol type)
+        public static IEnumerable<ITypeSymbol> GetAllBaseTypes(this ITypeSymbol type)
         {
             if (type.TypeKind == TypeKind.Interface)
             {
@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Extensions
             }
         }
 
-        internal static bool IsEffectivelySealed(this ITypeSymbol type, bool includeInternals) =>
+        public static bool IsEffectivelySealed(this ITypeSymbol type, bool includeInternals) =>
             type.IsSealed || !HasVisibleConstructor(type, includeInternals);
 
         private static bool HasVisibleConstructor(ITypeSymbol type, bool includeInternals)
@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Extensions
             return false;
         }
 
-        internal static IEnumerable<ITypeSymbol> GetAllBaseInterfaces(this ITypeSymbol type)
+        public static IEnumerable<ITypeSymbol> GetAllBaseInterfaces(this ITypeSymbol type)
         {
             foreach (ITypeSymbol @interface in type.Interfaces)
             {
@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Extensions
                     yield return baseInterface;
         }
 
-        internal static bool IsVisibleOutsideOfAssembly(this ISymbol symbol, bool includeInternals, bool includeEffectivelyPrivateSymbols = false) =>
+        public static bool IsVisibleOutsideOfAssembly(this ISymbol symbol, bool includeInternals, bool includeEffectivelyPrivateSymbols = false) =>
             symbol.DeclaredAccessibility switch
             {
                 Accessibility.Public => true,
@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Extensions
                 _ => includeInternals && symbol.DeclaredAccessibility != Accessibility.Private,
             };
 
-        internal static bool IsEventAdderOrRemover(this IMethodSymbol method) =>
+        public static bool IsEventAdderOrRemover(this IMethodSymbol method) =>
             method.MethodKind == MethodKind.EventAdd ||
             method.MethodKind == MethodKind.EventRemove ||
             method.Name.StartsWith("add_", StringComparison.Ordinal) ||

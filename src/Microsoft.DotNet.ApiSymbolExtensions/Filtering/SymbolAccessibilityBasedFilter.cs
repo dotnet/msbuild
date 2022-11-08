@@ -2,15 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ApiCompatibility.Extensions;
+using Microsoft.DotNet.ApiSymbolExtensions;
 
-namespace Microsoft.DotNet.ApiCompatibility.Abstractions
+namespace Microsoft.DotNet.ApiSymbolExtensions
 {
-    internal class SymbolAccessibilityBasedFilter : ISymbolFilter
+    public class SymbolAccessibilityBasedFilter : ISymbolFilter
     {
         private readonly bool _includeInternalSymbols;
 
-        internal SymbolAccessibilityBasedFilter(bool includeInternalSymbols)
+        public SymbolAccessibilityBasedFilter(bool includeInternalSymbols)
         {
             _includeInternalSymbols = includeInternalSymbols;
         }
