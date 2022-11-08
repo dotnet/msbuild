@@ -183,7 +183,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
         {
             var testInstance = _testAssetsManager.CopyTestAsset("HelloWorld")
                 .WithSource()
-                .WithTargetFrameworkOrFrameworks("net7.0", false)
+                .WithTargetFrameworkOrFrameworks(ToolsetInfo.CurrentTargetFramework, false)
                 .Restore(Log);
 
             new DotnetBuildCommand(Log)
