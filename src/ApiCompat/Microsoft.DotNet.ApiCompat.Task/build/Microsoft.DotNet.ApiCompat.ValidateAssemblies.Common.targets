@@ -8,7 +8,8 @@
   <Target Name="ApiCompatValidateAssembliesCore"
           Inputs="@(ApiCompatLeftAssemblies);
                   @(ApiCompatRightAssemblies);
-                  $(CompatibilitySuppressionFilePath)"
+                  @(ApiCompatSuppressionFile);
+                  $(ApiCompatSuppressionOutputFile)"
           Outputs="$(ApiCompatValidateAssembliesSemaphoreFile)"
           Condition="'@(ApiCompatLeftAssemblies)' != '' and '@(ApiCompatRightAssemblies)' != ''"
           DependsOnTargets="$(ApiCompatValidateAssembliesDependsOn)">
@@ -16,8 +17,9 @@
       RoslynAssembliesPath="$(RoslynAssembliesPath)"
       LeftAssemblies="@(ApiCompatLeftAssemblies)"
       RightAssemblies="@(ApiCompatRightAssemblies)"
-      GenerateCompatibilitySuppressionFile="$(GenerateCompatibilitySuppressionFile)"
-      CompatibilitySuppressionFilePath="$(CompatibilitySuppressionFilePath)"
+      GenerateSuppressionFile="$(ApiCompatGenerateSuppressionFile)"
+      SuppressionFiles="@(ApiCompatSuppressionFile)"
+      SuppressionOutputFile="$(ApiCompatSuppressionOutputFile)"
       NoWarn="$(NoWarn)"
       EnableRuleAttributesMustMatch="$(ApiCompatEnableRuleAttributesMustMatch)"
       ExcludeAttributesFiles="@(ApiCompatExcludeAttributesFile)"

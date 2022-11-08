@@ -48,6 +48,6 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
         /// </summary>
         /// <param name="supressionFile">The path to the file to be written.</param>
         /// <returns>Whether it wrote the file.</returns>
-        bool WriteSuppressionsToFile(string suppressionFile);
+        bool WriteSuppressionsToFile(string suppressionOutputFile);
     }
 }

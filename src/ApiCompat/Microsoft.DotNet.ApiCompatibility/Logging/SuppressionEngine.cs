@@ -26,13 +26,13 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
         public bool BaselineAllErrors { get; }
 
         /// <inheritdoc/>
-        public SuppressionEngine(string? suppressionFile = null,
+        public SuppressionEngine(string[]? suppressionFiles = null,
             string? noWarn = null,
             bool baselineAllErrors = false)
         {
             BaselineAllErrors = baselineAllErrors;
             _noWarn = string.IsNullOrEmpty(noWarn) ? new HashSet<string>() : new HashSet<string>(noWarn!.Split(';'));
-            _validationSuppressions = ParseSuppressionFile(suppressionFile);
+            _validationSuppressions = ParseSuppressionFiles(suppressionFiles);
         }
 
         /// <inheritdoc/>
@@ -122,7 +122,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
         }
 
         /// <inheritdoc/>
-        public bool WriteSuppressionsToFile(string suppressionFile)
+        public bool WriteSuppressionsToFile(string suppressionOutputFile)
         {
             if (_validationSuppressions.Count == 0)
                 return false;
@@ -134,7 +134,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
                 .ThenBy(sup => sup.Target)
                 .ToArray();
 
-            using (Stream writer = GetWritableStream(suppressionFile))
+            using (Stream writer = GetWritableStream(suppressionOutputFile))
             {
                 _readerWriterLock.EnterReadLock();
                 try
@@ -161,27 +161,30 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
             // Do nothing. Used for tests.
         }
 
-        private HashSet<Suppression> ParseSuppressionFile(string? suppressionFile)
+        private HashSet<Suppression> ParseSuppressionFiles(string[]? suppressionFiles)
         {
-            if (string.IsNullOrWhiteSpace(suppressionFile))
-            {
-                return new HashSet<Suppression>();
-            }
+            HashSet<Suppression> suppressions = new();
 
-            try
+            if (suppressionFiles != null)
             {
-                using Stream reader = GetReadableStream(suppressionFile!);
-                if (_serializer.Deserialize(reader) is Suppression[] deserializedSuppressions)
+                foreach (string suppressionFile in suppressionFiles)
                 {
-                    return new HashSet<Suppression>(deserializedSuppressions);
+                    try
+                    {
+                        using Stream reader = GetReadableStream(suppressionFile);
+                        if (_serializer.Deserialize(reader) is Suppression[] deserializedSuppressions)
+                        {
+                            suppressions.UnionWith(deserializedSuppressions);
+                        }
+                    }
+                    catch (FileNotFoundException) when (BaselineAllErrors)
+                    {
+                        // Throw if the passed in suppression file doesn't exist and errors aren't baselined.
+                    }
                 }
             }
-            catch (FileNotFoundException) when (BaselineAllErrors)
-            {
-                // Throw if the passed in suppression file doesn't exist and errors aren't baselined.
-            }
 
-            return new HashSet<Suppression>();
+            return suppressions;
         }
 
         // FileAccess.Read and FileShare.Read are specified to allow multiple processes to concurrently read from the suppression file.
