@@ -117,11 +117,6 @@
         <target state="translated">无法从成员“{0}”中删除虚拟关键字。</target>
         <note />
       </trans-unit>
-      <trans-unit id="CouldNotResolveReference">
-        <source>Could not resolve reference '{0}' in any of the provided search directories.</source>
-        <target state="translated">无法在任何提供的搜索目录中解析引用“{0}”。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ElementShouldNotBeNullAtIndex">
         <source>Element should not be null. Found null at index: {0}.</source>
         <target state="translated">元素不应为 null。在索引 {0} 找到 null。</target>
@@ -135,11 +130,6 @@
       <trans-unit id="EnumValuesMustMatch">
         <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
         <target state="translated">枚举“{0}”中字段“{1}”的值已从“{2}”更改为“{3}”。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FileDoesNotExist">
-        <source>File '{0}' does not exist.</source>
-        <target state="translated">文件“{0}”不存在。</target>
         <note />
       </trans-unit>
       <trans-unit id="IndexShouldBeWithinSetSizeRange">
@@ -162,16 +152,6 @@
         <target state="translated">成员“{0}”在 {2} 上存在，但在 {1} 上不存在</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProvidedPathToLoadBinariesFromNotFound">
-        <source>Could not find the provided path '{0}' to load binaries from.</source>
-        <target state="translated">找不到所提供的要从中加载二进制文件的路径“{0}”。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProvidedStreamDoesNotHaveMetadata">
-        <source>Provided stream for assembly '{0}' doesn't have any metadata to read. from.</source>
-        <target state="translated">为程序集“{0}”提供的流没有任何可供读取的元数据。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="RightNamesAtLeastOne">
         <source>Should at least contain one right name.</source>
         <target state="translated">应至少包含一个权限名称。</target>
@@ -180,21 +160,6 @@
       <trans-unit id="ShouldBeGreaterThanZero">
         <source>Value should be greater than 0.</source>
         <target state="translated">值应大于 0。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ShouldNotBeNullAndContainAtLeastOneElement">
-        <source>Should not be null and contain at least one element.</source>
-        <target state="translated">不应为 null，并且应至少包含一个元素。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ShouldProvideValidAssemblyName">
-        <source>Should provide a valid assembly name.</source>
-        <target state="translated">应提供有效的程序集名称。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="StreamPositionGreaterThanLength">
-        <source>Stream position is greater than it's length, so there are no contents available to read.</source>
-        <target state="translated">流位置大于其长度，因此没有可供读取的内容。</target>
         <note />
       </trans-unit>
       <trans-unit id="TypeIsActuallySealed">

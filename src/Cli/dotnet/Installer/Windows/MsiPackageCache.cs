@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security;
@@ -79,6 +78,16 @@ namespace Microsoft.DotNet.Installer.Windows
         /// The root directory of the package cache where MSI workload packs are stored.
         /// </summary>
         public readonly string PackageCacheRoot;
+
+        /// <summary>
+        /// SDDL string for files inside the package cache. The owner is set to built-in administrators (O:BA), the group is domain users (G:DU).
+        /// DACL is auto-inherit with the following ACE definitions: Full control for NT AUTHORITY\SYSTEM (A;ID;FA;;;SY),
+        /// full control for BUILTIN\Administators (A;ID;FA;;;BA), read and execute for BUILTIN\Users (A;ID;0x1200a9;;;BU) and
+        /// and Everyone (A;ID;0x1200a9;;;WD).
+        /// </summary>
+        /// <remarks>See <see href="https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language">SDDL</see>
+        /// documentation for details.</remarks>
+        private const string FileSecurityDescriptor = "O:BAG:DUD:AI(A;ID;FA;;;SY)(A;ID;FA;;;BA)(A;ID;0x1200a9;;;BU)(A;ID;0x1200a9;;;WD)";
 
         public MsiPackageCache(InstallElevationContextBase elevationContext, ISetupLogger logger,
             bool verifySignatures, string packageCacheRoot = null) : base(elevationContext, logger, verifySignatures)
@@ -156,8 +165,8 @@ namespace Microsoft.DotNet.Installer.Windows
                 string cachedMsiPath = Path.Combine(packageDirectory, Path.GetFileName(msiPath));
                 string cachedManifestPath = Path.Combine(packageDirectory, Path.GetFileName(manifestPath));
 
-                MoveFile(manifestPath, cachedManifestPath);
-                MoveFile(msiPath, cachedMsiPath);
+                MoveAndSecureFile(manifestPath, cachedManifestPath);
+                MoveAndSecureFile(msiPath, cachedMsiPath);
             }
             else if (IsClient)
             {
@@ -177,16 +186,23 @@ namespace Microsoft.DotNet.Installer.Windows
         }
 
         /// <summary>
-        /// Moves a file from one location to another if the destination file does not already exist.
+        /// Moves a file from one location to another if the destination file does not already exist and
+        /// configure its permissions.
         /// </summary>
         /// <param name="sourceFile">The source file to move.</param>
         /// <param name="destinationFile">The destination where the source file will be moved.</param>
-        protected void MoveFile(string sourceFile, string destinationFile)
+        private void MoveAndSecureFile(string sourceFile, string destinationFile)
         {
             if (!File.Exists(destinationFile))
             {
+                // See https://github.com/dotnet/sdk/issues/28450
                 FileAccessRetrier.RetryOnMoveAccessFailure(() => File.Move(sourceFile, destinationFile));
                 Log?.LogMessage($"Moved '{sourceFile}' to '{destinationFile}'");
+
+                FileInfo fi = new(destinationFile);
+                FileSecurity fs = new();
+                fs.SetSecurityDescriptorSddlForm(FileSecurityDescriptor);
+                fi.SetAccessControl(fs);
             }
         }
 

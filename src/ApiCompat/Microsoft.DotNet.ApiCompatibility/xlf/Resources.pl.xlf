@@ -117,11 +117,6 @@
         <target state="translated">Nie można usunąć wirtualnego słowa kluczowego z składowej „{0}”.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CouldNotResolveReference">
-        <source>Could not resolve reference '{0}' in any of the provided search directories.</source>
-        <target state="translated">Nie można rozpoznać odwołania "{0}" w żadnym z podanych katalogów wyszukiwania.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ElementShouldNotBeNullAtIndex">
         <source>Element should not be null. Found null at index: {0}.</source>
         <target state="translated">Element nie może mieć wartości null. Znaleziono wartość null w indeksie: {0}.</target>
@@ -135,11 +130,6 @@
       <trans-unit id="EnumValuesMustMatch">
         <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
         <target state="translated">Wartość pola „{1}” w wyliczeniu „{0}” zmieniona z „{2}” na „{3}”.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FileDoesNotExist">
-        <source>File '{0}' does not exist.</source>
-        <target state="translated">Plik „{0}” nie istnieje.</target>
         <note />
       </trans-unit>
       <trans-unit id="IndexShouldBeWithinSetSizeRange">
@@ -162,16 +152,6 @@
         <target state="translated">Członek „{0}” istnieje w {2}, ale nie w {1}</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProvidedPathToLoadBinariesFromNotFound">
-        <source>Could not find the provided path '{0}' to load binaries from.</source>
-        <target state="translated">Nie można odnaleźć podanej ścieżki "{0}", z której mają zostać załadowane pliki binarne.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProvidedStreamDoesNotHaveMetadata">
-        <source>Provided stream for assembly '{0}' doesn't have any metadata to read. from.</source>
-        <target state="translated">Podany strumień dla zestawu "{0}" nie ma metadanych, z których można odczytywać.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="RightNamesAtLeastOne">
         <source>Should at least contain one right name.</source>
         <target state="translated">Powinna zawierać co najmniej jedną prawidłową nazwę.</target>
@@ -180,21 +160,6 @@
       <trans-unit id="ShouldBeGreaterThanZero">
         <source>Value should be greater than 0.</source>
         <target state="translated">Wartość powinna być większa od 0.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ShouldNotBeNullAndContainAtLeastOneElement">
-        <source>Should not be null and contain at least one element.</source>
-        <target state="translated">Nie może mieć wartości null i powinna zawierać co najmniej jeden element.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ShouldProvideValidAssemblyName">
-        <source>Should provide a valid assembly name.</source>
-        <target state="translated">Należy podać prawidłową nazwę zestawu.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="StreamPositionGreaterThanLength">
-        <source>Stream position is greater than it's length, so there are no contents available to read.</source>
-        <target state="translated">Pozycja strumienia jest większa niż jego długość, więc nie ma dostępnej zawartości do odczytania.</target>
         <note />
       </trans-unit>
       <trans-unit id="TypeIsActuallySealed">
