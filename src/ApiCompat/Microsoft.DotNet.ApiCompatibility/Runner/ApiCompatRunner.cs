@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
                         if (logHeader)
                         {
                             logHeader = false;
-                            _log.LogMessage(MessageImportance.Normal,
+                            _log.LogMessage(MessageImportance.High,
                                 Resources.ApiCompatibilityHeader,
                                 difference.Left.AssemblyId,
                                 difference.Right.AssemblyId,
