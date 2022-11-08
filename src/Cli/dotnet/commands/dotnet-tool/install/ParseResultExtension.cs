@@ -1,10 +1,15 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.NugetSearch;
+using Microsoft.DotNet.ToolPackage;
+using Microsoft.DotNet.Tools.Tool.Search;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tool.Install
@@ -13,6 +18,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
     {
         public static VersionRange GetVersionRange(this ParseResult parseResult)
         {
+            string packageId = parseResult.GetValueForArgument(ToolInstallCommandParser.PackageIdArgument);
             string packageVersion = parseResult.GetValueForOption(ToolInstallCommandParser.VersionOption);
             bool prerelease = parseResult.GetValueForOption(ToolInstallCommandParser.PrereleaseOption);
 
@@ -37,7 +43,26 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                         LocalizableStrings.InvalidNuGetVersionRange,
                         packageVersion));
             }
-
+            
+            if (string.IsNullOrEmpty(packageVersion))
+            {
+                var nugetToolSearchApiRequest = new NugetToolSearchApiRequest();
+                NugetSearchApiParameter nugetSearchApiParameter = new(searchTerm: packageId, prerelease: prerelease);
+                IReadOnlyCollection<SearchResultPackage> searchResultPackages =
+                    NugetSearchApiResultDeserializer.Deserialize(
+                        nugetToolSearchApiRequest.GetResult(nugetSearchApiParameter).GetAwaiter().GetResult());
+                if (searchResultPackages.Any())
+                {
+                    string latestVersion = searchResultPackages.First().Versions.Last().Version;
+                    if (!VersionRange.TryParse(latestVersion, out versionRange))
+                    {
+                        throw new GracefulException(
+                            string.Format(
+                                LocalizableStrings.InvalidNuGetVersionRange,
+                                latestVersion));
+                    }
+                }
+            }
             return versionRange;
         }
     }
