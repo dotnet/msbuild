@@ -32,6 +32,20 @@
         <target state="translated">Der Wert der Eigenschaft "{0}" konnte nicht in eine Zeichenfolge konvertiert werden.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DuplicateCaseInsensitiveLaunchProfileNames">
+        <source>There are several launch profiles with case-sensitive names, which isn't permitted:
+{0}
+Make the profile names distinct.</source>
+        <target state="new">There are several launch profiles with case-sensitive names, which isn't permitted:
+{0}
+Make the profile names distinct.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LaunchProfileDoesNotExist">
+        <source>A launch profile with the name '{0}' doesn't exist.</source>
+        <target state="new">A launch profile with the name '{0}' doesn't exist.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OnlyOneProjectAllowed">
         <source>Only one project can be specified at a time using the `-p` option.</source>
         <target state="translated">Mithilfe der Option „-p“ kann jeweils nur ein Projekt angegeben werden.</target>
@@ -101,8 +115,8 @@ Ein ausführbares Projekt muss ein ausführbares TFM (z. B. net5.0) und den Outp
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotLocateALaunchSettingsFile">
-        <source>The specified launch profile could not be located.</source>
-        <target state="translated">Das angegebene Startprofil wurde nicht gefunden.</target>
+        <source>The specified launch profile '{0}' could not be located.</source>
+        <target state="new">The specified launch profile '{0}' could not be located.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotApplyLaunchSettings">
@@ -128,8 +142,8 @@ Ein ausführbares Projekt muss ein ausführbares TFM (z. B. net5.0) und den Outp
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileIsNotAJsonObject">
-        <source>A profile with the specified name could not be found or is not a valid JSON object.</source>
-        <target state="translated">Ein Profil mit dem angegebenen Namen wurde nicht gefunden oder ist kein gültiges JSON-Objekt.</target>
+        <source>A profile with the specified name isn't a valid JSON object.</source>
+        <target state="needs-review-translation">Ein Profil mit dem angegebenen Namen wurde nicht gefunden oder ist kein gültiges JSON-Objekt.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileHandlerCannotBeLocated">
