@@ -139,6 +139,13 @@ Copyright (c) .NET Foundation. All rights reserved.
         Include="@(_DesignerShadowCopy->'%(FullPath)')"
         TargetPath="%(_DesignerShadowCopy.DestinationSubDirectory)%(_DesignerShadowCopy.Filename)%(_DesignerShadowCopy.Extension)"
         />
+
+      <!-- Include ijwhost.dll for projects that use it -->
+      <DesignerRuntimeImplementationProjectOutputGroupOutput
+        Include="$(IjwHostSourcePath)"
+        TargetPath="$(_DotNetIjwHostLibraryName)"
+        Condition="'$(IjwHostSourcePath)' != '' and '$(UseIJWHost)' == 'true'"
+        />
       </ItemGroup>
   </Target>
 
