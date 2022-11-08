@@ -244,7 +244,7 @@ namespace Microsoft.Build.CommandLine
             {
                 Console.CancelKeyPress += Console_CancelKeyPress;
 
-                
+
                 // Use the client app to execute build in msbuild server. Opt-in feature.
                 exitCode = ((s_initialized && MSBuildClientApp.Execute(
 #if FEATURE_GET_COMMANDLINE
@@ -291,9 +291,11 @@ namespace Microsoft.Build.CommandLine
             )
         {
             bool canRunServer = true;
+            bool shouldRecurse = false;
+            string nullProjectFile = null;
             try
             {
-                GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out string fullCommandLine);
+                GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out string fullCommandLine, ref shouldRecurse, ref nullProjectFile);
                 CommandLineSwitches commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
                 if (CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, false, fullCommandLine, out string projectFile))
                 {
@@ -705,8 +707,14 @@ namespace Microsoft.Build.CommandLine
                 bool lowPriority = false;
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
+                bool shouldRecurse = false;
 
-                GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _);
+                GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _, ref shouldRecurse,ref projectFile);
+                // CommandLineSwitches commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, commandLine);
+                // if (CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, false, commandLine,out projectFile))
+                // {
+                //     commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, commandLine);
+                // }
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
                                             switchesFromAutoResponseFile,
                                             switchesNotFromAutoResponseFile,
@@ -741,6 +749,7 @@ namespace Microsoft.Build.CommandLine
                                             ref outputResultsCache,
                                             ref lowPriority,
                                             recursing: false,
+                                            shouldRecurse,
 #if FEATURE_GET_COMMANDLINE
                                             commandLine
 #else
@@ -811,9 +820,9 @@ namespace Microsoft.Build.CommandLine
                                     inputResultsCaches,
                                     outputResultsCache,
                                     commandLine))
-                            {
-                                exitType = ExitType.BuildError;
-                            }
+                        {
+                            exitType = ExitType.BuildError;
+                        }
                     } // end of build
 
                     DateTime t2 = DateTime.Now;
@@ -1007,7 +1016,7 @@ namespace Microsoft.Build.CommandLine
             // We're already on a threadpool thread anyway.
             WaitCallback callback = delegate
             {
-                try 
+                try
                 {
                     s_cancelComplete.Reset();
 
@@ -1356,7 +1365,7 @@ namespace Microsoft.Build.CommandLine
                             {
                                 if (graphBuildOptions != null)
                                 {
-                                    graphBuildRequest = new GraphBuildRequestData(new[]{ new ProjectGraphEntryPoint(projectFile, globalProperties) }, targets, null, BuildRequestDataFlags.None, graphBuildOptions);
+                                    graphBuildRequest = new GraphBuildRequestData(new[] { new ProjectGraphEntryPoint(projectFile, globalProperties) }, targets, null, BuildRequestDataFlags.None, graphBuildOptions);
                                 }
                                 else
                                 {
@@ -1674,7 +1683,7 @@ namespace Microsoft.Build.CommandLine
 #else
             string[] commandLine,
 #endif
-            out CommandLineSwitches switchesFromAutoResponseFile, out CommandLineSwitches switchesNotFromAutoResponseFile, out string fullCommandLine)
+            out CommandLineSwitches switchesFromAutoResponseFile, out CommandLineSwitches switchesNotFromAutoResponseFile, out string fullCommandLine, ref bool shouldRecurse, ref string projectFile)
         {
             ResetGatheringSwitchesState();
 
@@ -1718,9 +1727,23 @@ namespace Microsoft.Build.CommandLine
             if (!switchesNotFromAutoResponseFile[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
             {
                 GatherAutoResponseFileSwitches(s_exePath, switchesFromAutoResponseFile, fullCommandLine);
+                shouldRecurse = GatherProjectAutoResponseFileSwitches(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine, ref projectFile);
             }
         }
 
+        private static bool GatherProjectAutoResponseFileSwitches(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches switchesNotFromAutoResponseFile, string commandLine, ref string projectFile)
+        {
+            CommandLineSwitches commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, commandLine);
+            if (commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Help]
+              || commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode)
+              || commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Version])
+            {
+                return false;
+            }
+
+            commandLineSwitches.ThrowErrors();
+            return CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, false, commandLine, out projectFile);
+        }
         /// <summary>
         /// Coordinates the parsing of the command line. It detects switches on the command line, gathers their parameters, and
         /// flags syntax errors, and other obvious switch errors.
@@ -2213,6 +2236,7 @@ namespace Microsoft.Build.CommandLine
             ref string outputResultsCache,
             ref bool lowPriority,
             bool recursing,
+            bool shouldRecurse,
             string commandLine
         )
         {
@@ -2286,52 +2310,57 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
-                    bool foundProjectAutoResponseFile = CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, recursing, commandLine, out projectFile);
-
-                    if (foundProjectAutoResponseFile)
+                    if (!shouldRecurse)
                     {
-                        // we presumably read in more switches, so start our switch processing all over again,
-                        // so that we consume switches in the following sequence of increasing priority:
-                        // (1) switches from the msbuild.rsp next to msbuild.exe, including recursively included response files
-                        // (2) switches from this msbuild.rsp next to the project or solution <<--------- these we have just now merged with (1)
-                        // (3) switches from the command line, including recursively included response file switches inserted at the point they are declared with their "@" symbol
-                        return ProcessCommandLineSwitches(
-                                                           switchesFromAutoResponseFile,
-                                                           switchesNotFromAutoResponseFile,
-                                                           ref projectFile,
-                                                           ref targets,
-                                                           ref toolsVersion,
-                                                           ref globalProperties,
-                                                           ref loggers,
-                                                           ref verbosity,
-                                                           ref originalVerbosity,
-                                                           ref distributedLoggerRecords,
+                        bool foundProjectAutoResponseFile = CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, recursing, commandLine, out projectFile);
+
+                        if (foundProjectAutoResponseFile)
+                        {
+                            // we presumably read in more switches, so start our switch processing all over again,
+                            // so that we consume switches in the following sequence of increasing priority:
+                            // (1) switches from the msbuild.rsp next to msbuild.exe, including recursively included response files
+                            // (2) switches from this msbuild.rsp next to the project or solution <<--------- these we have just now merged with (1)
+                            // (3) switches from the command line, including recursively included response file switches inserted at the point they are declared with their "@" symbol
+                            return ProcessCommandLineSwitches(
+                                                               switchesFromAutoResponseFile,
+                                                               switchesNotFromAutoResponseFile,
+                                                               ref projectFile,
+                                                               ref targets,
+                                                               ref toolsVersion,
+                                                               ref globalProperties,
+                                                               ref loggers,
+                                                               ref verbosity,
+                                                               ref originalVerbosity,
+                                                               ref distributedLoggerRecords,
 #if FEATURE_XML_SCHEMA_VALIDATION
-                                                           ref needToValidateProject,
-                                                           ref schemaFile,
+                                                               ref needToValidateProject,
+                                                               ref schemaFile,
 #endif
-                                                           ref cpuCount,
-                                                           ref enableNodeReuse,
-                                                           ref preprocessWriter,
-                                                           ref targetsWriter,
-                                                           ref detailedSummary,
-                                                           ref warningsAsErrors,
-                                                           ref warningsNotAsErrors,
-                                                           ref warningsAsMessages,
-                                                           ref enableRestore,
-                                                           ref interactive,
-                                                           ref profilerLogger,
-                                                           ref enableProfiler,
-                                                           ref restoreProperties,
-                                                           ref isolateProjects,
-                                                           ref graphBuild,
-                                                           ref inputResultsCaches,
-                                                           ref outputResultsCache,
-                                                           ref lowPriority,
-                                                           recursing: true,
-                                                           commandLine
-                                                         );
+                                                               ref cpuCount,
+                                                               ref enableNodeReuse,
+                                                               ref preprocessWriter,
+                                                               ref targetsWriter,
+                                                               ref detailedSummary,
+                                                               ref warningsAsErrors,
+                                                               ref warningsNotAsErrors,
+                                                               ref warningsAsMessages,
+                                                               ref enableRestore,
+                                                               ref interactive,
+                                                               ref profilerLogger,
+                                                               ref enableProfiler,
+                                                               ref restoreProperties,
+                                                               ref isolateProjects,
+                                                               ref graphBuild,
+                                                               ref inputResultsCaches,
+                                                               ref outputResultsCache,
+                                                               ref lowPriority,
+                                                               recursing: true,
+                                                               shouldRecurse: false,
+                                                               commandLine
+                                                             );
+                        }
                     }
+
 
                     // figure out which targets we are building
                     targets = ProcessTargetSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Target]);
@@ -2545,7 +2574,7 @@ namespace Microsoft.Build.CommandLine
 
                 if (parameter.Trim().Equals("NoBuild", StringComparison.OrdinalIgnoreCase))
                 {
-                    options = options with {Build = false};
+                    options = options with { Build = false };
                 }
                 else
                 {
@@ -3032,7 +3061,7 @@ namespace Microsoft.Build.CommandLine
                 }
                 // if there are no project, solution filter, or solution files in the directory, we can't build
                 else if (actualProjectFiles.Count == 0 &&
-                         actualSolutionFiles.Count== 0 &&
+                         actualSolutionFiles.Count == 0 &&
                          solutionFilterFiles.Count == 0)
                 {
                     InitializationException.Throw("MissingProjectError", null, null, false);
@@ -3325,7 +3354,7 @@ namespace Microsoft.Build.CommandLine
 
             string arguments = binaryLoggerParameters[binaryLoggerParameters.Length - 1];
 
-            BinaryLogger logger = new BinaryLogger {Parameters = arguments};
+            BinaryLogger logger = new BinaryLogger { Parameters = arguments };
 
             // If we have a binary logger, force verbosity to diagnostic.
             // The only place where verbosity is used downstream is to determine whether to log task inputs.
