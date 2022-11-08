@@ -1083,6 +1083,11 @@ namespace Microsoft.Build.CommandLine
         private const string msbuildLogFileName = "msbuild.log";
 
         /// <summary>
+        /// Messages to be logged into loggrers
+        /// </summary>
+        private static IEnumerable<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = Enumerable.Empty<BuildManager.DeferredBuildMessage>();
+
+        /// <summary>
         /// Initializes the build engine, and starts the project building.
         /// </summary>
         /// <returns>true, if build succeeds</returns>
@@ -1323,7 +1328,6 @@ namespace Microsoft.Build.CommandLine
 
                     BuildResultCode? result = null;
 
-                    IEnumerable<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = null;
                     if (!Traits.Instance.EscapeHatches.DoNotSendDeferredMessagesToBuildManager)
                     {
                         var commandLineString =
@@ -1334,7 +1338,6 @@ namespace Microsoft.Build.CommandLine
 #endif
                         messagesToLogInBuildLoggers = GetMessagesToLogInBuildLoggers(commandLineString);
                     }
-
                     buildManager.BeginBuild(parameters, messagesToLogInBuildLoggers);
 
                     Exception exception = null;
@@ -1526,6 +1529,17 @@ namespace Microsoft.Build.CommandLine
                         "MSBuildDebugPath",
                         DebugUtils.DebugPath),
                         MessageImportance.High));
+            }
+
+            // Log a message for every response file
+            foreach (var responseFilePath in s_includedResponseFiles)
+            {
+                messages.Add(
+                    new BuildManager.DeferredBuildMessage(
+                        String.Format("Included response file: {0}", responseFilePath),
+                        MessageImportance.Normal
+                    )
+                );
             }
 
             return messages;

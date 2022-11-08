@@ -1,7 +1,8 @@
 {
-  "sdk": {
-    "allowPrerelease": true
-  },
+    "sdk": {
+        "allowPrerelease": true,
+        "version": "7.0.100-rc.2.22477.23"
+    },
   "tools": {
     "dotnet": "7.0.100-rc.2.22477.23",
     "vs": {
