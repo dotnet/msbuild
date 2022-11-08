@@ -163,7 +163,7 @@ namespace Microsoft.DotNet.Cli
             };
             return new CliTemplateEngineHost(
                 HostIdentifier,
-                "v" + Product.Version,
+                Product.Version,
                 preferences,
                 builtIns,
                 outputPath: outputPath?.FullName,
