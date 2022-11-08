@@ -51,9 +51,10 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                 IReadOnlyCollection<SearchResultPackage> searchResultPackages =
                     NugetSearchApiResultDeserializer.Deserialize(
                         nugetToolSearchApiRequest.GetResult(nugetSearchApiParameter).GetAwaiter().GetResult());
-                if (searchResultPackages.Any())
+                var packageData = searchResultPackages.Where(p => p.Id.ToString().Equals(packageId)).FirstOrDefault();
+                if (packageData != null)
                 {
-                    string latestVersion = searchResultPackages.First().Versions.Last().Version;
+                    string latestVersion = packageData.LatestVersion;
                     if (!VersionRange.TryParse(latestVersion, out versionRange))
                     {
                         throw new GracefulException(
