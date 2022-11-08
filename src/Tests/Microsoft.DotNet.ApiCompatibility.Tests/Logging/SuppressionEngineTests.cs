@@ -252,6 +252,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
 </Suppressions>";
 
         public readonly string suppressionsFileWithoutComment = @$"<?xml version=""1.0"" encoding=""utf-8""?>
+<!--{DiagnosticIdDocumentationComment}-->
 {s_suppressionsHeader}
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
