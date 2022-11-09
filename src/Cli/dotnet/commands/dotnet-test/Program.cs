@@ -119,9 +119,13 @@ namespace Microsoft.DotNet.Tools.Test
                 "-nologo"
             };
 
+            var unMatchedNonSettingsArgs = settings.Length > 1
+                ? result.UnmatchedTokens.TakeWhile(x => x != settings[1])
+                : result.UnmatchedTokens;
+
             var parsedArgs =
                 result.OptionValuesToBeForwarded(TestCommandParser.GetCommand()) // all msbuild-recognized tokens
-                    .Concat(args); // all tokens that the test-parser doesn't explicitly track (minus the settings tokens)
+                    .Concat(unMatchedNonSettingsArgs); // all tokens that the test-parser doesn't explicitly track (minus the settings tokens)
 
             VSTestTrace.SafeWriteTrace(() => $"MSBuild args from forwarded options: {String.Join(", ", parsedArgs)}" );
             msbuildArgs.AddRange(parsedArgs);
@@ -129,14 +133,14 @@ namespace Microsoft.DotNet.Tools.Test
             if (settings.Any())
             {
                 //workaround for correct -- logic
-                var commandArgument = result.GetValueForArgument(TestCommandParser.SlnOrProjectArgument);
-                // TODO: @baronfel, @Evangelink
-                // If the project or solution is not specified we would expect null here but we actually
-                // get some of the parameter (last one before --) instead. 
-                if (!string.IsNullOrWhiteSpace(commandArgument) && !settings.Contains(commandArgument))
-                {
-                    msbuildArgs.Add(commandArgument);
-                }
+                //var commandArgument = result.GetValueForArgument(TestCommandParser.SlnOrProjectArgument);
+                //// TODO: @baronfel, @Evangelink
+                //// If the project or solution is not specified we would expect null here but we actually
+                //// get some of the parameter (last one before --) instead. 
+                //if (!string.IsNullOrWhiteSpace(commandArgument) && !settings.Contains(commandArgument))
+                //{
+                //    msbuildArgs.Add(commandArgument);
+                //}
 
                 // skip '--' and escape every \ to be \\ and every " to be \" to survive the next hop
                 string[] escaped = settings.Skip(1).Select(s => s.Replace("\\", "\\\\").Replace("\"", "\\\"")).ToArray();
@@ -146,11 +150,11 @@ namespace Microsoft.DotNet.Tools.Test
             }
             else
             {
-                var argument = result.GetValueForArgument(TestCommandParser.SlnOrProjectArgument);
-                if (!string.IsNullOrWhiteSpace(argument))
-                {
-                    msbuildArgs.Add(argument);
-                }
+                //var argument = result.GetValueForArgument(TestCommandParser.SlnOrProjectArgument);
+                //if (!string.IsNullOrWhiteSpace(argument))
+                //{
+                //    msbuildArgs.Add(argument);
+                //}
             }
 
             string verbosityArg = result.ForwardedOptionValues<IReadOnlyCollection<string>>(TestCommandParser.GetCommand(), "verbosity")?.SingleOrDefault() ?? null;
