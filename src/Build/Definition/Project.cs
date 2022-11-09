@@ -56,7 +56,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// * and ? are invalid file name characters, but they occur in globs as wild cards.
         /// </summary>
-        private static readonly char[] s_invalidGlobChars = FileUtilities.InvalidFileNameChars.Where(c => c != '*' && c != '?' && c!= '/' && c != '\\' && c != ':').ToArray();
+        private static readonly char[] s_invalidGlobChars = FileUtilities.InvalidFileNameChars.Where(c => c != '*' && c != '?' && c != '/' && c != '\\' && c != ':').ToArray();
 
         /// <summary>
         /// Context to log messages and events in.
@@ -2782,12 +2782,13 @@ namespace Microsoft.Build.Evaluation
                     return new List<ProvenanceResult>();
                 }
 
-                return
-                    projectItemElements
+                return projectItemElements
                     .AsParallel()
-                    .AsOrdered()
-                    .Select(i => ComputeProvenanceResult(itemToMatch, i))
-                    .Where(r => r != null)
+                    .Select((item, index) => (Result: ComputeProvenanceResult(itemToMatch, item), Index: index))
+                    .Where(pair => pair.Result != null)
+                    .AsSequential()
+                    .OrderBy(pair => pair.Index)
+                    .Select(pair => pair.Result)
                     .ToList();
             }
 
