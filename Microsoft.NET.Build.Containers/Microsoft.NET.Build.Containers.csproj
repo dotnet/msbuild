@@ -30,6 +30,7 @@
     <Compile Remove="*.*" />
     <Compile Include="ReferenceParser.cs" />
     <Compile Include="ParseContainerProperties.cs" />
+    <Compile Include="CreateNewImage.Interface.cs" />
     <Compile Include="CreateNewImageToolTask.cs" />
     <Compile Include="ContainerHelpers.cs" />
     <Compile Include="net472Definitions.cs" />
