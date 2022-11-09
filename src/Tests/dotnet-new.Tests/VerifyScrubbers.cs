@@ -26,6 +26,15 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         }
 
         /// <summary>
+        /// Replaces Windows newlines (CRLF) with Unix style newlines (LF).
+        /// </summary>
+        /// <param name="output"></param>
+        internal static void UnixifyNewlines(this StringBuilder output)
+        {
+            output.Replace("\r\n", "\n");
+        }
+
+        /// <summary>
         /// Replaces content matching <paramref name="pattern"/> with <paramref name="replacement"/>.
         /// </summary>
         internal static void ScrubByRegex(this StringBuilder output, string pattern, string replacement, RegexOptions regexOptions = RegexOptions.None)
