@@ -362,7 +362,7 @@ namespace Microsoft.Build.UnitTests
         public void TempPathContainsAmpersand3()
         {
             string directoryWithAmpersand = "nospace& space";
-            string newTmp = Path.Combine(Path.GetTempPath(), directoryWithAmpersand);
+            string newTmp = Path.Combine(FileUtilities.TempFileDirectory, directoryWithAmpersand);
             string oldTmp = Environment.GetEnvironmentVariable("TMP");
 
             try

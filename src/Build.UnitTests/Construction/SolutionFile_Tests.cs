@@ -566,6 +566,7 @@ namespace Microsoft.Build.UnitTests.Construction
                         </References>
                     </GENERAL>
                 </EFPROJECT>";
+
                 // Create the directory for the third project
                 Directory.CreateDirectory(Path.Combine(FileUtilities.TempFileDirectory, "ETPProjUpgradeTest"));
                 File.WriteAllText(proj3Path, etpProjContent);
