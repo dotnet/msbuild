@@ -23,6 +23,13 @@
         <Error Condition="'$(_IsSDKContainerAllowedVersion)' != 'true'" Code="CONTAINER002" Text="The current .NET SDK ($(NETCoreSdkVersion)) doesn't support containerization. Please use version 7.0.100 or higher to enable containerization." />
     </Target>
 
+    <Target Name="_ContainerVerifyRuntime"
+        Condition="'$(WebPublishMethod)' == 'Container' or '$(PublishProfile)' == 'DefaultContainer'"
+        BeforeTargets="AfterPublish">
+        <!-- https://github.com/dotnet/sdk-container-builds/issues/91 -->
+        <Error Condition="'$(RuntimeIdentifier)' != 'linux-x64'" Code="CONTAINER006" Text="The Microsoft.NET.Build.Containers package does not (yet) support publishing for $([MSBuild]::ValueOrDefault('$(RuntimeIdentifier)', 'portable or no-RuntimeIdentifier-defined scenarios')). Please specify a runtime of &quot;linux-x64&quot;" />
+    </Target>
+
     <Target Name="ComputeContainerConfig">
         <!-- Reference data about this project -->
         <PropertyGroup>
@@ -101,6 +108,7 @@
     <PropertyGroup>
         <PublishContainerDependsOn>
             _ContainerVerifySDKVersion;
+            _ContainerVerifyRuntime;
             ComputeContainerConfig
         </PublishContainerDependsOn>
     </PropertyGroup>
