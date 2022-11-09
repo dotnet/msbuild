@@ -15,13 +15,7 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class TestCommandParser
     {
-        public static readonly string DocsLink = "https://aka.ms/dotnet-test";
-
-        //public static readonly Argument<string> SlnOrProjectArgument = new Argument<string>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
-        //{
-        //    Description = CommonLocalizableStrings.SolutionOrProjectArgumentDescription,
-        //    Arity = ArgumentArity.ZeroOrOne
-        //};
+        public static readonly string DocsLink = "https://aka.ms/dotnet-test";        
 
         public static readonly Option<string> SettingsOption = new ForwardedOption<string>(new string[] { "-s", "--settings" }, LocalizableStrings.CmdSettingsDescription)
         {
@@ -130,7 +124,9 @@ namespace Microsoft.DotNet.Cli
         {
             var command = new DocumentedCommand("test", DocsLink, LocalizableStrings.AppFullName);
             command.TreatUnmatchedTokensAsErrors = false;
-            //command.AddArgument(SlnOrProjectArgument);
+
+            // We are on purpose not capturing the solution, project or directory here. We want to pass it to the
+            // MSBuild command so we are letting it flow.
 
             command.AddOption(SettingsOption);
             command.AddOption(ListTestsOption);

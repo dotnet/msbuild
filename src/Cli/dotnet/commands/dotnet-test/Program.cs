@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.Tools.Test
             try
             {
                 Environment.SetEnvironmentVariable(NodeWindowEnvironmentName, "1");
-                int exitCode = FromParseResult(parseResult, args, settings, testSessionCorrelationId).Execute();
+                int exitCode = FromParseResult(parseResult, settings, testSessionCorrelationId).Execute();
 
                 // We run post processing also if execution is failed for possible partial successful result to post process.
                 exitCode |= RunArtifactPostProcessingIfNeeded(testSessionCorrelationId, parseResult, FeatureFlag.Instance);
@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.Tools.Test
             return exitCode;
         }
 
-        private static TestCommand FromParseResult(ParseResult result, string[] args, string[] settings, string testSessionCorrelationId, string msbuildPath = null)
+        private static TestCommand FromParseResult(ParseResult result, string[] settings, string testSessionCorrelationId, string msbuildPath = null)
         {
             result.ShowHelpOrErrorIfAppropriate();
 
@@ -119,6 +119,9 @@ namespace Microsoft.DotNet.Tools.Test
                 "-nologo"
             };
 
+            // Extra msbuild properties won't be parsed and so end up in the UnmatchedTokens list. In addition to those
+            // properties, all the test settings properties are also considered as unmatched but we don't want to forward
+            // these as-is to msbuild. So we filter out the test settings properties from the unmatched tokens.
             var unMatchedNonSettingsArgs = settings.Length > 1
                 ? result.UnmatchedTokens.TakeWhile(x => x != settings[1])
                 : result.UnmatchedTokens;
@@ -132,29 +135,11 @@ namespace Microsoft.DotNet.Tools.Test
 
             if (settings.Any())
             {
-                //workaround for correct -- logic
-                //var commandArgument = result.GetValueForArgument(TestCommandParser.SlnOrProjectArgument);
-                //// TODO: @baronfel, @Evangelink
-                //// If the project or solution is not specified we would expect null here but we actually
-                //// get some of the parameter (last one before --) instead. 
-                //if (!string.IsNullOrWhiteSpace(commandArgument) && !settings.Contains(commandArgument))
-                //{
-                //    msbuildArgs.Add(commandArgument);
-                //}
-
                 // skip '--' and escape every \ to be \\ and every " to be \" to survive the next hop
                 string[] escaped = settings.Skip(1).Select(s => s.Replace("\\", "\\\\").Replace("\"", "\\\"")).ToArray();
 
                 string runSettingsArg = string.Join(";", escaped);
                 msbuildArgs.Add($"-property:VSTestCLIRunSettings=\"{runSettingsArg}\"");
-            }
-            else
-            {
-                //var argument = result.GetValueForArgument(TestCommandParser.SlnOrProjectArgument);
-                //if (!string.IsNullOrWhiteSpace(argument))
-                //{
-                //    msbuildArgs.Add(argument);
-                //}
             }
 
             string verbosityArg = result.ForwardedOptionValues<IReadOnlyCollection<string>>(TestCommandParser.GetCommand(), "verbosity")?.SingleOrDefault() ?? null;
