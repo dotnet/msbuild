@@ -42,7 +42,7 @@ stages:
   displayName: Build
 
   jobs:
-  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/vs17.2') }}: # should track next-release's active dev branch
+  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/vs17.3') }}: # should track next-release's active dev branch
     - template: /eng/common/templates/job/onelocbuild.yml
       parameters:
         LclSource: lclFilesfromPackage
@@ -67,7 +67,7 @@ stages:
     - name: VisualStudio.MajorVersion
       value: 17
     - name: VisualStudio.ChannelName
-      value: 'int.d17.2'
+      value: 'int.d17.3'
     - name: VisualStudio.DropName
       value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
