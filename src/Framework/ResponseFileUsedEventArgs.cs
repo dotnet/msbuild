@@ -1,6 +1,6 @@
 using System;
-using System.IO;
-using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Framework
 {
@@ -8,18 +8,18 @@ namespace Microsoft.Build.Framework
     /// Arguments for the response file used event
     /// </summary>
     [Serializable]
-    public class ResponseFileUsedEventArgs : BuildMessageEventArgs
+    public class ResponseFileUsedEventArgs : CustomBuildEventArgs
     {
         /// <summary>
         /// Initialize a new instance of the ResponseFileUsedEventArgs class.
         /// </summary>
-        public ResponseFileUsedEventArgs()
+        public ResponseFileUsedEventArgs() : base() { }
+
+        public ResponseFileUsedEventArgs(string responseFilePath) : base()
         {
+            ResponseFilePath = responseFilePath;
         }
 
-        public ResponseFileUsedEventArgs(string message)
-            : base(message: message)
-        {
-        }
+        public string ResponseFilePath { get; set; }
     }
 }

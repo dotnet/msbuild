@@ -632,6 +632,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             throw new NotImplementedException();
         }
+        public void LogResponseFile(BuildEventContext buildEventContext, string filePath)
+        {
+        }
 
         #endregion
     }

@@ -269,5 +269,14 @@ namespace Microsoft.Build.BackEnd.Logging
             LoggingService.LogFatalBuildError(BuildEventContext, exception, file);
             _hasLoggedErrors = true;
         }
+        /// <summary>
+        /// Logs a response file to be included in the binary logger
+        /// </summary>
+        /// <param name="filePath">Path to response file</param>
+        internal void LogResponseFile(string filePath)
+        { 
+            ErrorUtilities.VerifyThrow(IsValid, "must be valid");
+            _loggingService.LogResponseFile(BuildEventContext, filePath);
+        }
     }
 }

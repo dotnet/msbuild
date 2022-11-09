@@ -1088,6 +1088,11 @@ namespace Microsoft.Build.CommandLine
         private static IEnumerable<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = Enumerable.Empty<BuildManager.DeferredBuildMessage>();
 
         /// <summary>
+        /// Response files to be included in loggers
+        /// </summary>
+        private static IEnumerable<BuildManager.DeferredResponseFile> responseFileToLogInBuildLoggers = Enumerable.Empty<BuildManager.DeferredResponseFile>();
+
+        /// <summary>
         /// Initializes the build engine, and starts the project building.
         /// </summary>
         /// <returns>true, if build succeeds</returns>
@@ -1338,7 +1343,21 @@ namespace Microsoft.Build.CommandLine
 #endif
                         messagesToLogInBuildLoggers = GetMessagesToLogInBuildLoggers(commandLineString);
                     }
-                    buildManager.BeginBuild(parameters, messagesToLogInBuildLoggers);
+
+                    // Log a message for every response file and include it in log
+                    foreach (var responseFilePath in s_includedResponseFiles)
+                    {
+                        messagesToLogInBuildLoggers = messagesToLogInBuildLoggers.Append(
+                            new BuildManager.DeferredBuildMessage(
+                                String.Format("Included response file: {0}", responseFilePath),
+                                MessageImportance.Normal
+                            ));
+                        responseFileToLogInBuildLoggers = responseFileToLogInBuildLoggers.Append(
+                            new BuildManager.DeferredResponseFile(responseFilePath));
+                    }
+
+
+                    buildManager.BeginBuild(parameters, messagesToLogInBuildLoggers, responseFileToLogInBuildLoggers);
 
                     Exception exception = null;
                     try
@@ -1529,17 +1548,6 @@ namespace Microsoft.Build.CommandLine
                         "MSBuildDebugPath",
                         DebugUtils.DebugPath),
                         MessageImportance.High));
-            }
-
-            // Log a message for every response file
-            foreach (var responseFilePath in s_includedResponseFiles)
-            {
-                messages.Add(
-                    new BuildManager.DeferredBuildMessage(
-                        String.Format("Included response file: {0}", responseFilePath),
-                        MessageImportance.Normal
-                    )
-                );
             }
 
             return messages;
