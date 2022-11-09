@@ -241,8 +241,10 @@
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
   </ItemGroup>
 
+  <!-- Xsds are not TF or arch-specific so copy once them in the outer build -->
   <Target Name="CopyXsds"
-          BeforeTargets="AfterBuild">
+          BeforeTargets="Build"
+          Condition="'$(IsInnerBuild)' != 'true'">
     <Copy SourceFiles="@(XsdsForVS)"
           DestinationFiles="@(XsdsForVS->'$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'xsd'))%(RecursiveDir)%(Filename)%(Extension)')"
           SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
