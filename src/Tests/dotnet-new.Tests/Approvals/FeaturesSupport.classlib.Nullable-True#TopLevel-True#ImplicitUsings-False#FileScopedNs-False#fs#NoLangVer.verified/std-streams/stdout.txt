@@ -1,0 +1,7 @@
+﻿The template "Class Library" was created successfully.
+
+Processing post-creation actions...
+Restoring %DIR%\MyProject\classlib.fsproj:
+  Determining projects to restore...
+  Restored %DIR%\MyProject\classlib.fsproj (%DURATION%).
+Restore succeeded.

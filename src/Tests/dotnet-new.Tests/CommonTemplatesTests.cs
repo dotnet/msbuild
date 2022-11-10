@@ -31,191 +31,26 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         }
 
         [Theory]
-        [InlineData("Console App", "console")]
-        [InlineData("Console App", "console", "C#")]
-        [InlineData("Console App", "console", "F#")]
-        [InlineData("Console App", "console", "VB")]
-        [InlineData("Console App", "console", "C#", "net7.0")]
-        [InlineData("Console App", "console", "F#", "net7.0")]
-        [InlineData("Console App", "console", "VB", "net7.0")]
-
-        [InlineData("Class Library", "classlib")]
-        [InlineData("Class Library", "classlib", "C#")]
-        [InlineData("Class Library", "classlib", "F#")]
-        [InlineData("Class Library", "classlib", "VB")]
-        [InlineData("Class Library", "classlib", "C#", "net7.0")]
-        [InlineData("Class Library", "classlib", "F#", "net7.0")]
-        [InlineData("Class Library", "classlib", "VB", "net7.0")]
-        [InlineData("Class Library", "classlib", "C#", "netstandard2.1")]
-        [InlineData("Class Library", "classlib", "VB", "netstandard2.1")]
-        [InlineData("Class Library", "classlib", "F#", "netstandard2.1")]
-        [InlineData("Class Library", "classlib", "C#", "netstandard2.0")]
-        [InlineData("Class Library", "classlib", "VB", "netstandard2.0")]
-        [InlineData("Class Library", "classlib", "F#", "netstandard2.0")]
-        public async void AllCommonProjectsCreateRestoreAndBuild(string expectedTemplateName, string templateShortName, string? language = null, string? framework = null, string? langVersion = null)
+        [InlineData("dotnet gitignore file", "gitignore", null)]
+        [InlineData("global.json file", "globaljson", null)]
+        [InlineData("global.json file", "globaljson", new[] { "--sdk-version", "5.0.200" })]
+        [InlineData("global.json file", "globaljson", new[] { "--sdk-version", "5.0.200", "--roll-forward", "major" })]
+        [InlineData("NuGet Config", "nugetconfig", null)]
+        [InlineData("Solution File", "sln", null)]
+        [InlineData("Solution File", "solution", null)]
+        [InlineData("Dotnet local tool manifest file", "tool-manifest", null)]
+        [InlineData("Web Config", "webconfig", null)]
+        [InlineData("EditorConfig file", "editorconfig", null)]
+        [InlineData("EditorConfig file", "editorconfig", new[] { "--empty" })]
+        public async void AllCommonItemsCreate(string expectedTemplateName, string templateShortName, string[]? args)
         {
-            string workingDir = CreateTemporaryFolder(folderName: $"{templateShortName}-{language?.Replace("#", "Sharp") ?? "null"}-{framework ?? "null"}");
-            string extension = language switch
-            {
-                "F#" => "fsproj",
-                "VB" => "vbproj",
-                _ => "csproj"
-            };
-
-            string projectName = "sample-project-name";
-            string projectDir = Path.Combine(workingDir, templateShortName);
-            string finalProjectName = Path.Combine(projectDir, $"{projectName}.{extension}");
-            Console.WriteLine($"Expected project location: {finalProjectName}");
-
-            List<string> args = new() { "-n", projectName };
-            if (!string.IsNullOrWhiteSpace(language))
-            {
-                args.Add("--language");
-                args.Add(language);
-            }
-            if (!string.IsNullOrWhiteSpace(framework))
-            {
-                args.Add("--framework");
-                args.Add(framework);
-            }
-            if (!string.IsNullOrWhiteSpace(langVersion))
-            {
-                args.Add("--langVersion");
-                args.Add(langVersion);
-            }
-
-            TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: templateShortName)
-            {
-                TemplateSpecificArgs = args,
-                SnapshotsDirectory = "Approvals",
-                OutputDirectory = workingDir,
-                VerifyCommandOutput = true,
-                VerificationExcludePatterns = new[] { "*.cs", "*.fs", "*.vb", "*.*proj" },
-                DoNotPrependCallerMethodNameToScenarioName = false,
-                DoNotAppendTemplateArgsToScenarioName = true,
-                DoNotPrependTemplateNameToScenarioName = true,
-                DotnetExecutablePath = TestContext.Current.ToolsetUnderTest.DotNetHostPath,
-            }
-            .WithCustomScrubbers(
-                ScrubbersDefinition.Empty
-                    .AddScrubber(sb =>
-                    {
-                        const string projectPathTag = "%PROJECT_NAME%";
-                        sb.Replace(expectedTemplateName, "%TEMPLATE_NAME%").Replace(finalProjectName, projectPathTag);
-                        string pattern = "(^  Restored " + Regex.Escape(projectPathTag) + " \\()(.*)(\\)\\.)";
-                        string res = sb.ToString();
-                        res = Regex.Replace(res, pattern, "$1%DURATION%$3", RegexOptions.Multiline);
-                        sb.Clear();
-                        sb.Append(res);
-                    }));
-
-            VerificationEngine engine = new VerificationEngine(_logger);
-            await engine.Execute(options).ConfigureAwait(false);
-
-            new DotnetRestoreCommand(_log)
-                .WithWorkingDirectory(projectDir)
-                .Execute()
-                .Should()
-                .ExitWith(0)
-                .And
-                .NotHaveStdErr();
-
-            new DotnetBuildCommand(_log)
-                .WithWorkingDirectory(projectDir)
-                .Execute()
-                .Should()
-                .ExitWith(0)
-                .And
-                .NotHaveStdErr();
-
-            Directory.Delete(workingDir, true);
-        }
-
-        [Theory]
-        [InlineData("Console App", "console")]
-        [InlineData("Console App", "console", "C#")]
-        [InlineData("Console App", "console", "F#")]
-        [InlineData("Console App", "console", "VB")]
-        [InlineData("Console App", "console", "C#", "net7.0")]
-        [InlineData("Console App", "console", "F#", "net7.0")]
-        [InlineData("Console App", "console", "VB", "net7.0")]
-        [InlineData("Console Application", "console", "C#", "net5.0")]
-        [InlineData("Console Application", "console", "F#", "net5.0")]
-        [InlineData("Console Application", "console", "VB", "net5.0")]
-        [InlineData("Console Application", "console", "C#", "netcoreapp3.1")]
-        [InlineData("Console Application", "console", "F#", "netcoreapp3.1")]
-        [InlineData("Console Application", "console", "VB", "netcoreapp3.1")]
-
-        [InlineData("Class Library", "classlib")]
-        [InlineData("Class Library", "classlib", "C#")]
-        [InlineData("Class Library", "classlib", "F#")]
-        [InlineData("Class Library", "classlib", "VB")]
-        [InlineData("Class Library", "classlib", "C#", "net7.0")]
-        [InlineData("Class Library", "classlib", "F#", "net7.0")]
-        [InlineData("Class Library", "classlib", "VB", "net7.0")]
-        [InlineData("Class library", "classlib", "C#", "net5.0")]
-        [InlineData("Class library", "classlib", "F#", "net5.0")]
-        [InlineData("Class library", "classlib", "VB", "net5.0")]
-        [InlineData("Class library", "classlib", "C#", "netcoreapp3.1")]
-        [InlineData("Class library", "classlib", "F#", "netcoreapp3.1")]
-        [InlineData("Class library", "classlib", "VB", "netcoreapp3.1")]
-        [InlineData("Class Library", "classlib", "C#", "netstandard2.1")]
-        [InlineData("Class Library", "classlib", "VB", "netstandard2.1")]
-        [InlineData("Class Library", "classlib", "F#", "netstandard2.1")]
-        [InlineData("Class Library", "classlib", "C#", "netstandard2.0")]
-        [InlineData("Class Library", "classlib", "VB", "netstandard2.0")]
-        [InlineData("Class Library", "classlib", "F#", "netstandard2.0")]
-        public async void AllCommonProjectsCreate_NoRestore(string expectedTemplateName, string templateShortName, string? language = null, string? framework = null)
-        {
-            List<string> args = new() { "--no-restore" };
-            if (!string.IsNullOrWhiteSpace(language))
-            {
-                args.Add("--language");
-                args.Add(language);
-            }
-            if (!string.IsNullOrWhiteSpace(framework))
-            {
-                args.Add("--framework");
-                args.Add(framework);
-            }
-
             TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: templateShortName)
             {
                 TemplateSpecificArgs = args,
                 SnapshotsDirectory = "Approvals",
                 VerifyCommandOutput = true,
-                VerificationIncludePatterns = new[] { "*.txt" },
-                DoNotAppendTemplateArgsToScenarioName = true,
+                VerificationExcludePatterns = new[] { "*/stderr.txt", "*\\stderr.txt" },
                 SettingsDirectory = _fixture.HomeDirectory,
-                DoNotPrependTemplateNameToScenarioName = true,
-            }
-            .WithCustomScrubbers(
-                ScrubbersDefinition.Empty
-                    .AddScrubber(sb => sb.Replace(expectedTemplateName, "%TEMPLATE_NAME%"))
-            );
-
-            VerificationEngine engine = new VerificationEngine(_logger);
-            await engine.Execute(options).ConfigureAwait(false);
-        }
-
-        [Theory]
-        [InlineData("dotnet gitignore file", "gitignore")]
-        [InlineData("global.json file", "globaljson")]
-        [InlineData("NuGet Config", "nugetconfig")]
-        [InlineData("Solution File", "sln")]
-        [InlineData("Solution File", "solution")]
-        [InlineData("Dotnet local tool manifest file", "tool-manifest")]
-        [InlineData("Web Config", "webconfig")]
-        public async void AllCommonItemsCreate(string expectedTemplateName, string templateShortName)
-        {
-            TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: templateShortName)
-            {
-                SnapshotsDirectory = "Approvals",
-                VerifyCommandOutput = true,
-                VerificationIncludePatterns = new[] { "*.txt" },
-                DoNotAppendTemplateArgsToScenarioName = true,
-                SettingsDirectory = _fixture.HomeDirectory,
-                DoNotPrependTemplateNameToScenarioName = true,
             }
             .WithCustomScrubbers(
                 ScrubbersDefinition.Empty
@@ -232,68 +67,33 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             await engine.Execute(options).ConfigureAwait(false);
         }
 
-        [Fact]
-        public async void EditorConfigTests_Empty()
-        {
-            TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: "editorconfig")
-            {
-                TemplateSpecificArgs = new[] { "--empty" },
-                SnapshotsDirectory = "Approvals",
-                SettingsDirectory = _fixture.HomeDirectory,
-                VerifyCommandOutput = true,
-            };
+        //
+        // Sample of a custom verifier callback
+        // To be uncommented in case editorconfig template will start to genearate dynamic content
+        //
 
-            VerificationEngine engine = new VerificationEngine(_logger);
-            await engine.Execute(options).ConfigureAwait(false);
-        }
+        //[Fact]
+        //public async void EditorConfigTests_Default()
+        //{
+        //    TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: "editorconfig")
+        //    {
+        //        SnapshotsDirectory = "Approvals",
+        //        SettingsDirectory = _fixture.HomeDirectory,
+        //    }
+        //    .WithCustomDirectoryVerifier(async (content, contentFetcher) =>
+        //    {
+        //        await foreach (var (filePath, scrubbedContent) in contentFetcher.Value)
+        //        {
+        //            filePath.Replace(Path.DirectorySeparatorChar, '/').Should().BeEquivalentTo(@"editorconfig/.editorconfig");
+        //            scrubbedContent.Should().Contain("dotnet_naming_rule");
+        //            scrubbedContent.Should().Contain("dotnet_style_");
+        //            scrubbedContent.Should().Contain("dotnet_naming_symbols");
+        //        }
+        //    });
 
-        [Fact]
-        public async void EditorConfigTests_Default()
-        {
-            TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: "editorconfig")
-            {
-                SnapshotsDirectory = "Approvals",
-                SettingsDirectory = _fixture.HomeDirectory,
-            }
-            .WithCustomDirectoryVerifier(async (content, contentFetcher) =>
-            {
-                await foreach (var (filePath, scrubbedContent) in contentFetcher.Value)
-                {
-                    filePath.Replace(Path.DirectorySeparatorChar, '/').Should().BeEquivalentTo(@"editorconfig/.editorconfig");
-                    scrubbedContent.Should().Contain("dotnet_naming_rule");
-                    scrubbedContent.Should().Contain("dotnet_style_");
-                    scrubbedContent.Should().Contain("dotnet_naming_symbols");
-                }
-            });
-
-            VerificationEngine engine = new VerificationEngine(_logger);
-            await engine.Execute(options).ConfigureAwait(false);
-        }
-
-        [Theory]
-        [InlineData(
-            "globaljson",
-            "--sdk-version",
-            "5.0.200")]
-        [InlineData(
-            "globaljson",
-            "--sdk-version",
-            "5.0.200",
-            "--roll-forward",
-            "major")]
-        public async void GlobalJsonTests(params string[] parameters)
-        {
-            TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: parameters[0])
-            {
-                TemplateSpecificArgs = parameters[1..],
-                SnapshotsDirectory = "Approvals",
-                SettingsDirectory = _fixture.HomeDirectory,
-                VerifyCommandOutput = true,
-            };
-
-            VerificationEngine engine = new VerificationEngine(_logger);
-            await engine.Execute(options).ConfigureAwait(false);
-        }
+        //    VerificationEngine engine = new VerificationEngine(_logger);
+        //    await engine.Execute(options).ConfigureAwait(false);
+        //}
 
         [Fact]
         public void NuGetConfigPermissions()
@@ -354,6 +154,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             //features: top-level statements; nullables; implicit usings; filescoped namespaces
 
             string[] unsupportedLanguageVersions = { "1", "ISO-1" };
+            string[] unsupportedFrameworkVersions = { "net5.0", "netcoreapp3.1" };
             string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "11", "latest", "latestMajor", "default", "preview" };
 
             string?[] nullableSupportedInFrameworkByDefault = { null, "net7.0", "netstandard2.1" };
@@ -365,27 +166,40 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string?[] implicitUsingsSupportedLanguages = { null, "10.0", "11.0", "11", "latest", "latestMajor", "default", "preview" };
             string?[] fileScopedNamespacesSupportedLanguages = { "10.0", "11.0", "11", "latest", "latestMajor", "default", "preview" };
 
+            string?[] supportedLangs = { null, "C#", "F#", "VB" };
+
             foreach (var template in templatesToTest)
             {
                 foreach (string? langVersion in unsupportedLanguageVersions.Concat(supportedLanguageVersions))
                 {
-                    foreach (string? framework in template.Frameworks)
+                    IEnumerable<string?> frameworks = template.Frameworks;
+                    IEnumerable<string?> langs = new string?[] { null };
+                    if (langVersion == null)
                     {
-                        yield return CreateParams(template.Template, langVersion, framework, false)!;
-                        var testParams = CreateParams(template.Template, langVersion, framework, true);
-                        if (testParams != null)
+                        frameworks = frameworks.Concat(unsupportedFrameworkVersions);
+                        langs = supportedLangs;
+                    }
+
+                    foreach (string? framework in frameworks)
+                    {
+                        foreach (string? lang in langs)
                         {
-                            yield return testParams;
+                            yield return CreateParams(template.Template, langVersion, lang, framework, false)!;
+                            var testParams = CreateParams(template.Template, langVersion, lang, framework, true);
+                            if (testParams != null)
+                            {
+                                yield return testParams;
+                            }
                         }
                     }
                 }
             }
 
-            object?[]? CreateParams(string templateName, string? langVersion, string? framework, bool forceDisableTopLevel)
+            object?[]? CreateParams(string templateName, string? langVersion, string? lang, string? framework, bool forceDisableTopLevel)
             {
-                bool supportsTopLevel = topLevelStatementSupportedLanguages.Contains(langVersion);
+                bool supportsTopLevel = topLevelStatementSupportedLanguages.Contains(langVersion) && !unsupportedFrameworkVersions.Contains(framework);
 
-                if ((!supportsTopLevel || !templateName.Equals(consoleTemplateShortname)) && forceDisableTopLevel)
+                if ((!supportsTopLevel || !templateName.Equals(consoleTemplateShortname) || (lang != null && lang != "C#")) && forceDisableTopLevel)
                 {
                     return null;
                 }
@@ -393,9 +207,10 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 return new object?[]
                 {
                     templateName,
-                    supportedLanguageVersions.Contains(langVersion),
+                    supportedLanguageVersions.Contains(langVersion) && !unsupportedFrameworkVersions.Contains(framework),
                     framework,
                     langVersion,
+                    lang,
                     nullableSupportedLanguages.Contains(langVersion)
                     || langVersion == null && nullableSupportedInFrameworkByDefault.Contains(framework),
                     supportsTopLevel,
@@ -417,15 +232,13 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             bool buildPass,
             string? framework,
             string? langVersion,
+            string? language,
             bool supportsNullable,
             bool supportsTopLevel,
             bool forceDisableTopLevel,
             bool supportsImplicitUsings,
             bool supportsFileScopedNs)
         {
-            var v = FeaturesSupport_Data().ToList();
-            v.Should().NotBeEmpty();
-
             const string currentDefaultFramework = "net7.0";
             //string currentDefaultFramework = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
 
@@ -442,14 +255,22 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 args.Add("--langVersion");
                 args.Add(langVersion);
             }
-
+            if (!string.IsNullOrWhiteSpace(language))
+            {
+                args.Add("--language");
+                args.Add(language);
+            }
+            if (!buildPass)
+            {
+                args.Add("--no-restore");
+            }
             if (forceDisableTopLevel)
             {
                 args.Add("--use-program-main");
                 supportsTopLevel = false;
             }
 
-            Dictionary<string, string> environmentUnderTest = new();
+            Dictionary<string, string> environmentUnderTest = new() { ["DOTNET_NOLOGO"] = false.ToString() };
             TestContext.Current.AddTestEnvironmentVariables(environmentUnderTest);
 
             TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: name)
@@ -458,37 +279,37 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 SnapshotsDirectory = "Approvals",
                 OutputDirectory = workingDir,
                 SettingsDirectory = _fixture.HomeDirectory,
+                VerifyCommandOutput = true,
                 DoNotPrependTemplateNameToScenarioName = false,
                 DoNotAppendTemplateArgsToScenarioName = true,
-                ScenarioName = !buildPass ?
-                    "OutOfSupport" :
-                    $"Nullable-{supportsNullable}#TopLevel-{supportsTopLevel}#ImplicitUsings-{supportsImplicitUsings}#FileScopedNs-{supportsFileScopedNs}" + (langVersion == null ? "#NoLang" : null),
-                VerificationExcludePatterns = buildPass ? null : new[] { "*" },
+                ScenarioName =
+                    $"Nullable-{supportsNullable}#TopLevel-{supportsTopLevel}#ImplicitUsings-{supportsImplicitUsings}#FileScopedNs-{supportsFileScopedNs}"
+                    + '#' + (language == null ? "cs" : language.Replace('#', 's').ToLower())
+                    + (langVersion == null ? "#NoLangVer" : null),
+                VerificationExcludePatterns = new[] { "*/stderr.txt", "*\\stderr.txt" },
                 DotnetExecutablePath = TestContext.Current.ToolsetUnderTest.DotNetHostPath,
             }
             .WithCustomEnvironment(environmentUnderTest)
             .WithCustomScrubbers(
                 ScrubbersDefinition.Empty
-                    //Todo: add extension here (once fixed in templating)
                     .AddScrubber(sb => sb.Replace($"<LangVersion>{langVersion}</LangVersion>", "<LangVersion>%LANG%</LangVersion>"))
-                    .AddScrubber(sb => sb.Replace($"<TargetFramework>{framework ?? currentDefaultFramework}</TargetFramework>", "<TargetFramework>%FRAMEWORK%</TargetFramework>"), "csproj")
+                    .AddScrubber(sb => sb.Replace($"<TargetFramework>{framework ?? currentDefaultFramework}</TargetFramework>", "<TargetFramework>%FRAMEWORK%</TargetFramework>"))
+                    .AddScrubber(sb => sb.Replace(workingDir, "%DIR%").ScrubByRegex("(^  Restored .* \\()(.*)(\\)\\.)", "$1%DURATION%$3", RegexOptions.Multiline), "txt")
             );
 
             VerificationEngine engine = new VerificationEngine(_logger);
             await engine.Execute(options).ConfigureAwait(false);
 
-            CommandResult buildResult = new DotnetBuildCommand(_log, "MyProject")
-                .WithWorkingDirectory(workingDir)
-                .Execute();
-
             if (buildPass)
             {
-                buildResult.Should().ExitWith(0).And.NotHaveStdErr();
+                new DotnetBuildCommand(_log, "MyProject")
+                    .WithWorkingDirectory(workingDir)
+                    .Execute()
+                    .Should()
+                    .Pass()
+                    .And.NotHaveStdErr();
             }
-            else
-            {
-                buildResult.Should().Fail();
-            }
+
             Directory.Delete(workingDir, true);
         }
 

@@ -1,0 +1,7 @@
+﻿The template "Class Library" was created successfully.
+
+Processing post-creation actions...
+Restoring %DIR%\MyProject\classlib.csproj:
+  Determining projects to restore...
+  Restored %DIR%\MyProject\classlib.csproj (%DURATION%).
+Restore succeeded.
