@@ -74,9 +74,9 @@ Copyright (c) .NET Foundation. All rights reserved.
                  '$(IsRidAgnostic)' != 'true' and
                   (
                     '$(SelfContained)' == 'true' or
-                    '$(PublishReadyToRun)' == 'true' or
-                    '$(PublishSingleFile)' == 'true' or
-                    '$(PublishAot)' == 'true'
+                    ('$(_IsPublishing)' == 'true' and '$(PublishReadyToRun)' == 'true') or
+                    ('$(_IsPublishing)' == 'true' and '$(PublishSingleFile)' == 'true') or
+                    ('$(_IsPublishing)' == 'true' and '$(PublishAot)' == 'true')
                   )">true</UseCurrentRuntimeIdentifier>
   </PropertyGroup>
 
