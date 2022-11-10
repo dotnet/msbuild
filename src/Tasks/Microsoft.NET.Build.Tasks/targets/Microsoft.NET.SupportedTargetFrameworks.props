@@ -26,6 +26,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v6.0" DisplayName=".NET 6.0" Alias="net6.0" />
         <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v7.0" DisplayName=".NET 7.0" Alias="net7.0"
                                             Condition="$([MSBuild]::VersionGreaterThanOrEquals($(MSBuildVersion), '17.4.0'))"/>
+        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v8.0" DisplayName=".NET 8.0" Alias="net8.0" />
     </ItemGroup>
 
     <!-- .NET Standard -->

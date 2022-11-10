@@ -37,6 +37,13 @@ namespace Microsoft.DotNet.Tools.Tool.List
         public override int Execute()
         {
             var toolPathOption = _parseResult.GetValueForOption(ToolListCommandParser.ToolPathOption);
+            var packageIdArgument = _parseResult.GetValueForArgument(ToolListCommandParser.PackageIdArgument);
+
+            PackageId? packageId = null;
+            if (!string.IsNullOrWhiteSpace(packageIdArgument))
+            {
+                packageId = new PackageId(packageIdArgument);
+            }
 
             DirectoryPath? toolPath = null;
             if (!string.IsNullOrWhiteSpace(toolPathOption))
@@ -64,16 +71,27 @@ namespace Microsoft.DotNet.Tools.Tool.List
                 LocalizableStrings.CommandsColumn,
                 p => string.Join(CommandDelimiter, p.Commands.Select(c => c.Name)));
 
-            table.PrintRows(GetPackages(toolPath), l => _reporter.WriteLine(l));
+            var packageEnumerable = GetPackages(toolPath, packageId);
+            table.PrintRows(packageEnumerable, l => _reporter.WriteLine(l));
+            if (packageId.HasValue && !packageEnumerable.Any())
+            {
+                // return 1 if target package was not found
+                return 1;
+            }
             return 0;
         }
 
-        private IEnumerable<IToolPackage> GetPackages(DirectoryPath? toolPath)
+        private IEnumerable<IToolPackage> GetPackages(DirectoryPath? toolPath, PackageId? packageId)
         {
             return _createToolPackageStore(toolPath).EnumeratePackages()
-                .Where(PackageHasCommands)
+                .Where((p) => PackageHasCommands(p) && PackageIdMatches(p, packageId))
                 .OrderBy(p => p.Id)
                 .ToArray();
+        }
+
+        internal static bool PackageIdMatches(IToolPackage package, PackageId? packageId)
+        {
+            return !packageId.HasValue || package.Id.Equals(packageId);
         }
 
         private bool PackageHasCommands(IToolPackage package)

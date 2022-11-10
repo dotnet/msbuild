@@ -141,14 +141,8 @@
   <data name="AssemblyVersionIsNotCompatible" xml:space="preserve">
     <value>{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</value>
   </data>
-  <data name="CouldNotResolveReference" xml:space="preserve">
-    <value>Could not resolve reference '{0}' in any of the provided search directories.</value>
-  </data>
   <data name="ElementShouldNotBeNullAtIndex" xml:space="preserve">
     <value>Element should not be null. Found null at index: {0}.</value>
-  </data>
-  <data name="FileDoesNotExist" xml:space="preserve">
-    <value>File '{0}' does not exist.</value>
   </data>
   <data name="IndexShouldBeWithinSetSizeRange" xml:space="preserve">
     <value>The index should be within the right set size range.</value>
@@ -162,26 +156,11 @@
   <data name="MemberExistsOnRight" xml:space="preserve">
     <value>Member '{0}' exists on {2} but not on {1}</value>
   </data>
-  <data name="ProvidedPathToLoadBinariesFromNotFound" xml:space="preserve">
-    <value>Could not find the provided path '{0}' to load binaries from.</value>
-  </data>
-  <data name="ProvidedStreamDoesNotHaveMetadata" xml:space="preserve">
-    <value>Provided stream for assembly '{0}' doesn't have any metadata to read. from.</value>
-  </data>
   <data name="RightNamesAtLeastOne" xml:space="preserve">
     <value>Should at least contain one right name.</value>
   </data>
   <data name="ShouldBeGreaterThanZero" xml:space="preserve">
     <value>Value should be greater than 0.</value>
-  </data>
-  <data name="ShouldNotBeNullAndContainAtLeastOneElement" xml:space="preserve">
-    <value>Should not be null and contain at least one element.</value>
-  </data>
-  <data name="ShouldProvideValidAssemblyName" xml:space="preserve">
-    <value>Should provide a valid assembly name.</value>
-  </data>
-  <data name="StreamPositionGreaterThanLength" xml:space="preserve">
-    <value>Stream position is greater than it's length, so there are no contents available to read.</value>
   </data>
   <data name="TypeMissingOnSide" xml:space="preserve">
     <value>Type '{0}' exists on {1} but not on {2}</value>
