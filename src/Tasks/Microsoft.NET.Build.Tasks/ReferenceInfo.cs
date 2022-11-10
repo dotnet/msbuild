@@ -69,12 +69,19 @@ namespace Microsoft.NET.Build.Tasks
                     return false;
                 }
 
-                string projectName = referencePath.GetMetadata(MetadataKeys.MSBuildSourceProjectFile);
-                if (string.IsNullOrEmpty(projectName))
+                string projectName;
+                string projectFilePath = referencePath.GetMetadata(MetadataKeys.MSBuildSourceProjectFile);
+                if (!string.IsNullOrEmpty(projectFilePath))
                 {
+                    projectName = Path.GetFileNameWithoutExtension(projectFilePath);
+                }
+                else
+                {
+                    // fall back to using the path to the output DLL
                     projectName = Path.GetFileNameWithoutExtension(referencePath.ItemSpec);
                     if (string.IsNullOrEmpty(projectName))
                     {
+                        // unexpected - let's assume this project was already included in the assets file.
                         return true;
                     }
                 }

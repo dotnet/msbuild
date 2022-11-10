@@ -155,7 +155,7 @@ namespace Microsoft.NET.Build.Tasks
             IEnumerable<ReferenceInfo> referenceAssemblyInfos =
                 ReferenceInfo.CreateReferenceInfos(ReferenceAssemblies);
 
-            // If there is a generated asset file. The projectContext will have most project references.
+            // If there is a generated asset file, the projectContext will contain most of the project references.
             // So remove any project reference contained within projectContext from directReferences to avoid duplication
             IEnumerable<ReferenceInfo> directReferences =
                 ReferenceInfo.CreateDirectReferenceInfos(

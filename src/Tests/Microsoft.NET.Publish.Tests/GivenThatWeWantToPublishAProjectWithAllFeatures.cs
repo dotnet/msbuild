@@ -118,7 +118,7 @@ namespace Microsoft.NET.Publish.Tests
         public void It_fails_when_nobuild_is_set_and_build_was_not_performed_previously()
         {
             var publishCommand = GetPublishCommand(ToolsetInfo.CurrentTargetFramework).Execute("/p:NoBuild=true");
-            publishCommand.Should().Fail().And.HaveStdOutContaining("MSB3030"); // "Could not copy ___ because it was not found."
+            publishCommand.Should().Fail().And.HaveStdOutContaining("MSB4018"); // GenerateDepsFile fails because TestLibrary.dll cannot be found
         }
 
         [Theory]

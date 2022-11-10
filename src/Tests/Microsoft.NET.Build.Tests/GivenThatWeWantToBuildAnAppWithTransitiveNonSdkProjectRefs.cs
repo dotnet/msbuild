@@ -57,10 +57,10 @@ namespace Microsoft.NET.Build.Tests
 
                             if (!string.IsNullOrEmpty(prefix))
                             {
-                                XElement propertyGroup = project.Root.Element(XName.Get("PropertyGroup", ns.NamespaceName));
-                                XElement assemblyName = propertyGroup.Element(XName.Get("AssemblyName", ns.NamespaceName));
+                                XElement propertyGroup = project.Root.Element(ns + "PropertyGroup");
+                                XElement assemblyName = propertyGroup.Element(ns + "AssemblyName");
                                 assemblyName.RemoveAll();
-                                assemblyName.Add("TestApp." + projectFileName);
+                                assemblyName.Add(prefix + projectFileName);
                             }
 
                             // indicate that project restore is not supported for these projects:
