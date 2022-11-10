@@ -378,6 +378,9 @@ namespace Microsoft.Build.Shared
             { (dotNetFrameworkVersion471, visualStudioVersion160), (dotNetFrameworkVersion47, visualStudioVersion160) },
             { (dotNetFrameworkVersion472, visualStudioVersion160), (dotNetFrameworkVersion471, visualStudioVersion160) },
             { (dotNetFrameworkVersion48, visualStudioVersion160), (dotNetFrameworkVersion472, visualStudioVersion160) },
+
+            // VS 17
+            { (dotNetFrameworkVersion481, visualStudioVersion170), (dotNetFrameworkVersion48, visualStudioVersion170) },
         };
 #endif // FEATURE_WIN32_REGISTRY
 
