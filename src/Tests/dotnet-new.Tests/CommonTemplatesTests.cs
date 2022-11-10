@@ -5,7 +5,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.Logging;
@@ -339,149 +338,72 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 
         #region Project templates language features tests
 
-        [Theory]
-        [InlineData("11.0")]
-        [InlineData("11")]
-        [InlineData("10.0")]
-        [InlineData("10")]
-        [InlineData("preview")]
-        [InlineData("latest")]
-        [InlineData("default")]
-        [InlineData("latestMajor")]
-        [InlineData(null)]
-        public async void TopLevelProgramSupport_WhenFlagIsEnabled(string? langVersion)
-        {
-            string workingDir = CreateTemporaryFolder(folderName: $"{langVersion ?? "null"}");
-
-            List<string> args = new() { "-o", "MyProject", "--use-program-main" };
-            if (!string.IsNullOrEmpty(langVersion))
-            {
-                args.Add("--langVersion");
-                args.Add(langVersion);
-            }
-
-            TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: "console")
-            {
-                TemplateSpecificArgs = args,
-                SnapshotsDirectory = "Approvals",
-                OutputDirectory = workingDir,
-                SettingsDirectory = _fixture.HomeDirectory,
-                // DoNotPrependTemplateNameToScenarioName = true,
-                DoNotAppendTemplateArgsToScenarioName = true,
-                ScenarioName = langVersion == null ? "#NoLang" : null,
-                DotnetExecutablePath = TestContext.Current.ToolsetUnderTest.DotNetHostPath,
-            }
-            .WithCustomScrubbers(
-                ScrubbersDefinition.Empty
-                    .AddScrubber(sb => sb.Replace($"<LangVersion>{langVersion}</LangVersion>", "<LangVersion>%LANG%</LangVersion>"), "csproj")
-            );
-
-            VerificationEngine engine = new VerificationEngine(_logger);
-            await engine.Execute(options).ConfigureAwait(false);
-
-            new DotnetBuildCommand(_log, "MyProject")
-                .WithWorkingDirectory(workingDir)
-                .Execute()
-                .Should().ExitWith(0).And.NotHaveStdErr();
-            Directory.Delete(workingDir, true);
-        }
-
-        [Theory]
-        [InlineData("9.0")]
-        [InlineData("9")]
-        public async void TopLevelProgramSupport_WhenFlagIsEnabled_NoFileScopedNamespaces(string? langVersion)
-        {
-            List<string> args = new() { "-o", "MyProject", "--use-program-main" };
-            if (!string.IsNullOrEmpty(langVersion))
-            {
-                args.Add("--langVersion");
-                args.Add(langVersion);
-            }
-
-            TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: "console")
-            {
-                TemplateSpecificArgs = args,
-                SnapshotsDirectory = "Approvals",
-                SettingsDirectory = _fixture.HomeDirectory,
-                // DoNotPrependTemplateNameToScenarioName = true,
-                DoNotAppendTemplateArgsToScenarioName = true,
-                DoNotPrependTemplateNameToScenarioName = true,
-                DotnetExecutablePath = TestContext.Current.ToolsetUnderTest.DotNetHostPath,
-            }
-            .WithCustomScrubbers(
-                ScrubbersDefinition.Empty
-                    .AddScrubber(sb => sb.Replace($"<LangVersion>{langVersion}</LangVersion>", "<LangVersion>%LANG%</LangVersion>"), "csproj")
-            );
-
-            VerificationEngine engine = new VerificationEngine(_logger);
-            await engine.Execute(options).ConfigureAwait(false);
-        }
-
         /// <summary>
         /// Creates all possible combinations for supported templates, language versions and frameworks.
         /// </summary>
         public static IEnumerable<object?[]> FeaturesSupport_Data()
         {
+            const string consoleTemplateShortname = "console";
+
             var templatesToTest = new[]
             {
-                new { Template = "console",  Frameworks = new[] { null, "net7.0" } },
+                new { Template = consoleTemplateShortname,  Frameworks = new[] { null, "net7.0" } },
                 new { Template = "classlib", Frameworks = new[] { null, "net7.0", "netstandard2.0", "netstandard2.1" } }
             };
 
             //features: top-level statements; nullables; implicit usings; filescoped namespaces
 
             string[] unsupportedLanguageVersions = { "1", "ISO-1" };
-            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
+            string?[] supportedLanguageVersions = { null, "ISO-2", "2", "3", "4", "5", "6", "7", "7.1", "7.2", "7.3", "8.0", "9.0", "10.0", "11.0", "11", "latest", "latestMajor", "default", "preview" };
 
             string?[] nullableSupportedInFrameworkByDefault = { null, "net7.0", "netstandard2.1" };
             string?[] implicitUsingsSupportedInFramework = { null, "net7.0" };
             string?[] fileScopedNamespacesSupportedFrameworkByDefault = { null, "net7.0" };
 
-            string?[] nullableSupportedLanguages = { "8.0", "9.0", "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
-            string?[] topLevelStatementSupportedLanguages = { null, "9.0", "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
-            string?[] implicitUsingsSupportedLanguages = { null, "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
-            string?[] fileScopedNamespacesSupportedLanguages = { "10.0", "11.0", "latest", "latestMajor", "default", "preview" };
+            string?[] nullableSupportedLanguages = { "8.0", "9.0", "10.0", "11.0", "11", "latest", "latestMajor", "default", "preview" };
+            string?[] topLevelStatementSupportedLanguages = { null, "9.0", "10.0", "11", "11.0", "latest", "latestMajor", "default", "preview" };
+            string?[] implicitUsingsSupportedLanguages = { null, "10.0", "11.0", "11", "latest", "latestMajor", "default", "preview" };
+            string?[] fileScopedNamespacesSupportedLanguages = { "10.0", "11.0", "11", "latest", "latestMajor", "default", "preview" };
 
             foreach (var template in templatesToTest)
             {
-                foreach (string? langVersion in unsupportedLanguageVersions)
+                foreach (string? langVersion in unsupportedLanguageVersions.Concat(supportedLanguageVersions))
                 {
                     foreach (string? framework in template.Frameworks)
                     {
-                        yield return new object?[]
+                        yield return CreateParams(template.Template, langVersion, framework, false)!;
+                        var testParams = CreateParams(template.Template, langVersion, framework, true);
+                        if (testParams != null)
                         {
-                            template.Template,
-                            false,  //dotnet build should fail
-                            framework,
-                            langVersion,
-                            nullableSupportedLanguages.Contains(langVersion)
-                                || langVersion == null && nullableSupportedInFrameworkByDefault.Contains(framework),
-                            topLevelStatementSupportedLanguages.Contains(langVersion),
-                            implicitUsingsSupportedLanguages.Contains(langVersion) && implicitUsingsSupportedInFramework.Contains(framework),
-                            fileScopedNamespacesSupportedLanguages.Contains(langVersion)
-                                || langVersion == null && fileScopedNamespacesSupportedFrameworkByDefault.Contains(framework),
-                        };
+                            yield return testParams;
+                        }
                     }
                 }
-                foreach (string? langVersion in supportedLanguageVersions)
+            }
+
+            object?[]? CreateParams(string templateName, string? langVersion, string? framework, bool forceDisableTopLevel)
+            {
+                bool supportsTopLevel = topLevelStatementSupportedLanguages.Contains(langVersion);
+
+                if ((!supportsTopLevel || !templateName.Equals(consoleTemplateShortname)) && forceDisableTopLevel)
                 {
-                    foreach (string? framework in template.Frameworks)
-                    {
-                        yield return new object?[]
-                        {
-                            template.Template,
-                            true,   //dotnet build should pass
-                            framework,
-                            langVersion,
-                            nullableSupportedLanguages.Contains(langVersion)
-                                || langVersion == null && nullableSupportedInFrameworkByDefault.Contains(framework),
-                            topLevelStatementSupportedLanguages.Contains(langVersion),
-                            implicitUsingsSupportedLanguages.Contains(langVersion) && implicitUsingsSupportedInFramework.Contains(framework),
-                            fileScopedNamespacesSupportedLanguages.Contains(langVersion)
-                                || langVersion == null && fileScopedNamespacesSupportedFrameworkByDefault.Contains(framework),
-                        };
-                    }
+                    return null;
                 }
+
+                return new object?[]
+                {
+                    templateName,
+                    supportedLanguageVersions.Contains(langVersion),
+                    framework,
+                    langVersion,
+                    nullableSupportedLanguages.Contains(langVersion)
+                    || langVersion == null && nullableSupportedInFrameworkByDefault.Contains(framework),
+                    supportsTopLevel,
+                    forceDisableTopLevel,
+                    implicitUsingsSupportedLanguages.Contains(langVersion) && implicitUsingsSupportedInFramework.Contains(framework),
+                    fileScopedNamespacesSupportedLanguages.Contains(langVersion)
+                    || langVersion == null && fileScopedNamespacesSupportedFrameworkByDefault.Contains(framework),
+                };
             }
         }
 
@@ -497,9 +419,13 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string? langVersion,
             bool supportsNullable,
             bool supportsTopLevel,
+            bool forceDisableTopLevel,
             bool supportsImplicitUsings,
             bool supportsFileScopedNs)
         {
+            var v = FeaturesSupport_Data().ToList();
+            v.Should().NotBeEmpty();
+
             const string currentDefaultFramework = "net7.0";
             //string currentDefaultFramework = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
 
@@ -515,6 +441,12 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             {
                 args.Add("--langVersion");
                 args.Add(langVersion);
+            }
+
+            if (forceDisableTopLevel)
+            {
+                args.Add("--use-program-main");
+                supportsTopLevel = false;
             }
 
             Dictionary<string, string> environmentUnderTest = new();
@@ -561,178 +493,5 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         }
 
         #endregion
-
-        [Theory]
-        [InlineData("Nullable", "enable", "Console App", "console", null, null)]
-        [InlineData("CheckForOverflowUnderflow", null, "Console App", "console", null, null)]
-        [InlineData("LangVersion", null, "Console App", "console", null, null)]
-        [InlineData("TargetFramework", "net7.0", "Console App", "console", null, null)]
-        [InlineData("Nullable", null, "Console Application", "console", null, "net5.0")]
-        [InlineData("Nullable", null, "Console Application", "console", null, "netcoreapp3.1")]
-
-        [InlineData("Nullable", null, "Console App", "console", "F#", null)]
-        [InlineData("CheckForOverflowUnderflow", null, "Console App", "console", "F#", null)]
-        [InlineData("LangVersion", null, "Console App", "console", "F#", null)]
-        [InlineData("TargetFramework", "net7.0", "Console App", "console", "F#", null)]
-        [InlineData("GenerateDocumentationFile", null, "Console App", "console", "F#", null)]
-
-        [InlineData("Nullable", null, "Console App", "console", "VB", null)]
-        [InlineData("CheckForOverflowUnderflow", null, "Console App", "console", "VB", null)]
-        [InlineData("LangVersion", null, "Console App", "console", "VB", null)]
-        [InlineData("TargetFramework", "net7.0", "Console App", "console", "VB", null)]
-
-        [InlineData("Nullable", "enable", "Class Library", "classlib", null, null)]
-        [InlineData("CheckForOverflowUnderflow", null, "Class Library", "classlib", null, null)]
-        [InlineData("LangVersion", null, "Class Library", "classlib", null, null)]
-        [InlineData("TargetFramework", "net7.0", "Class Library", "classlib", null, null)]
-        [InlineData("Nullable", null, "Class Library", "classlib", null, "netstandard2.0")]
-        [InlineData("Nullable", "enable", "Class Library", "classlib", null, "netstandard2.1")]
-
-        [InlineData("Nullable", null, "Class Library", "classlib", "F#", null)]
-        [InlineData("CheckForOverflowUnderflow", null, "Class Library", "classlib", "F#", null)]
-        [InlineData("LangVersion", null, "Class Library", "classlib", "F#", null)]
-        [InlineData("TargetFramework", "net7.0", "Class Library", "classlib", "F#", null)]
-        [InlineData("GenerateDocumentationFile", "true", "Class Library", "classlib", "F#", null)]
-        [InlineData("Nullable", null, "Class Library", "classlib", "F#", "netstandard2.0")]
-
-        [InlineData("Nullable", null, "Class Library", "classlib", "VB", null)]
-        [InlineData("CheckForOverflowUnderflow", null, "Class Library", "classlib", "VB", null)]
-        [InlineData("LangVersion", null, "Class Library", "classlib", "VB", null)]
-        [InlineData("TargetFramework", "net7.0", "Class Library", "classlib", "VB", null)]
-        [InlineData("Nullable", null, "Class Library", "classlib", "VB", "netstandard2.0")]
-
-        public async void SetPropertiesByDefault(string propertyName, string? propertyValue, string expectedTemplateName, string templateShortName, string? language, string? framework)
-        {
-            List<string> args = new() { "--no-restore" };
-            if (!string.IsNullOrWhiteSpace(language))
-            {
-                args.Add("--language");
-                args.Add(language);
-            }
-            if (!string.IsNullOrWhiteSpace(framework))
-            {
-                args.Add("--framework");
-                args.Add(framework);
-            }
-
-            TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: templateShortName)
-            {
-                TemplateSpecificArgs = args,
-                SettingsDirectory = _fixture.HomeDirectory,
-                VerifyCommandOutput = true,
-                VerificationIncludePatterns = new[] { "**/*.*proj", "std-streams/stdout.txt", "**\\*.*proj", "std-streams\\stdout.txt" }
-            }
-            .WithCustomDirectoryVerifier(async (directory, fetcher) =>
-            {
-                int filesNum = 0;
-                await foreach (var (filePath, scrubbedContent) in fetcher.Value)
-                {
-                    filesNum++;
-                    if (filePath.EndsWith("stdout.txt", StringComparison.Ordinal))
-                    {
-                        scrubbedContent.Should().BeEquivalentTo($@"The template ""{expectedTemplateName}"" was created successfully.");
-                    }
-
-                    if (filePath.EndsWith("proj", StringComparison.OrdinalIgnoreCase))
-                    {
-                        XDocument projectXml = XDocument.Parse(scrubbedContent);
-                        XNamespace ns = projectXml.Root?.Name.Namespace ?? throw new Exception("Unexpected project file format");
-                        if (propertyValue != null)
-                        {
-                            Assert.Equal(propertyValue, projectXml.Root?.Element(ns + "PropertyGroup")?.Element(ns + propertyName)?.Value);
-                        }
-                        else
-                        {
-                            Assert.Null(projectXml.Root?.Element(ns + "PropertyGroup")?.Element(ns + propertyName));
-                        }
-                    }
-                }
-
-                filesNum.Should().Be(2);
-            });
-
-            VerificationEngine engine = new VerificationEngine(_logger);
-            await engine.Execute(options).ConfigureAwait(false);
-        }
-
-        [Theory]
-        //language version
-        [InlineData("LangVersion", "9.0", "--langVersion", "9.0", "Console App", "console", null, null)]
-        [InlineData("LangVersion", "9.0", "--langVersion", "9.0", "Console App", "console", "VB", null)]
-        [InlineData("LangVersion", "9.0", "--langVersion", "9.0", "Class Library", "classlib", null, null)]
-        [InlineData("LangVersion", "9.0", "--langVersion", "9.0", "Class Library", "classlib", "VB", null)]
-
-        //framework
-        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Console Application", "console", null, null)]
-        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Console Application", "console", "VB", null)]
-        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Console Application", "console", "F#", null)]
-        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Class library", "classlib", null, null)]
-        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Class library", "classlib", "VB", null)]
-        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Class library", "classlib", "F#", null)]
-
-        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Console Application", "console", null, null)]
-        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Console Application", "console", "VB", null)]
-        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Console Application", "console", "F#", null)]
-        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Class library", "classlib", null, null)]
-        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Class library", "classlib", "VB", null)]
-        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Class library", "classlib", "F#", null)]
-        public async void CanSetProperty(string propertyName, string? propertyValue, string argName, string argValue, string expectedTemplateName, string templateShortName, string? language, string? framework)
-        {
-            List<string> args = new() { "--no-restore" };
-            if (!string.IsNullOrWhiteSpace(language))
-            {
-                args.Add("--language");
-                args.Add(language);
-            }
-            if (!string.IsNullOrWhiteSpace(framework))
-            {
-                args.Add("--framework");
-                args.Add(framework);
-            }
-            if (!string.IsNullOrWhiteSpace(argName))
-            {
-                args.Add(argName);
-                args.Add(argValue);
-            }
-
-            TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: templateShortName)
-            {
-                TemplateSpecificArgs = args,
-                SettingsDirectory = _fixture.HomeDirectory,
-                VerifyCommandOutput = true,
-                VerificationIncludePatterns = new[] { "**/*.*proj", "std-streams/stdout.txt", "**\\*.*proj", "std-streams\\stdout.txt" }
-            }
-            .WithCustomDirectoryVerifier(async (directory, fetcher) =>
-            {
-                int filesNum = 0;
-                await foreach (var (filePath, scrubbedContent) in fetcher.Value)
-                {
-                    filesNum++;
-                    if (filePath.EndsWith("stdout.txt", StringComparison.Ordinal))
-                    {
-                        scrubbedContent.Should().BeEquivalentTo($@"The template ""{expectedTemplateName}"" was created successfully.");
-                    }
-
-                    if (filePath.EndsWith("proj", StringComparison.OrdinalIgnoreCase))
-                    {
-                        XDocument projectXml = XDocument.Parse(scrubbedContent);
-                        XNamespace ns = projectXml.Root?.Name.Namespace ?? throw new Exception("Unexpected project file format");
-                        if (propertyValue != null)
-                        {
-                            Assert.Equal(propertyValue, projectXml.Root?.Element(ns + "PropertyGroup")?.Element(ns + propertyName)?.Value);
-                        }
-                        else
-                        {
-                            Assert.Null(projectXml.Root?.Element(ns + "PropertyGroup")?.Element(ns + propertyName));
-                        }
-                    }
-                }
-
-                filesNum.Should().Be(2);
-            });
-
-            VerificationEngine engine = new VerificationEngine(_logger);
-            await engine.Execute(options).ConfigureAwait(false);
-        }
     }
 }
