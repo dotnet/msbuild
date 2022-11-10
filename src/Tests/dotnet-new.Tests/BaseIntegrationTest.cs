@@ -3,7 +3,6 @@
 //
 
 using System.Runtime.CompilerServices;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -46,11 +45,6 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         /// Gets a path to the template packages maintained in the repo (/template_feed).
         /// </summary>
         public static string RepoTemplatePackages { get; } = VerifyExists(Path.Combine(CodeBaseRoot, "template_feed"));
-
-        /// <summary>
-        /// Gets a version of dotnet executing tests.
-        /// </summary>
-        public static string Version { get; } = $"v{Product.Version}";
 
 #if DEBUG
         /// <summary>

@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .AddScrubber(output =>
                 {
                     output.ScrubAndReplace(testTemplateLocation, "%TEMPLATE FOLDER%");
-                    output.ScrubByRegex("dotnetcli \\(version: v[A-Za-z0-9.-]+\\)", "dotnetcli (version: v%VERSION%)");
+                    output.ScrubByRegex("dotnetcli \\(version: [A-Za-z0-9.-]+\\)", "dotnetcli (version: %VERSION%)");
                 });
         }
 
