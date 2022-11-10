@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
@@ -57,10 +56,10 @@ namespace Microsoft.DotNet.Tools.Test
                 return ForwardToVSTestConsole(parseResult, args, settings, testSessionCorrelationId);
             }
 
-            return ForwardToMsbuild(parseResult, args, settings, testSessionCorrelationId);
+            return ForwardToMsbuild(parseResult, settings, testSessionCorrelationId);
         }
 
-        private static int ForwardToMsbuild(ParseResult parseResult, string[] args, string[] settings, string testSessionCorrelationId)
+        private static int ForwardToMsbuild(ParseResult parseResult, string[] settings, string testSessionCorrelationId)
         {
             // Workaround for https://github.com/Microsoft/vstest/issues/1503
             const string NodeWindowEnvironmentName = "MSBUILDENSURESTDOUTFORTASKPROCESSES";
@@ -122,7 +121,7 @@ namespace Microsoft.DotNet.Tools.Test
             // Extra msbuild properties won't be parsed and so end up in the UnmatchedTokens list. In addition to those
             // properties, all the test settings properties are also considered as unmatched but we don't want to forward
             // these as-is to msbuild. So we filter out the test settings properties from the unmatched tokens,
-            // by only taking values until the first item after `--`. (`--` is not present in the UnmatchedTokens ).
+            // by only taking values until the first item after `--`. (`--` is not present in the UnmatchedTokens).
             var unMatchedNonSettingsArgs = settings.Length > 1
                 ? result.UnmatchedTokens.TakeWhile(x => x != settings[1])
                 : result.UnmatchedTokens;

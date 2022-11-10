@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class TestCommandParser
     {
-        public static readonly string DocsLink = "https://aka.ms/dotnet-test";        
+        public static readonly string DocsLink = "https://aka.ms/dotnet-test";
 
         public static readonly Option<string> SettingsOption = new ForwardedOption<string>(new string[] { "-s", "--settings" }, LocalizableStrings.CmdSettingsDescription)
         {
