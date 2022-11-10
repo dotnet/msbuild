@@ -256,6 +256,7 @@ namespace Microsoft.Build.Execution
         /// Messages to be logged
         /// </summary>
         private IEnumerable<DeferredBuildMessage> _deferredBuildMessages;
+
         /// <summary>
         /// Response files to be included
         /// </summary>
@@ -409,7 +410,9 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        // TOOD: Add commment
+        /// <summary>
+        /// <see cref="BuildManager.BeginBuild(BuildParameters, IEnumerable{DeferredBuildMessage}, IEnumerable{DeferredResponseFile})"/>
+        /// </summary>
         public readonly struct DeferredResponseFile
         {
             public string FilePath { get; }
