@@ -1362,8 +1362,6 @@ namespace Microsoft.Build.Shared
             /// </summary>
             public virtual string GetPathToDotNetFramework(DotNetFrameworkArchitecture architecture)
             {
-                Console.WriteLine("!!! Entered GetPathToDotNetFramework !!!");
-
                 string cachedPath;
                 if (this._pathsToDotNetFramework.TryGetValue(architecture, out cachedPath))
                 {
@@ -1382,11 +1380,6 @@ namespace Microsoft.Build.Shared
                 }
 #endif
 
-                Console.WriteLine("!!! About to call FindDotNetFrameworkPath !!!");
-                Console.WriteLine($"!!! CurrentRuntimePath: {Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName)} !!!");
-                Console.WriteLine($"!!! Prefix: {this.DotNetFrameworkFolderPrefix} !!!");
-                Console.WriteLine($"!!! DotNetFrameworkArchitecture: {architecture} !!!");
-
                 // We're installed and we haven't found this framework path yet -- so find it!
                 string generatedPathToDotNetFramework =
                                 FindDotNetFrameworkPath(
@@ -1395,10 +1388,6 @@ namespace Microsoft.Build.Shared
                                     Directory.Exists,
                                     Directory.GetDirectories,
                                     architecture);
-
-                Console.WriteLine("!!! About to look for msbuild / microsoft.build.dll !!!");
-                Console.WriteLine($"!!! Do we see Microsoft.Build.dll? {FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, "Microsoft.Build.dll"))} !!!");
-                Console.WriteLine($"!!! Do we see MSBuild.exe? {FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, "MSBuild.exe"))} !!!");
 
                 // Assume if either MSBuild.exe or Microsoft.Build.dll are shipped, there is a valid install.
                 // Note: net481 did not ship an ARM64 MSBuild.exe, so checking its dll's is the fallback for a valid install.
