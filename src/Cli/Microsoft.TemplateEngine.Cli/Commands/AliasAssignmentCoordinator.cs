@@ -16,9 +16,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             List<string> predefinedLongOverrides = parameters.SelectMany(p => p.LongNameOverrides).Where(n => !string.IsNullOrEmpty(n)).Select(n => $"--{n}").ToList();
             List<string> predefinedShortOverrides = parameters.SelectMany(p => p.ShortNameOverrides).Where(n => !string.IsNullOrEmpty(n)).Select(n => $"-{n}").ToList();
 
-            Func<string, bool> isAliasTaken = (s) => takenAliases.Contains(s);
-            Func<string, bool> isLongNamePredefined = (s) => predefinedLongOverrides.Contains(s);
-            Func<string, bool> isShortNamePredefined = (s) => predefinedShortOverrides.Contains(s);
+            Func<string, bool> isAliasTaken = takenAliases.Contains;
+            Func<string, bool> isLongNamePredefined = predefinedLongOverrides.Contains;
+            Func<string, bool> isShortNamePredefined = predefinedShortOverrides.Contains;
 
             foreach (var parameter in parameters)
             {
@@ -154,6 +154,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             if (!isAliasTaken(qualifiedShortName))
             {
                 aliases.Add(qualifiedShortName);
+                takenAliases.Add(qualifiedShortName);
                 return;
             }
             errors.Add(string.Format(LocalizableStrings.AliasAssignmentCoordinator_Error_ShortAlias, parameter.Name, shortName, qualifiedShortName));
