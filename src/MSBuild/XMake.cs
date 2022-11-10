@@ -1088,11 +1088,6 @@ namespace Microsoft.Build.CommandLine
         private static IEnumerable<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = Enumerable.Empty<BuildManager.DeferredBuildMessage>();
 
         /// <summary>
-        /// Response files to be included in loggers
-        /// </summary>
-        private static IEnumerable<BuildManager.DeferredResponseFile> responseFileToLogInBuildLoggers = Enumerable.Empty<BuildManager.DeferredResponseFile>();
-
-        /// <summary>
         /// Initializes the build engine, and starts the project building.
         /// </summary>
         /// <returns>true, if build succeeds</returns>
@@ -1350,14 +1345,13 @@ namespace Microsoft.Build.CommandLine
                         messagesToLogInBuildLoggers = messagesToLogInBuildLoggers.Append(
                             new BuildManager.DeferredBuildMessage(
                                 String.Format("Included response file: {0}", responseFilePath),
-                                MessageImportance.Normal
+                                MessageImportance.Normal,
+                                responseFilePath
                             ));
-                        responseFileToLogInBuildLoggers = responseFileToLogInBuildLoggers.Append(
-                            new BuildManager.DeferredResponseFile(responseFilePath));
                     }
 
 
-                    buildManager.BeginBuild(parameters, messagesToLogInBuildLoggers, responseFileToLogInBuildLoggers);
+                    buildManager.BeginBuild(parameters, messagesToLogInBuildLoggers);
 
                     Exception exception = null;
                     try

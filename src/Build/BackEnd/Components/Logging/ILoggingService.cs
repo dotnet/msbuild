@@ -608,11 +608,11 @@ namespace Microsoft.Build.BackEnd.Logging
 
         #region Log response files
         /// <summary>
-        /// Helper method to create an event for including response files
+        /// Helper method to create an event for including files. Typically response files
         /// </summary>
         /// <param name="buildEventContext">Event context information which describes where is the event getting logged</param>
         /// <param name="filePath">Full path to the response file</param>
-        void LogResponseFile(BuildEventContext buildEventContext, string filePath);
+        void LogIncludeFile(BuildEventContext buildEventContext, string filePath);
         #endregion
     }
 

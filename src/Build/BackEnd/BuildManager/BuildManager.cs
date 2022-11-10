@@ -257,11 +257,6 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private IEnumerable<DeferredBuildMessage> _deferredBuildMessages;
 
-        /// <summary>
-        /// Response files to be included
-        /// </summary>
-        private IEnumerable<DeferredResponseFile> _deferredResponseFiles;
-
         private ProjectCacheService _projectCacheService;
 
         private bool _hasProjectCacheServiceInitializedVsScenario;
@@ -403,22 +398,18 @@ namespace Microsoft.Build.Execution
 
             public string Text { get; }
 
+            public string FilePath { get; }
+
             public DeferredBuildMessage(string text, MessageImportance importance)
             {
                 Importance = importance;
                 Text = text;
+                FilePath = "";
             }
-        }
-
-        /// <summary>
-        /// <see cref="BuildManager.BeginBuild(BuildParameters, IEnumerable{DeferredBuildMessage}, IEnumerable{DeferredResponseFile})"/>
-        /// </summary>
-        public readonly struct DeferredResponseFile
-        {
-            public string FilePath { get; }
-
-            public DeferredResponseFile(string filePath)
+            public DeferredBuildMessage(string text, MessageImportance importance, string filePath)
             {
+                Importance = importance;
+                Text = text;
                 FilePath = filePath;
             }
         }
@@ -444,17 +435,6 @@ namespace Microsoft.Build.Execution
             _deferredBuildMessages = deferredBuildMessages;
             BeginBuild(parameters);
             _deferredBuildMessages = null;
-        }
-
-        // TODO: Review
-        // TODO: Add comments
-        public void BeginBuild(BuildParameters parameters, IEnumerable<DeferredBuildMessage> deferredBuildMessages, IEnumerable<DeferredResponseFile> deferredResponseFiles)
-        {
-            _deferredBuildMessages = deferredBuildMessages;
-            _deferredResponseFiles = deferredResponseFiles;
-            BeginBuild(parameters);
-            _deferredBuildMessages = null;
-            _deferredResponseFiles = null;
         }
 
         private void UpdatePriority(Process p, ProcessPriorityClass priority)
@@ -563,7 +543,6 @@ namespace Microsoft.Build.Execution
 
                 // Log deferred messages and response files
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
-                LogDeferredResponseFiles(loggingService, _deferredResponseFiles);
 
                 InitializeCaches();
 
@@ -2902,19 +2881,11 @@ namespace Microsoft.Build.Execution
             foreach (var message in deferredBuildMessages)
             {
                 loggingService.LogCommentFromText(BuildEventContext.Invalid, message.Importance, message.Text);
-            }
-        }
-
-        private static void LogDeferredResponseFiles(ILoggingService loggingService, IEnumerable<DeferredResponseFile> deferredResponseFiles)
-        {
-            if (deferredResponseFiles == null)
-            {
-                return;
-            }
-
-            foreach (var responseFile in deferredResponseFiles)
-            {
-                loggingService.LogResponseFile(BuildEventContext.Invalid, responseFile.FilePath);
+                // If message includes a file path, include that file
+                if (message.FilePath != "")
+                {
+                    loggingService.LogIncludeFile(BuildEventContext.Invalid, message.FilePath);
+                }
             }
         }
 

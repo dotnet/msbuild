@@ -818,11 +818,11 @@ namespace Microsoft.Build.BackEnd.Logging
 
         #region log response files
         /// <summary>
-        /// Logs a response file to include in the binlogs
+        /// Logs a file to include in the binlogs
         /// </summary>
         /// <param name="buildEventContext">Event context information which describes who is logging the event</param>
         /// <param name="filePath">Full path to response file</param>
-        public void LogResponseFile(BuildEventContext buildEventContext, string filePath)
+        public void LogIncludeFile(BuildEventContext buildEventContext, string filePath)
         {
             ErrorUtilities.VerifyThrow(buildEventContext != null, "buildEventContext was null");
             ErrorUtilities.VerifyThrow(filePath != null, "response file path was null");
