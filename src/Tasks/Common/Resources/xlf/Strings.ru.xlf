@@ -722,7 +722,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PublishSelfContainedMustBeBool">
         <source>NETSDK1193: If PublishSelfContained is set, it must be either true or false. The value given was '{0}'.</source>
-        <target state="new">NETSDK1193: If PublishSelfContained is set, it must be either true or false. The value given was '{0}'.</target>
+        <target state="translated">NETSDK1193: если параметр PublishSelfContained настроен, он должен иметь значение true или false. Указанное значение: "{0}".</target>
         <note>{StrBegin="NETSDK1193: "}</note>
       </trans-unit>
       <trans-unit id="PublishSingleFileRequiresVersion30">

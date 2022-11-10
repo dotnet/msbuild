@@ -13,16 +13,23 @@ namespace Microsoft.DotNet.ApiCompat
         /// </summary>
         public static void GenerateSuppressionFile(ISuppressionEngine suppressionEngine,
             ICompatibilityLogger log,
-            string? suppressionFile)
+            string[]? suppressionFiles,
+            string? suppressionOutputFile)
         {
-            if (suppressionFile == null)
+            // When a single suppression (input) file is passed in but no suppression output file, use the single input file.
+            if (suppressionOutputFile == null && suppressionFiles?.Length == 1)
             {
-                throw new ArgumentException(CommonResources.SuppressionsFileNotSpecified, nameof(suppressionFile));
+                suppressionOutputFile = suppressionFiles[0];
             }
 
-            if (suppressionEngine.WriteSuppressionsToFile(suppressionFile))
+            if (suppressionOutputFile == null)
             {
-                log.LogMessage(MessageImportance.High, CommonResources.WroteSuppressions, suppressionFile);
+                throw new ArgumentException(CommonResources.SuppressionsFileNotSpecified, nameof(suppressionOutputFile));
+            }
+
+            if (suppressionEngine.WriteSuppressionsToFile(suppressionOutputFile))
+            {
+                log.LogMessage(MessageImportance.High, CommonResources.WroteSuppressions, suppressionOutputFile);
             }
         }
     }

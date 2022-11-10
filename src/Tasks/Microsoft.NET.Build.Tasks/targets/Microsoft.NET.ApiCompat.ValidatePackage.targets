@@ -19,7 +19,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="RunPackageValidation"
           DependsOnTargets="$(RunPackageValidationDependsOn)"
           AfterTargets="Pack"
-          Inputs="@(NuGetPackInput);$(CompatibilitySuppressionFilePath)"
+          Inputs="@(NuGetPackInput);
+                  @(ApiCompatSuppressionFile);
+                  $(ApiCompatSuppressionOutputFile)"
           Outputs="$(ApiCompatValidatePackageSemaphoreFile)"
           Condition="'$(EnablePackageValidation)' == 'true' and '$(IsPackable)' == 'true'">
     <PropertyGroup>
@@ -45,8 +47,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       EnableStrictModeForCompatibleTfms="$([MSBuild]::ValueOrDefault('$(EnableStrictModeForCompatibleTfms)', 'true'))"
       EnableStrictModeForCompatibleFrameworksInPackage="$(EnableStrictModeForCompatibleFrameworksInPackage)"
       EnableStrictModeForBaselineValidation="$(EnableStrictModeForBaselineValidation)"
-      GenerateCompatibilitySuppressionFile="$(GenerateCompatibilitySuppressionFile)"
-      CompatibilitySuppressionFilePath="$(CompatibilitySuppressionFilePath)"
+      GenerateSuppressionFile="$(ApiCompatGenerateSuppressionFile)"
+      SuppressionFiles="@(ApiCompatSuppressionFile)"
+      SuppressionOutputFile="$(ApiCompatSuppressionOutputFile)"
       BaselinePackageTargetPath="$(_packageValidationBaselinePath)"
       RoslynAssembliesPath="$(RoslynAssembliesPath)"
       PackageAssemblyReferences="@(PackageValidationReferencePath)" />

@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using Microsoft.DotNet.ApiCompatibility.Logging;
 using Microsoft.DotNet.ApiCompatibility.Rules;
 using Microsoft.DotNet.PackageValidation;
@@ -15,7 +14,8 @@ namespace Microsoft.DotNet.ApiCompat
     {
         public static void Run(Func<ISuppressionEngine, ICompatibilityLogger> logFactory,
             bool generateSuppressionFile,
-            string? suppressionFile,
+            string[]? suppressionFiles,
+            string? suppressionOutputFile,
             string? noWarn,
             bool enableRuleAttributesMustMatch,
             string[]? excludeAttributesFiles,
@@ -30,12 +30,9 @@ namespace Microsoft.DotNet.ApiCompat
             Dictionary<string, string[]>? packageAssemblyReferences,
             Dictionary<string, string[]>? baselinePackageAssemblyReferences)
         {
-            // Configure the suppression engine. Ignore the passed in suppression file if it should be generated and doesn't yet exist.
-            string? suppressionFileForEngine = generateSuppressionFile && !File.Exists(suppressionFile) ? null : suppressionFile;
-
             // Initialize the service provider
             ApiCompatServiceProvider serviceProvider = new(logFactory,
-                () => new SuppressionEngine(suppressionFileForEngine, noWarn, generateSuppressionFile),
+                () => new SuppressionEngine(suppressionFiles, noWarn, generateSuppressionFile),
                 (log) => new RuleFactory(log,
                     enableRuleAttributesMustMatch,
                     excludeAttributesFiles,
@@ -83,7 +80,8 @@ namespace Microsoft.DotNet.ApiCompat
             {
                 SuppressionFileHelper.GenerateSuppressionFile(serviceProvider.SuppressionEngine,
                     serviceProvider.CompatibilityLogger,
-                    suppressionFile);
+                    suppressionFiles,
+                    suppressionOutputFile);
             }
         }
     }

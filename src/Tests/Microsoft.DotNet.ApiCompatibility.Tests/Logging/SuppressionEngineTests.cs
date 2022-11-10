@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Xml.Serialization;
 using Xunit;
 
@@ -51,14 +52,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
         [Fact]
         public void SuppressionEngineThrowsIfFileDoesNotExist()
         {
-            Assert.Throws<FileNotFoundException>(() => new SuppressionEngine("AFileThatDoesNotExist.xml"));
-        }
-
-        [Fact]
-        public void SuppressionEngineDoesNotThrowOnEmptyFile()
-        {
-            SuppressionEngine _ = new(suppressionFile: string.Empty);
-            _ = new SuppressionEngine(suppressionFile: "      ");
+            Assert.Throws<FileNotFoundException>(() => new SuppressionEngine(new string[] { "AFileThatDoesNotExist.xml" }));
         }
 
         [Fact]
@@ -177,19 +171,18 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
 
         public int GetSuppressionCount() => _validationSuppressions.Count;
 
-        protected override Stream GetReadableStream(string baselineFile)
+        protected override Stream GetReadableStream(string suppressionFile)
         {
             // Not Disposing stream since it will be disposed by caller.
             _stream = new MemoryStream();
             return _stream;
         }
 
-        protected override Stream GetWritableStream(string validationSuppressionFile) => new MemoryStream();
+        protected override Stream GetWritableStream(string suppressionFile) => new MemoryStream();
 
         protected override void AfterWrittingSuppressionsCallback(Stream stream)
         {
-            if (_callback != null)
-                _callback();
+            _callback?.Invoke();
         }
     }
 
@@ -198,7 +191,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
         private MemoryStream _stream;
         private StreamWriter _writer;
         // On .NET Framework the xsd element is written before the xsi element, where-as on modern .NET, it's the other way around.
-        private readonly static string s_suppressionsHeader = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework") ?
+        private static readonly string s_suppressionsHeader = RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework") ?
             @"<Suppressions xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">" :
             @"<Suppressions xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">";
         public readonly string suppressionsFile = @$"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -259,6 +252,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
 </Suppressions>";
 
         public readonly string suppressionsFileWithoutComment = @$"<?xml version=""1.0"" encoding=""utf-8""?>
+<!--{DiagnosticIdDocumentationComment}-->
 {s_suppressionsHeader}
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
@@ -317,8 +311,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
         private readonly MemoryStream _outputStream = new();
         private readonly Action<Stream> _callback;
 
-        public TestSuppressionEngine(string suppressionsFile, string noWarn, Action<Stream> callback)
-            : base(suppressionsFile, noWarn)
+        public TestSuppressionEngine(string[] suppressionsFiles, string noWarn, Action<Stream> callback)
+            : base(suppressionsFiles, noWarn)
         {
             if (callback == null)
             {
@@ -328,11 +322,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
         }
 
         public static TestSuppressionEngine CreateTestSuppressionEngine(Action<Stream> callback = null, string noWarn = "")
-            => new("NonExistentFile.xml", noWarn, callback);
+            => new(new string[] { "NonExistentFile.xml" }, noWarn, callback);
 
         public int GetSuppressionCount() => _validationSuppressions.Count;
 
-        protected override Stream GetReadableStream(string baselineFile)
+        protected override Stream GetReadableStream(string suppressionFile)
         {
             // Not Disposing stream since it will be disposed by caller.
             _stream = new MemoryStream();
@@ -343,7 +337,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
             return _stream;
         }
 
-        protected override Stream GetWritableStream(string validationSuppressionFile) => _outputStream;
+        protected override Stream GetWritableStream(string suppressionFile) => _outputStream;
 
         protected override void AfterWrittingSuppressionsCallback(Stream stream) => _callback(stream);
     }
