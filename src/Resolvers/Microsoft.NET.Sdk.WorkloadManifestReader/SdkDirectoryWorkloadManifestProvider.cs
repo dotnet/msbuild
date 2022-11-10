@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
@@ -17,7 +18,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         private readonly string [] _manifestDirectories;
         private static HashSet<string> _outdatedManifestIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "microsoft.net.workload.android", "microsoft.net.workload.blazorwebassembly", "microsoft.net.workload.ios",
             "microsoft.net.workload.maccatalyst", "microsoft.net.workload.macos", "microsoft.net.workload.tvos" };
-        private readonly HashSet<string>? _knownManifestIds;
+        private readonly Dictionary<string, int>? _knownManifestIdsAndOrder;
 
         public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, string? userProfileDir)
             : this(sdkRootPath, sdkVersion, Environment.GetEnvironmentVariable, userProfileDir)
@@ -44,7 +45,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             var knownManifestIdsFilePath = Path.Combine(_sdkRootPath, "sdk", sdkVersion, "IncludedWorkloadManifests.txt");
             if (File.Exists(knownManifestIdsFilePath))
             {
-                _knownManifestIds = File.ReadAllLines(knownManifestIdsFilePath).Where(l => !string.IsNullOrEmpty(l)).ToHashSet();
+                _knownManifestIdsAndOrder = new Dictionary<string, int>();
+                int lineNumber = 0;
+                foreach (var manifestId in File.ReadAllLines(knownManifestIdsFilePath).Where(l => !string.IsNullOrEmpty(l)))
+                {
+                    _knownManifestIdsAndOrder[manifestId] = lineNumber++;
+                }
             }
 
             string? userManifestsDir = userProfileDir is null ? null : Path.Combine(userProfileDir, "sdk-manifests", _sdkVersionBand.ToString());
@@ -126,9 +132,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 }
             }
 
-            if (_knownManifestIds != null && _knownManifestIds.Any(id => !manifestIdsToDirectories.ContainsKey(id)))
+            if (_knownManifestIdsAndOrder != null && _knownManifestIdsAndOrder.Keys.Any(id => !manifestIdsToDirectories.ContainsKey(id)))
             {
-                var missingManifestIds = _knownManifestIds.Where(id => !manifestIdsToDirectories.ContainsKey(id));
+                var missingManifestIds = _knownManifestIdsAndOrder.Keys.Where(id => !manifestIdsToDirectories.ContainsKey(id));
                 foreach (var missingManifestId in missingManifestIds)
                 {
                     var manifestDir = FallbackForMissingManifest(missingManifestId);
@@ -139,7 +145,21 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 }
             }
 
-            return manifestIdsToDirectories.Values;
+            //  Return manifests in a stable order.  Manifests in the IncludedWorkloadManifests.txt file will be first, and in the same order they appear in that file.
+            //  Then the rest of the manifests (if any) will be returned in (ordinal case-insensitive) alphabetical order.
+            return manifestIdsToDirectories
+                .OrderBy(kvp =>
+                {
+                    if (_knownManifestIdsAndOrder != null &&
+                        _knownManifestIdsAndOrder.TryGetValue(kvp.Key, out var order))
+                    {
+                        return order;
+                    }
+                    return int.MaxValue;
+                })
+                .ThenBy(kvp => kvp.Key, StringComparer.OrdinalIgnoreCase)
+                .Select(kvp => kvp.Value)
+                .ToList();
         }
 
         private string FallbackForMissingManifest(string manifestId)

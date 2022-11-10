@@ -92,7 +92,7 @@ stages:
     parameters:
       platform:
         name: 'Managed'
-        container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7-3e800f1-20190501005343'
+        container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7'
   - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
     - template: /eng/build.yml
       parameters:
@@ -146,7 +146,7 @@ stages:
             name: NetCore1ESPool-Internal
             demands: ImageOverride -equals 1es-ubuntu-2204
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: 'ubuntu.2204.amd64.open@mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-22.04-helix-amd64-20220813234317-1b9461f'
+          helixTargetQueue: 'ubuntu.2204.amd64.open@mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-22.04-helix-amd64'
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
           helixTargetQueue: Ubuntu.2204.Amd64
         strategy:

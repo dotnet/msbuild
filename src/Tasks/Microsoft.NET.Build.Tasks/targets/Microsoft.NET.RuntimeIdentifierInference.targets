@@ -61,17 +61,20 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeIdentifier Condition="'$(PlatformTarget)' == 'x86' or '$(PlatformTarget)' == ''">win7-x86</RuntimeIdentifier>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(UseCurrentRuntimeIdentifier)' == 'true' or
-                 (
+  <PropertyGroup Condition="'$(UseCurrentRuntimeIdentifier)' == ''">
+    <UseCurrentRuntimeIdentifier Condition="
                  '$(RuntimeIdentifier)' == '' and
-                 '$(RuntimeIdentifiers)' == '' and
-                   (
-                   '$(SelfContained)' == 'true' or
-                   '$(PublishReadyToRun)' == 'true' or
-                   '$(PublishSingleFile)' == 'true' or
-                   '$(PublishAot)' == 'true'
-                   )
-                 )">
+                 '$(_IsExecutable)' == 'true' and '$(IsTestProject)' != 'true' and
+                 '$(IsRidAgnostic)' != 'true' and
+                  (
+                    '$(SelfContained)' == 'true' or
+                    '$(PublishReadyToRun)' == 'true' or
+                    '$(PublishSingleFile)' == 'true' or
+                    '$(PublishAot)' == 'true'
+                  )">true</UseCurrentRuntimeIdentifier>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(UseCurrentRuntimeIdentifier)' == 'true'">
     <RuntimeIdentifier>$(NETCoreSdkPortableRuntimeIdentifier)</RuntimeIdentifier>
   </PropertyGroup>
 
@@ -162,19 +165,19 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(HasRuntimeOutput)' == 'true'">
 
     <!-- The following RID errors are asserts, and we don't expect them to ever occur. The error message is added as a safeguard.-->
-    <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == ''"
+    <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(RuntimeIdentifier)' == ''"
                  ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
                  FormatArguments="SelfContained"/>
 
-    <NETSdkError Condition="'$(PublishReadyToRun)' == 'true' and '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == ''"
+    <NETSdkError Condition="'$(PublishReadyToRun)' == 'true' and '$(RuntimeIdentifier)' == ''"
                  ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
                  FormatArguments="PublishReadyToRun"/>
 
-    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == ''"
+    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(RuntimeIdentifier)' == ''"
                 ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
                 FormatArguments="PublishSingleFile"/>
 
-    <NETSdkError Condition="'$(PublishAot)' == 'true' and '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == ''"
+    <NETSdkError Condition="'$(PublishAot)' == 'true' and '$(RuntimeIdentifier)' == ''"
                 ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
                 FormatArguments="PublishAot"/>
 
@@ -222,7 +225,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                     ResourceName="Prefer32BitIgnoredForNetCoreApp" />
 
     <PropertyGroup>
-          <Prefer32Bit>false</Prefer32Bit>
+      <Prefer32Bit>false</Prefer32Bit>
     </PropertyGroup>
 
   </Target>
@@ -234,7 +237,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(PlatformTarget)' != 'AnyCPU' and !$(RuntimeIdentifier.ToUpperInvariant().Contains($(PlatformTarget.ToUpperInvariant())))"
                  ResourceName="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget"
                  FormatArguments="$(RuntimeIdentifier);$(PlatformTarget)" />
-    
+
   </Target>
 
   <Target Name="_CheckForLanguageAndFeatureCombinationSupport"

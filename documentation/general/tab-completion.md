@@ -31,7 +31,7 @@ Learn more about .NET Core: https://aka.ms/dotnet-docs
 ...
 ```
 
-You should see the following ouput (perhaps coming at the end of the first-run output). This indicates that `dotnet` is resolving to a v2.0 installation that supports completion.
+You should see the following output (perhaps coming at the end of the first-run output). This indicates that `dotnet` is resolving to a v2.0 installation that supports completion.
 
 ```
 --help
