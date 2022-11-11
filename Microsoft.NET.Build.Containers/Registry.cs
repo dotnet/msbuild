@@ -38,7 +38,7 @@ public record Registry(Uri BaseUri)
 
     public async Task<Image?> GetImageManifest(string name, string reference, string runtimeIdentifier)
     {
-        using var client = GetClient();
+        var client = GetClient();
         var initialManifestResponse = await GetManifest(reference);
         
         return initialManifestResponse.Content.Headers.ContentType?.MediaType switch {
@@ -48,14 +48,14 @@ public record Registry(Uri BaseUri)
         };
 
         async Task<HttpResponseMessage> GetManifest(string reference) {
-            using var client = GetClient();
+            var client = GetClient();
             var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{reference}"));
             response.EnsureSuccessStatusCode();
             return response;
         }
 
         async Task<HttpResponseMessage> GetBlob(string digest) {
-            using var client = GetClient();
+            var client = GetClient();
             var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{name}/blobs/{digest}"));
             response.EnsureSuccessStatusCode();
             return response;
