@@ -22,6 +22,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       $(DesignerRuntimeImplementationProjectOutputGroupDependsOn);
       _GenerateDesignerDepsFile;
       _GenerateDesignerRuntimeConfigFile;
+      GetCopyToOutputDirectoryItems;
       _GatherDesignerShadowCopyFiles;
     </DesignerRuntimeImplementationProjectOutputGroupDependsOn>
 
@@ -142,11 +143,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <!-- Include ijwhost.dll for projects that use it -->
       <DesignerRuntimeImplementationProjectOutputGroupOutput
-        Include="$(IjwHostSourcePath)"
-        TargetPath="$(_DotNetIjwHostLibraryName)"
-        Condition="'$(IjwHostSourcePath)' != '' and '$(UseIJWHost)' == 'true'"
+        Include="@(AllItemsFullPathWithTargetPath->WithMetadataValue('Filename', '$(_DotNetIjwHostLibraryNameWithoutExtension)')->WithMetadataValue('Extension', '$(_IjwHostLibraryExtension)'))"
         />
-      </ItemGroup>
+    </ItemGroup>
   </Target>
 
 </Project>
