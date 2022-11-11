@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <RootNamespace>vb-console</RootNamespace>
+    <RootNamespace>vb_console</RootNamespace>
     <TargetFramework>%FRAMEWORK%</TargetFramework>
   </PropertyGroup>
 

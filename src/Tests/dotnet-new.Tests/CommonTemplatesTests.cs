@@ -4,8 +4,8 @@
 
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
-using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.NET.TestFramework;
@@ -62,6 +62,13 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                             content.UnixifyDirSeparators().Replace(expectedTemplateName, "%TEMPLATE_NAME%");
                         }
                     })
+            );
+
+            // TODO: workaround for '.config' files until https://github.com/VerifyTests/EmptyFiles/pull/110 is merged and flown all the way here
+            //  Untill then a stream comparison is used without scrubbing and normalizing BOM, newlines etc.
+            VerifierSettings.RegisterFileConverter(
+                "config",
+                (stream, _) => new(null, "txt", new StringBuilder(new StreamReader(stream).ReadToEnd()))
             );
 
             // globaljson is appending current sdk version. Due to the 'base' dotnet used to run test this version differs
