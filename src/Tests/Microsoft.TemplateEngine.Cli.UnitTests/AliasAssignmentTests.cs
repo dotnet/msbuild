@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
+using FluentAssertions;
 using Microsoft.TemplateEngine.Cli.Commands;
+using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests
 {
