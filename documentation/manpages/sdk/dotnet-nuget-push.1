@@ -14,7 +14,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "dotnet-nuget-push" "1" "2022-06-03" "" ".NET Documentation"
+.TH "dotnet-nuget-push" "1" "2022-10-10" "" ".NET Documentation"
 .hy
 .SH dotnet nuget push
 .PP
@@ -152,8 +152,10 @@ Push \f[I]foo.nupkg\f[R] to the official NuGet server, specifying an API key:
 dotnet nuget push foo.nupkg -k 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -s https://api.nuget.org/v3/index.json
 \f[R]
 .fi
+.RE
 .IP \[bu] 2
 Push \f[I]foo.nupkg\f[R] to the custom push source \f[V]https://customsource\f[R], specifying an API key:
+.RS 2
 .IP
 .nf
 \f[C]
@@ -230,6 +232,10 @@ Push all \f[I].nupkg\f[R] files in the current directory to a local feed directo
 dotnet nuget push \[dq]*.nupkg\[dq] -s c:\[rs]mydir
 \f[R]
 .fi
+.RE
+.IP \[bu] 2
+For pushing to Azure Artifacts, see Azure Artifacts\[cq] push documentation.
+.RS 2
 .PP
 This command doesn\[cq]t store packages in a hierarchical folder structure, which is recommended to optimize performance.
 For more information, see Local feeds.

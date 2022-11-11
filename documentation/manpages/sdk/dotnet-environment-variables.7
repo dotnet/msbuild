@@ -14,7 +14,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "dotnet-environment-variables" "7" "2022-06-03" "" ".NET Documentation"
+.TH "dotnet-environment-variables" "7" "2022-09-19" "" ".NET Documentation"
 .hy
 .SH NAME
 .PP
@@ -139,7 +139,7 @@ This setting can make performance worse if there is expensive work that will end
 Test to make sure this setting helps performance.
 .RE
 .PP
-Using TechEmpower benchmarks that generate a lot of small socket reads and writes under a very high load, a single socket engine is capable of keeping busy up to thirty x64 and eight ARM64 CPU cores.
+Using TechEmpower benchmarks that generate a lot of small socket reads and writes under a very high load, a single socket engine is capable of keeping busy up to thirty x64 and eight Arm64 CPU cores.
 The vast majority of real-life scenarios will never generate such a huge load (hundreds of thousands of requests per second), and having a single producer is almost always enough.
 However, to be sure that extreme loads can be handled, you can use \f[V]DOTNET_SYSTEM_NET_SOCKETS_THREAD_COUNT\f[R] to override the calculated value.
 When not overridden, the following value is used:
@@ -149,7 +149,7 @@ When \f[V]DOTNET_SYSTEM_NET_SOCKETS_INLINE_COMPLETIONS\f[R] is \f[V]1\f[R], the 
 When \f[V]DOTNET_SYSTEM_NET_SOCKETS_INLINE_COMPLETIONS\f[R] is not \f[V]1\f[R], <xref:System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture?displayProperty=nameWithType> is evaluated:
 .RS 2
 .IP \[bu] 2
-When ARM or ARM64 the cores per engine value is set to \f[V]8\f[R], otherwise \f[V]30\f[R].
+When Arm or Arm64 the cores per engine value is set to \f[V]8\f[R], otherwise \f[V]30\f[R].
 .RE
 .IP \[bu] 2
 Using the determined cores per engine, the maximum value of either \f[V]1\f[R] or <xref:System.Environment.ProcessorCount?displayProperty=nameWithType> over the cores per engine.
@@ -211,7 +211,7 @@ GC Hole Stress can be enabled using the \f[V]DOTNET_GCStress\f[R] environment va
 For more information, see Investigating JIT and GC Hole stress (https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/jit/investigate-stress.md).
 .SS JIT memory barriers
 .PP
-The code generator for ARM64 allows all \f[V]MemoryBarriers\f[R] instructions to be removed by setting \f[V]DOTNET_JitNoMemoryBarriers\f[R] to \f[V]1\f[R].
+The code generator for Arm64 allows all \f[V]MemoryBarriers\f[R] instructions to be removed by setting \f[V]DOTNET_JitNoMemoryBarriers\f[R] to \f[V]1\f[R].
 .SS \f[V]DOTNET_RUNNING_IN_CONTAINER\f[R] and \f[V]DOTNET_RUNNING_IN_CONTAINERS\f[R]
 .PP
 The official .NET images (Windows and Linux) set the well-known environment variables:
@@ -257,7 +257,7 @@ By default trace information is accumulated in a circular buffer and the content
 .PP
 Specifies the location of the .NET runtimes, if they are not installed in the default location.
 The default location on Windows is \f[V]C:\[rs]Program Files\[rs]dotnet\f[R].
-The default location on Linux and macOS is \f[V]/usr/share/dotnet\f[R].
+The default location on Linux and macOS is \f[V]/usr/local/share/dotnet\f[R].
 This environment variable is used only when running apps via generated executables (apphosts).
 \f[V]DOTNET_ROOT(x86)\f[R] is used instead when running a 32-bit executable on a 64-bit OS.
 .SS \f[V]NUGET_PACKAGES\f[R]
@@ -285,7 +285,7 @@ The default value is \f[V]true\f[R], but this can be overridden by setting this 
 .SS \f[V]DOTNET_ADD_GLOBAL_TOOLS_TO_PATH\f[R]
 .PP
 Specifies whether to add global tools to the \f[V]PATH\f[R] environment variable.
-the default is \f[V]true\f[R].
+The default is \f[V]true\f[R].
 To not add global tools to the path, set to \f[V]0\f[R], \f[V]false\f[R], or \f[V]no\f[R].
 .SS \f[V]DOTNET_CLI_TELEMETRY_OPTOUT\f[R]
 .PP
@@ -311,18 +311,16 @@ For more information, see Multi-level lookup is disabled.
 .SS \f[V]DOTNET_ROLL_FORWARD\f[R]
 .PP
 Determines roll forward behavior.
-For more information, see the \f[V]--roll-forward\f[R] option earlier in this article.
+For more information, see the \f[V]--roll-forward\f[R] option for the \f[V]dotnet\f[R] command.
 .SS \f[V]DOTNET_ROLL_FORWARD_TO_PRERELEASE\f[R]
 .PP
 If set to \f[V]1\f[R] (enabled), enables rolling forward to a pre-release version from a release version.
 By default (\f[V]0\f[R] - disabled), when a release version of .NET runtime is requested, roll-forward will only consider installed release versions.
 .PP
-For more information, see Roll forward.
+For more information, see the \f[V]--roll-forward\f[R] option for the \f[V]dotnet\f[R] command
 .SS \f[V]DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX\f[R]
 .PP
 Disables minor version roll forward, if set to \f[V]0\f[R].
-For more information, see Roll forward.
-.PP
 This setting is superseded in .NET Core 3.0 by \f[V]DOTNET_ROLL_FORWARD\f[R].
 The new settings should be used instead.
 .SS \f[V]DOTNET_CLI_UI_LANGUAGE\f[R]

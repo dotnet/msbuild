@@ -14,7 +14,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "dotnet-restore" "1" "2022-06-03" "" ".NET Documentation"
+.TH "dotnet-restore" "1" "2022-11-08" "" ".NET Documentation"
 .hy
 .SH dotnet restore
 .PP
@@ -58,6 +58,11 @@ In most cases, you don\[cq]t need to explicitly use the \f[V]dotnet restore\f[R]
 Sometimes, it might be inconvenient to run the implicit NuGet restore with these commands.
 For example, some automated systems, such as build systems, need to call \f[V]dotnet restore\f[R] explicitly to control when the restore occurs so that they can control network usage.
 To prevent the implicit NuGet restore, you can use the \f[V]--no-restore\f[R] flag with any of these commands to disable implicit restore.
+.RS
+.PP
+Signed package verification during restore operations requires a certificate root store that is valid for both code signing and timestamping.
+See NuGet signed package verification for details.
+.RE
 .SS Specify feeds
 .PP
 To restore the dependencies, NuGet needs the feeds where the packages are located.
@@ -206,7 +211,6 @@ Specifies the directory for restored packages.
 Specifies a runtime for the package restore.
 This is used to restore packages for runtimes not explicitly listed in the \f[V]<RuntimeIdentifiers>\f[R] tag in the \f[I].csproj\f[R] file.
 For a list of Runtime Identifiers (RIDs), see the RID catalog.
-Provide multiple RIDs by specifying this option multiple times.
 .RE
 .IP \[bu] 2
 \f[B]\f[VB]-s|--source <SOURCE>\f[B]\f[R]

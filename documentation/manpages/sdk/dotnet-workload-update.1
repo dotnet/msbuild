@@ -14,7 +14,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "dotnet-workload-update" "1" "2022-06-03" "" ".NET Documentation"
+.TH "dotnet-workload-update" "1" "2022-10-10" "" ".NET Documentation"
 .hy
 .SH dotnet workload update
 .PP
@@ -134,18 +134,6 @@ Update the installed workloads:
 .nf
 \f[C]
 dotnet workload update
-\f[R]
-.fi
-.RE
-.IP \[bu] 2
-Download the assets needed for updating installed workloads to a cache located in the \f[I]workload-cache\f[R] directory under the current directory.
-Then update installed workloads from that cache location:
-.RS 2
-.IP
-.nf
-\f[C]
-dotnet workload update --download-to-cache ./workload-cache
-dotnet workload update --from-cache ./workload-cache
 \f[R]
 .fi
 .RE

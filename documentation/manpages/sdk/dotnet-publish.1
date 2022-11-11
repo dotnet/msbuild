@@ -14,7 +14,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "dotnet-publish" "1" "2022-06-03" "" ".NET Documentation"
+.TH "dotnet-publish" "1" "2022-10-24" "" ".NET Documentation"
 .hy
 .SH dotnet publish
 .PP
@@ -32,9 +32,9 @@ dotnet publish [<PROJECT>|<SOLUTION>] [-a|--arch <ARCHITECTURE>]
     [--manifest <PATH_TO_MANIFEST_FILE>] [--no-build] [--no-dependencies]
     [--no-restore] [--nologo] [-o|--output <OUTPUT_DIRECTORY>]
     [--os <OS>] [-r|--runtime <RUNTIME_IDENTIFIER>]
-    [--self-contained [true|false]] [--no-self-contained]
-     [-s|--source <SOURCE>] [-v|--verbosity <LEVEL>]
-    [--version-suffix <VERSION_SUFFIX>]
+    [--sc|--self-contained [true|false]] [--no-self-contained]
+    [-s|--source <SOURCE>] [--use-current-runtime, --ucr [true|false]]
+    [-v|--verbosity <LEVEL>] [--version-suffix <VERSION_SUFFIX>]
 
 dotnet publish -h|--help
 \f[R]
@@ -276,7 +276,7 @@ If you use this option, don\[cq]t use the \f[V]-r|--runtime\f[R] option.
 Available since .NET 6.
 .RE
 .IP \[bu] 2
-\f[B]\f[VB]--self-contained [true|false]\f[B]\f[R]
+\f[B]\f[VB]--sc|--self-contained [true|false]\f[B]\f[R]
 .RS 2
 .PP
 Publishes the .NET runtime with your application so the runtime doesn\[cq]t need to be installed on the target machine.
@@ -315,6 +315,14 @@ Sets the verbosity level of the command.
 Allowed values are \f[V]q[uiet]\f[R], \f[V]m[inimal]\f[R], \f[V]n[ormal]\f[R], \f[V]d[etailed]\f[R], and \f[V]diag[nostic]\f[R].
 The default is \f[V]minimal\f[R].
 For more information, see <xref:Microsoft.Build.Framework.LoggerVerbosity>.
+.RE
+.IP \[bu] 2
+\f[B]\f[VB]--use-current-runtime, --ucr [true|false]\f[B]\f[R]
+.RS 2
+.PP
+Sets the \f[V]RuntimeIdentifier\f[R] to a platform portable \f[V]RuntimeIdentifier\f[R] based on the one of your machine.
+This happens implicitly with properties that require a \f[V]RuntimeIdentifier\f[R], such as \f[V]SelfContained\f[R], \f[V]PublishAot\f[R], \f[V]PublishSelfContained\f[R], \f[V]PublishSingleFile\f[R], and \f[V]PublishReadyToRun\f[R].
+If the property is set to false, that implicit resolution will no longer occur.
 .RE
 .IP \[bu] 2
 \f[B]\f[VB]--version-suffix <VERSION_SUFFIX>\f[B]\f[R]

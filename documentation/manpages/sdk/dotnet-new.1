@@ -15,7 +15,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "dotnet-new" "1" "2022-06-03" "" ".NET Documentation"
+.TH "dotnet-new" "1" "2022-11-08" "" ".NET Documentation"
 .hy
 .SH dotnet new <TEMPLATE>
 .PP
@@ -28,7 +28,9 @@ dotnet-new - Creates a new project, configuration file, or solution based on the
 .nf
 \f[C]
 dotnet new <TEMPLATE> [--dry-run] [--force] [-lang|--language {\[dq]C#\[dq]|\[dq]F#\[dq]|VB}]
-    [-n|--name <OUTPUT_NAME>] [--no-update-check] [-o|--output <OUTPUT_DIRECTORY>] [Template options]
+    [-n|--name <OUTPUT_NAME>] [--no-update-check] 
+    [-o|--output <OUTPUT_DIRECTORY>] [--project <PROJECT_PATH>]
+    [-d|--diagnostics] [--verbosity <LEVEL>] [Template options]
 
 dotnet new -h|--help
 \f[R]
@@ -42,18 +44,23 @@ The command calls the template engine (https://github.com/dotnet/templating) to 
 .PP
 .RE
 .PP
-Starting with .NET SDK 7.0.100 Preview 2, the \f[V]dotnet new\f[R] syntax has changed:
+Starting with the .NET 7 SDK, the \f[V]dotnet new\f[R] syntax has changed:
 .IP \[bu] 2
 The \f[V]--list\f[R], \f[V]--search\f[R], \f[V]--install\f[R], and \f[V]--uninstall\f[R] options became \f[V]list\f[R], \f[V]search\f[R], \f[V]install\f[R] and \f[V]uninstall\f[R] subcommands.
 .IP \[bu] 2
 The \f[V]--update-apply\f[R] option became the \f[V]update\f[R] subcommand.
 .IP \[bu] 2
-to use \f[V]--update-check\f[R], use the \f[V]update\f[R] subcommand with the \f[V]--check\f[R] option.
+To use \f[V]--update-check\f[R], use the \f[V]update\f[R] subcommand with the \f[V]--check-only\f[R] option.
 .PP
 Other options that were available before are still available to use with their respective subcommands.
 Separate help for each subcommand is available via the \f[V]-h\f[R] or \f[V]--help\f[R] option: \f[V]dotnet new <subcommand> --help\f[R] lists all supported options for the subcommand.
 .PP
 Additionally, tab completion is now available for \f[V]dotnet new\f[R].
+It supports completion for installed template names and for the options a selected template provides.
+To activate tab completion for the .NET SDK, see Enable tab completion.
+.SS Tab completion
+.PP
+Starting with .NET SDK 7.0.100, tab completion is available for \f[V]dotnet new\f[R].
 It supports completion for installed template names, as well as completion for the options a selected template provides.
 To activate tab completion for the .NET SDK, see Enable tab completion.
 .SS Implicit restore
@@ -73,16 +80,16 @@ The template to instantiate when the command is invoked.
 Each template might have specific options you can pass.
 For more information, see Template options.
 .PP
-You can run \f[V]dotnet new --list\f[R] to see a list of all installed templates.
+You can run \f[V]dotnet new list\f[R] to see a list of all installed templates.
 .PP
-Starting with .NET Core 3.0 SDK and ending with .NET Core 5.0.300 SDK, the CLI searches for templates in NuGet.org when you invoke the \f[V]dotnet new\f[R] command in the following conditions:
+Starting with .NET Core 3.0 SDK and ending with .NET SDK 5.0.300, the CLI searches for templates in NuGet.org when you invoke the \f[V]dotnet new\f[R] command in the following conditions:
 .IP \[bu] 2
 If the CLI can\[cq]t find a template match when invoking \f[V]dotnet new\f[R], not even partial.
 .IP \[bu] 2
 If there\[cq]s a newer version of the template available.
 In this case, the project or artifact is created but the CLI warns you about an updated version of the template.
 .PP
-Starting with .NET Core 5.0.300 SDK, the \f[V]--search\f[R] option should be used to search for templates in NuGet.org..
+Starting with .NET SDK 5.0.300, the \f[V]search\f[R] command should be used to search for templates in NuGet.org.
 .PP
 The following table shows the templates that come pre-installed with the .NET SDK.
 The default language for the template is shown inside the brackets.
@@ -542,7 +549,7 @@ If no name is specified, the name of the current directory is used.
 .RS 2
 .PP
 Disables checking for template package updates when instantiating a template.
-Available since .NET 6.0.100 SDK.
+Available since .NET SDK 6.0.100.
 When instantiating the template from a template package that was installed by using \f[V]dotnet new --install\f[R], \f[V]dotnet new\f[R] checks if there is an update for the template.
 Starting with .NET 6, no update checks are done for .NET default templates.
 To update .NET default templates, install the patch version of the .NET SDK.
@@ -553,6 +560,30 @@ To update .NET default templates, install the patch version of the .NET SDK.
 .PP
 Location to place the generated output.
 The default is the current directory.
+.RE
+.IP \[bu] 2
+\f[B]\f[VB]--project <PROJECT_PATH>\f[B]\f[R]
+.RS 2
+.PP
+The project that the template is added to.
+This project is used for context evaluation.
+If not specified, the project in the current or parent directories will be used.
+Available since .NET SDK 7.0.100.
+.RE
+.IP \[bu] 2
+\f[B]\f[VB]-d|--diagnostics\f[B]\f[R]
+.RS 2
+.PP
+Enables diagnostic output.
+Available since .NET SDK 7.0.100.
+.RE
+.IP \[bu] 2
+\f[B]\f[VB]-v|--verbosity <LEVEL>\f[B]\f[R]
+.RS 2
+.PP
+Sets the verbosity level of the command.
+Allowed values are \f[V]q[uiet]\f[R], \f[V]m[inimal]\f[R], \f[V]n[ormal]\f[R], and \f[V]diag[nostic]\f[R].
+Available since .NET SDK 7.0.100.
 .RE
 .SS Template options
 .PP
@@ -641,11 +672,11 @@ dotnet new console --language \[dq]F#\[dq] -h
 .RE
 .SH SEE ALSO
 .IP \[bu] 2
-dotnet new \[en]list option
+dotnet new list command
 .IP \[bu] 2
-dotnet new \[en]search option
+dotnet new search command
 .IP \[bu] 2
-dotnet new \[en]install option
+dotnet new install command
 .IP \[bu] 2
 \&.NET default templates for dotnet new
 .IP \[bu] 2
