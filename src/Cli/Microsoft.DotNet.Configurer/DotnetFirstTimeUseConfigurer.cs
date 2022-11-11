@@ -58,6 +58,9 @@ namespace Microsoft.DotNet.Configurer
             if (ShouldPrintFirstTimeUseNotice())
             {
                 Stopwatch beforeFirstTimeUseNotice = Stopwatch.StartNew();
+                // Migrate the nuget state from earlier SDKs
+                NuGet.Common.Migrations.MigrationRunner.Run();
+
                 if (!_dotnetFirstRunConfiguration.NoLogo)
                 {
                     PrintFirstTimeMessageWelcome();
