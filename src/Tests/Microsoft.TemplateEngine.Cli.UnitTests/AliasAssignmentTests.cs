@@ -4,11 +4,13 @@
 
 using System.CommandLine;
 using FakeItEasy;
+using FluentAssertions;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Mocks;
+using Microsoft.TemplateEngine.Utils;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests
@@ -130,6 +132,21 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Contains("--f", result["f"].Aliases);
             Assert.Contains("-p:f", result["f"].Aliases);
             Assert.DoesNotContain(result, r => r.Value.Errors.Any());
+        }
+
+        [Fact]
+        public void ShortNameGenerationShouldNotProduceDuplicates()
+        {
+            List<CliTemplateParameter> paramList = new List<CliTemplateParameter>();
+            for (int i = 0; i < 10; i++)
+            {
+                paramList.Add(new CliTemplateParameter("par" + i));
+            }
+
+            var result = AliasAssignmentCoordinator.AssignAliasesForParameter(paramList, InitiallyTakenAliases);
+
+            result.SelectMany(p => p.Aliases).HasDuplicates().Should()
+                .BeFalse("Duplicate option aliases should not be generated.");
         }
 
         // This reflects the MVC 2.0 tempalte as of May 24, 2017
