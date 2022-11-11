@@ -125,6 +125,21 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.DoesNotContain(result, r => r.Value.Errors.Any());
         }
 
+        [Fact]
+        public void ShortNameGenerationShouldNotProduceDuplicates()
+        {
+            List<CliTemplateParameter> paramList = new List<CliTemplateParameter>();
+            for (int i = 0; i < 10; i++)
+            {
+                paramList.Add(new CliTemplateParameter("par" + i));
+            }
+
+            var result = AliasAssignmentCoordinator.AssignAliasesForParameter(paramList, InitiallyTakenAliases);
+
+            result.SelectMany(p => p.Aliases).HasDuplicates().Should()
+                .BeFalse("Duplicate option aliases should not be generated.");
+        }
+
         // This reflects the MVC 2.0 tempalte as of May 24, 2017
         [Fact(DisplayName = nameof(CheckAliasAssignmentsMvc20))]
         public void CheckAliasAssignmentsMvc20()
