@@ -136,7 +136,8 @@
                         EntrypointArgs="@(ContainerEntrypointArgs)"
                         Labels="@(ContainerLabel)"
                         ExposedPorts="@(ContainerPort)"
-                        ContainerEnvironmentVariables="@(ContainerEnvironmentVariables)">
+                        ContainerEnvironmentVariables="@(ContainerEnvironmentVariables)"
+                        ContainerRuntimeIdentifier="$(RuntimeIdentifier)">
             <Output TaskParameter="GeneratedContainerManifest" PropertyName="GeneratedContainerManifest" />
             <Output TaskParameter="GeneratedContainerConfiguration" PropertyName="GeneratedContainerConfiguration" />
         </CreateNewImage>

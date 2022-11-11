@@ -151,6 +151,8 @@ var envVarsOpt = new Option<string[]>(
     AllowMultipleArgumentsPerToken = true
 };
 
+var ridOpt = new Option<string>(name: "--rid", description: "Runtime Identifier of the generated container.");
+
 
 RootCommand root = new RootCommand("Containerize an application without Docker.")
 {
@@ -166,7 +168,8 @@ RootCommand root = new RootCommand("Containerize an application without Docker."
     entrypointArgsOpt,
     labelsOpt,
     portsOpt,
-    envVarsOpt
+    envVarsOpt,
+    ridOpt
 };
 
 root.SetHandler(async (context) =>
@@ -184,7 +187,8 @@ root.SetHandler(async (context) =>
     string[] _labels = context.ParseResult.GetValueForOption(labelsOpt) ?? Array.Empty<string>();
     Port[] _ports = context.ParseResult.GetValueForOption(portsOpt) ?? Array.Empty<Port>();
     string[] _envVars = context.ParseResult.GetValueForOption(envVarsOpt) ?? Array.Empty<string>();
-    await ContainerBuilder.Containerize(_publishDir, _workingDir, _baseReg, _baseName, _baseTag, _entrypoint, _entrypointArgs, _name, _tags, _outputReg, _labels, _ports, _envVars);
+    string _rid = context.ParseResult.GetValueForOption(ridOpt) ?? "";
+    await ContainerBuilder.Containerize(_publishDir, _workingDir, _baseReg, _baseName, _baseTag, _entrypoint, _entrypointArgs, _name, _tags, _outputReg, _labels, _ports, _envVars, _rid);
 });
 
 return await root.InvokeAsync(args);

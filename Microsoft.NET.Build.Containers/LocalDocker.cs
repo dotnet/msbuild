@@ -47,12 +47,12 @@ public class LocalDocker
 
         foreach (var d in x.LayerDescriptors)
         {
-            if (!x.originatingRegistry.HasValue)
+            if (x.originatingRegistry is null)
             {
                 throw new NotImplementedException("Need a good error for 'couldn't download a thing because no link to registry'");
             }
 
-            string localPath = await x.originatingRegistry.Value.DownloadBlob(x.OriginatingName, d);
+            string localPath = await x.originatingRegistry.DownloadBlob(x.OriginatingName, d);
 
             // Stuff that (uncompressed) tarball into the image tar stream
             // TODO uncompress!!

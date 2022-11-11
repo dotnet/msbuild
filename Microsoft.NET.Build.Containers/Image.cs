@@ -8,7 +8,7 @@ namespace Microsoft.NET.Build.Containers;
 
 public class Image
 {
-    public JsonNode manifest;
+    public ManifestV2 manifest;
     public JsonNode config;
 
     public readonly string OriginatingName;
@@ -22,7 +22,7 @@ public class Image
 
     internal Dictionary<string, string> environmentVariables;
 
-    public Image(JsonNode manifest, JsonNode config, string name, Registry? registry)
+    public Image(ManifestV2 manifest, JsonNode config, string name, Registry? registry)
     {
         this.manifest = manifest;
         this.config = config;
@@ -38,21 +38,16 @@ public class Image
     {
         get
         {
-            JsonNode? layersNode = manifest["layers"];
+            var layersNode = manifest.layers;
 
             if (layersNode is null)
             {
                 throw new NotImplementedException("Tried to get layer information but there is no layer node?");
             }
 
-            foreach (JsonNode? descriptorJson in layersNode.AsArray())
+            foreach (var layer in layersNode)
             {
-                if (descriptorJson is null)
-                {
-                    throw new NotImplementedException("Null layer descriptor in the list?");
-                }
-
-                yield return descriptorJson.Deserialize<Descriptor>();
+                yield return new(layer.mediaType, layer.digest, layer.size);
             }
         }
     }
@@ -60,7 +55,8 @@ public class Image
     public void AddLayer(Layer l)
     {
         newLayers.Add(l);
-        manifest["layers"]!.AsArray().Add(l.Descriptor);
+
+        manifest.layers.Add(new (l.Descriptor.MediaType, l.Descriptor.Size, l.Descriptor.Digest, l.Descriptor.Urls));
         config["rootfs"]!["diff_ids"]!.AsArray().Add(l.Descriptor.UncompressedDigest);
         RecalculateDigest();
     }
@@ -68,9 +64,7 @@ public class Image
     private void RecalculateDigest()
     {
         config["created"] = DateTime.UtcNow;
-
-        manifest["config"]!["digest"] = GetDigest(config);
-        manifest["config"]!["size"] = Encoding.UTF8.GetBytes(config.ToJsonString()).Length;
+        manifest = manifest with { config = manifest.config with { digest = GetDigest(config), size = Encoding.UTF8.GetBytes(config.ToJsonString()).Length } };
     }
 
     private JsonObject CreatePortMap()
@@ -247,6 +241,13 @@ public class Image
         hashString = GetSha(json);
 
         return $"sha256:{hashString}";
+    }
+
+    public string GetDigest<T>(T item)
+    {
+        var node = JsonSerializer.SerializeToNode(item);
+        if (node is not null) return GetDigest(node);
+        else return String.Empty;
     }
 
     public static string GetSha(JsonNode json)

@@ -8,52 +8,90 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Runtime.ExceptionServices;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using System.Xml.Linq;
 
 namespace Microsoft.NET.Build.Containers;
 
-public record struct Registry(Uri BaseUri)
+public record struct ManifestConfig(string mediaType, long size, string digest);
+public record struct ManifestLayer(string mediaType, long size, string digest, string[]? urls);
+public record struct ManifestV2(int schemaVersion, string tag, string mediaType, ManifestConfig config, List<ManifestLayer> layers);
+
+// not a complete list, only the subset that we support
+// public enum GoOS { linux, windows };
+// not a complete list, only the subset that we support
+// public enum GoArch { amd64, arm , arm64,  [JsonStringEnumMember("386")] x386 };
+public record struct PlatformInformation(string architecture, string os, string? variant, string[] features);
+public record struct PlatformSpecificManifest(string mediaType, long size, string digest, PlatformInformation platform);
+public record struct ManifestListV2(int schemaVersion, string mediaType, PlatformSpecificManifest[] manifests);
+
+public record Registry(Uri BaseUri)
 {
     private const string DockerManifestV2 = "application/vnd.docker.distribution.manifest.v2+json";
+    private const string DockerManifestListV2 = "application/vnd.docker.distribution.manifest.list.v2+json";
     private const string DockerContainerV1 = "application/vnd.docker.container.image.v1+json";
     private const int MaxChunkSizeBytes = 1024 * 64;
 
     private string RegistryName { get; } = BaseUri.Host;
 
-    public async Task<Image> GetImageManifest(string name, string reference)
+    public async Task<Image?> GetImageManifest(string name, string reference, string runtimeIdentifier)
     {
-        HttpClient client = GetClient();
+        using var client = GetClient();
+        var initialManifestResponse = await GetManifest(reference);
+        
+        return initialManifestResponse.Content.Headers.ContentType?.MediaType switch {
+            DockerManifestV2 => await TryReadSingleImage(await initialManifestResponse.Content.ReadFromJsonAsync<ManifestV2>()),
+            DockerManifestListV2 => await TryPickBestImageFromManifestList(await initialManifestResponse.Content.ReadFromJsonAsync<ManifestListV2>(), runtimeIdentifier),
+            var unknownMediaType => throw new NotImplementedException($"Do not understand the mediaType {unknownMediaType}")
+        };
 
-        var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{reference}"));
-
-        response.EnsureSuccessStatusCode();
-
-        var s = await response.Content.ReadAsStringAsync();
-
-        var manifest = JsonNode.Parse(s);
-
-        if (manifest is null) throw new NotImplementedException("Got a manifest but it was null");
-
-        if ((string?)manifest["mediaType"] != DockerManifestV2)
-        {
-            throw new NotImplementedException($"Do not understand the mediaType {manifest["mediaType"]}");
+        async Task<HttpResponseMessage> GetManifest(string reference) {
+            using var client = GetClient();
+            var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{reference}"));
+            response.EnsureSuccessStatusCode();
+            return response;
         }
 
-        JsonNode? config = manifest["config"];
-        Debug.Assert(config is not null);
-        Debug.Assert(((string?)config["mediaType"]) == DockerContainerV1);
+        async Task<HttpResponseMessage> GetBlob(string digest) {
+            using var client = GetClient();
+            var response = await client.GetAsync(new Uri(BaseUri, $"/v2/{name}/blobs/{digest}"));
+            response.EnsureSuccessStatusCode();
+            return response;
+        }
 
-        string? configSha = (string?)config["digest"];
-        Debug.Assert(configSha is not null);
+        async Task<Image?> TryReadSingleImage(ManifestV2 manifest) {
+            var config = manifest.config;
+            string configSha = config.digest;
+            
+            var blobResponse = await GetBlob(configSha);
 
-        response = await client.GetAsync(new Uri(BaseUri, $"/v2/{name}/blobs/{configSha}"));
+            JsonNode? configDoc = JsonNode.Parse(await blobResponse.Content.ReadAsStringAsync());
+            Debug.Assert(configDoc is not null);
 
-        JsonNode? configDoc = JsonNode.Parse(await response.Content.ReadAsStringAsync());
-        Debug.Assert(configDoc is not null);
-        //Debug.Assert(((string?)configDoc["mediaType"]) == DockerContainerV1);
+            return new Image(manifest, configDoc, name, this);
+        }
 
-        return new Image(manifest, configDoc, name, this);
+        async Task<Image?> TryPickBestImageFromManifestList(ManifestListV2 manifestList, string runtimeIdentifier) {
+            (string os, string arch, string? variant) = runtimeIdentifier.Split('-') switch {
+                ["linux", "x64"] => ("linux", "amd64", null),
+                ["linux", "x86"] => ("linux", "386", null),
+                ["linux", "arm"] => ("linux", "arm", "v7"),
+                ["linux", "arm64"] => ("linux", "arm64", "v8"),
+                ["windows", "x64"] => ("windows", "amd64", null),
+                var parts => throw new ArgumentException($"Unknown OS/platform combination {String.Join(' ', parts)}")
+            };
+
+            var potentialManifest = manifestList.manifests.SingleOrDefault(manifest => manifest.platform.os == os && manifest.platform.architecture == arch && manifest.platform.variant == variant);
+            if (potentialManifest != default) {
+                var manifestResponse = await GetManifest(potentialManifest.digest);
+                return await TryReadSingleImage(await manifestResponse.Content.ReadFromJsonAsync<ManifestV2>());
+            } else {
+                return null;
+            }
+        }
+
     }
 
     /// <summary>
@@ -103,7 +141,7 @@ public record struct Registry(Uri BaseUri)
         }
     }
 
-    private readonly async Task UploadBlob(string name, string digest, Stream contents)
+    private async Task UploadBlob(string name, string digest, Stream contents)
     {
         HttpClient client = GetClient();
 
@@ -118,7 +156,7 @@ public record struct Registry(Uri BaseUri)
 
         if (pushResponse.StatusCode != HttpStatusCode.Accepted)
         {
-            string errorMessage = $"Failed to upload blob to {pushUri}; recieved {pushResponse.StatusCode} with detail {await pushResponse.Content.ReadAsStringAsync()}";
+            string errorMessage = $"Failed to upload blob to {pushUri}; received {pushResponse.StatusCode} with detail {await pushResponse.Content.ReadAsStringAsync()}";
             throw new ApplicationException(errorMessage);
         }
 
@@ -199,7 +237,7 @@ public record struct Registry(Uri BaseUri)
         }
     }
 
-    private readonly async Task<bool> BlobAlreadyUploaded(string name, string digest, HttpClient client)
+    private async Task<bool> BlobAlreadyUploaded(string name, string digest, HttpClient client)
     {
         HttpResponseMessage response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, new Uri(BaseUri, $"/v2/{name}/blobs/{digest}")));
 
@@ -224,12 +262,10 @@ public record struct Registry(Uri BaseUri)
         HttpClient client = new(clientHandler);
 
         client.DefaultRequestHeaders.Accept.Clear();
-        client.DefaultRequestHeaders.Accept.Add(
-            new MediaTypeWithQualityHeaderValue("application/json"));
-        client.DefaultRequestHeaders.Accept.Add(
-            new MediaTypeWithQualityHeaderValue(DockerManifestV2));
-        client.DefaultRequestHeaders.Accept.Add(
-            new MediaTypeWithQualityHeaderValue(DockerContainerV1));
+        client.DefaultRequestHeaders.Accept.Add(new("application/json"));
+        client.DefaultRequestHeaders.Accept.Add(new(DockerManifestListV2));
+        client.DefaultRequestHeaders.Accept.Add(new(DockerManifestV2));
+        client.DefaultRequestHeaders.Accept.Add(new(DockerContainerV1));
 
         client.DefaultRequestHeaders.Add("User-Agent", ".NET Container Library");
 
@@ -258,13 +294,13 @@ public record struct Registry(Uri BaseUri)
             {
                 // The blob wasn't already available in another namespace, so fall back to explicitly uploading it
 
-                if (!x.originatingRegistry.HasValue)
+                if (x.originatingRegistry is null)
                 {
                     throw new NotImplementedException("Need a good error for 'couldn't download a thing because no link to registry'");
                 }
 
                 // Ensure the blob is available locally
-                await x.originatingRegistry.Value.DownloadBlob(x.OriginatingName, descriptor);
+                await x.originatingRegistry.DownloadBlob(x.OriginatingName, descriptor);
                 // Then push it to the destination registry
                 await reg.Push(Layer.FromDescriptor(descriptor), name, logProgressMessage);
                 logProgressMessage($"Finished uploading layer {digest} to {reg.RegistryName}");
@@ -280,8 +316,8 @@ public record struct Registry(Uri BaseUri)
         }
 
         var manifestDigest = x.GetDigest(x.manifest);
-        logProgressMessage($"Uploading manifest to {RegistryName} as blob {manifestDigest}");
-        string jsonString = x.manifest.ToJsonString();
+        logProgressMessage($"Uploading manifest to registry {RegistryName} as blob {manifestDigest}");
+        string jsonString = JsonSerializer.SerializeToNode(x.manifest)?.ToJsonString() ?? "";
         HttpContent manifestUploadContent = new StringContent(jsonString);
         manifestUploadContent.Headers.ContentType = new MediaTypeHeaderValue(DockerManifestV2);
         var putResponse = await client.PutAsync(new Uri(BaseUri, $"/v2/{name}/manifests/{manifestDigest}"), manifestUploadContent);

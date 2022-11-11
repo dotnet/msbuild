@@ -93,6 +93,13 @@ partial class CreateNewImage
     /// </summary>
     public ITaskItem[] ContainerEnvironmentVariables { get; set; }
 
+    /// <summary>
+    /// The RID to use to determine the host manifest if the parent container is a manifest list
+    /// </summary>
+    [Required]
+    public string ContainerRuntimeIdentifier { get; set; }
+
+
     [Output]
     public string GeneratedContainerManifest { get; set; }
 
@@ -117,6 +124,8 @@ partial class CreateNewImage
         Labels = Array.Empty<ITaskItem>();
         ExposedPorts = Array.Empty<ITaskItem>();
         ContainerEnvironmentVariables = Array.Empty<ITaskItem>();
+        ContainerRuntimeIdentifier = "";
+
         GeneratedContainerConfiguration = "";
         GeneratedContainerManifest = "";
     }
