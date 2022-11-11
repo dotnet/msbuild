@@ -29,9 +29,18 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         /// Replaces Windows newlines (CRLF) with Unix style newlines (LF).
         /// </summary>
         /// <param name="output"></param>
-        internal static void UnixifyNewlines(this StringBuilder output)
+        internal static StringBuilder UnixifyNewlines(this StringBuilder output)
         {
-            output.Replace("\r\n", "\n");
+            return output.Replace("\r\n", "\n");
+        }
+
+        /// <summary>
+        /// Replaces Windows Directory separator char (\) with Unix Directory separator char (/).
+        /// </summary>
+        /// <param name="output"></param>
+        internal static StringBuilder UnixifyDirSeparators(this StringBuilder output)
+        {
+            return output.Replace('\\', '/');
         }
 
         /// <summary>

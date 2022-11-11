@@ -1,1 +1,1 @@
-﻿The template "Console Application" was created successfully.
+The template "Console Application" was created successfully.

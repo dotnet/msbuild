@@ -1,7 +1,7 @@
-﻿The template "Console App" was created successfully.
+The template "Console App" was created successfully.
 
 Processing post-creation actions...
-Restoring %DIR%\MyProject\console.fsproj:
+Restoring %DIR%/MyProject/console.fsproj:
   Determining projects to restore...
-  Restored %DIR%\MyProject\console.fsproj (%DURATION%).
+  Restored %DIR%/MyProject/console.fsproj (%DURATION%).
 Restore succeeded.

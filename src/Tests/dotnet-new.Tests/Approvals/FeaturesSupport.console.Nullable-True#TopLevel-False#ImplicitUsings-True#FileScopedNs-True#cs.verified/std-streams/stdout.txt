@@ -1,7 +1,7 @@
-﻿The template "Console App" was created successfully.
+The template "Console App" was created successfully.
 
 Processing post-creation actions...
-Restoring %DIR%\MyProject\console.csproj:
+Restoring %DIR%/MyProject/console.csproj:
   Determining projects to restore...
-  Restored %DIR%\MyProject\console.csproj (%DURATION%).
+  Restored %DIR%/MyProject/console.csproj (%DURATION%).
 Restore succeeded.

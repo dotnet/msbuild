@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                     {
                         if (path.Replace(Path.DirectorySeparatorChar, '/') == "std-streams/stdout.txt")
                         {
-                            content.Replace(expectedTemplateName, "%TEMPLATE_NAME%");
+                            content.UnixifyDirSeparators().Replace(expectedTemplateName, "%TEMPLATE_NAME%");
                         }
                     })
             );
@@ -294,7 +294,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 ScrubbersDefinition.Empty
                     .AddScrubber(sb => sb.Replace($"<LangVersion>{langVersion}</LangVersion>", "<LangVersion>%LANG%</LangVersion>"))
                     .AddScrubber(sb => sb.Replace($"<TargetFramework>{framework ?? currentDefaultFramework}</TargetFramework>", "<TargetFramework>%FRAMEWORK%</TargetFramework>"))
-                    .AddScrubber(sb => sb.Replace(workingDir, "%DIR%").ScrubByRegex("(^  Restored .* \\()(.*)(\\)\\.)", "$1%DURATION%$3", RegexOptions.Multiline), "txt")
+                    .AddScrubber(sb => sb.Replace(workingDir, "%DIR%").UnixifyDirSeparators().ScrubByRegex("(^  Restored .* \\()(.*)(\\)\\.)", "$1%DURATION%$3", RegexOptions.Multiline), "txt")
             );
 
             VerificationEngine engine = new VerificationEngine(_logger);
