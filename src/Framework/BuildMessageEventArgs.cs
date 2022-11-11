@@ -227,10 +227,6 @@ namespace Microsoft.Build.Framework
             this.endColumnNumber = endColumnNumber;
         }
 
-        public BuildMessageEventArgs(string message)
-        {
-        }
-
         private MessageImportance importance;
 
         [OptionalField(VersionAdded = 2)]

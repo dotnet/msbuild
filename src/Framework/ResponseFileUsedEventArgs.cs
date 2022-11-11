@@ -3,8 +3,6 @@
 
 using System;
 
-#nullable disable
-
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -16,7 +14,9 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Initialize a new instance of the ResponseFileUsedEventArgs class.
         /// </summary>
-        public ResponseFileUsedEventArgs() : base() { }
+        public ResponseFileUsedEventArgs() : base() {
+            ResponseFilePath = "";
+        }
 
         public ResponseFileUsedEventArgs(string responseFilePath) : base()
         {
