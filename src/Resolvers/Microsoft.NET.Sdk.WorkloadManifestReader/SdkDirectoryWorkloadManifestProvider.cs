@@ -17,7 +17,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         private readonly SdkFeatureBand _sdkVersionBand;
         private readonly string [] _manifestDirectories;
         private static HashSet<string> _outdatedManifestIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "microsoft.net.workload.android", "microsoft.net.workload.blazorwebassembly", "microsoft.net.workload.ios",
-            "microsoft.net.workload.maccatalyst", "microsoft.net.workload.macos", "microsoft.net.workload.tvos" };
+            "microsoft.net.workload.maccatalyst", "microsoft.net.workload.macos", "microsoft.net.workload.tvos", "microsoft.net.workload.mono.toolchain" };
         private readonly Dictionary<string, int>? _knownManifestIdsAndOrder;
 
         public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, string? userProfileDir)
