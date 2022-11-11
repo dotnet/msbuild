@@ -3,6 +3,7 @@
 //
 
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using FluentAssertions;
@@ -54,6 +55,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             }
             .WithCustomScrubbers(
                 ScrubbersDefinition.Empty
+                    .AddScrubber(sb => sb.UnixifyNewlines(), "out")
                     .AddScrubber((path, content) =>
                     {
                         if (path.Replace(Path.DirectorySeparatorChar, '/') == "std-streams/stdout.txt")
@@ -62,6 +64,15 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                         }
                     })
             );
+
+            // globaljson is appending current sdk version. Due to the 'base' dotnet used to run test this version differs
+            //  on dev and CI runs and possibly from the version within test host. Easiest is just to scrub it away
+            if (templateShortName.Equals("globaljson") && args == null)
+            {
+                options.CustomScrubbers?.AddScrubber(
+                    sb => sb.ScrubByRegex("(^    \"version\": \")(.*)(\"$)", "$1%CURRENT-VER%$3", RegexOptions.Multiline),
+                    "json");
+            }
 
             VerificationEngine engine = new VerificationEngine(_logger);
             await engine.Execute(options).ConfigureAwait(false);
@@ -210,6 +221,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                     supportedLanguageVersions.Contains(langVersion) && !unsupportedFrameworkVersions.Contains(framework),
                     framework,
                     langVersion,
+                    unsupportedLanguageVersions.Contains(langVersion),
                     lang,
                     nullableSupportedLanguages.Contains(langVersion)
                     || langVersion == null && nullableSupportedInFrameworkByDefault.Contains(framework),
@@ -232,6 +244,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             bool buildPass,
             string? framework,
             string? langVersion,
+            bool langVersionUnsupported,
             string? language,
             bool supportsNullable,
             bool supportsTopLevel,
@@ -243,8 +256,17 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             //string currentDefaultFramework = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
 
             string workingDir = CreateTemporaryFolder(folderName: $"{name}-{langVersion ?? "null"}-{framework ?? "null"}");
+            string outputDir = "MyProject";
+            string projName = name;
 
-            List<string> args = new() { "-o", "MyProject" };
+            List<string> args = new() { "-o", outputDir };
+            // VB build would fail for name 'console' (root namespace would conflict with BCL namespace)
+            if (language?.Equals("VB") == true && name.Equals("console"))
+            {
+                projName = "vb-console";
+                args.Add("-n");
+                args.Add(projName);
+            }
             if (!string.IsNullOrWhiteSpace(framework))
             {
                 args.Add("--framework");
@@ -270,6 +292,16 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 supportsTopLevel = false;
             }
 
+            string extension = language switch
+            {
+                "F#" => "fsproj",
+                "VB" => "vbproj",
+                _ => "csproj"
+            };
+
+            string projectDir = Path.Combine(workingDir, outputDir);
+            string finalProjectName = Path.Combine(projectDir, $"{projName}.{extension}");
+
             Dictionary<string, string> environmentUnderTest = new() { ["DOTNET_NOLOGO"] = false.ToString() };
             TestContext.Current.AddTestEnvironmentVariables(environmentUnderTest);
 
@@ -285,7 +317,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 ScenarioName =
                     $"Nullable-{supportsNullable}#TopLevel-{supportsTopLevel}#ImplicitUsings-{supportsImplicitUsings}#FileScopedNs-{supportsFileScopedNs}"
                     + '#' + (language == null ? "cs" : language.Replace('#', 's').ToLower())
-                    + (langVersion == null ? "#NoLangVer" : null),
+                    + (langVersion == null ? "#NoLangVer" : (langVersionUnsupported ? "#UnsuportedLangVer" : null)),
                 VerificationExcludePatterns = new[] { "*/stderr.txt", "*\\stderr.txt" },
                 DotnetExecutablePath = TestContext.Current.ToolsetUnderTest.DotNetHostPath,
             }
@@ -294,7 +326,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 ScrubbersDefinition.Empty
                     .AddScrubber(sb => sb.Replace($"<LangVersion>{langVersion}</LangVersion>", "<LangVersion>%LANG%</LangVersion>"))
                     .AddScrubber(sb => sb.Replace($"<TargetFramework>{framework ?? currentDefaultFramework}</TargetFramework>", "<TargetFramework>%FRAMEWORK%</TargetFramework>"))
-                    .AddScrubber(sb => sb.Replace(workingDir, "%DIR%").UnixifyDirSeparators().ScrubByRegex("(^  Restored .* \\()(.*)(\\)\\.)", "$1%DURATION%$3", RegexOptions.Multiline), "txt")
+                    .AddScrubber(sb => sb.Replace(finalProjectName, "%PROJECT_PATH%").UnixifyDirSeparators().ScrubByRegex("(^  Restored .* \\()(.*)(\\)\\.)", "$1%DURATION%$3", RegexOptions.Multiline), "txt")
             );
 
             VerificationEngine engine = new VerificationEngine(_logger);

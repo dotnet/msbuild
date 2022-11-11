@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>console</RootNamespace>
     <TargetFramework>%FRAMEWORK%</TargetFramework>
+    <LangVersion>%LANG%</LangVersion>
   </PropertyGroup>
 
 </Project>
