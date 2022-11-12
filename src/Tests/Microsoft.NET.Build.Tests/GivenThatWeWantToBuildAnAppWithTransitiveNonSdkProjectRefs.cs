@@ -55,9 +55,9 @@ namespace Microsoft.NET.Build.Tests
                         {
                             var ns = project.Root.Name.Namespace;
 
+                            XElement propertyGroup = project.Root.Element(ns + "PropertyGroup");
                             if (!string.IsNullOrEmpty(prefix))
                             {
-                                XElement propertyGroup = project.Root.Element(ns + "PropertyGroup");
                                 XElement assemblyName = propertyGroup.Element(ns + "AssemblyName");
                                 assemblyName.RemoveAll();
                                 assemblyName.Add(prefix + projectFileName);
@@ -69,6 +69,16 @@ namespace Microsoft.NET.Build.Tests
                                 new XAttribute("Returns", "@(_ValidProjectsForRestore)"));
 
                             project.Root.Add(target);
+                        }
+                        else // if (StringComparer.OrdinalIgnoreCase.Equals(projectFileName, "TestApp"))
+                        {
+                            var ns = project.Root.Name.Namespace;
+
+                            XElement propertyGroup = project.Root.Element(ns + "PropertyGroup");
+
+                            XElement includeProjectsNotInAssetsFileInDepsFile = new XElement(ns + "IncludeProjectsNotInAssetsFileInDepsFile");
+                            includeProjectsNotInAssetsFileInDepsFile.Add("true");
+                            propertyGroup.Add(includeProjectsNotInAssetsFileInDepsFile);
                         }
                     });
 

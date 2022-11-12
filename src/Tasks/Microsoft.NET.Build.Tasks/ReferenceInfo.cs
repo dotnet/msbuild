@@ -55,7 +55,8 @@ namespace Microsoft.NET.Build.Tasks
             IEnumerable<ITaskItem> referencePaths,
             IEnumerable<ITaskItem> referenceSatellitePaths,
             LockFileLookup lockFileLookup,
-            Func<ITaskItem, bool> isRuntimeAssembly)
+            Func<ITaskItem, bool> isRuntimeAssembly,
+            bool includeProjectsNotInAssetsFile)
         {
             bool lockFileContainsProject(ITaskItem referencePath)
             {
@@ -67,6 +68,11 @@ namespace Microsoft.NET.Build.Tasks
                 if (!IsProjectReference(referencePath))
                 {
                     return false;
+                }
+
+                if (!includeProjectsNotInAssetsFile)
+                {
+                    return true;
                 }
 
                 string projectName;

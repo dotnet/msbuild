@@ -54,7 +54,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     referencePaths ?? new ITaskItem[] { },
                     referenceSatellitePaths ?? new ITaskItem[] { },
                     lockFileLookup: lockFileLookup,
-                    i => true);
+                    i => true,
+                    true);
 
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 FrameworkConstants.CommonFrameworks.NetCoreApp10.GetShortFolderName(),

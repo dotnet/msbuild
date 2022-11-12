@@ -94,6 +94,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool IncludeRuntimeFileVersions { get; set; }
 
+        public bool IncludeProjectsNotInAssetsFile { get; set; }
+
         [Required]
         public string RuntimeGraphPath { get; set; }
 
@@ -162,7 +164,8 @@ namespace Microsoft.NET.Build.Tasks
                     ReferencePaths,
                     ReferenceSatellitePaths,
                     lockFileLookup,
-                    isUserRuntimeAssembly);
+                    isUserRuntimeAssembly,
+                    IncludeProjectsNotInAssetsFile);
 
             IEnumerable<ReferenceInfo> dependencyReferences =
                 ReferenceInfo.CreateDependencyReferenceInfos(ReferenceDependencyPaths, ReferenceSatellitePaths, isUserRuntimeAssembly);
