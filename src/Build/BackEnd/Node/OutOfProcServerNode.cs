@@ -361,6 +361,10 @@ namespace Microsoft.Build.Experimental
             Thread.CurrentThread.CurrentCulture = command.Culture;
             Thread.CurrentThread.CurrentUICulture = command.UICulture;
 
+            // Reconfigure static BuildParameters.StartupDirectory to have this value
+            // same as startup directory of msbuild entry client or dotnet CLI.
+            BuildParameters.StartupDirectory = command.StartupDirectory;
+
             // Configure console configuration so Loggers can change their behavior based on Target (client) Console properties.
             ConsoleConfiguration.Provider = command.ConsoleConfiguration;
 
