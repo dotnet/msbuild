@@ -12,6 +12,8 @@ namespace Microsoft.DotNet.Watcher
         string ProjectPath,
         bool IsNetCoreApp,
         Version? TargetFrameworkVersion,
+        string RuntimeIdentifier,
+        string DefaultAppHostRuntimeIdentifier,
         string RunCommand,
         string RunArguments,
         string RunWorkingDirectory
