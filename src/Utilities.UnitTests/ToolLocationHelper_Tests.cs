@@ -796,6 +796,7 @@ namespace Microsoft.Build.UnitTests
             string fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK471 = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\NETFXSDK\4.7.1\WinSDK-NetFx40Tools-x86";
             string fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK472 = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\NETFXSDK\4.7.2\WinSDK-NetFx40Tools-x86";
             string fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK48 = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\NETFXSDK\4.8\WinSDK-NetFx40Tools-x86";
+            string fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK481 = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\NETFXSDK\4.8.1\WinSDK-NetFx40Tools-x86";
 
             // v4.0
             ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version40, VisualStudioVersion.Version100).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK70A);
@@ -863,9 +864,20 @@ namespace Microsoft.Build.UnitTests
             Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version48, VisualStudioVersion.Version120));
             Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version48, VisualStudioVersion.Version140));
             ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version48, VisualStudioVersion.Version150).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK48);
+            ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version48, VisualStudioVersion.Version160).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK48);
+            ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version48, VisualStudioVersion.Version170).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK48);
+
+            // v4.8.1
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version481, VisualStudioVersion.Version100));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version481, VisualStudioVersion.Version110));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version481, VisualStudioVersion.Version120));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version481, VisualStudioVersion.Version140));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version481, VisualStudioVersion.Version150));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version481, VisualStudioVersion.Version160));
+            ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version481, VisualStudioVersion.Version170).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK481);
 
             // Latest
-            ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Latest, VisualStudioVersion.Version150).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK48);
+            ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Latest, VisualStudioVersion.Version150).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK481);
         }
 
         [Fact]
