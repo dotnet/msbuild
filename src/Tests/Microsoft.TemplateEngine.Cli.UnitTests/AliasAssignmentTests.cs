@@ -142,6 +142,27 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 .BeFalse("Duplicate option aliases should not be generated.");
         }
 
+        [Fact]
+        public void ShortNameSkippedAfter4Reps()
+        {
+            List<CliTemplateParameter> paramList = new List<CliTemplateParameter>();
+            for (int i = 0; i < 8; i++)
+            {
+                paramList.Add(new CliTemplateParameter("par" + i));
+            }
+
+            var result = AliasAssignmentCoordinator.AssignAliasesForParameter(paramList, InitiallyTakenAliases);
+
+            result[0].Aliases.Should().BeEquivalentTo(new[] { "-p", "--par0" });
+            result[1].Aliases.Should().BeEquivalentTo(new[] { "-pa", "--par1" });
+            result[2].Aliases.Should().BeEquivalentTo(new[] { "-p:p", "--par2" });
+            result[3].Aliases.Should().BeEquivalentTo(new[] { "-p:pa", "--par3" });
+            result[4].Aliases.Should().BeEquivalentTo(new[] { "--par4" });
+            result[5].Aliases.Should().BeEquivalentTo(new[] { "--par5" });
+            result[6].Aliases.Should().BeEquivalentTo(new[] { "--par6" });
+            result[7].Aliases.Should().BeEquivalentTo(new[] { "--par7" });
+        }
+
         // This reflects the MVC 2.0 tempalte as of May 24, 2017
         [Fact(DisplayName = nameof(CheckAliasAssignmentsMvc20))]
         public void CheckAliasAssignmentsMvc20()
