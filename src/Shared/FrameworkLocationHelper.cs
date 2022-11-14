@@ -380,6 +380,15 @@ namespace Microsoft.Build.Shared
             { (dotNetFrameworkVersion48, visualStudioVersion160), (dotNetFrameworkVersion472, visualStudioVersion160) },
 
             // VS 17
+            { (dotNetFrameworkVersion451, visualStudioVersion170), (dotNetFrameworkVersion45, visualStudioVersion170) },
+            { (dotNetFrameworkVersion452, visualStudioVersion170), (dotNetFrameworkVersion451, visualStudioVersion170) },
+            { (dotNetFrameworkVersion46, visualStudioVersion170), (dotNetFrameworkVersion451, visualStudioVersion170) },
+            { (dotNetFrameworkVersion461, visualStudioVersion170), (dotNetFrameworkVersion46, visualStudioVersion170) },
+            { (dotNetFrameworkVersion462, visualStudioVersion170), (dotNetFrameworkVersion461, visualStudioVersion170) },
+            { (dotNetFrameworkVersion47, visualStudioVersion170), (dotNetFrameworkVersion462, visualStudioVersion170) },
+            { (dotNetFrameworkVersion471, visualStudioVersion170), (dotNetFrameworkVersion47, visualStudioVersion170) },
+            { (dotNetFrameworkVersion472, visualStudioVersion170), (dotNetFrameworkVersion471, visualStudioVersion170) },
+            { (dotNetFrameworkVersion48, visualStudioVersion170), (dotNetFrameworkVersion472, visualStudioVersion170) },
             { (dotNetFrameworkVersion481, visualStudioVersion170), (dotNetFrameworkVersion48, visualStudioVersion170) },
         };
 #endif // FEATURE_WIN32_REGISTRY
