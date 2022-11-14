@@ -126,6 +126,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
+    <!-- Turn off IncludeProjectsNotInAssetsFileInDepsFile by default. -->
+    <IncludeProjectsNotInAssetsFileInDepsFile Condition="'$(IncludeProjectsNotInAssetsFileInDepsFile)' == ''">false</IncludeProjectsNotInAssetsFileInDepsFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <CoreBuildDependsOn>
       _CheckForBuildWithNoBuild;
       $(CoreBuildDependsOn);
