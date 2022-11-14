@@ -20,6 +20,10 @@ namespace DotNetWatchTasks
 
         public string TargetFrameworkVersion { get; set; }
 
+        public string RuntimeIdentifier { get; set; }
+
+        public string DefaultAppHostRuntimeIdentifier { get; set; }
+
         public string RunCommand { get; set; }
 
         public string RunArguments { get; set; }
@@ -37,6 +41,8 @@ namespace DotNetWatchTasks
             {
                 IsNetCoreApp = IsNetCoreApp,
                 TargetFrameworkVersion = TargetFrameworkVersion,
+                RuntimeIdentifier = RuntimeIdentifier,
+                DefaultAppHostRuntimeIdentifier = DefaultAppHostRuntimeIdentifier,
                 RunCommand = RunCommand,
                 RunArguments = RunArguments,
                 RunWorkingDirectory = RunWorkingDirectory,

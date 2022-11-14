@@ -20,6 +20,8 @@ them to a file.
     <FileSetSerializer
        IsNetCoreApp="$(_IsNetCoreApp)"
        TargetFrameworkVersion="$(TargetFrameworkVersion)"
+       RuntimeIdentifier="$(RuntimeIdentifier)"
+       DefaultAppHostRuntimeIdentifier="$(DefaultAppHostRuntimeIdentifier)"
        RunCommand="$(RunCommand)"
        RunArguments="$(RunArguments)"
        RunWorkingDirectory="$(RunWorkingDirectory)"
