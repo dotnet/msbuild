@@ -517,7 +517,8 @@ namespace Microsoft.Build.Tasks
     internal enum SymbolicLink
     {
         File = 0,
-        Directory = 1
+        Directory = 1,
+        AllowUnprivilegedCreate = 2,
     }
 
     /// <summary>
@@ -837,7 +838,7 @@ namespace Microsoft.Build.Tasks
                 SymbolicLink flags = SymbolicLink.File;
                 if (osVersion.Major >= 11 || (osVersion.Major == 10 && osVersion.Build >= 14972))
                 {
-                    flags |= (SymbolicLink)0x2;
+                    flags |= SymbolicLink.AllowUnprivilegedCreate;
                 }
 
                 symbolicLinkCreated = CreateSymbolicLink(newFileName, exitingFileName, flags);
