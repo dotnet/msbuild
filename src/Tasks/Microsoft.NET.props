@@ -22,8 +22,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
   -->
   <PropertyGroup>
-    <!-- Attempt to use net4.8.1 if possible, falling back to the last available version. -->
-    <TargetFrameworkSDKToolsDirectory Condition=" '$(TargetFrameworkSDKToolsDirectory)' == '' ">$(SDK481ToolsPath)</TargetFrameworkSDKToolsDirectory>
     <TargetFrameworkSDKToolsDirectory Condition=" '$(TargetFrameworkSDKToolsDirectory)' == '' ">$(SDK40ToolsPath)</TargetFrameworkSDKToolsDirectory>
   </PropertyGroup>
 
