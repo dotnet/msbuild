@@ -972,6 +972,7 @@ namespace Microsoft.Build.Tasks
             if (IsBadImage)
             {
                 CopyLocal = CopyLocalState.NoBecauseBadImage;
+                return;
             }
 
             // If this item was unresolvable, then copy-local is false.

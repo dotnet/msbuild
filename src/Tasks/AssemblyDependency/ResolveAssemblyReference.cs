@@ -1074,7 +1074,7 @@ namespace Microsoft.Build.Tasks
                         string fusionName = assemblyName.FullName;
                         Reference primaryCandidate = dependencyTable.GetReference(assemblyName);
 
-                        if (primaryCandidate.IsPrimary && !(primaryCandidate.IsConflictVictim && primaryCandidate.IsCopyLocal))
+                        if (primaryCandidate.IsPrimary && !(primaryCandidate.IsConflictVictim && primaryCandidate.IsCopyLocal) && primaryCandidate.CopyLocal != CopyLocalState.NoBecauseBadImage)
                         {
                             LogReference(primaryCandidate, fusionName);
                         }
