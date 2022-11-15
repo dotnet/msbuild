@@ -139,8 +139,10 @@ public record struct Layer
         {
             try
             {
-                hashAlgorithm.Dispose();
+                // dispose hashAlgorithm after sha256Stream since sha256Stream references/uses it
                 sha256Stream.Dispose();
+                hashAlgorithm.Dispose();
+
                 compressionStream.Dispose();
             }
             finally
