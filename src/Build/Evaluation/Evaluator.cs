@@ -1638,7 +1638,9 @@ namespace Microsoft.Build.Evaluation
             // paths will be returned (union of all files that match).
             var allProjects = new List<ProjectRootElement>();
             bool containsWildcards = FileMatcher.HasWildcards(importElement.Project);
-            bool noDirectoryExists = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6);
+
+            // Initially set to log an error if the change wave is enabled.
+            bool foundDirectoryDuringProbeOrConditionWasFalse = !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6);
 
             // Try every extension search path, till we get a Hit:
             // 1. 1 or more project files loaded
@@ -1656,7 +1658,7 @@ namespace Microsoft.Build.Evaluation
                 if (!EvaluateConditionCollectingConditionedProperties(importElement, newExpandedCondition, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties,
                             _projectRootElementCache))
                 {
-                    noDirectoryExists = false;
+                    foundDirectoryDuringProbeOrConditionWasFalse = true;
                     continue;
                 }
 
@@ -1665,7 +1667,7 @@ namespace Microsoft.Build.Evaluation
                     continue;
                 }
 
-                noDirectoryExists = false;
+                foundDirectoryDuringProbeOrConditionWasFalse = true;
 
                 var newExpandedImportPath = importElement.Project.Replace(extensionPropertyRefAsString, extensionPathExpanded, StringComparison.OrdinalIgnoreCase);
                 _evaluationLoggingContext.LogComment(MessageImportance.Low, "TryingExtensionsPath", newExpandedImportPath, extensionPathExpanded);
@@ -1716,7 +1718,7 @@ namespace Microsoft.Build.Evaluation
             // atleastOneExactFilePathWasLookedAtAndNotFound would be false, eg, if the expression
             // was a wildcard and it resolved to zero files!
             if (allProjects.Count == 0 &&
-                (atleastOneExactFilePathWasLookedAtAndNotFound || noDirectoryExists) &&
+                (atleastOneExactFilePathWasLookedAtAndNotFound || !foundDirectoryDuringProbeOrConditionWasFalse) &&
                 (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) == 0)
             {
                 ThrowForImportedProjectWithSearchPathsNotFound(fallbackSearchPathMatch, importElement);
