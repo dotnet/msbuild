@@ -371,7 +371,7 @@ namespace Microsoft.NET.Build.Tests
             appProject.ReferencedProjects.Add(libProject);
             var createdAppProject = _testAssetsManager.CreateTestProject(appProject);
             var publishCommand = new PublishCommand(createdAppProject);
-            publishCommand.Execute(new [] {"-property:SelfContained=true", "-property:_CommandLineDefinedSelfContained=true", $"-property:RuntimeIdentifier={rid}", "-property:_CommandLineDefinedRuntimeIdentifier=true" }).Should().Pass().And.NotHaveStdOutContaining("warning");
+            publishCommand.Execute(new [] {"-property:SelfContained=true", "-property:_CommandLineDefinedSelfContained=true", $"-property:RuntimeIdentifier={rid}", "-property:_CommandLineDefinedRuntimeIdentifier=true -nowarn:NETSDK1179" }).Should().Pass().And.NotHaveStdOutContaining("warning");
         }
 
         [Theory]
