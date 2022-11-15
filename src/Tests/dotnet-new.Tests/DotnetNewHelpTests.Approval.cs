@@ -357,5 +357,81 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             commandResult.Should().Pass().And.NotHaveStdErr();
             return Verify(commandResult.StdOut);
         }
+
+        [Fact]
+        public Task CanShowHelpForTemplate_RequiredParams()
+        {
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate("TemplateWithRequiredParameters", _log, _fixture.HomeDirectory, workingDirectory);
+
+            CommandResult commandResult = new DotnetNewCommand(_log, "TestAssets.TemplateWithRequiredParameters", "--help")
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr();
+
+            return Verify(commandResult.StdOut);
+        }
+
+        [Fact]
+        public Task CanShowHelpForTemplate_ConditionalParams()
+        {
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate("TemplateWithConditionalParameters", _log, _fixture.HomeDirectory, workingDirectory);
+
+            CommandResult commandResult = new DotnetNewCommand(_log, "TestAssets.TemplateWithConditionalParameters", "--help")
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr();
+
+            return Verify(commandResult.StdOut);
+        }
+
+        [Fact]
+        public Task CanShowHelpForTemplateWhenRequiredParamIsMissed()
+        {
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate($"TemplateResolution/MissedRequiredParameter/BasicTemplate1", _log, _fixture.HomeDirectory, workingDirectory);
+
+            CommandResult commandResult = new DotnetNewCommand(_log, "basic", "--help")
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr();
+
+            return Verify(commandResult.StdOut);
+        }
+
+        [Fact]
+        public Task CanShowHelpForTemplateWhenRequiredParamIsMissedAndConditionIntroduced()
+        {
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate($"TemplateResolution/MissedRequiredParameter/BasicTemplate2", _log, _fixture.HomeDirectory, workingDirectory);
+
+            CommandResult commandResult = new DotnetNewCommand(_log, "basic2", "--help")
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr();
+
+            return Verify(commandResult.StdOut);
+        }
     }
 }
