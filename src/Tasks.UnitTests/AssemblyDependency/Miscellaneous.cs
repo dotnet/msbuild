@@ -98,17 +98,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void test()
         {
-            using TestEnvironment env = TestEnvironment.Create();
-            TransientTestFolder folder = env.CreateFolder(createFolder: true);
-            TransientTestFile pdb = env.CreateFile(folder, "x.pdb", @"not_assembly_text");
+            ITaskItem x = new TaskItem(Path.Combine(s_myComponentsRootPath, "X.dll"));
+            ITaskItem xpdb = new TaskItem(Path.Combine(s_myComponentsRootPath, "X.pdb"));
             ResolveAssemblyReference t = new()
             {
-                SearchPaths = new string[] { folder.Path },
                 BuildEngine = new MockEngine(),
                 AllowedRelatedFileExtensions = new string[] { ".pdb" },
-                Assemblies = new ITaskItem[] { new TaskItem("x.dll"), new TaskItem("x.pdb") },
-                AssemblyFiles = new ITaskItem[] { new TaskItem("x.dll") }
-            };
+                Assemblies = new ITaskItem[] { x, xpdb },
+                AssemblyFiles = new ITaskItem[] { x, xpdb },
+                SearchPaths = new string[] { s_myComponentsRootPath }
+        };
 
             bool success = Execute(t);
             success.ShouldBeTrue();
