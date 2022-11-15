@@ -37,11 +37,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Uninstall
             string userProfileDir = null)
             : base(parseResult, reporter: reporter, nugetPackageDownloader: nugetPackageDownloader)
         {
-            _workloadIds = parseResult.GetValueForArgument(WorkloadUninstallCommandParser.WorkloadIdArgument)
+            _workloadIds = parseResult.GetValue(WorkloadUninstallCommandParser.WorkloadIdArgument)
                 .Select(workloadId => new WorkloadId(workloadId)).ToList().AsReadOnly();
             var dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(WorkloadUninstallCommandParser.VersionOption), version, dotnetPath, userProfileDir, true);
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValue(WorkloadUninstallCommandParser.VersionOption), version, dotnetPath, userProfileDir, true);
 
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString(), userProfileDir);
             workloadResolver ??= WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString(), userProfileDir);

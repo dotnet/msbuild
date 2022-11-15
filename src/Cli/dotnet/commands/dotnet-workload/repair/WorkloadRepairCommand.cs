@@ -42,10 +42,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
         {
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(WorkloadRepairCommandParser.VersionOption), version, _dotnetPath, userProfileDir, true);
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValue(WorkloadRepairCommandParser.VersionOption), version, _dotnetPath, userProfileDir, true);
 
-            var configOption = parseResult.GetValueForOption(WorkloadRepairCommandParser.ConfigOption);
-            var sourceOption = parseResult.GetValueForOption(WorkloadRepairCommandParser.SourceOption);
+            var configOption = parseResult.GetValue(WorkloadRepairCommandParser.ConfigOption);
+            var sourceOption = parseResult.GetValue(WorkloadRepairCommandParser.SourceOption);
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides: sourceOption);
 

@@ -123,10 +123,10 @@ namespace Microsoft.DotNet.Tools.Test
             if (settings.Any())
             {
                 //workaround for correct -- logic
-                var commandArgument = result.GetValueForArgument(TestCommandParser.SlnOrProjectArgument);
+                var commandArgument = result.GetValue(TestCommandParser.SlnOrProjectArgument);
                 if(!string.IsNullOrWhiteSpace(commandArgument) && !settings.Contains(commandArgument))
                 {
-                    msbuildArgs.Add(result.GetValueForArgument(TestCommandParser.SlnOrProjectArgument));
+                    msbuildArgs.Add(result.GetValue(TestCommandParser.SlnOrProjectArgument));
                 }
 
                 // skip '--' and escape every \ to be \\ and every " to be \" to survive the next hop
@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.Tools.Test
             }
             else
             {
-                var argument = result.GetValueForArgument(TestCommandParser.SlnOrProjectArgument);
+                var argument = result.GetValue(TestCommandParser.SlnOrProjectArgument);
                 if(!string.IsNullOrWhiteSpace(argument))
                     msbuildArgs.Add(argument);
             }
@@ -203,7 +203,7 @@ namespace Microsoft.DotNet.Tools.Test
 
             if (parseResult.HasOption(TestCommandParser.DiagOption))
             {
-                artifactsPostProcessArgs.Add($"--diag:{parseResult.GetValueForOption(TestCommandParser.DiagOption)}");
+                artifactsPostProcessArgs.Add($"--diag:{parseResult.GetValue(TestCommandParser.DiagOption)}");
             }
 
             try
@@ -229,7 +229,7 @@ namespace Microsoft.DotNet.Tools.Test
 
         private static bool ContainsBuiltTestSources(ParseResult parseResult)
         {
-            string commandArgument = parseResult.GetValueForArgument(TestCommandParser.SlnOrProjectArgument);
+            string commandArgument = parseResult.GetValue(TestCommandParser.SlnOrProjectArgument);
 
             if (commandArgument is not null && (commandArgument.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || commandArgument.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)))
             {
@@ -248,7 +248,7 @@ namespace Microsoft.DotNet.Tools.Test
                 return;
             }
 
-            foreach (string env in parseResult.GetValueForOption(option))
+            foreach (string env in parseResult.GetValue(option))
             {
                 string name = env;
                 string value = string.Empty;

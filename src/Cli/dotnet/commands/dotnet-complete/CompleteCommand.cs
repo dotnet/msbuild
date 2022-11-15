@@ -52,9 +52,9 @@ namespace Microsoft.DotNet.Cli
 
         private static CompletionItem[] Completions(ParseResult complete)
         {
-            var input = complete.GetValueForArgument(CompleteCommandParser.PathArgument) ?? string.Empty;
+            var input = complete.GetValue(CompleteCommandParser.PathArgument) ?? string.Empty;
 
-            var position = complete.GetValueForOption(CompleteCommandParser.PositionOption);
+            var position = complete.GetValue(CompleteCommandParser.PositionOption);
 
             if (position > input.Length)
             {

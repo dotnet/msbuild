@@ -189,7 +189,7 @@ namespace Microsoft.DotNet.Cli
         {
             Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-            string[] globalPropEnumerable = parseResult.GetValueForOption(CommonOptions.PropertiesOption);
+            string[] globalPropEnumerable = parseResult.GetValue(CommonOptions.PropertiesOption);
 
             foreach (var keyEqVal in globalPropEnumerable)
             {

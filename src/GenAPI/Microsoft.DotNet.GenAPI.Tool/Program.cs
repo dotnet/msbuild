@@ -66,13 +66,13 @@ namespace Microsoft.DotNet.GenAPI.Tool
             rootCommand.SetHandler((InvocationContext context) =>
             {
                 GenAPIApp.Run(new GenAPIApp.Context(
-                    context.ParseResult.GetValueForOption(assembliesOption)!,
-                    context.ParseResult.GetValueForOption(assemblyReferencesOption),
-                    context.ParseResult.GetValueForOption(exceptionMessageOption),
-                    context.ParseResult.GetValueForOption(headerFileOption),
-                    context.ParseResult.GetValueForOption(outputPathOption),
-                    context.ParseResult.GetValueForOption(excludeAttributesFilesOption),
-                    context.ParseResult.GetValueForOption(includeVisibleOutsideOfAssembly)
+                    context.ParseResult.GetValue(assembliesOption)!,
+                    context.ParseResult.GetValue(assemblyReferencesOption),
+                    context.ParseResult.GetValue(exceptionMessageOption),
+                    context.ParseResult.GetValue(headerFileOption),
+                    context.ParseResult.GetValue(outputPathOption),
+                    context.ParseResult.GetValue(excludeAttributesFilesOption),
+                    context.ParseResult.GetValue(includeVisibleOutsideOfAssembly)
                 ));
             });
 

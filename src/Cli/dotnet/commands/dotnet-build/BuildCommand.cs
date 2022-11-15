@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Tools.Build
             {
                 msbuildArgs.Add("-target:Rebuild");
             }
-            var arguments = parseResult.GetValueForArgument(BuildCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>();
+            var arguments = parseResult.GetValue(BuildCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>();
 
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(BuildCommandParser.GetCommand()));
 
