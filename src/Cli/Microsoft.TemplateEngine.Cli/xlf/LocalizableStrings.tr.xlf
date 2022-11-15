@@ -524,9 +524,9 @@ The header is followed by the list of parameters and their errors (might be seve
         <note>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</note>
       </trans-unit>
       <trans-unit id="MissingRequiredParameter">
-        <source>Mandatory option '{0}' is missing for the template '{1}'.</source>
-        <target state="translated">'{1}' şablonunda zorunlu '{0}' seçeneği eksik.</target>
-        <note />
+        <source>Missing mandatory option(s) for the template '{1}': {0}.</source>
+        <target state="needs-review-translation">'{1}' şablonunda zorunlu '{0}' seçeneği eksik.</target>
+        <note>{0} - comma-separated list of missing options, each option is quoted.</note>
       </trans-unit>
       <trans-unit id="MountPointFactories">
         <source>Mount Point Factories</source>
@@ -546,6 +546,11 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="NoTemplatesFound">
         <source>No templates installed.</source>
         <target state="translated">Yüklü şablon yok.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OperationCancelled">
+        <source>The operation was cancelled.</source>
+        <target state="new">The operation was cancelled.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionalWorkloadsSyncFailed">
@@ -1055,6 +1060,11 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="UnableToSetPermissions">
         <source>Unable to apply permissions {0} to "{1}".</source>
         <target state="translated">{0} izinleri "{1}" öğesine uygulanamıyor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedResult">
+        <source>Template generation ended with unexpected result: '{0}'. Details: {1}</source>
+        <target state="new">Template generation ended with unexpected result: '{0}'. Details: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnknownChangeKind">
