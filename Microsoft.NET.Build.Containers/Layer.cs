@@ -1,4 +1,5 @@
-﻿using System.Formats.Tar;
+﻿using System.Diagnostics;
+using System.Formats.Tar;
 using System.IO.Compression;
 using System.Security.Cryptography;
 
@@ -36,7 +37,7 @@ public record struct Layer
     {
         long fileSize;
         Span<byte> hash = stackalloc byte[SHA256.HashSizeInBytes];
-        byte[] uncompressedHash;
+        Span<byte> uncompressedHash = stackalloc byte[SHA256.HashSizeInBytes];
 
         string tempTarballPath = ContentStore.GetTempFile();
         using (FileStream fs = File.Create(tempTarballPath))
@@ -55,7 +56,8 @@ public record struct Layer
                     }
                 } // Dispose of the TarWriter before getting the hash so the final data get written to the tar stream
 
-                uncompressedHash = gz.GetHash();
+                int bytesWritten = gz.GetCurrentUncompressedHash(uncompressedHash);
+                Debug.Assert(bytesWritten == uncompressedHash.Length);
             }
 
             fileSize = fs.Length;
@@ -98,14 +100,12 @@ public record struct Layer
     /// </summary>
     private sealed class HashDigestGZipStream : Stream
     {
-        private readonly SHA256 hashAlgorithm;
-        private readonly CryptoStream sha256Stream;
+        private readonly IncrementalHash sha256Hash;
         private readonly Stream compressionStream;
 
         public HashDigestGZipStream(Stream writeStream, bool leaveOpen)
         {
-            hashAlgorithm = SHA256.Create();
-            sha256Stream = new CryptoStream(Stream.Null, hashAlgorithm, CryptoStreamMode.Write);
+            sha256Hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
             compressionStream = new GZipStream(writeStream, CompressionMode.Compress, leaveOpen);
         }
 
@@ -113,36 +113,28 @@ public record struct Layer
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            sha256Stream.Write(buffer, offset, count);
+            sha256Hash.AppendData(buffer, offset, count);
             compressionStream.Write(buffer, offset, count);
         }
 
         public override void Write(ReadOnlySpan<byte> buffer)
         {
-            sha256Stream.Write(buffer);
+            sha256Hash.AppendData(buffer);
             compressionStream.Write(buffer);
         }
 
         public override void Flush()
         {
-            sha256Stream.Flush();
             compressionStream.Flush();
         }
 
-        internal byte[] GetHash()
-        {
-            sha256Stream.FlushFinalBlock();
-            return hashAlgorithm.Hash!;
-        }
+        internal int GetCurrentUncompressedHash(Span<byte> buffer) => sha256Hash.GetCurrentHash(buffer);
 
         protected override void Dispose(bool disposing)
         {
             try
             {
-                // dispose hashAlgorithm after sha256Stream since sha256Stream references/uses it
-                sha256Stream.Dispose();
-                hashAlgorithm.Dispose();
-
+                sha256Hash.Dispose();
                 compressionStream.Dispose();
             }
             finally
