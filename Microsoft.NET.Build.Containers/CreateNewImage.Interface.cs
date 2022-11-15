@@ -49,6 +49,7 @@ partial class CreateNewImage
     /// <summary>
     /// The tag to associate with the new image.
     /// </summary>
+    [Required]
     public string[] ImageTags { get; set; }
 
     /// <summary>
