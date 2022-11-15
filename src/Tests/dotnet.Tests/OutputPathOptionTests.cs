@@ -15,6 +15,7 @@ using Xunit.Abstractions;
 using Xunit;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace dotnet.Tests
 {
@@ -46,7 +47,7 @@ namespace dotnet.Tests
             TestOutputWithSolution(command, false);
         }
 
-        void TestOutputWithSolution(string command, bool useOption)
+        void TestOutputWithSolution(string command, bool useOption, [CallerMemberName] string callingMethod = "")
         {
             var testProject = new TestProject()
             {
@@ -54,7 +55,7 @@ namespace dotnet.Tests
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: command);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, callingMethod, identifier: command);
 
             var slnDirectory = testAsset.TestRoot;
 
