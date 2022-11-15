@@ -9,12 +9,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
     /// <summary>
     /// Object that represents a mapping between two <see cref="ISymbol"/> objects.
     /// </summary>
-    public class MemberMapper : ElementMapper<ISymbol>
+    public class MemberMapper : ElementMapper<ISymbol>, IMemberMapper
     {
-        /// <summary>
-        /// The containg type of this member.
-        /// </summary>
-        public TypeMapper ContainingType { get; }
+        /// <inheritdoc />
+        public ITypeMapper ContainingType { get; }
 
         /// <summary>
         /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
@@ -22,9 +20,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// <param name="settings">The settings used to diff the elements in the mapper.</param>
         /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
         public MemberMapper(IRuleRunner ruleRunner,
-            TypeMapper containingType,
-            MapperSettings settings = default,
-            int rightSetSize = 1)
+            MapperSettings settings,
+            int rightSetSize,
+            ITypeMapper containingType)
             : base(ruleRunner, settings, rightSetSize)
         {
             ContainingType = containingType;

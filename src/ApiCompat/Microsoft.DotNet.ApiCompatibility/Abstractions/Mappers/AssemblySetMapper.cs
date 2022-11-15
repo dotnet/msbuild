@@ -10,13 +10,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
     /// <summary>
     /// Object that represents a mapping between two lists of <see cref="IAssemblySymbol"/>.
     /// </summary>
-    public class AssemblySetMapper : ElementMapper<IEnumerable<ElementContainer<IAssemblySymbol>>>
+    public class AssemblySetMapper : ElementMapper<IEnumerable<ElementContainer<IAssemblySymbol>>>, IAssemblySetMapper
     {
-        private Dictionary<IAssemblySymbol, AssemblyMapper>? _assemblies;
+        private Dictionary<IAssemblySymbol, IAssemblyMapper>? _assemblies;
 
-        /// <summary>
-        /// The number of assemblies mapped.
-        /// </summary>
+        /// <inheritdoc />
         public int AssemblyCount => _assemblies != null ? _assemblies.Count : 0;
 
         /// <summary>
@@ -25,18 +23,16 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// <param name="settings">The settings used to diff the elements in the mapper.</param>
         /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
         public AssemblySetMapper(IRuleRunner ruleRunner,
-            MapperSettings settings = default,
-            int rightSetSize = 1)
+            MapperSettings settings,
+            int rightSetSize)
             : base(ruleRunner, settings, rightSetSize) { }
 
-        /// <summary>
-        /// Gets the assembly mappers built from the provided lists of <see cref="IAssemblySymbol"/>.
-        /// <returns>The list of <see cref="AssemblyMapper"/> representing the underlying assemblies.</returns>
-        public IEnumerable<AssemblyMapper> GetAssemblies()
+        /// <inheritdoc />
+        public IEnumerable<IAssemblyMapper> GetAssemblies()
         {
             if (_assemblies == null)
             {
-                _assemblies = new Dictionary<IAssemblySymbol, AssemblyMapper>(Settings.EqualityComparer);
+                _assemblies = new Dictionary<IAssemblySymbol, IAssemblyMapper>(Settings.EqualityComparer);
                 AddOrCreateMappers(Left, ElementSide.Left);
 
                 for (int i = 0; i < Right.Length; i++)
@@ -54,7 +50,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 
                     foreach (ElementContainer<IAssemblySymbol> assemblyContainer in assemblyContainers)
                     {
-                        if (!_assemblies.TryGetValue(assemblyContainer.Element, out AssemblyMapper? mapper))
+                        if (!_assemblies.TryGetValue(assemblyContainer.Element, out IAssemblyMapper? mapper))
                         {
                             mapper = new AssemblyMapper(RuleRunner, Settings, Right.Length, this);
                             _assemblies.Add(assemblyContainer.Element, mapper);

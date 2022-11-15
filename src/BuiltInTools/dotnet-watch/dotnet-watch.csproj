@@ -11,6 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\Common\EnvironmentVariableNames.cs" Link="Common\EnvironmentVariableNames.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Update="**\*.resx" GenerateSource="true" />
     <Content Include="DotNetWatch.targets" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>

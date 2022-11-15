@@ -11,23 +11,19 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
     /// <summary>
     /// Object that represents a mapping between two <see cref="ITypeSymbol"/> objects.
-    /// This also holds the nested types as a list of <see cref="TypeMapper"/> and the members defined within the type
-    /// as a list of <see cref="MemberMapper"/>
+    /// This also holds the nested types as a list of <see cref="ITypeMapper"/> and the members defined within the type
+    /// as a list of <see cref="IMemberMapper"/>
     /// </summary>
-    public class TypeMapper : ElementMapper<ITypeSymbol>
+    public class TypeMapper : ElementMapper<ITypeSymbol>, ITypeMapper
     {
-        private Dictionary<ITypeSymbol, TypeMapper>? _nestedTypes;
-        private Dictionary<ISymbol, MemberMapper>? _members;
+        private Dictionary<ITypeSymbol, ITypeMapper>? _nestedTypes;
+        private Dictionary<ISymbol, IMemberMapper>? _members;
 
-        /// <summary>
-        /// The containg namespace of this type.
-        /// </summary>
-        public NamespaceMapper ContainingNamespace { get; }
+        /// <inheritdoc />
+        public INamespaceMapper ContainingNamespace { get; }
 
-        /// <summary>
-        /// The containing type of this type. Null if the type isn't nested.
-        /// </summary>
-        internal TypeMapper? ContainingType { get; }
+        /// <inheritdoc />
+        public ITypeMapper? ContainingType { get; }
 
         /// <summary>
         /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
@@ -35,10 +31,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// <param name="settings">The settings used to diff the elements in the mapper.</param>
         /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
         public TypeMapper(IRuleRunner ruleRunner,
-            NamespaceMapper containingNamespace,
-            MapperSettings settings = default,
-            TypeMapper? containingType = null,
-            int rightSetSize = 1)
+            MapperSettings settings,
+            int rightSetSize,
+            INamespaceMapper containingNamespace,
+            ITypeMapper? containingType = null)
             : base(ruleRunner, settings, rightSetSize)
         {
             ContainingNamespace = containingNamespace;
@@ -60,9 +56,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             return true;
         }
 
-        /// <summary>
-        /// Indicates whether we have a complete mapper and if the members should be diffed.
-        /// </summary>
+        /// <inheritdoc />
         public bool ShouldDiffMembers
         {
             get
@@ -85,15 +79,12 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             }
         }
 
-        /// <summary>
-        /// Gets the nested types within the mapped types.
-        /// </summary>
-        /// <returns>The list of <see cref="TypeMapper"/> representing the nested types.</returns>
-        public IEnumerable<TypeMapper> GetNestedTypes()
+        /// <inheritdoc />
+        public IEnumerable<ITypeMapper> GetNestedTypes()
         {
             if (_nestedTypes == null)
             {
-                _nestedTypes = new Dictionary<ITypeSymbol, TypeMapper>(Settings.EqualityComparer);
+                _nestedTypes = new Dictionary<ITypeSymbol, ITypeMapper>(Settings.EqualityComparer);
 
                 AddOrCreateMappers(Left, ElementSide.Left);
                 for (int i = 0; i < Right.Length; i++)
@@ -113,9 +104,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                     {
                         if (Settings.Filter.Include(nestedType))
                         {
-                            if (!_nestedTypes.TryGetValue(nestedType, out TypeMapper? mapper))
+                            if (!_nestedTypes.TryGetValue(nestedType, out ITypeMapper? mapper))
                             {
-                                mapper = new TypeMapper(RuleRunner, ContainingNamespace, Settings, this, Right.Length);
+                                mapper = new TypeMapper(RuleRunner, Settings, Right.Length, ContainingNamespace, this);
                                 _nestedTypes.Add(nestedType, mapper);
                             }
                             mapper.AddElement(nestedType, side, setIndex);
@@ -127,15 +118,12 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             return _nestedTypes.Values;
         }
 
-        /// <summary>
-        /// Gets the members defined in this type.
-        /// </summary>
-        /// <returns>The list of <see cref="MemberMapper"/> representing the members.</returns>
-        public IEnumerable<MemberMapper> GetMembers()
+        /// <inheritdoc />
+        public IEnumerable<IMemberMapper> GetMembers()
         {
             if (_members == null)
             {
-                _members = new Dictionary<ISymbol, MemberMapper>(Settings.EqualityComparer);
+                _members = new Dictionary<ISymbol, IMemberMapper>(Settings.EqualityComparer);
 
                 AddOrCreateMappers(Left, ElementSide.Left);
                 for (int i = 0; i < Right.Length; i++)
@@ -159,9 +147,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                         // we would compare __value vs null and emit some warnings.
                         if (Settings.Filter.Include(member) && member is not ITypeSymbol && !IsSpecialEnumField(member))
                         {
-                            if (!_members.TryGetValue(member, out MemberMapper? mapper))
+                            if (!_members.TryGetValue(member, out IMemberMapper? mapper))
                             {
-                                mapper = new MemberMapper(RuleRunner, this, Settings, Right.Length);
+                                mapper = new MemberMapper(RuleRunner, Settings, Right.Length, this);
                                 _members.Add(member, mapper);
                             }
                             mapper.AddElement(member, side, setIndex);

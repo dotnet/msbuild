@@ -14,6 +14,7 @@ using Microsoft.TemplateEngine.Abstractions.Components;
 using Xunit;
 using System.Linq;
 using System.Collections.Generic;
+using System;
 
 namespace Microsoft.DotNet.Cli.New.Tests
 {
@@ -44,7 +45,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
                 currentSdkVersion: "1.2.3",
                 workloadRecordRepo: repoMock.Object,
                 workloadResolver: resolverMock.Object);
-            IWorkloadsInfoProvider wp = new WorkloadsInfoProvider(workloadsEnumerator);
+            IWorkloadsInfoProvider wp = new WorkloadsInfoProvider(new Lazy<IWorkloadsRepositoryEnumerator>(workloadsEnumerator));
 
             // Act
             var workloads = wp.GetInstalledWorkloadsAsync(default).Result;

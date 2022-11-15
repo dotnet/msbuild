@@ -42,6 +42,13 @@
         <target state="translated">여러 프로젝트를 찾았습니다: {0}.</target>
         <note>{0} - semi-colon separated list of path to projects found.</note>
       </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Error_BothInRootAndSolutionFolderSpecified">
+        <source>Add project reference to solution action is not configured correctly in the template.
+    The 'solutionFolder' and 'inRoot' cannot be used together; use only one of the options.</source>
+        <target state="translated">솔루션 작업에 대한 프로젝트 참조 추가가 템플릿에 올바르게 구성되지 않았습니다.
+    'solutionFolder' 및 'inRoot'는 함께 사용할 수 없습니다. 옵션 중 하나만 사용하세요.</target>
+        <note>do not translate: 'solutionFolder', 'inRoot'</note>
+      </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Error_NoProjectsToAdd">
         <source>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</source>
         <target state="translated">솔루션 작업에 프로젝트 참조 추가가 템플릿에서 올바르게 구성되지 않았습니다. 추가할 프로젝트 파일을 확인할 수 없습니다.</target>
@@ -62,6 +69,16 @@
         <target state="translated">솔루션 파일에 프로젝트를 추가하지 못했습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_InRoot_Running">
+        <source>Adding
+    project(s): {0}
+    in the root of solution file: {1}</source>
+        <target state="translated">
+    프로젝트 추가 중: {0}
+    솔루션 파일의 루트에서: {1}</target>
+        <note>{0} - list of file paths to projects to add,
+{1} - the path to target solution file</note>
+      </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Running">
         <source>Adding
     project(s): {0}
@@ -71,7 +88,9 @@
     프로젝트 추가 {0}
     대상 솔루션 파일: {1}
     솔루션 폴더: {2}</target>
-        <note />
+        <note>{0} - list of file paths to projects to add,
+{1} - the path to target solution file,
+{2} - the solution folder inside solution to add the projects to.</note>
       </trans-unit>
       <trans-unit id="PostAction_AddProjToSln_Succeeded">
         <source>Successfully added project(s) to a solution file.</source>
@@ -231,7 +250,7 @@
       <trans-unit id="ProjectCapabilityConstraint_Restricted_NotRestored_CTA">
         <source>Run 'dotnet restore {0}' to restore the project.</source>
         <target state="translated">프로젝트를 복원하려면 'dotnet restore {0}'을(를) 실행하세요.</target>
-        <note>do not translate 'dotnet restore {0}'</note>
+        <note>{Locked="dotnet restore {0}"}</note>
       </trans-unit>
       <trans-unit id="ProjectContextSymbolSource_DisplayName">
         <source>Project context</source>
@@ -255,8 +274,8 @@
       </trans-unit>
       <trans-unit id="WorkloadInfoProvider_Message_AddWorkloads">
         <source>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</source>
-        <target state="translated">'dotnet 워크로드 검색'을 실행하여 SDK에 설치할 수 있는 워크로드를 검색합니다.</target>
-        <note />
+        <target state="translated">'dotnet workload search'을 실행하여 SDK에 설치할 수 있는 워크로드를 검색합니다.</target>
+        <note>{Locked="dotnet workload search"}</note>
       </trans-unit>
     </body>
   </file>

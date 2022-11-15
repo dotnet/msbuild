@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             Assert.NotEqual(processIdentifier, processIdentifier2);
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/29046")]
         public async Task RestartProcessThatTerminatesAfterFileChange()
         {
             var testAsset = _testAssetsManager.CopyTestAsset(AppName)

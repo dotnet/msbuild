@@ -22,8 +22,7 @@ namespace Microsoft.DotNet.Cli
             .SetForwardingFunction((optionVals) =>
                 optionVals
                     .SelectMany(Microsoft.DotNet.Cli.Utils.MSBuildPropertyParser.ParseProperties)
-                    // must escape semicolon-delimited property values when forwarding them to MSBuild
-                    .Select(keyValue => $"{option.Aliases.FirstOrDefault()}:{keyValue.key}={keyValue.value.Replace(";", "%3B")}")
+                    .Select(keyValue => $"{option.Aliases.FirstOrDefault()}:{keyValue.key}={keyValue.value}")
                 );
 
         public static Option<T> ForwardAsMany<T>(this ForwardedOption<T> option, Func<T, IEnumerable<string>> format) => option.SetForwardingFunction(format);

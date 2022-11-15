@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Extensions
             {
                 foreach (IMethodSymbol constructor in namedType.Constructors)
                 {
-                    if (!constructor.IsStatic && constructor.IsVisibleOutsideOfAssembly(includeInternals))
+                    if (!constructor.IsStatic && constructor.IsVisibleOutsideOfAssembly(includeInternals, includeEffectivelyPrivateSymbols: true))
                         return true;
                 }
             }
@@ -84,11 +84,15 @@ namespace Microsoft.DotNet.ApiCompatibility.Extensions
                     yield return baseInterface;
         }
 
-        internal static bool IsVisibleOutsideOfAssembly(this ISymbol symbol, bool includeInternals) =>
-            symbol.DeclaredAccessibility == Accessibility.Public ||
-            symbol.DeclaredAccessibility == Accessibility.Protected ||
-            symbol.DeclaredAccessibility == Accessibility.ProtectedOrInternal ||
-            (includeInternals && symbol.DeclaredAccessibility != Accessibility.Private);
+        internal static bool IsVisibleOutsideOfAssembly(this ISymbol symbol, bool includeInternals, bool includeEffectivelyPrivateSymbols = false) =>
+            symbol.DeclaredAccessibility switch
+            {
+                Accessibility.Public => true,
+                Accessibility.Protected => includeEffectivelyPrivateSymbols || symbol.ContainingType == null || !IsEffectivelySealed(symbol.ContainingType, includeInternals),
+                Accessibility.ProtectedOrInternal => includeEffectivelyPrivateSymbols || includeInternals || symbol.ContainingType == null || !IsEffectivelySealed(symbol.ContainingType, includeInternals),
+                Accessibility.ProtectedAndInternal => includeInternals && (includeEffectivelyPrivateSymbols || symbol.ContainingType == null || !IsEffectivelySealed(symbol.ContainingType, includeInternals)),
+                _ => includeInternals && symbol.DeclaredAccessibility != Accessibility.Private,
+            };
 
         internal static bool IsEventAdderOrRemover(this IMethodSymbol method) =>
             method.MethodKind == MethodKind.EventAdd ||

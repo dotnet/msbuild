@@ -113,5 +113,29 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             result.ExitCode.Should().Be(1);
         }
+
+        [Theory]
+        [InlineData("-e:foo=bardll")]
+        [InlineData("-e:foo=barexe")]
+        public void MissingOutputDllAndArgumentsEndWithDllOrExeShouldFailInMSBuild(string arg)
+        {
+            var testAppName = "VSTestCore";
+            var testAsset = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource()
+                .WithVersionVariables();
+
+            new BuildCommand(testAsset)
+                .Execute()
+                .Should().Pass();
+
+            var result = new DotnetTestCommand(Log)
+                .Execute(arg);
+            if (!TestContext.IsLocalized())
+            {
+                result.StdOut.Should().Contain("MSBUILD : error MSB1003: Specify a project or solution file. The current working directory does not contain a project or solution file.");
+            }
+
+            result.ExitCode.Should().Be(1);
+        }
     }
 }

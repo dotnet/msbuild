@@ -17,45 +17,45 @@ namespace Microsoft.DotNet.ApiCompatibility
         public IEnumerable<CompatDifference> CompatDifferences => _compatDifferences;
 
         /// <inheritdoc />
-        public void Visit<T>(ElementMapper<T> mapper)
+        public void Visit<T>(IElementMapper<T> mapper)
         {
-            if (mapper is AssemblySetMapper assemblySetMapper)
+            if (mapper is IAssemblySetMapper assemblySetMapper)
             {
                 Visit(assemblySetMapper);
             }
-            else if (mapper is AssemblyMapper assemblyMapper)
+            else if (mapper is IAssemblyMapper assemblyMapper)
             {
                 Visit(assemblyMapper);
             }
-            else if (mapper is NamespaceMapper nsMapper)
+            else if (mapper is INamespaceMapper nsMapper)
             {
                 Visit(nsMapper);
             }
-            else if (mapper is TypeMapper typeMapper)
+            else if (mapper is ITypeMapper typeMapper)
             {
                 Visit(typeMapper);
             }
-            else if (mapper is MemberMapper memberMapper)
+            else if (mapper is IMemberMapper memberMapper)
             {
                 Visit(memberMapper);
             }
         }
 
         /// <inheritdoc />
-        public void Visit(AssemblySetMapper mapper)
+        public void Visit(IAssemblySetMapper mapper)
         {
-            foreach (AssemblyMapper assembly in mapper.GetAssemblies())
+            foreach (IAssemblyMapper assembly in mapper.GetAssemblies())
             {
                 Visit(assembly);
             }
         }
 
         /// <inheritdoc />
-        public void Visit(AssemblyMapper assembly)
+        public void Visit(IAssemblyMapper assembly)
         {
             AddDifferences(assembly);
 
-            foreach (NamespaceMapper @namespace in assembly.GetNamespaces())
+            foreach (INamespaceMapper @namespace in assembly.GetNamespaces())
             {
                 Visit(@namespace);
             }
@@ -69,27 +69,27 @@ namespace Microsoft.DotNet.ApiCompatibility
         }
 
         /// <inheritdoc />
-        public void Visit(NamespaceMapper @namespace)
+        public void Visit(INamespaceMapper @namespace)
         {
-            foreach (TypeMapper type in @namespace.GetTypes())
+            foreach (ITypeMapper type in @namespace.GetTypes())
             {
                 Visit(type);
             }
         }
 
         /// <inheritdoc />
-        public void Visit(TypeMapper type)
+        public void Visit(ITypeMapper type)
         {
             AddDifferences(type);
 
             if (type.ShouldDiffMembers)
             {
-                foreach (TypeMapper nestedType in type.GetNestedTypes())
+                foreach (ITypeMapper nestedType in type.GetNestedTypes())
                 {
                     Visit(nestedType);
                 }
 
-                foreach (MemberMapper member in type.GetMembers())
+                foreach (IMemberMapper member in type.GetMembers())
                 {
                     Visit(member);
                 }
@@ -97,12 +97,12 @@ namespace Microsoft.DotNet.ApiCompatibility
         }
 
         /// <inheritdoc />
-        public void Visit(MemberMapper member)
+        public void Visit(IMemberMapper member)
         {
             AddDifferences(member);
         }
 
-        private void AddDifferences<T>(ElementMapper<T> mapper)
+        private void AddDifferences<T>(IElementMapper<T> mapper)
         {
             foreach (CompatDifference item in mapper.GetDifferences())
             {
