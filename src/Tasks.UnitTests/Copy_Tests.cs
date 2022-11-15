@@ -2398,7 +2398,7 @@ namespace Microsoft.Build.UnitTests
         public void CopyToDestinationFolderWithSymbolicLinkCheck()
         {
             Version osVersion = Environment.OSVersion.Version;
-            if (NativeMethodsShared.IsWindows && osVersion.Major < 11 (osVersion.Major < 10 || osVersion.Build < 14972))
+            if (NativeMethodsShared.IsWindows && osVersion.Major < 11 && (osVersion.Major < 10 || osVersion.Build < 14972))
             {
                 // Symlink creation depends on having a high enough OS version on windows unless you explicitly enable the setting for
                 // the current user or are running as admin. Skip this test.
