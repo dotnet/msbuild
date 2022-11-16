@@ -171,7 +171,4 @@
   <data name="CmdFormatDescription" xml:space="preserve">
     <value>Specifies the output format type for the list packages command.</value>
   </data>
-  <data name="CmdFormat" xml:space="preserve">
-    <value>FORMAT</value>
-  </data>
 </root>

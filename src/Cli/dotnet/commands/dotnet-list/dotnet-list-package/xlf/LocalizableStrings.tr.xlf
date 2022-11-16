@@ -12,11 +12,6 @@
         <target state="translated">Kullanım dışı bırakılan paketleri listeler. '--vulnerable' veya '--outdated' seçenekleriyle birleştirilemez.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CmdFormat">
-        <source>FORMAT</source>
-        <target state="new">FORMAT</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CmdFormatDescription">
         <source>Specifies the output format type for the list packages command.</source>
         <target state="new">Specifies the output format type for the list packages command.</target>

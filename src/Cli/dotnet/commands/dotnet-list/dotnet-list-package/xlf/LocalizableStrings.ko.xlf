@@ -12,11 +12,6 @@
         <target state="translated">사용되지 않는 패키지를 나열합니다. '--vulnerable' 또는 '--outdated' 옵션과 함께 사용할 수 없습니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CmdFormat">
-        <source>FORMAT</source>
-        <target state="new">FORMAT</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CmdFormatDescription">
         <source>Specifies the output format type for the list packages command.</source>
         <target state="new">Specifies the output format type for the list packages command.</target>

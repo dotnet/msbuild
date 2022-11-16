@@ -61,9 +61,7 @@ namespace Microsoft.DotNet.Cli
             }.ForwardAsSingle(o => $"--verbosity:{o}");
 
         public static readonly Option FormatOption = new ForwardedOption<ReportOutputFormat>("--format", LocalizableStrings.CmdFormatDescription)
-        {
-            ArgumentHelpName = LocalizableStrings.CmdFormat
-        }.ForwardAsSingle(o => $"--format:{o}");
+        { }.ForwardAsSingle(o => $"--format:{o}");
 
         private static readonly Command Command = ConstructCommand();
 

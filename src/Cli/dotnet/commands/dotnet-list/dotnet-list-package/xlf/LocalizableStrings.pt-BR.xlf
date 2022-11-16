@@ -12,11 +12,6 @@
         <target state="translated">Lista os pacotes que foram preteridos. Não pode ser combinado com a opção '--vulnerable' nem com a opção '--outdated'.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CmdFormat">
-        <source>FORMAT</source>
-        <target state="new">FORMAT</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CmdFormatDescription">
         <source>Specifies the output format type for the list packages command.</source>
         <target state="new">Specifies the output format type for the list packages command.</target>
