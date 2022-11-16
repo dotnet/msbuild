@@ -349,7 +349,7 @@ namespace Microsoft.NET.Build.Tests
             testRuntimePack.metadata["NuGetPackageVersion"].Should().Be("1.0.42-abc");
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("17.4.0.51802")]
         [InlineData("net6.0")]
         public void It_can_publish_runtime_specific_apps_with_library_dependencies_self_contained(string targetFramework) {
 
@@ -371,7 +371,7 @@ namespace Microsoft.NET.Build.Tests
             appProject.ReferencedProjects.Add(libProject);
             var createdAppProject = _testAssetsManager.CreateTestProject(appProject);
             var publishCommand = new PublishCommand(createdAppProject);
-            publishCommand.Execute(new [] {"-property:SelfContained=true", "-property:_CommandLineDefinedSelfContained=true", $"-property:RuntimeIdentifier={rid}", "-property:_CommandLineDefinedRuntimeIdentifier=true -nowarn:NETSDK1179" }).Should().Pass().And.NotHaveStdOutContaining("warning");
+            publishCommand.Execute(new [] {"-property:SelfContained=true", "-property:_CommandLineDefinedSelfContained=true", $"-property:RuntimeIdentifier={rid}", "-property:_CommandLineDefinedRuntimeIdentifier=true" }).Should().Pass().And.NotHaveStdOutContaining("warning");
         }
 
         [Theory]
