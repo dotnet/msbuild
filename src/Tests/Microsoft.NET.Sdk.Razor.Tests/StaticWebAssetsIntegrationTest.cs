@@ -1,22 +1,20 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System.IO;
-using System.Runtime.InteropServices;
-using FluentAssertions;
-using Microsoft.AspNetCore.Razor.Tasks;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Xunit;
-using Xunit.Abstractions;
-using System.Linq;
-using System.Diagnostics;
-using System.Xml.Linq;
-using NuGet.Packaging;
 using System;
 using System.Collections.Generic;
-using Microsoft.NET.TestFramework.Utilities;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Xml.Linq;
+using FluentAssertions;
+using Microsoft.AspNetCore.Razor.Tasks;
 using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.Utilities;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.Razor.Tests
 {
@@ -49,8 +47,9 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var finalPath = Path.Combine(outputPath, "ComponentApp.staticwebassets.runtime.json");
             new FileInfo(finalPath).Should().Exist();
 
-            AssertManifest(StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(Path.Combine(intermediateOutputPath, "staticwebassets.build.json"))), expectedManifest);
-            AssertBuildAssets(StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(Path.Combine(intermediateOutputPath, "staticwebassets.build.json"))), outputPath, intermediateOutputPath);
+            var manifest1 = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(Path.Combine(intermediateOutputPath, "staticwebassets.build.json")));
+            AssertManifest(manifest1, expectedManifest);
+            AssertBuildAssets(manifest1, outputPath, intermediateOutputPath);
         }
 
         [Fact]
@@ -116,7 +115,8 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var originalObjFile = new FileInfo(path);
             originalObjFile.Should().Exist();
             var objManifestContents = File.ReadAllText(Path.Combine(intermediateOutputPath, "staticwebassets.build.json"));
-            AssertManifest(StaticWebAssetsManifest.FromJsonString(objManifestContents), LoadBuildManifest());
+            var firstManifest = StaticWebAssetsManifest.FromJsonString(objManifestContents);
+            AssertManifest(firstManifest, LoadBuildManifest());
 
             // GenerateStaticWebAssetsManifest should copy the file to the output folder.
             var finalPath = Path.Combine(outputPath, "ComponentApp.staticwebassets.runtime.json");
@@ -125,7 +125,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var binManifestContents = File.ReadAllText(finalPath);
 
             AssertBuildAssets(
-                StaticWebAssetsManifest.FromJsonString(objManifestContents),
+                firstManifest,
                 outputPath,
                 intermediateOutputPath);
 
@@ -140,8 +140,9 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var secondObjFile = new FileInfo(secondPath);
             secondObjFile.Should().Exist();
             var secondObjManifest = File.ReadAllText(secondPath);
+            var secondManifest = StaticWebAssetsManifest.FromJsonString(secondObjManifest);
             AssertManifest(
-                StaticWebAssetsManifest.FromJsonString(secondObjManifest),
+                secondManifest,
                 LoadBuildManifest("Updated"),
                 "Updated");
 
@@ -158,7 +159,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             secondFinalFile.LastWriteTimeUtc.Should().NotBe(originalFile.LastWriteTimeUtc);
 
             AssertBuildAssets(
-                StaticWebAssetsManifest.FromJsonString(secondObjManifest),
+                secondManifest,
                 outputPath,
                 intermediateOutputPath,
                 "Updated");
@@ -182,19 +183,17 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             // GenerateStaticWebAssetsManifest should generate the manifest file.
             var path = Path.Combine(intermediateOutputPath, "staticwebassets.build.json");
             new FileInfo(path).Should().Exist();
+            var manifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path));
             AssertManifest(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path)),
+                manifest,
                 LoadBuildManifest());
 
             // GenerateStaticWebAssetsManifest should copy the file to the output folder.
             var finalPath = Path.Combine(outputPath, "AppWithPackageAndP2PReference.staticwebassets.runtime.json");
             new FileInfo(finalPath).Should().Exist();
-            AssertManifest(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(Path.Combine(intermediateOutputPath, "staticwebassets.build.json"))),
-                LoadBuildManifest());
 
             AssertBuildAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(Path.Combine(intermediateOutputPath, "staticwebassets.build.json"))),
+                manifest,
                 outputPath,
                 intermediateOutputPath);
         }
@@ -236,19 +235,20 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             // GenerateStaticWebAssetsManifest should generate the manifest file.
             var path = Path.Combine(intermediateOutputPath, "staticwebassets.build.json");
             new FileInfo(path).Should().Exist();
+            var manifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(Path.Combine(intermediateOutputPath, "staticwebassets.build.json")));
             AssertManifest(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path)),
+                manifest,
                 LoadBuildManifest());
 
             // GenerateStaticWebAssetsManifest should copy the file to the output folder.
             var finalPath = Path.Combine(outputPath, "AppWithPackageAndP2PReference.staticwebassets.runtime.json");
             new FileInfo(finalPath).Should().Exist();
             AssertManifest(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(Path.Combine(intermediateOutputPath, "staticwebassets.build.json"))),
+                manifest,
                 LoadBuildManifest());
 
             AssertBuildAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(Path.Combine(intermediateOutputPath, "staticwebassets.build.json"))),
+                manifest,
                 outputPath,
                 intermediateOutputPath);
         }
@@ -304,12 +304,13 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             // GenerateStaticWebAssetsPublishManifest should generate the publish manifest file.
             var intermediatePublishManifestPath = Path.Combine(intermediateOutputPath, "staticwebassets.publish.json");
             new FileInfo(path).Should().Exist();
+            var publishManifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath));
             AssertManifest(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath)),
+                publishManifest,
                 LoadPublishManifest());
 
             AssertPublishAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath)),
+                publishManifest,
                 publishPath,
                 intermediateOutputPath);
         }
@@ -337,9 +338,10 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             // GenerateStaticWebAssetsManifest should copy the file to the output folder.
             var finalPath = Path.Combine(outputPath, "AppWithPackageAndP2PReference.staticwebassets.runtime.json");
             new FileInfo(finalPath).Should().Exist();
-            var manifest = File.ReadAllText(finalPath);
+            var manifestContents = File.ReadAllText(finalPath);
+            var initialManifest = StaticWebAssetsManifest.FromJsonString(File.ReadAllText(path));
             AssertManifest(
-                StaticWebAssetsManifest.FromJsonString(File.ReadAllText(path)),
+                initialManifest,
                 LoadBuildManifest());
 
             // Second build
@@ -348,26 +350,28 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             // GenerateStaticWebAssetsManifest should generate the manifest file.
             new FileInfo(path).Should().Exist();
+            var manifestNoDeps = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path));
             AssertManifest(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path)),
+                manifestNoDeps,
                 LoadBuildManifest("NoDependencies"),
                 "NoDependencies");
 
             // GenerateStaticWebAssetsManifest should copy the file to the output folder.
             new FileInfo(finalPath).Should().Exist();
+            var manifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(Path.Combine(intermediateOutputPath, "staticwebassets.build.json")));
             AssertManifest(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(Path.Combine(intermediateOutputPath, "staticwebassets.build.json"))),
+                manifest,
                 LoadBuildManifest("NoDependencies"),
                 "NoDependencies");
 
             AssertBuildAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(Path.Combine(intermediateOutputPath, "staticwebassets.build.json"))),
+                manifest,
                 outputPath,
                 intermediateOutputPath,
                 "NoDependencies");
 
             // Check that the two manifests are the same
-            manifest.Should().Be(File.ReadAllText(finalPath));
+            manifestContents.Should().Be(File.ReadAllText(finalPath));
         }
 
         // Rebuild
@@ -403,13 +407,14 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var secondPath = Path.Combine(intermediateOutputPath, "staticwebassets.build.json");
             var secondObjFile = new FileInfo(secondPath);
             secondObjFile.Should().Exist();
-            var secondObjManifest = File.ReadAllText(secondPath);
+            var secondObjManifestContents = File.ReadAllText(secondPath);
+            var secondManifest = StaticWebAssetsManifest.FromJsonString(secondObjManifestContents);
             AssertManifest(
-                StaticWebAssetsManifest.FromJsonString(secondObjManifest),
+                secondManifest,
                 LoadBuildManifest("Rebuild"),
                 "Rebuild");
 
-            secondObjManifest.Should().Be(objManifestContents);
+            secondObjManifestContents.Should().Be(objManifestContents);
 
             // GenerateStaticWebAssetsManifest should copy the file to the output folder.
             var secondFinalPath = Path.Combine(outputPath, "ComponentApp.staticwebassets.runtime.json");
@@ -422,7 +427,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             secondFinalFile.LastWriteTimeUtc.Should().NotBe(originalFile.LastWriteTimeUtc);
 
             AssertBuildAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(Path.Combine(intermediateOutputPath, "staticwebassets.build.json"))),
+                secondManifest,
                 outputPath,
                 intermediateOutputPath,
                 "Rebuild");
@@ -458,7 +463,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             AssertManifest(publishManifest, LoadPublishManifest());
 
             AssertPublishAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath)),
+                publishManifest,
                 publishPath,
                 intermediateOutputPath);
         }
@@ -489,12 +494,13 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             // GenerateStaticWebAssetsManifest should generate the publish manifest file.
             var intermediatePublishManifestPath = Path.Combine(intermediateOutputPath, "staticwebassets.publish.json");
             new FileInfo(path).Should().Exist();
+            var publishManifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath));
             AssertManifest(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath)),
+                publishManifest,
                 LoadPublishManifest());
 
             AssertPublishAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath)),
+                publishManifest,
                 publishPath,
                 intermediateOutputPath);
         }
@@ -555,12 +561,13 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             // GenerateStaticWebAssetsManifest should generate the publish manifest file.
             var intermediatePublishManifestPath = Path.Combine(intermediateOutputPath, "staticwebassets.publish.json");
             new FileInfo(path).Should().Exist();
+            var publishManifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath));
             AssertManifest(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath)),
+                publishManifest,
                 LoadPublishManifest());
 
             AssertPublishAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath)),
+                publishManifest,
                 publishPath,
                 intermediateOutputPath);
         }
@@ -595,7 +602,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             AssertManifest(publishManifest, LoadPublishManifest());
 
             AssertPublishAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath)),
+                publishManifest,
                 Path.Combine(outputPath, "publish"),
                 intermediateOutputPath);
         }
@@ -630,12 +637,13 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             // GenerateStaticWebAssetsPublishManifest should generate the publish manifest file.
             var intermediatePublishManifestPath = Path.Combine(intermediateOutputPath, "staticwebassets.publish.json");
             new FileInfo(path).Should().Exist();
+            var publishManifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath));
             AssertManifest(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath)),
+                publishManifest,
                 LoadPublishManifest());
 
             AssertPublishAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath)),
+                publishManifest,
                 publishPath,
                 intermediateOutputPath);
         }
@@ -670,7 +678,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             AssertManifest(publishManifest, LoadPublishManifest());
 
             AssertPublishAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath)),
+                publishManifest,
                 publishPath,
                 intermediateOutputPath);
         }
@@ -736,7 +744,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             AssertManifest(publishManifest, LoadPublishManifest());
 
             AssertPublishAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath)),
+                publishManifest,
                 publishPath,
             intermediateOutputPath);
         }
@@ -771,12 +779,13 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             // GenerateStaticWebAssetsPublishManifest should generate the publish manifest file.
             var intermediatePublishManifestPath = Path.Combine(intermediateOutputPath, "staticwebassets.publish.json");
             new FileInfo(path).Should().Exist();
+            var publishManifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath));
             AssertManifest(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath)),
+                publishManifest,
                 LoadPublishManifest());
 
             AssertPublishAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath)),
+                publishManifest,
                 publishPath,
                 intermediateOutputPath);
         }
@@ -812,7 +821,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             AssertManifest(publishManifest, LoadPublishManifest());
 
             AssertPublishAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(intermediatePublishManifestPath)),
+                publishManifest,
                 Path.Combine(outputPath, "publish"),
                 intermediateOutputPath);
         }
