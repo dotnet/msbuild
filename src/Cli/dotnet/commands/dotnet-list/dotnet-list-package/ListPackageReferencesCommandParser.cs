@@ -1,10 +1,9 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.List.PackageReferences;
 using LocalizableStrings = Microsoft.DotNet.Tools.List.PackageReferences.LocalizableStrings;
@@ -61,10 +60,10 @@ namespace Microsoft.DotNet.Cli
                 ArgumentHelpName = CommonLocalizableStrings.LevelArgumentName
             }.ForwardAsSingle(o => $"--verbosity:{o}");
 
-        public static readonly Option FormatOption = new ForwardedOption<string>("--format", LocalizableStrings.CmdFormatDescription)
+        public static readonly Option FormatOption = new ForwardedOption<ReportOutputFormat>("--format", LocalizableStrings.CmdFormatDescription)
         {
-            ArgumentHelpName = LocalizableStrings.CmdConfig
-        }.ForwardAsMany(o => new[] { "--format", o });
+            ArgumentHelpName = LocalizableStrings.CmdFormat
+        }.ForwardAsSingle(o => $"--format:{o}");
 
         private static readonly Command Command = ConstructCommand();
 

@@ -12,9 +12,14 @@
         <target state="translated">Listet Pakete auf, die veraltet sind. Kann nicht mit den Optionen "--vulnerable" oder "--outdated" kombiniert werden.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdFormat">
+        <source>FORMAT</source>
+        <target state="new">FORMAT</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdFormatDescription">
-        <source>Specify output format type for list packages command. Requires the "console", "json" option.</source>
-        <target state="new">Specify output format type for list packages command. Requires the "console", "json" option.</target>
+        <source>Specifies the output format type for the list packages command.</source>
+        <target state="new">Specifies the output format type for the list packages command.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
