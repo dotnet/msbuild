@@ -1638,9 +1638,7 @@ namespace Microsoft.Build.Evaluation
             // paths will be returned (union of all files that match).
             var allProjects = new List<ProjectRootElement>();
             bool containsWildcards = FileMatcher.HasWildcards(importElement.Project);
-
-            // Initially set to log an error if the change wave is enabled.
-            bool foundDirectoryDuringProbeOrConditionWasFalse = !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6);
+            bool missingDirectoryDespiteTrueCondition = false;
 
             // Try every extension search path, till we get a Hit:
             // 1. 1 or more project files loaded
@@ -1658,16 +1656,16 @@ namespace Microsoft.Build.Evaluation
                 if (!EvaluateConditionCollectingConditionedProperties(importElement, newExpandedCondition, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties,
                             _projectRootElementCache))
                 {
-                    foundDirectoryDuringProbeOrConditionWasFalse = true;
                     continue;
                 }
 
                 if (!_fallbackSearchPathsCache.DirectoryExists(extensionPathExpanded))
                 {
+                    // Set to log an error only if the change wave is enabled.
+                    missingDirectoryDespiteTrueCondition = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6);
                     continue;
                 }
 
-                foundDirectoryDuringProbeOrConditionWasFalse = true;
 
                 var newExpandedImportPath = importElement.Project.Replace(extensionPropertyRefAsString, extensionPathExpanded, StringComparison.OrdinalIgnoreCase);
                 _evaluationLoggingContext.LogComment(MessageImportance.Low, "TryingExtensionsPath", newExpandedImportPath, extensionPathExpanded);
@@ -1718,7 +1716,7 @@ namespace Microsoft.Build.Evaluation
             // atleastOneExactFilePathWasLookedAtAndNotFound would be false, eg, if the expression
             // was a wildcard and it resolved to zero files!
             if (allProjects.Count == 0 &&
-                (atleastOneExactFilePathWasLookedAtAndNotFound || !foundDirectoryDuringProbeOrConditionWasFalse) &&
+                (atleastOneExactFilePathWasLookedAtAndNotFound || missingDirectoryDespiteTrueCondition) &&
                 (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) == 0)
             {
                 ThrowForImportedProjectWithSearchPathsNotFound(fallbackSearchPathMatch, importElement);
