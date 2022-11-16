@@ -7,7 +7,7 @@
   "ManifestType": "Publish",
   "ReferencedProjectsConfiguration": [
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\blazorwasm.csproj",
+      "Identity": "${ProjectPath}\\blazorwasm\\blazorwasm.csproj",
       "Version": 1,
       "Source": "blazorwasm",
       "GetPublishAssetsTargets": "",
@@ -18,7 +18,7 @@
       "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework"
     },
     {
-      "Identity": "${ProjectRoot}\\razorclasslibrary\\RazorClassLibrary.csproj",
+      "Identity": "${ProjectPath}\\razorclasslibrary\\RazorClassLibrary.csproj",
       "Version": 1,
       "Source": "RazorClassLibrary",
       "GetPublishAssetsTargets": "",
@@ -33,24 +33,24 @@
     {
       "Name": "RazorClassLibrary\\wwwroot",
       "Source": "RazorClassLibrary",
-      "ContentRoot": "${ProjectRoot}\\razorclasslibrary\\wwwroot\\",
+      "ContentRoot": "${ProjectPath}\\razorclasslibrary\\wwwroot\\",
       "BasePath": "_content/RazorClassLibrary",
       "Pattern": "**"
     },
     {
       "Name": "blazorwasm\\wwwroot",
       "Source": "blazorwasm",
-      "ContentRoot": "${ProjectRoot}\\blazorwasm\\wwwroot\\",
+      "ContentRoot": "${ProjectPath}\\blazorwasm\\wwwroot\\",
       "BasePath": "/",
       "Pattern": "**"
     }
   ],
   "Assets": [
     {
-      "Identity": "${ProjectRoot}\\razorclasslibrary\\wwwroot\\styles.css",
+      "Identity": "${ProjectPath}\\razorclasslibrary\\wwwroot\\styles.css",
       "SourceId": "RazorClassLibrary",
       "SourceType": "Project",
-      "ContentRoot": "${ProjectRoot}\\razorclasslibrary\\wwwroot\\",
+      "ContentRoot": "${ProjectPath}\\razorclasslibrary\\wwwroot\\",
       "BasePath": "_content/RazorClassLibrary",
       "RelativePath": "styles.css",
       "AssetKind": "All",
@@ -61,13 +61,13 @@
       "AssetTraitValue": "",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\razorclasslibrary\\wwwroot\\styles.css"
+      "OriginalItemSpec": "${ProjectPath}\\razorclasslibrary\\wwwroot\\styles.css"
     },
     {
-      "Identity": "${ProjectRoot}\\razorclasslibrary\\wwwroot\\wwwroot\\exampleJsInterop.js",
+      "Identity": "${ProjectPath}\\razorclasslibrary\\wwwroot\\wwwroot\\exampleJsInterop.js",
       "SourceId": "RazorClassLibrary",
       "SourceType": "Project",
-      "ContentRoot": "${ProjectRoot}\\razorclasslibrary\\wwwroot\\",
+      "ContentRoot": "${ProjectPath}\\razorclasslibrary\\wwwroot\\",
       "BasePath": "_content/RazorClassLibrary",
       "RelativePath": "wwwroot/exampleJsInterop.js",
       "AssetKind": "All",
@@ -78,7 +78,7 @@
       "AssetTraitValue": "",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\razorclasslibrary\\wwwroot\\wwwroot\\exampleJsInterop.js"
+      "OriginalItemSpec": "${ProjectPath}\\razorclasslibrary\\wwwroot\\wwwroot\\exampleJsInterop.js"
     }
   ]
 }
