@@ -524,7 +524,16 @@ namespace Microsoft.Build.BackEnd
                         // This target is no longer actively building.
                         _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Remove(currentTargetEntry.Name);
 
-                        _buildResult.AddResultsForTarget(currentTargetEntry.Name, targetResult);
+                        // Don't add the target result to the build result if this target was built
+                        // under isolation exemption because otherwise it will appear in the
+                        // override cache of the dependent project, resulting in the target
+                        // result being present in both the override and current caches
+                        // once the dependent project receives the build result and places it
+                        // into its current cache.
+                        if (!_requestEntry.Request.BuildUnderIsolationExemption)
+                        {
+                            _buildResult.AddResultsForTarget(currentTargetEntry.Name, targetResult);
+                        }
 
                         TargetEntry topEntry = _targetsToBuild.Pop();
                         if (topEntry.StopProcessingOnCompletion)

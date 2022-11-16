@@ -165,6 +165,14 @@ namespace Microsoft.Build.BackEnd
         /// <param name="buildRequestDataFlags">Additional flags for the request.</param>
         /// <param name="requestedProjectState">Filter for desired build results.</param>
         /// <param name="projectContextId">The project context id</param>
+        /// <param name="buildUnderIsolationExemption"><c>true</c> iff this request's
+        /// <see cref="BuildRequest.Targets"></see>
+        /// will be built under an isolation exemption triggered under the isolation
+        /// mode <see cref="IsolateProjects.Message"/>; i.e., the issuing
+        /// (dependent) project did not obtain all required target cache
+        /// results in its <see cref="BuildParameters.InputResultsCacheFiles"/>,
+        /// so it must violate isolation constraints and build the
+        /// <see cref="BuildRequest.Targets"/> on the dependency project.</param>
         public BuildRequest(
             int submissionId,
             int nodeRequestId,
@@ -176,7 +184,8 @@ namespace Microsoft.Build.BackEnd
             BuildRequestDataFlags buildRequestDataFlags = BuildRequestDataFlags.None,
             RequestedProjectState requestedProjectState = null,
             bool skipStaticGraphIsolationConstraints = false,
-            int projectContextId = BuildEventContext.InvalidProjectContextId)
+            int projectContextId = BuildEventContext.InvalidProjectContextId,
+            bool buildUnderIsolationExemption = false)
         : this(submissionId, nodeRequestId, configurationId, hostServices, buildRequestDataFlags, requestedProjectState, projectContextId)
         {
             ErrorUtilities.VerifyThrowArgumentNull(escapedTargets, "targets");
@@ -193,6 +202,7 @@ namespace Microsoft.Build.BackEnd
             _parentGlobalRequestId = parentRequest?.GlobalRequestId ?? InvalidGlobalRequestId;
 
             _skipStaticGraphIsolationConstraints = skipStaticGraphIsolationConstraints;
+            BuildUnderIsolationExemption = buildUnderIsolationExemption;
         }
 
         /// <summary>
@@ -395,6 +405,20 @@ namespace Microsoft.Build.BackEnd
         /// Whether static graph isolation constraints should be skipped for this request
         /// </summary>
         internal bool SkipStaticGraphIsolationConstraints => _skipStaticGraphIsolationConstraints;
+
+        /// <summary>
+        /// Gets a value indicating whether this request's <see cref="BuildRequest.Targets"></see>
+        /// will be built under an isolation exemption triggered under the isolation
+        /// mode <see cref="IsolateProjects.Message"/>; i.e., the issuing
+        /// (dependent) project did not obtain all required target cache
+        /// results in its <see cref="BuildParameters.InputResultsCacheFiles"/>,
+        /// so it must violate isolation constraints and build the
+        /// <see cref="BuildRequest.Targets"/> on the dependency project.
+        /// </summary>
+        internal bool BuildUnderIsolationExemption
+        {
+            get;
+        }
 
         /// <summary>
         /// Sets the configuration id to a resolved id.
