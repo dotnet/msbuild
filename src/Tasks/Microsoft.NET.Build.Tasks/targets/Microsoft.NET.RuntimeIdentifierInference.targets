@@ -72,11 +72,12 @@ Copyright (c) .NET Foundation. All rights reserved.
                  '$(RuntimeIdentifier)' == '' and
                  '$(_IsExecutable)' == 'true' and '$(IsTestProject)' != 'true' and
                  '$(IsRidAgnostic)' != 'true' and
+                 '$(_IsPublishing)' == 'true' and
                   (
                     '$(SelfContained)' == 'true' or
-                    ('$(_IsPublishing)' == 'true' and '$(PublishReadyToRun)' == 'true') or
-                    ('$(_IsPublishing)' == 'true' and '$(PublishSingleFile)' == 'true') or
-                    ('$(_IsPublishing)' == 'true' and '$(PublishAot)' == 'true')
+                    '$(PublishReadyToRun)' == 'true' or
+                    '$(PublishSingleFile)' == 'true' or
+                    '$(PublishAot)' == 'true'
                   )">true</UseCurrentRuntimeIdentifier>
   </PropertyGroup>
 
