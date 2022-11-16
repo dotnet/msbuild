@@ -207,6 +207,25 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         }
 
         [Fact]
+        public void CanInstantiateTemplate_WithParamsSharingPrefix()
+        {
+            string workingDirectory = CreateTemporaryFolder();
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string templateLocation = GetTestTemplateLocation("TemplateWithParamsSharingPrefix");
+
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+
+            // not asserting on actual generated content - as there is none
+            new DotnetNewCommand(_log, "TestAssets.TemplateWithParamsSharingPrefix")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .Pass()
+                .And.NotHaveStdErr();
+        }
+
+        [Fact]
         public void CanInstantiateTemplate_Angular_CanReplaceTextInLargeFile()
         {
             string workingDirectory = CreateTemporaryFolder();

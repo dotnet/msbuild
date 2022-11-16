@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             await app.AssertOutputLineEquals("Environment: Development");
         }
 
-        [CoreMSBuildOnlyFact]
+        [CoreMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/29047")]
         public async Task Run_WithHotReloadEnabled_DoesNotReadConsoleIn_InNonInteractiveMode()
         {
             var testAsset = _testAssetsManager.CopyTestAsset("WatchAppWithLaunchSettings")
