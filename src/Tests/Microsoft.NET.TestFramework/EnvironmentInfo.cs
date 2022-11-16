@@ -125,9 +125,9 @@ namespace Microsoft.NET.TestFramework
             {
                 string restOfRid = currentRid.Substring(ridOS.Length + 1);
                 string ubuntuVersionString = restOfRid.Split('-')[0];
-                if (float.TryParse(ubuntuVersionString, out float ubuntuVersion))
+                if (float.TryParse(ubuntuVersionString, System.Globalization.CultureInfo.InvariantCulture, out float ubuntuVersion))
                 {
-                    if (ubuntuVersion > 16.04)
+                    if (ubuntuVersion > 16.04f)
                     {
                         if (nugetFramework.Version < new Version(2, 0, 0, 0))
                         {
@@ -144,59 +144,31 @@ namespace Microsoft.NET.TestFramework
             {
                 string restOfRid = currentRid.Substring(ridOS.Length + 1);
                 string osxVersionString = restOfRid.Split('-')[0];
-                //  From a string such as "10.14", get the second part, e.g. "14"
-                if (osxVersionString.Contains('.'))
+                if (float.TryParse(osxVersionString, System.Globalization.CultureInfo.InvariantCulture, out float osxVersion))
                 {
-                    string osxVersionString2 = osxVersionString.Split('.')[1];
-                    if (int.TryParse(osxVersionString2, out int osxVersion))
+                    //  .NET Core 1.1 - 10.11, 10.12
+                    //  .NET Core 2.0 - 10.12+
+                    if (osxVersion <= 10.11f)
                     {
-                        //  .NET Core 1.1 - 10.11, 10.12
-                        //  .NET Core 2.0 - 10.12+
-                        if (osxVersion <= 11)
+                        if (nugetFramework.Version >= new Version(2, 0, 0, 0))
                         {
-                            if (nugetFramework.Version >= new Version(2, 0, 0, 0))
-                            {
-                                return false;
-                            }
-                        }
-                        else if (osxVersion == 12)
-                        {
-                            if (nugetFramework.Version < new Version(2, 0, 0, 0))
-                            {
-                                return false;
-                            }
-                        }
-                        else if (osxVersion > 12)
-                        {
-                            //  .NET Core 2.0 is out of support, and doesn't seem to work with OS X 10.14
-                            //  (it finds no assets for the RID), even though the support page says "10.12+"
-                            if (nugetFramework.Version < new Version(2, 1, 0, 0))
-                            {
-                                return false;
-                            }
+                            return false;
                         }
                     }
-                }
-                else
-                {
-                    if (int.TryParse(osxVersionString, out int osxVersionMajor))
+                    else if (osxVersion == 10.12f)
                     {
-                        //  .NET 5 <= 11.0
-                        //  .NET 6 <= 12
-                        //  .NET 7 <= 13
-                        if (osxVersionMajor == 12)
+                        if (nugetFramework.Version < new Version(2, 0, 0, 0))
                         {
-                            if (nugetFramework.Version < new Version(6, 0, 0, 0))
-                            {
-                                return false;
-                            }
+                            return false;
                         }
-                        else if (osxVersionMajor > 12)
+                    }
+                    else if (osxVersion > 10.12f)
+                    {
+                        //  .NET Core 2.0 is out of support, and doesn't seem to work with OS X 10.14
+                        //  (it finds no assets for the RID), even though the support page says "10.12+"
+                        if (nugetFramework.Version < new Version(2, 1, 0, 0))
                         {
-                            if (nugetFramework.Version < new Version(7, 0, 0, 0))
-                            {
-                                return false;
-                            }
+                            return false;
                         }
                     }
                 }
