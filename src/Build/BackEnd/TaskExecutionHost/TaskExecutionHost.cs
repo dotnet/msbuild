@@ -24,7 +24,6 @@ using Microsoft.Build.Shared;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Task = System.Threading.Tasks.Task;
 using System.Linq;
-using Microsoft.Build.Collections;
 
 #nullable disable
 
@@ -1436,8 +1435,11 @@ namespace Microsoft.Build.BackEnd
                                     // Probably a Microsoft.Build.Utilities.TaskItem.  Not quite as good, but we can still preserve escaping. 
                                     newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsITaskItem2.EvaluatedIncludeEscaped, parameterLocationEscaped);
 
-                                    // It would be nice to be copy-on-write here, but Utilities.TaskItem doesn't know about CopyOnWritePropertyDictionary.
-                                    newItem.SetMetadataOnTaskOutput(outputAsITaskItem2.CloneCustomMetadataEscaped().Cast<KeyValuePair<string, string>>());
+                                    // It would be nice to be copy-on-write here, but Utilities.TaskItem doesn't know about CopyOnWritePropertyDictionary. 
+                                    foreach (DictionaryEntry entry in outputAsITaskItem2.CloneCustomMetadataEscaped())
+                                    {
+                                        newItem.SetMetadataOnTaskOutput((string)entry.Key, (string)entry.Value);
+                                    }
                                 }
                                 else
                                 {
@@ -1445,9 +1447,10 @@ namespace Microsoft.Build.BackEnd
                                     // Setting an item spec expects the escaped value, as does setting metadata. 
                                     newItem = new ProjectItemInstance(_projectInstance, outputTargetName, EscapingUtilities.Escape(output.ItemSpec), parameterLocationEscaped);
 
-                                    newItem.SetMetadataOnTaskOutput(output.CloneCustomMetadata()
-                                        .Cast<KeyValuePair<string, string>>()
-                                        .Select(x => new KeyValuePair<string, string>(x.Key, EscapingUtilities.Escape(x.Value))));
+                                    foreach (DictionaryEntry entry in output.CloneCustomMetadata())
+                                    {
+                                        newItem.SetMetadataOnTaskOutput((string)entry.Key, EscapingUtilities.Escape((string)entry.Value));
+                                    }
                                 }
                             }
 
