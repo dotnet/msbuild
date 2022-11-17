@@ -123,7 +123,9 @@ namespace Microsoft.NET.Build.Tests
             buildCommand
                 .Execute("/p:DisableTransitiveProjectReferences=true")
                 .Should()
-                .Fail();
+                .Fail()
+                .And
+                .HaveStdOutContaining("CS0103");
         }
     }
 }
