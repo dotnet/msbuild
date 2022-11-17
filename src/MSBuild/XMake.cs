@@ -3222,7 +3222,10 @@ namespace Microsoft.Build.CommandLine
 
             // Choose default console logger
             // TODO: Add conditions for terminals that do not support ANSI
-            if(shouldUseFancyLogger)
+            if(
+                shouldUseFancyLogger &&
+                !Console.IsOutputRedirected // Avoid using the FancyLogger when output is redirected to a file
+            )
             {
                 ProcessFancyLogger(noConsoleLogger, loggers);
             }
