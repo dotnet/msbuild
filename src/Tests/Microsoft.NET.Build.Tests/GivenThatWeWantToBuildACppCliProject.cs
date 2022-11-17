@@ -66,9 +66,8 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource()
                 .WithProjectChanges((projectPath, project) => ConfigureProject(projectPath, project, "NewtonSoft.Json","13.0.1", targetFramework, new string[] { "_EnablePackageReferencesInVCProjects" , "IncludeWindowsSDKRefFrameworkReferences" }));
 
-            // build projects separately with BuildProjectReferences=false to simulate VS build behavior
             new BuildCommand(testAsset, "NETCoreCppCliTest")
-                .Execute("-p:Platform=x64", "-p:EnableManagedpackageReferenceSupport=true", "/bl")
+                .Execute("-p:Platform=x64", "-p:EnableManagedpackageReferenceSupport=true")
                 .Should()
                 .Pass();
 
@@ -214,34 +213,29 @@ namespace Microsoft.NET.Build.Tests
         {
             if (Path.GetExtension(projectPath) == ".vcxproj")
             {
-                List<XElement> propertiesElements = new List<XElement>();
+                string propertiesTextElements = "";
                 XNamespace ns = project.Root.Name.Namespace;
                 foreach (var propertyName in properties)
                 {
-                    propertiesElements.Add( new XElement(ns + "LinesToWrite", new XAttribute("Include", @$"{ propertyName }: $({ propertyName })")));
+                    propertiesTextElements += $"      <LinesToWrite Include='{propertyName}: $({propertyName})'/>" + Environment.NewLine;
                 }
 
-//                string target = $@"<Target Name='WritePropertyValues' BeforeTargets='AfterBuild'>
-//    <ItemGroup>
-//{propertiesElements}
-//    </ItemGroup>
-//    <WriteLinesToFile
-//      File='$(BaseIntermediateOutputPath)\$(Configuration)\$(TargetFramework)\PropertyValues.txt'
-//      Lines='@(LinesToWrite)'
-//      Overwrite='true'
-//      Encoding='Unicode'
-//      />
-//  </Target>";
-                XElement newNode = new XElement(ns + "Target",new XAttribute("Name","WriteProperty"), new XAttribute("BeforeTargets", "AfterBuild"),
-                    new XElement(ns + "ItemGroup",
-                        propertiesElements),
-                    new XElement(ns + "WriteLinesToFile",
-                        new XAttribute("File", @"$(BaseIntermediateOutputPath)\$(Configuration)\$(TargetFramework)\PropertyValues.txt"),
-                        new XAttribute("Lines", "@(LinesToWrite)"),
-                        new XAttribute("Overwrite","true"),
-                        new XAttribute("Encoding","Unicode")));
-
-
+                string target = $@"<Target Name='WritePropertyValues' BeforeTargets='AfterBuild'>
+                    <ItemGroup>
+                {propertiesTextElements}
+                    </ItemGroup>
+                    <WriteLinesToFile
+                      File='$(BaseIntermediateOutputPath)\$(Configuration)\$(TargetFramework)\PropertyValues.txt'
+                      Lines='@(LinesToWrite)'
+                      Overwrite='true'
+                      Encoding='Unicode'
+                      />
+                  </Target>";
+                XElement newNode = XElement.Parse(target);
+                foreach (var element in newNode.DescendantsAndSelf())
+                {
+                    element.Name = ns + element.Name.LocalName;
+                }
                 project.Root.AddFirst(newNode);
             }
         }
