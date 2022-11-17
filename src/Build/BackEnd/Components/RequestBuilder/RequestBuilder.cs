@@ -363,13 +363,13 @@ namespace Microsoft.Build.BackEnd
 
                 BuildRequestConfiguration config = new BuildRequestConfiguration(data, _componentHost.BuildParameters.DefaultToolsVersion);
                 IsolateProjects isolateProjects = _componentHost.BuildParameters.IsolateProjects;
-                bool skipStaticGraphIsolationConstraints = (isolateProjects != IsolateProjects.False && _requestEntry.RequestConfiguration.ShouldSkipIsolationConstraintsForReference(config.ProjectFullPath))
+                bool skipIsolationConstraints = (isolateProjects != IsolateProjects.False && _requestEntry.RequestConfiguration.ShouldSkipIsolationConstraintsForReference(config.ProjectFullPath))
                     || isolateProjects == IsolateProjects.Message;
                 requests[i] = new FullyQualifiedBuildRequest(
                     config: config,
                     targets: targets,
                     resultsNeeded: waitForResults,
-                    skipStaticGraphIsolationConstraints: skipStaticGraphIsolationConstraints,
+                    skipIsolationConstraints: skipIsolationConstraints,
                     flags: skipNonexistentTargets
                         ? BuildRequestDataFlags.SkipNonexistentTargets
                         : BuildRequestDataFlags.None);

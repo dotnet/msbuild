@@ -1967,10 +1967,9 @@ namespace Microsoft.Build.BackEnd
             var configCache = (IConfigCache) _componentHost.GetComponent(BuildComponentType.ConfigCache);
 
             // do not check root requests as nothing depends on them
-            if (isolateProjects == IsolateProjects.False || request.IsRootRequest || request.SkipStaticGraphIsolationConstraints)
+            if (isolateProjects == IsolateProjects.False || request.IsRootRequest || request.SkipIsolationConstraints)
             {
-                // N.B.: isolateProjects == IsolateProjects.Message iff request.SkipStaticGraphIsolationConstraints
-                bool logComment = ((isolateProjects == IsolateProjects.True || isolateProjects == IsolateProjects.Message) && request.SkipStaticGraphIsolationConstraints);
+                bool logComment = ((isolateProjects == IsolateProjects.True || isolateProjects == IsolateProjects.Message) && request.SkipIsolationConstraints);
                 if (logComment)
                 {
                     // retrieving the configs is not quite free, so avoid computing them eagerly

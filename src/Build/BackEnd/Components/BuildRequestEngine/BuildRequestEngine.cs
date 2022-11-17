@@ -1180,7 +1180,7 @@ namespace Microsoft.Build.BackEnd
                             parentRequest: issuingEntry.Request,
                             buildRequestDataFlags: buildRequestDataFlags,
                             requestedProjectState: null,
-                            skipStaticGraphIsolationConstraints: request.SkipStaticGraphIsolationConstraints,
+                            skipIsolationConstraints: request.SkipIsolationConstraints,
                             buildUnderIsolationExemption: buildUnderIsolationExemption);
 
                         issuingEntry.WaitForResult(newRequest);
@@ -1210,7 +1210,7 @@ namespace Microsoft.Build.BackEnd
                             parentRequest: issuingEntry.Request,
                             buildRequestDataFlags: buildRequestDataFlags,
                             requestedProjectState: null,
-                            skipStaticGraphIsolationConstraints: request.SkipStaticGraphIsolationConstraints,
+                            skipIsolationConstraints: request.SkipIsolationConstraints,
                             buildUnderIsolationExemption: buildUnderIsolationExemption);
 
                         IResultsCache resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
