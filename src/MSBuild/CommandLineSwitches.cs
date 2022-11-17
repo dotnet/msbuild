@@ -47,7 +47,6 @@ namespace Microsoft.Build.CommandLine
             FileLogger8,
             FileLogger9,
             DistributedFileLogger,
-            // TOOD: Review
             FancyLogger,
 #if DEBUG
             WaitForDebugger,
