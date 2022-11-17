@@ -2405,7 +2405,6 @@ namespace Microsoft.Build.CommandLine
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Verbosity],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.DistributedFileLogger],
-                        // TODO: Review
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.FancyLogger], 
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters], // used by DistributedFileLogger
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters],
@@ -3191,7 +3190,6 @@ namespace Microsoft.Build.CommandLine
             string[] verbositySwitchParameters,
             bool noConsoleLogger,
             bool distributedFileLogger,
-            // TODO: Review
             bool shouldUseFancyLogger, 
             string[] fileLoggerParameters,
             string[] consoleLoggerParameters,
@@ -3412,7 +3410,6 @@ namespace Microsoft.Build.CommandLine
             // Check for flags and env variables
             if (true && !noConsoleLogger)
             {
-                // Console.WriteLine("HELLO! I AM A VERY FANCY CONSOLE LOGGER!!");
                 FancyLogger.FancyLogger l = new FancyLogger.FancyLogger();
                 loggers.Add(l);
             }
