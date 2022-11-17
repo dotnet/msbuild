@@ -2405,6 +2405,8 @@ namespace Microsoft.Build.CommandLine
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Verbosity],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.DistributedFileLogger],
+                        // TODO: Review
+                        commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.FancyLogger], 
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters], // used by DistributedFileLogger
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
@@ -3189,6 +3191,8 @@ namespace Microsoft.Build.CommandLine
             string[] verbositySwitchParameters,
             bool noConsoleLogger,
             bool distributedFileLogger,
+            // TODO: Review
+            bool shouldUseFancyLogger, 
             string[] fileLoggerParameters,
             string[] consoleLoggerParameters,
             string[] binaryLoggerParameters,
@@ -3218,13 +3222,25 @@ namespace Microsoft.Build.CommandLine
             // Add any loggers which have been specified on the commandline
             distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
 
-            ProcessConsoleLoggerSwitch(noConsoleLogger, consoleLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
+            // Choose default console logger
+            // TODO: Add conditions for terminals that do not support ANSI
+            if(shouldUseFancyLogger)
+            {
+                ProcessFancyLogger(noConsoleLogger, loggers);
+            }
+            else
+            {
+                ProcessConsoleLoggerSwitch(noConsoleLogger, consoleLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
+            }
 
             ProcessDistributedFileLogger(distributedFileLogger, fileLoggerParameters, distributedLoggerRecords, loggers, cpuCount);
 
             ProcessFileLoggers(groupedFileLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
 
             ProcessBinaryLogger(binaryLoggerParameters, loggers, ref verbosity);
+
+            // TOOD: Review
+            // ProcessFancyLogger(noConsoleLogger, loggers);
 
             profilerLogger = ProcessProfileEvaluationSwitch(profileEvaluationParameters, loggers, out enableProfiler);
 
@@ -3385,6 +3401,20 @@ namespace Microsoft.Build.CommandLine
                     DistributedLoggerRecord forwardingLoggerRecord = CreateForwardingLoggerRecord(logger, consoleParameters, verbosity);
                     distributedLoggerRecords.Add(forwardingLoggerRecord);
                 }
+            }
+        }
+
+        private static void ProcessFancyLogger(
+            bool noConsoleLogger,
+            List<ILogger> loggers
+        )
+        {
+            // Check for flags and env variables
+            if (true && !noConsoleLogger)
+            {
+                // Console.WriteLine("HELLO! I AM A VERY FANCY CONSOLE LOGGER!!");
+                FancyLogger.FancyLogger l = new FancyLogger.FancyLogger();
+                loggers.Add(l);
             }
         }
 
