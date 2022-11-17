@@ -143,8 +143,8 @@
         <note>{StrBegin="NETSDK1099: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSolutionLevelOutputPath">
-        <source>NETSDK1194: Building a solution with a specific OutputPath is not supported. Specifiy the output path at the individual project level instead.</source>
-        <target state="new">NETSDK1194: Building a solution with a specific OutputPath is not supported. Specifiy the output path at the individual project level instead.</target>
+        <source>NETSDK1194: The "--output" option isn't supported when building a solution.</source>
+        <target state="new">NETSDK1194: The "--output" option isn't supported when building a solution.</target>
         <note>{StrBegin="NETSDK1194: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSolutionLevelRuntimeIdentifier">

@@ -91,8 +91,6 @@ namespace dotnet.Tests
                     .Should()
                     .Pass();
             }
-            
-            
         }
     }
 }

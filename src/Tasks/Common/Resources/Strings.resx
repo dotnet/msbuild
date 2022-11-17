@@ -880,7 +880,7 @@ You may need to build the project on another operating system or architecture, o
     <comment>{StrBegin="NETSDK1193: "}</comment>
   </data>
     <data name="CannotHaveSolutionLevelOutputPath" xml:space="preserve">
-    <value>NETSDK1194: Building a solution with a specific OutputPath is not supported. Specifiy the output path at the individual project level instead.</value>
+    <value>NETSDK1194: The "--output" option isn't supported when building a solution.</value>
     <comment>{StrBegin="NETSDK1194: "}</comment>
   </data>
 </root>
