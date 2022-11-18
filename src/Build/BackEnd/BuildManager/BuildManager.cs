@@ -404,7 +404,7 @@ namespace Microsoft.Build.Execution
             {
                 Importance = importance;
                 Text = text;
-                FilePath = "";
+                FilePath = null;
             }
             public DeferredBuildMessage(string text, MessageImportance importance, string filePath)
             {
@@ -2882,7 +2882,7 @@ namespace Microsoft.Build.Execution
             {
                 loggingService.LogCommentFromText(BuildEventContext.Invalid, message.Importance, message.Text);
                 // If message includes a file path, include that file
-                if (message.FilePath != "")
+                if (message.FilePath is not null)
                 {
                     loggingService.LogIncludeFile(BuildEventContext.Invalid, message.FilePath);
                 }
