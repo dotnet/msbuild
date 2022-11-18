@@ -406,6 +406,7 @@ namespace Microsoft.Build.Execution
                 Text = text;
                 FilePath = null;
             }
+
             public DeferredBuildMessage(string text, MessageImportance importance, string filePath)
             {
                 Importance = importance;
