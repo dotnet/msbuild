@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using Valleysoft.DockerCredsProvider;
 
 using Microsoft.NET.Build.Containers.Credentials;
+using System.Net.Sockets;
 
 namespace Microsoft.NET.Build.Containers;
 
@@ -18,6 +19,8 @@ namespace Microsoft.NET.Build.Containers;
 /// </summary>
 public partial class AuthHandshakeMessageHandler : DelegatingHandler
 {
+    private const int MaxRequestRetries = 5; // Arbitrary but seems to work ok for chunked uploads to ghcr.io
+
     private record AuthInfo(Uri Realm, string Service, string? Scope);
 
     /// <summary>
@@ -161,24 +164,46 @@ public partial class AuthHandshakeMessageHandler : DelegatingHandler
             request.Headers.Authorization = cachedAuthentication;
         }
 
-        var response = await base.SendAsync(request, cancellationToken);
-        if (response is { StatusCode: HttpStatusCode.OK })
+        int retryCount = 0;
+
+        while (retryCount < MaxRequestRetries)
         {
-            return response;
-        }
-        else if (response is { StatusCode: HttpStatusCode.Unauthorized } && TryParseAuthenticationInfo(response, out string? scheme, out AuthInfo? authInfo))
-        {
-            if (await GetAuthenticationAsync(scheme, authInfo.Realm, authInfo.Service, authInfo.Scope, cancellationToken) is AuthenticationHeaderValue authentication)
+            try
             {
-                request.Headers.Authorization = AuthHeaderCache.AddOrUpdate(request.RequestUri, authentication);
-                return await base.SendAsync(request, cancellationToken);
+                var response = await base.SendAsync(request, cancellationToken);
+                if (response is { StatusCode: HttpStatusCode.OK })
+                {
+                    return response;
+                }
+                else if (response is { StatusCode: HttpStatusCode.Unauthorized } && TryParseAuthenticationInfo(response, out string? scheme, out AuthInfo? authInfo))
+                {
+                    if (await GetAuthenticationAsync(scheme, authInfo.Realm, authInfo.Service, authInfo.Scope, cancellationToken) is AuthenticationHeaderValue authentication)
+                    {
+                        request.Headers.Authorization = AuthHeaderCache.AddOrUpdate(request.RequestUri, authentication);
+                        return await base.SendAsync(request, cancellationToken);
+                    }
+                    return response;
+                }
+                else
+                {
+                    return response;
+                }
             }
-            return response;
+            catch (HttpRequestException e) when (e.InnerException is IOException ioe && ioe.InnerException is SocketException se)
+            {
+                retryCount += 1;
+
+                // TODO: log in a way that is MSBuild-friendly
+                Console.WriteLine($"Encountered a SocketException with message \"{se.Message}\". Pausing before retry.");
+
+                await Task.Delay(TimeSpan.FromSeconds(1.0 * Math.Pow(2, retryCount)), cancellationToken);
+
+                // retry
+                continue;
+            }
         }
-        else
-        {
-            return response;
-        }
+
+        throw new ApplicationException("Too many retries, stopping");
     }
 
     [GeneratedRegex("(?<key>\\w+)=\"(?<value>[^\"]*)\"(?:,|$)")]
