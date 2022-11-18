@@ -414,7 +414,6 @@ namespace Microsoft.Build.Execution
             }
         }
 
-
         /// <summary>
         /// Prepares the BuildManager to receive build requests.
         /// </summary>
