@@ -5,10 +5,10 @@ using System.Linq;
 using System.Security;
 
 using Microsoft.Build.Framework;
-// using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+using Microsoft.Build.Logging;
 
-namespace FancyLogger
+namespace Microsoft.Build.Logging.FancyLogger
 {
     public class LogLine
     {
@@ -43,9 +43,9 @@ namespace FancyLogger
             LogLines.Add(line.Id, line);
             Console.Write(
                 "\n" +
-                ANSIBuilder.Cursor.GoToPosition(lineNumber, 0) +
-                line.Text +
-                ANSIBuilder.Cursor.GoToPosition(lineNumber+1, 0)
+                // ANSIBuilder.Cursor.GoToPosition(lineNumber, 0) +
+                line.Text
+                // ANSIBuilder.Cursor.GoToPosition(lineNumber+1, 0)
             );
             // Return line
             return line;
@@ -60,9 +60,9 @@ namespace FancyLogger
                 line.Text = text;
                 // Log it
                 Console.Write(
-                    ANSIBuilder.Cursor.GoToPosition(line.LineNumber, 0)
-                    + "\r" + text +
-                    ANSIBuilder.Cursor.GoToPosition(line.LineNumber + 1, 0)
+                    // ANSIBuilder.Cursor.GoToPosition(line.LineNumber, 0)
+                    "\r" + text
+                    // ANSIBuilder.Cursor.GoToPosition(line.LineNumber + 1, 0)
                 );
             }
         }
@@ -71,101 +71,6 @@ namespace FancyLogger
             return;
         }
     }
-
-
-    #region ANSI Formatting
-    internal enum ANSIColors
-    {
-        Red = 31,
-        Green = 32,
-        Yellow = 33,
-        Blue = 34,
-        Magenta = 35,
-        Cyan = 36,
-        White = 37
-    }
-    internal static class ANSIBuilder
-    {
-        internal static class Formatting
-        {
-            public static string Bold(string text)
-            {
-                return String.Format("\x1b[1m{0}\x1b[22m", text);
-            }
-            public static string Dim(string text)
-            {
-                return String.Format("\x1b[2m{0}\x1b[22m", text);
-            }
-            public static string Italic(string text)
-            {
-                return String.Format("\x1b[3m{0}\x1b[23m", text);
-            }
-            public static string Underline(string text)
-            {
-                return String.Format("\x1b[4m{0}\x1b[24m", text);
-            }
-            public static string Blinking(string text)
-            {
-                return String.Format("\x1b[5m{0}\x1b[25m", text);
-            }
-            public static string StrikeThrough(string text)
-            {
-                return String.Format("\x1b[9m{0}\x1b[29m", text);
-            }
-            public static string Color(string text, ANSIColors color)
-            {
-                return String.Format("\x1b[{0}m{1}\x1b[0m", (int) color, text);
-            }
-        }
-
-        internal static class Cursor
-        {
-            private static int savedCursorLine = 0;
-            public static string GoToPosition(int line, int column)
-            {
-                return String.Format("\x1b[{0};{1}H", line, column);
-                // Console.SetCursorPosition(line, column);
-                // return "";
-            }
-            public static string SaveCursorPosition()
-            {
-                savedCursorLine = Console.CursorTop;
-                return "";
-                // return "\x1b 7";
-            }
-            public static string RestoreCursorPosition()
-            {
-                return GoToPosition(savedCursorLine, 0);
-                // return "\x1b 8";
-            }
-        }
-
-        internal static class Eraser
-        {
-            public static string EraseLine()
-            {
-                return "\x1b[2K";
-            }
-        }
-
-        internal static class Graphics
-        {
-            public static string ProgressBar(float percentage, int width = 10, char completedChar= '█', char remainingChar = '░')
-            {
-                string result = "[";
-                for (int i = 0; i < (int) Math.Floor(width * percentage); i++)
-                {
-                    result += completedChar;
-                }
-                for (int i = (int) Math.Floor(width * percentage) + 1; i < width; i++)
-                {
-                    result += remainingChar;
-                }
-                return result + "]";
-            }
-        }
-    }
-    #endregion
 
     public class FancyLogger : ILogger
     {
@@ -241,12 +146,9 @@ namespace FancyLogger
                 targetConsoleLines[e.BuildEventContext.TargetId] = line.Id;
 
                 LogLine nextLine = Log.WriteNewLine(
-                    ANSIBuilder.Formatting.Dim("\tTasks will go here")
+                    ANSIBuilder.Formatting.Dim("\tTasks will go here") 
                 );
-                // Log.WriteNewLine("");
-
-                // Log.WriteInLine("Task task task task task task", nextLine.Id);
-                // Number of 
+                Log.WriteNewLine("");
             }
         }
         void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
@@ -258,11 +160,11 @@ namespace FancyLogger
                 if (e.Succeeded)
                 {
                     Log.WriteInLine(
-                        ANSIBuilder.Formatting.Color("✓ " + e.TargetName, ANSIColors.Green)
+                        ANSIBuilder.Formatting.Color("✓ " + e.TargetName, ANSIForegroundColor.Green)
                     , lineId);
                 }
                 Log.WriteInLine(
-                    ANSIBuilder.Eraser.EraseLine(), lineId+1
+                    ANSIBuilder.Eraser.EraseCurrentLine(), lineId+1
                 );
             }
         }
@@ -274,7 +176,8 @@ namespace FancyLogger
             {
                 int targetLineId = targetConsoleLines[e.BuildEventContext.TargetId];
                 Log.WriteInLine(
-                    ANSIBuilder.Eraser.EraseLine() + "\t" + ANSIBuilder.Graphics.ProgressBar(0.6f, 16) + "\t" +
+                    ANSIBuilder.Eraser.EraseCurrentLine() + "\t" +
+                    ANSIBuilder.Graphics.ProgressBar(0.6f, 16) + "\t" +
                     ANSIBuilder.Formatting.Dim(e.TaskName), 
                     targetLineId + 1
                 );

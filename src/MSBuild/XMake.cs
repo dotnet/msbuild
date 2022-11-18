@@ -38,6 +38,7 @@ using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Logging.FancyLogger;
 
 #nullable disable
 
@@ -3221,10 +3222,10 @@ namespace Microsoft.Build.CommandLine
             distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
 
             // Choose default console logger
-            // TODO: Add conditions for terminals that do not support ANSI
             if(
                 shouldUseFancyLogger &&
-                !Console.IsOutputRedirected // Avoid using the FancyLogger when output is redirected to a file
+                !Console.IsOutputRedirected && // Avoid using the FancyLogger when output is redirected to a file
+                Environment.GetEnvironmentVariable("TERM") != "dumb" // TODO: Check for better ways of figuring out terminals' capabilities
             )
             {
                 ProcessFancyLogger(noConsoleLogger, loggers);
@@ -3413,7 +3414,7 @@ namespace Microsoft.Build.CommandLine
             // Check for flags and env variables
             if (true && !noConsoleLogger)
             {
-                FancyLogger.FancyLogger l = new FancyLogger.FancyLogger();
+                FancyLogger l = new FancyLogger();
                 loggers.Add(l);
             }
         }
