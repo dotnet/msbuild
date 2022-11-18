@@ -307,8 +307,12 @@ namespace Microsoft.DotNet.Watcher
                 processSpec.EnvironmentVariables["ASPNETCORE_URLS"] = context.LaunchSettingsProfile.ApplicationUrl;
             }
 
-            var rootVariableName = Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)";
-            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(rootVariableName)))
+            var rootVariableName = EnvironmentVariableNames.TryGetDotNetRootVariableName(
+                project.RuntimeIdentifier ?? "",
+                project.DefaultAppHostRuntimeIdentifier ?? "",
+                project.TargetFrameworkVersion);
+
+            if (rootVariableName != null && string.IsNullOrEmpty(Environment.GetEnvironmentVariable(rootVariableName)))
             {
                 processSpec.EnvironmentVariables[rootVariableName] = Path.GetDirectoryName(_muxerPath);
             }
