@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Text.Json.Nodes;
 using System.Xml.Linq;
@@ -16,6 +17,7 @@ public record struct Registry(Uri BaseUri)
 {
     private const string DockerManifestV2 = "application/vnd.docker.distribution.manifest.v2+json";
     private const string DockerContainerV1 = "application/vnd.docker.container.image.v1+json";
+    private const int MaxChunkSizeBytes = 1024 * 64;
 
     private string RegistryName { get; } = BaseUri.Host;
 
@@ -132,17 +134,69 @@ public record struct Registry(Uri BaseUri)
             x = new UriBuilder(new Uri(BaseUri, pushResponse.Headers.Location?.OriginalString ?? ""));
         }
 
+        Uri patchUri = x.Uri;
+
         x.Query += $"&digest={Uri.EscapeDataString(digest)}";
 
-        // TODO: consider chunking
-        StreamContent content = new StreamContent(contents);
-        content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-        content.Headers.ContentLength = contents.Length;
-        HttpResponseMessage putResponse = await client.PutAsync(x.Uri, content);
+        Uri putUri = x.Uri;
 
-        string resp = await putResponse.Content.ReadAsStringAsync();
+        // TODO: this chunking is super tiny and probably not necessary; what does the docker client do
+        //       and can we be smarter?
 
-        putResponse.EnsureSuccessStatusCode();
+        byte[] chunkBackingStore = new byte[MaxChunkSizeBytes];
+
+        int chunkCount = 0;
+        int chunkStart = 0;
+
+        while (contents.Position < contents.Length)
+        {
+            int bytesRead = await contents.ReadAsync(chunkBackingStore);
+
+            ByteArrayContent content = new (chunkBackingStore, offset: 0, count: bytesRead);
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            content.Headers.ContentLength = bytesRead;
+
+            // manual because ACR throws an error with the .NET type {"Range":"bytes 0-84521/*","Reason":"the Content-Range header format is invalid"}
+            //    content.Headers.Add("Content-Range", $"0-{contents.Length - 1}");
+            Debug.Assert(content.Headers.TryAddWithoutValidation("Content-Range", $"{chunkStart}-{chunkStart + bytesRead - 1}"));
+
+            HttpResponseMessage patchResponse = await client.PatchAsync(patchUri, content);
+
+            if (patchResponse.StatusCode != HttpStatusCode.Accepted)
+            {
+                string errorMessage = $"Failed to upload blob to {patchUri}; recieved {patchResponse.StatusCode} with detail {await patchResponse.Content.ReadAsStringAsync()}";
+                throw new ApplicationException(errorMessage);
+            }
+
+            if (patchResponse.Headers.Location is { IsAbsoluteUri: true })
+            {
+                x = new UriBuilder(patchResponse.Headers.Location);
+            }
+            else
+            {
+                // if we don't trim the BaseUri and relative Uri of slashes, you can get invalid urls.
+                // Uri constructor does this on our behalf.
+                x = new UriBuilder(new Uri(BaseUri, patchResponse.Headers.Location?.OriginalString ?? ""));
+            }
+
+            patchUri = x.Uri;
+
+            chunkCount += 1;
+            chunkStart += bytesRead;
+        }
+
+        // PUT with digest to finalize
+        x.Query += $"&digest={Uri.EscapeDataString(digest)}";
+
+        putUri = x.Uri;
+
+        HttpResponseMessage finalizeResponse = await client.PutAsync(putUri, content: null);
+
+        if (finalizeResponse.StatusCode != HttpStatusCode.Created)
+        {
+            string errorMessage = $"Failed to finalize upload to {putUri}; recieved {finalizeResponse.StatusCode} with detail {await finalizeResponse.Content.ReadAsStringAsync()}";
+            throw new ApplicationException(errorMessage);
+        }
     }
 
     private readonly async Task<bool> BlobAlreadyUploaded(string name, string digest, HttpClient client)
