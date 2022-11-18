@@ -1324,7 +1324,7 @@ namespace Microsoft.Build.CommandLine
 
                     BuildResultCode? result = null;
 
-                    IEnumerable<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = null;
+                    // IEnumerable<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = null;
                     if (!Traits.Instance.EscapeHatches.DoNotSendDeferredMessagesToBuildManager)
                     {
                         var commandLineString =
@@ -3222,18 +3222,20 @@ namespace Microsoft.Build.CommandLine
             distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
 
             // Choose default console logger
-            if(
-                shouldUseFancyLogger &&
-                !Console.IsOutputRedirected && // Avoid using the FancyLogger when output is redirected to a file
-                Environment.GetEnvironmentVariable("TERM") != "dumb" // TODO: Check for better ways of figuring out terminals' capabilities
-            )
+            bool outputSupportsFancyLogger = !Console.IsOutputRedirected && // Avoid using the FancyLogger when output is redirected to a file
+                Environment.GetEnvironmentVariable("TERM") != "dumb"; // Avoid using FancyLogger when output is dumb (does not support ANSI). TODO: Check for better ways of figuring out terminals' capabilities
+            if (!outputSupportsFancyLogger)
+            {
+                // Add to deferredbuildmessages
+            }
+            if(shouldUseFancyLogger && outputSupportsFancyLogger )
             {
                 ProcessFancyLogger(noConsoleLogger, loggers);
-            }
-            else
+            } else
             {
                 ProcessConsoleLoggerSwitch(noConsoleLogger, consoleLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
             }
+
 
             ProcessDistributedFileLogger(distributedFileLogger, fileLoggerParameters, distributedLoggerRecords, loggers, cpuCount);
 
