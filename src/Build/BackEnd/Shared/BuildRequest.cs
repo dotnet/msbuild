@@ -90,7 +90,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private RequestedProjectState _requestedProjectState;
 
-        private bool _skipIsolationConstraints;
+        private bool _skipStaticGraphIsolationConstraints;
 
         /// <summary>
         /// Constructor for serialization.
@@ -161,7 +161,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="hostServices">Host services if any. May be null.</param>
         /// <param name="parentBuildEventContext">The build event context of the parent project.</param>
         /// <param name="parentRequest">The parent build request, if any.</param>
-        /// <param name="skipIsolationConstraints"></param>
+        /// <param name="skipStaticGraphIsolationConstraints"></param>
         /// <param name="buildRequestDataFlags">Additional flags for the request.</param>
         /// <param name="requestedProjectState">Filter for desired build results.</param>
         /// <param name="projectContextId">The project context id</param>
@@ -183,7 +183,7 @@ namespace Microsoft.Build.BackEnd
             BuildRequest parentRequest,
             BuildRequestDataFlags buildRequestDataFlags = BuildRequestDataFlags.None,
             RequestedProjectState requestedProjectState = null,
-            bool skipIsolationConstraints = false,
+            bool skipStaticGraphIsolationConstraints = false,
             int projectContextId = BuildEventContext.InvalidProjectContextId,
             bool buildUnderIsolationExemption = false)
         : this(submissionId, nodeRequestId, configurationId, hostServices, buildRequestDataFlags, requestedProjectState, projectContextId)
@@ -201,7 +201,7 @@ namespace Microsoft.Build.BackEnd
             _parentBuildEventContext = parentBuildEventContext;
             _parentGlobalRequestId = parentRequest?.GlobalRequestId ?? InvalidGlobalRequestId;
 
-            _skipIsolationConstraints = skipIsolationConstraints;
+            _skipStaticGraphIsolationConstraints = skipStaticGraphIsolationConstraints;
             BuildUnderIsolationExemption = buildUnderIsolationExemption;
         }
 
@@ -402,9 +402,9 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Whether isolation constraints should be skipped for this request.
+        /// Whether static graph isolation constraints should be skipped for this request
         /// </summary>
-        internal bool SkipIsolationConstraints => _skipIsolationConstraints;
+        internal bool SkipStaticGraphIsolationConstraints => _skipStaticGraphIsolationConstraints;
 
         /// <summary>
         /// Gets a value indicating whether this request's <see cref="BuildRequest.Targets"></see>
@@ -447,7 +447,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _parentBuildEventContext);
             translator.Translate(ref _buildEventContext);
             translator.TranslateEnum(ref _buildRequestDataFlags, (int)_buildRequestDataFlags);
-            translator.Translate(ref _skipIsolationConstraints);
+            translator.Translate(ref _skipStaticGraphIsolationConstraints);
             translator.Translate(ref _requestedProjectState);
             translator.Translate(ref _hostServices);
             translator.Translate(ref _proxyTargets, ProxyTargets.FactoryForDeserialization);

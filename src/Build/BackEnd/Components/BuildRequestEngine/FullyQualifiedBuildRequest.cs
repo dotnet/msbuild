@@ -26,13 +26,13 @@ namespace Microsoft.Build.BackEnd
         /// <param name="config">The configuration to use for the request.</param>
         /// <param name="targets">The set of targets to build.</param>
         /// <param name="resultsNeeded">Whether or not to wait for the results of this request.</param>
-        /// <param name="skipIsolationConstraints">Whether to skip the constraints of isolation.</param>
+        /// <param name="skipStaticGraphIsolationConstraints">Whether to skip the constraints of static graph isolation.</param>
         /// <param name="flags">Flags specified for the build request.</param>
         public FullyQualifiedBuildRequest(
             BuildRequestConfiguration config,
             string[] targets,
             bool resultsNeeded,
-            bool skipIsolationConstraints = false,
+            bool skipStaticGraphIsolationConstraints = false,
             BuildRequestDataFlags flags = BuildRequestDataFlags.None
             )
         {
@@ -42,7 +42,7 @@ namespace Microsoft.Build.BackEnd
             Config = config;
             Targets = targets;
             ResultsNeeded = resultsNeeded;
-            SkipIsolationConstraints = skipIsolationConstraints;
+            SkipStaticGraphIsolationConstraints = skipStaticGraphIsolationConstraints;
             BuildRequestDataFlags = flags;
         }
 
@@ -66,7 +66,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public BuildRequestDataFlags BuildRequestDataFlags { get; set; }
 
-        public bool SkipIsolationConstraints { get; }
+        public bool SkipStaticGraphIsolationConstraints { get; }
 
         /// <summary>
         /// Implementation of the equality operator.
