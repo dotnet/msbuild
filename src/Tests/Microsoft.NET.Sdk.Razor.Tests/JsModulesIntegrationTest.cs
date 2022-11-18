@@ -90,7 +90,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             buildManifest.DiscoveryPatterns.Should().BeEmpty();
 
             AssertBuildAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(finalPath)),
+                buildManifest,
                 outputPath,
                 intermediateOutputPath);
         }
@@ -117,7 +117,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             AssertManifest(manifest, LoadPublishManifest());
 
             AssertPublishAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path)),
+                manifest,
                 outputPath,
                 intermediateOutputPath);
         }
@@ -213,12 +213,13 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var outputPath = build.GetOutputDirectory(DefaultTfm, "Debug").ToString();
 
             var finalPath = Path.Combine(intermediateOutputPath, "staticwebassets.build.json");
+            var manifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(finalPath));
             AssertManifest(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(finalPath)),
+                manifest,
                 LoadBuildManifest());
 
             AssertBuildAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(finalPath)),
+                manifest,
                 outputPath,
                 intermediateOutputPath);
 
@@ -250,17 +251,19 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var outputPath = publish.GetOutputDirectory(DefaultTfm, "Debug").ToString();
 
             var path = Path.Combine(intermediateOutputPath, "staticwebassets.build.json");
+            var buildManifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path));
             AssertManifest(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path)),
+                buildManifest,
                 LoadBuildManifest());
 
             var finalPath = Path.Combine(intermediateOutputPath, "staticwebassets.publish.json");
+            var publishManifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(finalPath));
             AssertManifest(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(finalPath)),
+                publishManifest,
                 LoadPublishManifest());
 
             AssertPublishAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(finalPath)),
+                publishManifest,
                 outputPath,
                 intermediateOutputPath);
 
@@ -311,12 +314,13 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 LoadBuildManifest());
 
             var finalPath = Path.Combine(intermediateOutputPath, "staticwebassets.publish.json");
+            var manifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(finalPath));
             AssertManifest(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(finalPath)),
+                manifest,
                 LoadPublishManifest());
 
             AssertBuildAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(finalPath)),
+                manifest,
                 outputPath,
                 intermediateOutputPath);
 

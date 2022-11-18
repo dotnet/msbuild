@@ -10,9 +10,11 @@ gitignore
 globaljson
 grpc
 mstest
+mstest-playwright
 mvc
 nugetconfig
 nunit
+NUnit-playwright
 nunit-test
 page
 proto

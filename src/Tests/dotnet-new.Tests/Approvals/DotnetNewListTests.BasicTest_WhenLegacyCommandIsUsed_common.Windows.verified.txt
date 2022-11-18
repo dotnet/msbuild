@@ -23,12 +23,14 @@ dotnet gitignore file                         gitignore                        C
 Dotnet local tool manifest file               tool-manifest                    Config                          
 EditorConfig file                             editorconfig                     Config                          
 global.json file                              globaljson                       Config                          
+MSTest Playwright Test Project                mstest-playwright    [C#]        Test/MSTest/Playwright          
 MSTest Test Project                           mstest               [C#],F#,VB  Test/MSTest                     
 MVC ViewImports                               viewimports          [C#]        Web/ASP.NET                     
 MVC ViewStart                                 viewstart            [C#]        Web/ASP.NET                     
 NuGet Config                                  nugetconfig                      Config                          
 NUnit 3 Test Item                             nunit-test           [C#],F#,VB  Test/NUnit                      
 NUnit 3 Test Project                          nunit                [C#],F#,VB  Test/NUnit                      
+NUnit Playwright Test Project                 NUnit-playwright     [C#]        Test/NUnit/Playwright           
 Protocol Buffer File                          proto                            Web/gRPC                        
 Razor Class Library                           razorclasslib        [C#]        Web/Razor/Library               
 Razor Component                               razorcomponent       [C#]        Web/ASP.NET                     
