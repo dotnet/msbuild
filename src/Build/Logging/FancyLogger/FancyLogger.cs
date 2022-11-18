@@ -127,8 +127,12 @@ namespace Microsoft.Build.Logging.FancyLogger
 
         // Project
         void eventSource_ProjectStarted(object sender, ProjectStartedEventArgs e)
-        { 
-            // Console.WriteLine(LoggerFormatting.Bold("[Project]") + "\t Started");
+        {
+            Log.WriteNewLine(
+                ANSIBuilder.Formatting.Color(
+                    ANSIBuilder.Formatting.Bold(String.Format("Project {0} started", e.ProjectFile)), ANSIForegroundColor.Yellow
+                )
+            );
         }
         void eventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
@@ -146,7 +150,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 targetConsoleLines[e.BuildEventContext.TargetId] = line.Id;
 
                 LogLine nextLine = Log.WriteNewLine(
-                    ANSIBuilder.Formatting.Dim("\tTasks will go here") 
+                    ANSIBuilder.Formatting.Dim("\t~~~") 
                 );
                 Log.WriteNewLine("");
             }
