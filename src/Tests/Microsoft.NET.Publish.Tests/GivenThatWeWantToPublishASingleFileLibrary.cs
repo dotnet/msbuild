@@ -1,11 +1,14 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -15,6 +18,7 @@ namespace Microsoft.NET.Publish.Tests
     {
         public GivenThatWeWantToPublishASingleFileLibrary(ITestOutputHelper log) : base(log)
         {
+
         }
 
         [WindowsOnlyFact]
@@ -22,23 +26,35 @@ namespace Microsoft.NET.Publish.Tests
         public void ItPublishesSuccessfullyWithRIDAndPublishSingleFileLibrary()
         {
             var targetFramework = ToolsetInfo.CurrentTargetFramework;
-            var testAsset = _testAssetsManager
-                     .CopyTestAsset("AppWithLibrarySDKStyleThatPublishesSingleFile")
-                     .WithTargetFramework(targetFramework)
-                     .WithSource();
+            TestProject referencedProject = new TestProject("Library")
+            {
+                TargetFrameworks = targetFramework,
+                IsExe = false
+            };
 
-            var publishCommand = new PublishCommand(testAsset);
-            publishCommand.Execute()
-                    .Should()
-                    .Pass();
+            TestProject testProject = new TestProject("MainProject")
+            {
+                TargetFrameworks = targetFramework,
+                IsExe = true
+            };
+            testProject.ReferencedProjects.Add(referencedProject);
+            testProject.RecordProperties("RuntimeIdentifier");
+            referencedProject.RecordProperties("RuntimeIdentifier");
 
-            // It would be better if we could somehow check the library binlog or something for a RID instead.
-            var exeFolder = publishCommand.GetOutputDirectory(targetFramework: targetFramework);
-            // Parent: RID, then TFM, then Debug, then bin, then the test folder
-            var ridlessLibraryDllPath = Path.Combine(exeFolder.Parent.Parent.Parent.Parent.FullName, "lib", "bin", "Debug", targetFramework, "lib.dll");
-            Assert.True(File.Exists(ridlessLibraryDllPath));
+            string rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+            List<string> args = new List<string>{"/p:PublishSingleFile=true", $"/p:RuntimeIdentifier={rid}"};
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            new PublishCommand(testAsset)
+                .Execute(args.ToArray())
+                .Should()
+                .Pass();
+
+            var referencedProjProperties = referencedProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework);
+            var mainProjProperties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework);
+            Assert.True(mainProjProperties["RuntimeIdentifier"] == rid);
+            Assert.True(referencedProjProperties["RuntimeIdentifier"] == "");
         }
-
     }
 
 }

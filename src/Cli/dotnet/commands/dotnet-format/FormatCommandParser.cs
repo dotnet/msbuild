@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Tools.Format
             {
                 Arguments
             };
-            formatCommand.SetHandler((ParseResult parseResult) => FormatCommand.Run(parseResult.GetValueForArgument(Arguments)));
+            formatCommand.SetHandler((ParseResult parseResult) => FormatCommand.Run(parseResult.GetValue(Arguments)));
             return formatCommand;
         }
     }

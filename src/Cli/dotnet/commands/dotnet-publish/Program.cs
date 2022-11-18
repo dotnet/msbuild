@@ -46,10 +46,10 @@ namespace Microsoft.DotNet.Tools.Publish
             var msbuildArgs = new List<string>()
             {
                 "-target:Publish",
-                "--property:_IsPublishing=true"
+                "--property:_IsPublishing=true" // This property will not hold true for MSBuild /t:Publish. VS should also inject this property when publishing in the future.
             };
 
-            IEnumerable<string> slnOrProjectArgs = parseResult.GetValueForArgument(PublishCommandParser.SlnOrProjectArgument);
+            IEnumerable<string> slnOrProjectArgs = parseResult.GetValue(PublishCommandParser.SlnOrProjectArgument);
 
             CommonOptions.ValidateSelfContainedOptions(parseResult.HasOption(PublishCommandParser.SelfContainedOption),
                 parseResult.HasOption(PublishCommandParser.NoSelfContainedOption));

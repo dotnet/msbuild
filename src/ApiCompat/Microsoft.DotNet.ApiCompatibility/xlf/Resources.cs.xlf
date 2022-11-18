@@ -117,11 +117,6 @@
         <target state="translated">Nelze odebrat virtuální klíčové slovo ze člena {0}.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CouldNotResolveReference">
-        <source>Could not resolve reference '{0}' in any of the provided search directories.</source>
-        <target state="translated">V žádném z uvedených adresářů vyhledávání se nepovedlo přeložit odkaz {0}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ElementShouldNotBeNullAtIndex">
         <source>Element should not be null. Found null at index: {0}.</source>
         <target state="translated">Element by neměl mít hodnotu null. V indexu byla nalezena hodnota null: {0}.</target>
@@ -135,11 +130,6 @@
       <trans-unit id="EnumValuesMustMatch">
         <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
         <target state="translated">Hodnota pole {1} ve výčtu {0} se změnila z {2} na {3}.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FileDoesNotExist">
-        <source>File '{0}' does not exist.</source>
-        <target state="translated">Soubor {0} neexistuje.</target>
         <note />
       </trans-unit>
       <trans-unit id="IndexShouldBeWithinSetSizeRange">
@@ -162,16 +152,6 @@
         <target state="translated">Člen {0} existuje v {2}, ale ne v {1}.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProvidedPathToLoadBinariesFromNotFound">
-        <source>Could not find the provided path '{0}' to load binaries from.</source>
-        <target state="translated">Nepovedlo se najít zadanou cestu {0}, ze které se mají načíst binární soubory.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProvidedStreamDoesNotHaveMetadata">
-        <source>Provided stream for assembly '{0}' doesn't have any metadata to read. from.</source>
-        <target state="translated">Poskytnutý datový proud pro sestavení {0} nemá žádná metadata pro čtení.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="RightNamesAtLeastOne">
         <source>Should at least contain one right name.</source>
         <target state="translated">Měl by obsahovat alespoň jeden správný název.</target>
@@ -180,21 +160,6 @@
       <trans-unit id="ShouldBeGreaterThanZero">
         <source>Value should be greater than 0.</source>
         <target state="translated">Hodnota by měla být větší než 0.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ShouldNotBeNullAndContainAtLeastOneElement">
-        <source>Should not be null and contain at least one element.</source>
-        <target state="translated">Nesmí být null a obsahovat alespoň jeden element.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ShouldProvideValidAssemblyName">
-        <source>Should provide a valid assembly name.</source>
-        <target state="translated">Zadejte platný název sestavení.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="StreamPositionGreaterThanLength">
-        <source>Stream position is greater than it's length, so there are no contents available to read.</source>
-        <target state="translated">Pozice streamu je větší než jeho délka, proto není k dispozici žádný obsah pro čtení.</target>
         <note />
       </trans-unit>
       <trans-unit id="TypeIsActuallySealed">

@@ -12,7 +12,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         {
             if (command is UpdateCommand updateCommand)
             {
-                CheckOnly = parseResult.GetValueForOption(UpdateCommand.CheckOnlyOption);
+                CheckOnly = parseResult.GetValue(UpdateCommand.CheckOnlyOption);
             }
             else if (command is LegacyUpdateCheckCommand)
             {
@@ -27,8 +27,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 throw new ArgumentException($"Unsupported type {command.GetType().FullName}", nameof(command));
             }
 
-            Interactive = parseResult.GetValueForOption(command.InteractiveOption);
-            AdditionalSources = parseResult.GetValueForOption(command.AddSourceOption);
+            Interactive = parseResult.GetValue(command.InteractiveOption);
+            AdditionalSources = parseResult.GetValue(command.AddSourceOption);
         }
 
         public bool CheckOnly { get; }

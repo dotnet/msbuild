@@ -51,7 +51,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
        CommandName,
                (ParseResult parseResult) =>
                {
-                   FileInfo outputPath = parseResult.GetValueForOption(SharedOptions.OutputOption);
+                   FileInfo outputPath = parseResult.GetValue(SharedOptions.OutputOption);
                    host = CreateHost(testAssetsRoot, outputPath?.FullName);
                    return host;
                });

@@ -32,6 +32,20 @@
         <target state="translated">无法将属性“{0}”的值转换为字符串。</target>
         <note />
       </trans-unit>
+      <trans-unit id="DuplicateCaseInsensitiveLaunchProfileNames">
+        <source>There are several launch profiles with case-sensitive names, which isn't permitted:
+{0}
+Make the profile names distinct.</source>
+        <target state="new">There are several launch profiles with case-sensitive names, which isn't permitted:
+{0}
+Make the profile names distinct.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LaunchProfileDoesNotExist">
+        <source>A launch profile with the name '{0}' doesn't exist.</source>
+        <target state="new">A launch profile with the name '{0}' doesn't exist.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OnlyOneProjectAllowed">
         <source>Only one project can be specified at a time using the `-p` option.</source>
         <target state="translated">使用“-p”选项一次只能指定一个项目。</target>
@@ -101,8 +115,8 @@ The current {1} is '{2}'.</source>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotLocateALaunchSettingsFile">
-        <source>The specified launch profile could not be located.</source>
-        <target state="translated">找不到指定的启动配置文件。</target>
+        <source>The specified launch profile '{0}' could not be located.</source>
+        <target state="new">The specified launch profile '{0}' could not be located.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotApplyLaunchSettings">
@@ -128,8 +142,8 @@ The current {1} is '{2}'.</source>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileIsNotAJsonObject">
-        <source>A profile with the specified name could not be found or is not a valid JSON object.</source>
-        <target state="translated">找不到具有指定名称的配置文件或该配置文件不是有效的 JSON 对象。</target>
+        <source>A profile with the specified name isn't a valid JSON object.</source>
+        <target state="needs-review-translation">找不到具有指定名称的配置文件或该配置文件不是有效的 JSON 对象。</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileHandlerCannotBeLocated">

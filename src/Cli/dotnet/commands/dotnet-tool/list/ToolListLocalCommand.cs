@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Tools.Tool.List
         public override int Execute()
         {
             var table = new PrintableTable<(ToolManifestPackage toolManifestPackage, FilePath SourceManifest)>();
-            var packageIdArgument = _parseResult.GetValueForArgument(ToolListCommandParser.PackageIdArgument);
+            var packageIdArgument = _parseResult.GetValue(ToolListCommandParser.PackageIdArgument);
             PackageId? packageId = null;
             if (!string.IsNullOrWhiteSpace(packageIdArgument))
             {

@@ -117,11 +117,6 @@
         <target state="translated">구성원 '{0}'에서 가상 키워드를 제거할 수 없습니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CouldNotResolveReference">
-        <source>Could not resolve reference '{0}' in any of the provided search directories.</source>
-        <target state="translated">제공된 검색 디렉터리에서 참조 '{0}'(을)를 확인할 수 없습니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ElementShouldNotBeNullAtIndex">
         <source>Element should not be null. Found null at index: {0}.</source>
         <target state="translated">요소는 Null이 아니어야 합니다. 인덱스 {0}에 Null이 있습니다.</target>
@@ -135,11 +130,6 @@
       <trans-unit id="EnumValuesMustMatch">
         <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
         <target state="translated">열거형 '{0}'의 필드 '{1}' 값이 '{2}'에서 '{3}'(으)로 변경되었습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FileDoesNotExist">
-        <source>File '{0}' does not exist.</source>
-        <target state="translated">파일 '{0}'이(가) 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="IndexShouldBeWithinSetSizeRange">
@@ -162,16 +152,6 @@
         <target state="translated">멤버 '{0}'이(가) {2}에는 있지만 {1}에는 없습니다</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProvidedPathToLoadBinariesFromNotFound">
-        <source>Could not find the provided path '{0}' to load binaries from.</source>
-        <target state="translated">이진 파일을 로드할 제공된 경로 '{0}'을(를) 찾을 수 없습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProvidedStreamDoesNotHaveMetadata">
-        <source>Provided stream for assembly '{0}' doesn't have any metadata to read. from.</source>
-        <target state="translated">어셈블리 '{0}'에 대해 제공된 스트림에 읽을 메타데이터가 없습니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="RightNamesAtLeastOne">
         <source>Should at least contain one right name.</source>
         <target state="translated">하나 이상의 올바른 이름을 포함해야 합니다.</target>
@@ -180,21 +160,6 @@
       <trans-unit id="ShouldBeGreaterThanZero">
         <source>Value should be greater than 0.</source>
         <target state="translated">값은 0보다 커야 합니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ShouldNotBeNullAndContainAtLeastOneElement">
-        <source>Should not be null and contain at least one element.</source>
-        <target state="translated">Null이 아니어야 하고 요소를 하나 이상 포함해야 합니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ShouldProvideValidAssemblyName">
-        <source>Should provide a valid assembly name.</source>
-        <target state="translated">유효한 어셈블리 이름을 제공해야 합니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="StreamPositionGreaterThanLength">
-        <source>Stream position is greater than it's length, so there are no contents available to read.</source>
-        <target state="translated">스트림 위치가 길이 보다 크므로 읽을 수 있는 콘텐츠가 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="TypeIsActuallySealed">

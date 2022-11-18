@@ -35,10 +35,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             using var app = new WatchableApp(testAsset, _logger);
 
             await app.StartWatcherAsync();
-            const string messagePrefix = "DOTNET_WATCH = ";
-            var message = await app.Process.GetOutputLineStartsWithAsync(messagePrefix);
-            var envValue = message.Substring(messagePrefix.Length);
-            Assert.Equal("1", envValue);
+            Assert.Equal("1", await app.AssertOutputLineStartsWith("DOTNET_WATCH = "));
         }
 
         [Fact]
@@ -55,82 +52,19 @@ namespace Microsoft.DotNet.Watcher.Tools
             var contents = File.ReadAllText(source);
             const string messagePrefix = "DOTNET_WATCH_ITERATION = ";
 
-            var message = await app.Process.GetOutputLineStartsWithAsync(messagePrefix);
-            var count = int.Parse(message.Substring(messagePrefix.Length), CultureInfo.InvariantCulture);
-            Assert.Equal(1, count);
+            var value = await app.AssertOutputLineStartsWith(messagePrefix);
+            Assert.Equal(1, int.Parse(value, CultureInfo.InvariantCulture));
 
-            await app.IsWaitingForFileChange();
-
-            File.SetLastWriteTime(source, DateTime.Now);
-            await app.HasRestarted();
-
-            message = await app.Process.GetOutputLineStartsWithAsync(messagePrefix);
-            count = int.Parse(message.Substring(messagePrefix.Length), CultureInfo.InvariantCulture);
-            Assert.Equal(2, count);
-        }
-
-        [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/23854")]
-        public async Task RunsWithNoRestoreOnOrdinaryFileChanges()
-        {
-            var testAsset = _testAssetsManager.CopyTestAsset(AppName)
-                .WithSource()
-                .Path;
-
-            using var app = new WatchableApp(testAsset, _logger);
-
-            app.DotnetWatchArgs.Add("--verbose");
-
-            await app.StartWatcherAsync(arguments: new[] { "wait" });
-            var source = Path.Combine(app.SourceDirectory, "Program.cs");
-            const string messagePrefix = "dotnet watch ⌚ Running dotnet with the following arguments: run";
-
-            // Verify that the first run does not use --no-restore
-            Assert.Contains(app.Process.Output, p => string.Equals(messagePrefix + " -- wait", p.Trim()));
-
-            for (var i = 0; i < 3; i++)
-            {
-                File.SetLastWriteTime(source, DateTime.Now);
-                var message = await app.Process.GetOutputLineStartsWithAsync(messagePrefix);
-
-                Assert.Equal(messagePrefix + " --no-restore -- wait", message.Trim());
-
-                await app.HasRestarted();
-            }
-        }
-
-        [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/23854")]
-        public async Task RunsWithRestoreIfCsprojChanges()
-        {
-            var testAsset = _testAssetsManager.CopyTestAsset(AppName)
-                .WithSource()
-                .Path;
-
-            using var app = new WatchableApp(testAsset, _logger);
-
-            app.DotnetWatchArgs.Add("--verbose");
-
-            await app.StartWatcherAsync(arguments: new[] { "wait" });
-            var source = Path.Combine(app.SourceDirectory, "KitchenSink.csproj");
-            const string messagePrefix = "dotnet watch ⌚ Running dotnet with the following arguments: run";
-
-            // Verify that the first run does not use --no-restore
-            Assert.Contains(app.Process.Output, p => string.Equals(messagePrefix + " -- wait", p.Trim()));
+            await app.AssertWaitingForFileChange();
 
             File.SetLastWriteTime(source, DateTime.Now);
-            var message = await app.Process.GetOutputLineStartsWithAsync(messagePrefix);
+            await app.AssertRestarted();
 
-            // csproj changed. Do not expect a --no-restore
-            Assert.Equal(messagePrefix + " -- wait", message.Trim());
-
-            await app.HasRestarted();
-
-            // regular file changed after csproj changes. Should use --no-restore
-            File.SetLastWriteTime(Path.Combine(app.SourceDirectory, "Program.cs"), DateTime.Now);
-            message = await app.Process.GetOutputLineStartsWithAsync(messagePrefix);
-            Assert.Equal(messagePrefix + " --no-restore -- wait", message.Trim());
+            value = await app.AssertOutputLineStartsWith(messagePrefix);
+            Assert.Equal(2, int.Parse(value, CultureInfo.InvariantCulture));
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/24406")]
+        [Fact]
         public async Task Run_WithHotReloadEnabled_ReadsLaunchSettings()
         {
             var testAsset = _testAssetsManager.CopyTestAsset("WatchAppWithLaunchSettings")
@@ -143,10 +77,10 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await app.StartWatcherAsync();
 
-            await app.Process.GetOutputLineAsyncWithConsoleHistoryAsync("Environment: Development");
+            await app.AssertOutputLineEquals("Environment: Development");
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/24406")]
+        [Fact]
         public async Task Run_WithHotReloadEnabled_ReadsLaunchSettings_WhenUsingProjectOption()
         {
             var testAsset = _testAssetsManager.CopyTestAsset("WatchAppWithLaunchSettings")
@@ -166,10 +100,10 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await app.StartWatcherAsync();
 
-            await app.Process.GetOutputLineAsyncWithConsoleHistoryAsync("Environment: Development");
+            await app.AssertOutputLineEquals("Environment: Development");
         }
 
-        [CoreMSBuildOnlyFact]
+        [CoreMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/29047")]
         public async Task Run_WithHotReloadEnabled_DoesNotReadConsoleIn_InNonInteractiveMode()
         {
             var testAsset = _testAssetsManager.CopyTestAsset("WatchAppWithLaunchSettings")
@@ -193,7 +127,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             var inputString = "This is a test input";
 
             await standardInput.WriteLineAsync(inputString);
-            await app.Process.GetOutputLineAsync($"Echo: {inputString}");
+            Assert.Equal(inputString, await app.AssertOutputLineStartsWith("Echo: "));
         }
     }
 }

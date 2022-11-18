@@ -19,7 +19,7 @@ setTimeout(async function () {
     }
   }
   if (!connection) {
-    console.debug('Unable to establish a conection to the browser refresh server.');
+    console.debug('Unable to establish a connection to the browser refresh server.');
     return;
   }
 
