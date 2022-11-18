@@ -10,6 +10,9 @@ using Microsoft.Build.Logging;
 
 namespace Microsoft.Build.Logging.FancyLogger
 {
+    /// <summary>
+    /// Represents an identifiable line within the log
+    /// </summary>
     public class LogLine
     {
         private static int IdCounter = 0;
@@ -28,7 +31,9 @@ namespace Microsoft.Build.Logging.FancyLogger
             }
         }
     }
-
+    /// <summary>
+    /// Utility class for writing identifiable log lines
+    /// </summary>
     public static class Log
     {
         public static int InitialCursorHeight;
@@ -43,9 +48,9 @@ namespace Microsoft.Build.Logging.FancyLogger
             LogLines.Add(line.Id, line);
             Console.Write(
                 "\n" +
-                // ANSIBuilder.Cursor.GoToPosition(lineNumber, 0) +
-                line.Text
-                // ANSIBuilder.Cursor.GoToPosition(lineNumber+1, 0)
+                ANSIBuilder.Cursor.GoToPosition(lineNumber, 0) +
+                line.Text +
+                ANSIBuilder.Cursor.GoToPosition(lineNumber+1, 0)
             );
             // Return line
             return line;
@@ -58,11 +63,12 @@ namespace Microsoft.Build.Logging.FancyLogger
             {
                 // Replace text on line
                 line.Text = text;
-                // Log it
+                // Write it
                 Console.Write(
-                    // ANSIBuilder.Cursor.GoToPosition(line.LineNumber, 0)
-                    "\r" + text
-                    // ANSIBuilder.Cursor.GoToPosition(line.LineNumber + 1, 0)
+                    ANSIBuilder.Cursor.GoToPosition(line.LineNumber, 0) +
+                    ANSIBuilder.Eraser.EraseCurrentLine() +
+                    "\r" + text +
+                    ANSIBuilder.Cursor.GoToPosition(line.LineNumber + 1, 0)
                 );
             }
         }
