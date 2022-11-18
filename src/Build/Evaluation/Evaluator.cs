@@ -1638,7 +1638,6 @@ namespace Microsoft.Build.Evaluation
             // paths will be returned (union of all files that match).
             var allProjects = new List<ProjectRootElement>();
             bool containsWildcards = FileMatcher.HasWildcards(importElement.Project);
-            bool noDirectoryExists = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6);
 
             // Try every extension search path, till we get a Hit:
             // 1. 1 or more project files loaded
@@ -1656,8 +1655,6 @@ namespace Microsoft.Build.Evaluation
                 {
                     continue;
                 }
-
-                noDirectoryExists = false;
 
                 var newExpandedCondition = importElement.Condition.Replace(extensionPropertyRefAsString, extensionPathExpanded, StringComparison.OrdinalIgnoreCase);
                 if (!EvaluateConditionCollectingConditionedProperties(importElement, newExpandedCondition, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties,
@@ -1715,7 +1712,7 @@ namespace Microsoft.Build.Evaluation
             // atleastOneExactFilePathWasLookedAtAndNotFound would be false, eg, if the expression
             // was a wildcard and it resolved to zero files!
             if (allProjects.Count == 0 &&
-                (atleastOneExactFilePathWasLookedAtAndNotFound || noDirectoryExists) &&
+                atleastOneExactFilePathWasLookedAtAndNotFound &&
                 (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) == 0)
             {
                 ThrowForImportedProjectWithSearchPathsNotFound(fallbackSearchPathMatch, importElement);
