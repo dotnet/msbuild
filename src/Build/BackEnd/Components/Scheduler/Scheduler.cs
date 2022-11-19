@@ -365,8 +365,14 @@ namespace Microsoft.Build.BackEnd
             List<ScheduleResponse> responses = new List<ScheduleResponse>();
             TraceScheduler("Reporting result from node {0} for request {1}, parent {2}.", nodeId, result.GlobalRequestId, result.ParentGlobalRequestId);
 
-            // Record these results to the cache.
-            _resultsCache.AddResult(result);
+            // Record these results to the cache only if they are not present in the
+            // override cache, which can happen if we are building in isolation mode
+            // (IsolateProjects.Message), and the received result was built by a
+            // dependency, isolation-violating project.
+            if (_configCache is not ConfigCacheWithOverride || !((ConfigCacheWithOverride)_configCache).HasConfigurationInOverrideCache(result.ConfigurationId))
+            {
+                _resultsCache.AddResult(result);
+            }
 
             if (result.NodeRequestId == BuildRequest.ResultsTransferNodeRequestId)
             {
@@ -1969,7 +1975,6 @@ namespace Microsoft.Build.BackEnd
             // do not check root requests as nothing depends on them
             if (isolateProjects == IsolateProjects.False || request.IsRootRequest || request.SkipStaticGraphIsolationConstraints)
             {
-                // N.B.: isolateProjects == IsolateProjects.Message iff request.SkipStaticGraphIsolationConstraints
                 bool logComment = ((isolateProjects == IsolateProjects.True || isolateProjects == IsolateProjects.Message) && request.SkipStaticGraphIsolationConstraints);
                 if (logComment)
                 {
