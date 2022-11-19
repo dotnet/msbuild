@@ -82,6 +82,7 @@ namespace Microsoft.Build.Logging.FancyLogger
         }
         public static class Graphics
         {
+            public static int loadingCounter = 0;
             public static string ProgressBar(float percentage, int width = 10, char completedChar = '█', char remainingChar = '░')
             {
                 string result = "";
@@ -94,6 +95,14 @@ namespace Microsoft.Build.Logging.FancyLogger
                     result += remainingChar;
                 }
                 return result;
+            }
+
+            public static string Loading()
+            {
+                char[] chars = { '⠄', '⠆', '⠇', '⠋', '⠙', '⠸', '⠰', '⠠', '⠰', '⠸', '⠙', '⠋', '⠇', '⠆' };
+                loadingCounter += (loadingCounter++) % (chars.Length - 1);
+
+                return chars[loadingCounter].ToString();
             }
         }
     }

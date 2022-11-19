@@ -187,6 +187,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 int targetLineId = targetConsoleLines[e.BuildEventContext.TargetId];
                 Log.WriteInLine(
                     ANSIBuilder.Eraser.EraseCurrentLine() + "\t" +
+                    ANSIBuilder.Graphics.Loading() + " " +
                     ANSIBuilder.Graphics.ProgressBar(0.6f, 16) + "\t" +
                     ANSIBuilder.Formatting.Dim(e.TaskName), 
                     targetLineId + 1
