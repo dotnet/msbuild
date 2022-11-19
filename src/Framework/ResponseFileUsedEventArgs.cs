@@ -11,18 +11,13 @@ namespace Microsoft.Build.Framework
     [Serializable]
     public class ResponseFileUsedEventArgs : CustomBuildEventArgs
     {
+        public string ResponseFilePath = "";
         /// <summary>
         /// Initialize a new instance of the ResponseFileUsedEventArgs class.
         /// </summary>
-        public ResponseFileUsedEventArgs() : base() {
-            ResponseFilePath = "";
-        }
-
         public ResponseFileUsedEventArgs(string responseFilePath) : base()
         {
             ResponseFilePath = responseFilePath;
         }
-
-        public string ResponseFilePath { get; set; }
     }
 }
