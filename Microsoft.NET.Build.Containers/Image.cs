@@ -56,7 +56,7 @@ public class Image
     {
         newLayers.Add(l);
 
-        manifest.layers.Add(new (l.Descriptor.MediaType, l.Descriptor.Size, l.Descriptor.Digest, l.Descriptor.Urls));
+        manifest.layers.Add(new(l.Descriptor.MediaType, l.Descriptor.Size, l.Descriptor.Digest, l.Descriptor.Urls));
         config["rootfs"]!["diff_ids"]!.AsArray().Add(l.Descriptor.UncompressedDigest);
         RecalculateDigest();
     }
@@ -64,7 +64,12 @@ public class Image
     private void RecalculateDigest()
     {
         config["created"] = DateTime.UtcNow;
-        manifest = manifest with { config = manifest.config with { digest = GetDigest(config), size = Encoding.UTF8.GetBytes(config.ToJsonString()).Length } };
+        var newManifestConfig = manifest.config with
+        {
+            digest = GetDigest(config),
+            size = Encoding.UTF8.GetBytes(config.ToJsonString()).Length
+        };
+        manifest.config = newManifestConfig;
     }
 
     private JsonObject CreatePortMap()

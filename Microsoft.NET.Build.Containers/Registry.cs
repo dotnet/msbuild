@@ -27,12 +27,21 @@ public record struct PlatformInformation(string architecture, string os, string?
 public record struct PlatformSpecificManifest(string mediaType, long size, string digest, PlatformInformation platform);
 public record struct ManifestListV2(int schemaVersion, string mediaType, PlatformSpecificManifest[] manifests);
 
+
 public record Registry(Uri BaseUri)
 {
     private const string DockerManifestV2 = "application/vnd.docker.distribution.manifest.v2+json";
     private const string DockerManifestListV2 = "application/vnd.docker.distribution.manifest.list.v2+json";
     private const string DockerContainerV1 = "application/vnd.docker.container.image.v1+json";
     private const int MaxChunkSizeBytes = 1024 * 64;
+
+    public static string[] SupportedRuntimeIdentifiers = new [] {
+        "linux-x86",
+        "linux-x64",
+        "linux-arm",
+        "linux-arm64",
+        "win-x64"
+    };
 
     private string RegistryName { get; } = BaseUri.Host;
 
@@ -44,7 +53,7 @@ public record Registry(Uri BaseUri)
         return initialManifestResponse.Content.Headers.ContentType?.MediaType switch {
             DockerManifestV2 => await TryReadSingleImage(await initialManifestResponse.Content.ReadFromJsonAsync<ManifestV2>()),
             DockerManifestListV2 => await TryPickBestImageFromManifestList(await initialManifestResponse.Content.ReadFromJsonAsync<ManifestListV2>(), runtimeIdentifier),
-            var unknownMediaType => throw new NotImplementedException($"Do not understand the mediaType {unknownMediaType}")
+            var unknownMediaType => throw new NotImplementedException($"The manifest for {name}:{reference} from registry {BaseUri} was an unknown type: {unknownMediaType}. Please raise an issue at https://github.com/dotnet/sdk-container-builds/issues with this message.")
         };
 
         async Task<HttpResponseMessage> GetManifest(string reference) {
@@ -84,7 +93,7 @@ public record Registry(Uri BaseUri)
                 ["linux", "arm"] => ("linux", "arm", "v7"),
                 ["linux", "arm64"] => ("linux", "arm64", "v8"),
                 ["win", "x64"] => ("windows", "amd64", null),
-                var parts => throw new ArgumentException($"Unknown OS/platform combination {String.Join(' ', parts)}")
+                var parts => throw new ArgumentException($"The runtimeIdentifier '{runtimeIdentifier}' is not supported. The supported RuntimeIdentifiers are {Registry.SupportedRuntimeIdentifiers}.")
             };
 
             var potentialManifest = manifestList.manifests.SingleOrDefault(manifest => manifest.platform.os == os && manifest.platform.architecture == arch && manifest.platform.variant == variant);
@@ -95,7 +104,6 @@ public record Registry(Uri BaseUri)
                 return null;
             }
         }
-
     }
 
     /// <summary>

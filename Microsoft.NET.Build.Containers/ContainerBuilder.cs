@@ -16,71 +16,73 @@ public static class ContainerBuilder
         Registry baseRegistry = new Registry(ContainerHelpers.TryExpandRegistryToUri(registryName));
 
         var img = await baseRegistry.GetImageManifest(baseName, baseTag, containerRuntimeIdentifier);
-        if (img is not null) {
-            img.WorkingDirectory = workingDir;
+        if (img is null) {
+            throw new ArgumentException($"Could not find image {baseName}:{baseTag} in registry {registryName} matching RuntimeIdentifier {containerRuntimeIdentifier}");
+        }
 
-            JsonSerializerOptions options = new()
+        img.WorkingDirectory = workingDir;
+
+        JsonSerializerOptions options = new()
+        {
+            WriteIndented = true,
+        };
+
+        Layer l = Layer.FromDirectory(folder.FullName, workingDir);
+
+        img.AddLayer(l);
+
+        img.SetEntrypoint(entrypoint, entrypointArgs);
+
+        var isDockerPush = String.IsNullOrEmpty(outputRegistry);
+        Registry? outputReg = isDockerPush ? null : new Registry(ContainerHelpers.TryExpandRegistryToUri(outputRegistry));
+
+        foreach (var label in labels)
+        {
+            string[] labelPieces = label.Split('=');
+
+            // labels are validated by System.CommandLine API
+            img.Label(labelPieces[0], labelPieces[1]);
+        }
+
+        foreach (string envVar in envVars)
+        {
+            string[] envPieces = envVar.Split('=', 2);
+
+            img.AddEnvironmentVariable(envPieces[0], envPieces[1]);
+        }
+
+        foreach (var (number, type) in exposedPorts)
+        {
+            // ports are validated by System.CommandLine API
+            img.ExposePort(number, type);
+        }
+
+        foreach (var tag in imageTags)
+        {
+            if (isDockerPush)
             {
-                WriteIndented = true,
-            };
-
-            Layer l = Layer.FromDirectory(folder.FullName, workingDir);
-
-            img.AddLayer(l);
-
-            img.SetEntrypoint(entrypoint, entrypointArgs);
-
-            var isDockerPush = String.IsNullOrEmpty(outputRegistry);
-            Registry? outputReg = isDockerPush ? null : new Registry(ContainerHelpers.TryExpandRegistryToUri(outputRegistry));
-
-            foreach (var label in labels)
-            {
-                string[] labelPieces = label.Split('=');
-
-                // labels are validated by System.CommandLine API
-                img.Label(labelPieces[0], labelPieces[1]);
-            }
-
-            foreach (string envVar in envVars)
-            {
-                string[] envPieces = envVar.Split('=', 2);
-
-                img.AddEnvironmentVariable(envPieces[0], envPieces[1]);
-            }
-
-            foreach (var (number, type) in exposedPorts)
-            {
-                // ports are validated by System.CommandLine API
-                img.ExposePort(number, type);
-            }
-
-            foreach (var tag in imageTags)
-            {
-                if (isDockerPush)
+                try
                 {
-                    try
-                    {
-                        LocalDocker.Load(img, imageName, tag, baseName).Wait();
-                        Console.WriteLine("Containerize: Pushed container '{0}:{1}' to Docker daemon", imageName, tag);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine($"Containerize: error CONTAINER001: Failed to push to local docker registry: {e}");
-                        Environment.ExitCode = -1;
-                    }
+                    LocalDocker.Load(img, imageName, tag, baseName).Wait();
+                    Console.WriteLine("Containerize: Pushed container '{0}:{1}' to Docker daemon", imageName, tag);
                 }
-                else
+                catch (Exception e)
                 {
-                    try
-                    {
-                        outputReg?.Push(img, imageName, tag, imageName, (message) => Console.WriteLine($"Containerize: {message}")).Wait();
-                        Console.WriteLine($"Containerize: Pushed container '{imageName}:{tag}' to registry '{outputRegistry}'");
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine($"Containerize: error CONTAINER001: Failed to push to output registry: {e}");
-                        Environment.ExitCode = -1;
-                    }
+                    Console.WriteLine($"Containerize: error CONTAINER001: Failed to push to local docker registry: {e}");
+                    Environment.ExitCode = -1;
+                }
+            }
+            else
+            {
+                try
+                {
+                    outputReg?.Push(img, imageName, tag, imageName, (message) => Console.WriteLine($"Containerize: {message}")).Wait();
+                    Console.WriteLine($"Containerize: Pushed container '{imageName}:{tag}' to registry '{outputRegistry}'");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Containerize: error CONTAINER001: Failed to push to output registry: {e}");
+                    Environment.ExitCode = -1;
                 }
             }
         }
