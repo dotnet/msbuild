@@ -20,7 +20,7 @@ namespace Microsoft.NET.Build.Tests
         public GivenThatWeWantToBuildAWindowsDesktopProject(ITestOutputHelper log) : base(log)
         {}
 
-        [WindowsOnlyRequiresMSBuildVersionTheory("16.7.0-preview-20310-07")]
+        [WindowsOnlyRequiresMSBuildVersionTheory("16.7.0")]
         [InlineData("UseWindowsForms")]
         [InlineData("UseWPF")]
         public void It_errors_when_missing_windows_target_platform(string propertyName)
@@ -44,7 +44,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("NETSDK1136");
         }
 
-        [WindowsOnlyRequiresMSBuildVersionTheory("16.7.0-preview-20310-07")]
+        [WindowsOnlyRequiresMSBuildVersionTheory("16.7.0")]
         [InlineData("UseWindowsForms")]
         [InlineData("UseWPF")]
         public void It_errors_when_missing_transitive_windows_target_platform(string propertyName)
