@@ -11,12 +11,16 @@ namespace Microsoft.Build.Framework
     [Serializable]
     public class ResponseFileUsedEventArgs : CustomBuildEventArgs
     {
-        public string ResponseFilePath = "";
+        public string ResponseFilePath { private set; get; }
         /// <summary>
         /// Initialize a new instance of the ResponseFileUsedEventArgs class.
         /// </summary>
         public ResponseFileUsedEventArgs(string responseFilePath) : base()
         {
+            if (responseFilePath == "")
+            {
+                throw new System.Exception("Response file path cannot be empty");
+            }
             ResponseFilePath = responseFilePath;
         }
     }
