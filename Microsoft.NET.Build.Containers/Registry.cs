@@ -74,12 +74,16 @@ public record Registry(Uri BaseUri)
         }
 
         async Task<Image?> TryPickBestImageFromManifestList(ManifestListV2 manifestList, string runtimeIdentifier) {
+            // TODO: we probably need to pull in actual RID parsing code and look for 'platform' here.
+            // 'win' can take a version number and we'd break.
+            // Also, there are more specific linux RIDs (like rhel) that we should instead be looking for the correct 'family' for?
+            // we probably also need to look at the 'variant' field if the RID contains a version.
             (string os, string arch, string? variant) = runtimeIdentifier.Split('-') switch {
                 ["linux", "x64"] => ("linux", "amd64", null),
                 ["linux", "x86"] => ("linux", "386", null),
                 ["linux", "arm"] => ("linux", "arm", "v7"),
                 ["linux", "arm64"] => ("linux", "arm64", "v8"),
-                ["windows", "x64"] => ("windows", "amd64", null),
+                ["win", "x64"] => ("windows", "amd64", null),
                 var parts => throw new ArgumentException($"Unknown OS/platform combination {String.Join(' ', parts)}")
             };
 
