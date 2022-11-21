@@ -1137,17 +1137,6 @@ namespace Microsoft.Build.BackEnd
                         buildRequestDataFlags |= BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports;
                     }
 
-                    bool buildUnderIsolationExemption = false;
-                    if (_componentHost.BuildParameters.IsolateProjects == IsolateProjects.Message
-                        && !string.Equals(issuingEntry.RequestConfiguration.ProjectFullPath, request.Config.ProjectFullPath, StringComparison.Ordinal))
-                    {
-                        // The issuing (dependent) project did not receive all the required
-                        // target results from its provided input results cache file, so
-                        // it will need to violate its isolation mode and build said
-                        // targets on the dependency project.
-                        buildUnderIsolationExemption = true;
-                    }
-
                     if (matchingConfig == null)
                     {
                         // No configuration locally, are we already waiting for it?
@@ -1180,8 +1169,7 @@ namespace Microsoft.Build.BackEnd
                             parentRequest: issuingEntry.Request,
                             buildRequestDataFlags: buildRequestDataFlags,
                             requestedProjectState: null,
-                            skipStaticGraphIsolationConstraints: request.SkipStaticGraphIsolationConstraints,
-                            buildUnderIsolationExemption: buildUnderIsolationExemption);
+                            skipStaticGraphIsolationConstraints: request.SkipStaticGraphIsolationConstraints);
 
                         issuingEntry.WaitForResult(newRequest);
 
@@ -1210,8 +1198,7 @@ namespace Microsoft.Build.BackEnd
                             parentRequest: issuingEntry.Request,
                             buildRequestDataFlags: buildRequestDataFlags,
                             requestedProjectState: null,
-                            skipStaticGraphIsolationConstraints: request.SkipStaticGraphIsolationConstraints,
-                            buildUnderIsolationExemption: buildUnderIsolationExemption);
+                            skipStaticGraphIsolationConstraints: request.SkipStaticGraphIsolationConstraints);
 
                         IResultsCache resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
 
