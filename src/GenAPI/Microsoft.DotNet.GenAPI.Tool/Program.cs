@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.GenAPI.Tool
             Option<string?> exceptionMessageOption = new("--exception-message",
                 "If specified - method bodies should throw PlatformNotSupportedException, else `throw null`.");
 
-            Option<bool> includeVisibleOutsideOfAssembly = new("--include-visible-outside",
+            Option<bool> includeVisibleOutsideOfAssemblyOption = new("--include-visible-outside",
                 "Include all API's not just public APIs. The default is public only.");
 
             RootCommand rootCommand = new("Microsoft.DotNet.GenAPI")
@@ -61,18 +61,18 @@ namespace Microsoft.DotNet.GenAPI.Tool
             rootCommand.AddGlobalOption(outputPathOption);
             rootCommand.AddGlobalOption(headerFileOption);
             rootCommand.AddGlobalOption(exceptionMessageOption);
-            rootCommand.AddGlobalOption(includeVisibleOutsideOfAssembly);
+            rootCommand.AddGlobalOption(includeVisibleOutsideOfAssemblyOption);
 
             rootCommand.SetHandler((InvocationContext context) =>
             {
                 GenAPIApp.Run(new GenAPIApp.Context(
                     context.ParseResult.GetValue(assembliesOption)!,
                     context.ParseResult.GetValue(assemblyReferencesOption),
-                    context.ParseResult.GetValue(exceptionMessageOption),
-                    context.ParseResult.GetValue(headerFileOption),
                     context.ParseResult.GetValue(outputPathOption),
+                    context.ParseResult.GetValue(headerFileOption),
+                    context.ParseResult.GetValue(exceptionMessageOption),
                     context.ParseResult.GetValue(excludeAttributesFilesOption),
-                    context.ParseResult.GetValue(includeVisibleOutsideOfAssembly)
+                    context.ParseResult.GetValue(includeVisibleOutsideOfAssemblyOption)
                 ));
             });
 

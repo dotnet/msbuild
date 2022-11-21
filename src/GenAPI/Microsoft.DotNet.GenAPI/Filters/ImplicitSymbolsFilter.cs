@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.GenAPI
     /// <summary>
     /// Filter out implicitly generated members for properties, events, etc.
     /// </summary>
-    internal class ImplicitSymbolsFilter : ISymbolFilter
+    public class ImplicitSymbolsFilter : ISymbolFilter
     {
         /// <summary>
         /// Determines whether implicitly generated symbols <see cref="ISymbol"/> should be included.

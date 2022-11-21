@@ -104,7 +104,8 @@ namespace Microsoft.DotNet.GenAPI
                 using CSharpFileBuilder fileBuilder = new(
                     compositeFilter,
                     GetTextWriter(context.OutputPath, assemblySymbol.Name),
-                    new CSharpSyntaxWriter(context.ExceptionMessage));
+                    new CSharpSyntaxWriter(context.ExceptionMessage),
+                    loader.MetadataReferences);
 
                 fileBuilder.WriteAssembly(assemblySymbol);
             }
