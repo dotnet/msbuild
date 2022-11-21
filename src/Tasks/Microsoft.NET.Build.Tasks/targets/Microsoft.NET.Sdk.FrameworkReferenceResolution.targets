@@ -147,6 +147,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                      RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
                      KnownAppHostPacks="@(KnownAppHostPack)"
                      NuGetRestoreSupported="$(_NuGetRestoreSupported)"
+                     EnableAppHostPackDownload="$(EnableAppHostPackDownload)"
                      NetCoreTargetingPackRoot="$(NetCoreTargetingPackRoot)">
 
       <Output TaskParameter="PackagesToDownload" ItemName="_PackageToDownload" />
