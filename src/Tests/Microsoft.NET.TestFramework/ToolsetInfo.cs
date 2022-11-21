@@ -17,10 +17,10 @@ namespace Microsoft.NET.TestFramework
 {
     public class ToolsetInfo
     {
-        public const string CurrentTargetFramework = "net7.0";
-        public const string CurrentTargetFrameworkVersion = "7.0";
-        public const string NextTargetFramework = "net8.0";
-        public const string NextTargetFrameworkVersion = "8.0";
+        public const string CurrentTargetFramework = "net8.0";
+        public const string CurrentTargetFrameworkVersion = "8.0";
+        public const string NextTargetFramework = "net9.0";
+        public const string NextTargetFrameworkVersion = "9.0";
 
         public const string LatestWinRuntimeIdentifier = "win10";
         public const string LatestLinuxRuntimeIdentifier = "ubuntu.22.04";
