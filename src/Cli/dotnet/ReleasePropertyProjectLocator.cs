@@ -36,8 +36,8 @@ namespace Microsoft.DotNet.Cli
         private static string sharedProjectGuid = "{D954291E-2A0B-460D-934E-DC6B0785DB48}";
 
         /// <summary>
-        /// Returns dotnet CLI command-line parameters (or an empty list) to change configuration based on 
-        /// a boolean that may or may not exist in the targeted project.
+        /// Returns dotnet CLI command-line parameters (or an empty list) to change configuration based on ...
+        /// ... a boolean that may or may not exist in the targeted project.
         /// </summary>
         /// <returns>Returns a string such as -property:configuration=value for a projects desired config. May be empty string.</returns>
         public IEnumerable<string> GetCustomDefaultConfigurationValueIfSpecified()
@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Cli
             // Configuration doesn't work in a .proj file, but it does as a global property.
             // Detect either A) --configuration option usage OR /p:Configuration=Foo, if so, don't use these properties.
             if (_parseResult.HasOption(_configOption) || globalProperties.ContainsKey(MSBuildPropertyNames.CONFIGURATION))
-                yield break;
+                return Enumerable.Empty<string>();
 
             project = GetTargetedProject(globalProperties);
 
@@ -60,21 +60,20 @@ namespace Microsoft.DotNet.Cli
                 if (!string.IsNullOrEmpty(releasePropertyFlag)) // The project set PublishRelease or PackRelease itself.
                 {
                     string configurationToUse = releasePropertyFlag.Equals("true", StringComparison.OrdinalIgnoreCase) ? MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE : MSBuildPropertyNames.CONFIGURATION_DEBUG_VALUE;
-                    yield return new List<string> {
+                    return new List<string> {
                         $"-property:{MSBuildPropertyNames.CONFIGURATION}={configurationToUse}",
                         _isPublishingSolution ? $"-property:_SolutionExtracted{_defaultedConfigurationProperty}=true" : "" // Allows us to spot conflicting configuration values during evaluation.
                     };
                 }
-                else if (GetMaxProjectTargetFramework(project) >= 8) // For 8.0, these properties are enabled by default.
+                else if (GetProjectMaxModernTargetFramework(project) >= 8) // For 8.0, these properties are enabled by default.
                 {
-                    yield return new List<string> {
+                    return new List<string> {
                         $"-property:{MSBuildPropertyNames.CONFIGURATION}={MSBuildPropertyNames.CONFIGURATION_RELEASE_VALUE}",
-                        $"-property:{_defaultedConfigurationProperty}=true",
                         _isPublishingSolution ? $"-property:_SolutionExtracted{_defaultedConfigurationProperty}=true" : ""
                     };
                 }
             }
-            yield break;
+            return Enumerable.Empty<string>();
         }
 
         // <summary>
@@ -173,34 +172,35 @@ namespace Microsoft.DotNet.Cli
             return File.Exists(path) && Path.GetExtension(path).EndsWith("proj");
         }
 
-        /// <param name="targetProject">The project which we want to get the TFM of.</param>
-        /// <returns>The target framework number (e.g. 8 for net8.0) of the project.
-        /// This will return 4 for any TFM not of the form netX.0 
-        /// If the project is multi-targeted, it will return the max TFM.</returns>
-        private int GetMaxProjectTargetFramework(ProjectInstance targetProject)
+        /// <param name="targetProject">The project which we want to get the potential modern (NET 5.0/Core+) TFM of.</param>
+        /// <returns>
+        /// Returns the target framework of the project.
+        /// This will return 0 if there are no TFM of the form netX.0.
+        /// If the project is multi-targeted, it will return the maximum target framework number (e.g. 8 for net8.0) of all modern TFMS in the project.
+        /// </returns>
+        /// <remarks>If the naming schema of TFM changes, this will not work. Yeah, it's not great.</remarks>
+        private float GetProjectMaxModernTargetFramework(ProjectInstance targetProject)
         {
             string multiTargetingFrameworks = targetProject.GetPropertyValue(MSBuildPropertyNames.TARGET_FRAMEWORKS);
             string targetFramework = targetProject.GetPropertyValue(MSBuildPropertyNames.TARGET_FRAMEWORK);
             if (!string.IsNullOrEmpty(multiTargetingFrameworks))
             {
-                return 1; // split by ; and call inner function
+                foreach (string tfm in multiTargetingFrameworks.Split(";").OrderByDescending(s => s))
+                {
+                    string numericPartition = string.Concat(tfm.Where(tf => char.IsNumber(tf) || tf == '.'));
+                    string nonNumericPartition = string.Concat(tfm.Where(tf => !char.IsNumber(tf)));
+                    if (nonNumericPartition.ToLowerInvariant() == "net." && numericPartition.Contains('.'))
+                    {
+                        return float.Parse(numericPartition);
+                    }
+                }
             }
             else if (!string.IsNullOrEmpty(targetFramework))
             {
-                return 1;
+                if (targetFramework.StartsWith("net", StringComparison.OrdinalIgnoreCase) && targetFramework.EndsWith(".0")) // dont return non modern .net versions. e.g.: net48 < net8.0, but 48 > 8
+                    return float.Parse(targetProject.GetPropertyValue(MSBuildPropertyNames.TARGET_FRAMEWORK_NUMERIC_VERSION));
             }
-            return 4;   // The project will not build or publish without a TFM, what we do here is irrelevant.
-
-            // inner function:
-            //int parseTfm(string token)
-            //{
-            //    if (token.StartsWith("net"))
-            //    {
-            //        int firstNumber = Int.Parse(new String(input.TakeWhile(Char.IsDigit).ToArray()));
-            //        return firstNumber;
-            //    }
-            //}
-            // if matches pattern net [digit] .0*, sort by greatest and pick greatest match 
+            return 0;  // There is no modern TFM, OR there's no TFM. The project will not build or publish without a TFM, what we do here is irrelevant.
         }
 
         /// <returns>A case-insensitive dictionary of any properties passed from the user and their values.</returns>
