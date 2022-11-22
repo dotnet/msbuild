@@ -214,6 +214,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Required: *true*.
+        /// </summary>
+        internal static string Text_Required {
+            get {
+                return ResourceManager.GetString("Text_Required", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Required if: {0}.
         /// </summary>
         internal static string Text_RequiredCondition {

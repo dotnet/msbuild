@@ -179,6 +179,10 @@
   <data name="Text_NoTemplateOptions" xml:space="preserve">
     <value>(No options)</value>
   </data>
+  <data name="Text_Required" xml:space="preserve">
+    <value>Required: *true*</value>
+    <comment>Indication that parameter is always required, do not translate "true".</comment>
+  </data>
   <data name="Text_RequiredCondition" xml:space="preserve">
     <value>Required if: {0}</value>
     <comment>{0} is the condition expression</comment>

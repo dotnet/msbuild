@@ -64,8 +64,8 @@ namespace Microsoft.NET.Build.Tests
                 case "C#":
                     analyzers.Select(x => GetPackageAndPath(x)).Should().BeEquivalentTo(new[]
                             {
-                                ("Microsoft.NET.Sdk", (string) null, "analyzers/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll"),
-                                ("Microsoft.NET.Sdk", (string)null, "analyzers/Microsoft.CodeAnalysis.NetAnalyzers.dll"),
+                                ("microsoft.net.sdk", (string) null, "analyzers/Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll"),
+                                ("microsoft.net.sdk", (string)null, "analyzers/Microsoft.CodeAnalysis.NetAnalyzers.dll"),
                                 ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/cs/System.Text.Json.SourceGeneration.dll"),
                                 ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/cs/System.Text.RegularExpressions.Generator.dll"),
                                 ("microsoft.codequality.analyzers", "2.6.0", "analyzers/dotnet/cs/Microsoft.CodeQuality.Analyzers.dll"),
@@ -81,8 +81,8 @@ namespace Microsoft.NET.Build.Tests
                 case "VB":
                     analyzers.Select(x => GetPackageAndPath(x)).Should().BeEquivalentTo( new[]
                         {
-                            ("Microsoft.NET.Sdk", (string)null, "analyzers/Microsoft.CodeAnalysis.VisualBasic.NetAnalyzers.dll"),
-                            ("Microsoft.NET.Sdk", (string)null, "analyzers/Microsoft.CodeAnalysis.NetAnalyzers.dll"),
+                            ("microsoft.net.sdk", (string)null, "analyzers/Microsoft.CodeAnalysis.VisualBasic.NetAnalyzers.dll"),
+                            ("microsoft.net.sdk", (string)null, "analyzers/Microsoft.CodeAnalysis.NetAnalyzers.dll"),
                             ("microsoft.codequality.analyzers", "2.6.0", "analyzers/dotnet/vb/Microsoft.CodeQuality.Analyzers.dll"),
                             ("microsoft.codequality.analyzers", "2.6.0", "analyzers/dotnet/vb/Microsoft.CodeQuality.VisualBasic.Analyzers.dll"),
                             ("microsoft.dependencyvalidation.analyzers", "0.9.0", "analyzers/dotnet/Microsoft.DependencyValidation.Analyzers.dll")
@@ -161,7 +161,7 @@ namespace Microsoft.NET.Build.Tests
                 var components = path.Split(new char[] { '/' }, 2);
                 string sdkName = components[0];
                 string pathInSdk = components[1];
-                return (sdkName, null, pathInSdk);
+                return (sdkName.ToLowerInvariant(), null, pathInSdk);
             }
 
             foreach (var nugetRoot in nugetRoots)
@@ -175,11 +175,11 @@ namespace Microsoft.NET.Build.Tests
                     var packageVersion = components[1];
                     var pathInPackage = components[2];
                     //  Don't check package version for analyzers included in targeting pack, as the version changes during development
-                    if (packageName.Equals("microsoft.netcore.app.ref", StringComparison.Ordinal))
+                    if (packageName.Equals("microsoft.netcore.app.ref", StringComparison.OrdinalIgnoreCase))
                     {
                         packageVersion = null;
                     }
-                    return (packageName, packageVersion, pathInPackage);
+                    return (packageName.ToLowerInvariant(), packageVersion, pathInPackage);
                 }
             }
 

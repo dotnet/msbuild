@@ -142,11 +142,16 @@ namespace Microsoft.TemplateEngine.Cli
         {
             Option option = GetBaseOption(aliases);
             option.IsHidden = IsHidden;
-            option.IsRequired = IsRequired;
-            if (!string.IsNullOrWhiteSpace(DefaultValue)
-                || (Type == ParameterType.String || Type == ParameterType.Choice) && DefaultValue != null)
+
+            //if parameter is required, the default value is ignored.
+            //the user should always specify the parameter, so the default value is not even shown.
+            if (!IsRequired)
             {
-                option.SetDefaultValue(DefaultValue);
+                if (!string.IsNullOrWhiteSpace(DefaultValue)
+                    || (Type == ParameterType.String || Type == ParameterType.Choice) && DefaultValue != null)
+                {
+                    option.SetDefaultValue(DefaultValue);
+                }
             }
             option.Description = GetOptionDescription();
             return option;
@@ -326,6 +331,7 @@ namespace Microsoft.TemplateEngine.Cli
                 case PrecedenceDefinition.Disabled:
                     return HelpStrings.Text_Disabled;
                 case PrecedenceDefinition.Required:
+                    return (HelpStrings.Text_Required);
                 case PrecedenceDefinition.Optional:
                 case PrecedenceDefinition.Implicit:
                     return null;
