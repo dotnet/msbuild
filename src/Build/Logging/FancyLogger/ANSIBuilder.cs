@@ -4,6 +4,8 @@
 
 using System;
 
+// TODO: See https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#viewport-positioning
+
 namespace Microsoft.Build.Logging.FancyLogger
 {
     public enum ANSIForegroundColor
@@ -68,6 +70,10 @@ namespace Microsoft.Build.Logging.FancyLogger
         }
         public static class Cursor
         {
+            public static string GoToHome()
+            {
+                return "\x1b[H";
+            }
             public static string GoToPosition(int row, int column)
             {
                 return String.Format("\x1b[{0};{1}H", row, column);

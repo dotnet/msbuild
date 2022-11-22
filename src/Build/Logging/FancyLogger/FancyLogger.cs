@@ -47,10 +47,13 @@ namespace Microsoft.Build.Logging.FancyLogger
             LogLine line = new LogLine(text);
             LogLines.Add(line.Id, line);
             Console.Write(
-                "\n" +
-                ANSIBuilder.Cursor.GoToPosition(lineNumber, 0) +
-                line.Text +
-                ANSIBuilder.Cursor.GoToPosition(lineNumber+1, 0)
+                "\n"
+                + ANSIBuilder.Cursor.GoToPosition(lineNumber, 0)
+                + line.Text
+                + "\x1bS"
+                + "\x1bS"
+                + "\x1bS"
+                + "\x1bS"
             );
             // Return line
             return line;
@@ -65,10 +68,10 @@ namespace Microsoft.Build.Logging.FancyLogger
                 line.Text = text;
                 // Write it
                 Console.Write(
-                    ANSIBuilder.Cursor.GoToPosition(line.LineNumber, 0) +
-                    ANSIBuilder.Eraser.EraseCurrentLine() +
-                    "\r" + text +
-                    ANSIBuilder.Cursor.GoToPosition(line.LineNumber + 1, 0)
+                    ANSIBuilder.Cursor.GoToPosition(line.LineNumber, 0)
+                    + ANSIBuilder.Eraser.EraseCurrentLine()
+                    + "\r"
+                    + text
                 );
             }
         }
@@ -158,7 +161,7 @@ namespace Microsoft.Build.Logging.FancyLogger
                 LogLine nextLine = Log.WriteNewLine(
                     ANSIBuilder.Formatting.Dim("\t~~~") 
                 );
-                Log.WriteNewLine("");
+                // Log.WriteNewLine("");
             }
         }
         void eventSource_TargetFinished(object sender, TargetFinishedEventArgs e)
@@ -173,9 +176,9 @@ namespace Microsoft.Build.Logging.FancyLogger
                         ANSIBuilder.Formatting.Color("✓ " + e.TargetName, ANSIForegroundColor.Green)
                     , targetLineId);
                 }
-                Log.WriteInLine(
+                /*Log.WriteInLine(
                     ANSIBuilder.Eraser.EraseCurrentLine(), targetLineId+1
-                );
+                );*/
             }
         }
 
