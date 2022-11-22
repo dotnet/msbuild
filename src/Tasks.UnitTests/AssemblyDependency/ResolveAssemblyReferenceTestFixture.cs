@@ -545,6 +545,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Path.Combine(s_myComponentsRootPath, "V.dll"),
             Path.Combine(s_myComponents2RootPath, "W.dll"),
+            Path.Combine(s_myComponentsRootPath, "DependsOnX.dll"),
             Path.Combine(s_myComponentsRootPath, "X.dll"),
             Path.Combine(s_myComponentsRootPath, "X.pdb"),
             Path.Combine(s_myComponentsRootPath, "Y.dll"),
@@ -1438,8 +1439,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "X.pdb"), StringComparison.OrdinalIgnoreCase))
             {
-                // throw new BadImageReferenceException("Bad Image", null);
-                return new AssemblyNameExtension("X, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null");
+                // return new AssemblyNameExtension("X, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null");
+                throw new BadImageReferenceException("Bad Image", null);
             }
 
             if (String.Equals(path, @"C:\Regress714052\X86\a.dll", StringComparison.OrdinalIgnoreCase))
@@ -1491,6 +1492,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             if (String.Equals(path, Path.Combine(s_myComponents2RootPath, "W.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("W, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
+            }
+            if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "DependsOnX.dll"), StringComparison.OrdinalIgnoreCase))
+            {
+                return new AssemblyNameExtension("DependsOnX, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
             if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "X.dll"), StringComparison.OrdinalIgnoreCase))
             {
@@ -2359,6 +2364,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             if (String.Equals(path, Path.Combine(s_myComponents2RootPath, "W.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return Array.Empty<AssemblyNameExtension>();
+            }
+
+            if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "DependsOnX.dll"), StringComparison.OrdinalIgnoreCase))
+            {
+                return new AssemblyNameExtension[]
+                {
+                    new AssemblyNameExtension("X, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null")
+                };
             }
 
             if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "X.dll"), StringComparison.OrdinalIgnoreCase))

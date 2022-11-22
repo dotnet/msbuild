@@ -98,14 +98,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void test()
         {
+            ITaskItem w = new TaskItem(Path.Combine(s_myComponentsRootPath, "DependsOnX.dll"));
             ITaskItem x = new TaskItem(Path.Combine(s_myComponentsRootPath, "X.dll"));
             ITaskItem xpdb = new TaskItem(Path.Combine(s_myComponentsRootPath, "X.pdb"));
             ResolveAssemblyReference t = new()
             {
                 BuildEngine = new MockEngine(),
                 AllowedRelatedFileExtensions = new string[] { ".pdb" },
-                Assemblies = new ITaskItem[] { x, xpdb },
-                AssemblyFiles = new ITaskItem[] { x, xpdb },
+                Assemblies = new ITaskItem[] { xpdb },
+                AssemblyFiles = new ITaskItem[] { w, x },
                 SearchPaths = new string[] { s_myComponentsRootPath }
         };
 
