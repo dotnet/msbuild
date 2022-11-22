@@ -17,10 +17,6 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public ResponseFileUsedEventArgs(string responseFilePath) : base()
         {
-            if (responseFilePath == "")
-            {
-                throw new System.Exception("Response file path cannot be empty");
-            }
             ResponseFilePath = responseFilePath;
         }
     }
