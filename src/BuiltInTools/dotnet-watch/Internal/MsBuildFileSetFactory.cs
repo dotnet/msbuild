@@ -16,7 +16,7 @@ using IReporter = Microsoft.Extensions.Tools.Internal.IReporter;
 
 namespace Microsoft.DotNet.Watcher.Internal
 {
-    public class MsBuildFileSetFactory : IFileSetFactory
+    internal sealed class MsBuildFileSetFactory : IFileSetFactory
     {
         private const string TargetName = "GenerateWatchList";
         private const string WatchTargetsFileName = "DotNetWatch.targets";

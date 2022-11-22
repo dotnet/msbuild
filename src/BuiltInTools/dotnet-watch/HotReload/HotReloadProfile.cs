@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public enum HotReloadProfile
+    internal enum HotReloadProfile
     {
         Default,
 

@@ -7,7 +7,7 @@ using System;
 
 namespace Microsoft.DotNet.Watcher
 {
-    public record ProjectInfo
+    internal sealed record ProjectInfo
     (
         string ProjectPath,
         bool IsNetCoreApp,

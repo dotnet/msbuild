@@ -14,7 +14,7 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Internal
 {
-    public class HotReloadFileSetWatcher : IDisposable
+    internal sealed class HotReloadFileSetWatcher : IDisposable
     {
         private static readonly TimeSpan DebounceInterval = TimeSpan.FromMilliseconds(50);
         private readonly FileWatcher _fileWatcher;
